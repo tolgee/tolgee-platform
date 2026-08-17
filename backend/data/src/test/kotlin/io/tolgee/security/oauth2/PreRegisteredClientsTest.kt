@@ -20,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -37,30 +38,36 @@ class PreRegisteredClientsTest {
   private val args = mock<ApplicationArguments>()
 
   @Test
-  fun `seeds nothing when no redirect URIs are configured`() {
+  fun `seeds nothing and deletes any prior row when no redirect URIs are configured`() {
     val repo = mock<RegisteredClientRepository>()
+    val jdbc = mock<OAuth2AuthorizationJdbcRepository>()
     val properties =
       OAuth2ServerProperties().apply {
         browserExtensionRedirectUris = listOf()
         cliRedirectUris = listOf()
       }
 
-    PreRegisteredClients(repo, properties).run(args)
+    PreRegisteredClients(repo, jdbc, properties).run(args)
 
     verify(repo, never()).save(any())
+    // Emptying the config disables the client: a stale registration must be deleted, not left usable.
+    verify(jdbc).deleteRegisteredClient(eq(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID))
+    verify(jdbc).deleteRegisteredClient(eq(OAuth2Constants.CLI_CLIENT_ID))
   }
 
   @Test
   fun `seeds the extension and CLI clients with PKCE and per-client consent when redirect URIs are configured`() {
     val repo = mock<RegisteredClientRepository>()
+    val jdbc = mock<OAuth2AuthorizationJdbcRepository>()
     val properties =
       OAuth2ServerProperties().apply {
         browserExtensionRedirectUris = listOf("https://ext.example/callback")
         cliRedirectUris = listOf("http://127.0.0.1:9876/callback")
       }
 
-    PreRegisteredClients(repo, properties).run(args)
+    PreRegisteredClients(repo, jdbc, properties).run(args)
 
+    verify(jdbc, never()).deleteRegisteredClient(any())
     val captor = argumentCaptor<RegisteredClient>()
     verify(repo, times(2)).save(captor.capture())
     val byClientId = captor.allValues.associateBy { it.clientId }

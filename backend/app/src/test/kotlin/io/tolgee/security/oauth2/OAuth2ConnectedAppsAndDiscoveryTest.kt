@@ -20,13 +20,40 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 
 class OAuth2ConnectedAppsAndDiscoveryTest : AuthorizedControllerTest() {
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
+
   @Test
   fun `lists no connected apps for a user who has authorized none`() {
     performAuthGet("/v2/user/connected-apps")
       .andIsOk
       .andAssertThatJson { isArray.hasSize(0) }
+  }
+
+  @Test
+  fun `omits a grant whose registered client can no longer be resolved`() {
+    // A CIMD grant can outlive its client's cache entry, and a removed pre-registered client leaves the same orphan;
+    // list() drops the unresolvable row (the grant is still killable via logout-everywhere).
+    val principal = userAccount!!.id.toString()
+    jdbcTemplate.update(
+      "INSERT INTO oauth2_authorization " +
+        "(id, registered_client_id, principal_name, authorization_grant_type, access_token_value) " +
+        "VALUES (?, ?, ?, 'authorization_code', 'token')",
+      "orphan-authz",
+      "nonexistent-client",
+      principal,
+    )
+    try {
+      performAuthGet("/v2/user/connected-apps")
+        .andIsOk
+        .andAssertThatJson { isArray.hasSize(0) }
+    } finally {
+      jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", "orphan-authz")
+    }
   }
 
   @Test

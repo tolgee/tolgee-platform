@@ -25,6 +25,12 @@ class UserAccountDtoTest {
   @Test
   fun `isTokenInvalidated allows every token when no cutoff is set`() {
     assertThat(dto(tokensValidNotBefore = null).isTokenInvalidated(Instant.ofEpochSecond(1))).isFalse()
+    assertThat(dto(tokensValidNotBefore = null).isTokenInvalidated(null)).isFalse()
+  }
+
+  @Test
+  fun `isTokenInvalidated fails closed when a cutoff is set but the token has no issue time`() {
+    assertThat(dto(tokensValidNotBefore = Date(1_700_000_000_500)).isTokenInvalidated(null)).isTrue()
   }
 
   private fun dto(tokensValidNotBefore: Date?) =

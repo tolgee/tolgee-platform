@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AbstractControllerTest
 import org.assertj.core.api.Assertions.assertThat
@@ -42,16 +43,15 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
 
   @Test
   fun `serves the authorization server metadata`() {
-    val body =
-      mvc
-        .perform(get("/.well-known/oauth-authorization-server"))
-        .andIsOk
-        .andReturn()
-        .response.contentAsString
-    assertThat(body).contains("authorization_endpoint")
-    assertThat(body).contains("token_endpoint")
-    assertThat(body).contains("jwks_uri")
-    // CIMD support is advertised so spec-aware clients know they can self-register with a URL-form client_id
-    assertThat(body).contains("client_id_metadata_document_supported")
+    mvc
+      .perform(get("/.well-known/oauth-authorization-server"))
+      .andIsOk
+      .andAssertThatJson {
+        node("authorization_endpoint").isString
+        node("token_endpoint").isString
+        node("jwks_uri").isString
+        // CIMD support is advertised so spec-aware clients know they can self-register with a URL-form client_id
+        node("client_id_metadata_document_supported").isEqualTo(true)
+      }
   }
 }

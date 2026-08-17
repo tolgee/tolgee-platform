@@ -65,6 +65,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Autowired
   private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
 
+  @Autowired
+  private lateinit var audienceResolver: OAuth2AudienceResolver
+
   private lateinit var testData: BaseTestData
   private lateinit var otherUser: UserAccount
   private var otherProjectId: Long = 0
@@ -214,8 +217,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(refreshedAccessToken).isNotNull()
     assertThat(refreshed.get("refresh_token")?.asString()).isNotNull().isNotEqualTo(refreshToken)
 
-    // The refreshed token must carry the same narrow binding as the original — refresh must never widen tg.prj to
-    // ALL_PROJECTS, widen the scope, or drop the audience.
     val initialClaims = decodeClaims(firstResponse.get("access_token").asString())
     val refreshedClaims = decodeClaims(refreshedAccessToken!!)
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
@@ -223,7 +224,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
     assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
 
-    // Reuse detection: replaying the consumed original refresh token must be rejected.
     val replayStatus =
       mvc
         .perform(
@@ -244,7 +244,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .get("refresh_token")
         .asString()
 
-    // Password change / forced sign-out: the already-issued refresh token must no longer mint access tokens.
     val user = userAccountService.get(testData.user.id)
     user.tokensValidNotBefore = Date(System.currentTimeMillis() + 3_600_000)
     userAccountService.save(user)
@@ -267,13 +266,49 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `changing the password revokes the user's OAuth grants`() {
+    authorizationCodeTokenResponse(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
+    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isNotEmpty()
+
+    // A password change must delete the grants, not only bump tokensValidNotBefore (which the refresh gate reads from a
+    // per-node-cached DTO that lags without Redis), so a stolen refresh token can't keep minting on a stale replica.
+    userAccountService.setUserPassword(userAccountService.get(testData.user.id), "new-password-123")
+
+    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+  }
+
+  @Test
+  fun `refresh grant is rejected and revoked after the subject user is deleted`() {
+    val refreshToken =
+      authorizationCodeTokenResponse(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
+        .get("refresh_token")
+        .asString()
+
+    // Deleting the account does not revoke its grants, so the refresh grant must reject the now-missing user itself
+    // and revoke the dead grant, not mint a fresh access token for a user who no longer exists.
+    userAccountService.delete(testData.user.id)
+
+    val status =
+      mvc
+        .perform(
+          post("/oauth2/token")
+            .param("grant_type", "refresh_token")
+            .param("refresh_token", refreshToken)
+            .param("client_id", TEST_CLIENT_ID)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn()
+        .response.status
+    assertThat(status).isEqualTo(400)
+    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+  }
+
+  @Test
   fun `disconnecting the app kills its already-issued access token on the next request`() {
     val accessToken = runAuthorizationCodeFlow()
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsOk
 
-    // Disconnect deletes the authorization row; the resolver's liveness check must reject the still-unexpired token.
     val superJwt = jwtService.emitToken(testData.user.id, isSuper = true)
     mvc
       .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $superJwt"))
@@ -296,7 +331,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsUnauthorized
-    // The grant itself is gone (not merely time-cut): connected-apps no longer lists it.
     assertThat(connectedApps(jwtService.emitToken(testData.user.id))).doesNotContain("\"$TEST_CLIENT_ID\"")
   }
 
@@ -326,9 +360,8 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .response
         .getHeader("Location")
     val state = URLDecoder.decode(queryParam(consentLocation!!, "state")!!, StandardCharsets.UTF_8)
+    selectProject(jwt, state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    // Approve only translations.view — translations.edit is deselected even though the user holds it live. The issued
-    // token must reflect the consent, not the full request or the user's live scopes.
     val codeLocation =
       mvc
         .perform(
@@ -361,8 +394,101 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `the code-delivery redirect echoes the client's own state and the RFC 9207 iss`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
+    val codeLocation =
+      mvc
+        .perform(
+          post("/oauth2/authorize")
+            .param("client_id", CONSENT_CLIENT_ID)
+            .param("state", pending.state)
+            .param("scope", "translations.view")
+            .session(pending.session),
+        ).andReturn()
+        .response
+        .getHeader("Location")
+    // The client's original `state` must round-trip for CSRF defense — NOT SAS's internal pending-authorization state.
+    val echoedState = URLDecoder.decode(queryParam(codeLocation!!, "state")!!, StandardCharsets.UTF_8)
+    assertThat(echoedState).isEqualTo("client-state").isNotEqualTo(pending.state)
+    // iss is present and equals the configured issuer (RFC 9207 AS mix-up defense; tests run with a base URL set).
+    assertThat(URLDecoder.decode(queryParam(codeLocation, "iss")!!, StandardCharsets.UTF_8))
+      .isEqualTo(audienceResolver.serverBaseUrl)
+  }
+
+  @Test
+  fun `a remembered-consent reconnect without a project selection fails closed instead of widening to all projects`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    // First flow: consent the client and bind it to a single project. This records a remembered consent for client+user.
+    val pending = startPendingConsent(jwt)
+    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    completeConsent(pending)
+
+    // Second authorize, same client+scope: SAS skips the consent screen (consent remembered) and issues a code directly,
+    // so select-project never runs. Without a project hint the token must not silently widen from the consented project.
+    val session = MockHttpSession()
+    mvc
+      .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+    val verifier = randomVerifier()
+    val authorizeUrl =
+      UriComponentsBuilder
+        .fromPath("/oauth2/authorize")
+        .queryParam("response_type", "code")
+        .queryParam("client_id", CONSENT_CLIENT_ID)
+        .queryParam("redirect_uri", CONSENT_REDIRECT)
+        .queryParam("scope", "translations.view")
+        .queryParam("code_challenge", s256Challenge(verifier))
+        .queryParam("code_challenge_method", "S256")
+        .queryParam("state", "client-state-2")
+        .build()
+        .toUriString()
+    val codeLocation = mvc.perform(get(authorizeUrl).session(session)).andReturn().response.getHeader("Location")
+    val code = queryParam(codeLocation!!, "code")
+    assertThat(code).isNotNull() // consent skipped -> code issued straight to the client redirect
+
+    val status =
+      mvc
+        .perform(
+          post("/oauth2/token")
+            .param("grant_type", "authorization_code")
+            .param("code", code!!)
+            .param("redirect_uri", CONSENT_REDIRECT)
+            .param("client_id", CONSENT_CLIENT_ID)
+            .param("code_verifier", verifier)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn()
+        .response.status
+    assertThat(status).isEqualTo(400)
+  }
+
+  @Test
+  fun `rejects an authorize request that omits the PKCE code_challenge for a public client`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val session = MockHttpSession()
+    mvc
+      .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    // Deliberately omit code_challenge. Every public client sets requireProofKey, so SAS must refuse with an error
+    // redirect and never issue a code — pins PKCE against an accidental downgrade that would re-open code interception.
+    val authorizeUrl =
+      UriComponentsBuilder
+        .fromPath("/oauth2/authorize")
+        .queryParam("response_type", "code")
+        .queryParam("client_id", TEST_CLIENT_ID)
+        .queryParam("redirect_uri", CLI_REDIRECT)
+        .queryParam("scope", "translations.view")
+        .queryParam("state", "no-pkce")
+        .build()
+        .toUriString()
+    val location = mvc.perform(get(authorizeUrl).session(session)).andReturn().response.getHeader("Location")
+    assertThat(location).contains("error=invalid_request")
+    assertThat(queryParam(location!!, "code")).isNull()
+  }
+
+  @Test
   fun `rejects the code exchange when the PKCE verifier is wrong`() {
-    // Guards the public-client refresh path: it must never let a code be redeemed without a valid code_verifier.
     val jwt = jwtService.emitToken(testData.user.id)
     val session = MockHttpSession()
     mvc.perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
@@ -436,7 +562,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Test
   fun `a consent-screen project choice overrides the client's authorize hint`() {
     val jwt = jwtService.emitToken(testData.user.id)
-    // Hint an unrelated project on the authorize request, then consent-select the real one.
     val pending = startPendingConsent(jwt, hintProjectId = INACCESSIBLE_PROJECT_ID)
     selectProject(jwt, pending.state, testData.project.id)
       .andExpect { assertThat(it.response.status).isEqualTo(204) }
@@ -449,7 +574,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Test
   fun `choosing all projects on the consent screen overrides a client's authorize hint`() {
     val jwt = jwtService.emitToken(testData.user.id)
-    // The client hints a concrete project, but the user widens to "all projects" (frontend omits projectId).
     val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
     selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
@@ -514,14 +638,11 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(noHint.get("requestedProjectId").isNull).isTrue()
     assertThat(noHint.get("requiredScopes").toString()).contains("translations.view")
 
-    // A hint pointing at a project the user cannot access must not leak the project's name, but the raw id is still
-    // reported (as requestedProjectId) so the consent screen can say "you can't edit the requested project".
     val inaccessible = startPendingConsent(jwt, hintProjectId = otherProjectId)
     val inaccessibleInfo = consentInfo(jwt, state = inaccessible.state)
     assertThat(inaccessibleInfo.get("project").isNull).isTrue()
     assertThat(inaccessibleInfo.get("requestedProjectId").asLong()).isEqualTo(otherProjectId)
 
-    // An accessible hint is surfaced (id + name) so the SPA can pre-select it.
     val accessible = startPendingConsent(jwt, hintProjectId = testData.project.id)
     val accessibleInfo = consentInfo(jwt, state = accessible.state)
     val hinted = accessibleInfo.get("project")
@@ -529,8 +650,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(hinted.get("name").asText()).isEqualTo(testData.project.name)
     assertThat(accessibleInfo.get("requestedProjectId").asLong()).isEqualTo(testData.project.id)
 
-    // A stale/nonexistent hint (project deleted mid-flow) resolves to a null project but still reports the raw id, so
-    // the SPA's inaccessible-warning fires — distinct from the no-hint (null id) case.
     val nonexistent = startPendingConsent(jwt, hintProjectId = INACCESSIBLE_PROJECT_ID)
     val nonexistentInfo = consentInfo(jwt, state = nonexistent.state)
     assertThat(nonexistentInfo.get("project").isNull).isTrue()
@@ -555,7 +674,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(info.get("scopes").toString())
       .contains("translations.view")
       .contains("translations.edit")
-    // translations.edit is requested but not in the client's required set, so it stays optional.
     assertThat(info.get("requiredScopes").toString())
       .contains("translations.view")
       .doesNotContain("translations.edit")
@@ -564,7 +682,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Test
   fun `select-project rejects binding another user's pending authorization`() {
     val pending = startPendingConsent(jwtService.emitToken(testData.user.id))
-    // otherUser tries to retarget user A's pending authorization by its state value.
     selectProject(jwtService.emitToken(otherUser.id), pending.state, testData.project.id)
       .andExpect { assertThat(it.response.status).isEqualTo(404) }
   }
@@ -589,7 +706,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @Test
   fun `a public project the user is not a member of is selectable via the community floor`() {
-    // The headline community-contributor case: a non-member of a public project narrows the token to it via the hint.
     val jwt = jwtService.emitToken(testData.user.id)
     val pending = startPendingConsent(jwt, hintProjectId = publicProjectId)
 
@@ -605,7 +721,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(claim.isArray).isTrue()
     assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
 
-    // and the minted token works on a community-permitted read endpoint, bounded by the contributor's live permissions.
     mvc
       .perform(get("/v2/projects/$publicProjectId/translations").header("Authorization", "Bearer $token"))
       .andIsOk
@@ -752,9 +867,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .response
         .getHeader("Location")
 
-    // The code is still delivered (invalidation must not break the response)...
     assertThat(queryParam(location!!, "code")).isNotNull()
-    // ...but the session that carried the flow is now dead.
     assertThat(session.isInvalid).isTrue()
   }
 
@@ -804,8 +917,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(location).doesNotContain(CLI_REDIRECT)
     assertThat(queryParam(location!!, "code")).isNull()
 
-    // The bootstrap redirect must preserve the original authorize URL (with its query) so the flow can resume after
-    // the session is established.
     val continueUrl = URLDecoder.decode(queryParam(location, "continue")!!, StandardCharsets.UTF_8)
     assertThat(continueUrl).contains("/oauth2/authorize")
     assertThat(continueUrl).contains("client_id=$TEST_CLIENT_ID")
@@ -821,7 +932,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
     assertThat(connectedApps(jwt)).contains("\"$TEST_CLIENT_ID\"").contains("\"$SECOND_CLIENT_ID\"")
 
-    // Revoke is a credential-management mutation: a plain token is rejected; only a super-authenticated one works.
     val plainDeleteStatus =
       mvc
         .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $jwt"))

@@ -68,6 +68,25 @@ class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
     assertThat(consentExists("shared-client", userB)).isTrue()
   }
 
+  @Test
+  fun `revokeAllForPrincipal deletes only the requesting user's grants and consents`() {
+    // logout-everywhere / password change deletes by principal_name with no client filter; a wrong or missing WHERE
+    // clause here would wipe every user's grants on any single user's invalidation.
+    insertGrant("a-1", "client-x", userA)
+    insertGrant("a-2", "client-y", userA)
+    insertGrant("b-1", "client-x", userB)
+    insertConsent("client-x", userA)
+    insertConsent("client-x", userB)
+
+    queryService.revokeAllForPrincipal(userA)
+
+    assertThat(authorizationExists("a-1")).isFalse()
+    assertThat(authorizationExists("a-2")).isFalse()
+    assertThat(authorizationExists("b-1")).isTrue()
+    assertThat(consentExists("client-x", userA)).isFalse()
+    assertThat(consentExists("client-x", userB)).isTrue()
+  }
+
   private fun insertGrant(
     id: String,
     clientId: String,

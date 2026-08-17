@@ -143,6 +143,24 @@ class CimdMetadataFetcherTest {
   }
 
   @Test
+  fun `buildClient rejects a same-host redirect_uri on a different explicit port`() {
+    val document = validDocument(redirectUris = listOf("https://example.com:8443/callback"))
+    assertThat(fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document)).isNull()
+  }
+
+  @Test
+  fun `buildClient accepts a same-host redirect_uri that states the default https port explicitly`() {
+    val document = validDocument(redirectUris = listOf("https://example.com:443/callback"))
+    assertThat(fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document)).isNotNull()
+  }
+
+  @Test
+  fun `buildClient rejects a same-host redirect_uri on a different scheme`() {
+    val document = validDocument(redirectUris = listOf("http://example.com/callback"))
+    assertThat(fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document)).isNull()
+  }
+
+  @Test
   fun `readCapped returns the body at exactly the size cap`() {
     val properties =
       OAuth2CimdProperties().apply {
