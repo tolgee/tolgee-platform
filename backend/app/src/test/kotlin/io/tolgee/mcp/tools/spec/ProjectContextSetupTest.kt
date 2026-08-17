@@ -44,6 +44,7 @@ class ProjectContextSetupTest : McpToolEndpointSpecTestBase() {
       )
     whenever(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
     whenever(authenticationFacade.projectApiKey).thenReturn(pakDto)
+    whenever(authenticationFacade.implicitProjectId).thenReturn(pakDto.projectId)
 
     sut.executeAs(spec(isGlobalRoute = false), projectId = null) {}
 

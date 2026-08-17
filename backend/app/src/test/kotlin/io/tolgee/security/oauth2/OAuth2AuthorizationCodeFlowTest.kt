@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
@@ -67,6 +68,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @Autowired
   private lateinit var audienceResolver: OAuth2AudienceResolver
+
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
 
   private lateinit var testData: BaseTestData
   private lateinit var otherUser: UserAccount
@@ -177,6 +181,10 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @AfterEach
   fun cleanup() {
+    // Consent is remembered per client+user; without clearing it a later test whose user id repeats would have SAS skip
+    // the consent screen (making startPendingConsent capture the client state, not the pending-authorization state).
+    jdbcTemplate.update("DELETE FROM oauth2_authorization_consent")
+    jdbcTemplate.update("DELETE FROM oauth2_authorization")
     testDataService.cleanTestData(testData.root)
   }
 
