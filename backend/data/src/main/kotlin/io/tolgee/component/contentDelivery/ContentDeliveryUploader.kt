@@ -5,12 +5,10 @@ import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurg
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.formats.resolveExportContentType
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.export.ExportService
 import io.tolgee.util.Logging
-import io.tolgee.util.formatPathsForLog
 import io.tolgee.util.logger
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
@@ -36,23 +34,15 @@ class ContentDeliveryUploader(
       files = createZipArchive(files)
     }
 
+    val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     pruneIfNeeded(config, storage)
-    storeToStorage(config, files, storage)
+    storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
 
     config.lastPublished = currentDateProvider.date
-    config.lastPublishedFiles = files.keys.toList()
+    config.lastPublishedFiles = files.map { it.key }.toList()
     contentDeliveryConfigService.save(config)
   }
-
-  private fun getStorage(contentDeliveryConfig: ContentDeliveryConfig) =
-    contentDeliveryConfig.contentStorage
-      ?.let {
-        contentDeliveryFileStorageProvider.getStorage(
-          config = it.storageConfig ?: throw IllegalStateException("No storage config stored"),
-        )
-      }
-      ?: contentDeliveryFileStorageProvider.getContentStorageWithDefaultClient()
 
   private fun createZipArchive(files: Map<String, InputStream>): Map<String, InputStream> {
     val zipFileName = "translations.zip"
@@ -83,44 +73,6 @@ class ContentDeliveryUploader(
     }
   }
 
-  private fun storeToStorage(
-    config: ContentDeliveryConfig,
-    files: Map<String, InputStream>,
-    storage: FileStorage,
-  ) {
-    val pathsWithoutContentType = mutableListOf<String>()
-
-    files.forEach { (path, stream) ->
-      val contentType = resolveExportContentType(config.format, config.zip, path)
-      if (contentType == null) {
-        pathsWithoutContentType.add(path)
-      }
-      storage.storeFile(
-        storageFilePath = "${config.slug}/$path",
-        bytes = stream.readBytes(),
-        contentType = contentType,
-      )
-    }
-
-    logUnresolvedContentTypes(config, pathsWithoutContentType)
-  }
-
-  private fun logUnresolvedContentTypes(
-    config: ContentDeliveryConfig,
-    pathsWithoutContentType: List<String>,
-  ) {
-    if (pathsWithoutContentType.isEmpty()) {
-      return
-    }
-    logger.warn(
-      "Content delivery config {} ({}) publishes {} file(s) without a content type: {}",
-      config.id,
-      config.format,
-      pathsWithoutContentType.size,
-      formatPathsForLog(pathsWithoutContentType),
-    )
-  }
-
   private fun purgeCacheIfConfigured(
     contentDeliveryConfig: ContentDeliveryConfig,
     paths: Set<String>,
@@ -132,4 +84,25 @@ class ContentDeliveryUploader(
       }
     }
   }
+
+  private fun storeToStorage(
+    withFullPaths: Map<String, InputStream>,
+    storage: FileStorage,
+  ) {
+    withFullPaths.forEach {
+      storage.storeFile(
+        storageFilePath = it.key,
+        bytes = it.value.readBytes(),
+      )
+    }
+  }
+
+  private fun getStorage(contentDeliveryConfig: ContentDeliveryConfig) =
+    contentDeliveryConfig.contentStorage
+      ?.let {
+        contentDeliveryFileStorageProvider.getStorage(
+          config = it.storageConfig ?: throw IllegalStateException("No storage config stored"),
+        )
+      }
+      ?: contentDeliveryFileStorageProvider.getContentStorageWithDefaultClient()
 }

@@ -29,6 +29,7 @@ open class S3FileStorage(
   override fun deleteFile(storageFilePath: String) {
     try {
       s3.deleteObject { b -> b.bucket(bucketName).key("$canonicalPath$storageFilePath") }
+      return
     } catch (e: Exception) {
       throw FileStoreException("Can not delete file using s3 bucket!", storageFilePath, e)
     }
@@ -37,19 +38,17 @@ open class S3FileStorage(
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
-    contentType: String?,
   ) {
+    val byteArrayInputStream = ByteArrayInputStream(bytes)
     try {
       s3.putObject(
-        { b ->
-          b.bucket(bucketName).key("$canonicalPath$storageFilePath")
-          contentType?.let { b.contentType(it) }
-        },
-        RequestBody.fromInputStream(ByteArrayInputStream(bytes), bytes.size.toLong()),
+        { b -> b.bucket(bucketName).key("$canonicalPath$storageFilePath") },
+        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()),
       )
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)
     }
+    return
   }
 
   override fun fileExists(storageFilePath: String): Boolean {

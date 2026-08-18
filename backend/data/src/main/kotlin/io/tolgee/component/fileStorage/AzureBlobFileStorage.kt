@@ -5,11 +5,8 @@
 package io.tolgee.component.fileStorage
 
 import com.azure.core.util.BinaryData
-import com.azure.core.util.Context
 import com.azure.storage.blob.BlobContainerClient
-import com.azure.storage.blob.models.BlobHttpHeaders
 import com.azure.storage.blob.models.ListBlobsOptions
-import com.azure.storage.blob.options.BlobParallelUploadOptions
 import io.tolgee.exceptions.FileStoreException
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 
@@ -27,6 +24,7 @@ open class AzureBlobFileStorage(
   override fun deleteFile(storageFilePath: String) {
     try {
       client.getBlobClient(storageFilePath).delete()
+      return
     } catch (e: Exception) {
       throw FileStoreException("Can not delete file using Azure Blob!", storageFilePath, e)
     }
@@ -35,15 +33,14 @@ open class AzureBlobFileStorage(
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
-    contentType: String?,
   ) {
     try {
-      val options = BlobParallelUploadOptions(BinaryData.fromBytes(bytes))
-      contentType?.let { options.setHeaders(BlobHttpHeaders().setContentType(it)) }
-      client.getBlobClient(storageFilePath).uploadWithResponse(options, null, Context.NONE)
+      val client = client.getBlobClient(storageFilePath)
+      client.upload(BinaryData.fromBytes(bytes), true)
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using Azure Blob!", storageFilePath, e)
     }
+    return
   }
 
   override fun fileExists(storageFilePath: String): Boolean {
