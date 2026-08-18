@@ -14,8 +14,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -92,7 +93,12 @@ class BatchJobManagementControllerCancellationTest :
           val currentJob = util.getSingleJob()
           currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
 
-          verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+          // Scoped to this job and deliberately not times(1): cancelling can publish
+          // OnBatchJobCancelled more than once, and the finalizer only assigns the
+          // after-flush callback, so the call count is not the contract. The single merged
+          // revision asserted below is.
+          verify(batchJobActivityFinalizer, atLeastOnce())
+            .finalizeActivityWhenJobCompleted(argThat { id == job.id })
 
           // assert activity stored
           val activityRevisions =
