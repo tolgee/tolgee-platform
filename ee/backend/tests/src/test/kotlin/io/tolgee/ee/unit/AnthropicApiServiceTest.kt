@@ -151,6 +151,21 @@ class AnthropicApiServiceTest {
   }
 
   @Test
+  fun `parses response omitting output_tokens`() {
+    val config = createConfig(format = "json_schema")
+    val params = createParams(shouldOutputJson = true)
+    val restTemplate =
+      stubLlmRestTemplate(
+        """{"content": [{"type": "text", "text": "Ahoj svet"}], "usage": {"input_tokens": 10}}""",
+      )
+
+    val result = service.translate(params, config, restTemplate)
+
+    assertThat(result.usage?.inputTokens).isEqualTo(10)
+    assertThat(result.usage?.outputTokens).isEqualTo(0)
+  }
+
+  @Test
   fun `omits output_config when shouldOutputJson is false`() {
     val config = createConfig(format = "json_schema")
     val params = createParams(shouldOutputJson = false)
