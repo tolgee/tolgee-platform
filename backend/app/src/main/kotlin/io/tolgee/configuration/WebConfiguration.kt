@@ -79,6 +79,7 @@ class WebConfiguration(
   fun objectMapper(): JsonMapper {
     return jacksonMapperBuilder()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
       .enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
       .build()
   }
