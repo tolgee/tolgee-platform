@@ -1,3 +1,10 @@
+## [3.218.2](https://github.com/tolgee/tolgee-platform/compare/v3.218.1...v3.218.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* restore Jackson 2 handling of absent numeric fields ([#3857](https://github.com/tolgee/tolgee-platform/issues/3857)) ([510ca06](https://github.com/tolgee/tolgee-platform/commit/510ca06d8c81a0a06eb14fdb0f20d803ece56eaa)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3856](https://github.com/tolgee/tolgee-platform/issues/3856)
+
 ## [3.218.1](https://github.com/tolgee/tolgee-platform/compare/v3.218.0...v3.218.1) (2026-08-17)
 
 
