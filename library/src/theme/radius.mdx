@@ -1,0 +1,35 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { RadiusAndElevation } from '../../.storybook/docs/RadiusAndElevation';
+
+<Meta title="Foundations/Radius and elevation" />
+
+# Radius and elevation
+
+How a surface is cut and how far it sits off the page.
+
+```
+<Box sx={{ borderRadius: 1, boxShadow: 2 }} />   // 4px, elevation 2
+```
+
+Both are written as numbers. Radius multiplies `shape.borderRadius`; elevation indexes the shadow
+array.
+
+## Where this comes from
+
+**Material UI's defaults**, like spacing and breakpoints. `borderRadius: 4` and the 25 shadow levels
+are inherited — Tolgee has changed neither. The one place the product does decide is per component,
+in the `components` block of `getThemeOptions`, which is what **Foundations → Component styles**
+lists.
+
+<RadiusAndElevation />
+
+## What the code actually does
+
+Measured on 2026-08-17 across `webapp/src`: **six `borderRadius` declarations in the whole app**, of
+which two go through the theme and four are literals (`8px`, `2px`, `12px`, and a percentage for
+avatars).
+
+That is a much smaller number than it looks, and it is the interesting part: rounding is almost
+entirely inherited from MUI component defaults rather than set by hand. So there is little to clean
+up here — but also nothing stopping the next person from inventing a seventh value, which is why the
+scale is written down.

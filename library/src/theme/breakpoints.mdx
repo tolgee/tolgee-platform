@@ -1,0 +1,81 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Breakpoints } from '../../.storybook/docs/Breakpoints';
+
+<Meta title="Foundations/Breakpoints" />
+
+# Breakpoints
+
+Where the layout is allowed to change. Always through the theme, never as a literal:
+
+```
+[theme.breakpoints.down('md')]: { display: 'none' }
+<Box sx={{ display: { xs: 'none', md: 'block' } }} />
+```
+
+## Where this comes from
+
+**Material UI's defaults**, untouched by Tolgee — same as spacing. The names and numbers below were
+inherited, not chosen for this product.
+
+## The scale
+
+<Breakpoints />
+
+## Where it shows up
+
+**Collapsing a grid.** The most common use by far — a multi-column layout becomes a single column
+on a phone. From the task creation form:
+
+```
+const StyledTopPart = styled(Box)`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(0.5, 2)};
+  grid-template-columns: 3fr 5fr;
+  ${({ theme }) => theme.breakpoints.down('sm')} {
+    grid-template-columns: 1fr;
+  }
+`;
+```
+
+Worth noting what does _not_ change: the gap is the same on both sides of the query. Only the
+column count moves, which is what keeps the two states looking like one design.
+
+**Responsive props, no query at all.** Every layout prop accepts an object keyed by breakpoint. The
+two-column dialog in account security:
+
+```
+<Box
+  display="flex"
+  flexDirection={{ xs: 'column', md: 'row' }}
+  gap={{ xs: 2, md: 8 }}
+/>
+```
+
+`xs` is the base, so this reads as "column by default, row from `md` up". This is the form to reach
+for first — it is shorter and it keeps the two states next to each other instead of in separate
+blocks.
+
+**Asking from JavaScript.** When the answer changes _behavior_ rather than layout, the query has
+to be readable from code rather than from CSS. The trial banner uses it to decide how much text to
+show:
+
+```
+const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+```
+
+A query can also be handed to a component that takes one — the expiration date field passes
+`theme.breakpoints.up('md')` to the picker to choose between its desktop and mobile mode.
+
+## What the code actually does
+
+Measured on 2026-08-17 across `webapp/src`:
+
+- `theme.breakpoints.*` — **9 uses**: 5× `down('sm')`, 3× `down('md')`, 1× `up('md')`
+- `xs`, `lg` and `xl` never appear in a query at all
+- hand-written `@media` queries — **4 uses**, at 600px and **800px**
+
+600px is `sm` written out by hand. **800px is not a breakpoint at all** — the theme goes from 600 to
+900, so that rule fires in a range nothing else responds to. It is one of the two to settle.
+
+Nine uses across the whole app also means responsiveness is mostly carried by flex and grid rather
+than by queries, which is worth knowing before adding a query at all.

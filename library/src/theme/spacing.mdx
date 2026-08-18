@@ -1,0 +1,62 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { SpacingScale } from '../../.storybook/docs/SpacingScale';
+
+<Meta title="Foundations/Spacing" />
+
+# Spacing
+
+One unit is **8px**. Every gap, padding and margin is a multiple of it, written as a number rather
+than pixels:
+
+```
+<Box sx={{ p: 2, gap: 1.5 }} />        // 16px padding, 12px gap
+theme.spacing(3)                        // '24px'
+```
+
+Half steps are part of the scale, not a workaround — `0.5` is 4px and is the second most common
+value in the product.
+
+## Where this comes from
+
+**Nowhere.** `spacing: 8` is Material UI's default and Tolgee has never overridden it. That is worth
+saying plainly, because it means the scale was inherited rather than designed — if the product needs
+a different rhythm, changing it is a decision nobody has made yet, not a change to a Tolgee value.
+
+## The scale
+
+<SpacingScale />
+
+## Where it shows up
+
+**The page wrapper.** Every view in the product sits inside `BaseView`, whose padding is
+`16px 24px` — which is `spacing(2, 3)` written the long way. Both values are on the scale; only the
+notation is not. That one line is the whole finding below in miniature.
+
+**Two values mean vertical and horizontal.** Table rows use it constantly:
+
+```
+padding: ${({ theme }) => theme.spacing(1, 2)};   // 8px top and bottom, 16px sides
+gap: ${({ theme }) => theme.spacing(0.5, 2)};     // 4px between rows, 16px between columns
+```
+
+**In `sx`, the number is the unit already.** No `theme.spacing()` call, no `px`:
+
+```
+<Box sx={{ display: 'flex', gap: 1, mt: 2, mb: 2 }} />   // 8px gap, 16px above and below
+```
+
+This is the form to reach for first — it is shorter, and it cannot drift from the scale because it
+has no way to express a value that is off it.
+
+## What the code actually does
+
+Measured on 2026-08-17 across `webapp/src`:
+
+- `theme.spacing()` — **339 uses**
+- pixel values written straight into `padding`, `margin` or `gap` — **507 uses, 25 distinct values**
+
+So most spacing bypasses the scale. The values people reach for are 8, 4, 12 and 16 — a four-pixel
+rhythm, which is the scale in half steps. The intent matches; only the notation does not. Values
+like 3, 5, 6 and 10 are the ones with nothing behind them.
+
+Use the scale. A layout that seems to need 10px needs 8 or 12.
