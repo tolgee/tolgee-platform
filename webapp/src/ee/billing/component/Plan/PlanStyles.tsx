@@ -90,6 +90,11 @@ export const PlanRow = styled('div')`
      cards still stretch across the full width. */
   grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
   align-items: stretch;
+  /* Four cards at a desktop width land at 350px each. Without a cap a sparse tab — two
+     self-hosted plans, say — stretches those same cards to twice the width. The grid passes its
+     column count, so the cap shrinks with it and the row centres instead of filling. */
+  max-width: calc(var(--plan-columns, 4) * 350px);
+  margin-inline: auto;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.soft};
   border-radius: 20px;
   background: ${({ theme }) => theme.palette.tokens.background['paper-2']};
