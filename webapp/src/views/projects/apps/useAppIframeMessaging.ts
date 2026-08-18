@@ -74,7 +74,10 @@ export function useAppIframeMessaging(
     [appOrigin, baseUrl, entry]
   );
 
-  const apiUrl = import.meta.env.VITE_APP_API_URL ?? window.location.origin;
+  // `||`, not `??`: a production build defines VITE_APP_API_URL as an empty string (the web app
+  // calls its API same-origin), and an empty apiUrl would send the iframe's requests to the app's
+  // own origin instead of Tolgee.
+  const apiUrl = import.meta.env.VITE_APP_API_URL || window.location.origin;
 
   const muiTheme = useTheme();
   const appTheme = useMemo<IframeTheme>(
