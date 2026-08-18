@@ -1,4 +1,5 @@
 /// <reference types="storybook/test" />
+/// <reference types="vite-plugin-svgr/client" />
 
 // ^ Load Storybook types (play, queries...)
 

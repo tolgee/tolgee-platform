@@ -1,6 +1,6 @@
 import { Link } from '@mui/material';
 import React from 'react';
-import EmptyImage from 'tg.svgs/icons/glossary-empty.svg?react';
+import { GlossaryEmpty as EmptyImage } from '@tginternal/library/illustrations';
 import { EmptyResourceMessage } from 'tg.component/common/EmptyResourceMessage';
 
 export type AddFirstGlossaryMessageProps = {

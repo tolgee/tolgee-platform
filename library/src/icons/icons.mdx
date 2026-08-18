@@ -1,0 +1,74 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { IconGrid } from '../../.storybook/docs/IconGrid';
+import { IconMeanings } from '../../.storybook/docs/IconMeanings';
+import { IconSizes } from '../../.storybook/docs/IconSizes';
+
+<Meta title="Foundations/Icons" />
+
+# Icons
+
+Two sets are in use. Most glyphs come from [Untitled UI](https://www.untitled-ui.com/free-icons) —
+about a thousand exist, and this page lists only the ones the product actually reaches for. The rest
+were drawn for Tolgee, because the set had nothing for them.
+
+Anything larger than 24×24 is not an icon and lives on **Foundations → Illustrations**.
+
+## General rules
+
+1. **Import from the library**, never from the package or a raw file:
+
+   ```
+   import { Plus } from '@tginternal/library/icons';
+   import { Slack } from '@tginternal/library/icons/custom';
+   ```
+
+2. **Never set a color.** An icon inherits it from the surrounding text, which is what makes it
+   follow the Light and Dark switch. An icon that needs its own color is a sign the surrounding
+   text color is wrong.
+3. **Use one of the three sizes below.** Nothing else.
+4. **Look through the vocabulary before adding.** The meaning you need often already has a glyph,
+   under a name that does not suggest it.
+5. **Do not draw a new glyph if Untitled UI has one.** A drawing of ours is a drawing we maintain
+   forever, in every size and both modes.
+6. **Every icon carries a meaning.** One exported without a description is flagged in red below.
+
+## Sizes
+
+Three sizes, passed as `width` and `height` at the call site:
+
+<IconSizes />
+
+The app currently renders icons at ten different sizes. Seven of them — 14, 15, 18, 19, 21, 22 and
+26 — are accidents rather than choices: nobody picks nineteen pixels on purpose, and `19px` alone
+appears fifteen times, almost always on a `Plus` in an add button that was copied from one place. If
+a layout seems to need a fourth size, the layout is the thing to change.
+
+## Adding an icon
+
+1. Check the vocabulary below.
+2. If it is genuinely missing, take it from the
+   [Untitled UI catalogue](https://www.untitled-ui.com/free-icons) and add the export to
+   `library/src/icons/index.ts`.
+3. Give it a meaning in `.storybook/docs/iconMeta.ts`.
+
+## The vocabulary
+
+Every glyph in use, at a glance. Click one to jump to what it means. A **filled red dot** marks a glyph that overlaps with another already in the set — usually picked
+because nobody knew the first existed. A **hollow dot** marks one that nothing seems to import any
+more; verify before deleting, since that is a snapshot rather than a live check.
+
+### From Untitled UI
+
+<IconGrid source="untitled" />
+
+### Tolgee custom icons
+
+<IconGrid source="custom" />
+
+## Usage and meaning
+
+The glyph is generic, the meaning is ours. `ShieldTick` is not "a shield" — here it is a protected
+branch, and in another product the same drawing would mean something else. The name cannot carry
+that, so the description does.
+
+<IconMeanings />

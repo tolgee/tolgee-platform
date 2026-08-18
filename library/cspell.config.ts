@@ -8,12 +8,14 @@ export default defineConfig({
   caseSensitive: true,
   words: [
     'argstable',
+    'Ccw',
     'CSF',
     'hsl',
     'rgb',
     'sbdocs',
     'Segoe',
     'subpaths',
+    'taskinfo',
     'Tolgee',
     'tsc',
     'Vite',
@@ -37,7 +39,8 @@ export default defineConfig({
     'tginternal',
     'tolgee',
   ],
-  ignorePaths: ['/dist/', '/storybook-static/'],
+  // SVG path data is coordinates, not prose.
+  ignorePaths: ['/dist/', '/storybook-static/', '**/*.svg'],
   ignoreRegExpList: ['tolgee-pat'],
   patterns: [
     {

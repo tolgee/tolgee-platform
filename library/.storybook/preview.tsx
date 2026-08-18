@@ -27,13 +27,24 @@ const preview: Preview = {
       storySort: {
         order: [
           'Foundations',
-          ['Theme', 'Colors', 'Typography', 'Component styles'],
+          [
+            'Theme',
+            'Colors',
+            'Typography',
+            'Icons',
+            'Illustrations',
+            'Component styles',
+          ],
           'components',
           '*',
         ],
       },
     },
-    docs: { container: DocsContainer },
+    // Without headingSelector the contents list only picks up h3, so the main sections are missing.
+    docs: {
+      container: DocsContainer,
+      toc: { headingSelector: 'h2, h3' },
+    },
     backgrounds: { disable: true },
   },
   decorators: [

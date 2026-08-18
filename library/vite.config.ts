@@ -1,16 +1,18 @@
 import { defineConfig, UserConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import { extname, resolve, relative } from 'node:path';
 import fg from 'fast-glob';
 import pkg from './package.json';
 
-const componentDirs = ['components'];
+// Only the directory's barrel is published; everything beside it stays internal.
+const indexDirs = ['components', 'icons', 'illustrations'];
 const otherDirs = ['hooks', 'constants', 'theme'];
 
 const entryFiles = [
-  ...componentDirs.flatMap((dir) =>
+  ...indexDirs.flatMap((dir) =>
     fg.sync(`src/${dir}/**/index.{ts,tsx}`, { cwd: __dirname, absolute: true }),
   ),
   ...otherDirs.flatMap((dir) =>
@@ -32,6 +34,7 @@ const entryPoints = Object.fromEntries(
 export default defineConfig({
   plugins: [
     react(),
+    svgr(),
     viteTsconfigPaths({
       projects: [resolve(__dirname, 'tsconfig.json')],
     }),

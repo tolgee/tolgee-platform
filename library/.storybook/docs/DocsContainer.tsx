@@ -30,6 +30,11 @@ const css = (mode: 'light' | 'dark') => {
        would highlight them with its light palette, unreadable here and unfixable from outside. */
     .docblock-source, pre.prismjs { background: ${codeBg} !important;
       color: ${onCode} !important; border-color: ${line} !important; }
+    .sbdocs a { color: ${palette.tokens.primary.main}; }
+    /* The table of contents sits outside .sbdocs, so it keeps Storybook's own blue otherwise. */
+    .toc-wrapper .toc-list-item .toc-link { color: ${palette.text.secondary}; }
+    .toc-wrapper .toc-list-item .toc-link.is-active-link { color: ${text};
+      font-weight: 500; }
     .sbdocs a[href^='#'] { color: ${palette.text.secondary}; }
 
     /* Frame only; the canvas surface is painted by the decorator in .storybook/preview.tsx. */
