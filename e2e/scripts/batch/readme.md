@@ -17,7 +17,7 @@ This test uses a **NO_OP batch job type** that does nothing except report progre
 - `docker`
 - `jq`
 - `psql` (libpq)
-- `java` (JDK 21)
+- `java` (JDK 25)
 
 #### Usage:
 Run from the project root:
