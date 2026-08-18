@@ -1,6 +1,6 @@
 ## Install Prerequisites
 
-* [Java 21](https://openjdk.org/install)
+* [Java 25](https://openjdk.org/install)
 * [Docker](https://docs.docker.com/engine/install)
 * [Node.js 18](https://nodejs.org/en/download) (or higher)
 * [Intellij Idea](https://www.jetbrains.com/help/idea/installation-guide.html) (optional)
