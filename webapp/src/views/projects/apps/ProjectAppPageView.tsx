@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Box, CircularProgress, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useParams } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useAppIframeMessaging } from 'tg.views/projects/apps/useAppIframeMessaging';
 
 const LOADING_MIN_HEIGHT = 400;
@@ -45,6 +47,23 @@ export const ProjectAppPageView = () => {
   const module = app?.modules?.['project-dashboard-page']?.find(
     (m) => m.key === moduleKey
   );
+
+  // Reports opening an app's dashboard page to analytics (grouped by organization
+  // in PostHog), once per app page — re-fired when the user opens a different app
+  // or page, not on the iframe's hourly token refresh.
+  const reportEvent = useReportEvent();
+  const reportedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const key = `${installId}:${moduleKey}`;
+    if (app && reportedKeyRef.current !== key) {
+      reportedKeyRef.current = key;
+      reportEvent('APP_OPENED', {
+        appId: app.appId,
+        appName: app.name,
+        installId,
+      });
+    }
+  }, [app, installId, moduleKey]);
 
   // Full-page dashboard iframe — it goes through the shared messaging so it
   // gets the context token, theme, and theme changes.

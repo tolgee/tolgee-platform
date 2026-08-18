@@ -31,8 +31,12 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       // A Cloudflare quick tunnel exposes one port — this one. Forwarding the
       // manifest path here is what makes it reachable through the tunnel.
+      // Tolgee talks to the app through this one origin: the manifest it
+      // fetches and the signed lifecycle deliveries both proxy through to the
+      // app server.
       proxy: {
         '/manifest.json': serverTarget,
+        '/tolgee/lifecycle': serverTarget,
       },
       // Quick tunnels rewrite the Host header to *.trycloudflare.com.
       allowedHosts: true,

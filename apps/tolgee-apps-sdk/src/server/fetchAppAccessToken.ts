@@ -160,7 +160,7 @@ const resolveCredentials = (
     throw new Error(
       `No Tolgee app credentials for ${tolgeeUrl}. They are stored automatically at ` +
         `${appInstallStatePath(options)} when the app self-registers — run the app once ` +
-        'with TOLGEE_APP_REGISTRATION_SECRET set, or register it in Tolgee and set ' +
+        'with TOLGEE_APP_REGISTRATION_TOKEN set, or register it in Tolgee and set ' +
         'TOLGEE_APP_CLIENT_ID and TOLGEE_APP_CLIENT_SECRET yourself.'
     )
   }

@@ -1,14 +1,16 @@
 import { FunctionComponent } from 'react';
 import { Box, Tab, Tabs, styled } from '@mui/material';
-import { Link, useRouteMatch } from 'react-router-dom';
+import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useConfig } from 'tg.globalContext/helpers';
+import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
 import { useOrganization } from '../useOrganization';
 import { apps } from 'tg.ee';
 import { RegisteredAppsSection } from 'tg.views/organizations/apps/registeredApps/RegisteredAppsSection';
 import { OwnedAppsSection } from 'tg.views/organizations/apps/ownedApps/OwnedAppsSection';
+import { OwnedAppDetailView } from 'tg.views/organizations/apps/ownedApps/OwnedAppDetailView';
+import { AvailableAppsSection } from 'tg.views/organizations/apps/availableApps/AvailableAppsSection';
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: -1px;
@@ -23,11 +25,12 @@ export const OrganizationAppsView: FunctionComponent<
 > = () => {
   const organization = useOrganization();
   const config = useConfig();
+  const isAdmin = useIsAdmin();
   const { t } = useTranslate();
   const ownedMatch = useRouteMatch(LINKS.ORGANIZATION_APPS_OWNED.template);
 
   const ownedTabVisible = Boolean(
-    config.appsEnabled && organization?.currentUserRole === 'OWNER'
+    config.appsEnabled && (organization?.currentUserRole === 'OWNER' || isAdmin)
   );
   const tab = ownedTabVisible && ownedMatch?.isExact ? 'owned' : 'installed';
 
@@ -35,7 +38,7 @@ export const OrganizationAppsView: FunctionComponent<
     return null;
   }
 
-  return (
+  const tabbedView = (
     <BaseOrganizationSettingsView
       windowTitle={t('organization_apps_title')}
       link={LINKS.ORGANIZATION_APPS}
@@ -82,7 +85,12 @@ export const OrganizationAppsView: FunctionComponent<
             {apps.map((App, index) => (
               <App key={index} />
             ))}
-            {config.appsEnabled && <RegisteredAppsSection />}
+            {config.appsEnabled && (
+              <>
+                <AvailableAppsSection organizationId={organization.id} />
+                <RegisteredAppsSection />
+              </>
+            )}
           </>
         )}
 
@@ -91,5 +99,14 @@ export const OrganizationAppsView: FunctionComponent<
         )}
       </Box>
     </BaseOrganizationSettingsView>
+  );
+
+  return (
+    <Switch>
+      <Route exact path={LINKS.ORGANIZATION_APP.template}>
+        <OwnedAppDetailView />
+      </Route>
+      <Route>{tabbedView}</Route>
+    </Switch>
   );
 };

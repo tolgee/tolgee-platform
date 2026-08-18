@@ -15,6 +15,23 @@ class AppsProperties {
 
   @DocProperty(
     description =
+      "SHA-256 hash, base64-encoded, of the app self-registration secret. When set, an app " +
+        "presenting the matching plaintext may register itself into any organization on this " +
+        "server without a signed-in user — meant for first-party apps deployed alongside the " +
+        "server, whose deployment injects the plaintext. Unset (the default), self-registration " +
+        "is disabled and apps are registered by hand in the UI.\n" +
+        "\n" +
+        "Only the hash lives in this configuration, so a leaked config file does not hand out a " +
+        "usable credential. Generate it from your chosen plaintext with:\n" +
+        "\n" +
+        "```\n" +
+        "printf '%s' \"<secret>\" | openssl dgst -sha256 -binary | base64\n" +
+        "```",
+  )
+  var registrationSecretHash: String? = null
+
+  @DocProperty(
+    description =
       "When enabled, Tolgee App manifest URLs may target otherwise-blocked address ranges — " +
         "loopback, private/site-local, link-local, IPv6 unique-local, multicast and " +
         "wildcard/any-local addresses. Useful for local development and integration testing.\n" +
@@ -26,21 +43,6 @@ class AppsProperties {
         ":::\n\n",
   )
   var allowLocalAddresses: Boolean = false
-
-  @DocProperty(
-    description =
-      "Server-wide secret that lets an app register itself without a signed-in user, by calling " +
-        "`POST /v2/public/apps/self-register` with the `X-Tolgee-App-Registration-Secret` header. " +
-        "Lets apps be connected to a running server without restarting it. Unset (the default) " +
-        "disables self-registration entirely.\n" +
-        "\n" +
-        ":::danger\n" +
-        "Anyone holding this secret can register an app into any organization and receive its " +
-        "credentials. Treat it like an admin credential: keep it long and random, and leave it " +
-        "unset unless you need self-registration.\n" +
-        ":::\n\n",
-  )
-  var registrationSecret: String? = null
 
   @DocProperty(
     description =

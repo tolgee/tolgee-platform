@@ -3,10 +3,18 @@
   "name": "Keys Showcase",
   "version": "0.1.0",
   "baseUrl": "__BASE_URL__",
-  "scopes": ["keys.view", "translations.view"],
+  "scopes": [
+    "keys.view",
+    "translations.view"
+  ],
   "modules": {
     "project-dashboard-page": [
-      { "key": "keys", "title": "Keys Showcase", "icon": "Key01", "entry": "/" }
+      {
+        "key": "main",
+        "title": "Keys Showcase",
+        "icon": "🧩",
+        "entry": "/"
+      }
     ]
   }
 }

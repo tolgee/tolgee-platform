@@ -170,26 +170,38 @@ Call `app.dispose()` when your UI unmounts.
 Instead of pasting a manifest URL into Tolgee's admin UI, an app can register
 itself on startup — no restart of Tolgee, no clicking. This is what a dev app
 does when its tunnel URL changes on every restart, and how a first-party app
-deployed alongside Tolgee connects itself. It requires an instance-wide
-registration secret, which the Tolgee admin configures.
+deployed alongside Tolgee connects itself. It requires the server's
+**registration secret**, which comes from the Tolgee administrator — Tolgee's
+configuration holds only its hash (`tolgee.apps.registration-secret-hash`).
+`organizationSlug` picks the organization the app registers into; unset, it
+targets the server's initial organization.
 
 ```ts
-import { loadTolgeeAppConfig, selfRegisterApp } from '@tolgee/apps-sdk/server'
+import {
+  loadTolgeeAppConfig,
+  selfRegisterAppWithRetry,
+} from '@tolgee/apps-sdk/server'
 
 const config = loadTolgeeAppConfig()
 
-const { installId, created, native, credentialsPath } = await selfRegisterApp({
+const { installId, created, credentialsPath } = await selfRegisterAppWithRetry({
   tolgeeUrl: config.tolgeeUrl,
-  registrationSecret: config.registrationSecret!,
+  registrationToken: config.registrationToken!,
   manifestUrl: `${baseUrl}/manifest.json`,
 })
 ```
 
-Omitting `organizationSlug` — the normal case — registers a **native** app: one
-owned by no organization. Which organizations may use it is then a server-admin
-decision, made in Tolgee under **Administration → Apps**; a project owner
-enables it per project afterwards. Pass an `organizationSlug` only when you want
-the app installed into that one organization instead.
+The token both authenticates the call and names the organization the app
+registers into and is owned by — nothing in the request decides ownership, so a
+leaked token compromises one organization's registration, not the whole server.
+A server admin can later offer the app to **every** organization from the
+owner's Apps page; each organization then installs it from its own **Available
+on this server** list, and enables it per project.
+
+`selfRegisterAppWithRetry` retries with backoff until Tolgee is reachable, so an
+app that boots before Tolgee — or before its token exists — still connects
+without a restart. Use the single-attempt `selfRegisterApp` when you want to
+handle failures yourself.
 
 Tolgee returns the client secret **only when it creates the install** — that's
 what `created` reflects. A later call for an already registered app repoints it
@@ -340,8 +352,8 @@ Run several replicas off one install? Only one of them should rotate: every call
 mints another secret, and Tolgee caps how many an install may hold.
 
 Revoking is not the SDK's to do — one replica revoking would cut off its
-siblings — so step two happens in Tolgee, under **Organization → Apps** (or
-**Administration → Apps** for a native app). An app that genuinely owns its own
+siblings — so step two happens in Tolgee, under **Organization → Apps** on the
+owner's page. An app that genuinely owns its own
 lifecycle can still call `DELETE /v2/apps/self/secrets/{id}`; Tolgee refuses to
 let it revoke its own last live secret, which would lock it out permanently.
 
@@ -500,8 +512,7 @@ const { installId, projectId, userId, expiresAt } = decodeContextToken(token)
 | `TOLGEE_URL` | `tolgeeUrl` | `http://localhost:8718` |
 | `VITE_PORT` | `vitePort` | `5180` |
 | `SERVER_PORT` (or `PORT`) | `serverPort` | `5181` |
-| `TOLGEE_ORGANIZATION_SLUG` | `organizationSlug` | `null` |
-| `TOLGEE_APP_REGISTRATION_SECRET` | `registrationSecret` | `null` |
+| `TOLGEE_APP_REGISTRATION_TOKEN` | `registrationToken` | `null` |
 | `TOLGEE_APP_CLIENT_ID` | `clientId` | stored credentials |
 | `TOLGEE_APP_CLIENT_SECRET` | `clientSecret` | stored credentials |
 | `TOLGEE_APP_WEBHOOK_SECRET` | `webhookSecret` | stored app-level record |

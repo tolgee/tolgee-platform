@@ -11,9 +11,9 @@ import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 /**
- * One app-level client secret of an [App]. Shaped like [AppInstallSecret] but kept in its own table:
- * `app_install_secret` has to stay exactly the credentials that reach a tenant's data, or an
- * operator cutting off a leak cannot tell the two layers apart and revokes the wrong one.
+ * One app-level client secret of an [App] — the app's only long-lived credential. The token
+ * endpoint exchanges it plus an install id for the short-lived tokens that reach an organization's
+ * data, so revoking it cuts the app off everywhere at once.
  *
  * The plaintext is disclosed only in the response to issuing it.
  */
@@ -40,8 +40,21 @@ class AppSecret : StandardAuditModel() {
   @Column(name = "secret_prefix", length = 16, nullable = false)
   lateinit var secretPrefix: String
 
+  /** Last characters of the secret, shown alongside the prefix so two secrets can be told apart. */
+  @Column(name = "secret_suffix", length = 8, nullable = false)
+  var secretSuffix: String = ""
+
   @Column(name = "last_used_at")
   var lastUsedAt: Date? = null
+
+  /**
+   * When this secret stops authenticating, or null while it has no scheduled end. A rotation sets it
+   * on the outgoing secret to keep it working through a grace window (so an app that copies the new
+   * one by hand is not cut off); the secret is treated as dead once the time passes, without needing
+   * a scheduled job to touch the row.
+   */
+  @Column(name = "secret_expires_at")
+  var expiresAt: Date? = null
 
   @Column(name = "revoked_at")
   var revokedAt: Date? = null

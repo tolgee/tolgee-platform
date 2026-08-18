@@ -24,6 +24,7 @@ class OwnedAppModelAssembler(
       manifestLastError = entity.manifestLastError,
       manifestLastFailureKind = entity.manifestLastFailureKind?.name,
       unhealthySince = entity.unhealthySince?.time,
+      availableToAllOrganizations = entity.availableToAllOrganizations,
     )
   }
 }

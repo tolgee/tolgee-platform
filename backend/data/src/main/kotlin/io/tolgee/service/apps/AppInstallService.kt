@@ -6,14 +6,13 @@ import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,6 +28,7 @@ class AppInstallService(
   private val appInstallPersister: AppInstallPersister,
   private val appService: AppService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
+  private val businessEventPublisher: io.tolgee.component.reporting.BusinessEventPublisher,
 ) {
   data class RegisterResult(
     val install: AppInstall,
@@ -59,7 +59,40 @@ class AppInstallService(
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
-    return registerAndCreate(organizationId = organization.id, manifestUrl = manifestUrl, author = author)
+    val result = registerAndCreate(organizationId = organization.id, manifestUrl = manifestUrl, author = author)
+    reportInstalled(organization, result)
+    return result
+  }
+
+  /**
+   * Installs a registered app into [targetOrganization] on a server admin's behalf, bypassing the
+   * availability gate that governs an organization installing an app itself — the admin is the
+   * authority for a first-party enrolment. Idempotent: an organization that already has the app
+   * keeps its one install.
+   */
+  @org.springframework.transaction.annotation.Transactional
+  fun installForOrganizationByAdmin(
+    app: io.tolgee.model.apps.App,
+    targetOrganization: Organization,
+    author: UserAccount,
+  ): RegisterResult {
+    appInstallRepository.findByOrganizationIdAndAppId(targetOrganization.id, app.appId)?.let {
+      return RegisterResult(it, AppService.AppSummary(app.id, app.appId, app.name), appCredentials = null)
+    }
+    val fetched = appManifestFetcher.fetch(app.manifestUrl)
+    if (fetched.manifest.id != app.appId) {
+      throw BadRequestException(Message.APP_MANIFEST_INVALID)
+    }
+    val result =
+      appInstallPersister.create(
+        appEntityId = app.id,
+        organizationId = targetOrganization.id,
+        authorId = author.id,
+        manifestUrl = app.manifestUrl,
+        fetched = fetched,
+      )
+    reportInstalled(targetOrganization, result)
+    return result
   }
 
   /**
@@ -79,6 +112,11 @@ class AppInstallService(
   ): RegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
     val app = appService.requireRegistered(fetched.manifest.id)
+    // An app another organization registered can only be installed once a server admin has offered
+    // it to everyone; otherwise knowing its manifest URL would be enough to install it.
+    if (app.organization.id != organization.id && !app.availableToAllOrganizations) {
+      throw PermissionException(Message.APP_NOT_AVAILABLE_FOR_ORGANIZATION)
+    }
     val registeredUrl = app.manifestUrl
     val authoritative = fetchRegistered(registeredUrl, manifestUrl, fetched)
     if (authoritative.manifest.id != app.appId) {
@@ -86,12 +124,46 @@ class AppInstallService(
     }
     // An install of an already-registered app discloses no credentials, so there is nothing to
     // deliver — the app reaches its new install with the app-level credentials it already holds.
-    return appInstallPersister.create(
-      appEntityId = app.id,
-      organizationId = organization.id,
-      authorId = author.id,
-      manifestUrl = registeredUrl,
-      fetched = authoritative,
+    val result =
+      appInstallPersister.create(
+        appEntityId = app.id,
+        organizationId = organization.id,
+        authorId = author.id,
+        manifestUrl = registeredUrl,
+        fetched = authoritative,
+      )
+    reportInstalled(organization, result)
+    return result
+  }
+
+  /**
+   * Reports an install to the analytics pipeline, so adoption of an app — and which organizations
+   * hold it — is visible in PostHog, grouped by organization. A newly registered app reports
+   * `APP_REGISTERED` too (the credentials disclosed once are what tell it apart from an install of an
+   * already-registered app).
+   */
+  private fun reportInstalled(
+    organization: Organization,
+    result: RegisterResult,
+  ) {
+    val appData = mapOf<String, Any?>("appId" to result.app.appId, "appName" to result.app.name)
+    if (result.appCredentials != null) {
+      businessEventPublisher.publish(
+        io.tolgee.component.reporting.OnBusinessEventToCaptureEvent(
+          eventName = "APP_REGISTERED",
+          organizationId = organization.id,
+          organizationName = organization.name,
+          data = appData,
+        ),
+      )
+    }
+    businessEventPublisher.publish(
+      io.tolgee.component.reporting.OnBusinessEventToCaptureEvent(
+        eventName = "APP_INSTALLED",
+        organizationId = organization.id,
+        organizationName = organization.name,
+        data = appData + mapOf("installId" to result.install.id),
+      ),
     )
   }
 
@@ -104,20 +176,8 @@ class AppInstallService(
     return appManifestFetcher.fetch(registeredUrl)
   }
 
-  /**
-   * Registers a native (server-level) install owned by no organization, on behalf of a server admin.
-   * Unlike [selfRegister] it never repoints an existing install — an admin pasting a manifest whose
-   * app is already registered gets the same "already installed" error as an organization owner does.
-   */
-  fun registerNative(
-    manifestUrl: String,
-    author: UserAccount,
-  ): RegisterResult {
-    return registerAndCreate(organizationId = null, manifestUrl = manifestUrl, author = author)
-  }
-
   private fun registerAndCreate(
-    organizationId: Long?,
+    organizationId: Long,
     manifestUrl: String,
     author: UserAccount,
   ): RegisterResult {
@@ -137,7 +197,7 @@ class AppInstallService(
     return appLifecycleDeliveryService.deliverNow(
       appEntityId = result.app.id,
       eventType = AppLifecycleEventType.APP_REGISTERED,
-      organizationId = result.install.organization?.id,
+      organizationId = result.install.organization.id,
       appCredentials =
         AppLifecycleAppCredentials(
           clientId = credentials.clientId,
@@ -157,22 +217,22 @@ class AppInstallService(
    * discloses nothing, or anyone holding the registration secret could silently mint fresh
    * credentials for an existing app.
    *
-   * @param organization null registers a native (server-level) install; a server admin then decides
-   *   which organizations may use it.
+   * @param organization the organization the app registers into and that owns it.
    */
   fun selfRegister(
-    organization: Organization?,
+    organization: Organization,
     manifestUrl: String,
     author: UserAccount,
   ): SelfRegisterResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
-    val organizationId = organization?.id
-    val existing = findForSelfRegister(organizationId, fetched.manifest.id)
+    val organizationId = organization.id
+    val existing = appInstallRepository.findByOrganizationIdAndAppId(organizationId, fetched.manifest.id)
 
     if (existing == null) {
       // No delivery on this path: the caller is the app itself and reads the credentials straight
       // out of this call's response.
       val created = appInstallPersister.registerAndCreate(organizationId, author.id, manifestUrl, fetched)
+      reportInstalled(organization, created)
       return SelfRegisterResult(
         install = created.install,
         created = true,
@@ -195,14 +255,6 @@ class AppInstallService(
       app = appService.summarize(appService.requireRegistered(fetched.manifest.id)),
       appCredentials = null,
     )
-  }
-
-  private fun findForSelfRegister(
-    organizationId: Long?,
-    appId: String,
-  ): AppInstall? {
-    if (organizationId == null) return appInstallRepository.findByOrganizationIsNullAndAppId(appId)
-    return appInstallRepository.findByOrganizationIdAndAppId(organizationId, appId)
   }
 
   fun previewManifest(manifestUrl: String): AppManifestFetcher.FetchResult {
@@ -252,10 +304,9 @@ class AppInstallService(
    * organization's install is untouched — removing the app everywhere is the owner's operation, see
    * [AppOwnerRemovalService].
    *
-   * @param organizationId null targets a native (server-level) install.
    */
   fun remove(
-    organizationId: Long?,
+    organizationId: Long,
     installId: Long,
   ) {
     // No delivery: an uninstall carries no secret, and an app that tracks its installs sees this one
@@ -268,20 +319,10 @@ class AppInstallService(
     return appInstallRepository.findAllByOrganizationId(organizationId)
   }
 
+  /** The organizations that currently have the app installed. */
   @Transactional(readOnly = true)
-  fun findAllNativePaged(pageable: Pageable): Page<AppInstall> {
-    return appInstallRepository.findAllByOrganizationIsNull(pageable)
-  }
-
-  @Transactional(readOnly = true)
-  fun isNative(installId: Long): Boolean {
-    return appInstallRepository.findByOrganizationIsNullAndId(installId) != null
-  }
-
-  @Transactional(readOnly = true)
-  fun getNative(installId: Long): AppInstall {
-    return appInstallRepository.findByOrganizationIsNullAndId(installId)
-      ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+  fun findInstallingOrganizations(appEntityId: Long): List<Organization> {
+    return appInstallRepository.findInstallingOrganizations(appEntityId)
   }
 
   @Transactional(readOnly = true)
@@ -355,13 +396,4 @@ class AppInstallService(
     return install
   }
 
-  /** @param organizationId null targets a native (server-level) install. */
-  @Transactional(readOnly = true)
-  fun getScoped(
-    organizationId: Long?,
-    installId: Long,
-  ): AppInstall {
-    if (organizationId == null) return getNative(installId)
-    return requireInstall(organizationId, installId)
-  }
 }

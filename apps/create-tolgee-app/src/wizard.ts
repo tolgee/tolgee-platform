@@ -1,23 +1,12 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import {
-  cancel,
-  confirm,
-  intro,
-  isCancel,
-  note,
-  password,
-  select,
-  text,
-} from '@clack/prompts'
+import { cancel, confirm, intro, isCancel, note, text } from '@clack/prompts'
 import pc from 'picocolors'
 import { PACKAGE_ROOT } from './paths'
 import {
-  CONNECT_MODES,
   DEFAULT_SERVER_PORT,
   DEFAULT_TOLGEE_URL,
   DEFAULT_VITE_PORT,
-  type ConnectMode,
   type SdkMode,
 } from './registry'
 import { resolveSdk, type SdkResolution } from './sdk'
@@ -27,11 +16,6 @@ export type Answers = {
   name: string
   targetDir: string
   tolgeeUrl: string
-  connectMode: ConnectMode
-  /** Empty unless `connectMode` is `auto`. */
-  organizationSlug: string
-  /** Empty unless `connectMode` is `auto`. */
-  registrationSecret: string
   vitePort: number
   serverPort: number
   /** Which `@tolgee/apps-sdk` the generated app depends on. */
@@ -73,32 +57,6 @@ export async function runWizard(
     )
   )
 
-  const connectMode = abortIfCancelled(
-    await select({
-      message: 'How should the app get registered in Tolgee?',
-      initialValue: 'manual' satisfies ConnectMode,
-      options: CONNECT_MODES.map((m) => ({
-        value: m.value,
-        label: m.label,
-        hint: m.hint,
-      })),
-    })
-  ) as ConnectMode
-
-  let organizationSlug = ''
-  let registrationSecret = ''
-  if (connectMode === 'auto') {
-    registrationSecret = abortIfCancelled(
-      await password({
-        message: 'Registration secret (from the Tolgee server configuration):',
-        validate: (v) =>
-          typeof v === 'string' && v.length > 0
-            ? undefined
-            : 'Required for self-registration.',
-      })
-    )
-  }
-
   const targetDir = resolve(process.cwd(), id)
   const sdk = resolveSdk({ mode: sdkMode, targetDir, packageRoot: PACKAGE_ROOT })
 
@@ -107,7 +65,6 @@ export async function runWizard(
       `App        ${id} (${name})`,
       `Directory  ${targetDir}`,
       `Tolgee     ${tolgeeUrl}`,
-      `Register   ${connectMode === 'auto' ? 'self-register as a native (server-wide) app' : 'manually in Tolgee'}`,
       `SDK        ${sdk.summary}`,
     ].join('\n'),
     'Summary'
@@ -133,9 +90,6 @@ export async function runWizard(
     name,
     targetDir,
     tolgeeUrl,
-    connectMode,
-    organizationSlug,
-    registrationSecret,
     vitePort: DEFAULT_VITE_PORT,
     serverPort: DEFAULT_SERVER_PORT,
     sdk,
@@ -151,16 +105,6 @@ export const validateId = (raw: unknown): string | undefined => {
   }
   if (existsSync(resolve(process.cwd(), raw))) {
     return `Directory "${raw}" already exists.`
-  }
-  return undefined
-}
-
-export const validateOrganizationSlug = (raw: unknown): string | undefined => {
-  if (typeof raw !== 'string' || raw.length === 0) {
-    return 'Organization slug is required for self-registration.'
-  }
-  if (!/^[a-z0-9][a-z0-9-]*$/i.test(raw)) {
-    return 'Slug looks wrong — copy it from the organization URL in Tolgee.'
   }
   return undefined
 }

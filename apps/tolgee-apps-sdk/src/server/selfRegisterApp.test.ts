@@ -4,7 +4,11 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, it } from 'node:test'
 import { readStoredApp, readStoredAppInstall, saveApp } from './installStore'
-import { selfRegisterApp } from './selfRegisterApp'
+import {
+  SelfRegisterError,
+  selfRegisterApp,
+  selfRegisterAppWithRetry,
+} from './selfRegisterApp'
 
 const TOLGEE_URL = 'http://localhost:8718'
 
@@ -31,7 +35,7 @@ const stubTolgee = (body: unknown): void => {
 const register = () =>
   selfRegisterApp({
     tolgeeUrl: TOLGEE_URL,
-    registrationSecret: 'reg-secret',
+    registrationToken: 'tgreg_test-token',
     manifestUrl: 'http://localhost:5181/manifest.json',
     stateDir,
   })
@@ -95,5 +99,69 @@ describe('selfRegisterApp', () => {
 
     assert.equal(result.app, null)
     assert.equal(readStoredApp(TOLGEE_URL, { stateDir }), null)
+  })
+
+  it('surfaces an unreachable server as a retryable SelfRegisterError', async () => {
+    globalThis.fetch = (async () => {
+      throw new Error('ECONNREFUSED')
+    }) as typeof fetch
+
+    await assert.rejects(register(), (error: unknown) => {
+      assert.ok(error instanceof SelfRegisterError)
+      assert.equal(error.status, null)
+      return true
+    })
+  })
+})
+
+describe('selfRegisterAppWithRetry', () => {
+  it('retries with backoff until the server accepts, then succeeds', async () => {
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls += 1
+      if (calls < 3) throw new Error('ECONNREFUSED')
+      return new Response(JSON.stringify({ id: 7, created: true }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    }) as typeof fetch
+
+    const delays: number[] = []
+    const result = await selfRegisterAppWithRetry(
+      {
+        tolgeeUrl: TOLGEE_URL,
+        registrationToken: 'tgreg_test-token',
+        manifestUrl: 'http://localhost:5181/manifest.json',
+        persist: false,
+      },
+      {
+        initialDelayMs: 10,
+        onRetry: (_error, _attempt, nextDelayMs) => delays.push(nextDelayMs),
+        sleep: async () => {},
+      }
+    )
+
+    assert.equal(result.installId, 7)
+    assert.equal(calls, 3)
+    assert.deepEqual(delays, [10, 20])
+  })
+
+  it('gives up after maxAttempts', async () => {
+    globalThis.fetch = (async () => {
+      throw new Error('ECONNREFUSED')
+    }) as typeof fetch
+
+    await assert.rejects(
+      selfRegisterAppWithRetry(
+        {
+          tolgeeUrl: TOLGEE_URL,
+          registrationToken: 'tgreg_test-token',
+          manifestUrl: 'http://localhost:5181/manifest.json',
+          persist: false,
+        },
+        { maxAttempts: 2, initialDelayMs: 1, sleep: async () => {} }
+      ),
+      SelfRegisterError
+    )
   })
 })

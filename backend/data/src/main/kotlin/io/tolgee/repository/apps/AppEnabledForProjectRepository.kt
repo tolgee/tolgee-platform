@@ -44,21 +44,18 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
 
   fun deleteByProjectId(projectId: Long)
 
-  fun deleteByAppInstallIdAndProjectOrganizationOwnerId(
-    appInstallId: Long,
-    organizationId: Long,
-  )
-
+  /**
+   * Disables an app in every project whose organization does not own it — used when a server admin
+   * withdraws the app's server-wide availability, so it stops running everywhere it could only be
+   * reached through that offer while staying enabled in the owner's own projects.
+   */
   @Query(
     """
-    select e from AppEnabledForProject e
-    where e.appInstall.id = :appInstallId
-      and not exists (
-        select a.id from AppAvailableForOrganization a
-        where a.appInstall.id = :appInstallId
-          and a.organization.id = e.project.organizationOwner.id
-      )
+    delete from AppEnabledForProject e
+    where e.appInstall.app.id = :appEntityId
+      and e.project.organizationOwner.id <> e.appInstall.app.organization.id
     """,
   )
-  fun findAllWithoutExplicitOrganizationAvailability(appInstallId: Long): List<AppEnabledForProject>
+  @org.springframework.data.jpa.repository.Modifying
+  fun deleteByAppIdAndProjectOrganizationNotOwner(appEntityId: Long)
 }

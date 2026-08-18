@@ -36,12 +36,22 @@ import java.util.Date
 )
 class App : StandardAuditModel() {
   /**
-   * The organization that registered the app and may administer it. Null for an app registered at
-   * server level by an admin — the server itself owns it, exactly as a native [AppInstall] belongs
-   * to no organization.
+   * The organization that registered the app and owns it: it holds the app-level credentials,
+   * rotates them, and can take the app off every organization that installed it. Every app has one —
+   * a server admin publishing a first-party app registers it under an organization it controls, the
+   * same way GitHub Apps are owned by a vendor account rather than by nobody.
    */
-  @ManyToOne(fetch = FetchType.LAZY)
-  var organization: Organization? = null
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  lateinit var organization: Organization
+
+  /**
+   * Whether every organization on the server may install this app, not only the owner. Set by a
+   * server admin — it is how a first-party or vetted app is offered server-wide. Each organization
+   * that installs it still gets its own install, so tokens and uninstalls stay per-tenant.
+   */
+  @Column(name = "available_to_all_organizations", nullable = false)
+  @ColumnDefault("false")
+  var availableToAllOrganizations: Boolean = false
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var author: UserAccount

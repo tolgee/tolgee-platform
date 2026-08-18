@@ -216,12 +216,19 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     return objectMapper.readTree(response).get("access_token").asText()
   }
 
-  /** Issues an additional app-level secret and returns its plaintext. */
+  /** Issues an additional app-level secret alongside the current one and returns its plaintext. */
   private fun issueSecret(): String {
-    loginAsUser()
+    logout()
     val response =
-      performAuthPost("/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets", null)
-        .andIsOk
+      perform(
+        post("/v2/public/apps/app-secrets/issue")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+            objectMapper.writeValueAsString(
+              mapOf("client_id" to appClientId, "client_secret" to appClientSecret),
+            ),
+          ),
+      ).andIsOk
         .andReturn()
         .response.contentAsString
     return objectMapper.readTree(response).get("secret").asText()

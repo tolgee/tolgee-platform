@@ -70,6 +70,15 @@ class AppService(
     return appRepository.findAllByOrganizationIdOrderByNameAsc(organizationId)
   }
 
+  /**
+   * Apps offered to every organization that [organizationId] can still install — it neither owns nor
+   * has already installed them.
+   */
+  @Transactional(readOnly = true)
+  fun listAvailableToInstall(organizationId: Long): List<App> {
+    return appRepository.findAvailableToInstall(organizationId)
+  }
+
   /** How many organizations currently have the app installed. */
   @Transactional(readOnly = true)
   fun countInstalls(appEntityId: Long): Long {
@@ -90,7 +99,7 @@ class AppService(
    * @param organizationId null registers an app owned by the server itself, matching a native install.
    */
   fun registerIfAbsent(
-    organizationId: Long?,
+    organizationId: Long,
     authorId: Long,
     manifestUrl: String,
     fetched: AppManifestFetcher.FetchResult,
@@ -102,7 +111,7 @@ class AppService(
     val webhookSecret = keyGenerator.generate(256)
     val app =
       App().apply {
-        this.organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
+        this.organization = entityManager.getReference(Organization::class.java, organizationId)
         this.author = entityManager.getReference(UserAccount::class.java, authorId)
         this.appId = fetched.manifest.id
         this.manifestUrl = manifestUrl
@@ -167,5 +176,6 @@ class AppService(
     const val APP_CLIENT_ID_PREFIX = "tgpub_"
     const val APP_CLIENT_SECRET_PREFIX = "tgpubs_"
     const val APP_CLIENT_SECRET_PREFIX_DISPLAY_LENGTH = 10
+    const val APP_CLIENT_SECRET_SUFFIX_DISPLAY_LENGTH = 6
   }
 }

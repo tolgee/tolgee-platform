@@ -9,17 +9,19 @@ import {
 export type SelfRegisterInput = {
   /** Base URL of the Tolgee instance to register with. */
   tolgeeUrl: string
-  /** Instance-wide secret Tolgee requires to accept a self-registration. */
-  registrationSecret: string
   /**
-   * Organization to install into. Omit — the normal case — to register a
-   * **native** app: one owned by no organization, which a server admin then
-   * grants to organizations under Administration → Apps. Pass a slug only to
-   * install the app into that single organization instead.
+   * The server's registration secret, obtained from the Tolgee administrator. Tolgee's
+   * configuration holds only its hash (`tolgee.apps.registration-secret-hash`); the plaintext
+   * lives with the app's deployment.
    */
-  organizationSlug?: string | null
+  registrationToken: string
   /** Publicly reachable URL Tolgee fetches the manifest from. */
   manifestUrl: string
+  /**
+   * Slug of the organization the app registers into, which owns it. Omitted, the app registers
+   * into the server's initial organization.
+   */
+  organizationSlug?: string | null
   /**
    * Set to false to keep the issued credentials out of the local state file —
    * only for apps that capture the secret themselves. Defaults to true.
@@ -33,8 +35,6 @@ export type SelfRegisterResult = {
   installId: number
   /** False when an existing install was repointed at `manifestUrl` instead. */
   created: boolean
-  /** True when the install belongs to no organization (see `organizationSlug`). */
-  native: boolean
   /**
    * App-level credentials, disclosed only by the call that first registered the
    * app on this Tolgee. Null on every later call, including a repoint.
@@ -52,10 +52,22 @@ export type SelfRegisteredApp = {
   webhookSecret: string | null
 }
 
+/** A self-registration Tolgee rejected — kept distinct so boot retries can log it. */
+export class SelfRegisterError extends Error {
+  constructor(
+    message: string,
+    readonly status: number | null
+  ) {
+    super(message)
+    this.name = 'SelfRegisterError'
+  }
+}
+
 /**
  * Registers (or repoints) this app on a Tolgee instance without anyone
  * clicking through the UI — the flow a dev app uses on startup, when its
- * tunnel URL changes on every restart.
+ * tunnel URL changes on every restart. The app registers into the organization
+ * `organizationSlug` names, or the server's initial organization when unset.
  *
  * Tolgee disclosed the app-level credentials only on the call that registered
  * the app; a repoint discloses nothing and leaves them valid, which is what
@@ -65,8 +77,7 @@ export type SelfRegisteredApp = {
  *
  *     const { installId, created, credentialsPath } = await selfRegisterApp({
  *       tolgeeUrl: config.tolgeeUrl,
- *       registrationSecret: config.registrationSecret!,
- *       organizationSlug: config.organizationSlug!,
+ *       registrationToken: config.registrationToken!,
  *       manifestUrl: `${baseUrl}/manifest.json`,
  *     })
  */
@@ -74,24 +85,36 @@ export const selfRegisterApp = async (
   input: SelfRegisterInput
 ): Promise<SelfRegisterResult> => {
   const url = `${normalizeTolgeeUrl(input.tolgeeUrl)}/v2/public/apps/self-register`
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Tolgee-App-Registration-Secret': input.registrationSecret,
-    },
-    body: JSON.stringify({
-      manifestUrl: input.manifestUrl,
-      // Omitted entirely rather than sent as null/"" so Tolgee takes the native path.
-      ...(input.organizationSlug
-        ? { organizationSlug: input.organizationSlug }
-        : {}),
-    }),
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Tolgee-App-Registration-Token': input.registrationToken,
+      },
+      body: JSON.stringify({
+        manifestUrl: input.manifestUrl,
+        ...(input.organizationSlug
+          ? { organizationSlug: input.organizationSlug }
+          : {}),
+      }),
+    })
+  } catch (error) {
+    // A server that is not up yet is the ordinary case at boot; surface it as a
+    // retryable SelfRegisterError rather than a raw network error.
+    throw new SelfRegisterError(
+      `Tolgee app self-registration could not reach ${url}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      null
+    )
+  }
 
   if (!response.ok) {
-    throw new Error(
-      `Tolgee app self-registration failed: ${response.status} ${response.statusText} — ${await response.text()}`
+    throw new SelfRegisterError(
+      `Tolgee app self-registration failed: ${response.status} ${response.statusText} — ${await response.text()}`,
+      response.status
     )
   }
 
@@ -107,20 +130,64 @@ export const selfRegisterApp = async (
     }
   }
   if (typeof body.id !== 'number') {
-    throw new Error(
-      `Tolgee app self-registration returned no install id: ${JSON.stringify(body)}`
+    throw new SelfRegisterError(
+      `Tolgee app self-registration returned no install id: ${JSON.stringify(body)}`,
+      response.status
     )
   }
   const result: SelfRegisterResult = {
     installId: body.id,
     created: body.created === true,
-    native: !input.organizationSlug,
     app: readApp(body.app),
     credentialsPath: null,
   }
 
   if (input.persist === false) return result
   return { ...result, credentialsPath: persist(input, result) }
+}
+
+export type SelfRegisterRetryOptions = {
+  /** Cap on attempts before giving up; Infinity keeps retrying forever. Defaults to Infinity. */
+  maxAttempts?: number
+  /** First backoff in ms; doubles each attempt up to `maxDelayMs`. Defaults to 1000. */
+  initialDelayMs?: number
+  /** Ceiling for the backoff. Defaults to 30000. */
+  maxDelayMs?: number
+  /** Called before each wait, so an app can log that Tolgee is not reachable yet. */
+  onRetry?: (error: SelfRegisterError, attempt: number, nextDelayMs: number) => void
+  /** Injectable sleeper, for tests. */
+  sleep?: (ms: number) => Promise<void>
+}
+
+/**
+ * `selfRegisterApp` with exponential backoff, so an app booting before its Tolgee — or before its
+ * organization or registration token exists — keeps serving its manifest and registers itself the
+ * moment Tolgee is ready. GitOps ordering therefore does not matter. Only rejections and unreachable
+ * servers are retried; a malformed response is not.
+ */
+export const selfRegisterAppWithRetry = async (
+  input: SelfRegisterInput,
+  options: SelfRegisterRetryOptions = {}
+): Promise<SelfRegisterResult> => {
+  const maxAttempts = options.maxAttempts ?? Infinity
+  const initialDelayMs = options.initialDelayMs ?? 1000
+  const maxDelayMs = options.maxDelayMs ?? 30000
+  const sleep =
+    options.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
+
+  let attempt = 0
+  let delay = initialDelayMs
+  for (;;) {
+    attempt += 1
+    try {
+      return await selfRegisterApp(input)
+    } catch (error) {
+      if (!(error instanceof SelfRegisterError) || attempt >= maxAttempts) throw error
+      options.onRetry?.(error, attempt, delay)
+      await sleep(delay)
+      delay = Math.min(delay * 2, maxDelayMs)
+    }
+  }
 }
 
 /**
@@ -155,8 +222,6 @@ const persist = (
       {
         tolgeeUrl: input.tolgeeUrl,
         installId: result.installId,
-        native: result.native,
-        organizationSlug: input.organizationSlug ?? null,
       },
       options
     )

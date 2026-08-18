@@ -79,7 +79,6 @@ class AppManifestReaperTest : AuthorizedControllerTest() {
   fun cleanup() {
     appsProperties.reapUnreachableApps = false
     clearForcedDate()
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
     testDataService.cleanTestData(testData.root)
   }
 

@@ -15,6 +15,12 @@ export type AppManifest = {
   baseUrl: string
   /** Tolgee permission scopes the app requests at install time (e.g. `keys.edit`). */
   scopes?: string[]
+  /**
+   * Revision of the app contract this app speaks. Optional; defaults to 1, the
+   * only version this alpha defines. Declare it so a future breaking revision
+   * can be told apart from this one.
+   */
+  protocolVersion?: number
   modules: AppModules
 }
 

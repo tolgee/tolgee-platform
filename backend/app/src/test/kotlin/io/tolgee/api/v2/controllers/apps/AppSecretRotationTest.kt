@@ -11,7 +11,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.service.apps.AppInstallService
+import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppSecretService
 import io.tolgee.service.apps.AppService
@@ -25,29 +25,29 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
-import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import tools.jackson.databind.JsonNode
+import java.time.Duration
 
 /**
- * The answer to a leaked app credential: rotate once, not once per organization that installed the
- * app. Rotation must leave everything below the credential — installs, availability, enablements —
- * untouched.
+ * Rolling an app's client secret: one action mints a replacement and retires the old one — at once
+ * when the app takes the new secret over the lifecycle channel, otherwise after a grace window so an
+ * app configured by hand can be switched over first. Rotation leaves everything below the credential
+ * — installs, availability, enablements — untouched.
  */
 class AppSecretRotationTest : AuthorizedControllerTest() {
   @Autowired
-  lateinit var appService: AppService
+  lateinit var appAvailabilityService: AppAvailabilityService
 
   @Autowired
   lateinit var appSecretService: AppSecretService
-
-  @Autowired
-  lateinit var appInstallService: AppInstallService
 
   @MockitoBean
   @Autowired
@@ -65,6 +65,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
+    currentDateProvider.forcedDate = currentDateProvider.date
     testData = NativeAppsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -81,71 +82,107 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
+    currentDateProvider.forcedDate = null
     testDataService.cleanTestData(testData.root)
   }
 
+  /**
+   * Even a landed delivery only proves the app received the webhook, not that it adopted the
+   * secret — so a rotation never cuts the old secret off on its own.
+   */
   @Test
-  fun `the owner issues a second secret and the first keeps working`() {
-    val issued = issueAsOwner()
+  fun `a delivered rotation keeps the old secret alive through the grace window`() {
+    val rolled = roll(graceSeconds = ONE_DAY)
 
-    issued
-      .get("secret")
-      .asText()
-      .assert
-      .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+    rolled.at("/secret/secret").asText().assert.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+    rolled.hasNonNull("previousExpiresAt").assert.isTrue()
+
     appSelfList(appClientSecret).andIsOk
-    appSelfList(issued.get("secret").asText()).andIsOk
+    appSelfList(newSecretOf(rolled)).andIsOk
+    activeSecretIds().assert.hasSize(2)
   }
 
   @Test
-  fun `a revoked app secret stops authenticating and the others keep working`() {
-    val issued = issueAsOwner()
-    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
-    // The app moves to the new secret; only then may the old one be revoked without forcing.
-    appSelfList(issued.get("secret").asText()).andIsOk
+  fun `an undelivered rotation keeps the old secret alive through the grace window`() {
+    failDelivery()
+    val rolled = roll(graceSeconds = ONE_DAY)
+
+    rolled.hasNonNull("previousExpiresAt").assert.isTrue()
+    appSelfList(appClientSecret).andIsOk
+    appSelfList(newSecretOf(rolled)).andIsOk
+    activeSecretIds().assert.hasSize(2)
+  }
+
+  @Test
+  fun `the old secret stops working once the grace window passes`() {
+    failDelivery()
+    val rolled = roll(graceSeconds = 60)
+
+    appSelfList(appClientSecret).andIsOk
+    currentDateProvider.move(Duration.ofSeconds(120))
+    appSelfList(appClientSecret).andIsUnauthorized
+    appSelfList(newSecretOf(rolled)).andIsOk
+    activeSecretIds().assert.hasSize(1)
+  }
+
+  /** There is no immediate-cutover path — old secrets end by expiry or by an explicit revoke. */
+  @Test
+  fun `rolling with zero grace is refused`() {
+    userAccount = testData.user
+    performAuthPost(
+      "${ownedAppsUrl()}/$appEntityId/secrets/rotate",
+      mapOf("graceSeconds" to 0),
+    ).andIsBadRequest
+  }
+
+  @Test
+  fun `a further rotation is refused once the active secret cap is reached`() {
+    failDelivery()
+    var newestId = 0L
+    repeat(AppSecretService.MAX_LIVE_SECRETS - 1) {
+      newestId = newIdOf(roll(graceSeconds = ONE_DAY))
+    }
+    activeSecretIds().assert.hasSize(AppSecretService.MAX_LIVE_SECRETS)
 
     userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId").andIsOk
+    performAuthPost(
+      "${ownedAppsUrl()}/$appEntityId/secrets/rotate",
+      mapOf("graceSeconds" to ONE_DAY),
+    ).andIsBadRequest.andHasErrorMessage(Message.APP_TOO_MANY_LIVE_SECRETS)
 
-    appSelfList(appClientSecret).andIsUnauthorized.andHasErrorMessage(Message.INVALID_APP_CREDENTIALS)
-    appSelfList(issued.get("secret").asText()).andIsOk
+    // Revoking one of the expiring secrets frees the slot again.
+    val expiringId = activeSecretIds().first { it != newestId }
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$expiringId").andIsOk
+    roll(graceSeconds = ONE_DAY)
   }
 
   @Test
-  fun `the new secret is both returned once and pushed to the app`() {
-    val issued = issueAsOwner()
+  fun `revoking during the grace window ends the old secret early`() {
+    failDelivery()
+    val rolled = roll(graceSeconds = ONE_DAY)
+    val oldId = activeSecretIds().first { it != newIdOf(rolled) }
+
+    userAccount = testData.user
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$oldId").andIsOk
+
+    appSelfList(appClientSecret).andIsUnauthorized
+    appSelfList(newSecretOf(rolled)).andIsOk
+  }
+
+  @Test
+  fun `the new secret is pushed to the app`() {
+    val rolled = roll(graceSeconds = ONE_DAY)
 
     val pushed = awaitPayload("app.secret_rotated")
-    pushed
-      .at("/app/clientSecret")
-      .asText()
-      .assert
-      .isEqualTo(issued.get("secret").asText())
-    pushed
-      .at("/app/clientId")
-      .asText()
-      .assert
-      .isEqualTo(appClientId)
-
-    userAccount = testData.user
-    performAuthGet("${ownedAppsUrl()}/$appEntityId/secrets").andIsOk.andAssertThatJson {
-      node("_embedded.appSecrets").isArray.hasSize(2)
-      node("_embedded.appSecrets[0].secret").isNull()
-      node("_embedded.appSecrets[1].secret").isNull()
-    }
+    pushed.at("/app/clientSecret").asText().assert.isEqualTo(newSecretOf(rolled))
+    pushed.at("/app/clientId").asText().assert.isEqualTo(appClientId)
   }
 
   @Test
-  fun `an app-level rotation leaves the install and its enablements alone`() {
-    val issued = issueAsOwner()
-    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
-    appSelfList(issued.get("secret").asText()).andIsOk
-    userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId").andIsOk
+  fun `a rotation leaves the install and its enablements alone`() {
+    val rolled = roll(graceSeconds = ONE_DAY)
 
-    // The surviving secret still mints tokens for the untouched install.
-    tokenRequest(appClientId, issued.get("secret").asText()).andIsOk
+    tokenRequest(appClientId, newSecretOf(rolled)).andIsOk
     userAccount = testData.user
     performAuthGet("/v2/organizations/${testData.organization.id}/apps").andIsOk.andAssertThatJson {
       node("_embedded.appInstalls").isArray.hasSize(1)
@@ -160,29 +197,23 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   fun `the app rotates its own app-level secret unattended`() {
     val issued =
       objectMapper.readTree(
-        appSelf("issue", appClientSecret)
-          .andIsOk
-          .andReturn()
-          .response.contentAsString,
+        appSelf("issue", appClientSecret).andIsOk.andReturn().response.contentAsString,
       )
 
-    issued
-      .get("secret")
-      .asText()
-      .assert
-      .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+    issued.get("secret").asText().assert.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     appSelfList(appClientSecret).andIsOk
     appSelfList(issued.get("secret").asText()).andIsOk
 
-    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
-    appSelf("revoke", issued.get("secret").asText(), originalId).andIsOk
+    val newId = issued.get("id").asLong()
+    val oldId = activeSecretIds().first { it != newId }
+    appSelf("revoke", issued.get("secret").asText(), oldId).andIsOk
     appSelfList(appClientSecret).andIsUnauthorized
   }
 
-  /** An app authenticates with a secret, so revoking its only one would lock it out for good. */
+  /** An app authenticates with a secret, so revoking its only active one would lock it out for good. */
   @Test
-  fun `the app may not revoke its own last live app-level secret`() {
-    val secretId = liveSecretIds().single()
+  fun `the app may not revoke its own last active app-level secret`() {
+    val secretId = activeSecretIds().single()
 
     appSelf("revoke", appClientSecret, secretId)
       .andIsBadRequest
@@ -191,10 +222,21 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     appSelfList(appClientSecret).andIsOk
   }
 
-  /** The owner may, though — it is the only way to cut a leaked credential off immediately. */
   @Test
-  fun `the owner may revoke the last live app-level secret as a kill switch`() {
-    val secretId = liveSecretIds().single()
+  fun `the owner cannot revoke the app's only active secret without force`() {
+    val secretId = activeSecretIds().single()
+
+    userAccount = testData.user
+    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$secretId")
+      .andIsBadRequest
+      .andHasErrorMessage(Message.APP_CANNOT_REVOKE_LAST_SECRET)
+
+    appSelfList(appClientSecret).andIsOk
+  }
+
+  @Test
+  fun `the owner may revoke the last active secret as a kill switch`() {
+    val secretId = activeSecretIds().single()
 
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$secretId?force=true").andIsOk
@@ -202,37 +244,10 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     appSelfList(appClientSecret).andIsUnauthorized
   }
 
-  /** The guard: an owner must not revoke the old secret before the app has moved to the new one. */
-  @Test
-  fun `revoking a secret before the app used its replacement is refused, and forced through`() {
-    val issued = issueAsOwner()
-    val originalId = liveSecretIds().first { it != issued.get("id").asLong() }
-
-    // Neither secret has been used yet, so an ordinary revoke of the original is refused.
-    userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId")
-      .andIsBadRequest
-      .andHasErrorMessage(Message.APP_SECRET_REPLACEMENT_UNUSED)
-    appSelfList(appClientSecret).andIsOk
-
-    // Force overrides the guard — the kill switch for a leaked secret.
-    userAccount = testData.user
-    performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$originalId?force=true").andIsOk
-    appSelfList(appClientSecret).andIsUnauthorized
-  }
-
-  @Test
-  fun `refuses to issue beyond the live secret cap`() {
-    repeat(AppSecretService.MAX_LIVE_SECRETS - 1) { issueAsOwner() }
-
-    userAccount = testData.user
-    performAuthPost("${ownedAppsUrl()}/$appEntityId/secrets", null)
-      .andIsBadRequest
-      .andHasErrorMessage(Message.APP_TOO_MANY_LIVE_SECRETS)
-  }
-
   @Test
   fun `an organization that only installed the app reaches none of its app-level credentials`() {
+    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
+
     userAccount = testData.otherOwner
     performAuthPost(
       "/v2/organizations/${testData.otherOrganization.id}/apps",
@@ -241,11 +256,8 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
     userAccount = testData.otherOwner
     val otherOwnedApps = "/v2/organizations/${testData.otherOrganization.id}/owned-apps"
-    performAuthGet(otherOwnedApps).andIsOk.andAssertThatJson {
-      node("_embedded").isAbsent()
-    }
     performAuthGet("$otherOwnedApps/$appEntityId/secrets").andIsNotFound
-    performAuthPost("$otherOwnedApps/$appEntityId/secrets", null).andIsNotFound
+    performAuthPost("$otherOwnedApps/$appEntityId/secrets/rotate", null).andIsNotFound
     performAuthDelete("$otherOwnedApps/$appEntityId").andIsNotFound
   }
 
@@ -253,36 +265,46 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   fun `an organization member who is not an owner may not rotate`() {
     userAccount = testData.member
     performAuthGet("${ownedAppsUrl()}/$appEntityId/secrets").andIsForbidden
-    performAuthPost("${ownedAppsUrl()}/$appEntityId/secrets", null).andIsForbidden
+    performAuthPost("${ownedAppsUrl()}/$appEntityId/secrets/rotate", null).andIsForbidden
   }
 
   private fun register(): JsonNode {
     userAccount = testData.user
-    val json =
-      objectMapper.readTree(
-        performAuthPost(
-          "/v2/organizations/${testData.organization.id}/apps/register",
-          mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
-        ).andIsOk
-          .andReturn()
-          .response.contentAsString,
-      )
-    return json
-  }
-
-  private fun issueAsOwner(): JsonNode {
-    userAccount = testData.user
     return objectMapper.readTree(
-      performAuthPost("${ownedAppsUrl()}/$appEntityId/secrets", null)
-        .andIsOk
-        .andReturn()
-        .response.contentAsString,
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/apps/register",
+        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
+      ).andIsOk.andReturn().response.contentAsString,
     )
   }
 
-  private fun liveSecretIds(): List<Long> {
+  private fun roll(graceSeconds: Long): JsonNode {
+    userAccount = testData.user
+    return objectMapper.readTree(
+      performAuthPost(
+        "${ownedAppsUrl()}/$appEntityId/secrets/rotate",
+        mapOf("graceSeconds" to graceSeconds),
+      ).andIsOk.andReturn().response.contentAsString,
+    )
+  }
+
+  private fun newSecretOf(rolled: JsonNode): String = rolled.at("/secret/secret").asText()
+
+  private fun newIdOf(rolled: JsonNode): Long = rolled.at("/secret/id").asLong()
+
+  private fun failDelivery() {
+    doThrow(AppLifecycleHttpClient.DeliveryFailedException("app unreachable"))
+      .whenever(appLifecycleHttpClient)
+      .post(any(), any(), any())
+  }
+
+  private fun activeSecretIds(): List<Long> {
     return executeInNewTransaction {
-      appSecretService.list(appEntityId).filter { it.revokedAt == null }.map { it.id }
+      val now = currentDateProvider.date
+      appSecretService
+        .list(appEntityId)
+        .filter { it.revokedAt == null && (it.expiresAt == null || it.expiresAt!!.after(now)) }
+        .map { it.id }
     }
   }
 
@@ -337,5 +359,9 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
           ),
         ),
     )
+  }
+
+  companion object {
+    const val ONE_DAY = 86_400L
   }
 }

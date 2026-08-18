@@ -3,6 +3,9 @@ import { useTheme } from '@mui/material';
 
 import { useAppToken } from 'tg.views/projects/apps/useAppToken';
 
+/** Revision of the app contract this host speaks; sent to the iframe at init. */
+const TOLGEE_APP_PROTOCOL_VERSION = 1;
+
 export type UseAppIframeMessagingOptions = {
   installId: number;
   projectId: number;
@@ -96,6 +99,7 @@ export function useAppIframeMessaging(
     iframeRef.current.contentWindow.postMessage(
       {
         type: 'tolgee-app:init',
+        protocolVersion: TOLGEE_APP_PROTOCOL_VERSION,
         token,
         apiUrl,
         organizationId,

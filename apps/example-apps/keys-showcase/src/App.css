@@ -1,95 +1,62 @@
-/* Colors come from applyTolgeeTheme(ctx.theme) → --tg-color-*.
-   The hex fallbacks only apply when the page is opened outside Tolgee. */
+/*
+ * Colors come from `applyTolgeeTheme(context.theme)`, which sets the
+ * `--tg-color-*` custom properties from Tolgee's own palette. The fallbacks
+ * only apply before the host's init message arrives.
+ */
 html,
 body,
 #root {
   margin: 0;
   padding: 0;
-}
-
-body {
   font-family: -apple-system, system-ui, sans-serif;
-  color: var(--tg-color-text, #1d1b20);
+  color: var(--tg-color-text, #222);
   background: var(--tg-color-background, #fff);
 }
 
-.ks-page {
-  padding: 16px 20px;
-  max-width: 860px;
+main {
+  padding: 16px;
 }
 
-.ks-title {
+h1 {
   margin: 0 0 4px;
-  font-size: 1.3rem;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.ks-description {
-  margin: 0 0 20px;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--tg-color-text, #1d1b20);
+code {
+  background: var(--tg-color-background-paper, #f3f3f3);
+  border: 1px solid var(--tg-color-divider, #e0e0e0);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12px;
 }
 
-.ks-muted {
-  font-size: 0.9rem;
-  color: var(--tg-color-text-secondary, #6b6375);
+.muted {
+  color: var(--tg-color-text-secondary, #666);
+  font-size: 13px;
 }
 
-.ks-notice {
-  padding: 12px 14px;
-  border: 1px solid var(--tg-color-divider, #e4e2dd);
-  border-radius: 8px;
-  background: var(--tg-color-background-paper, #f4f3ec);
-  font-size: 0.9rem;
-  line-height: 1.45;
-}
-
-.ks-notice-error {
-  border-color: var(--tg-color-error, #cc0000);
-}
-
-.ks-table {
-  width: 100%;
+.kv {
+  margin-top: 16px;
   border-collapse: collapse;
-  margin-top: 12px;
+  font-size: 13px;
 }
 
-.ks-table th {
+.kv th {
   text-align: left;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--tg-color-text-secondary, #6b6375);
-  border-bottom: 1px solid var(--tg-color-divider, #e4e2dd);
-  padding: 6px 10px;
+  padding: 4px 16px 4px 0;
+  font-weight: 500;
+  color: var(--tg-color-text-secondary, #666);
+  white-space: nowrap;
 }
 
-.ks-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--tg-color-divider, #e4e2dd);
-  vertical-align: top;
-  font-size: 0.9rem;
+.kv td {
+  padding: 4px 0;
 }
 
-.ks-key-name {
-  font-size: 0.85em;
-  background: var(--tg-color-background-paper, #f4f3ec);
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-
-.ks-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  padding: 1px 8px;
-  border-radius: 10px;
-  background: var(--tg-color-background-paper, #f4f3ec);
-  color: var(--tg-color-text-secondary, #6b6375);
-}
-
-.ks-notice code {
-  background: var(--tg-color-background, #fff);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 0.85em;
+.error {
+  margin-top: 16px;
+  color: var(--tg-color-error, crimson);
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }

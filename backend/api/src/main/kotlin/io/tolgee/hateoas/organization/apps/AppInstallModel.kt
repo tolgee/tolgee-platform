@@ -16,11 +16,6 @@ open class AppInstallModel(
   val modules: AppManifestModules,
   val scopes: List<String>,
   /**
-   * Native apps only: whether every organization — including ones created later — may enable this
-   * app, on top of the explicitly granted ones.
-   */
-  val availableToAllOrganizations: Boolean = false,
-  /**
    * Self-registration only: whether this call created the install, as opposed to repointing an
    * existing one at a new manifest URL. Absent elsewhere.
    */

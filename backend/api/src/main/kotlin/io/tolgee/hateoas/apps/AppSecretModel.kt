@@ -9,9 +9,17 @@ open class AppSecretModel(
   val id: Long,
   @Schema(description = "First characters of the secret, enough to tell two of them apart")
   val prefix: String,
+  @Schema(description = "Last characters of the secret; the prefix is always the same, so the suffix distinguishes")
+  val suffix: String,
   val createdAt: Long,
   @Schema(description = "When this secret was last used to administer the app, or null if never")
   val lastUsedAt: Long?,
+  @Schema(
+    description =
+      "When this secret stops authenticating, or null while it has no scheduled end. Set on the " +
+        "outgoing secret during a rotation's grace window.",
+  )
+  val expiresAt: Long?,
   @Schema(description = "When the secret was revoked, or null while it still authenticates")
   val revokedAt: Long?,
   @Schema(

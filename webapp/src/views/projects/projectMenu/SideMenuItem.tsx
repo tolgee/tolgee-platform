@@ -20,6 +20,9 @@ const StyledItem = styled('li')`
     cursor: pointer;
     justify-content: center;
     color: ${({ theme }) => theme.palette.emphasis[600]};
+    /* Invisible under the usual SVG icons, but an app's emoji icon is text and would
+       show the browser-default anchor underline. */
+    text-decoration: none;
     outline: 0;
     transition: all 0.2s ease-in-out;
     &:focus,

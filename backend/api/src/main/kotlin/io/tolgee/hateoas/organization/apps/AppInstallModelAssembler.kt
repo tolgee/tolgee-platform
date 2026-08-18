@@ -65,7 +65,6 @@ class AppInstallModelAssembler(
       baseUrl = entity.baseUrl,
       modules = manifest.modules,
       scopes = entity.grantedScopes.map { it.value },
-      availableToAllOrganizations = entity.availableToAllOrganizations,
       created = created,
       app = app,
     )

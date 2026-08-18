@@ -7,11 +7,14 @@ import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModelAssembler
+import io.tolgee.hateoas.organization.apps.AvailableAppModel
+import io.tolgee.hateoas.organization.apps.AvailableAppModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.service.apps.AppInstallService
+import io.tolgee.service.apps.AppService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
@@ -34,8 +37,10 @@ class OrganizationAppsController(
   private val organizationHolder: OrganizationHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val appInstallService: AppInstallService,
+  private val appService: AppService,
   private val appInstallModelAssembler: AppInstallModelAssembler,
   private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
+  private val availableAppModelAssembler: AvailableAppModelAssembler,
 ) {
   @PostMapping("/preview")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
@@ -112,6 +117,21 @@ class OrganizationAppsController(
   ): CollectionModel<AppInstallModel> {
     val installs = appInstallService.findAll(organizationId)
     return appInstallModelAssembler.toCollectionModel(installs)
+  }
+
+  @GetMapping("/available")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "List apps available on this server",
+    description =
+      "Apps a server admin has offered to every organization that this organization can still " +
+        "install — it neither owns nor has already installed them. Installing one goes through the " +
+        "same consent flow as any other app.",
+  )
+  fun listAvailable(
+    @PathVariable organizationId: Long,
+  ): CollectionModel<AvailableAppModel> {
+    return availableAppModelAssembler.toCollectionModel(appService.listAvailableToInstall(organizationId))
   }
 
   @PostMapping("/{installId}/refresh")

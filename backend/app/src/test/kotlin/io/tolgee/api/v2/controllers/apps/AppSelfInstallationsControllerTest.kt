@@ -65,7 +65,6 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -113,27 +112,6 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     enabledProjectIds().assert.isEmpty()
   }
 
-  @Test
-  fun `drops a project when the native install's availability is revoked`() {
-    val native = registerNativeInstallGrantedToOrganization()
-    userAccount = testData.user
-    performAuthPut("/v2/projects/${testData.project.id}/apps/${native.first}", null).andIsOk
-    val nativeToken = requestInstallToken(native.second, native.third, native.first)
-
-    asToken(nativeToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
-      node("_embedded.installations[0].native").isEqualTo(true)
-      node("_embedded.installations[0].enabledProjects").isArray.hasSize(1)
-    }
-
-    userAccount = testData.admin
-    performAuthDelete(
-      "/v2/administration/apps/${native.first}/organizations/${testData.organization.id}",
-    ).andIsOk
-
-    asToken(nativeToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
-      node("_embedded.installations[0].enabledProjects").isArray.isEmpty()
-    }
-  }
 
   /**
    * A user-context token acts for one signed-in user, who need not be a member of every project the
@@ -192,21 +170,6 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     return credentialsOf(response)
   }
 
-  private fun registerNativeInstallGrantedToOrganization(): Triple<Long, String, String> {
-    userAccount = testData.admin
-    AppsTestFixtures.mockManifest(appManifestHttpClient, NATIVE_MANIFEST)
-    val response =
-      performAuthPost(
-        "/v2/administration/apps",
-        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
-      ).andIsOk.andReturn().response.contentAsString
-    val credentials = credentialsOf(response)
-    performAuthPut(
-      "/v2/administration/apps/${credentials.first}/organizations/${testData.organization.id}",
-      null,
-    ).andIsOk
-    return credentials
-  }
 
   private fun credentialsOf(registrationResponse: String): Triple<Long, String, String> {
     val json = objectMapper.readTree(registrationResponse)
@@ -267,20 +230,5 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
       }
       """.trimIndent()
 
-    private val NATIVE_MANIFEST: String =
-      """
-      {
-        "id": "native-test-app",
-        "name": "Native Test App",
-        "version": "0.1.0",
-        "baseUrl": "https://native.example.com",
-        "scopes": ["activity.view"],
-        "modules": {
-          "project-dashboard-page": [
-            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
-          ]
-        }
-      }
-      """.trimIndent()
   }
 }

@@ -77,9 +77,9 @@ class AppSelfAppSecretsController(
   @Operation(
     summary = "Revoke one of the calling app's own app-level secrets",
     description =
-      "The secret stops authenticating immediately. Refused while the app has not moved to a " +
-        "replacement — the last live secret, or one issued but never used yet — so an app cannot " +
-        "lock itself out of this very endpoint. Issue the replacement and use it first. Idempotent.",
+      "The secret stops authenticating immediately. Revoking the app's only active secret is " +
+        "refused, so an app cannot lock itself out of this very endpoint — issue the replacement " +
+        "first, then revoke the old one. Idempotent.",
   )
   fun revoke(
     @RequestBody @Valid body: AppSecretRotationRequest,

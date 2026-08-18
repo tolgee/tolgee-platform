@@ -43,12 +43,9 @@ class AppInstall : StandardAuditModel() {
   @JoinColumn(name = "registered_app_id")
   lateinit var app: App
 
-  /**
-   * Null for a native (first-party, server-level) app: it belongs to no customer organization and
-   * a server admin controls which organizations may use it via [AppAvailableForOrganization].
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  var organization: Organization? = null
+  /** The organization this app is installed in. Its projects are the ones the app can be enabled for. */
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  lateinit var organization: Organization
 
   /**
    * Who registered the install. A historical "created by" record only — an organization's app
@@ -89,15 +86,6 @@ class AppInstall : StandardAuditModel() {
 
   @Column(columnDefinition = "TEXT", nullable = false)
   lateinit var manifestJson: String
-
-  /**
-   * Blanket availability of a native app: every organization may enable it, including organizations
-   * that do not exist yet. Independent of the explicit [AppAvailableForOrganization] rows — clearing
-   * this flag falls back to exactly those.
-   */
-  @Column(name = "available_to_all_organizations", nullable = false)
-  @ColumnDefault("false")
-  var availableToAllOrganizations: Boolean = false
 
   @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)

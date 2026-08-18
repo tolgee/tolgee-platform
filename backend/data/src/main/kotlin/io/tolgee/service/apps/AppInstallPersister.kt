@@ -9,7 +9,6 @@ import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.apps.AppInstallRepository
-import io.tolgee.repository.apps.AppRepository
 import jakarta.persistence.EntityManager
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
@@ -19,21 +18,17 @@ import org.springframework.transaction.annotation.Transactional
 class AppInstallPersister(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementService: AppEnablementService,
-  private val appAvailabilityService: AppAvailabilityService,
   private val appService: AppService,
-  private val appRepository: AppRepository,
   private val appInstallPrincipalService: AppInstallPrincipalService,
   private val entityManager: EntityManager,
 ) {
   /**
    * Registers the app if nobody has yet — making [organizationId] its owner — and installs it in one
    * transaction, so a failed install never leaves behind an app its owner has no install of.
-   *
-   * @param organizationId null registers a native (server-level) install owned by no organization.
    */
   @Transactional
   fun registerAndCreate(
-    organizationId: Long?,
+    organizationId: Long,
     authorId: Long,
     manifestUrl: String,
     fetched: AppManifestFetcher.FetchResult,
@@ -46,7 +41,7 @@ class AppInstallPersister(
   @Transactional
   fun create(
     appEntityId: Long,
-    organizationId: Long?,
+    organizationId: Long,
     authorId: Long,
     manifestUrl: String,
     fetched: AppManifestFetcher.FetchResult,
@@ -57,7 +52,7 @@ class AppInstallPersister(
 
   private fun persist(
     app: App,
-    organizationId: Long?,
+    organizationId: Long,
     authorId: Long,
     manifestUrl: String,
     fetched: AppManifestFetcher.FetchResult,
@@ -70,7 +65,7 @@ class AppInstallPersister(
     val install =
       AppInstall().apply {
         this.app = app
-        this.organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
+        this.organization = entityManager.getReference(Organization::class.java, organizationId)
         this.author = entityManager.getReference(UserAccount::class.java, authorId)
         this.principal = appInstallPrincipalService.create(fetched.manifest.name)
         this.manifestUrl = manifestUrl
@@ -97,14 +92,14 @@ class AppInstallPersister(
 
   @Transactional
   fun applySnapshot(
-    organizationId: Long?,
+    organizationId: Long,
     installId: Long,
     manifestUrl: String?,
     fetched: AppManifestFetcher.FetchResult,
     allowScopeWidening: Boolean,
   ): AppInstall {
     val install =
-      findScopedInstall(organizationId, installId)
+      appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
 
     if (fetched.manifest.id != install.appId) {
@@ -123,47 +118,23 @@ class AppInstallPersister(
 
   @Transactional
   fun remove(
-    organizationId: Long?,
+    organizationId: Long,
     installId: Long,
   ) {
     val install =
-      findScopedInstall(organizationId, installId)
+      appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    val app = install.app
     val principal = install.principal
     appEnablementService.removeAllForAppInstall(installId)
-    appAvailabilityService.removeAllForAppInstall(installId)
     appInstallRepository.delete(install)
     appInstallRepository.flush()
     appInstallPrincipalService.retire(principal)
-    dropServerOwnedAppIfUnused(app)
-  }
-
-  /**
-   * A server-owned app is reachable only through its native install. Once that is gone nothing can
-   * administer or delete the app, while it keeps occupying its server-wide app id — so deregistering
-   * the last native install deregisters the app too. An app owned by an organization stays: its
-   * owner still holds it, whether or not they have an install of it.
-   */
-  private fun dropServerOwnedAppIfUnused(app: App) {
-    if (app.organization != null) return
-    if (appInstallRepository.countByRegisteredAppId(app.id) > 0) return
-    appRepository.delete(app)
-  }
-
-  private fun findScopedInstall(
-    organizationId: Long?,
-    installId: Long,
-  ): AppInstall? {
-    if (organizationId == null) return appInstallRepository.findByOrganizationIsNullAndId(installId)
-    return appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
   }
 
   private fun findByAppId(
-    organizationId: Long?,
+    organizationId: Long,
     appId: String,
   ): AppInstall? {
-    if (organizationId == null) return appInstallRepository.findByOrganizationIsNullAndAppId(appId)
     return appInstallRepository.findByOrganizationIdAndAppId(organizationId, appId)
   }
 

@@ -10,8 +10,11 @@ export type AppManifestPreviewModel =
  * registers an app. It holds no strings, so each screen keeps its own translation
  * keys while the steps behave identically.
  */
-export const useAppRegisterState = (onClose: () => void) => {
-  const [manifestUrl, setManifestUrl] = useState('');
+export const useAppRegisterState = (
+  onClose: () => void,
+  initialManifestUrl = ''
+) => {
+  const [manifestUrl, setManifestUrl] = useState(initialManifestUrl);
   const [preview, setPreview] = useState<AppManifestPreviewModel | null>(null);
 
   return {

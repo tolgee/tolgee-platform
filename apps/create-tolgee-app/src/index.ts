@@ -8,12 +8,10 @@ import { copyTree } from './copy'
 import { buildManifest } from './manifest'
 import { PACKAGE_ROOT, TEMPLATE_ROOT } from './paths'
 import {
-  CONNECT_MODES,
   DEFAULT_SERVER_PORT,
   DEFAULT_TOLGEE_URL,
   DEFAULT_VITE_PORT,
   SDK_MODES,
-  type ConnectMode,
   type SdkMode,
 } from './registry'
 import { findLocalSdk, resolveSdk } from './sdk'
@@ -24,7 +22,6 @@ import {
   runWizard,
   toTitle,
   validateId,
-  validateOrganizationSlug,
   type Answers,
 } from './wizard'
 
@@ -45,9 +42,7 @@ const main = async (): Promise<void> => {
  * Resolves answers either from the interactive wizard or, when `--yes`/`-y` is
  * passed, from CLI flags + defaults (headless mode for CI and scripted scaffolds).
  *
- *     create-tolgee-app my-app --yes \
- *       --tolgee-url=http://localhost:8718 \
- *       --connect=auto --org=my-org --secret=tgappreg_xxx
+ *     create-tolgee-app my-app --yes --tolgee-url=http://localhost:8718
  */
 const resolveAnswers = async (argv: string[]): Promise<Answers> => {
   const positional = argv.find((a) => !a.startsWith('-'))
@@ -85,28 +80,6 @@ const resolveAnswers = async (argv: string[]): Promise<Answers> => {
     process.exit(1)
   }
 
-  const connectMode = (flags.get('connect') ?? 'manual') as ConnectMode
-  if (!CONNECT_MODES.some((m) => m.value === connectMode)) {
-    log.error(`--connect must be one of: ${CONNECT_MODES.map((m) => m.value).join(', ')}`)
-    process.exit(1)
-  }
-
-  const organizationSlug = flags.get('org') ?? ''
-  const registrationSecret = flags.get('secret') ?? ''
-  if (connectMode === 'auto' && registrationSecret.length === 0) {
-    log.error('--connect=auto needs the registration secret: --secret=<secret>.')
-    process.exit(1)
-  }
-  // Optional: self-registration defaults to a native, server-wide app. --org narrows it to a
-  // single organization, so it is only validated when actually supplied.
-  if (organizationSlug.length > 0) {
-    const slugError = validateOrganizationSlug(organizationSlug)
-    if (slugError) {
-      log.error(slugError)
-      process.exit(1)
-    }
-  }
-
   const targetDir = resolve(process.cwd(), id as string)
 
   return {
@@ -114,9 +87,6 @@ const resolveAnswers = async (argv: string[]): Promise<Answers> => {
     name: flags.get('name') ?? toTitle(id as string),
     targetDir,
     tolgeeUrl: normalizeUrl(flags.get('tolgee-url') ?? DEFAULT_TOLGEE_URL),
-    connectMode,
-    organizationSlug,
-    registrationSecret,
     vitePort: DEFAULT_VITE_PORT,
     serverPort: DEFAULT_SERVER_PORT,
     sdk: resolveSdk({ mode: sdkMode, targetDir, packageRoot: PACKAGE_ROOT }),
@@ -196,28 +166,24 @@ const envLocal = (answers: Answers): string => {
     `VITE_PORT=${answers.vitePort}`,
     `SERVER_PORT=${answers.serverPort}`,
     '',
+    "# Origin of Tolgee's web app — the page that frames this app. Set it when",
+    '# it differs from TOLGEE_URL (a dev Tolgee serves the web app and the API',
+    '# on different ports) or the iframe stays on "Waiting for Tolgee…".',
+    '# TOLGEE_FRONTEND_URL=http://localhost:3718',
+    '',
     '# Uncomment to keep `npm run dev` from opening a Cloudflare tunnel when',
     '# TOLGEE_URL is not localhost. See .env.example.',
     '# TOLGEE_DEV_TUNNEL=none',
   ]
-  if (answers.connectMode === 'auto') {
-    lines.push(
-      '',
-      '# Self-registration on server boot. Registers a native (server-wide) app;',
-      '# grant it to organizations under Administration -> Apps.',
-      `TOLGEE_APP_REGISTRATION_SECRET=${answers.registrationSecret}`,
-      '# Set this only to install into one specific organization instead.',
-      ...(answers.organizationSlug
-        ? [`TOLGEE_ORGANIZATION_SLUG=${answers.organizationSlug}`]
-        : ['# TOLGEE_ORGANIZATION_SLUG=']),
-      '',
-      '# Leave unset in dev: registration stores the credentials in',
-      '# .tolgee-dev/install.json and the SDK reads them from there. Set both',
-      '# only where the app is deployed and secrets are injected. See .env.example.',
-      '# TOLGEE_APP_CLIENT_ID=',
-      '# TOLGEE_APP_CLIENT_SECRET='
-    )
-  }
+  lines.push(
+    '',
+    '# Tolgee-internal: set the server registration secret (from the Tolgee',
+    '# administrator) and the app registers itself on boot — into',
+    "# TOLGEE_APP_ORGANIZATION, or the server's initial organization when unset.",
+    '# Without it, register the app in Tolgee under Organization → Apps.',
+    '# TOLGEE_APP_REGISTRATION_TOKEN=',
+    '# TOLGEE_APP_ORGANIZATION='
+  )
   return lines.join('\n') + '\n'
 }
 
@@ -247,28 +213,7 @@ const nextSteps = (answers: Answers): string[] => {
     ''
   )
 
-  if (answers.connectMode === 'auto') {
-    steps.push(
-      ...(answers.organizationSlug
-        ? [`The server registers itself in "${answers.organizationSlug}" on boot.`]
-        : ['The server registers itself on boot as a native (server-wide) app.']),
-      'Tolgee shows the client secret only then, so the SDK stores the credentials',
-      'in .tolgee-dev/install.json (gitignored) — nothing to copy.',
-      ...(answers.organizationSlug
-        ? []
-        : [
-            'Grant it to an organization in Administration → Apps before enabling it',
-            'for a project.',
-          ]),
-      ...(isLocalUrl(answers.tolgeeUrl)
-        ? []
-        : [
-            `${answers.tolgeeUrl} cannot reach localhost, so it registers the`,
-            'Cloudflare tunnel URL that starts alongside the dev servers.',
-          ]),
-      ''
-    )
-  } else if (isLocalUrl(answers.tolgeeUrl)) {
+  if (isLocalUrl(answers.tolgeeUrl)) {
     steps.push(
       `In ${answers.tolgeeUrl}, go to Organization → Apps → add an app with`,
       `manifest URL ${manifestUrl(answers)}`,

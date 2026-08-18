@@ -42,7 +42,6 @@ describe('installStore', () => {
       {
         tolgeeUrl: TOLGEE_URL,
         installId: 12,
-        native: true,
         organizationSlug: null,
       },
       { stateDir }
@@ -50,7 +49,6 @@ describe('installStore', () => {
 
     const stored = readStoredAppInstall(TOLGEE_URL, { stateDir })
     assert.equal(stored?.installId, 12)
-    assert.equal(stored?.native, true)
 
     const mode = statSync(appInstallStatePath({ stateDir })).mode & 0o777
     assert.equal(mode, 0o600)
@@ -177,7 +175,6 @@ describe('installStore', () => {
             installId: 12,
             clientId: 'tgapp_legacy',
             clientSecret: 'tgapps_legacy',
-            native: true,
             organizationSlug: null,
             updatedAt: '2026-01-01T00:00:00.000Z',
           },
@@ -188,7 +185,6 @@ describe('installStore', () => {
 
     const migrated = readStoredAppInstall(TOLGEE_URL, { stateDir })
     assert.equal(migrated?.installId, 12)
-    assert.equal(migrated?.native, true)
     assert.equal(readStoredApp(TOLGEE_URL, { stateDir }), null)
     assert.equal(hasStoredCredentials(TOLGEE_URL, { stateDir }), false)
 
@@ -244,15 +240,14 @@ describe('selfRegisterApp persistence', () => {
 
     const result = await selfRegisterApp({
       tolgeeUrl: TOLGEE_URL,
-      registrationSecret: 'reg-secret',
+      registrationToken: 'tgreg_test-token',
       manifestUrl: 'http://localhost:5181/manifest.json',
       stateDir,
     })
 
     assert.equal(result.created, true)
-    assert.equal(result.native, true)
     assert.equal(result.credentialsPath, appInstallStatePath({ stateDir }))
-    assert.ok(!readFileSync(result.credentialsPath!, 'utf8').includes('reg-secret'))
+    assert.ok(!readFileSync(result.credentialsPath!, 'utf8').includes('tgreg_test-token'))
 
     const config = loadTolgeeAppConfig(
       { TOLGEE_URL } as NodeJS.ProcessEnv,
@@ -268,7 +263,7 @@ describe('selfRegisterApp persistence', () => {
     stubFetch(CREATED_RESPONSE)
     await selfRegisterApp({
       tolgeeUrl: TOLGEE_URL,
-      registrationSecret: 'reg-secret',
+      registrationToken: 'tgreg_test-token',
       manifestUrl: 'http://localhost:5181/manifest.json',
       stateDir,
     })
@@ -276,7 +271,7 @@ describe('selfRegisterApp persistence', () => {
     stubFetch({ id: 42, created: false })
     const again = await selfRegisterApp({
       tolgeeUrl: TOLGEE_URL,
-      registrationSecret: 'reg-secret',
+      registrationToken: 'tgreg_test-token',
       manifestUrl: 'https://tunnel.example.com/manifest.json',
       stateDir,
     })
@@ -293,7 +288,7 @@ describe('selfRegisterApp persistence', () => {
 
     const result = await selfRegisterApp({
       tolgeeUrl: TOLGEE_URL,
-      registrationSecret: 'reg-secret',
+      registrationToken: 'tgreg_test-token',
       manifestUrl: 'http://localhost:5181/manifest.json',
       persist: false,
       stateDir,
@@ -308,7 +303,7 @@ describe('selfRegisterApp persistence', () => {
     stubFetch(CREATED_RESPONSE)
     await selfRegisterApp({
       tolgeeUrl: TOLGEE_URL,
-      registrationSecret: 'reg-secret',
+      registrationToken: 'tgreg_test-token',
       manifestUrl: 'http://localhost:5181/manifest.json',
       stateDir,
     })

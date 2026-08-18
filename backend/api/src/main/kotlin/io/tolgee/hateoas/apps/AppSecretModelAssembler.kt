@@ -28,8 +28,10 @@ class AppSecretModelAssembler : RepresentationModelAssembler<AppSecret, AppSecre
     return AppSecretModel(
       id = entity.id,
       prefix = entity.secretPrefix,
+      suffix = entity.secretSuffix,
       createdAt = entity.createdAt?.time ?: 0,
       lastUsedAt = entity.lastUsedAt?.time,
+      expiresAt = entity.expiresAt?.time,
       revokedAt = entity.revokedAt?.time,
       secret = plaintextSecret,
       delivery = delivery?.toModel(),

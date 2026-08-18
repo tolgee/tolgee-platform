@@ -1,9 +1,8 @@
 package io.tolgee.repository.apps
 
+import io.tolgee.model.Organization
 import io.tolgee.model.apps.AppInstall
 import org.springframework.context.annotation.Lazy
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -23,13 +22,18 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
     appId: String,
   ): AppInstall?
 
-  fun findAllByOrganizationIsNull(pageable: Pageable): Page<AppInstall>
-
-  fun findAllByOrganizationIsNullAndAvailableToAllOrganizationsIsTrue(): List<AppInstall>
-
-  fun findByOrganizationIsNullAndId(id: Long): AppInstall?
-
-  fun findByOrganizationIsNullAndAppId(appId: String): AppInstall?
+  /**
+   * Installs of server-wide apps that some *other* organization owns — the ones [organizationId]'s
+   * projects may enable on top of its own installs.
+   */
+  @Query(
+    """
+    select i from AppInstall i
+    where i.app.availableToAllOrganizations = true and i.organization.id <> :organizationId
+    order by i.name
+    """,
+  )
+  fun findAvailableToOtherOrganizations(organizationId: Long): List<AppInstall>
 
   /**
    * The app is fetched eagerly because app-token authentication reads its token cutoff from the
@@ -45,19 +49,9 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
   @Query("select i from AppInstall i where i.app.id = :appId")
   fun findAllByRegisteredAppId(appId: Long): List<AppInstall>
 
-  @Query("select i.app.id from AppInstall i where i.id = :installId and i.organization.id = :organizationId")
-  fun findAppEntityId(
-    organizationId: Long,
-    installId: Long,
-  ): Long?
-
-  @Query("select i.app.id from AppInstall i where i.id = :installId and i.organization is null")
-  fun findAppEntityIdOfNativeInstall(installId: Long): Long?
-
-  @Query("select i.app.id from AppInstall i where i.id = :installId")
-  fun findAppEntityIdOfInstall(installId: Long): Long?
-
-  /** Null for a native install: the implicit join over a null organization matches nothing. */
-  @Query("select i.organization.id from AppInstall i where i.id = :installId")
-  fun findOrganizationIdOfInstall(installId: Long): Long?
+  /** The organizations that currently have the app installed, for the owner's installations view. */
+  @Query(
+    "select distinct i.organization from AppInstall i where i.app.id = :appEntityId order by i.organization.name",
+  )
+  fun findInstallingOrganizations(appEntityId: Long): List<Organization>
 }

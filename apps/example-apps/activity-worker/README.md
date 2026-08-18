@@ -12,8 +12,8 @@ background worker is told nothing, and has to ask.
 
 The loop:
 
-1. On boot the server self-registers as a **native** app (no
-   `TOLGEE_ORGANIZATION_SLUG`) and gets machine-to-machine credentials.
+1. On boot the server self-registers with the server-wide
+   `TOLGEE_APP_REGISTRATION_TOKEN` and gets machine-to-machine credentials.
 2. It asks Tolgee **which projects it is enabled for**
    (`fetchAppInstallations()`), each with the organization owning it.
 3. For every one of those projects it polls
@@ -73,10 +73,14 @@ tolgee:
     # Needed only because this app runs on localhost. Production instances keep
     # this off, which is why a remote Tolgee needs the dev tunnel below.
     allow-local-addresses: true
-    # This app is backend-driven — it needs credentials to poll with, so
-    # self-registration is the practical way to run it.
-    registration-secret: <a long random string>
 ```
+
+This app is backend-driven — it needs credentials to poll with, so
+self-registration is the practical way to run it. The registration secret comes
+from the Tolgee administrator — the server config holds only its hash
+(`tolgee.apps.registration-secret-hash`); a dev server sets a known one. The
+app registers into `TOLGEE_APP_ORGANIZATION`, or the server's initial
+organization when unset.
 
 The app assumes Tolgee is at `http://localhost:8718`; override with `TOLGEE_URL`.
 
@@ -125,31 +129,27 @@ tunnel process says so and leaves Vite and the app server running.
 
 ## Connecting the app to Tolgee
 
-Set the registration secret and the server self-registers on boot:
+Set the registration token and the server self-registers on boot:
 
 ```bash
 cat >> .env.local <<'EOF'
-TOLGEE_APP_REGISTRATION_SECRET=<tolgee.apps.registration-secret from the server>
+TOLGEE_APP_REGISTRATION_TOKEN=<the server's registration secret>
 EOF
 
 npm run dev
 ```
 
-This registers a **native** app — one owned by no organization. Making it
-available to an organization is a separate, admin-only decision: in Tolgee go to
-**Administration → Apps**, open the app's **Organizations** dialog and grant the
-organizations that may use it. Only then can a project owner enable it for a
-project.
-
-(Setting `TOLGEE_ORGANIZATION_SLUG` as well installs the app into that single
-organization instead, skipping the admin step. Usually you don't want that.)
+The app is registered into — and owned by — the token's organization; enable it
+for a project under that project's **Apps** settings. A server admin can later
+offer it to **every** organization from the owner's Apps page, after which any
+organization installs it from its own **Available on this server** list.
 
 On the **first** registration Tolgee issues the app's credentials. It shows the
 client secret once and stores only its hash, so the SDK writes the install record
 straight to `.tolgee-dev/install.json` (gitignored) instead of printing it:
 
 ```
-Auto-connect: registered install 12 on http://localhost:8718 as a native (server-wide) app.
+Auto-connect: registered install 12 on http://localhost:8718.
   Its credentials are stored in .../activity-worker/.tolgee-dev/install.json (gitignored) — nothing to copy.
 ```
 
@@ -157,8 +157,8 @@ On later boots the app is already registered, so the server only repoints the
 existing install at the current manifest URL — which is what makes a fresh tunnel
 hostname take effect; the stored secret is left untouched.
 
-Without a registration secret the server still serves the manifest and prints
-how to register the app by hand under **Administration → Apps**. The worker will
+Without a registration token the server still serves the manifest and prints
+how to register the app by hand under **Organization → Apps**. The worker will
 have no credentials until that happens, and says so.
 
 Set `TOLGEE_APP_CLIENT_ID` and `TOLGEE_APP_CLIENT_SECRET` only when you deploy

@@ -45,7 +45,6 @@ class AppsDeletionTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -65,98 +64,48 @@ class AppsDeletionTest : AbstractSpringTest() {
     deleteRuleOf("fk_app_install_organization").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_enabled_for_project_project").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_enabled_for_project_app_install").assert.isEqualTo("CASCADE")
-    deleteRuleOf("fk_app_available_for_organization_app_install").assert.isEqualTo("CASCADE")
-    deleteRuleOf("fk_app_available_for_organization_organization").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_organization").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_install_app").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_secret_app").assert.isEqualTo("CASCADE")
   }
 
   @Test
-  fun `removing a native install clears its availability rows`() {
-    val installId =
-      executeInNewTransaction(platformTransactionManager) {
-        appInstallService
-          .selfRegister(
-            organization = null,
-            manifestUrl = AppsTestFixtures.MANIFEST_URL,
-            author = testData.user,
-          ).install.id
-      }
-    appAvailabilityService.grant(
-      installId = installId,
-      organizationId = testData.organization.id,
-      author = testData.user,
-    )
+  fun `withdrawing blanket availability disables the app in non-owner projects`() {
+    val install = registerOrganizationInstall()
+    appAvailabilityService.setAvailableToAllOrganizations(install.appId, true)
+    enableForProject(testData.projectBuilder.self.id, install.installId)
+    enableForProject(testData.otherProject.id, install.installId)
 
-    appInstallService.remove(organizationId = null, installId = installId)
+    appAvailabilityService.setAvailableToAllOrganizations(install.appId, false)
 
-    appAvailabilityService.listOrganizations(installId).assert.isEmpty()
-  }
-
-  @Test
-  fun `removing a native install clears its enablements across every organization`() {
-    val installId = registerNativeInstall()
-    appAvailabilityService.grantToAllOrganizations(installId)
-    enableForProject(testData.projectBuilder.self.id, installId)
-    enableForProject(testData.otherProject.id, installId)
-
-    appInstallService.remove(organizationId = null, installId = installId)
-
-    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
-    appEnablementService.isEnabledForProject(testData.otherProject.id, installId).assert.isFalse()
-    AppsTestFixtures.nativeInstalls(appInstallService).assert.isEmpty()
-  }
-
-  @Test
-  fun `revoking the blanket availability keeps enablements of explicitly granted organizations`() {
-    val installId = registerNativeInstall()
-    appAvailabilityService.grantToAllOrganizations(installId)
-    appAvailabilityService.grant(
-      installId = installId,
-      organizationId = testData.otherOrganization.id,
-      author = testData.user,
-    )
-    enableForProject(testData.projectBuilder.self.id, installId)
-    enableForProject(testData.otherProject.id, installId)
-
-    appAvailabilityService.revokeFromAllOrganizations(installId)
-
-    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
-    appEnablementService.isEnabledForProject(testData.otherProject.id, installId).assert.isTrue()
+    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, install.installId).assert.isTrue()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, install.installId).assert.isFalse()
   }
 
   @Test
   fun `transferring a project to another organization clears its enablements`() {
-    val installId = registerOrganizationInstall()
-    enableForProject(testData.projectBuilder.self.id, installId)
+    val install = registerOrganizationInstall()
+    enableForProject(testData.projectBuilder.self.id, install.installId)
 
     executeInNewTransaction(platformTransactionManager) {
       projectService.transferToOrganization(testData.projectBuilder.self.id, testData.otherOrganization.id)
     }
 
-    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, installId).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, install.installId).assert.isFalse()
   }
 
-  private fun registerOrganizationInstall(): Long {
-    return executeInNewTransaction(platformTransactionManager) {
-      appInstallService
-        .register(
-          organization = testData.organization,
-          manifestUrl = AppsTestFixtures.MANIFEST_URL,
-          author = testData.user,
-        ).install.id
-    }
-  }
+  private data class RegisteredInstall(val installId: Long, val appId: Long)
 
-  private fun registerNativeInstall(): Long {
+  private fun registerOrganizationInstall(): RegisteredInstall {
     return executeInNewTransaction(platformTransactionManager) {
-      appInstallService
-        .selfRegister(
-          organization = null,
-          manifestUrl = AppsTestFixtures.MANIFEST_URL,
-          author = testData.user,
-        ).install.id
+      val install =
+        appInstallService
+          .register(
+            organization = testData.organization,
+            manifestUrl = AppsTestFixtures.MANIFEST_URL,
+            author = testData.user,
+          ).install
+      RegisteredInstall(install.id, install.app.id)
     }
   }
 

@@ -30,4 +30,10 @@ open class OwnedAppModel(
         "working; it is only a warning that its manifest has stopped answering.",
   )
   val unhealthySince: Long?,
+  @Schema(
+    description =
+      "Whether a server admin has offered this app to every organization on the server, not just " +
+        "the owner. Toggled from the server-admin controls on the owner's Apps page.",
+  )
+  val availableToAllOrganizations: Boolean,
 ) : RepresentationModel<OwnedAppModel>()

@@ -54,7 +54,7 @@ class AppSelfInstallationsController(
     val model =
       appSelfInstallationModelAssembler.toModel(
         install = install,
-        native = appInstallService.isNative(install.id),
+        native = false,
         enabledProjects = appEnablementService.listEnabledProjectsForInstall(install.id),
       )
     return CollectionModel.of(listOf(model))

@@ -50,35 +50,33 @@ project) so you can see the app's token working before writing any code.
 App id                kebab-case; the folder name, package name and manifest id
 Display name          shown in Tolgee's UI
 Tolgee URL            default http://localhost:8718
-How to register       manual | self-register  (see below)
-  Organization slug   self-register only
-  Registration secret self-register only
 Install dependencies? y/n
 Initialize git?       y/n
 ```
 
-## Connect modes
+## Registering the app
 
 An app has to be **registered** in an organization before a project can enable
-it. The wizard asks how you want that to happen.
-
-**`manual`** — you register the app yourself in Tolgee's UI, under
-**Organization → Apps**, using the manifest URL the CLI prints
+it. You do that in Tolgee's UI, under **Organization → Apps → Register app**,
+using the manifest URL the CLI prints
 (`http://localhost:5181/manifest.json` by default).
 
-**`auto`** — the generated server registers itself on boot, using the
-server-wide registration secret. The wizard also asks for the organization slug
-and the secret, and writes both into `.env.local`. Tolgee shows the client
-secret only at that first registration, so the SDK stores the install record in
-`.tolgee-dev/install.json` (gitignored) and reads it back later — nothing to
-copy, and the secret is never printed. If registration fails, the server logs an
-actionable error and keeps serving the manifest, so manual registration remains
-available.
+The wizard does not ask about this — there is nothing to choose. The generated
+server also understands Tolgee's internal self-registration: when
+`TOLGEE_APP_REGISTRATION_TOKEN` (the server's registration secret, held by the
+Tolgee administrator) is set in `.env.local`, the app registers itself on boot
+into `TOLGEE_APP_ORGANIZATION` or the server's initial organization, and
+retries until Tolgee is reachable. This exists for first-party apps deployed
+alongside Tolgee; everyone else registers manually.
 
-Either way, the last step is the same and is done per project:
+Registration is when Tolgee hands the app its credentials, delivered over the
+signed lifecycle channel and stored by the SDK in `.tolgee-dev/install.json`
+(gitignored) — nothing to copy, and the secret is never printed.
+
+The last step is the same either way and is done per project:
 **Project → Settings → Apps**, enable the app.
 
-Either way, too, the generated server already receives Tolgee's **signed
+The generated server already receives Tolgee's **signed
 lifecycle deliveries** — the app-level credentials at registration, the
 per-install credentials when an organization installs it, and every later
 rotation. That is `server/routes/lifecycle.ts`, one `mountTolgeeLifecycle()`
@@ -138,13 +136,11 @@ Vite and the app server carry on.
 create-tolgee-app my-app --yes \
   --name="My App" \
   --tolgee-url=http://localhost:8718 \
-  --connect=auto --org=my-org --secret=… \
   --sdk=auto --install --git
 ```
 
-`--yes` (or `-y`) skips every prompt. `--connect` defaults to `manual`;
-`--org` and `--secret` are required with `--connect=auto`. `--install` and
-`--git` are opt-in flags in this mode. `--sdk` works in both modes.
+`--yes` (or `-y`) skips every prompt. `--install` and `--git` are opt-in flags
+in this mode. `--sdk` works in both modes.
 
 ## Ports
 

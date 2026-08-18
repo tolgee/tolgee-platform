@@ -6,7 +6,9 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.repository.apps.AppRepository
+import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppSecretService
@@ -34,6 +36,9 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   lateinit var appSecretService: AppSecretService
 
   @Autowired
+  lateinit var appAvailabilityService: AppAvailabilityService
+
+  @Autowired
   lateinit var appRepository: AppRepository
 
   @MockitoBean
@@ -56,7 +61,6 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -122,6 +126,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `two organizations installing the same manifest get one app and two installs`() {
     val first = register(testData.organization.id)
+    appAvailabilityService.setAvailableToAllOrganizations(first.at("/app/id").asLong(), true)
 
     userAccount = testData.otherOwner
     val second =
@@ -147,7 +152,10 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `an organization installing somebody else's app never sees its app-level credentials`() {
-    register(testData.organization.id)
+    appAvailabilityService.setAvailableToAllOrganizations(
+      register(testData.organization.id).at("/app/id").asLong(),
+      true,
+    )
 
     userAccount = testData.otherOwner
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
@@ -173,33 +181,46 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
     ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
   }
 
+
+
   @Test
-  fun `a native app is owned by the server, not by an organization`() {
-    userAccount = testData.admin
+  fun `installing an app another organization owns is refused until it is made available`() {
+    val first = register(testData.organization.id)
+    val appEntityId = first.at("/app/id").asLong()
 
-    performAuthPost("/v2/administration/apps", manifestBody()).andIsOk.andAssertThatJson {
-      node("app.clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
-    }
+    userAccount = testData.otherOwner
+    performAuthPost(installUrl(testData.otherOrganization.id), manifestBody())
+      .andIsForbidden
+      .andAssertThatJson { node("code").isEqualTo("app_not_available_for_organization") }
+    appInstallService.findAll(testData.otherOrganization.id).assert.isEmpty()
 
-    ownerOrganizationIdOf("test-app").assert.isNull()
+    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
+
+    performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk
+    appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
   }
 
   @Test
-  fun `deregistering the last native install deregisters the app`() {
-    userAccount = testData.admin
-    val installId =
-      objectMapper
-        .readTree(
-          performAuthPost("/v2/administration/apps", manifestBody())
-            .andIsOk
-            .andReturn()
-            .response.contentAsString,
-        ).at("/id")
-        .asLong()
+  fun `the available list shows a server-wide app until this organization installs it`() {
+    val appEntityId = register(testData.organization.id).at("/app/id").asLong()
 
-    performAuthDelete("/v2/administration/apps/$installId").andIsOk
+    userAccount = testData.otherOwner
+    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
+      node("_embedded").isAbsent()
+    }
 
-    appRepository.findByAppId("test-app").assert.isNull()
+    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
+
+    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
+      node("_embedded.availableApps").isArray.hasSize(1)
+      node("_embedded.availableApps[0].appId").isEqualTo("test-app")
+    }
+
+    performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk
+
+    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
+      node("_embedded").isAbsent()
+    }
   }
 
   private fun ownerOrganizationIdOf(appId: String): Long? =
@@ -216,6 +237,8 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
     )
 
   private fun installUrl(organizationId: Long) = "/v2/organizations/$organizationId/apps"
+
+  private fun availableUrl(organizationId: Long) = "${installUrl(organizationId)}/available"
 
   private fun registerUrl(organizationId: Long) = "${installUrl(organizationId)}/register"
 

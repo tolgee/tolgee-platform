@@ -28,25 +28,6 @@ export const DASHBOARD_ICON = '🧩'
  */
 export const DEFAULT_SCOPES = ['keys.view', 'translations.view']
 
-export type ConnectMode = 'manual' | 'auto'
-
-export const CONNECT_MODES: {
-  value: ConnectMode
-  label: string
-  hint: string
-}[] = [
-  {
-    value: 'manual',
-    label: 'Manual',
-    hint: "Register the app yourself in Tolgee's UI (Organization → Apps)",
-  },
-  {
-    value: 'auto',
-    label: 'Self-register',
-    hint: 'App self-registers on boot as a native (server-wide) app, using the registration secret',
-  },
-]
-
 export const SDK_PACKAGE_NAME = '@tolgee/apps-sdk'
 
 export type SdkMode = 'auto' | 'local' | 'published'

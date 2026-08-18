@@ -16,10 +16,16 @@ export type TolgeeAppConfig = {
   vitePort: number
   /** App server port (manifest and custom API routes). */
   serverPort: number
-  /** Organization the app self-registers into; null when unset. */
+  /**
+   * The server's self-registration secret; null when unset. Comes from the Tolgee administrator
+   * (the server config holds only its hash) and is passed as `TOLGEE_APP_REGISTRATION_TOKEN`.
+   */
+  registrationToken: string | null
+  /**
+   * Slug of the organization the app self-registers into, passed as `TOLGEE_APP_ORGANIZATION`;
+   * null when unset, which targets the server's initial organization.
+   */
   organizationSlug: string | null
-  /** Instance-wide secret authorizing self-registration; null when unset. */
-  registrationSecret: string | null
   /**
    * App-level client id (`tgpub_…`) — the app's only credentials; the token
    * endpoint derives install-scoped tokens from them. Null when unknown.
@@ -71,8 +77,8 @@ export const loadTolgeeAppConfig = (
     tolgeeUrl,
     vitePort: Number(env.VITE_PORT ?? 5180),
     serverPort: Number(env.SERVER_PORT ?? env.PORT ?? 5181),
-    organizationSlug: env.TOLGEE_ORGANIZATION_SLUG ?? null,
-    registrationSecret: env.TOLGEE_APP_REGISTRATION_SECRET ?? null,
+    registrationToken: env.TOLGEE_APP_REGISTRATION_TOKEN ?? null,
+    organizationSlug: env.TOLGEE_APP_ORGANIZATION ?? null,
     clientId: fromEnv ? envClientId : (storedApp?.clientId ?? null),
     clientSecret: fromEnv ? envClientSecret : (storedApp?.clientSecret ?? null),
     installId: storedInstall?.installId ?? null,

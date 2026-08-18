@@ -8,11 +8,11 @@ data class AppSelfRegisterRequest(
   @field:NotBlank
   @field:Size(max = 255)
   val manifestUrl: String = "",
-  @field:Size(max = 255)
   @Schema(
     description =
-      "Slug of the organization owning the app. Leave empty to register a native (server-level) " +
-        "app, which belongs to no organization and is made available to organizations by a server admin.",
+      "Slug of the organization the app registers into, which owns it. Omitted or blank, the app " +
+        "registers into the server's initial organization.",
   )
+  @field:Size(max = 255)
   val organizationSlug: String? = null,
 )

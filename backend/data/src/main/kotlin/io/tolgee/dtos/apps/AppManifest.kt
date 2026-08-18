@@ -17,6 +17,12 @@ data class AppManifest(
   val baseUrl: String,
   val modules: AppManifestModules,
   val scopes: List<String>? = null,
+  /**
+   * Which revision of the app contract the app speaks. Optional and defaults to 1 — the only
+   * version this alpha defines. Declared so a manifest may carry it without being rejected as an
+   * unknown property, and so a future breaking revision can be told apart from this one.
+   */
+  val protocolVersion: Int? = null,
 ) {
   @get:JsonIgnore
   val unknownProperties: MutableSet<String> = mutableSetOf()

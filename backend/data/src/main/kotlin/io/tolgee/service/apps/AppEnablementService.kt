@@ -19,6 +19,7 @@ class AppEnablementService(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementInserter: AppEnablementInserter,
   private val appAvailabilityService: AppAvailabilityService,
+  private val businessEventPublisher: io.tolgee.component.reporting.BusinessEventPublisher,
 ) {
   data class ProjectAppEnablement(
     val install: AppInstall,
@@ -37,6 +38,7 @@ class AppEnablementService(
     if (appEnabledForProjectRepository.findByProjectIdAndAppInstallId(project.id, install.id) == null) {
       try {
         appEnablementInserter.insert(install.id, project.id, author.id)
+        reportEnabled(project, install)
       } catch (e: DataIntegrityViolationException) {
         // Only a concurrent enable is idempotent. The same exception also covers an FK violation
         // (install or project deleted mid-flight), which must not be reported as success.
@@ -48,9 +50,25 @@ class AppEnablementService(
     return install
   }
 
+  /** Reports an app being switched on for a project, so usage is visible in PostHog per organization. */
+  private fun reportEnabled(
+    project: Project,
+    install: AppInstall,
+  ) {
+    businessEventPublisher.publish(
+      io.tolgee.component.reporting.OnBusinessEventToCaptureEvent(
+        eventName = "APP_ENABLED_FOR_PROJECT",
+        projectId = project.id,
+        organizationId = project.organizationOwner.id,
+        data = mapOf("appId" to install.appId, "appName" to install.name, "installId" to install.id),
+      ),
+    )
+  }
+
   /**
-   * An install of a *different* organization stays indistinguishable from a missing one (404), so
-   * this never confirms the existence of another tenant's install.
+   * The install this organization may enable: one it owns, or one of a server-wide app another
+   * organization owns. An install it can reach neither way stays indistinguishable from a missing
+   * one (404), so this never confirms the existence of another tenant's private install.
    */
   private fun resolveEnableableInstall(
     organizationId: Long,
@@ -59,13 +77,13 @@ class AppEnablementService(
     val owned = appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
     if (owned != null) return owned
 
-    val native =
-      appInstallRepository.findByOrganizationIsNullAndId(installId)
+    val install =
+      appInstallRepository.findWithAppById(installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    if (!appAvailabilityService.isAvailableForOrganization(organizationId, native)) {
-      throw BadRequestException(Message.APP_NOT_AVAILABLE_FOR_ORGANIZATION)
+    if (!appAvailabilityService.isAvailableForOrganization(organizationId, install)) {
+      throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     }
-    return native
+    return install
   }
 
   @Transactional
@@ -83,7 +101,7 @@ class AppEnablementService(
     val organizationId = project.organizationOwner.id
     val installs =
       appInstallRepository.findAllByOrganizationId(organizationId) +
-        appAvailabilityService.listNativeInstallsForOrganization(organizationId)
+        appAvailabilityService.listAvailableInstallsForOrganization(organizationId)
     val enabledIds =
       appEnabledForProjectRepository
         .findAllByProjectId(project.id)

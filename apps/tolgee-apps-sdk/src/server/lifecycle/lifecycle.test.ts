@@ -357,18 +357,21 @@ describe('a delivery signed with the held secret', () => {
     const app = readStoredApp(TOLGEE_URL, { stateDir })
     assert.equal(app?.clientSecret, 'tgpubs_rotated')
     assert.equal(app?.webhookSecret, 'rotated-webhook-secret')
+    // The pre-rotation secret is kept as the previous one, so the overlap is bridged.
+    assert.equal(app?.webhookSecretPrevious, WEBHOOK_SECRET)
 
-    // The rotated signing secret is the one the next delivery is checked against.
-    assertRejected(
-      await deliver(
-        { eventType: 'app.uninstalled', install: { id: 7 } },
-        { timestamp: NOW + 1 }
-      )
-    )
+    // The new signing secret verifies…
     assertAccepted(
       await deliver(
         { eventType: 'app.uninstalled', install: { id: 7 } },
         { secret: 'rotated-webhook-secret', timestamp: NOW + 2 }
+      )
+    )
+    // …and so does the previous one, during the rotation overlap.
+    assertAccepted(
+      await deliver(
+        { eventType: 'app.uninstalled', install: { id: 7 } },
+        { secret: WEBHOOK_SECRET, timestamp: NOW + 1 }
       )
     )
   })

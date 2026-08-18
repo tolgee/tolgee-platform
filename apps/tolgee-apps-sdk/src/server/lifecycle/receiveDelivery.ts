@@ -233,6 +233,18 @@ export const receiveTolgeeDelivery = async (
   return { accepted: true, status: 200, event }
 }
 
+/** Non-null, de-duplicated, order preserved — the candidate secrets to try in turn. */
+const dedupe = (values: (string | null)[]): string[] => {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const value of values) {
+    if (value === null || seen.has(value)) continue
+    seen.add(value)
+    out.push(value)
+  }
+  return out
+}
+
 type Verified = { envelope: TolgeeSignatureEnvelope; trusted: boolean }
 
 const verify = async (
@@ -241,11 +253,15 @@ const verify = async (
   tolgeeUrl: string,
   storeOptions: AppInstallStoreOptions
 ): Promise<Verified | Extract<DeliveryResult, { accepted: false }>> => {
-  const known =
-    input.webhookSecret ??
-    process.env.TOLGEE_APP_WEBHOOK_SECRET ??
-    readStoredApp(tolgeeUrl, storeOptions)?.webhookSecret ??
-    null
+  const storedApp = readStoredApp(tolgeeUrl, storeOptions)
+  // During a webhook-secret rotation the app holds both the new secret and the previous one, and a
+  // delivery signed with either must verify until the owner revokes the old one.
+  const known = dedupe([
+    input.webhookSecret ?? null,
+    process.env.TOLGEE_APP_WEBHOOK_SECRET ?? null,
+    storedApp?.webhookSecret ?? null,
+    storedApp?.webhookSecretPrevious ?? null,
+  ])
 
   const check = (secret: string): TolgeeSignatureEnvelope =>
     verifyTolgeeSignature({
@@ -256,12 +272,16 @@ const verify = async (
       now: input.now?.(),
     })
 
-  if (known !== null) {
-    try {
-      return { envelope: check(known), trusted: true }
-    } catch (error) {
-      return rejectSignature(error)
+  if (known.length > 0) {
+    let lastError: unknown
+    for (const secret of known) {
+      try {
+        return { envelope: check(secret), trusted: true }
+      } catch (error) {
+        lastError = error
+      }
     }
+    return rejectSignature(lastError)
   }
 
   if (input.requireKnownSecret === true) {
@@ -414,7 +434,6 @@ const persist = (
       {
         tolgeeUrl,
         installId,
-        native: event.install.native,
         organizationId: organization?.id ?? null,
         organizationSlug: organization?.slug ?? null,
         organizationName: organization?.name ?? null,

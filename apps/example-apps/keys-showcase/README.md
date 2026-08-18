@@ -1,211 +1,199 @@
-# Keys Showcase — Tolgee App example
+# Keys Showcase
 
-A minimal **project dashboard page** app. It renders in a sandboxed iframe inside Tolgee's
-project dashboard, receives a scoped token over `postMessage`, and calls Tolgee's REST API to
-list **10 localization keys** of the current project — key name, namespace, and the
-base-language translation.
+A Tolgee App scaffolded by `create-tolgee-app`. It contributes one
+**project dashboard page**: an iframe Tolgee renders inside a project, with a
+menu item of its own.
 
-That is the whole alpha loop in one small app:
-
-1. The Express server publishes `manifest.json`, declaring one `project-dashboard-page` module
-   and the scopes the app needs (`keys.view`, `translations.view`).
-2. Tolgee fetches the manifest, and once the app is enabled for a project, renders the page in
-   an iframe and posts it a `TolgeeAppContext` — a scoped token, the API URL, the project id,
-   and the current theme.
-3. The page calls Tolgee with that token (`createTolgeeAppClient`) and follows Tolgee's
-   light/dark mode (`applyTolgeeTheme` + `onThemeChanged`), so it looks native.
-4. `npm run token` shows the same app reading the same keys from a plain backend script — no
-   browser involved.
-
-## Prerequisites
-
-A Tolgee dev server with apps turned on. In your `application.yaml` (or as env vars):
-
-```yaml
-tolgee:
-  apps:
-    enabled: true
-    # Needed only because this app runs on localhost. Production instances keep
-    # this off, which is why a remote Tolgee needs the dev tunnel below.
-    allow-local-addresses: true
-```
-
-The app assumes Tolgee is at `http://localhost:8718`; override with `TOLGEE_URL`.
-
-## Install and run
+## Run it
 
 ```bash
-npm install --prefix ../..   # from apps/ — this is an npm workspace of it
-cp .env.example .env.local   # optional; every value has a default
-npm run dev                  # vite on :5180 + manifest server on :5181 + dev tunnel
+npm install   # if you skipped it during scaffolding
+npm run dev
 ```
 
-- `http://localhost:5180` — the iframe page (Vite)
-- `http://localhost:5181/manifest.json` — the manifest Tolgee fetches
+That starts three processes:
 
-With Tolgee on the same machine no tunnel is needed: it fetches `localhost` directly, and the
-tunnel process says so and stays out of the way.
+| Process | URL | What it serves |
+| --- | --- | --- |
+| Vite | <http://localhost:5180> | the React app Tolgee embeds |
+| Express | <http://localhost:5181> | `GET /manifest.json` |
+| Tunnel | printed on start | a public URL for both, when Tolgee is remote |
 
-## Reaching the app from a remote Tolgee
+With Tolgee on localhost the manifest URL is **http://localhost:5181/manifest.json** and the tunnel
+does nothing.
 
-Tolgee fetches the manifest and loads the iframe **from its own server**, so pointing
-`TOLGEE_URL` at staging, a preview environment or production means localhost URLs are useless to
-it — and those instances run with `tolgee.apps.allow-local-addresses` disabled, so they reject
-them outright.
+## Reaching the app from Tolgee
 
-For a non-localhost `TOLGEE_URL`, `npm run dev` opens a
-[Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-tunnel/) in front of Vite
-(downloading the `cloudflared` binary on first use) and publishes the public URLs to
-`.tolgee-dev/tunnel.json`. Vite proxies `/manifest.json` to Express, so one public hostname
-covers both the manifest and the iframe.
+Tolgee fetches the manifest and loads the iframe **from its own server**, not
+from your browser. So both have to be reachable from wherever Tolgee runs.
 
-The hostname changes on every restart. The server waits for it before registering, and
-registration repoints the existing install, so restarting `npm run dev` is all it takes for
-Tolgee to follow along.
+- **Tolgee on localhost** — nothing to do. The tunnel process notices and
+  publishes the local URLs unchanged.
+- **Tolgee anywhere else** (staging, a preview environment, production) —
+  `npm run dev` opens a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-tunnel/)
+  in front of Vite, downloading the `cloudflared` binary on first use. Vite
+  proxies `/manifest.json` to Express, so the one public hostname covers the
+  manifest and the iframe. A public URL is not optional there: production Tolgee
+  runs with `tolgee.apps.allow-local-addresses` disabled and refuses localhost
+  manifest URLs.
+
+The tunnel gets a **new hostname on every restart**. The server waits for that
+URL before it registers, and self-registration repoints the existing install, so
+a restart is all it takes for Tolgee to follow.
 
 `TOLGEE_DEV_TUNNEL=none` in `.env.local` forces the tunnel off and falls back to
 `http://localhost:5180`.
 
-`cloudflared` is a **dev dependency** — it is a local-development convenience, so
-nothing that deploys this app pulls its binary down. Without it installed the
-tunnel process says so and leaves Vite and the app server running.
+The URLs in play live in `.tolgee-dev/tunnel.json` (gitignored), written by the
+tunnel process and read by the server on every manifest request.
 
 ## Connecting the app to Tolgee
 
-### Manual mode (default)
+An app becomes usable in two steps: it is **registered** in an organization,
+then **enabled** for individual projects.
 
-`npm run dev` just serves the manifest. Register it yourself:
+### 1. Register
 
-1. Open Tolgee → **Organization → Apps → Add app**.
-2. Paste the manifest URL:
+Pick whichever fits your setup.
 
-   ```
-   http://localhost:5181/manifest.json
-   ```
+**Manually** — in Tolgee, go to **Organization → Apps**, add an app and give it
+the manifest URL the server prints on boot (the tunnel one when tunnelling).
+Tolgee fetches the manifest and shows what the app contributes.
 
-3. Confirm the requested scopes.
+**Automatically** — set this in `.env.local`:
 
-### Auto-connect mode
-
-Set the registration secret and the server self-registers on boot:
-
-```bash
-cat >> .env.local <<'EOF'
-TOLGEE_APP_REGISTRATION_SECRET=<tolgee.apps.registration-secret from the server>
-EOF
-
-npm run dev
+```dotenv
+TOLGEE_APP_REGISTRATION_TOKEN=…
 ```
 
-This registers a **native** app — one owned by no organization. Making it
-available to an organization is a separate, admin-only decision: in Tolgee go to
-**Administration → Apps**, open the app's **Organizations** dialog and grant the
-organizations that may use it. Only then can a project owner enable it for a
-project.
+The registration secret is **server-wide** and comes from the Tolgee
+administrator — Tolgee's configuration holds only its hash
+(`tolgee.apps.registration-secret-hash`). With it set, the server registers
+itself on every boot (retrying until Tolgee is reachable) and logs the result.
 
-(Setting `TOLGEE_ORGANIZATION_SLUG` as well installs the app into that single
-organization instead, skipping the admin step. Usually you don't want that.)
+The app is registered into — and owned by — the organization
+`TOLGEE_APP_ORGANIZATION` names, or the server's initial organization when
+unset. Enable it
+for a project under that project's **Apps** settings. A server admin can later
+offer it to **every** organization from the owner's Apps page, after which any
+organization can install it from its own **Available on this server** list.
 
-On the **first** registration Tolgee issues the app's credentials. It shows the client secret
-once and stores only its hash, so the SDK writes the install record straight to
-`.tolgee-dev/install.json` (gitignored) instead of printing it:
+The **first** registration is the only time Tolgee hands out the client secret —
+it stores just a hash of it. So the SDK saves the whole install record to
+`.tolgee-dev/install.json` (gitignored) rather than printing it, and reads it
+back on later runs: `loadTolgeeAppConfig()` and `fetchAppAccessToken()` find the
+credentials with nothing wired up. Registering again only repoints the existing
+install; the stored secret stays put.
 
+Set these in `.env.local` **only where the app is deployed**, with secrets
+injected by the platform:
+
+```dotenv
+TOLGEE_APP_CLIENT_ID=…
+TOLGEE_APP_CLIENT_SECRET=…
 ```
-Auto-connect: registered install 12 on http://localhost:8718 as a native (server-wide) app.
-  Its credentials are stored in .../keys-showcase/.tolgee-dev/install.json (gitignored) — nothing to copy; `npm run token` reads them from there.
-```
 
-Nothing to copy. On later boots the app is already registered, so the server only repoints the
-existing install at the current manifest URL — which is exactly what makes a fresh tunnel
-hostname take effect; the stored secret is left untouched.
+The environment wins over the stored file, so a deployment is never overridden
+by a developer's leftover state. Setting either one makes the SDK ignore the
+file entirely — set both or neither.
 
-Set `TOLGEE_APP_CLIENT_ID` and `TOLGEE_APP_CLIENT_SECRET` only when you deploy the app somewhere
-that injects secrets properly — the environment wins over the local file, and setting either one
-makes the SDK ignore the file entirely.
+A failed registration never takes the server down; it logs what went wrong and
+keeps serving `/manifest.json` so you can fall back to registering by hand.
 
-If self-registration fails, the server logs why and keeps serving the manifest, so you can
-always fall back to the manual flow.
+Registration always uses the URL the tunnel process published, so restarting
+`npm run dev` re-registers the app at its new hostname instead of leaving Tolgee
+pointed at a dead one.
+
+### 2. Enable for a project
+
+Registration makes the app known to the organization, not visible in projects.
+For each project that should use it: **Project → Settings → Apps**, then enable
+**Keys Showcase**. The dashboard page shows up in that project's menu.
 
 ## Credentials Tolgee pushes at you
 
-Registration is not the only way this app gets credentials. Tolgee POSTs **signed
-lifecycle deliveries** to the `baseUrl` in the manifest, and `server/index.ts`
-receives them in a single `mountTolgeeLifecycle(app, …)` call — watch the server
-log when you register or install the app.
+You never copy a secret into this app. Tolgee POSTs **signed lifecycle
+deliveries** to the `baseUrl` in the manifest, and `server/routes/lifecycle.ts`
+receives them in a single `mountTolgeeLifecycle(app, …)` call:
 
-There are two credential layers, and the deliveries carry both:
+| Event | What arrives |
+| --- | --- |
+| registered | The **app-level** credentials (`tgpub_` / `tgpubs_`) and the webhook signing secret. They identify the app; they reach no data. |
+| installed | The **per-install** credentials (`tgapp_` / `tgapps_`), the install id and the organization. These are the ones that act on projects. |
+| uninstalled | Nothing to store — the credentials of that install are dropped. |
+| secret rotated | The replacement secret, at whichever layer it belongs to. |
 
-| Layer | Prefixes | Arrives with | What it does |
-| --- | --- | --- | --- |
-| App | `tgpub_` / `tgpubs_` | *registered* | Identifies and administers the app everywhere it is installed. Reaches no data. |
-| Install | `tgapp_` / `tgapps_` | *installed* | Acts on one organization's projects — what `npm run token` uses. |
+Each delivery is signed `HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` and
+sent in a `Tolgee-Signature` header. **Holding the webhook secret is what proves
+a delivery is really Tolgee** — the SDK verifies every one, refuses a stale or
+replayed timestamp, and refuses a first delivery outright once this app already
+holds credentials for that instance, so nobody can push their own credentials
+over yours. Everything it accepts lands in `.tolgee-dev/install.json`.
 
-A third secret, the **webhook secret**, arrives with the registration and is
-never sent anywhere: Tolgee signs each delivery
-`HMAC-SHA256(webhookSecret, "<timestamp>.<body>")` in a `Tolgee-Signature`
-header, so holding it is what proves a delivery is really Tolgee. The SDK
-verifies every one, refuses a stale or replayed timestamp (5-minute window), and
-**refuses a first delivery once this app already holds credentials for that
-instance** — otherwise anyone could post their own credentials over yours. A
-rotation, signed with the secret only Tolgee knows, is accepted and replaces what
-is held.
+The route is mounted **before `express.json()`** on purpose: the signature covers
+the exact bytes Tolgee sent, and a body parser would consume them.
 
-Everything accepted lands in `.tolgee-dev/install.json`, and nothing is printed.
-
-## Enabling the app for a project
-
-Registering installs the app into the organization; it still has to be turned on per project:
-
-**Project → Settings → Apps → Keys Showcase → enable**
-
-The **Keys Showcase** item then appears in the project's dashboard menu.
-
-## Machine-to-machine demo (`npm run token`)
-
-The "cron job" story: an app backend that reads Tolgee on its own, without a user or a browser.
-
-```bash
-# in .env.local — the only thing you have to set
-TOLGEE_PROJECT_ID=1
-
-npm run token
-```
-
-The credentials come from `.tolgee-dev/install.json`, written when the app registered, so
-there is nothing else to wire up. The script exchanges them for an access token
-(`fetchAppAccessToken`) and prints the project's first 10 keys with their base-language
-translations. If the app has never registered — and no `TOLGEE_APP_CLIENT_ID` /
-`TOLGEE_APP_CLIENT_SECRET` are set — it says so and points at both ways to fix it.
-
-## Changing what the app contributes
-
-`server/manifest.template.json` is the source of truth. Keep `baseUrl` as `__BASE_URL__` — the
-server substitutes the real origin per request — and re-fetch the manifest in Tolgee afterwards.
-
-The page's `icon` is either a **native Tolgee icon name** or an **emoji**; this app uses
-`Key01`. Names come from Tolgee's icon registry ([Untitled UI
-icons](https://www.untitledui.com/free-icons) plus Tolgee's own set) and must match an exported
-component **exactly**, numeric suffix included — `Key01` and `Key02` exist, plain `Key` does
-not. Others: `Globe01`, `Translate01`, `LayoutAlt04`, `Settings01`, `BarChart01`, `Zap`.
-
-An unrecognised value is not an error: Tolgee renders the string as literal text. That is what
-makes emoji work, and how you spot a typo — the menu shows the word `Key` instead of an icon.
+Self-registration still works on its own — an app that never receives a delivery
+keeps running on the credentials it registered with.
 
 ## Layout
 
 ```
-src/                    iframe page (Vite + React)
-  KeysShowcase.tsx      the dashboard page: context, theme, resize
-  useProjectKeys.ts     the REST call, via the SDK's typed client
-server/
-  index.ts              manifest endpoint + self-registration + lifecycle deliveries
-  config.ts             env config and the URLs Tolgee should use
-  devTunnel.ts          reads/writes the dev-tunnel state
-  manifest.template.json  __BASE_URL__ is substituted at request time
-scripts/
-  dev-tunnel.ts         opens the tunnel and publishes its URL
-  token.ts              machine-to-machine demo
-.tolgee-dev/           local state, gitignored
-  tunnel.json           the URLs Tolgee currently reaches this app at
-  install.json          app-level + per-install credentials, written as they arrive
+server/manifest.template.json   what the app contributes; __BASE_URL__ is
+                                substituted per request
+server/index.ts                 Express: /manifest.json + self-registration
+server/routes/lifecycle.ts      receives Tolgee's signed lifecycle deliveries
+server/devTunnel.ts             the URLs Tolgee reaches this app at
+scripts/dev-tunnel.ts           opens the tunnel and publishes those URLs
+src/App.tsx                     the dashboard page
+.tolgee-dev/tunnel.json         the URLs currently in play (gitignored)
+.tolgee-dev/install.json        app-level + per-install credentials (gitignored)
 ```
+
+## What the SDK gives you
+
+From `@tolgee/apps-sdk/browser`, inside the iframe:
+
+- **`createTolgeeApp()`** — the postMessage handshake. `await app.context` gives
+  you `{ token, apiUrl, organizationId, projectId, theme }`.
+- **`createTolgeeAppClient(context)`** — typed REST client with the app's token
+  and API URL already wired in. Returns `{ data, error }` rather than throwing.
+- **`applyTolgeeTheme(theme)`** — exposes Tolgee's palette as `--tg-color-*` CSS
+  variables. Pair it with `app.onThemeChanged` to follow light/dark toggles
+  live, and `app.resize(height)` to tell the host how tall the iframe is.
+
+From `@tolgee/apps-sdk/server`:
+
+- **`loadTolgeeAppConfig()`** — reads the environment into a typed config.
+- **`renderManifest(template, baseUrl)`** — substitutes `__BASE_URL__`.
+- **`tolgeeAppCorsHeaders()`** — CORS headers for endpoints the webapp calls.
+- **`selfRegisterAppWithRetry(…)`** — the boot-time registration used above;
+  retries with backoff until Tolgee is reachable and stores the issued
+  credentials in `.tolgee-dev/install.json`. (`selfRegisterApp(…)` is the
+  single-attempt version.)
+- **`fetchAppAccessToken()`** — exchanges the client id/secret for an access
+  token, for work the app does on its own behalf rather than a user's. Called
+  with no arguments it uses the stored credentials.
+- **`mountTolgeeLifecycle(app, …)`** — receives, verifies and stores everything
+  Tolgee pushes about this app. One call; see above.
+
+## Changing what the app contributes
+
+Edit `server/manifest.template.json`. Keep `baseUrl` as `__BASE_URL__` — the
+server substitutes the real origin on every request. After changing the
+manifest, re-fetch it in Tolgee so the change is picked up.
+
+### The `icon` field
+
+A page's `icon` is either a **native Tolgee icon name** or an **emoji** (the
+generated manifest starts with `🧩`).
+
+Names come from Tolgee's icon registry — [Untitled UI
+icons](https://www.untitledui.com/free-icons) plus Tolgee's own set — and have
+to match an exported component **exactly**, numeric suffix included: `Key01` and
+`Key02` exist, plain `Key` does not. Other valid names: `Globe01`,
+`Translate01`, `LayoutAlt04`, `Settings01`, `BarChart01`, `Zap`.
+
+An unrecognised value is not an error — Tolgee renders the string as literal
+text. That is what makes emoji work, and it is how you spot a typo: the menu
+shows the word `Key` where the icon should be.

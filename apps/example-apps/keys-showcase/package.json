@@ -9,9 +9,8 @@
     "dev:frontend": "vite",
     "dev:server": "tsx watch --env-file-if-exists=.env.local server/index.ts",
     "dev:tunnel": "tsx --env-file-if-exists=.env.local scripts/dev-tunnel.ts",
-    "token": "tsx --env-file-if-exists=.env.local scripts/token.ts",
-    "typecheck": "tsc -b",
-    "build": "tsc -b && vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

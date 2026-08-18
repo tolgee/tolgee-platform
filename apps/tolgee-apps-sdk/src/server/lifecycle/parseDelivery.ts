@@ -155,7 +155,6 @@ const toAppCredentials = (
 
 const toInstall = (node: Record<string, unknown>): DeliveredInstall => ({
   installId: numberAt(node, 'installId', 'appInstallId', 'id'),
-  native: node.native === true,
   organization: toOrganization(objectAt(node, 'organization', 'org')),
 })
 

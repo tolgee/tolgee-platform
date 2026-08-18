@@ -42,8 +42,6 @@ export type DeliveredOrganization = {
  */
 export type DeliveredInstall = {
   installId: number | null
-  /** True when the install belongs to no organization. */
-  native: boolean
   organization: DeliveredOrganization | null
 }
 

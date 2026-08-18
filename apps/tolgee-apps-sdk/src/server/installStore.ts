@@ -37,6 +37,12 @@ export type StoredApp = {
   /** App-level client secret, prefixed `tgpubs_`. */
   clientSecret: string | null
   webhookSecret: string | null
+  /**
+   * The webhook secret in force before the last rotation, still accepted during the overlap. Set
+   * automatically when a delivery brings a new `webhookSecret` that replaces a different stored one,
+   * so a delivery signed with either verifies until Tolgee's owner revokes the old one.
+   */
+  webhookSecretPrevious: string | null
   /** ISO timestamp of when Tolgee issued `clientSecret`, or null when unknown. */
   secretIssuedAt: string | null
   /** ISO timestamp of the last write. */
@@ -50,6 +56,7 @@ export type AppRecord = {
   clientId?: string | null
   clientSecret?: string | null
   webhookSecret?: string | null
+  webhookSecretPrevious?: string | null
   /** Defaults to now whenever the record carries a `clientSecret`. */
   secretIssuedAt?: string | null
 }
@@ -63,8 +70,6 @@ export type StoredAppInstall = {
   /** Tolgee instance the install belongs to. */
   tolgeeUrl: string
   installId: number
-  /** True when the install belongs to no organization. */
-  native: boolean
   organizationId: number | null
   organizationSlug: string | null
   organizationName: string | null
@@ -75,7 +80,6 @@ export type StoredAppInstall = {
 export type AppInstallRecord = {
   tolgeeUrl: string
   installId: number
-  native?: boolean
   organizationId?: number | null
   organizationSlug?: string | null
   organizationName?: string | null
@@ -181,13 +185,22 @@ export const saveApp = (
   const carried = instance.app
 
   const now = new Date().toISOString()
+  // A delivery bringing a webhook secret that replaces a different stored one is a rotation: keep
+  // the old one as `webhookSecretPrevious` so a delivery signed with either still verifies.
+  const newWebhook = record.webhookSecret ?? null
+  const carriedWebhook = carried?.webhookSecret ?? null
+  const rotated =
+    newWebhook !== null && carriedWebhook !== null && newWebhook !== carriedWebhook
   const stored: StoredApp = {
     tolgeeUrl: key,
     id: record.id ?? carried?.id ?? null,
     appId: record.appId ?? carried?.appId ?? null,
     clientId: record.clientId ?? carried?.clientId ?? null,
     clientSecret: record.clientSecret ?? carried?.clientSecret ?? null,
-    webhookSecret: record.webhookSecret ?? carried?.webhookSecret ?? null,
+    webhookSecret: newWebhook ?? carriedWebhook,
+    webhookSecretPrevious: rotated
+      ? carriedWebhook
+      : (record.webhookSecretPrevious ?? carried?.webhookSecretPrevious ?? null),
     secretIssuedAt:
       record.secretIssuedAt ??
       (record.clientSecret != null ? now : (carried?.secretIssuedAt ?? null)),
@@ -214,7 +227,6 @@ export const saveAppInstall = (
   const stored: StoredAppInstall = {
     tolgeeUrl: key,
     installId: record.installId,
-    native: record.native ?? carried?.native ?? false,
     organizationId: record.organizationId ?? carried?.organizationId ?? null,
     organizationSlug:
       record.organizationSlug ?? carried?.organizationSlug ?? null,
@@ -310,6 +322,7 @@ const asStoredApp = (tolgeeUrl: string, value: unknown): StoredApp | null => {
     clientId: asString(raw.clientId),
     clientSecret: asString(raw.clientSecret),
     webhookSecret: asString(raw.webhookSecret),
+    webhookSecretPrevious: asString(raw.webhookSecretPrevious),
     secretIssuedAt: asString(raw.secretIssuedAt),
     updatedAt: asString(raw.updatedAt) ?? '',
   }
@@ -325,7 +338,6 @@ const asStoredInstall = (
   return {
     tolgeeUrl,
     installId: raw.installId,
-    native: raw.native === true,
     organizationId: asNumber(raw.organizationId),
     organizationSlug: asString(raw.organizationSlug),
     organizationName: asString(raw.organizationName),

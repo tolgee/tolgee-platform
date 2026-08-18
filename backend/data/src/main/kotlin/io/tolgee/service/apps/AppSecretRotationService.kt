@@ -6,12 +6,13 @@ import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
 import org.springframework.stereotype.Service
+import java.util.Date
 
 /**
- * Phase one of an app-level rotation. The new secret leaves Tolgee in the response and, on the
- * operator path, over the lifecycle channel too, because the two callers need different things: an
- * app rotating itself reads the response, but an operator rotating by hand has no response to hand
- * to the app.
+ * Rolls an app-level client secret: mints a replacement, hands it to the app over the lifecycle
+ * channel, and retires the outgoing one. If the app took the new secret over that channel the old
+ * one is cut off at once; otherwise it keeps working through a grace window so an app configured by
+ * hand can be switched over first.
  *
  * Kept out of [AppSecretService] so the delivery happens after that service's transaction commits,
  * and out of [AppService] so the delivery service can keep depending on it.
@@ -26,11 +27,33 @@ class AppSecretRotationService(
     val issued: AppSecretService.IssueResult,
     /** Present only on the operator path — the app-initiated path returns the secret in its response. */
     val delivery: AppLifecycleDeliveryOutcome?,
+    /** When the outgoing secrets lapse, or null when there was nothing to retire. */
+    val previousExpiresAt: Date? = null,
   )
 
   /**
-   * The operator path: issue a new secret and hand it to the app synchronously, so the rotation
-   * dialog can say whether the app took it or the operator still has to copy it.
+   * The operator path: issue a new secret, hand it to the app, and put every other active secret on
+   * a [graceSeconds] deadline. The old ones are never revoked here — a landed delivery only proves
+   * the app received the webhook, not that it adopted the secret, so cutting anything off is left to
+   * the window or to the operator's explicit revoke.
+   */
+  fun rotate(
+    app: App,
+    graceSeconds: Long,
+  ): RotationResult {
+    val result = issueAndDeliver(app)
+    val previousExpiresAt =
+      appSecretService.expireOthers(
+        appId = app.id,
+        keepSecretId = result.issued.secret.id,
+        graceSeconds = graceSeconds,
+      )
+    return result.copy(previousExpiresAt = previousExpiresAt)
+  }
+
+  /**
+   * Issues a new secret and hands it to the app synchronously, so the caller can tell whether the
+   * app took it or the operator still has to copy it. Does not touch the old secret.
    */
   fun issueAndDeliver(app: App): RotationResult {
     val issued = appSecretService.issue(app)

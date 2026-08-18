@@ -26,9 +26,14 @@ export type TolgeeAppTheme = {
 export type TolgeeAppContext = {
   token: string
   apiUrl: string
-  /** Null when the install is not owned by an organization. */
   organizationId: number | null
   projectId: number
+  /**
+   * Revision of the app contract the host speaks. 1 in this alpha, and 1 for a
+   * host that predates the field. Read it to keep working across a future
+   * breaking revision rather than assuming the newest shape.
+   */
+  protocolVersion: number
   /** Host theme at init; subscribe to changes via `onThemeChanged`. */
   theme: TolgeeAppTheme
 }

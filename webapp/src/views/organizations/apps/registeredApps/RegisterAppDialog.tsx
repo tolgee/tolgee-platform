@@ -22,6 +22,8 @@ type AppModel = components['schemas']['AppModel'];
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** Pre-fills the manifest URL; used when installing an app from the available list. */
+  initialManifestUrl?: string;
 };
 
 const INVALIDATE_PREFIXES = [
@@ -29,7 +31,11 @@ const INVALIDATE_PREFIXES = [
   '/v2/organizations/{organizationId}/owned-apps',
 ] as const;
 
-export const RegisterAppDialog = ({ open, onClose }: Props) => {
+export const RegisterAppDialog = ({
+  open,
+  onClose,
+  initialManifestUrl,
+}: Props) => {
   const organization = useOrganization();
   const { t } = useTranslate();
   const [notRegistered, setNotRegistered] = useState(false);
@@ -59,7 +65,7 @@ export const RegisterAppDialog = ({ open, onClose }: Props) => {
     setNotRegistered(false);
     setIssuedApp(null);
     onClose();
-  });
+  }, initialManifestUrl);
 
   const handlePreview = () => {
     if (!organization) return;

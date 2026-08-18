@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
       // tunnel (which exposes one port) reach both.
       proxy: {
         '/manifest.json': `http://localhost:${serverPort}`,
+        '/tolgee/lifecycle': `http://localhost:${serverPort}`,
         '/api': `http://localhost:${serverPort}`,
       },
       // A Cloudflare quick tunnel rewrites the Host header to *.trycloudflare.com.

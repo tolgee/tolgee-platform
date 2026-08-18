@@ -17,11 +17,13 @@ import org.springframework.transaction.PlatformTransactionManager
 import tools.jackson.databind.ObjectMapper
 
 /**
- * Hands an app a secret-carrying event over a signed POST to the `baseUrl` in its manifest, and
- * tells the caller whether it landed. Only two events travel this way now — an app being registered
- * and an operator rotating its secret — and both happen with a human at a dialog, so the delivery
- * is **synchronous** and its outcome is shown there. An app that discovers the rest (its installs)
- * asks Tolgee itself.
+ * Hands an app a secret-carrying event over a signed POST to `<baseUrl>/tolgee/lifecycle` — a
+ * dedicated path rather than the base URL itself, because the base URL serves the app's UI (in
+ * development typically a Vite server that has no idea about POSTs, and can only proxy a known path
+ * through to the app server). Tells the caller whether it landed. Only two events travel this way
+ * now — an app being registered and an operator rotating its secret — and both happen with a human
+ * at a dialog, so the delivery is **synchronous** and its outcome is shown there. An app that
+ * discovers the rest (its installs) asks Tolgee itself.
  *
  * A failure never propagates: the credentials were already returned in the response, so a dead app
  * host must not roll back the registration or rotation. The blast radius of the synchronous call is
@@ -93,12 +95,20 @@ class AppLifecycleDeliveryService(
         organization = organization?.let { AppLifecycleOrganization(id = it.id, name = it.name, slug = it.slug) },
       )
 
+    val url = deliveryUrl(target.baseUrl)
     return try {
-      httpClient.post(target.baseUrl, objectMapper.writeValueAsString(payload), target.signingSecret)
+      httpClient.post(url, objectMapper.writeValueAsString(payload), target.signingSecret)
       AppLifecycleDeliveryOutcome.DELIVERED
     } catch (e: AppLifecycleHttpClient.DeliveryFailedException) {
-      logger.info("App lifecycle {} delivery to {} failed: {}", eventType.wireName, target.baseUrl, e.message)
+      logger.info("App lifecycle {} delivery to {} failed: {}", eventType.wireName, url, e.message)
       AppLifecycleDeliveryOutcome.failed(e.message ?: "delivery failed")
     }
+  }
+
+  companion object {
+    /** The well-known path the SDK's `mountTolgeeLifecycle` listens on. */
+    const val LIFECYCLE_PATH = "/tolgee/lifecycle"
+
+    fun deliveryUrl(baseUrl: String): String = baseUrl.trimEnd('/') + LIFECYCLE_PATH
   }
 }

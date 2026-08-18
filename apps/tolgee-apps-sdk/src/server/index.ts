@@ -62,8 +62,16 @@ export type {
   TolgeeLifecycleEvent,
   TolgeeLifecycleEventType,
 } from './lifecycle/events'
-export { selfRegisterApp } from './selfRegisterApp'
-export type { SelfRegisterInput, SelfRegisterResult } from './selfRegisterApp'
+export {
+  selfRegisterApp,
+  selfRegisterAppWithRetry,
+  SelfRegisterError,
+} from './selfRegisterApp'
+export type {
+  SelfRegisterInput,
+  SelfRegisterResult,
+  SelfRegisterRetryOptions,
+} from './selfRegisterApp'
 export {
   ensureAppCredentialsFresh,
   rotateAppClientSecret,

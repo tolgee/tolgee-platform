@@ -1,122 +1,63 @@
 package io.tolgee.service.apps
 
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Organization
-import io.tolgee.model.UserAccount
-import io.tolgee.model.apps.AppAvailableForOrganization
 import io.tolgee.model.apps.AppInstall
-import io.tolgee.repository.apps.AppAvailableForOrganizationRepository
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
 import io.tolgee.repository.apps.AppInstallRepository
-import jakarta.persistence.EntityManager
+import io.tolgee.repository.apps.AppRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * Decides which organizations may use a native (server-level) app install. A project can only enable
- * a native app once its organization has been granted availability here.
+ * Decides which organizations may use an app they do not own. An app is either private to its owner
+ * or, when a server admin flips [io.tolgee.model.apps.App.availableToAllOrganizations], available to
+ * every organization on the server. There is no per-organization grant list anymore — the flag is
+ * all or the owner.
  */
 @Service
 class AppAvailabilityService(
-  private val appAvailableForOrganizationRepository: AppAvailableForOrganizationRepository,
-  private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
+  private val appRepository: AppRepository,
   private val appInstallRepository: AppInstallRepository,
-  private val entityManager: EntityManager,
+  private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
 ) {
+  /** Server-admin action: offer the app to every organization, or withdraw it to the owner only. */
   @Transactional
-  fun grant(
-    installId: Long,
-    organizationId: Long,
-    author: UserAccount,
-  ): AppAvailableForOrganization {
-    val existing = appAvailableForOrganizationRepository.findByAppInstallIdAndOrganizationId(installId, organizationId)
-    if (existing != null) return existing
-
-    val install = getNativeInstall(installId)
-    val organization =
-      entityManager.find(Organization::class.java, organizationId)
-        ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
-
-    return appAvailableForOrganizationRepository.save(
-      AppAvailableForOrganization().apply {
-        this.appInstall = install
-        this.organization = organization
-        this.author = author
-      },
-    )
-  }
-
-  /**
-   * Also disables the app in every project of the organization. Without that, an app whose
-   * availability was revoked would keep running in the projects that had already enabled it. A
-   * blanket grant still covers the organization, so it suppresses that cascade.
-   */
-  @Transactional
-  fun revoke(
-    installId: Long,
-    organizationId: Long,
+  fun setAvailableToAllOrganizations(
+    appEntityId: Long,
+    available: Boolean,
   ) {
-    val native = appInstallRepository.findByOrganizationIsNullAndId(installId) ?: return
-    if (!native.availableToAllOrganizations) {
-      appEnabledForProjectRepository.deleteByAppInstallIdAndProjectOrganizationOwnerId(native.id, organizationId)
+    val app = appRepository.findById(appEntityId).orElse(null) ?: return
+    if (app.availableToAllOrganizations == available) return
+    app.availableToAllOrganizations = available
+    appRepository.save(app)
+
+    // Withdrawing availability must not leave the app running in projects that could only reach it
+    // through the blanket offer — every project whose organization does not own the app.
+    if (!available) {
+      appEnabledForProjectRepository.deleteByAppIdAndProjectOrganizationNotOwner(app.id)
     }
-    val existing =
-      appAvailableForOrganizationRepository.findByAppInstallIdAndOrganizationId(installId, organizationId) ?: return
-    appAvailableForOrganizationRepository.delete(existing)
   }
 
-  /** Idempotent. Leaves the explicit per-organization grants in place. */
-  @Transactional
-  fun grantToAllOrganizations(installId: Long) {
-    val install = getNativeInstall(installId)
-    install.availableToAllOrganizations = true
-    appInstallRepository.save(install)
-  }
-
-  /**
-   * Also disables the app in every project that was only ever covered by the blanket grant. Projects
-   * of an organization holding an explicit grant keep it.
-   */
-  @Transactional
-  fun revokeFromAllOrganizations(installId: Long) {
-    val install = getNativeInstall(installId)
-    install.availableToAllOrganizations = false
-    appInstallRepository.save(install)
-    appEnabledForProjectRepository.deleteAll(
-      appEnabledForProjectRepository.findAllWithoutExplicitOrganizationAvailability(install.id),
-    )
-  }
-
-  @Transactional(readOnly = true)
-  fun listOrganizations(installId: Long): List<Organization> {
-    return appAvailableForOrganizationRepository.findOrganizationsByAppInstallId(installId)
-  }
-
-  @Transactional(readOnly = true)
-  fun listNativeInstallsForOrganization(organizationId: Long): List<AppInstall> {
-    val explicit = appAvailableForOrganizationRepository.findNativeInstallsByOrganizationId(organizationId)
-    val blanket = appInstallRepository.findAllByOrganizationIsNullAndAvailableToAllOrganizationsIsTrue()
-    return (explicit + blanket).distinctBy { it.id }.sortedBy { it.name }
-  }
-
-  @Transactional(readOnly = true)
+  /** An organization may use [install]'s app if it owns it or the app is offered to everyone. */
   fun isAvailableForOrganization(
     organizationId: Long,
     install: AppInstall,
   ): Boolean {
-    if (install.availableToAllOrganizations) return true
-    return appAvailableForOrganizationRepository
-      .findByAppInstallIdAndOrganizationId(install.id, organizationId) != null
+    if (install.organization.id == organizationId) return true
+    return install.app.availableToAllOrganizations
+  }
+
+  /**
+   * Installs of server-wide apps this organization does not own — the ones its projects may enable
+   * on top of the organization's own installs.
+   */
+  @Transactional(readOnly = true)
+  fun listAvailableInstallsForOrganization(organizationId: Long): List<AppInstall> {
+    return appInstallRepository.findAvailableToOtherOrganizations(organizationId)
   }
 
   @Transactional
-  fun removeAllForAppInstall(installId: Long) {
-    appAvailableForOrganizationRepository.deleteByAppInstallId(installId)
-  }
-
-  private fun getNativeInstall(installId: Long): AppInstall {
-    return appInstallRepository.findByOrganizationIsNullAndId(installId)
-      ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+  fun removeAllForAppInstall(appInstallId: Long) {
+    // Availability is a property of the app, not the install, so there is nothing per-install to
+    // remove — kept for call-site symmetry with the enablement cleanup.
   }
 }

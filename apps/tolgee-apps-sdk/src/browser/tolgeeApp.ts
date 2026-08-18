@@ -25,6 +25,8 @@ type InitMessage = {
   apiUrl: string
   organizationId: number | null
   projectId: number
+  /** Absent from a host predating the field; treated as 1. */
+  protocolVersion?: number
   theme: TolgeeAppTheme
 }
 
@@ -172,6 +174,7 @@ const parseInit = (m: InitMessage): TolgeeAppContext => ({
   apiUrl: m.apiUrl,
   organizationId: m.organizationId ?? null,
   projectId: m.projectId,
+  protocolVersion: m.protocolVersion ?? 1,
   theme: m.theme,
 })
 

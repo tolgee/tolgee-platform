@@ -68,6 +68,7 @@ export enum PARAMS {
   PLAN_MIGRATION_ID = 'migrationId',
   APP_INSTALL_ID = 'appInstallId',
   APP_MODULE_KEY = 'appModuleKey',
+  APP_ID = 'appId',
 }
 
 export class LINKS {
@@ -196,8 +197,6 @@ export class LINKS {
 
   static ADMINISTRATION_USERS = Link.ofParent(LINKS.ADMINISTRATION, 'users');
 
-  static ADMINISTRATION_APPS = Link.ofParent(LINKS.ADMINISTRATION, 'apps');
-
   static ADMINISTRATION_EE_LICENSE = Link.ofParent(
     LINKS.ADMINISTRATION,
     'ee-license'
@@ -291,6 +290,11 @@ export class LINKS {
   static ORGANIZATION_APPS_OWNED = Link.ofParent(
     LINKS.ORGANIZATION_APPS,
     'owned'
+  );
+
+  static ORGANIZATION_APP = Link.ofParent(
+    LINKS.ORGANIZATION_APPS_OWNED,
+    p(PARAMS.APP_ID)
   );
 
   static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(

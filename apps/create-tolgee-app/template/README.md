@@ -63,18 +63,20 @@ Tolgee fetches the manifest and shows what the app contributes.
 **Automatically** — set this in `.env.local`:
 
 ```dotenv
-TOLGEE_APP_REGISTRATION_SECRET=…
+TOLGEE_APP_REGISTRATION_TOKEN=…
 ```
 
-The registration secret is server-wide and comes from whoever administers your
-Tolgee instance. With it set, the server registers itself on every boot and
-logs the result.
+The registration secret is **server-wide** and comes from the Tolgee
+administrator — Tolgee's configuration holds only its hash
+(`tolgee.apps.registration-secret-hash`). With it set, the server registers
+itself on every boot (retrying until Tolgee is reachable) and logs the result.
 
-This registers a **native** app — one owned by no organization. Which
-organizations may use it is a separate, admin-only decision, made in Tolgee
-under **Administration → Apps**; a project owner then enables it per project.
-(Setting `TOLGEE_ORGANIZATION_SLUG` too installs the app into that single
-organization instead, skipping the admin step.)
+The app is registered into — and owned by — the organization
+`TOLGEE_APP_ORGANIZATION` names, or the server's initial organization when
+unset. Enable it
+for a project under that project's **Apps** settings. A server admin can later
+offer it to **every** organization from the owner's Apps page, after which any
+organization can install it from its own **Available on this server** list.
 
 The **first** registration is the only time Tolgee hands out the client secret —
 it stores just a hash of it. So the SDK saves the whole install record to
@@ -165,8 +167,10 @@ From `@tolgee/apps-sdk/server`:
 - **`loadTolgeeAppConfig()`** — reads the environment into a typed config.
 - **`renderManifest(template, baseUrl)`** — substitutes `__BASE_URL__`.
 - **`tolgeeAppCorsHeaders()`** — CORS headers for endpoints the webapp calls.
-- **`selfRegisterApp(…)`** — the boot-time registration used above; stores the
-  issued credentials in `.tolgee-dev/install.json`.
+- **`selfRegisterAppWithRetry(…)`** — the boot-time registration used above;
+  retries with backoff until Tolgee is reachable and stores the issued
+  credentials in `.tolgee-dev/install.json`. (`selfRegisterApp(…)` is the
+  single-attempt version.)
 - **`fetchAppAccessToken()`** — exchanges the client id/secret for an access
   token, for work the app does on its own behalf rather than a user's. Called
   with no arguments it uses the stored credentials.

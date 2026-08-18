@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.repository.apps.AppRepository
+import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppSecretService
@@ -31,6 +32,9 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var appSecretService: AppSecretService
+
+  @Autowired
+  lateinit var appAvailabilityService: AppAvailabilityService
 
   @Autowired
   lateinit var appRepository: AppRepository
@@ -63,6 +67,7 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
     appEntityId = registered.at("/app/id").asLong()
     ownerInstallId = registered.get("id").asLong()
     performAuthPut("/v2/projects/${testData.project.id}/apps/$ownerInstallId", null).andIsOk
+    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
 
     userAccount = testData.otherOwner
     otherInstallId =
@@ -74,7 +79,6 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    AppsTestFixtures.removeNativeInstalls(appInstallService)
     testDataService.cleanTestData(testData.root)
   }
 
