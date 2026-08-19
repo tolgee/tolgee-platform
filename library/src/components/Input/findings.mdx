@@ -77,6 +77,21 @@ invisible — the fallback is 400 anyway — which is exactly why it survived.
   to change weight where they should have been medium all along.
 </Callout>
 
+## The theme declares a root font size nothing sets
+
+`htmlFontSize: 15` tells Material UI that one `rem` is 15px, and every conversion it makes between
+px and rem is based on that number. Nothing sets the root to 15px though — `MuiCssBaseline` styles
+`html` for height only, and puts `fontSize: 15` on `body`. The root stays at the browser's 16px.
+
+The typography scale is written in px, so most of it is unaffected. What is affected is anything
+Material UI expresses in rem on our behalf, which comes out about 7% larger than the theme intends.
+
+<Callout title="Suggested fix">
+  Either set `html { font-size: 15px }` in `MuiCssBaseline` so the declaration becomes true, or drop
+  `htmlFontSize` and let it be 16. Both are one line; leaving them disagreeing is the only wrong
+  option.
+</Callout>
+
 ## Five search fields, one of them shared
 
 `common/form/fields/SearchField` is the real one: magnifier, clear button, 500ms debounce. Four

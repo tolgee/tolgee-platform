@@ -36,7 +36,7 @@ const Field = ({
 }) => (
   <Box sx={{ display: 'grid', minHeight: 64 }}>
     {label && (
-      <InputLabel sx={{ fontSize: 14, fontWeight: 500, mb: 0.5 }}>
+      <InputLabel sx={{ fontSize: 14, fontWeight: 400, mb: 0.5 }}>
         {label}
       </InputLabel>
     )}

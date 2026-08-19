@@ -28,6 +28,20 @@ Three rules, and they hold for every kind of field — text, select, date:
 The placeholder goes inside the box and says what to type — _Task_, _MM/DD/YYYY_ — while the label
 above says what the field is. They are not alternatives to each other.
 
+Measured on the rendered page, so these are the numbers the product actually shows:
+
+|                     | Value                             |
+| ------------------- | --------------------------------- |
+| label               | 14px, regular, `text.secondary`   |
+| gap under the label | 4px                               |
+| field text          | 16px (`body1`)                    |
+| field height        | 40px (`size="small"`), 4px corner |
+| row reserve         | 64px                              |
+
+The label is regular weight rather than medium **because the declaration that asked for medium is
+invalid** — see Findings. Fixing it will make every label in the product heavier, which is a visible
+change worth deciding on rather than slipping in.
+
 <Callout title="Why the label is above and not inside">
   A floating label moves when the field is filled and shrinks to a size that is
   hard to read. Above the field it stays put, stays the same size, and every
