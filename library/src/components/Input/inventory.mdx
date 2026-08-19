@@ -1,0 +1,182 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import { TextField } from '@mui/material';
+import * as InputStories from './stories';
+import {
+  CopyField,
+  FakeSelect,
+  Field,
+  PlainSelect,
+  Sample,
+  SharedSearch,
+  TranslationsSearch,
+} from '../../../.storybook/docs/InputInventory';
+
+<Meta of={InputStories} name="Inventory" />
+
+# Every field in the app
+
+Measured across `webapp/src` on 2026-08-19. Each sample is rebuilt from the real CSS of the
+component it names, so the picture is what ships rather than an impression of it.
+
+Read it as a checklist: fields that look alike and are built differently, or look different and mean
+the same thing, are the ones to settle.
+
+## Text fields — 100 call sites
+
+<Sample
+  name="The standard"
+  where="Most forms — task creation, project settings, member invites"
+  built="common/TextField · form/fields/TextField · 74 call sites"
+>
+  <Field label="Task name (optional)">
+    <TextField size="small" placeholder="Task" fullWidth />
+  </Field>
+</Sample>
+
+<Sample
+  name="Floating label"
+  where="Scattered — wherever TextField was imported from @mui/material"
+  built="@mui/material directly · 6 call sites"
+  problem="Not the product's shape: the label moves and shrinks when the field fills."
+>
+  <TextField size="small" fullWidth label="Task name" />
+</Sample>
+
+<Sample
+  name="Underline"
+  where="Scattered, including 11 formik fields that override the wrapper"
+  built='variant="standard" · 21 call sites'
+  problem="No box. Reads as a different kind of control in the same form."
+>
+  <TextField size="small" fullWidth variant="standard" label="Task name" />
+</Sample>
+
+<Sample
+  name="Long text"
+  where="Descriptions, AI prompts, translation notes"
+  built="multiline + minRows · 10 call sites"
+>
+  <Field label="Description">
+    <TextField size="small" multiline minRows={3} fullWidth />
+  </Field>
+</Sample>
+
+<Sample
+  name="Read-only, copy on the right"
+  where="Clipboard fields — API URLs, content delivery"
+  built="OutlinedInput · 2 call sites"
+>
+  <CopyField />
+</Sample>
+
+## Search — five of them
+
+<Sample
+  name="SearchField — the shared one"
+  where="Project lists, members, glossary"
+  built="TextField + two adornments + 500ms debounce"
+>
+  <SharedSearch />
+</Sample>
+
+<Sample
+  name="SecondaryBarSearchField"
+  where="Secondary bar above list views"
+  built="wraps SearchField · own background, width 250px"
+>
+  <SharedSearch width={250} />
+</Sample>
+
+<Sample
+  name="HeaderSearchField"
+  where="Top bar, global search"
+  built="its own TextField · adornments assembled again · flexBasis 200"
+  problem="Repeats what SearchField already does, and the two have drifted apart."
+>
+  <SharedSearch width={200} />
+</Sample>
+
+<Sample
+  name="FlagSearchField"
+  where="Flag picker when adding a language"
+  built="styled(TextField) · padding 8px · 500ms debounce"
+  problem="A third copy of the same debounce, with no icon and no clear button."
+>
+  <TextField size="small" placeholder="Search flag" sx={{ p: 1, width: 220 }} />
+</Sample>
+
+<Sample
+  name="TranslationsSearchField"
+  where="Translations view — the one with the ? help icon"
+  built="a div around a CodeMirror editor · 40px · own border and focus ring"
+  problem="Not a TextField at all. It carries search syntax, so it needs an editor — but everything around it was rebuilt from scratch."
+>
+  <TranslationsSearch value="homepage.title" />
+</Sample>
+
+<Callout title="Five ways to type a query" kind="warning">
+  One is shared, one wraps it, two rebuild it and one is a different technology.
+  They differ in height, in whether there is a clear button, and in whether the
+  icon is inside the border. Only the last has a reason to be different.
+</Callout>
+
+## Fields that are not fields
+
+<Sample
+  name="Filter"
+  where="Translations header, right of the search"
+  built="TextField · readOnly · inputComponent={FakeInput} · opens a menu on click"
+  problem="Looks like a field, behaves like a select, is neither. A screen reader is told it is a text box that cannot be typed into."
+>
+  <FakeSelect placeholder="Filter..." />
+</Sample>
+
+<Sample
+  name="BranchLabelInput"
+  where="Branch selector"
+  built="InputBaseComponentProps on a styled div"
+  problem="Same pattern: a div passed to Material UI as if it were an input."
+>
+  <FakeSelect placeholder="main" />
+</Sample>
+
+## Selects — 26 call sites
+
+<Sample
+  name="Through the wrapper"
+  where="Forms — task type, target languages, assignees"
+  built="common/Select · label above · 8 call sites, 4 more through formik"
+>
+  <Field label="Type">
+    <PlainSelect value="Translate" />
+  </Field>
+</Sample>
+
+<Sample
+  name="Direct"
+  where="Toolbars and table headers"
+  built="@mui/material · no label above · 14 call sites"
+>
+  <PlainSelect value="Untranslated" />
+</Sample>
+
+## What is not on this page
+
+`Editor`, `EditorJson` and `EditorHandlebars` — the translation editor is CodeMirror 6 and shares
+nothing with the components above. Four `<input type="file">` elements sit hidden under their own
+UI in the file dropzone, the avatar picker, the import screen and the key cell. Neither group is a
+field in the sense this page means.
+
+## The shape of the problem
+
+Counted from the samples above, one row of the translations header holds **three unrelated
+mechanisms**: a CodeMirror editor styled as a field, a read-only text field standing in for a
+select, and an icon button. None of them is the component the rest of the product uses for the same
+job.
+
+<Callout title="Where to start">
+  The five search fields are the cheapest win — four of them want to be one. The
+  two fake fields are the most valuable, because they are the ones a screen
+  reader gets wrong.
+</Callout>
