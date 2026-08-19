@@ -1,0 +1,126 @@
+# Tolgee DEV deployment. Secrets are intentionally created out of band.
+# The deployment is intentionally minimal: it reuses the existing Docker image
+# and publishes it through the shared internal DEV ingress domain.
+---
+apiVersion: v1
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tolgee-data
+  namespace: env-base
+spec:
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tolgee
+  namespace: env-base
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tolgee
+  template:
+    metadata:
+      labels:
+        app: tolgee
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: tolgee
+          image: tolgee/tolgee:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: tolgee-config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 36
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: tolgee-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tolgee
+  namespace: env-base
+spec:
+  type: ClusterIP
+  selector:
+    app: tolgee
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tolgee
+  namespace: env-base
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 64m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: tolgee.devops.tripo3d.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tolgee
+                port:
+                  name: http
+
+# Create this Secret separately with real values. Do not commit it.
+#
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: tolgee-secrets
+#   namespace: env-base
+# stringData:
+#   # Add application secrets here if DEV enables authenticated integrations.
