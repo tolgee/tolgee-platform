@@ -1,0 +1,99 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as InputStories from './stories';
+
+<Meta of={InputStories} name="Findings" />
+
+# Input — findings
+
+Measured by hand on 2026-08-18 across 100 call sites. A work list: **done when it is empty.**
+
+## Three doors into one field
+
+<Canvas of={InputStories.FindingThreeDoors} />
+
+| Door                            | Files | What it adds                                                                   |
+| ------------------------------- | ----- | ------------------------------------------------------------------------------ |
+| `@mui/material` directly        | 64    | nothing                                                                        |
+| `tg.component/common/TextField` | 15    | label above the box, forces `outlined` and `small`, reserves `minHeight: 64px` |
+| `common/form/fields/TextField`  | 39    | formik binding, on top of the wrapper above                                    |
+
+The middle one is a real component with real opinions — it moves the label out of the box and holds
+64px of vertical space so a validation message can appear without moving the form. Those are good
+decisions that 64 files never get, because they reach past it.
+
+<Callout title="Suggested fix">
+  Decide whether the label belongs above the box or inside it, then make one of
+  the two the way in and migrate the rest.
+</Callout>
+
+## A typo nobody sees
+
+`tg.component/common/TextField` styles its label with:
+
+```
+font-size: 14px;
+font-weight: 500px;
+```
+
+`500px` is not a font weight. The browser drops the declaration, so every label rendered through
+that wrapper is at the default weight rather than the intended medium — in 15 files, since the day
+it was written.
+
+<Callout title="Suggested fix">
+  `font-weight: 500`. Check the labels still look right afterwards, because the
+  product has been living with the unstyled version.
+</Callout>
+
+## Five search fields, one of them shared
+
+`common/form/fields/SearchField` is the real one: magnifier, clear button, 500ms debounce. Four
+others exist beside it.
+
+| Field                     | Built on                                        |
+| ------------------------- | ----------------------------------------------- |
+| `SearchField`             | `TextField` — the shared one                    |
+| `SecondaryBarSearchField` | wraps `SearchField` ✓                           |
+| `HeaderSearchField`       | its own `TextField`, adornments assembled again |
+| `FlagSearchField`         | its own                                         |
+| `TranslationsSearchField` | its own                                         |
+
+`HeaderSearchField` repeats the adornments, the clear button and the icon sizes that `SearchField`
+already has, and the two now differ in ways nobody chose.
+
+<Callout title="Suggested fix">
+  Fold `HeaderSearchField` onto `SearchField` the way the secondary bar already
+  does, and check whether the other two can follow.
+</Callout>
+
+## Two search fields import icons from the package
+
+`SearchField` and `HeaderSearchField` both do:
+
+```
+import { SearchSm, XClose } from '@untitled-ui/icons-react';
+```
+
+**Foundations → Icons** asks for the library instead. These two are the closest violations to hand
+because they sit in shared components, where the next person copies from.
+
+<Callout title="Suggested fix">
+  Import from `@tginternal/library/icons`, and add the eslint rule that makes
+  the page's own instruction enforceable.
+</Callout>
+
+## Variants are mixed within the product
+
+79 outlined against 21 standard. The split is not per screen but scattered, and the wrapper forces
+`outlined` while 21 direct call sites choose `standard` — so the same form can hold both.
+
+<Callout title="Suggested fix">
+  Settle on outlined, keep standard only where a field sits inside something
+  that already has edges, and write down which is which.
+</Callout>
+
+## Not wrong
+
+75 of the 100 pass a `label`, and the 26 placeholders sit where the label is carried by the layout.
+`helperText` doubles as the error message on all 8 error states rather than adding a second line, so
+the form never jumps.

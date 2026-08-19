@@ -1,0 +1,92 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as InputStories from './stories';
+
+<Meta of={InputStories} />
+
+# Input
+
+<Upstream docs="react-text-field" />
+
+Material UI calls it `TextField`, and it is one component doing three jobs at once: the label, the
+box the text sits in and the message underneath. **100 call sites**, and 75 of them pass a `label`,
+which is what makes it worth using instead of a bare input.
+
+## A field is its label
+
+<Canvas of={InputStories.Labelled} />
+
+The label is not decoration — it is what a screen reader reads and what the pointer targets when the
+user clicks the words instead of the box. A placeholder is not a substitute: it disappears as soon
+as the field has content, exactly when the user needs to check what they were filling in.
+
+26 fields use `placeholder`, and it is right where the label is already carried by the surrounding
+layout — a search box, a table cell. It is wrong as the only description of a field.
+
+## States
+
+<Canvas of={InputStories.States} />
+
+Five, and they cover everything the product does: empty, filled, hinted, rejected, unavailable.
+`helperText` carries the hint (14 uses) and switches to the error message when `error` is set (8
+uses) — the same line, so the field never grows when it goes wrong.
+
+## Variants
+
+<Canvas of={InputStories.Variants} />
+
+Two are in use: `outlined` on 79 and `standard` on 21. Outlined is the one to reach for — it is what
+the shared wrapper forces and what most of the product shows. Standard, without a border, belongs
+where a field sits inside something that already has edges, such as a table row.
+
+<Callout title="One field, one variant per screen">
+  Mixing outlined and standard in the same form makes the fields look like
+  different kinds of control. Pick per screen, not per field.
+</Callout>
+
+## Long text
+
+<Canvas of={InputStories.Multiline} />
+
+`multiline` with `minRows` — 10 fields use it. Give it a starting height rather than letting it grow
+from one line, otherwise the form jumps as soon as anyone types.
+
+## Search is this component, not a new one
+
+<Canvas of={InputStories.Search} />
+
+A search field is an Input with a magnifier in front, a clear button behind, and a debounce so it
+does not fire on every keystroke:
+
+```
+<TextField
+  placeholder={t('standard_search_label')}
+  InputProps={{
+    startAdornment: <InputAdornment position="start"><SearchSm /></InputAdornment>,
+    endAdornment: value && (
+      <InputAdornment position="end">
+        <IconButton size="small" onClick={clear}><XClose /></IconButton>
+      </InputAdornment>
+    ),
+  }}
+/>
+```
+
+That is `tg.component/common/form/fields/SearchField`, which also debounces by 500ms. Reach for it
+rather than assembling the adornments again — **see Findings for the four other search fields that
+did.**
+
+## Don't
+
+- **Don't use a placeholder instead of a label.** It vanishes when it is needed.
+- **Don't put the error message anywhere but `helperText`.** A second line below the field moves the
+  layout.
+- **Don't build a search field from scratch.** `SearchField` exists.
+- **Don't set a width on the field.** Let the form's grid do it.
+
+## Where the styling lives
+
+`MuiInputBase` in `library/src/theme/getTheme.ts`, and it holds exactly one rule: the background
+color of an outlined input. Everything else — the border, the floating label, the spacing — is
+Material UI's own. See **Foundations → Component styles**.
