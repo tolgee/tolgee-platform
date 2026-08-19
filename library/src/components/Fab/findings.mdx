@@ -1,0 +1,38 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FabStories from './stories';
+
+<Meta of={FabStories} name="Findings" />
+
+# Fab — findings
+
+One call site, `component/HelpMenu.tsx`. A work list: **done when it is empty.**
+
+## The click and the name are on the wrapper
+
+<Canvas of={FabStories.FindingNameOnWrapper} />
+
+```
+<Tooltip title={t('help_menu_tooltip')}>
+  <StyledHelpButton onClick={handleOpen} id="help-button">
+    <Fab color="primary" size="small"><HelpCircle /></Fab>
+  </StyledHelpButton>
+</Tooltip>
+```
+
+`StyledHelpButton` is a `div`. Both the handler and the tooltip are attached to it, so the
+accessible name lands on an element that is not a button, and the real `<button>` that `Fab` renders
+has none. It works with a mouse because the click bubbles; a screen reader reaching the button
+announces "button" and stops.
+
+<Callout title="Suggested fix">
+  Move `onClick` and the `Tooltip` onto the `Fab` and leave the `div` doing only
+  what it is good at — position.
+</Callout>
+
+## Not wrong
+
+The wrapper itself is right: `Fab` styles a button, it does not place one, so the fixed position
+belongs outside. `theme.zIndex.fab` is Material UI's own scale rather than a hand-picked number, and
+`size="small"` puts the floating button at 40px — the same height as an ordinary Button, which is
+why it does not shout.

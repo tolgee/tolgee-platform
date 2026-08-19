@@ -1,0 +1,79 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as CheckboxStories from './stories';
+
+<Meta of={CheckboxStories} />
+
+# Checkbox
+
+<Upstream docs="react-checkbox" />
+
+A choice that stands on its own: each box is independent, and ticking one says nothing about the
+others. If the options are mutually exclusive it is a radio, and if the thing takes effect the
+moment you touch it, it is a `Switch`.
+
+Used **49 times** across the product, all of them with no color set, which is right — the theme's
+default is the one to use.
+
+## It needs a label
+
+<Canvas of={CheckboxStories.WithLabel} />
+
+A checkbox is a 20px square with nothing to read. `FormControlLabel` pairs it with text and makes
+that text part of the hit area, so the label is clickable too:
+
+```
+<FormControlLabel control={<Checkbox size="small" />} label={t('reviewed')} />
+```
+
+<Callout title="Most boxes here have no label of their own" kind="warning">
+  Of the 49, **11 sit inside a `FormControlLabel`** and **none carry an `aria-label`**. The other 38
+  are in table rows and lists where the label is a separate cell — which works visually, but a
+  screen reader reaching the box alone has nothing to announce. Worth a pass with `inputProps={{
+  'aria-label': … }}`.
+</Callout>
+
+## States
+
+<Canvas of={CheckboxStories.States} />
+
+Five, and the third one earns its keep: **indeterminate** is for a parent box whose children are
+partly selected. It is not a third value — the box is still on or off, `indeterminate` only changes
+what is drawn.
+
+```
+<Checkbox
+  checked={all}
+  indeterminate={some && !all}
+  onChange={toggleAll}
+/>
+```
+
+## Size
+
+<Canvas of={CheckboxStories.Sizes} />
+
+`small` in dense places — table rows, filter lists, anywhere a row is 40px or less. The default
+everywhere else. The split in the product is 29 small to 20 default.
+
+## In a list
+
+<Canvas of={CheckboxStories.InARow} />
+
+Keep the boxes on one vertical line and let the labels run right. A list of checkboxes is read down
+the left edge, so anything that breaks that column makes it slower.
+
+## Don't
+
+- **Don't use one for an instant action.** A checkbox states an intention that a Save button
+  commits. Something that applies immediately is a `Switch`.
+- **Don't use two for an either-or.** That is a radio group.
+- **Don't set a color.** All 49 in the product leave it alone; the theme handles it.
+- **Don't leave it unnamed.** Either a `FormControlLabel` or an `aria-label`.
+
+## Where the styling lives
+
+Nowhere of ours — `MuiCheckbox` has no entry in the theme, so this is Material UI's own look
+throughout. It is also the reason `styled(Checkbox)` appears six times in the app: with no central
+style, every adjustment is made locally. See **Foundations → Component styles**.

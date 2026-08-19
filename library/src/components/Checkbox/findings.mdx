@@ -1,0 +1,64 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as CheckboxStories from './stories';
+
+<Meta of={CheckboxStories} name="Findings" />
+
+# Checkbox — findings
+
+Measured by hand on 2026-08-18 across 49 call sites. A work list: **done when it is empty.**
+
+## Not one carries a name of its own
+
+<Canvas of={CheckboxStories.FindingNoName} />
+
+11 sit inside a `FormControlLabel` and are announced by it. **None of the 49 has an `aria-label`.**
+The other 38 are in table rows and lists where the label is a separate cell — visually clear, silent
+to a screen reader that lands on the box.
+
+<Callout title="Suggested fix">
+  `inputProps={{ 'aria-label': … }}` on the 38, naming the row rather than the column: "Select
+  key homepage.title", not "Select".
+</Callout>
+
+## Three doors into one checkbox
+
+| Door                           | Files | What it adds                |
+| ------------------------------ | ----- | --------------------------- |
+| `@mui/material` directly       | 42    | nothing                     |
+| `tg.component/common/Checkbox` | 1     | maps `value` onto `checked` |
+| `common/form/fields/Checkbox`  | 2     | formik binding              |
+
+The middle one is the odd part. It exists to accept `value` where MUI wants `checked`, and it is
+used once:
+
+```
+<MUICheckbox ref={ref} checked={!!props.value} {...props} />
+```
+
+`{...props}` spreads after `checked`, so a caller passing both wins — the wrapper's whole purpose is
+overridable by accident.
+
+<Callout title="Suggested fix">
+  Fold the one caller onto `checked` and delete the wrapper; keep the formik
+  field, which earns its place.
+</Callout>
+
+## The theme says nothing about it
+
+<Canvas of={CheckboxStories.FindingHandSized} />
+
+`MuiCheckbox` has no entry in the theme at all, so this is Material UI's own look throughout — and
+that is why `styled(Checkbox)` appears six times. Three of those change shape or color: the key
+cell and the trash cell both hand-size it to `height`/`width`, and the filter item overrides
+`color`.
+
+<Callout title="Suggested fix">
+  Decide whether the product wants its own checkbox before those six become
+  twelve. The two hand-sized cells are the same override written twice.
+</Callout>
+
+## Not wrong
+
+All 49 leave `color` alone, which is right. The `small` to default split, 29 against 20, matches
+where they sit — dense rows against forms.

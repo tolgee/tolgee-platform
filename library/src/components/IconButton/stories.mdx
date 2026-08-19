@@ -1,0 +1,85 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as IconButtonStories from './stories';
+
+<Meta of={IconButtonStories} />
+
+# IconButton
+
+<Upstream docs="react-button#icon-button" />
+
+An action with no words — a round hit area around a single glyph. The product uses it **98 times in
+77 files**, which makes it the second most common control after `Button`.
+
+It is not a `Button` with an icon inside. `Button` reserves 64px of width for a label; `IconButton`
+is square, has no minimum width and centres its glyph. If a control has text, it is a `Button`.
+
+## It must say what it does
+
+An icon is not a name. Every icon button needs an accessible one, and there are two ways to give it:
+
+<Canvas of={IconButtonStories.Named} />
+
+**A tooltip**, which is the usual one here — the tooltip's title becomes the button's name, so the
+mouse and the screen reader learn the same thing:
+
+```
+<Tooltip title={t('close')}>
+  <IconButton size="small"><XClose /></IconButton>
+</Tooltip>
+```
+
+**Or `aria-label`**, when there is no tooltip because the meaning is obvious to a sighted user:
+
+```
+<IconButton aria-label={t('open_menu')} size="small"><DotsVertical /></IconButton>
+```
+
+<Callout title="Two in five say nothing" kind="warning">
+  Of the 98 in the product, 14 carry an `aria-label` and 43 get their name from
+  a tooltip. The other **41 have neither** — a screen reader announces "button"
+  and stops. This is the largest single accessibility gap the audit has turned
+  up so far.
+</Callout>
+
+## Size
+
+`small` is the working size — 64 of the 98 use it, and it is what belongs in table rows, toolbars
+and cards. The default is for standalone controls with room around them.
+
+<Canvas of={IconButtonStories.Sizes} />
+
+Keep the glyph at 20px inside `small` and 24px inside the default, per
+**Foundations → Icons**. `large` and `medium` are used seven times between them and should not be.
+
+## Color
+
+Most say nothing and inherit the surrounding text, which is right — the icon is not the point of
+the screen.
+
+<Canvas of={IconButtonStories.Colors} />
+
+Named colors follow the same meanings as on **Button**: `primary` for the action that commits (7
+uses), `error` for destroying something (1), `inherit` inside a banner that already sets a text
+color (7).
+
+## Disabled
+
+<Canvas of={IconButtonStories.Disabled} />
+
+A disabled icon button is a shape with nothing to read — no label, no reason. Keep the tooltip so
+the reason survives.
+
+## Don't
+
+- **Don't ship one without a name.** Tooltip or `aria-label`, always.
+- **Don't put text in it.** That is a `Button`.
+- **Don't build a toggle from two of them.** That is `ToggleButton` — see **ButtonGroup**.
+- **Don't set a size other than `small` or the default.**
+
+## Where the styling lives
+
+`MuiIconButton` in `library/src/theme/getTheme.ts`, and it holds exactly one rule: a
+`brightness(0.9)` filter in dark mode. Everything else is Material UI's. See
+**Foundations → Component styles**.

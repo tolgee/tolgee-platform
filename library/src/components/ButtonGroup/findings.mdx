@@ -1,0 +1,61 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ButtonGroupStories from './stories';
+
+<Meta of={ButtonGroupStories} name="Findings" />
+
+# ButtonGroup — findings
+
+Measured by hand on 2026-08-18 across 11 call sites. A work list: **done when it is empty.**
+
+## Four groups are really toggles
+
+<Canvas of={ButtonGroupStories.FindingToggleByHand} />
+
+The translations header, its compact twin, the tasks header and the translation memory toolbar all
+use `ButtonGroup` to switch between views. A group holds no state, so each one carries it by hand,
+flipping `color` between `primary` and `default`.
+
+None of the four sets `aria-pressed` or `aria-selected`. A screen reader reads two identical
+buttons and never says which view is on — the active state is carried by color alone.
+
+<Callout title="Suggested fix">
+  Replace all four with `ToggleButtonGroup`, which brings the selected state and
+  its ARIA with it.
+</Callout>
+
+## The split button's arrow is written three times
+
+`PromptSaveMenu`, `PromptPreviewMenu` and `ControlsEditorMain` each declare the same component:
+
+```
+const StyledArrowButton = styled(Button)`
+  padding-left: 6px;
+  padding-right: 6px;
+  min-width: unset !important;
+`;
+```
+
+The `!important` is there because a button holding only an arrow is still 64px wide by default.
+
+<Callout title="Suggested fix">
+  One `SplitButton` component with the arrow inside it, and the three copies go
+  away with the `!important`.
+</Callout>
+
+## Five children override the group
+
+<Canvas of={ButtonGroupStories.FindingChildOverride} />
+
+`ButtonGroup` exists to style its children once. Five of them set their own `size` anyway — three
+in the project invitation dialog, two in the organization one.
+
+<Callout title="Suggested fix">
+  Move `size` onto the group and delete it from the children.
+</Callout>
+
+## Not wrong
+
+The four groups that hold genuinely related actions — permission tabs, the storage edit dialog and
+both invitation dialogs — are used exactly as intended. The single `styled(ButtonGroup)`, in the
+theme menu, only sets `min-width`.

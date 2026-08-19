@@ -1,0 +1,86 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as IconButtonStories from './stories';
+
+<Meta of={IconButtonStories} name="Findings" />
+
+# IconButton — findings
+
+Measured by hand on 2026-08-18 across 98 call sites. A work list: **done when it is empty.**
+
+## 41 announce nothing
+
+<Canvas of={IconButtonStories.FindingNoName} />
+
+14 carry an `aria-label`, 43 take their name from a surrounding `Tooltip`. The remaining **41 have
+neither** — a screen reader says "button" and stops. It is the largest single accessibility gap
+found so far, and it is concentrated in dialogs and list rows: `AiPrompt`, `TabBasic`, `LabelItem`,
+`ScreenshotDetail`, `GlobalErrorModal`, `ClipboardCopyInput`, `SearchField`.
+
+<Callout title="Suggested fix">
+  Wrap in a `Tooltip` where a hover hint helps anyway, `aria-label` where it
+  does not.
+</Callout>
+
+## The 40px square is written ten times
+
+<Canvas of={IconButtonStories.FindingHandSizes} />
+
+Twelve components restyle `IconButton`, and ten of them do the same thing: set `height` and `width`
+by hand. In four different values.
+
+| Size    | Times | Where                                                                     |
+| ------- | ----- | ------------------------------------------------------------------------- |
+| 40 × 40 | **6** | notifications, language menu, three avatar menus, floating scroll counter |
+| 38 × 38 | 2     | tasks header, compact translations header                                 |
+| 36 × 36 | 1     | editor controls                                                           |
+| 20 × 20 | 1     | prepared language                                                         |
+
+Six identical copies is not ten accidents — it is a size the theme does not offer, so everyone
+invents it.
+
+<Callout title="Suggested fix">
+  Add the 40px square to the theme as a named size, migrate the six exact
+  matches, and decide whether 38 and 36 are really different or just drift.
+</Callout>
+
+## Two icons mean close
+
+<Canvas of={IconButtonStories.FindingTwoCloseIcons} />
+
+`XClose` is used 36 times and `X` 8 times — inside icon buttons it is 20 against 7. Both draw a
+cross, both mean dismiss.
+
+<Callout title="Suggested fix">
+  Pick `XClose`, retire `X`, and mark it on **Foundations → Icons** so the next
+  person does not reintroduce it.
+</Callout>
+
+## Glyph sizes off the scale
+
+<Canvas of={IconButtonStories.FindingGlyphSizes} />
+
+The scale is 16, 20 and 24. Inside icon buttons: 20px appears 34 times, and then 19, 18, 16, 14 and
+26 appear twelve times between them.
+
+<Callout title="Suggested fix">
+  Move all twelve onto 20px; the ones at 14 and 16 belong in a `small` button
+  rather than at a smaller glyph.
+</Callout>
+
+## Sizes that are not on the scale
+
+<Canvas of={IconButtonStories.FindingSizes} />
+
+`small` 64, default 27 — and then `large` 4 and `medium` 3, which the documentation does not
+describe and nothing else in the product uses.
+
+<Callout title="Suggested fix">
+  Take all seven to `small` or the default.
+</Callout>
+
+## Not wrong
+
+Recorded so nobody re-checks it: 83 of the 98 name no color at all, which is right, and the ten
+layout-only restyles (`margin` on filter and search selects, `position` in the tools panel) fight
+nothing.

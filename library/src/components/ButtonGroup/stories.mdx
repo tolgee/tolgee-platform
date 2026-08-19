@@ -1,0 +1,102 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ButtonGroupStories from './stories';
+
+<Meta of={ButtonGroupStories} />
+
+# ButtonGroup
+
+<Upstream docs="react-button-group" />
+
+Material UI's own line is short: _"The ButtonGroup component can be used to group related
+buttons."_ It joins the borders, drops the gap between them and passes `variant`, `color`, `size`
+and `disabled` down to every child, so the group is styled once instead of button by button.
+
+It carries no state. A group does not know which of its buttons is on — that is the difference that
+matters below.
+
+## Related actions
+
+Buttons that belong to the same decision, sharing one visual block.
+
+<Canvas of={ButtonGroupStories.RelatedActions} />
+
+Four places in Tolgee use it this way: the permission tabs, the storage edit dialog, and both
+invitation dialogs. Props go on the group, not the children:
+
+```
+<ButtonGroup size="small" disabled={disabled}>
+  <Button>Members</Button>
+  <Button>Invitations</Button>
+</ButtonGroup>
+```
+
+## Split button
+
+One action plus a narrow arrow that opens the alternatives. Material UI documents this as its own
+pattern: _"ButtonGroup can also be used to create a split button. The dropdown can change the button
+action or be used to immediately trigger a related action."_
+
+<Canvas of={ButtonGroupStories.SplitButton} />
+
+Three places use it — saving an AI prompt, previewing one, and the translation editor's main
+action. All three are built the same way, and all three need the same local override, because a
+button that holds only an arrow is still 64px wide by default:
+
+```
+<ButtonGroup variant="contained" color="primary" size="small">
+  <LoadingButton onClick={save}>Save</LoadingButton>
+  <StyledArrowButton onClick={openMenu}><ArrowDropDown /></StyledArrowButton>
+</ButtonGroup>
+```
+
+```
+const StyledArrowButton = styled(Button)`
+  padding-left: 6px;
+  padding-right: 6px;
+  min-width: unset !important;
+`;
+```
+
+<Callout title="The arrow button is written three times">
+  Same twelve lines in `PromptSaveMenu`, `PromptPreviewMenu` and
+  `ControlsEditorMain`. It is a split button, and the product has three of them
+  — so it should be one component, not three copies with an `!important` each.
+</Callout>
+
+## What it is not: a view switch
+
+<Canvas of={ButtonGroupStories.ViewSwitch} />
+
+Four places use `ButtonGroup` to switch between views — the translations header and its compact
+twin, the tasks header and the translation memory toolbar. They work, but the group has no notion of
+a selected button, so each one carries the state by hand, flipping `color` between `primary` and
+`default`.
+
+<Callout title="Use ToggleButtonGroup for this" kind="warning">
+  `ToggleButtonGroup` exists for exactly this and brings the selected state with
+  it, including `aria-pressed`. None of the four hand-built switches sets it, so
+  a screen reader reads two identical buttons and never says which view is on.
+  See **Button → Findings**.
+</Callout>
+
+## Size
+
+`small` and the default, same scale as Button. Set it on the group — a child that sets its own
+breaks the shared border.
+
+<Canvas of={ButtonGroupStories.Sizes} />
+
+## Don't
+
+- **Don't put unrelated actions in one group.** Joined borders promise the buttons belong together.
+- **Don't set `variant` or `size` on the children.** They come from the group; a child that
+  disagrees splits the block visually.
+- **Don't build a toggle out of it.** That is `ToggleButtonGroup`.
+
+## Where the styling lives
+
+Nowhere of ours. `MuiButtonGroup` has no entry in the theme — the group inherits whatever `MuiButton`
+defines, which is why the joined corners follow the `borderRadius: 3` set there. See
+**Foundations → Component styles**.

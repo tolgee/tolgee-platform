@@ -1,0 +1,67 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FabStories from './stories';
+
+<Meta of={FabStories} />
+
+# Fab
+
+<Upstream docs="react-floating-action-button" />
+
+A round, raised button that floats above the page instead of sitting in the layout. The product has
+**exactly one**, and it is on every screen: the help button in the bottom-left corner.
+
+<Canvas of={FabStories.Help} />
+
+One occurrence would normally mean "delete it or make it a pattern". This one earns its place for a
+different reason — it is permanent. It follows you through every view, so it is the one control a
+user always knows where to find, and that is precisely what a floating action button is for.
+
+## How it is built
+
+```
+const StyledHelpButton = styled('div')`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.fab};
+  bottom: 15px;
+  left: 10px;
+`;
+
+<Tooltip title={t('help_menu_tooltip')}>
+  <StyledHelpButton onClick={handleOpen} id="help-button">
+    <Fab color="primary" size="small"><HelpCircle /></Fab>
+  </StyledHelpButton>
+</Tooltip>
+```
+
+The positioning sits on a wrapper rather than on the Fab, which is reasonable — `Fab` styles a
+button, it does not place it. `theme.zIndex.fab` is Material UI's own scale, so the button stacks
+correctly against dialogs and menus without a hand-picked number.
+
+<Callout title="The click and the name are on the wrapper, not the button" kind="warning">
+  `onClick` sits on the `div`, and the tooltip wraps the `div` too — so the accessible name lands on
+  an element that is not a button, and the real `<button>` inside has none. A screen reader reaching
+  it announces "button" and stops. Moving `onClick` and the tooltip onto the `Fab` fixes both at
+  once and loses nothing.
+</Callout>
+
+## Size
+
+<Canvas of={FabStories.Sizes} />
+
+`small` is what the product uses — 40px, which matches the default Button height, so the floating
+button is the same weight as an ordinary action. `medium` and `large` exist and are not used.
+
+## Don't
+
+- **Don't add a second one.** Two floating buttons compete for the same corner and neither reads as
+  the persistent one. If a screen needs its own action, it belongs in the layout.
+- **Don't use it for a screen-specific action.** A Fab promises "available everywhere".
+- **Don't position it with a hand-picked `z-index`.** `theme.zIndex.fab` already exists.
+
+## Where the styling lives
+
+`MuiFab` in `library/src/theme/getTheme.ts`, and it holds one rule: a `brightness(0.9)` filter on
+the primary variant in dark mode — the same blunt trick used on `MuiIconButton`. See
+**Foundations → Component styles**.
