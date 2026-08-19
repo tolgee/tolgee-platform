@@ -269,6 +269,12 @@ jobs:
         with:
           java: "false"
 
+      # The addon is a file: dependency whose dist/ is gitignored, so nothing on a fresh
+      # checkout provides the types that library/.storybook/preview.tsx imports.
+      - name: Build Storybook addon
+        run: npm ci && npm run build
+        working-directory: ./storybook-tolgee-addon
+
       - name: Install library dependencies
         run: npm ci
         working-directory: ./library
