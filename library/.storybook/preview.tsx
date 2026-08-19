@@ -41,7 +41,7 @@ const preview: Preview = {
           'Components',
           [
             'Buttons',
-            ['Button', 'IconButton', 'ButtonGroup', 'Fab'],
+            ['Button', 'IconButton', 'ButtonGroup', 'ToggleButton', 'Fab'],
             'Forms',
             ['TextField', 'Checkbox'],
             '*',

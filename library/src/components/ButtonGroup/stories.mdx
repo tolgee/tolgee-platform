@@ -22,8 +22,8 @@ Buttons that belong to the same decision, sharing one visual block.
 
 <Canvas of={ButtonGroupStories.RelatedActions} />
 
-Four places in Tolgee use it this way: the permission tabs, the storage edit dialog, and both
-invitation dialogs. Props go on the group, not the children:
+**No place in Tolgee uses it this way.** Of the twelve groups in the product, three are split
+buttons and nine are toggles wearing a group. Props go on the group, not the children:
 
 ```
 <ButtonGroup size="small" disabled={disabled}>
@@ -65,20 +65,22 @@ const StyledArrowButton = styled(Button)`
   — so it should be one component, not three copies with an `!important` each.
 </Callout>
 
-## What it is not: a view switch
+## What it is not: a toggle
 
 <Canvas of={ButtonGroupStories.ViewSwitch} />
 
-Four places use `ButtonGroup` to switch between views — the translations header and its compact
-twin, the tasks header and the translation memory toolbar. They work, but the group has no notion of
-a selected button, so each one carries the state by hand, flipping `color` between `primary` and
-`default`.
+Nine places use `ButtonGroup` to switch between options — list or table, flat or stacked, e-mail or
+link, light or dark. They work, but the group has no notion of a selected child, so each one carries
+the state by hand, flipping `color` between `primary` and `default`.
+
+`ToggleButtonGroup` is not a mode of this component — it is a separate one, built straight on
+`ButtonBase` the same way `Button` is. Reach for it and the group keeps the selection itself.
 
 <Callout title="Use ToggleButtonGroup for this" kind="warning">
-  `ToggleButtonGroup` exists for exactly this and brings the selected state with
-  it, including `aria-pressed`. None of the four hand-built switches sets it, so
-  a screen reader reads two identical buttons and never says which view is on.
-  See **Button → Findings**.
+  It brings the selected state with it, including `aria-pressed`. Not one of the
+  nine hand-built groups sets that, so a screen reader reads identical buttons
+  and never says which option is on. **ToggleButton** carries the list and the
+  fix.
 </Callout>
 
 ## Size

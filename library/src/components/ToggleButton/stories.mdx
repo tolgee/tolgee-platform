@@ -1,0 +1,107 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ToggleButtonStories from './stories';
+
+<Meta of={ToggleButtonStories} />
+
+# ToggleButton
+
+<Upstream docs="react-toggle-button" />
+
+A button that stays down. Material UI's own line: _"Toggle buttons can be used to group related
+options."_ The difference from `Button` is not how it looks — it is that the component **holds a
+state and says so**, in the markup, where software other than the eye can read it.
+
+It is a sibling of `Button`, not a variant of it: both are built on `ButtonBase`, and
+`ToggleButtonGroup` is its own component rather than a mode of **ButtonGroup**. A group styles its
+children; a toggle group also remembers which one is on.
+
+The product has fifteen of these. **Two use this component.**
+
+## Segmented — one of N
+
+<Canvas of={ToggleButtonStories.Segmented} />
+
+A row where exactly one option is on: list or table, flat or stacked, e-mail or link. Put the
+options in a `ToggleButtonGroup` with `exclusive`, and the group keeps them mutually exclusive:
+
+```
+<ToggleButtonGroup value={view} exclusive onChange={(_, v) => v && setView(v)}>
+  <ToggleButton value="LIST" aria-label={t('view_list')}><LayoutLeft /></ToggleButton>
+  <ToggleButton value="TABLE" aria-label={t('view_table')}><LayoutGrid02 /></ToggleButton>
+</ToggleButtonGroup>
+```
+
+The `v &&` guard is not decoration. Clicking the active option fires `onChange` with `null`, and
+without the guard the row ends up with nothing selected.
+
+<Canvas of={ToggleButtonStories.ThreeOptions} />
+
+Three options work the same way. A label may be an icon or a word; an icon-only option needs an
+`aria-label`, exactly as on **IconButton**.
+
+## Icon toggle — on and off
+
+<Canvas of={ToggleButtonStories.IconToggle} />
+
+One control that flips a single thing: show the code, mark the task done. Same component, no group:
+
+```
+<ToggleButton value="code" selected={showCode} onChange={() => setShowCode(!showCode)}>
+  <Code01 />
+</ToggleButton>
+```
+
+## The state belongs in the markup
+
+This is the whole reason to reach for the component. Read from Material UI 5.16.0's own source:
+`ToggleButton` renders **`aria-pressed`** from its `selected` prop, and `ToggleButtonGroup` renders
+**`role="group"`**. A button that only changes color announces nothing — the name a screen reader
+reads is identical whether the option is on or off.
+
+<Callout title="Changing the label instead is not the fix" kind="warning">
+  Swapping the tooltip between _Show code_ and _Hide code_ does tell a screen
+  reader something changed, and it is better than silence. But the name of a
+  control is meant to be stable — it is how someone refers to it and finds it
+  again. State goes in `aria-pressed`, name stays put.
+</Callout>
+
+## When it is not a toggle
+
+<Canvas of={ToggleButtonStories.NotEveryPairIsAToggle} />
+
+Three controls that look alike in a toolbar and are three different things:
+
+| It is                | When                                          | Use                            |
+| -------------------- | --------------------------------------------- | ------------------------------ |
+| a **toggle**         | the same click turns it back off              | `ToggleButton`, `aria-pressed` |
+| a **one-way action** | it moves something forward and cannot undo it | `Button` / `IconButton`        |
+| a **disclosure**     | it opens and closes a region on the page      | `IconButton` + `aria-expanded` |
+
+The translation cell holds all three. `StateTransitionButtons` advances the translation to its next
+state and never comes back — a plain button, and correct as it is. The import screen's chevron opens
+a row; that is `aria-expanded`, not `aria-pressed`.
+
+## Size
+
+`small` and the default, the same scale as Button. Set it on the group.
+
+## Don't
+
+- **Don't build a toggle from `ButtonGroup` and `color`.** The group has no notion of a selected
+  child, so the state exists only as a shade.
+- **Don't leave an icon-only toggle unnamed.** `aria-label`, or a `Tooltip` around it.
+- **Don't use it for an action that cannot be undone.** That is a button.
+- **Don't let a group end up with nothing selected** — guard the `null` from `onChange`.
+
+## Where the styling lives
+
+Nowhere of ours, and that is a problem rather than a note.
+
+<Canvas of={ToggleButtonStories.FindingNoThemeEntry} />
+
+`MuiToggleButton` has no entry in `library/src/theme/getTheme.ts`, so the component renders Material
+UI's defaults and does not match the buttons beside it. The `default` color the product uses
+everywhere is augmented onto `Button` only — `ToggleButton` will not accept it. Both need fixing
+before the thirteen hand-built toggles can move over; see **Findings**.

@@ -6,23 +6,7 @@ import * as ButtonGroupStories from './stories';
 
 # ButtonGroup — findings
 
-Measured by hand on 2026-08-18 across 11 call sites. A work list: **done when it is empty.**
-
-## Four groups are really toggles
-
-<Canvas of={ButtonGroupStories.FindingToggleByHand} />
-
-The translations header, its compact twin, the tasks header and the translation memory toolbar all
-use `ButtonGroup` to switch between views. A group holds no state, so each one carries it by hand,
-flipping `color` between `primary` and `default`.
-
-None of the four sets `aria-pressed` or `aria-selected`. A screen reader reads two identical
-buttons and never says which view is on — the active state is carried by color alone.
-
-<Callout title="Suggested fix">
-  Replace all four with `ToggleButtonGroup`, which brings the selected state and
-  its ARIA with it.
-</Callout>
+Measured across `webapp/src` on 2026-08-19, 12 call sites. A work list: **done when it is empty.**
 
 ## The split button's arrow is written three times
 
@@ -56,6 +40,11 @@ in the project invitation dialog, two in the organization one.
 
 ## Not wrong
 
-The four groups that hold genuinely related actions — permission tabs, the storage edit dialog and
-both invitation dialogs — are used exactly as intended. The single `styled(ButtonGroup)`, in the
-theme menu, only sets `min-width`.
+The three split buttons are the component used as documented. The single `styled(ButtonGroup)`, in
+the theme menu, only sets `min-width`.
+
+Worth noticing what is absent: **no group in the product holds plain related actions.** Twelve call
+sites, three split buttons, nine toggles. The use `ButtonGroup` is actually for does not appear.
+
+The nine toggles are a defect, but not this page's — they are counted, located and fixed on
+**ToggleButton → Findings**, so the work is ticked off once rather than twice.

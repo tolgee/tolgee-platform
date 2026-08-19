@@ -67,9 +67,7 @@ export const FindingNoName = {
     <Box sx={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>
       <Box>
         <Checkbox size="small" defaultChecked />
-        <Box sx={{ typography: 'caption', color: 'error.main' }}>
-          bare · 38 places
-        </Box>
+        <Box sx={{ typography: 'caption', color: 'error.main' }}>bare</Box>
       </Box>
       <Box>
         <FormControlLabel
@@ -77,7 +75,7 @@ export const FindingNoName = {
           label="Reviewed"
         />
         <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
-          labelled · 11 places
+          labelled
         </Box>
       </Box>
     </Box>

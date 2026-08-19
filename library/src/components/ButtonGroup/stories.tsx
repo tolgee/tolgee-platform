@@ -1,11 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
+import { Box, Button, ButtonGroup } from '@mui/material';
 import { ArrowDown, LayoutGrid02, LayoutLeft } from '../../icons';
 
 const meta = {
@@ -75,41 +69,6 @@ export const Sizes = {
   ),
 } satisfies Story;
 
-/** Left: the state carried by hand. Right: the component that carries it. */
-export const FindingToggleByHand = {
-  args: {},
-  render: () => (
-    <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
-      <Box>
-        <ButtonGroup>
-          <Button color="primary" sx={{ px: 1 }}>
-            <LayoutLeft width={20} height={20} />
-          </Button>
-          <Button sx={{ px: 1 }}>
-            <LayoutGrid02 width={20} height={20} />
-          </Button>
-        </ButtonGroup>
-        <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
-          ButtonGroup + color · no aria-pressed · 4 places
-        </Box>
-      </Box>
-      <Box>
-        <ToggleButtonGroup value="list" exclusive size="small">
-          <ToggleButton value="list" aria-label="List view">
-            <LayoutLeft width={20} height={20} />
-          </ToggleButton>
-          <ToggleButton value="table" aria-label="Table view">
-            <LayoutGrid02 width={20} height={20} />
-          </ToggleButton>
-        </ToggleButtonGroup>
-        <Box sx={{ typography: 'caption', color: 'text.secondary', mt: 0.5 }}>
-          ToggleButtonGroup · aria-pressed included · 1 place
-        </Box>
-      </Box>
-    </Box>
-  ),
-} satisfies Story;
-
 /** A child that sets its own size breaks the shared block. */
 export const FindingChildOverride = {
   args: {},
@@ -121,7 +80,7 @@ export const FindingChildOverride = {
           <Button>Copy link</Button>
         </ButtonGroup>
         <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
-          size on the child · 5 places
+          size on the child
         </Box>
       </Box>
       <Box>

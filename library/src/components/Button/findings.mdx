@@ -76,22 +76,14 @@ highlights. Three copies of one shape is a variant, not three accidents.
   with it.
 </Callout>
 
-## Toggles are built two ways, and the common one is the worse one
+## Toggles are built out of Button, and lose their state on the way
 
-The view switcher in Translations, its compact twin and the tasks header all build a toggle by hand:
-`ButtonGroup` wrapping `styled(Button)`, with `color` flipped between `primary` and `default` to
-show which one is on.
+Nine places in the product build a toggle by hand — `ButtonGroup` wrapping `Button`, with `color`
+flipped between `primary` and `default` to show which option is on. Four more do it with a single
+`IconButton`, including the editor's code switch.
 
-Material UI has `ToggleButton` for exactly this, and it is used — once, in Translation memory.
-
-The hand-built version signals the active state **with color alone**. None of the three sets
-`aria-pressed` or `aria-selected`, so a screen reader announces two identical buttons and never says
-which view you are in. That is a real defect, not a style preference.
-
-<Callout title="Suggested fix">
-  Swap the three hand-built toggles for `ToggleButtonGroup`, which brings the
-  selected state with it.
-</Callout>
+Counted, located and drawn on **ToggleButton → Findings**, together with the theme work the fix
+needs first. It is one defect with one cause, so it lives on one page rather than three.
 
 ## Red on a non-destructive action
 

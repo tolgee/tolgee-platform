@@ -75,7 +75,7 @@ export const FindingNoTitle = {
           </IconButton>
         </Tooltip>
         <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
-          empty title · 3 places
+          empty title
         </Box>
       </Box>
       <Box sx={{ textAlign: 'center' }}>

@@ -1,0 +1,124 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ToggleButtonStories from './stories';
+
+<Meta of={ToggleButtonStories} name="Findings" />
+
+# ToggleButton — findings
+
+Measured across `webapp/src` on 2026-08-19 by parsing every JSX element and reading only its
+top-level attributes — 8,867 elements. A work list: **done when it is empty.**
+
+## `aria-pressed` appears zero times
+
+Not once in the whole of `webapp/src`. Neither does `aria-selected` outside the menus, where
+Material UI writes it for us. Fifteen controls in the product turn on and off, and **none of them
+says so** to anything but the eye.
+
+`aria-expanded` appears once, in `ProjectTotals`.
+
+This is the finding the rest of the page is made of, and the reason to fix it is not tidiness: a
+toolbar of icon buttons where the active one differs only in color is unreadable to a screen reader
+and to anyone who cannot separate the two shades.
+
+## Nine segmented toggles built by hand
+
+<Canvas of={ToggleButtonStories.FindingSegmentedByHand} />
+
+Every one is a `ButtonGroup` holding `Button`s whose `color` flips between `primary` and `default`.
+
+| Where                         | Options                | Buttons |
+| ----------------------------- | ---------------------- | ------- |
+| `TranslationControls`         | list / table           | 2       |
+| `TranslationControlsCompact`  | list / table           | 2       |
+| `TasksHeaderBig`              | list / board           | 2       |
+| `TmEntriesToolbar`            | flat / stacked         | 2       |
+| `PermissionsSettings`         | basic / advanced       | 2       |
+| `StorageEditDialog`           | S3 / Azure             | 2       |
+| `InviteDialog` (organization) | e-mail / link          | 2       |
+| `InviteDialog` (project)      | e-mail / link / agency | 3       |
+| `ThemeItem`                   | light / dark / system  | 3       |
+
+Twenty buttons in nine groups. Three of them wrap the buttons in a `styled(Button)` named
+`StyledToggleButton` — a name that says what was wanted and a component that is not it.
+
+<Callout title="Suggested fix">
+  `ToggleButtonGroup` with `exclusive`, which brings `aria-pressed` and
+  `role="group"` with it. Guard the `null` that `onChange` sends when the active
+  option is clicked again. Do the theme entry below first, or the nine groups
+  will stop matching the buttons around them.
+</Callout>
+
+## Four icon toggles carried by color
+
+<Canvas of={ToggleButtonStories.FindingIconByColor} />
+
+| Where                 | Flips               | Off state   |
+| --------------------- | ------------------- | ----------- |
+| `ControlsEditorSmall` | placeholders / code | `default`   |
+| `ControlsEditorSmall` | task done           | `primary`   |
+| `ControlsTranslation` | task done           | `undefined` |
+| `AiResult`            | translation / raw   | `undefined` |
+
+All four flip a boolean — `onClick={() => onTaskStateChange(!task?.done)}` — so they are toggles by
+behavior, whatever they are built from. Three different values stand for _off_ across four call
+sites, and in `ControlsTranslation` the color is a nested ternary carrying assignment as well as
+state.
+
+These four do better than the nine above in one respect: their tooltip changes with the state, so
+something is announced. But it is the **name** that changes, not the state, which is the pattern to
+avoid — a control people refer to by name should keep it.
+
+<Callout title="Suggested fix">
+  `ToggleButton` with `selected`, and a tooltip that stops rewording itself.
+  Settle on one representation of _off_ while you are in there.
+</Callout>
+
+## The theme has no entry for it, so the fix does not land cleanly
+
+<Canvas of={ToggleButtonStories.FindingNoThemeEntry} />
+
+`getTheme.ts` styles `MuiButton`, `MuiIconButton` and `MuiFab`. There is **no `MuiToggleButton`**,
+so the component renders Material UI's defaults — different corner, different grey, different
+selected background from anything else in the product.
+
+`augmentation.ts` adds the `default` and `contrast` colors to `ButtonPropsColorOverrides` — for
+`Button` only. `ToggleButton` has its own override interface and did not get them, so the color the
+nine hand-built toggles use today will not compile on the component meant to replace them.
+
+<Callout title="Suggested fix">
+  This one comes first. Add `MuiToggleButton` to the theme so a toggle looks
+  like our buttons, and extend the augmentation to
+  `ToggleButtonPropsColorOverrides`. Until both exist, every migration above
+  trades an accessibility bug for a visual one.
+</Callout>
+
+## A component called ToggleButton that is not one
+
+`ImportConflictTranslation` defines `const StyledToggleButton = styled(IconButton)` and uses it for
+the chevron that expands a row. Expanding is not pressing: the right attribute is `aria-expanded`,
+and it is missing too.
+
+<Canvas of={ToggleButtonStories.NotEveryPairIsAToggle} />
+
+<Callout title="Suggested fix">
+  Rename it — it is a disclosure button — and give it `aria-expanded`.
+</Callout>
+
+## `ButtonGroupRouterItem` has no callers
+
+`component/common/ButtonGroupRouter.tsx` exports a `Button` that colors itself `primary` when the
+current route matches. Nothing imports it. It is the same hand-built toggle as the nine above,
+waiting to be copied.
+
+<Callout title="Suggested fix">Delete it.</Callout>
+
+## Not wrong
+
+Two places use the real component. `TranslationMemoriesListView` has a proper
+`ToggleButtonGroup` with three `ToggleButton`s — the only fully correct toggle in the product.
+`WeaponSelector` maps `ToggleButton` over the integration guides with `selected`, so each button
+gets its `aria-pressed`; it is missing only the group wrapper, and so `role="group"`.
+
+Both had to override the styling by hand, which is the theme gap above rather than a fault of
+theirs.
