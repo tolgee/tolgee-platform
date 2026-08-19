@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FlagImage } from '.';
 
 const meta = {
+  title: 'Components/Languages/FlagImage',
   component: FlagImage,
   parameters: {
     layout: 'centered',

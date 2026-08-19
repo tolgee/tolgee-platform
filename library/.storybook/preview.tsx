@@ -38,7 +38,8 @@ const preview: Preview = {
             'Radius and elevation',
             'Component styles',
           ],
-          'components',
+          'Components',
+          ['Buttons', ['Button', 'IconButton', 'ButtonGroup', 'Fab'], '*'],
           '*',
         ],
       },
@@ -47,6 +48,10 @@ const preview: Preview = {
     docs: {
       container: DocsContainer,
       toc: { headingSelector: 'h2, h3' },
+      // Every story here is a `render` function with no args, so Storybook has nothing to
+      // serialize and the code panel opens empty. Hide the control rather than promise a
+      // snippet that never arrives; the MDX pages quote real call sites instead.
+      canvas: { sourceState: 'none' },
     },
     backgrounds: { disable: true },
   },

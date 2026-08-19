@@ -18,7 +18,13 @@ const branchName = () => {
 
 export default {
   staticDirs: ['./assets'],
-  stories: ['../src/**/stories.@(js|jsx|ts|tsx)', '../src/**/*.@(md|mdx)'],
+  // Order matters and storySort does not reach docs entries: the main page first, then any
+  // further docs pages attached to the same component, then the stories themselves.
+  stories: [
+    '../src/**/stories.@(md|mdx)',
+    '../src/**/*.@(md|mdx)',
+    '../src/**/stories.@(js|jsx|ts|tsx)',
+  ],
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-a11y',

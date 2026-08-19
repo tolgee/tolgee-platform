@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MfaBadge } from '.';
 
 const meta = {
+  title: 'Components/MfaBadge',
   component: MfaBadge,
   parameters: {
     layout: 'centered',
