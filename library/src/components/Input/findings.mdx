@@ -27,7 +27,7 @@ decisions that 64 files never get, because they reach past it.
   the two the way in and migrate the rest.
 </Callout>
 
-## A typo nobody sees
+## A typo nobody sees, in two places
 
 `tg.component/common/TextField` styles its label with:
 
@@ -36,13 +36,25 @@ font-size: 14px;
 font-weight: 500px;
 ```
 
-`500px` is not a font weight. The browser drops the declaration, so every label rendered through
-that wrapper is at the default weight rather than the intended medium — in 15 files, since the day
-it was written.
+`500px` is not a font weight. The browser drops the declaration, so the label renders at the default
+400 rather than the intended medium.
+
+It does not stop at TextField. `common/Select` imports the very same `StyledInputLabel`, and both
+wrappers are in turn wrapped by their formik versions — so the broken label reaches **66 files**:
+
+| Through                 | Files |
+| ----------------------- | ----- |
+| `common/TextField`      | 15    |
+| `form/fields/TextField` | 39    |
+| `common/Select`         | 8     |
+| `form/fields/Select`    | 4     |
+
+`common/Switch` has its own copy of the same mistake, `font-weight: 400px`. That one happens to be
+invisible — the fallback is 400 anyway — which is exactly why it survived.
 
 <Callout title="Suggested fix">
-  `font-weight: 500`. Check the labels still look right afterwards, because the
-  product has been living with the unstyled version.
+  `font-weight: 500` in the shared label and `400` in Switch. Expect the labels
+  to change weight where they should have been medium all along.
 </Callout>
 
 ## Five search fields, one of them shared
