@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import remarkGfm from 'remark-gfm';
 import type { StorybookConfig } from '@storybook/react-vite';
 
 const muiVersion = () =>
@@ -30,7 +31,16 @@ export default {
     '../src/**/stories.@(js|jsx|ts|tsx)',
   ],
   addons: [
-    '@storybook/addon-docs',
+    {
+      // MDX 3 has no tables of its own — they are a GitHub-flavored extension. Without this
+      // every table in the docs renders as a run-on paragraph.
+      name: '@storybook/addon-docs',
+      options: {
+        mdxPluginOptions: {
+          mdxCompileOptions: { remarkPlugins: [remarkGfm] },
+        },
+      },
+    },
     '@storybook/addon-a11y',
     '@storybook/addon-themes',
     '@tolgee/storybook-addon',
