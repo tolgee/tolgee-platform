@@ -1,16 +1,16 @@
 import { Canvas, Meta } from '@storybook/addon-docs/blocks';
 import { Callout } from '../../../.storybook/docs/Callout';
-import * as InputStories from './stories';
+import * as TextFieldStories from './stories';
 
-<Meta of={InputStories} name="Findings" />
+<Meta of={TextFieldStories} name="Findings" />
 
-# Input — findings
+# TextField — findings
 
 Measured by hand on 2026-08-18 across 100 call sites. A work list: **done when it is empty.**
 
 ## One field, four shapes
 
-<Canvas of={InputStories.FindingThreeShapes} />
+<Canvas of={TextFieldStories.FindingThreeShapes} />
 
 Every one of the 100 call sites, classified by where its `TextField` comes from and what it renders:
 
@@ -31,7 +31,7 @@ So 63 fields go through the wrapper and come out as an outlined box; 22 do not.
 
 ## The wrapper states the standard but does not hold it
 
-<Canvas of={InputStories.FindingOverridable} />
+<Canvas of={TextFieldStories.FindingOverridable} />
 
 `common/TextField` sets `variant="outlined"` and `size="small"` — and then spreads the caller's
 props after them:

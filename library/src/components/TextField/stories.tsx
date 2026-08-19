@@ -12,7 +12,7 @@ import {
 import { SearchSm, XClose } from '../../icons';
 
 const meta = {
-  title: 'Components/Inputs/Input',
+  title: 'Components/Forms/TextField',
   component: TextField,
   parameters: {
     layout: 'centered',

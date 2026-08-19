@@ -1,11 +1,11 @@
 import { Canvas, Meta } from '@storybook/addon-docs/blocks';
 import { Upstream } from '../../../.storybook/docs/Upstream';
 import { Callout } from '../../../.storybook/docs/Callout';
-import * as InputStories from './stories';
+import * as TextFieldStories from './stories';
 
-<Meta of={InputStories} />
+<Meta of={TextFieldStories} />
 
-# Input
+# TextField
 
 <Upstream docs="react-text-field" />
 
@@ -15,7 +15,7 @@ only an underline. Neither is the shape this product uses.
 
 ## The Tolgee field
 
-<Canvas of={InputStories.TheStandard} />
+<Canvas of={TextFieldStories.TheStandard} />
 
 Three rules, and they hold for every kind of field — text, select, date:
 
@@ -51,7 +51,7 @@ change worth deciding on rather than slipping in.
 
 ## One model, and two that are not options
 
-<Canvas of={InputStories.TheOnlyModel} />
+<Canvas of={TextFieldStories.TheOnlyModel} />
 
 **The product has one field.** The other two shapes exist in the codebase, and both are defects
 rather than choices:
@@ -66,21 +66,21 @@ counted and located on **Findings**.
 
 ## Messages under the field
 
-<Canvas of={InputStories.WithAMessage} />
+<Canvas of={TextFieldStories.WithAMessage} />
 
 `helperText` carries the hint and switches to the error when the field is rejected. It is the same
 line either way, and the 64px reserve is what keeps the form still when it appears.
 
 ## Long text
 
-<Canvas of={InputStories.Multiline} />
+<Canvas of={TextFieldStories.Multiline} />
 
 `multiline` with `minRows` — give it a starting height rather than one line, or the form jumps as
 soon as anyone types.
 
 ## Search
 
-<Canvas of={InputStories.Search} />
+<Canvas of={TextFieldStories.Search} />
 
 A search field is this component with a magnifier in front, a clear button behind and a debounce.
 It has no label above, because the magnifier and the placeholder already say what it is:
