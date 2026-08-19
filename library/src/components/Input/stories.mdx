@@ -97,7 +97,8 @@ than assembling the adornments again.
 | a search box             | `tg.component/common/form/fields/SearchField` |
 
 **Not `TextField` from `@mui/material`.** It gives you the floating label and none of the rules
-above. Twenty call sites do it anyway — see Findings.
+above. 63 of the 100 fields go through the wrapper; the other 37 are on the Inventory page, with
+the 22 that come out the wrong shape marked.
 
 ## Don't
 

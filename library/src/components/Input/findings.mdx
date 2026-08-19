@@ -8,24 +8,25 @@ import * as InputStories from './stories';
 
 Measured by hand on 2026-08-18 across 100 call sites. A work list: **done when it is empty.**
 
-## One field, three shapes
+## One field, four shapes
 
 <Canvas of={InputStories.FindingThreeShapes} />
 
-The product's shape is the label above an outlined box. Counting all 100 call sites by where their
-`TextField` is imported from:
+Every one of the 100 call sites, classified by where its `TextField` comes from and what it renders:
 
-| Shape                        | Call sites | How it happens                                              |
-| ---------------------------- | ---------- | ----------------------------------------------------------- |
-| **label above the field**    | **74**     | through `common/TextField` or the formik field              |
-| underline, no box            | 21         | `variant="standard"` passed at the call site                |
-| label floating in the border | 6          | Material UI's `TextField` imported directly, with a `label` |
+| Shape                                | Call sites |                               |
+| ------------------------------------ | ---------- | ----------------------------- |
+| **label above an outlined box**      | **53**     | the standard                  |
+| no label, through the wrapper        | 10         | fine — search boxes and cells |
+| no label, straight from Material UI  | 15         | fine, but outside the wrapper |
+| **underline** (`variant="standard"`) | **21**     | not the product's field       |
+| **floating label**                   | **1**      | not the product's field       |
 
-The remaining call sites have no label at all, which is right for search boxes and table cells.
+So 63 fields go through the wrapper and come out as an outlined box; 22 do not.
 
 <Callout title="Suggested fix">
-  Take the 21 underlined fields to the standard, then the 6 floating ones — the
-  second group also has to move off the direct Material UI import.
+  The 21 underlined fields first — they are concentrated in eleven files and
+  listed on the Inventory page. The single floating label after that.
 </Callout>
 
 ## The wrapper states the standard but does not hold it

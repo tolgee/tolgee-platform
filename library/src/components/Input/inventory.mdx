@@ -27,7 +27,7 @@ the same thing, are the ones to settle.
 <Sample
   name="The standard"
   where="Most forms — task creation, project settings, member invites"
-  built="common/TextField · form/fields/TextField · 74 call sites"
+  built="common/TextField · form/fields/TextField · 63 call sites"
 >
   <Field label="Task name (optional)">
     <TextField size="small" placeholder="Task" fullWidth />
@@ -37,7 +37,7 @@ the same thing, are the ones to settle.
 <Sample
   name="Floating label"
   where="Scattered — wherever TextField was imported from @mui/material"
-  built="@mui/material directly · 6 call sites"
+  built="@mui/material directly · 1 call site"
   problem="Not the product's shape: the label moves and shrinks when the field fills."
 >
   <TextField size="small" fullWidth label="Task name" />
@@ -167,6 +167,83 @@ the same thing, are the ones to settle.
 nothing with the components above. Four `<input type="file">` elements sit hidden under their own
 UI in the file dropzone, the avatar picker, the import screen and the key cell. Neither group is a
 field in the sense this page means.
+
+## Every occurrence to fix
+
+The samples above say what is wrong. This is where each one lives.
+
+### Underline instead of a box — 21 in 11 files
+
+Fix: delete `variant="standard"`. Eleven of these go through the formik field, whose own default is
+already `outlined` — so removing the prop is the whole change.
+
+| File                                                             |     |
+| ---------------------------------------------------------------- | --- |
+| `views/organizations/sso/CreateProviderSsoForm.tsx`              | 5   |
+| `component/languages/LanguageModifyFields.tsx`                   | 3   |
+| `views/organizations/components/OrganizationFields.tsx`          | 3   |
+| `component/SensitiveOperationAuthDialog.tsx`                     | 2   |
+| `views/projects/project/components/ProjectTransferModal.tsx`     | 2   |
+| `component/common/ConfirmationDialog.tsx`                        | 1   |
+| `ee/developer/webhook/WebhookEditDialog.tsx`                     | 1   |
+| `views/organizations/members/InviteDialog.tsx`                   | 1   |
+| `views/projects/developer/contentDelivery/CdDialog.tsx`          | 1   |
+| `views/projects/developer/contentDelivery/CdStorageSelector.tsx` | 1   |
+| `views/projects/members/component/InviteDialog.tsx`              | 1   |
+
+### Floating label — 1
+
+`component/security/ResetPasswordView.tsx`. Fix: import the field from
+`tg.component/common/form/fields/TextField` and let the label sit above.
+
+### Search fields that rebuild the shared one — 3
+
+| File                                                        | Fix                                                        |
+| ----------------------------------------------------------- | ---------------------------------------------------------- |
+| `component/layout/HeaderSearchField.tsx`                    | fold onto `SearchField`, as the secondary bar already does |
+| `component/languages/FlagSelector/FlagSearchField.tsx`      | same, and it gains the icon and clear button it lacks      |
+| `views/projects/translations/…/TranslationsSearchField.tsx` | keep the editor, borrow the shell — see below              |
+
+### Fields that are not fields — 2
+
+| File                                                                    | Fix                                                                                |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `views/projects/translations/TranslationFilters/TranslationFilters.tsx` | it is a select; use one, or give the trigger `role="combobox"` and `aria-expanded` |
+| `component/branching/BranchLabelInput.tsx`                              | same                                                                               |
+
+### Icons imported from the package instead of the library — 2
+
+`component/common/form/fields/SearchField.tsx` and `component/layout/HeaderSearchField.tsx` both
+import `SearchSm` and `XClose` from `@untitled-ui/icons-react`. Fix: `@tginternal/library/icons`.
+
+## The advanced search overflows on its own
+
+The translations search is a CodeMirror editor, and long queries are handled by this, in
+`searchFieldStyles.ts`:
+
+```
+& .cm-scroller {
+  overflow-x: hidden;
+}
+```
+
+The editor never wraps — there is no `lineWrapping` extension and a transaction filter forces the
+document to stay one line — so a long query runs past the right edge and is clipped. The caret stays
+visible because CodeMirror scrolls to it programmatically, but **the user cannot scroll the field**:
+no wheel, no drag, no way to look at the start of a query while the caret is at the end.
+
+A native `<input>`, which is what every other field here contains, does this without being asked.
+Material UI does not solve overflow — it simply does not get in the way of the browser.
+
+<Callout title="It can be built from Material UI, and the codebase already knows how">
+  `TextField` accepts `InputProps={{ inputComponent }}`, which replaces the
+  inner input while keeping the border, the hover and focus rings, the adornment
+  slots, the sizes, the disabled and error states and the theme wiring. The
+  filter beside it already uses that hook to pass a `div` — so the mechanism is
+  in the codebase, just used for the wrong purpose. The search would keep its
+  CodeMirror area as the `inputComponent` and stop reimplementing the shell
+  around it.
+</Callout>
 
 ## The shape of the problem
 
