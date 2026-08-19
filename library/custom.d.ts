@@ -13,6 +13,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_TOLGEE_API_URL: string;
   readonly VITE_APP_TOLGEE_API_KEY: string;
   readonly VITE_BRANCH_NAME: string;
+  readonly VITE_MUI_VERSION: string;
 }
 
 interface ImportMeta {

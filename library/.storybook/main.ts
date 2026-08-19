@@ -1,5 +1,9 @@
 import { execSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import type { StorybookConfig } from '@storybook/react-vite';
+
+const muiVersion = () =>
+  createRequire(import.meta.url)('@mui/material/package.json').version;
 
 const branchName = () => {
   if (process.env.GITHUB_HEAD_REF) return process.env.GITHUB_HEAD_REF;
@@ -44,6 +48,7 @@ export default {
     define: {
       ...config.define,
       'import.meta.env.VITE_BRANCH_NAME': JSON.stringify(branchName()),
+      'import.meta.env.VITE_MUI_VERSION': JSON.stringify(muiVersion()),
     },
   }),
 } satisfies StorybookConfig;

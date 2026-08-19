@@ -11,6 +11,7 @@ export default defineConfig({
     'Ccw',
     'CSF',
     'hsl',
+    'nums',
     'rgb',
     'sbdocs',
     'Segoe',
@@ -40,7 +41,14 @@ export default defineConfig({
     'tolgee',
   ],
   // SVG path data is coordinates, not prose.
-  ignorePaths: ['/dist/', '/storybook-static/', '**/*.svg'],
+  // Generated from webapp source paths and product copy, not prose written here.
+  ignorePaths: [
+    '/dist/',
+    '/storybook-static/',
+    '**/*.svg',
+    '.storybook/docs/buttonUsages.ts',
+    '.storybook/docs/restyledButtons.ts',
+  ],
   ignoreRegExpList: ['tolgee-pat'],
   patterns: [
     {

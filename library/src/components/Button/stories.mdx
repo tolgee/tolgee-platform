@@ -1,0 +1,140 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ButtonStories from './stories';
+
+<Meta of={ButtonStories} />
+
+# Button
+
+<Upstream docs="react-button" />
+
+The props are Material UI's and this page does not repeat them — that list belongs to the version
+above and would rot here. What it does say is which of them to reach for, because that part is
+ours.
+
+## Two things differ from the Material UI docs
+
+**The default color is grey, not blue.** The theme sets `color: 'default'` as the default prop, so
+a `<Button>` written without a color comes out neutral. In the Material UI documentation the same
+line of code produces a blue button. This trips people up more than anything else here.
+
+**The height is fixed.** 40px, and 30px at `size="small"`. That is what makes buttons line up with
+inputs and with each other across the product, so it is not something to override locally.
+
+## Which variant
+
+Three exist and each carries a different weight. The rule below is the one the product already
+follows, and it is the same one Material UI states.
+
+<Callout title="One filled button per screen">
+  A screen or dialog has exactly **one** action that commits, and it is the only `contained` button
+  on it. Everything else supports it: `outlined` when the action is real but secondary, plain `text`
+  when it only dismisses.
+
+A second filled button does not add emphasis, it removes it — with two, neither reads as the thing
+to do next. If two actions genuinely compete, one of them is the wrong shape for that screen.
+
+Material UI puts the same hierarchy in its own words: contained is _high-emphasis, distinguished
+by elevation and fill, containing actions primary to your app_; outlined is _medium-emphasis,
+important but not the primary action_; text is for _less-pronounced actions, including those in
+dialogs and cards_.
+
+</Callout>
+
+<Canvas of={ButtonStories.AllThree} />
+
+**Contained + primary — the action that commits.** Saving, creating, submitting. Exactly one per
+screen or dialog. If a second one appears, one of the two is not really the main action.
+
+<Canvas of={ButtonStories.Commit} />
+
+**Outlined — a real action that is not the main one.** Delete, test connection, edit, add. It reads
+as available rather than as the thing to do next.
+
+<Canvas of={ButtonStories.Secondary} />
+
+**No variant — dismissal.** Cancel, close, back. Nothing happens to the data, so nothing needs to
+carry weight.
+
+<Canvas of={ButtonStories.Dismiss} />
+
+Every dialog in the product is built from the first and the third:
+
+```
+<DialogActions>
+  <Button onClick={onClose}>Cancel</Button>
+  <LoadingButton variant="contained" color="primary" onClick={submit}>Save</LoadingButton>
+</DialogActions>
+```
+
+## Size
+
+Two are in use. `small` belongs in dense places — table rows, toolbars, cards. Everywhere else the
+default is right, and the default needs no prop: `size="medium"` is what a button already is, so
+writing it changes nothing.
+
+<Canvas of={ButtonStories.Sizes} />
+
+## Colors
+
+Most buttons name no color at all and come out neutral, because the theme sets `default`. Where a
+color is named, it means something.
+
+<Canvas of={ButtonStories.Colors} />
+
+| Color       | What it means here                                                                                    | Uses |
+| ----------- | ----------------------------------------------------------------------------------------------------- | ---- |
+| `primary`   | The action that commits. Nearly always with `contained`.                                              | 104  |
+| `secondary` | A second emphasis alongside primary, nearly always `outlined`.                                        | 13   |
+| `error`     | Destructive and irreversible: deleting a key, a token or an account, disabling two-factor.            | 7    |
+| `inherit`   | Inside a banner or alert that already sets a text color, so the button matches rather than fights it. | 7    |
+| `success`   | Confirming a good end state, such as marking a task finished.                                         | 2    |
+| `info`      | Once, in the disabled-feature banner.                                                                 | 1    |
+| `warning`   | Never used.                                                                                           | 0    |
+
+<Callout title="Color is not emphasis" kind="warning">
+  Emphasis comes from the variant, not the color. `error` on an `outlined` button is still a
+  secondary action — it is red because it destroys something, not because it is the main thing on
+  the screen.
+
+Which is why `contained` + `error` should stay rare: it claims to be both the primary action and a
+destructive one, and that combination belongs on a confirmation dialog, not on a settings page.
+
+</Callout>
+
+## Anything that waits uses LoadingButton
+
+A button that fires a request must show that it is working. That is `LoadingButton` from
+`@mui/lab`, not `Button`, and it is already used in 64 files:
+
+```
+<LoadingButton loading={mutation.isLoading} variant="contained" color="primary">
+  Save
+</LoadingButton>
+```
+
+The two take the same variants and colors, so everything above applies unchanged.
+
+## Disabled
+
+Disabled keeps the shape and drops the contrast. Reach for it only when the reason is visible on
+screen — a disabled button with no explanation is indistinguishable from a broken one.
+
+<Canvas of={ButtonStories.Disabled} />
+
+## Don't
+
+- **Don't restyle it.** Radius, padding and height come from the theme. A locally styled button is
+  one that will not follow the next change.
+- **Don't invent a color.** Six exist in the product and each already means something — see
+  **Colors** below.
+- **Don't put two contained buttons next to each other.** They cancel each other out.
+- **Don't use `color="contrast"`.** It is declared in the type augmentation but has no palette
+  entry behind it, and nothing in the product uses it.
+
+## Where the styling lives
+
+`MuiButton` in `library/src/theme/getTheme.ts` — radius, padding, both heights, the disabled
+background and a dark-mode brightness filter on the contained variant. See
+**Foundations → Component styles** for the full list of what the theme restyles.

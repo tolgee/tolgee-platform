@@ -1,0 +1,145 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { ContrastCheck } from '../../../.storybook/docs/ContrastCheck';
+import { Callout } from '../../../.storybook/docs/Callout';
+import {
+  ButtonInventory,
+  ButtonSummary,
+} from '../../../.storybook/docs/ButtonInventory';
+import * as ButtonStories from './stories';
+
+<Meta of={ButtonStories} name="Findings" />
+
+# Button — findings
+
+Buttons that do not match **Docs**. A work list: each one is either fixed in the app or promoted
+into the theme, and **this page is done when it is empty.**
+
+Measured by hand on 2026-08-18, so it drifts silently. It wants the script that
+`webapp/scripts/generate-data-cy.mjs` already demonstrates, with a CI check that fails when the
+page goes stale.
+
+## Contrast
+
+<ContrastCheck
+  label="Contained primary"
+  fg="tokens.primary.contrast"
+  bg="tokens.primary.main"
+/>
+
+<ContrastCheck
+  label="Contained secondary"
+  fg="tokens.secondary.contrast"
+  bg="tokens.secondary.main"
+/>
+
+Fails in Light, passes in Dark. A palette decision, not a component bug.
+
+<Callout title="Suggested fix">
+  Darken `primary.main` in the light palette until white text clears 4.5:1, or
+  give contained primary a dark label.
+</Callout>
+
+## How much of each we use
+
+Every combination in the product, each sample drawn at the size that row is mostly used at. Nothing
+here is a finding — it is the ground to weigh a change against.
+
+<ButtonSummary />
+
+## Call sites
+
+<ButtonInventory />
+
+## Heights off the scale
+
+Two sizes are defined, 40px and 30px. Three more exist:
+
+| Height  | Where                       | Written as                                              |
+| ------- | --------------------------- | ------------------------------------------------------- |
+| 35px    | compact translations header | `height` + `min-height` in `TranslationControlsCompact` |
+| 29px    | flag picker                 | inner span in `FlagSelectorContent`                     |
+| content | filter chips                | `min-height: 0 !important` in `ButtonToggle`            |
+
+<Callout title="Suggested fix">
+  Move 35px and 29px onto 30px; the filter chip keeps a height of its own only
+  if it becomes a named variant.
+</Callout>
+
+## One shape, written three times
+
+A 40×40 icon button with the minimum height zeroed, built independently in the batch toolbar
+(Translation memory, Glossary), the batch operations panel (Translations) and the Quick start
+highlights. Three copies of one shape is a variant, not three accidents.
+
+<Callout title="Suggested fix">
+  Add one square icon-button variant to the theme and replace all three copies
+  with it.
+</Callout>
+
+## Toggles are built two ways, and the common one is the worse one
+
+The view switcher in Translations, its compact twin and the tasks header all build a toggle by hand:
+`ButtonGroup` wrapping `styled(Button)`, with `color` flipped between `primary` and `default` to
+show which one is on.
+
+Material UI has `ToggleButton` for exactly this, and it is used — once, in Translation memory.
+
+The hand-built version signals the active state **with color alone**. None of the three sets
+`aria-pressed` or `aria-selected`, so a screen reader announces two identical buttons and never says
+which view you are in. That is a real defect, not a style preference.
+
+<Callout title="Suggested fix">
+  Swap the three hand-built toggles for `ToggleButtonGroup`, which brings the
+  selected state with it.
+</Callout>
+
+## Red on a non-destructive action
+
+`error` marks six destructive actions correctly — delete a key, a token, an account, disable
+two-factor, release a license. The seventh is **Restore** in the translation trash, which undoes a
+deletion. `success` on _Account security provider_ deserves the same second look.
+
+<Callout title="Suggested fix">
+  Drop `color="error"` from Restore — undoing a deletion is not destructive.
+</Callout>
+
+## `success` is Material UI's green, not ours
+
+The design tokens define `success` as **#00b962**. The theme never passes it into the palette, so
+Material UI fills the gap with its own **#2e7d32** — and that is what the two `color="success"`
+buttons render as. Same for `warning`, which nothing uses yet.
+
+Every other role is mapped: `primary` #ec407a, `secondary` #00af9a, `error` #d60027, `info` #0288d1.
+`success` is the one that was missed.
+
+<Callout title="Suggested fix">
+  Map `success` into the palette in `getTheme.ts`, next to the four roles
+  already there.
+</Callout>
+
+## `color="default"` is the default
+
+The theme sets `default` as `MuiButton`'s default color, so naming it changes nothing. It appears
+once, on the _Test_ button in Developer settings → Storage.
+
+<Callout title="Suggested fix">Delete the prop.</Callout>
+
+## Not covered yet
+
+This page counts `Button` and `LoadingButton` only. Three button families sit outside it and need
+their own pass:
+
+|                | Uses | Files |
+| -------------- | ---- | ----- |
+| `IconButton`   | 98   | 77    |
+| `ButtonGroup`  | 11   | 11    |
+| `ToggleButton` | 4    | 1     |
+| `Fab`          | 1    | 1     |
+
+`IconButton` is the big one — a third as common as `Button` and completely unexamined. `Fab` used
+once is worth a look on its own: a floating action button that exists in a single place is either a
+pattern or a leftover.
+
+<Callout title="Suggested fix">
+  Give `IconButton` its own findings page next, built the same way as this one.
+</Callout>
