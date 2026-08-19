@@ -6144,7 +6144,7 @@
             <column name="secret_prefix" type="VARCHAR(16)">
                 <constraints nullable="false"/>
             </column>
-            <column name="secret_suffix" type="VARCHAR(8)" defaultValue="">
+            <column name="secret_suffix" type="VARCHAR(8)">
                 <constraints nullable="false"/>
             </column>
             <column name="last_used_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
