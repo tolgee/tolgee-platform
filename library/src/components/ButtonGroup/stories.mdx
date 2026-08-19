@@ -67,11 +67,14 @@ const StyledArrowButton = styled(Button)`
 
 ## What it is not: a toggle
 
-<Canvas of={ButtonGroupStories.ViewSwitch} />
+Nine places in the product use `ButtonGroup` to switch between options — list or table, flat or
+stacked, e-mail or link, light or dark. **This is what that looks like, and it is the thing to stop
+doing:**
 
-Nine places use `ButtonGroup` to switch between options — list or table, flat or stacked, e-mail or
-link, light or dark. They work, but the group has no notion of a selected child, so each one carries
-the state by hand, flipping `color` between `primary` and `default`.
+<Canvas of={ButtonGroupStories.NotAToggle} />
+
+The group has no notion of a selected child, so each of the nine carries the state by hand, flipping
+`color` between `primary` and `default`.
 
 `ToggleButtonGroup` is not a mode of this component — it is a separate one, built straight on
 `ButtonBase` the same way `Button` is. Reach for it and the group keeps the selection itself.
@@ -81,6 +84,14 @@ the state by hand, flipping `color` between `primary` and `default`.
   nine hand-built groups sets that, so a screen reader reads identical buttons
   and never says which option is on. **ToggleButton** carries the list and the
   fix.
+</Callout>
+
+<Callout title="The group's color reaches every child">
+  `ButtonGroup` passes its own `color` down, and its default is `primary`. A
+  child that simply omits `color` does not come out neutral — it comes out
+  primary like the rest, and the on and off states render identically. The nine
+  toggles set `color="default"` explicitly on the inactive option, which is the
+  only reason they look switched at all.
 </Callout>
 
 ## Size

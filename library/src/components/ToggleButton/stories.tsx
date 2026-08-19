@@ -139,7 +139,7 @@ export const FindingSegmentedByHand = {
           <Button color="primary" sx={{ px: 1 }}>
             <LayoutLeft width={20} height={20} />
           </Button>
-          <Button sx={{ px: 1 }}>
+          <Button color="default" sx={{ px: 1 }}>
             <LayoutGrid02 width={20} height={20} />
           </Button>
         </ButtonGroup>

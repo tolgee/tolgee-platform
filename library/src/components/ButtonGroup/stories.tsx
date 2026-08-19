@@ -39,17 +39,23 @@ export const SplitButton = {
   ),
 } satisfies Story;
 
-export const ViewSwitch = {
+/** What nine places in the product build out of this component. It is not what it looks like. */
+export const NotAToggle = {
   args: {},
   render: () => (
-    <ButtonGroup>
-      <Button color="primary" aria-label="List view">
-        <LayoutLeft width={20} height={20} />
-      </Button>
-      <Button aria-label="Table view">
-        <LayoutGrid02 width={20} height={20} />
-      </Button>
-    </ButtonGroup>
+    <Box>
+      <ButtonGroup>
+        <Button color="primary" aria-label="List view">
+          <LayoutLeft width={20} height={20} />
+        </Button>
+        <Button color="default" aria-label="Table view">
+          <LayoutGrid02 width={20} height={20} />
+        </Button>
+      </ButtonGroup>
+      <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.75 }}>
+        the left one is on — color says so, the markup does not
+      </Box>
+    </Box>
   ),
 } satisfies Story;
 
