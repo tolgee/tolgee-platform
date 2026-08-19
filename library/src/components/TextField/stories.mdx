@@ -49,6 +49,13 @@ change worth deciding on rather than slipping in.
   of fields scannable.
 </Callout>
 
+<Callout title="The wrapper does not connect the two yet" kind="warning">
+  Moving the label out of Material UI's hands also moved it out of Material
+  UI's wiring: the `<label>` carries no `for` and the field is announced with no
+  name at all. The shape is right; one thing is missing from it. It is the first
+  item on **Findings** and it is two files.
+</Callout>
+
 ## One model, and two that are not options
 
 <Canvas of={TextFieldStories.TheOnlyModel} />

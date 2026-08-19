@@ -1,0 +1,109 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SelectStories from './stories';
+
+<Meta of={SelectStories} name="Findings" />
+
+# Select — findings
+
+Measured across `webapp/src` on 2026-08-19, classified by where each `Select` is imported from. A
+work list: **done when it is empty.**
+
+| Comes from                   | Call sites |                              |
+| ---------------------------- | ---------- | ---------------------------- |
+| `@mui/material`              | **19**     | none of the rules below hold |
+| `tg.component/common/Select` | 7          | label above an outlined box  |
+| `form/fields/Select`         | 4          | the same, inside formik      |
+
+Thirty selects; **eleven** come out as the product's field — and, as the next section shows, being
+the product's field is not yet enough.
+
+## Twenty-seven of the thirty selects have no name
+
+<Canvas of={SelectStories.FindingHowItIsNamed} />
+
+Material UI names a select from **`labelId`** and nothing else. Read from `SelectInput.js`, the
+`aria-labelledby` it renders is built from `labelId` alone; an `<InputLabel>` sitting inside a
+`<FormControl>` gets no `for` and creates no association at all. Verified on this page's own DOM —
+the middle sample above is the export dialog's exact structure, and its combobox carries neither
+`aria-labelledby` nor `aria-label`.
+
+| Named by                                     | Count  |
+| -------------------------------------------- | ------ |
+| `labelId` pointing at an `<InputLabel>`      | 2      |
+| `aria-label`                                 | 1      |
+| an `<InputLabel>` with nothing connecting it | **8**  |
+| nothing at all                               | **8**  |
+| the wrapper, which does not wire it either   | **11** |
+
+So **three** selects in the product can be named out loud. The eight with an unconnected
+`InputLabel` are the worst of them, because on screen they look finished.
+
+The eleven wrapper selects fail for the reason set out on **TextField → Findings**: the label is
+rendered as a sibling of the control and nothing ever points at it.
+
+<Callout title="Suggested fix" kind="warning">
+  One change covers eleven of them: give `common/Select` an `id`, put it on the
+  `InputLabel` and pass the same value as `labelId`. Then `labelId` on the eight
+  that already draw a label, and `aria-label` on the eight in toolbars.
+</Callout>
+
+## Seven selects are underlined, and five are one dialog
+
+<Canvas of={SelectStories.FindingUnderlinedSelects} />
+
+`variant="standard"` on the surrounding `FormControl` produces an underline instead of a box:
+
+| File                                                |
+| --------------------------------------------------- |
+| `views/projects/export/…/FormatSelector.tsx`        |
+| `views/projects/export/…/LanguageSelector.tsx`      |
+| `views/projects/export/…/MessageFormatSelector.tsx` |
+| `views/projects/export/…/NsSelector.tsx`            |
+| `views/projects/export/…/StateSelector.tsx`         |
+| `views/projects/import/…/LanguageSelector.tsx`      |
+| `views/projects/developer/…/CdStorageSelector.tsx`  |
+
+The first five are the **export dialog**, all of it. It is the same defect the 21 underlined text
+fields have — see **TextField → Findings** — and fixing them together is one decision rather than
+two.
+
+<Callout title="Suggested fix">
+  Drop `variant="standard"` from the `FormControl`, or move the five export
+  selectors onto the wrapper, which never had the option.
+</Callout>
+
+## The wrapper can be overridden, like its twin
+
+`common/Select` sets its decisions and then spreads the caller's props after them:
+
+```
+<StyledMUISelect variant="outlined" size="small" error={Boolean(error)} {...otherProps} />
+```
+
+So `variant` can be walked over by any caller, exactly as on `common/TextField`. No caller does it
+today — this is the hole, not yet a leak.
+
+<Callout title="Suggested fix">
+  Spread `otherProps` first and set `variant` after it. Same one-line change as
+  on TextField; do them together.
+</Callout>
+
+## It inherits TextField's broken label
+
+`common/Select` imports `StyledInputLabel` from `common/TextField`, which carries
+`font-weight: 500px`. The label above every wrapper select renders at 400 rather than the intended
+medium, for the same reason and in the same declaration. Counted on **TextField → Findings**; listed
+here so it is not fixed in one place and forgotten in the other.
+
+## The theme says nothing about it
+
+`getTheme.ts` styles thirteen components and `MuiSelect` is not among them. The only theme rule that
+touches a select is `MuiInputBase`, which sets the background of the outlined shell it shares with
+`TextField`.
+
+## Not wrong
+
+The eleven wrapper selects are the product's field, and the four formik ones inherit it without
+restating anything. `ExpirationDateField` and `LanguagesSelect` wire `labelId` properly and are
+worth copying from.

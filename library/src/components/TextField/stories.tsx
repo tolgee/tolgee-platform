@@ -237,3 +237,37 @@ export const TheOnlyModel = {
     </Box>
   ),
 } satisfies Story;
+
+/** What each shape is called by a screen reader. Measured on this page. */
+export const FindingNoAccessibleName = {
+  args: {},
+  render: () => (
+    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Box sx={{ width: 240 }}>
+        <Field label="Task name">
+          <TextField size="small" fullWidth placeholder="Task" />
+        </Field>
+        <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
+          the standard — announced as “edit text”, with no name
+        </Box>
+      </Box>
+      <Box sx={{ width: 240 }}>
+        <TextField size="small" fullWidth label="Task name" />
+        <Box sx={{ typography: 'caption', color: 'success.main', mt: 0.5 }}>
+          floating label — announced as “Task name”
+        </Box>
+      </Box>
+      <Box sx={{ width: 240 }}>
+        <TextField
+          size="small"
+          fullWidth
+          variant="standard"
+          label="Task name"
+        />
+        <Box sx={{ typography: 'caption', color: 'success.main', mt: 0.5 }}>
+          underline — announced as “Task name”
+        </Box>
+      </Box>
+    </Box>
+  ),
+} satisfies Story;

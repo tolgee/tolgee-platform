@@ -1,0 +1,86 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SelectStories from './stories';
+
+<Meta of={SelectStories} />
+
+# Select
+
+<Upstream docs="react-select" />
+
+The same field as **TextField**, with a list instead of a keyboard. Everything on that page holds
+here: **the label sits above an outlined box**, never floating in the border and never reduced to an
+underline, and the row reserves 64px so a message can appear without moving the form.
+
+That is not a coincidence of style — `tg.component/common/Select` imports the very same
+`StyledContainer` and `StyledInputLabel` from `common/TextField`, so a select and a text field in
+one form are the same shape by construction.
+
+## The Tolgee select
+
+<Canvas of={SelectStories.TheStandard} />
+
+```
+<Select label={t('task_type')} value={type} onChange={…}>
+  <MenuItem value="TRANSLATE">{t('task_type_translate')}</MenuItem>
+</Select>
+```
+
+`variant="outlined"` and `size="small"` come from the wrapper. So does the 64px row.
+
+## When it is rejected
+
+<Canvas of={SelectStories.WithAMessage} />
+
+The wrapper takes `error` as a **string**, not a boolean, and renders it as the message below:
+
+```
+<Select label={t('type')} error={errors.type} … />
+```
+
+## In a toolbar
+
+<Canvas of={SelectStories.InAToolbar} />
+
+Filters and table controls have no room for a label above, and the value itself usually says what
+the control is. That is fine — **but it still needs a name.** `aria-label`, or an `<InputLabel>`
+inside a `<FormControl>`, which wires the two together for you.
+
+<Callout title="A select with no label and no aria-label is anonymous">
+  Unlike a checkbox, a select has a value showing, so it looks self-explanatory
+  on screen. It is not: a screen reader reads the current value and never says
+  what the value is for. Eight of them are in that state today — see
+  **Findings**.
+</Callout>
+
+## When to reach for Autocomplete instead
+
+A `Select` shows every option at once. Past a dozen or so — languages, projects, assignees — people
+need to type to narrow it down, and that is **Autocomplete**. The product already draws that
+line: languages, projects and assignees all go through search selects rather than a plain `Select`.
+
+## How to get the standard
+
+| You need                  | Use                                      |
+| ------------------------- | ---------------------------------------- |
+| a select in a formik form | `tg.component/common/form/fields/Select` |
+| a select outside a form   | `tg.component/common/Select`             |
+| a searchable list         | `tg.component/searchSelect/SearchSelect` |
+
+**Not `Select` from `@mui/material`.** Nineteen of the thirty selects in the product take it
+straight, and that is where the missing labels and the underlines come from.
+
+## Don't
+
+- **Don't use `variant="standard"`.** An underline is not this product's field. Seven selects still
+  do — five of them are one dialog.
+- **Don't leave it unnamed** because the value is visible.
+- **Don't set a width on it.** The form's grid decides.
+- **Don't use it for a long list.** Use a search select.
+
+## Where the styling lives
+
+Nowhere of ours. `getTheme.ts` has no `MuiSelect` entry — everything that makes a select a Tolgee
+select is in `webapp/src/component/common/Select.tsx`, which is why importing from `@mui/material`
+bypasses all of it. See **Foundations → Component styles**.

@@ -1,0 +1,85 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SwitchStories from './stories';
+
+<Meta of={SwitchStories} />
+
+# Switch
+
+<Upstream docs="react-switch" />
+
+An on/off that **takes effect the moment it is clicked**. That is the whole distinction from
+**Checkbox**: a checkbox is a value you are filling in and will submit with the rest of the form, a
+switch is a setting you are changing now.
+
+<Callout title="Which one to reach for">
+  If the change needs a Save button, it is a checkbox. If clicking it fires a
+  request, it is a switch. Every switch in Tolgee sits on a settings screen and
+  saves immediately — project settings, quality checks, webhooks, notification
+  preferences.
+</Callout>
+
+## The label goes beside it
+
+<Canvas of={SwitchStories.TheStandard} />
+
+Unlike a text field, the label does not sit above — a switch is small and reads as one line with its
+label. `FormControlLabel` puts them together **and connects them**, which is what makes the label
+clickable and what a screen reader reads out:
+
+```
+<FormControlLabel control={<Switch checked={enabled} onChange={toggle} />} label={t('enabled')} />
+```
+
+A `<Typography>` next to a `<Switch>` looks the same and is not the same. See Findings.
+
+## A line of explanation under it
+
+<Canvas of={SwitchStories.WithDescription} />
+
+Settings usually need a sentence saying what the switch does.
+`tg.component/common/Switch` takes it as `helperText` and renders it below at 12px:
+
+```
+<Switch label={t('quality_checks')} helperText={t('quality_checks_description')} />
+```
+
+## Size
+
+<Canvas of={SwitchStories.Sizes} />
+
+`small` in dense rows — table cells, list rows — and the default elsewhere. Ten of the nineteen
+switches in the product are small.
+
+## Disabled
+
+<Canvas of={SwitchStories.Disabled} />
+
+A disabled switch still shows its state, so it says what the setting is while explaining you cannot
+change it. Give the reason somewhere the person can read it — a tooltip on a wrapper element,
+because a disabled control does not fire hover events of its own.
+
+## How to get the standard
+
+| You need                    | Use                                        |
+| --------------------------- | ------------------------------------------ |
+| a switch in a formik form   | `tg.component/common/form/fields/Switch`   |
+| a switch with a description | `tg.component/common/Switch`               |
+| a bare switch in a row      | `@mui/material` **plus a connected label** |
+
+## Don't
+
+- **Don't put a switch on something that needs saving.** That is a checkbox.
+- **Don't place a label beside it without connecting it.** `FormControlLabel`, or
+  `aria-labelledby` pointing at the text you already render.
+- **Don't rely on a tooltip for the name** — especially one that only appears when the switch is
+  disabled.
+- **Don't use it to filter or to choose between two things.** One is a checkbox, the other is
+  **ToggleButton**.
+
+## Where the styling lives
+
+Nowhere of ours. `getTheme.ts` has no `MuiSwitch` entry, so the switch is Material UI's, at Material
+UI's colors. `tg.component/common/Switch` adds the label and description around it and nothing else
+— except one broken declaration, on **Findings**.

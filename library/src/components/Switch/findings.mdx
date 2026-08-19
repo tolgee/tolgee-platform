@@ -1,0 +1,104 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SwitchStories from './stories';
+
+<Meta of={SwitchStories} name="Findings" />
+
+# Switch — findings
+
+Measured across `webapp/src` on 2026-08-19. A work list: **done when it is empty.**
+
+`<Switch>` appears 34 times, but **15 of those are React Router's** — a different component that
+happens to share the name. Classified by where each import comes from, the product has **19
+switches**: 18 straight from `@mui/material`, one through the formik field.
+
+## Eight switches have no name
+
+<Canvas of={SwitchStories.FindingLabelNotAttached} />
+
+| How it is named          | Count |
+| ------------------------ | ----- |
+| `FormControlLabel`       | 7     |
+| a `Tooltip` on a wrapper | 3     |
+| **nothing**              | **8** |
+
+In every one of the eight, **the words are on the screen** — a title in the grid cell to the left, a
+language name earlier in the row, a column header above. They are simply not attached to the
+control, so a screen reader announces "switch, on" and stops.
+
+`SwitchWithDescription` is the clearest case: it renders `title` and `description` into their own
+grid areas and drops a bare `<Switch>` into a third. The name exists as text and not as a name.
+
+<Callout title="Suggested fix">
+  Where the layout allows it, `FormControlLabel` with `labelPlacement="start"`.
+  Where the title has to stay in its own grid cell, give that element an `id`
+  and point `aria-labelledby` at it — no visual change, and the switch stops
+  being anonymous.
+</Callout>
+
+## Two tooltips disappear exactly when they are needed
+
+<Canvas of={SwitchStories.FindingTooltipOnlyWhenDisabled} />
+
+`SettingsRow` names its two switches with a tooltip written like this:
+
+```
+title={disabledInApp && t('settings_notifications_tooltip_cannot_be_turned_off')}
+```
+
+When the switch **can** be used, the condition is false, Material UI gets no title and renders no
+tooltip — so the control has no name in its normal state. The name appears only once the switch is
+disabled, which is the one state where it matters least.
+
+<Callout title="Suggested fix">
+  Name the switch from the row it belongs to with `aria-labelledby`, and let the
+  tooltip carry only the reason it is locked.
+</Callout>
+
+## The wrapper exists and one caller uses it
+
+`tg.component/common/Switch` puts the switch in a `FormControlLabel` and renders `helperText`
+beneath — exactly the shape the settings screens keep rebuilding. It is reached **once**, through
+`form/fields/Switch`, from the SSO provider form.
+
+The other eighteen import `Switch` from `@mui/material` and assemble the label themselves, which is
+where the eight missing names come from.
+
+<Callout title="Suggested fix">
+  Route the settings screens through the wrapper. The label problem disappears
+  for every caller that moves, because the wrapper cannot be used without one.
+</Callout>
+
+## `font-weight: 400px` in the wrapper's description
+
+```
+export const StyledInputLabel = styled(InputLabel)`
+  font-size: 12px;
+  font-weight: 400px;
+`;
+```
+
+`400px` is not a font weight, so the browser drops the declaration. This one is invisible — the
+fallback is 400 anyway — which is exactly why it has survived. Its twin in
+`common/TextField` says `500px` and is **not** invisible; see **TextField → Findings**.
+
+<Callout title="Suggested fix">
+  `font-weight: 400`. Fix both at once, since they are the same mistake.
+</Callout>
+
+## The theme says nothing about it
+
+`getTheme.ts` styles thirteen components. `MuiSwitch` is not among them, so every switch in Tolgee
+is Material UI's default at Material UI's colors, and the palette the rest of the product uses does
+not reach it.
+
+<Callout title="Suggested fix">
+  Same decision as **Checkbox** and **ToggleButton**, and worth making once for
+  all three rather than three times.
+</Callout>
+
+## Not wrong
+
+Every switch in the product does save immediately, so the choice of a switch over a checkbox is
+right in all nineteen places. Ten of the nineteen set `size="small"`, and they are the ones in table
+cells and list rows — the size is being used deliberately rather than at random.

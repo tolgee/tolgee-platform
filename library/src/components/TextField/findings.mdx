@@ -8,6 +8,45 @@ import * as TextFieldStories from './stories';
 
 Measured by hand on 2026-08-18 across 100 call sites. A work list: **done when it is empty.**
 
+## The label above the field is not attached to it
+
+<Canvas of={TextFieldStories.FindingNoAccessibleName} />
+
+`common/TextField` renders the label and the input as siblings:
+
+```
+<StyledContainer>
+  {label && <StyledInputLabel>{label}</StyledInputLabel>}
+  <MUITextField variant="outlined" size="small" … />
+</StyledContainer>
+```
+
+Nothing connects them. The `<label>` has no `for`, the input gets an id nobody points at, and no
+`aria-labelledby` is set. Read off this page's own DOM:
+
+| Shape                          | Accessible name |
+| ------------------------------ | --------------- |
+| **label above — the standard** | **none**        |
+| floating label                 | "Task name"     |
+| underline                      | "Task name"     |
+
+**The two shapes this page calls defects are the two that name the field.** Material UI wires
+`label` to the input itself; the wrapper took the label away from Material UI and never rewired it.
+
+It costs more than the announcement: a `<label>` without `for` is not clickable either, so the
+label above a Tolgee field does not focus it the way a label is supposed to.
+
+`common/Select` copies the same block from `common/TextField`, so every wrapper select is in the
+same state — see **Select → Findings**.
+
+<Callout title="Suggested fix" kind="warning">
+  Both wrappers own the label and the control, so this is two files: take an
+  `id` (`useId()` when the caller passes none), put it on the field and
+  `htmlFor` on the label. For `Select`, give `InputLabel` an `id` and pass it as
+  `labelId` — that is the only thing Material UI reads. Around 74 call sites are
+  named by the change without one of them being touched.
+</Callout>
+
 ## One field, four shapes
 
 <Canvas of={TextFieldStories.FindingThreeShapes} />
