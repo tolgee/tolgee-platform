@@ -1,5 +1,14 @@
+import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material';
 import { SearchSm, XClose } from '../../icons';
 
 const meta = {
@@ -14,62 +23,65 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Labelled = {
-  args: {},
-  render: () => (
-    <TextField label="Project name" size="small" defaultValue="Website copy" />
-  ),
-} satisfies Story;
+/**
+ * The product's own shape: the label is an element above the field, and the box below it
+ * reserves room so a message can appear without moving the form.
+ */
+const Field = ({
+  label,
+  children,
+}: {
+  label?: ReactNode;
+  children: ReactNode;
+}) => (
+  <Box sx={{ display: 'grid', minHeight: 64 }}>
+    {label && (
+      <InputLabel sx={{ fontSize: 14, fontWeight: 500, mb: 0.5 }}>
+        {label}
+      </InputLabel>
+    )}
+    {children}
+  </Box>
+);
 
-export const States = {
+export const TheStandard = {
   args: {},
   render: () => (
-    <Box sx={{ display: 'grid', gap: 2, width: 260 }}>
-      <TextField label="Empty" size="small" placeholder="Type a name" />
-      <TextField label="Filled" size="small" defaultValue="Website copy" />
-      <TextField
-        label="With a hint"
-        size="small"
-        helperText="Shown to everyone in the project"
-      />
-      <TextField
-        label="Rejected"
-        size="small"
-        error
-        defaultValue="  "
-        helperText="Name cannot be blank"
-      />
-      <TextField
-        label="Unavailable"
-        size="small"
-        disabled
-        defaultValue="Locked"
-      />
+    <Box sx={{ display: 'grid', gap: 1, width: 300 }}>
+      <Field label="Task name (optional)">
+        <TextField size="small" placeholder="Task" fullWidth />
+      </Field>
+      <Field label="Type">
+        <Select size="small" value="translate" fullWidth>
+          <MenuItem value="translate">Translate</MenuItem>
+          <MenuItem value="review">Review</MenuItem>
+        </Select>
+      </Field>
     </Box>
   ),
 } satisfies Story;
 
-export const Variants = {
+export const WithAMessage = {
   args: {},
   render: () => (
-    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
-      <Box sx={{ textAlign: 'center' }}>
-        <TextField label="Outlined" size="small" defaultValue="79 uses" />
-        <Box sx={{ typography: 'caption', color: 'text.secondary', mt: 0.5 }}>
-          the default
-        </Box>
-      </Box>
-      <Box sx={{ textAlign: 'center' }}>
+    <Box sx={{ display: 'grid', gap: 1, width: 300 }}>
+      <Field label="Project name">
         <TextField
-          label="Standard"
           size="small"
-          variant="standard"
-          defaultValue="21 uses"
+          fullWidth
+          defaultValue="Website copy"
+          helperText="Shown to everyone in the project"
         />
-        <Box sx={{ typography: 'caption', color: 'text.secondary', mt: 0.5 }}>
-          no border
-        </Box>
-      </Box>
+      </Field>
+      <Field label="Project name">
+        <TextField
+          size="small"
+          fullWidth
+          error
+          defaultValue=" "
+          helperText="Name cannot be blank"
+        />
+      </Field>
     </Box>
   ),
 } satisfies Story;
@@ -77,20 +89,12 @@ export const Variants = {
 export const Multiline = {
   args: {},
   render: () => (
-    <TextField
-      label="Description"
-      size="small"
-      multiline
-      minRows={3}
-      sx={{ width: 300 }}
-      defaultValue={
-        'Shown on the project list.\nTwo lines fit before it grows.'
-      }
-    />
+    <Field label="Description">
+      <TextField size="small" multiline minRows={3} sx={{ width: 300 }} />
+    </Field>
   ),
 } satisfies Story;
 
-/** Search is an Input with two adornments and a debounce — not a component of its own. */
 export const Search = {
   args: {},
   render: () => (
@@ -117,29 +121,77 @@ export const Search = {
   ),
 } satisfies Story;
 
-/** Same field, three ways in — and the wrapper forces its own variant and height. */
-export const FindingThreeDoors = {
+const Deviation = ({
+  caption,
+  count,
+  children,
+}: {
+  caption: string;
+  count: string;
+  children: ReactNode;
+}) => (
+  <Box sx={{ width: 240 }}>
+    {children}
+    <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
+      {caption}
+    </Box>
+    <Box sx={{ typography: 'caption', color: 'text.secondary' }}>{count}</Box>
+  </Box>
+);
+
+/** Three shapes for one field, all of them in the product today. */
+export const FindingThreeShapes = {
   args: {},
   render: () => (
-    <Box sx={{ display: 'grid', gap: 2, width: 300 }}>
-      <Box>
-        <TextField label="From @mui/material" size="small" fullWidth />
+    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Box sx={{ width: 240 }}>
+        <Field label="Task name">
+          <TextField size="small" fullWidth placeholder="Task" />
+        </Field>
+        <Box sx={{ typography: 'caption', color: 'success.main', mt: 0.5 }}>
+          label above the field
+        </Box>
         <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
-          64 files · nothing added
+          74 of 100 · the standard
         </Box>
       </Box>
-      <Box>
-        <Box sx={{ display: 'grid' }}>
-          <Box
-            component="label"
-            sx={{ typography: 'caption', fontWeight: 500, mb: 0.5 }}
-          >
-            From tg.component/common/TextField
-          </Box>
-          <TextField size="small" fullWidth sx={{ minHeight: '64px' }} />
+      <Deviation caption="label floating in the border" count="6 of 100">
+        <TextField size="small" fullWidth label="Task name" />
+      </Deviation>
+      <Deviation caption="underline, no box" count="21 of 100">
+        <TextField
+          size="small"
+          fullWidth
+          variant="standard"
+          label="Task name"
+        />
+      </Deviation>
+    </Box>
+  ),
+} satisfies Story;
+
+/** The wrapper states the standard but lets any caller walk over it. */
+export const FindingOverridable = {
+  args: {},
+  render: () => (
+    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Box sx={{ width: 240 }}>
+        <Field label="Through the wrapper">
+          <TextField size="small" fullWidth />
+        </Field>
+        <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
+          variant=&quot;outlined&quot; set by the wrapper
         </Box>
+      </Box>
+      <Box sx={{ width: 240 }}>
+        <Field label="Same wrapper, one prop">
+          <TextField size="small" fullWidth variant="standard" />
+        </Field>
         <Box sx={{ typography: 'caption', color: 'error.main' }}>
-          15 files · label above, outlined and small forced, 64px reserved
+          caller passed variant=&quot;standard&quot;
+        </Box>
+        <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
+          11 formik fields do this
         </Box>
       </Box>
     </Box>

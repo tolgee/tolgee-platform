@@ -9,55 +9,52 @@ import * as InputStories from './stories';
 
 <Upstream docs="react-text-field" />
 
-Material UI calls it `TextField`, and it is one component doing three jobs at once: the label, the
-box the text sits in and the message underneath. **100 call sites**, and 75 of them pass a `label`,
-which is what makes it worth using instead of a bare input.
+Material UI's `TextField` underneath, but **Tolgee does not use it the way Material UI documents
+it.** The upstream page shows a label that floats into the border, and a `standard` variant that is
+only an underline. Neither is the shape this product uses.
 
-## A field is its label
+## The Tolgee field
 
-<Canvas of={InputStories.Labelled} />
+<Canvas of={InputStories.TheStandard} />
 
-The label is not decoration — it is what a screen reader reads and what the pointer targets when the
-user clicks the words instead of the box. A placeholder is not a substitute: it disappears as soon
-as the field has content, exactly when the user needs to check what they were filling in.
+Three rules, and they hold for every kind of field — text, select, date:
 
-26 fields use `placeholder`, and it is right where the label is already carried by the surrounding
-layout — a search box, a table cell. It is wrong as the only description of a field.
+1. **The label sits above the field**, as its own element. It never floats into the border and the
+   field is never left with only an underline.
+2. **The field is an outlined box.** One border, all the way around.
+3. **The row reserves 64px**, so a validation message can appear without pushing the rest of the
+   form down.
 
-## States
+The placeholder goes inside the box and says what to type — _Task_, _MM/DD/YYYY_ — while the label
+above says what the field is. They are not alternatives to each other.
 
-<Canvas of={InputStories.States} />
-
-Five, and they cover everything the product does: empty, filled, hinted, rejected, unavailable.
-`helperText` carries the hint (14 uses) and switches to the error message when `error` is set (8
-uses) — the same line, so the field never grows when it goes wrong.
-
-## Variants
-
-<Canvas of={InputStories.Variants} />
-
-Two are in use: `outlined` on 79 and `standard` on 21. Outlined is the one to reach for — it is what
-the shared wrapper forces and what most of the product shows. Standard, without a border, belongs
-where a field sits inside something that already has edges, such as a table row.
-
-<Callout title="One field, one variant per screen">
-  Mixing outlined and standard in the same form makes the fields look like
-  different kinds of control. Pick per screen, not per field.
+<Callout title="Why the label is above and not inside">
+  A floating label moves when the field is filled and shrinks to a size that is
+  hard to read. Above the field it stays put, stays the same size, and every
+  label in a form starts at the same x-position — which is what makes a column
+  of fields scannable.
 </Callout>
+
+## Messages under the field
+
+<Canvas of={InputStories.WithAMessage} />
+
+`helperText` carries the hint and switches to the error when the field is rejected. It is the same
+line either way, and the 64px reserve is what keeps the form still when it appears.
 
 ## Long text
 
 <Canvas of={InputStories.Multiline} />
 
-`multiline` with `minRows` — 10 fields use it. Give it a starting height rather than letting it grow
-from one line, otherwise the form jumps as soon as anyone types.
+`multiline` with `minRows` — give it a starting height rather than one line, or the form jumps as
+soon as anyone types.
 
-## Search is this component, not a new one
+## Search
 
 <Canvas of={InputStories.Search} />
 
-A search field is an Input with a magnifier in front, a clear button behind, and a debounce so it
-does not fire on every keystroke:
+A search field is this component with a magnifier in front, a clear button behind and a debounce.
+It has no label above, because the magnifier and the placeholder already say what it is:
 
 ```
 <TextField
@@ -73,20 +70,31 @@ does not fire on every keystroke:
 />
 ```
 
-That is `tg.component/common/form/fields/SearchField`, which also debounces by 500ms. Reach for it
-rather than assembling the adornments again — **see Findings for the four other search fields that
-did.**
+That is `tg.component/common/form/fields/SearchField`, which also debounces by 500ms. Use it rather
+than assembling the adornments again.
+
+## How to get the standard
+
+| You need                 | Use                                           |
+| ------------------------ | --------------------------------------------- |
+| a field in a formik form | `tg.component/common/form/fields/TextField`   |
+| a field outside a form   | `tg.component/common/TextField`               |
+| a select                 | `tg.component/common/Select`                  |
+| a search box             | `tg.component/common/form/fields/SearchField` |
+
+**Not `TextField` from `@mui/material`.** It gives you the floating label and none of the rules
+above. Twenty call sites do it anyway — see Findings.
 
 ## Don't
 
-- **Don't use a placeholder instead of a label.** It vanishes when it is needed.
-- **Don't put the error message anywhere but `helperText`.** A second line below the field moves the
-  layout.
-- **Don't build a search field from scratch.** `SearchField` exists.
-- **Don't set a width on the field.** Let the form's grid do it.
+- **Don't use `variant="standard"`.** An underline is not this product's field.
+- **Don't pass `label` to a Material UI `TextField`.** That is the floating label.
+- **Don't use a placeholder instead of a label.** It disappears exactly when it is needed.
+- **Don't set a width on the field.** The form's grid decides.
 
 ## Where the styling lives
 
-`MuiInputBase` in `library/src/theme/getTheme.ts`, and it holds exactly one rule: the background
-color of an outlined input. Everything else — the border, the floating label, the spacing — is
-Material UI's own. See **Foundations → Component styles**.
+`MuiInputBase` in `library/src/theme/getTheme.ts` holds one rule — the background of an outlined
+input. Everything that makes the field a Tolgee field lives in
+`webapp/src/component/common/TextField.tsx` instead, which is the reason it can be bypassed. See
+**Foundations → Component styles**.

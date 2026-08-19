@@ -8,23 +8,43 @@ import * as InputStories from './stories';
 
 Measured by hand on 2026-08-18 across 100 call sites. A work list: **done when it is empty.**
 
-## Three doors into one field
+## One field, three shapes
 
-<Canvas of={InputStories.FindingThreeDoors} />
+<Canvas of={InputStories.FindingThreeShapes} />
 
-| Door                            | Files | What it adds                                                                   |
-| ------------------------------- | ----- | ------------------------------------------------------------------------------ |
-| `@mui/material` directly        | 64    | nothing                                                                        |
-| `tg.component/common/TextField` | 15    | label above the box, forces `outlined` and `small`, reserves `minHeight: 64px` |
-| `common/form/fields/TextField`  | 39    | formik binding, on top of the wrapper above                                    |
+The product's shape is the label above an outlined box. Counting all 100 call sites by where their
+`TextField` is imported from:
 
-The middle one is a real component with real opinions — it moves the label out of the box and holds
-64px of vertical space so a validation message can appear without moving the form. Those are good
-decisions that 64 files never get, because they reach past it.
+| Shape                        | Call sites | How it happens                                              |
+| ---------------------------- | ---------- | ----------------------------------------------------------- |
+| **label above the field**    | **74**     | through `common/TextField` or the formik field              |
+| underline, no box            | 21         | `variant="standard"` passed at the call site                |
+| label floating in the border | 6          | Material UI's `TextField` imported directly, with a `label` |
+
+The remaining call sites have no label at all, which is right for search boxes and table cells.
 
 <Callout title="Suggested fix">
-  Decide whether the label belongs above the box or inside it, then make one of
-  the two the way in and migrate the rest.
+  Take the 21 underlined fields to the standard, then the 6 floating ones — the
+  second group also has to move off the direct Material UI import.
+</Callout>
+
+## The wrapper states the standard but does not hold it
+
+<Canvas of={InputStories.FindingOverridable} />
+
+`common/TextField` sets `variant="outlined"` and `size="small"` — and then spreads the caller's
+props after them:
+
+```
+<MUITextField ref={ref} variant="outlined" size="small" sx={…} {...otherProps} />
+```
+
+So any caller can walk over the decision with one prop, and **eleven formik fields do exactly
+that**, rendering as `standard` through a wrapper whose whole point was to stop that.
+
+<Callout title="Suggested fix">
+  Spread `otherProps` first and set `variant` after it, so the wrapper's own
+  decisions win. Then fix the eleven callers that were relying on the override.
 </Callout>
 
 ## A typo nobody sees, in two places
@@ -92,16 +112,6 @@ because they sit in shared components, where the next person copies from.
 <Callout title="Suggested fix">
   Import from `@tginternal/library/icons`, and add the eslint rule that makes
   the page's own instruction enforceable.
-</Callout>
-
-## Variants are mixed within the product
-
-79 outlined against 21 standard. The split is not per screen but scattered, and the wrapper forces
-`outlined` while 21 direct call sites choose `standard` — so the same form can hold both.
-
-<Callout title="Suggested fix">
-  Settle on outlined, keep standard only where a field sits inside something
-  that already has edges, and write down which is which.
 </Callout>
 
 ## Not wrong
