@@ -16,6 +16,11 @@ const css = (mode: 'light' | 'dark') => {
   const line = palette.divider;
   const codeBg = palette.colors.grey['950'];
   const onCode = palette.colors.grey['50'];
+  // primary.main is the brand pink; on either page background it lands at 3.7:1, under WCAG AA.
+  const linkColor =
+    mode === 'dark'
+      ? palette.tokens.primary.light
+      : palette.tokens.primary.dark;
 
   return `
     .sbdocs-wrapper, .sbdocs.sbdocs-content { background: ${bg}; }
@@ -30,7 +35,7 @@ const css = (mode: 'light' | 'dark') => {
        would highlight them with its light palette, unreadable here and unfixable from outside. */
     .docblock-source, pre.prismjs { background: ${codeBg} !important;
       color: ${onCode} !important; border-color: ${line} !important; }
-    .sbdocs a { color: ${palette.tokens.primary.main}; }
+    .sbdocs a { color: ${linkColor}; }
     /* The table of contents sits outside .sbdocs, so it keeps Storybook's own blue otherwise. */
     .toc-wrapper .toc-list-item .toc-link { color: ${palette.text.secondary}; }
     .toc-wrapper .toc-list-item .toc-link.is-active-link { color: ${text};
