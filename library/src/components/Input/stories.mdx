@@ -49,6 +49,21 @@ change worth deciding on rather than slipping in.
   of fields scannable.
 </Callout>
 
+## One model, and two that are not options
+
+<Canvas of={InputStories.TheOnlyModel} />
+
+**The product has one field.** The other two shapes exist in the codebase, and both are defects
+rather than choices:
+
+- **A floating label** comes from importing `TextField` straight from `@mui/material`. The label
+  moves and shrinks when the field fills, and it does not line up with the labels above it.
+- **An underline** comes from `variant="standard"`. It has no box, so in a form beside the others it
+  reads as a different kind of control.
+
+Neither is a variant to pick between. If a screen shows one, it is something to fix — they are
+counted and located on **Findings**.
+
 ## Messages under the field
 
 <Canvas of={InputStories.WithAMessage} />

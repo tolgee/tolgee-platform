@@ -123,11 +123,9 @@ export const Search = {
 
 const Deviation = ({
   caption,
-  count,
   children,
 }: {
   caption: string;
-  count: string;
   children: ReactNode;
 }) => (
   <Box sx={{ width: 240 }}>
@@ -135,7 +133,6 @@ const Deviation = ({
     <Box sx={{ typography: 'caption', color: 'error.main', mt: 0.5 }}>
       {caption}
     </Box>
-    <Box sx={{ typography: 'caption', color: 'text.secondary' }}>{count}</Box>
   </Box>
 );
 
@@ -149,16 +146,13 @@ export const FindingThreeShapes = {
           <TextField size="small" fullWidth placeholder="Task" />
         </Field>
         <Box sx={{ typography: 'caption', color: 'success.main', mt: 0.5 }}>
-          label above the field
-        </Box>
-        <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
-          74 of 100 · the standard
+          label above the field — the standard
         </Box>
       </Box>
-      <Deviation caption="label floating in the border" count="6 of 100">
+      <Deviation caption="label floating in the border">
         <TextField size="small" fullWidth label="Task name" />
       </Deviation>
-      <Deviation caption="underline, no box" count="21 of 100">
+      <Deviation caption="underline, no box">
         <TextField
           size="small"
           fullWidth
@@ -190,10 +184,56 @@ export const FindingOverridable = {
         <Box sx={{ typography: 'caption', color: 'error.main' }}>
           caller passed variant=&quot;standard&quot;
         </Box>
-        <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
-          11 formik fields do this
-        </Box>
       </Box>
+    </Box>
+  ),
+} satisfies Story;
+
+const Verdict = ({
+  ok,
+  children,
+  caption,
+}: {
+  ok: boolean;
+  caption: string;
+  children: ReactNode;
+}) => (
+  <Box sx={{ width: 240 }}>
+    {children}
+    <Box
+      sx={{
+        typography: 'body2',
+        mt: 0.5,
+        color: ok ? 'success.main' : 'error.main',
+      }}
+    >
+      {ok ? '\u2713 ' : '\u2717 '}
+      {caption}
+    </Box>
+  </Box>
+);
+
+/** One model. The other two are defects, not options. */
+export const TheOnlyModel = {
+  args: {},
+  render: () => (
+    <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Verdict ok caption="label above an outlined box">
+        <Field label="Task name">
+          <TextField size="small" fullWidth placeholder="Task" />
+        </Field>
+      </Verdict>
+      <Verdict ok={false} caption="floating label">
+        <TextField size="small" fullWidth label="Task name" />
+      </Verdict>
+      <Verdict ok={false} caption="underline">
+        <TextField
+          size="small"
+          fullWidth
+          variant="standard"
+          label="Task name"
+        />
+      </Verdict>
     </Box>
   ),
 } satisfies Story;
