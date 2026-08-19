@@ -1,0 +1,78 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as RadioStories from './stories';
+
+<Meta of={RadioStories} name="Findings" />
+
+# Radio — findings
+
+Measured across `webapp/src` on 2026-08-19. Three call sites. A work list: **done when it is
+empty.**
+
+## `RadioGroup` is never imported
+
+<Canvas of={RadioStories.FindingNoRadioGroup} />
+
+Not once in `webapp/src`. All three radios are loose `<Radio>` elements wired by hand through
+`checked` and `onClick`, and none of them sets `name`.
+
+What that costs, in the two places it is a real choice:
+
+- **no `role="radiogroup"`** — a screen reader never says the options belong together, or how many
+  there are
+- **no roving tab stop** — every option is its own Tab stop instead of the group being one, with
+  the arrows moving inside it
+- **no exclusivity from the browser** — it works only because each `onClick` sets the state by hand
+
+`ModeSelector` does wrap its options in `<FormControl component="fieldset">`, which is the right
+instinct, but a fieldset without a `RadioGroup` inside it gives none of the above — and it carries
+no `FormLabel`, so the fieldset has no legend either.
+
+<Callout title="Suggested fix">
+  `RadioGroup` with a `name` and a `value`, and let it own the exclusivity that
+  the `onClick` handlers are doing by hand.
+</Callout>
+
+## The machine-translation radio has no name
+
+`LanguageSettingsForm` puts a bare `<Radio>` in a table cell:
+
+```
+<StyledCell>
+  <Radio checked={values.primaryService === type} onClick={() => setPrimary(type)} … />
+</StyledCell>
+```
+
+The service it belongs to is the row, and the thing it selects is the column header — neither is
+attached, so the control is announced as a radio with no name and no group. It is the same shape as
+the eight unnamed switches on **Switch → Findings**.
+
+<Callout title="Suggested fix">
+  `aria-labelledby` pointing at the row's service name, and a `RadioGroup`
+  around the column so the choice reads as one.
+</Callout>
+
+## A radio that is not a choice
+
+`TranslationFilters/FilterItem` renders `StyledRadio` inside a `StyledMenuItem`, as the marker for
+an exclusive filter:
+
+```
+<StyledMenuItem selected={selected}>
+  {exclusive ? <StyledRadio checked={…} /> : <StyledCheckbox checked={…} />}
+```
+
+The `MenuItem` already carries the selection and its own `aria-selected`. The radio inside it is a
+picture of a radio — a second, contradictory control in the accessibility tree, focusable in its own
+right.
+
+<Callout title="Suggested fix">
+  Draw the marker rather than nesting a control: the radio and checkbox glyphs
+  with `aria-hidden`, leaving the `MenuItem` to carry the state.
+</Callout>
+
+## Not wrong
+
+Three call sites is the right number. Every other either-or choice in the product is a `Select` or a
+toggle, and those are the right calls — a radio for the export format or the task type would be a
+column of twenty.

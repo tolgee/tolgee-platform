@@ -1,0 +1,86 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as AutocompleteStories from './stories';
+
+<Meta of={AutocompleteStories} />
+
+# Autocomplete
+
+<Upstream docs="react-autocomplete" />
+
+**Select** with a keyboard. Reach for it when the list is longer than someone wants to read — the
+product uses it for languages, projects, assignees, tasks and tags, which are all lists that grow
+with the account.
+
+It appears in the product in two shapes, and they are different enough to be worth naming.
+
+## As a popover — the search select
+
+<Canvas of={AutocompleteStories.SearchSelect} />
+
+A button opens a panel, the panel has a search box at the top and the list below, and the field the
+person clicked stays where it was. Seven places do this: languages, projects, assignees, tasks,
+branches, and the two multi-selects behind them.
+
+The mechanics are `open` held true while the popover is mounted, plus `PopperComponent` and
+`PaperComponent` replaced so the list renders inside the panel rather than floating over the page:
+
+```
+<Autocomplete
+  open
+  options={items}
+  PopperComponent={PopperComponent}
+  PaperComponent={PaperComponent}
+  renderInput={(params) => <StyledInput {...params.InputProps} {...params.inputProps} autoFocus />}
+/>
+```
+
+## As a field — in a form
+
+<Canvas of={AutocompleteStories.AsAField} />
+
+Here it is a **TextField** and everything on that page applies: the label sits above, the box is
+outlined, the row reserves 64px. `renderInput` is the whole hook:
+
+```
+<Autocomplete
+  options={projects}
+  renderInput={(params) => <TextField {...params} placeholder={t('search_project')} />}
+/>
+```
+
+<Callout title="renderInput is a TextField, so the field rules hold">
+  It is easy to read `renderInput` as "draw whatever you like". What comes back
+  has to be the product's field — outlined, labelled from above — or the form
+  ends up with one control that does not match the rest. One call site gets this
+  wrong today.
+</Callout>
+
+## Several values at once
+
+<Canvas of={AutocompleteStories.Multiple} />
+
+`multiple` turns the value into chips inside the field, with backspace removing the last one. Used
+for assignees and for the projects a translation memory is shared with.
+
+## Naming it
+
+An `Autocomplete` is a combobox, and a combobox with no name is announced by its value alone.
+**Not one of the thirteen sets `aria-label`**, and only one passes `label`. The rest lean on a
+placeholder, which is a name until the moment somebody types.
+
+## Don't
+
+- **Don't rebuild the popover.** Seven copies exist; the next one should reuse
+  `tg.component/searchSelect`.
+- **Don't return something other than a `TextField` from `renderInput`** unless the control genuinely
+  is not a field.
+- **Don't use `variant="standard"`** in `renderInput`. One call site does.
+- **Don't name it with a placeholder alone.**
+
+## Where the styling lives
+
+Nowhere of ours. `getTheme.ts` has no `MuiAutocomplete` entry and there is no wrapper — all thirteen
+call sites import from `@mui/material` and assemble the rest by hand. That is the reason the seven
+popovers drifted apart; see **Findings**.

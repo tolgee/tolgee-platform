@@ -1,0 +1,127 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as AutocompleteStories from './stories';
+
+<Meta of={AutocompleteStories} name="Findings" />
+
+# Autocomplete — findings
+
+Measured across `webapp/src` on 2026-08-19. **Thirteen call sites, all thirteen importing straight
+from `@mui/material`** — there is no wrapper to bypass, because there is none. A work list: **done
+when it is empty.**
+
+| Shape                       | Call sites |
+| --------------------------- | ---------- |
+| popover — the search select | 7          |
+| a field in a form           | 6          |
+
+## The same popover, written seven times
+
+<Canvas of={AutocompleteStories.FindingSevenCopies} />
+
+Seven files each declare their own `PopperComponent` and `PaperComponent`. Compared with whitespace
+normalized, **`PaperComponent` is identical in all seven** and `PopperComponent` in six of them —
+fourteen copies of two functions, one of which differs for no stated reason.
+
+Four of the seven go further and declare their own `StyledInput`, `StyledInputWrapper` and
+`StyledProgressContainer`. The `StyledInput` is character-for-character the same in all four:
+
+```
+const StyledInput = styled(InputBase)`
+  padding: 5px 4px 3px 16px;
+  flex-grow: 1;
+`;
+```
+
+They also repeat the same six props each time — `open`, `filterOptions={(x) => x}`,
+`clearOnEscape={false}`, `noOptionsText`, `loadingText`, and the same `ListboxProps` padding reset.
+
+<Callout title="Suggested fix">
+  `component/searchSelect` already holds three of the seven. Move the Popper,
+  the Paper and the styled input there, and let the task, assignee, project and
+  branch popovers import them instead of redeclaring them.
+</Callout>
+
+## Twelve of the thirteen are named by a placeholder
+
+| Named by      | Call sites |
+| ------------- | ---------- |
+| `placeholder` | **12**     |
+| `label`       | 1          |
+| `aria-label`  | **0**      |
+
+A placeholder is a name only while the field is empty. For a search select that is the first
+keystroke: the person types, the placeholder goes, and the combobox is left announcing its value
+with nothing saying what the value is for. Two of the twelve take the placeholder from a prop that
+callers may leave unset, so those are nameless outright.
+
+<Callout title="Suggested fix">
+  `aria-label` on the search inputs, taken from the string the trigger button
+  already carries. The six form fields should pass a real `label` and put it
+  above the box, as every other field does.
+</Callout>
+
+## TagInput builds its own field, and two of its lines do not work
+
+<Canvas of={AutocompleteStories.FindingTagInput} />
+
+`renderInput` returns a `div` around a bare `<input>` rather than a `TextField`, and the wrapper
+carries:
+
+```
+<StyledWrapper role="input">
+```
+
+**`input` is not an ARIA role.** There is `textbox`, there is `combobox`, there is `searchbox`;
+`role="input"` is ignored, so the wrapper contributes nothing and the input inside is left
+unlabelled.
+
+The styled input beneath it has:
+
+```
+font-size: 14;
+```
+
+A unitless length is invalid for `font-size`, so the browser drops the declaration and the tag input
+renders at the inherited size rather than 14px. It is the third member of a family already on
+**TextField → Findings** — `font-weight: 500px` there, `400px` in Switch, `font-size: 14` here.
+
+<Callout title="Suggested fix">
+  `font-size: 14px`, and delete `role="input"`. Rendering the field through
+  `TextField` with `InputProps.inputComponent` would remove the need for both.
+</Callout>
+
+## One field is underlined
+
+<Canvas of={AutocompleteStories.FindingUnderlined} />
+
+`ProjectTransferModal` is the only Autocomplete that passes a `label`, and it passes it to a
+`TextField` with `variant="standard"` — so the one call site that names its field also draws the
+wrong one. It is already counted among the 21 underlined fields on **TextField → Findings**.
+
+## The search icon is an end adornment used at the start
+
+`LanguageAutocomplete` builds its magnifier like this:
+
+```
+startAdornment: (
+  <InputAdornment position="end">
+    <SearchSm width={20} height={20} />
+  </InputAdornment>
+),
+```
+
+`position` sets the margins, so an end adornment in the start slot gets the spacing for the wrong
+side. Small, and it is why that field's icon does not sit where the shared `SearchField`'s does.
+
+<Callout title="Suggested fix">
+  `position="start"`. Better still, use `SearchField` — see **TextField →
+  Inventory**.
+</Callout>
+
+## Not wrong
+
+`component/searchSelect` is the right idea and holds the three most-used variants. `multiple` is
+used where several values genuinely apply and nowhere else. Every one of the thirteen sets
+`noOptionsText` and `loadingText` from translations rather than leaving Material UI's English
+defaults — repetitively, but never forgotten.

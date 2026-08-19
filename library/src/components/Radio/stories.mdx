@@ -1,0 +1,56 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as RadioStories from './stories';
+
+<Meta of={RadioStories} />
+
+# Radio
+
+<Upstream docs="react-radio-button" />
+
+One choice out of a few, with every option visible. The product barely uses it — **three call
+sites** — because most either-or choices here are either a **Select** (more than a handful of
+options) or a **ToggleButton** (a view or a mode, changing immediately).
+
+<Callout title="Radio, Select or ToggleButton">
+  Two to five options that all deserve to be read, and the choice is submitted
+  with a form: **Radio**. More options than fit comfortably: **Select**. A
+  choice that takes effect the moment it is clicked and belongs in a toolbar:
+  **ToggleButton**.
+</Callout>
+
+## Always in a RadioGroup
+
+<Canvas of={RadioStories.TheStandard} />
+
+`RadioGroup` is not decoration. It gives the options a shared `name`, makes them exclusive, renders
+`role="radiogroup"`, and — the part people notice — makes the whole set **one stop for the Tab key,
+with the arrow keys moving between options**. Loose `<Radio>` elements look identical and behave
+like a row of unrelated controls.
+
+```
+<RadioGroup name="scope" value={scope} onChange={(e) => setScope(e.target.value)}>
+  <FormControlLabel value="all" control={<Radio />} label={t('all_languages')} />
+  <FormControlLabel value="selected" control={<Radio />} label={t('selected_languages')} />
+</RadioGroup>
+```
+
+## With a description
+
+<Canvas of={RadioStories.AsCards} />
+
+When each option needs a sentence, the radio moves to the right of the title and the description
+sits underneath. `ModeSelector` does this — still inside a `RadioGroup`, with `FormControlLabel`
+carrying the title so the whole card is clickable.
+
+## Don't
+
+- **Don't use loose `<Radio>` elements.** All three call sites do; see Findings.
+- **Don't leave the label unattached.** `FormControlLabel`, not a `Typography` beside it.
+- **Don't use it for a long list.** That is a **Select**.
+- **Don't use it as a filter marker.** A row that is selected is a menu item, not a radio.
+
+## Where the styling lives
+
+Nowhere of ours. `getTheme.ts` has no `MuiRadio` entry.
