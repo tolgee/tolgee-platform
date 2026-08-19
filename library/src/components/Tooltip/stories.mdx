@@ -1,0 +1,74 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as TooltipStories from './stories';
+
+<Meta of={TooltipStories} />
+
+# Tooltip
+
+<Upstream docs="react-tooltip" />
+
+The most used component in the product — **185 call sites in 128 files**, ahead of every button and
+every input. It is also the one doing the most invisible work: 43 icon buttons have no name of their
+own and are announced entirely by the tooltip wrapped around them.
+
+## It is a label, not a place to put text
+
+<Canvas of={TooltipStories.NamingAnIconButton} />
+
+`title` becomes the child's accessible name. That makes a tooltip the cheapest way to name an icon
+button — and it also means the text has to read as a name, not as a sentence:
+
+```
+<Tooltip title={t('delete_key')}>
+  <IconButton size="small"><Trash01 /></IconButton>
+</Tooltip>
+```
+
+The title must be translated. 108 of the 185 use `t()` or `<T>`; the rest build it from data, which
+is fine as long as the words inside come from a key.
+
+## Placement
+
+<Canvas of={TooltipStories.Placement} />
+
+`bottom` is the default and 165 of the 185 leave it alone. The exceptions are worth their prop:
+`bottom-end` (10) keeps a tooltip inside the viewport at the right edge, `bottom-start` (4) at the
+left, and `right` (2) is for the help button in the corner, where there is no room below.
+
+## Interactive or not
+
+<Canvas of={TooltipStories.Interactive} />
+
+By default the pointer can travel onto the tooltip and it stays open, which matters when it holds a
+link. `disableInteractive` closes it as soon as the pointer leaves the trigger — used **54 times**,
+nearly a third, and the right choice whenever the tooltip is only a label.
+
+<Callout title="Reach for disableInteractive on plain labels">
+  A label the user can hover onto is a label that gets in the way. Keep the
+  interactive default only when the tooltip holds something to click or select.
+</Callout>
+
+## The child has to hold a ref
+
+A tooltip attaches its handlers to whatever it wraps, so the child must forward a ref. Every
+Material UI component does; a plain `<div>` does too. A custom component that does not will silently
+never show a tooltip.
+
+Wrapping a disabled button is the common trap — a disabled button fires no events, so the tooltip
+never opens. Wrap it in a `<span>` when the reason for being disabled is what you wanted to explain.
+
+## Don't
+
+- **Don't put a tooltip on something that already says what it does.** A button labelled "Save" does
+  not need one.
+- **Don't hide anything essential in it.** It never appears on touch.
+- **Don't leave `title` empty.** Nothing renders, and the child loses the name it was relying on.
+- **Don't wrap a disabled control directly.** Use a `span`.
+
+## Where the styling lives
+
+`MuiTooltip` in `library/src/theme/getTheme.ts` — 12px text, `borderRadius: 11px`, its own
+background and a soft shadow. One of the few components the theme fully dresses. See
+**Foundations → Component styles**.

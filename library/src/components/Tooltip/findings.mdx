@@ -1,0 +1,60 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as TooltipStories from './stories';
+
+<Meta of={TooltipStories} name="Findings" />
+
+# Tooltip — findings
+
+Measured by hand on 2026-08-18 across 185 call sites. A work list: **done when it is empty.**
+
+## Three tooltips have no title
+
+<Canvas of={TooltipStories.FindingNoTitle} />
+
+An empty `title` renders nothing, which is harmless on its own. It stops being harmless when the
+child was counting on the tooltip for its name — then the control loses the only thing that
+announced it, and nothing on screen shows that anything is missing.
+
+<Callout title="Suggested fix">
+  Give each a translated title, or drop the `Tooltip` and name the child
+  directly.
+</Callout>
+
+## 43 icon buttons depend on this component for their name
+
+Not a defect, but the fact worth writing down: a quarter of all tooltips in the product are the only
+thing naming the control they wrap. Removing a tooltip is therefore never only a visual change.
+
+<Callout title="Suggested fix">
+  None needed — but when a tooltip is removed, check whether an `aria-label` has
+  to take its place. The list of unnamed icon buttons is on **IconButton →
+  Findings**.
+</Callout>
+
+## Interactive by default, 54 times overridden
+
+`disableInteractive` appears on 54 of the 185, which means two thirds keep the interactive default —
+a tooltip the pointer can move onto and that stays open. For a plain label that is the wrong
+default, and it is the reason a tooltip sometimes sits over the thing you were trying to click.
+
+<Callout title="Suggested fix">
+  Set `disableInteractive` on every tooltip that is only a label, and leave the
+  default only where the tooltip holds something to click.
+</Callout>
+
+## Four tooltips control their own open state
+
+`open` is passed on four of them, which takes the behavior out of Material UI's hands — the tooltip
+no longer closes on blur or on Escape unless the surrounding code says so.
+
+<Callout title="Suggested fix">
+  Check each one still closes on Escape and on blur; if it does not, hand
+  control back by dropping `open`.
+</Callout>
+
+## Not wrong
+
+108 titles come from a translation key and the rest are built from data, so nothing hardcodes
+English. 165 leave `placement` alone, and the twenty that do not are all at a viewport edge where
+the default would be clipped.
