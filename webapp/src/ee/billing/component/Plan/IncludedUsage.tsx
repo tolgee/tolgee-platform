@@ -1,4 +1,5 @@
-import { Box, SxProps, Theme } from '@mui/material';
+import { Box, SxProps, Theme, Typography } from '@mui/material';
+import { T } from '@tolgee/react';
 import { PlanType } from './types';
 import {
   IncludedCredits,
@@ -14,6 +15,8 @@ type Props = {
   sx?: SxProps<Theme>;
   className?: string;
   metricType: PlanType['metricType'];
+  onboardingBoostMonths?: number;
+  onboardingBoostCredits?: number;
 };
 
 export const IncludedUsage = ({
@@ -22,7 +25,12 @@ export const IncludedUsage = ({
   highlightColor,
   sx,
   className,
+  onboardingBoostMonths,
+  onboardingBoostCredits,
 }: Props) => {
+  // Both halves are needed for the sentence to say anything: a boost of no credits, or credits for
+  // no months, is not a boost.
+  const hasBoost = Boolean(onboardingBoostMonths && onboardingBoostCredits);
   return (
     <Box
       display="flex"
@@ -81,6 +89,23 @@ export const IncludedUsage = ({
         count={includedUsage?.mtCredits ?? -1}
         highlightColor={highlightColor}
       />
+
+      {hasBoost && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-cy="billing-plan-onboarding-boost"
+        >
+          <T
+            keyName="billing_plan_onboarding_boost"
+            defaultValue="+{credits, number} AI credits for your first {months, plural, one {month} other {# months}}"
+            params={{
+              credits: onboardingBoostCredits!,
+              months: onboardingBoostMonths!,
+            }}
+          />
+        </Typography>
+      )}
     </Box>
   );
 };

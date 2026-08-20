@@ -132,6 +132,7 @@ declare namespace DataCy {
         "billing-plan-included-seats": true;
         "billing-plan-included-strings": true;
         "billing-plan-included-words": true;
+        "billing-plan-onboarding-boost": true;
         "billing-plan-subtitle": true;
         "billing-progress-label-item": true;
         "branch-default-chip": true;
