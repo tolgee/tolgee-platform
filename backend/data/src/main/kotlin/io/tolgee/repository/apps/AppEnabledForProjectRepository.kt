@@ -5,7 +5,9 @@ import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.apps.AppInstall
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -22,10 +24,12 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
     """
     select e.appInstall from AppEnabledForProject e
     where e.project.id = :projectId
-    order by e.appInstall.name
+    order by e.appInstall.app.name
     """,
   )
-  fun findEnabledInstallsByProjectId(projectId: Long): List<AppInstall>
+  fun findEnabledInstallsByProjectId(
+    @Param("projectId") projectId: Long,
+  ): List<AppInstall>
 
   @Query(
     """
@@ -38,7 +42,9 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
     order by p.name, p.id
     """,
   )
-  fun findEnabledProjectsByAppInstallId(appInstallId: Long): List<Project>
+  fun findEnabledProjectsByAppInstallId(
+    @Param("appInstallId") appInstallId: Long,
+  ): List<Project>
 
   fun deleteByAppInstallId(appInstallId: Long)
 
@@ -56,6 +62,8 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
       and e.project.organizationOwner.id <> e.appInstall.app.organization.id
     """,
   )
-  @org.springframework.data.jpa.repository.Modifying
-  fun deleteByAppIdAndProjectOrganizationNotOwner(appEntityId: Long)
+  @Modifying(clearAutomatically = true)
+  fun deleteByAppIdAndProjectOrganizationNotOwner(
+    @Param("appEntityId") appEntityId: Long,
+  )
 }

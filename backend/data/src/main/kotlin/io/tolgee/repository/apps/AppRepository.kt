@@ -2,9 +2,10 @@ package io.tolgee.repository.apps
 
 import io.tolgee.model.apps.App
 import org.springframework.context.annotation.Lazy
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Limit
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -36,7 +37,9 @@ interface AppRepository : JpaRepository<App, Long> {
     order by a.name asc
     """,
   )
-  fun findAvailableToInstall(organizationId: Long): List<App>
+  fun findAvailableToInstall(
+    @Param("organizationId") organizationId: Long,
+  ): List<App>
 
   /**
    * Ids only, ascending, so the manifest reaper can walk every app in bounded batches without
@@ -44,7 +47,7 @@ interface AppRepository : JpaRepository<App, Long> {
    */
   @Query("select a.id from App a where a.id > :afterId order by a.id")
   fun findIdsAfter(
-    afterId: Long,
-    pageable: Pageable,
+    @Param("afterId") afterId: Long,
+    limit: Limit,
   ): List<Long>
 }

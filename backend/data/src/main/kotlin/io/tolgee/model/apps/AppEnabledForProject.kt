@@ -2,7 +2,6 @@ package io.tolgee.model.apps
 
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
-import io.tolgee.model.UserAccount
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
@@ -30,7 +29,4 @@ class AppEnabledForProject : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var project: Project
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  lateinit var author: UserAccount
 }
