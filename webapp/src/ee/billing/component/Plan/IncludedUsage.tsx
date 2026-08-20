@@ -1,4 +1,4 @@
-import { Box, SxProps, Theme } from '@mui/material';
+import { Box, styled, SxProps, Theme } from '@mui/material';
 import { T } from '@tolgee/react';
 import { SecondaryChip } from 'tg.component/common/chips/SecondaryChip';
 import { PlanType } from './types';
@@ -10,6 +10,25 @@ import {
   IncludedWords,
 } from '../IncludedItem';
 import { Stars } from 'tg.component/CustomIcons';
+
+/**
+ * The chip carries a sentence rather than a label, and MUI chips keep their content width, so
+ * without wrapping it spills out of a narrow plan card.
+ */
+const StyledBoostChip = styled(SecondaryChip)`
+  align-self: center;
+  margin-top: 10px;
+  max-width: 100%;
+  height: auto;
+
+  & .MuiChip-label {
+    white-space: normal;
+    text-align: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 12px;
+  }
+`;
 
 type Props = {
   includedUsage: PlanType['includedUsage'];
@@ -93,22 +112,9 @@ export const IncludedUsage = ({
       />
 
       {hasBoost && (
-        <SecondaryChip
+        <StyledBoostChip
           data-cy="billing-plan-onboarding-boost"
           size="small"
-          // A chip carrying a sentence, not a label: without this it keeps its content width and
-          // spills out of a narrow plan card.
-          sx={{
-            alignSelf: 'center',
-            mt: '10px',
-            maxWidth: '100%',
-            height: 'auto',
-            '& .MuiChip-label': {
-              whiteSpace: 'normal',
-              textAlign: 'center',
-              py: '4px',
-            },
-          }}
           icon={<Stars width={16} height={16} />}
           label={
             <T
