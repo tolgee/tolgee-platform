@@ -84,6 +84,17 @@ class AppManifestValidatorTest {
   }
 
   @Test
+  fun `rejects a page icon carrying a URI scheme`() {
+    val exception =
+      assertThrows<BadRequestException> {
+        validator().validate(manifest(pageIcon = "javascript:alert(1)"))
+      }
+    exception.params!!.assert.contains(
+      "project-dashboard-page 'home' icon must be an emoji, a native icon name, or an image URL",
+    )
+  }
+
+  @Test
   fun `an absolute entry on the app's own origin is accepted`() {
     assertDoesNotThrow {
       validator().validate(manifest(entry = "https://app.example.com/deep/page"))
@@ -137,6 +148,7 @@ class AppManifestValidatorTest {
     name: String = "Test App",
     scopes: String = """["translations.view"]""",
     entry: String = "/",
+    pageIcon: String = "🏠",
   ): AppManifestDto =
     parse(
       """
@@ -148,7 +160,7 @@ class AppManifestValidatorTest {
         "scopes": $scopes,
         "modules": {
           "project-dashboard-page": [
-            {"key": "home", "title": "Home", "icon": "🏠", "entry": "$entry"}
+            {"key": "home", "title": "Home", "icon": "$pageIcon", "entry": "$entry"}
           ]
         }
       }

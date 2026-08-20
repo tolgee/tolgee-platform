@@ -77,7 +77,24 @@ class UrlSecurity(
       address.isLinkLocalAddress ||
       address.isAnyLocalAddress ||
       address.isMulticastAddress ||
-      isIpv6UniqueLocal(address)
+      isIpv6UniqueLocal(address) ||
+      isReservedIpv4(address)
+  }
+
+  /**
+   * Ranges [InetAddress] has no predicate for: CGNAT 100.64.0.0/10 (Alibaba/Tencent cloud
+   * metadata endpoints and every Tailscale node live there), 192.0.0.0/24, benchmarking
+   * 198.18.0.0/15, and reserved 240.0.0.0/4 including the broadcast address.
+   */
+  private fun isReservedIpv4(address: InetAddress): Boolean {
+    val bytes = address.address
+    if (bytes.size != 4) return false
+    val first = bytes[0].toInt() and 0xFF
+    val second = bytes[1].toInt() and 0xFF
+    if (first == 100 && second in 64..127) return true
+    if (first == 192 && second == 0 && (bytes[2].toInt() and 0xFF) == 0) return true
+    if (first == 198 && second in 18..19) return true
+    return first >= 240
   }
 
   // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress

@@ -16,8 +16,9 @@ class AppIconResolver {
     icon: String?,
     baseUrl: String,
     errors: MutableList<String>,
+    field: String = "icon",
   ) {
-    resolveInternal(icon, baseUrl).error?.let { errors.add(it) }
+    resolveInternal(icon, baseUrl).error?.let { errors.add("$field $it") }
   }
 
   /** The stored form of a valid icon. Call after [validate] passed. */
@@ -33,11 +34,11 @@ class AppIconResolver {
     val icon = rawIcon?.trim()
     if (icon.isNullOrEmpty()) return Resolution()
     if (icon.length > MAX_ICON_LENGTH) {
-      return Resolution(error = "icon exceeds $MAX_ICON_LENGTH characters")
+      return Resolution(error = "exceeds $MAX_ICON_LENGTH characters")
     }
     if (!icon.contains('/')) {
       if (icon.contains(':')) {
-        return Resolution(error = "icon must be an emoji, a native icon name, or an image URL")
+        return Resolution(error = "must be an emoji, a native icon name, or an image URL")
       }
       return Resolution(value = icon)
     }
@@ -45,10 +46,10 @@ class AppIconResolver {
       try {
         URI(baseUrl).resolve(icon)
       } catch (e: Exception) {
-        return Resolution(error = "invalid icon: ${e.message}")
+        return Resolution(error = "is not a valid URL: ${e.message}")
       }
     if (resolved.scheme?.lowercase() !in HTTP_SCHEMES || resolved.host.isNullOrBlank()) {
-      return Resolution(error = "icon must resolve to an absolute http(s) URL")
+      return Resolution(error = "must resolve to an absolute http(s) URL")
     }
     return Resolution(value = resolved.toString())
   }

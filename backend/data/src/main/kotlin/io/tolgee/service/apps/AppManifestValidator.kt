@@ -118,6 +118,12 @@ class AppManifestValidator(
       if (!seenKeys.add(page.key)) {
         errors.add("duplicate project-dashboard-page key '${page.key}'")
       }
+      appIconResolver.validate(
+        page.icon,
+        manifest.baseUrl,
+        errors,
+        field = "project-dashboard-page '${page.key}' icon",
+      )
       validateEntry(manifest.baseUrl, page.key, page.entry, errors)
     }
   }
