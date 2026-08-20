@@ -14,41 +14,23 @@ jobs:
     name: Test policy 🚦
     runs-on: ubuntu-24.04
     outputs:
-      run-tests: ${{ steps.resolve.outputs.run-tests }}
+      run-tests: ${{ steps.decide.outputs.run-tests }}
     steps:
-      - name: Resolve emergency labels
-        id: resolve
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          # On pull_request the labels ride along on the event. On push they do
-          # not, so ask which PR produced the commit — for a squash merge that
-          # is the PR whose label we want.
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-          REPO: ${{ github.repository }}
-          SHA: ${{ github.sha }}
-        run: |
-          set -uo pipefail
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            labels="$PR_LABELS"
-          elif [ "$EVENT_NAME" = "push" ]; then
-            # A failed lookup must read as "no labels" so the tests still run:
-            # never let a transient API error skip them.
-            labels=$(gh api "repos/$REPO/commits/$SHA/pulls" \
-              --jq '[.[].labels[].name] | join(",")' 2>/dev/null) || labels=""
-          else
-            labels=""
-          fi
-          echo "Labels: ${labels:-<none>}"
+      - uses: actions/checkout@v4
 
-          run=true
-          if [[ ",$labels," == *",skip-all-tests,"* ]]; then
-            run=false
-            echo "skip-all-tests: running nothing, here or in billing."
-          elif [[ ",$labels," == *",test-cloud-only,"* ]]; then
-            run=false
-            echo "test-cloud-only: billing's composed run is the gate instead."
-          fi
+      - name: Resolve emergency labels
+        id: labels
+        uses: ./.github/actions/resolve-test-policy
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Decide
+        id: decide
+        env:
+          EMERGENCY: ${{ steps.labels.outputs.emergency }}
+        run: |
+          if [ "$EMERGENCY" = "true" ]; then run=false; else run=true; fi
+          echo "Emergency: $EMERGENCY -> run-tests=$run"
           echo "run-tests=$run" >> "$GITHUB_OUTPUT"
 
   backend-build:

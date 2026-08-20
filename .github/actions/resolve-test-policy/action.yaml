@@ -1,0 +1,68 @@
+name: Resolve test policy
+description: Reads the emergency test labels off the pull request behind a commit
+
+inputs:
+  sha:
+    description: >-
+      Commit to look up. Empty falls back to the event: payload labels on
+      pull_request, github.sha on push, none otherwise.
+    required: false
+    default: ""
+  github-token:
+    description: Token used for the pull request lookup
+    required: true
+
+outputs:
+  emergency:
+    description: true when either emergency label waived this commit's tests
+    value: ${{ steps.resolve.outputs.emergency }}
+  skip-billing-tests:
+    description: true only for skip-all-tests
+    value: ${{ steps.resolve.outputs.skip-billing-tests }}
+
+runs:
+  using: composite
+  steps:
+    - id: resolve
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        EVENT_NAME: ${{ github.event_name }}
+        PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        REPO: ${{ github.repository }}
+        SHA: ${{ inputs.sha }}
+      run: |
+        set -uo pipefail
+        # A lookup error must read as "no labels", never as a waiver.
+        lookup() {
+          gh api "repos/$REPO/commits/$1/pulls" \
+            --jq '[.[].labels[].name] | join(",")' 2>/dev/null || echo ""
+        }
+
+        if [ -n "$SHA" ]; then
+          labels=$(lookup "$SHA")
+        elif [ "$EVENT_NAME" = "pull_request" ]; then
+          labels="$PR_LABELS"
+        elif [ "$EVENT_NAME" = "push" ]; then
+          labels=$(lookup "$GITHUB_SHA")
+        else
+          # A manual run means "run the tests" — never inherit a waiver from
+          # whatever pull request last touched HEAD.
+          labels=""
+        fi
+        echo "Labels: ${labels:-<none>}"
+
+        emergency=false
+        skip_billing=false
+        if [[ ",$labels," == *",skip-all-tests,"* ]]; then
+          emergency=true
+          skip_billing=true
+          echo "skip-all-tests: nothing gates this release."
+        # test-cloud-only keeps billing's run: it is the only one that builds
+        # platform + ee + billing, so the only one that tests what reaches cloud.
+        elif [[ ",$labels," == *",test-cloud-only,"* ]]; then
+          emergency=true
+          echo "test-cloud-only: billing's composed run is the gate."
+        fi
+        echo "emergency=$emergency" >> "$GITHUB_OUTPUT"
+        echo "skip-billing-tests=$skip_billing" >> "$GITHUB_OUTPUT"

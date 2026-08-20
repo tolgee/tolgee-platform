@@ -106,21 +106,11 @@ jobs:
       - name: Resolve test policy
         id: policy
         if: ${{ steps.version.outputs.VERSION != '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
+        uses: ./.github/actions/resolve-test-policy
+        with:
+          github-token: ${{ github.token }}
           # Not github.sha, which here is the default branch head.
-          SHA: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          set -uo pipefail
-          labels=$(gh api "repos/$REPO/commits/$SHA/pulls" \
-            --jq '[.[].labels[].name] | join(",")' 2>/dev/null) || labels=""
-          echo "Labels: ${labels:-<none>}"
-          skip=false
-          if [[ ",$labels," == *",skip-all-tests,"* ]]; then
-            skip=true
-          fi
-          echo "skip-tests=$skip" >> "$GITHUB_OUTPUT"
+          sha: ${{ github.event.workflow_run.head_sha }}
 
       # --fail-with-body: an input billing does not declare is rejected with 422,
       # which curl otherwise prints while exiting 0 — a release that never
@@ -128,7 +118,7 @@ jobs:
       - name: Trigger Billing repo tests & testing deploy
         if: ${{ steps.version.outputs.VERSION != '' }}
         env:
-          SKIP_TESTS: ${{ steps.policy.outputs.skip-tests }}
+          SKIP_TESTS: ${{ steps.policy.outputs.skip-billing-tests }}
         run: |
           curl --fail-with-body \
             -X POST \
