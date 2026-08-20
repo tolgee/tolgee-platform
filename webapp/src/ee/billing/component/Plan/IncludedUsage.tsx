@@ -1,4 +1,5 @@
-import { Box, SxProps, Theme, Typography } from '@mui/material';
+import { Box, styled, SxProps, Theme } from '@mui/material';
+import { Stars01 } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { PlanType } from './types';
 import {
@@ -8,6 +9,24 @@ import {
   IncludedStrings,
   IncludedWords,
 } from '../IncludedItem';
+
+/**
+ * A temporary bonus rather than a permanent allowance, so it is set apart from the included items
+ * instead of listed among them. Teal-on-teal is the same token pair PlanSubtitle uses.
+ */
+const StyledBoost = styled(Box)`
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: ${({ theme }) => theme.palette.tokens.secondary.main};
+  background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
+`;
 
 type Props = {
   includedUsage: PlanType['includedUsage'];
@@ -91,20 +110,19 @@ export const IncludedUsage = ({
       />
 
       {hasBoost && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          data-cy="billing-plan-onboarding-boost"
-        >
-          <T
-            keyName="billing_plan_onboarding_boost"
-            defaultValue="+{credits, number} AI credits for your first {months, plural, one {month} other {# months}}"
-            params={{
-              credits: onboardingBoostCredits!,
-              months: onboardingBoostMonths!,
-            }}
-          />
-        </Typography>
+        <StyledBoost data-cy="billing-plan-onboarding-boost">
+          <Stars01 width={18} height={18} />
+          <span>
+            <T
+              keyName="billing_plan_onboarding_boost"
+              defaultValue="+{credits, number} MT credits for your first {months, plural, one {month} other {# months}}"
+              params={{
+                credits: onboardingBoostCredits!,
+                months: onboardingBoostMonths!,
+              }}
+            />
+          </span>
+        </StyledBoost>
       )}
     </Box>
   );
