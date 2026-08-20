@@ -9,6 +9,12 @@ import java.net.URI
  * against the base URL — the browser will load it from the app's host directly, so a broken or
  * non-http value must be refused here. A slash-free value must not carry a URI scheme either, or
  * `javascript:x` would be stored as an "emoji".
+ *
+ * An image URL must stay on the app's own origin. Tolgee never fetches the icon — the admin's
+ * browser does, in an `<img>` with no SSRF guard and no CSP restricting `img-src`. An off-origin
+ * URL would let a registered app fire a stored, blind GET from every viewing admin's browser at
+ * an arbitrary host (an internal LAN device, a tracking beacon). Confining it to the origin the
+ * admin already trusts by installing the app removes that.
  */
 @Component
 class AppIconResolver {
@@ -51,7 +57,34 @@ class AppIconResolver {
     if (resolved.scheme?.lowercase() !in HTTP_SCHEMES || resolved.host.isNullOrBlank()) {
       return Resolution(error = "must resolve to an absolute http(s) URL")
     }
+    val base = parseHttpUri(baseUrl)
+    if (base == null || originOf(resolved) != originOf(base)) {
+      return Resolution(error = "must be on the app's own origin")
+    }
     return Resolution(value = resolved.toString())
+  }
+
+  private fun parseHttpUri(value: String): URI? {
+    val uri =
+      try {
+        URI(value)
+      } catch (e: Exception) {
+        return null
+      }
+    if (uri.scheme?.lowercase() !in HTTP_SCHEMES || uri.host.isNullOrBlank()) return null
+    return uri
+  }
+
+  private fun originOf(uri: URI): String? {
+    val host = uri.host?.lowercase() ?: return null
+    val scheme = uri.scheme?.lowercase() ?: return null
+    val port = if (uri.port == -1) defaultPortOf(scheme) else uri.port
+    return "$scheme://$host:$port"
+  }
+
+  private fun defaultPortOf(scheme: String): Int {
+    if (scheme == "https") return 443
+    return 80
   }
 
   private data class Resolution(

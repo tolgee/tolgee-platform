@@ -21,8 +21,13 @@ class AppIconResolverTest {
   }
 
   @Test
-  fun `an absolute http image URL is kept`() {
-    resolve("https://cdn.example.com/logo.png").assert.isEqualTo("https://cdn.example.com/logo.png")
+  fun `an absolute image URL on the app's own origin is kept`() {
+    resolve("https://app.example.com/logo.png").assert.isEqualTo("https://app.example.com/logo.png")
+  }
+
+  @Test
+  fun `an image URL on another origin is refused`() {
+    errorOf("https://cdn.example.com/logo.png").assert.contains("must be on the app's own origin")
   }
 
   @Test
