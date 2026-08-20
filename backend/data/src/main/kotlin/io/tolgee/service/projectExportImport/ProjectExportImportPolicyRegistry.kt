@@ -29,6 +29,10 @@ import io.tolgee.model.UserPreferences
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.apps.App
+import io.tolgee.model.apps.AppEnabledForProject
+import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.apps.AppSecret
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationTrigger
@@ -188,6 +192,10 @@ object ProjectExportImportPolicyRegistry {
         NotificationSetting::class,
         UploadedImage::class,
         TranslationAgency::class,
+        App::class,
+        AppSecret::class,
+        AppInstall::class,
+        AppEnabledForProject::class,
         InstanceId::class,
         ForcedServerDateTime::class,
       )
