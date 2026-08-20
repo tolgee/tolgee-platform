@@ -1,6 +1,6 @@
-import { Box, styled, SxProps, Theme } from '@mui/material';
-import { Stars01 } from '@untitled-ui/icons-react';
+import { Box, SxProps, Theme } from '@mui/material';
 import { T } from '@tolgee/react';
+import { SecondaryChip } from 'tg.component/common/chips/SecondaryChip';
 import { PlanType } from './types';
 import {
   IncludedCredits,
@@ -9,24 +9,7 @@ import {
   IncludedStrings,
   IncludedWords,
 } from '../IncludedItem';
-
-/**
- * A temporary bonus rather than a permanent allowance, so it is set apart from the included items
- * instead of listed among them. Teal-on-teal is the same token pair PlanSubtitle uses.
- */
-const StyledBoost = styled(Box)`
-  display: flex;
-  align-items: center;
-  align-self: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  line-height: 1.25;
-  color: ${({ theme }) => theme.palette.tokens.secondary.main};
-  background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
-`;
+import { Stars } from 'tg.component/CustomIcons';
 
 type Props = {
   includedUsage: PlanType['includedUsage'];
@@ -110,9 +93,24 @@ export const IncludedUsage = ({
       />
 
       {hasBoost && (
-        <StyledBoost data-cy="billing-plan-onboarding-boost">
-          <Stars01 width={18} height={18} />
-          <span>
+        <SecondaryChip
+          data-cy="billing-plan-onboarding-boost"
+          size="small"
+          // A chip carrying a sentence, not a label: without this it keeps its content width and
+          // spills out of a narrow plan card.
+          sx={{
+            alignSelf: 'center',
+            mt: '10px',
+            maxWidth: '100%',
+            height: 'auto',
+            '& .MuiChip-label': {
+              whiteSpace: 'normal',
+              textAlign: 'center',
+              py: '4px',
+            },
+          }}
+          icon={<Stars width={16} height={16} />}
+          label={
             <T
               keyName="billing_plan_onboarding_boost"
               defaultValue="+{credits, number} MT credits for your first {months, plural, one {month} other {# months}}"
@@ -121,8 +119,8 @@ export const IncludedUsage = ({
                 months: onboardingBoostMonths!,
               }}
             />
-          </span>
-        </StyledBoost>
+          }
+        />
       )}
     </Box>
   );
