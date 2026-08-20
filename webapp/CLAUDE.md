@@ -110,12 +110,12 @@ Map each entry from `getVisibleKeys()` to a key in the `keys` array, using the `
 A key appearing multiple times (e.g. repeated buttons) should have multiple entries in `positions`.
 Only provide translations for the base language (English [en]).
 
-The request accepts `name`, `namespace`, `translations` and `screenshots` — **there is no `tags` field**.
-A `tags` array here is silently ignored and the call still returns 200, so tag in a separate step (see below).
+The request accepts `name`, `namespace`, `translations` and `screenshots`.
 
 `resolution` is `OVERRIDE` by default, which overwrites an existing translation. Use
-`EXPECT_NO_CONFLICT` when the keys are meant to be new — the import then fails instead of
-overwriting someone's existing translation, and the response reports `unresolvedConflicts`.
+`EXPECT_NO_CONFLICT` when the keys are meant to be new — a conflicting translation then fails the
+whole request with `400 expect_no_conflict_failed` and writes nothing, and the conflicting keys
+are listed in the error's `params`.
 
 ### 4. Tag Keys as Draft
 
