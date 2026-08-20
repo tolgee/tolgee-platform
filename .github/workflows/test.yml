@@ -7,9 +7,55 @@ on:
   pull_request:
 
 jobs:
+  # Every job below can be skipped, but the run itself must still complete
+  # successfully: Release triggers on `workflow_run` of this workflow, so
+  # suppressing the run outright (a [skip ci] commit, say) means no release.
+  policy:
+    name: Test policy 🚦
+    runs-on: ubuntu-24.04
+    outputs:
+      run-tests: ${{ steps.resolve.outputs.run-tests }}
+    steps:
+      - name: Resolve emergency labels
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          # On pull_request the labels ride along on the event. On push they do
+          # not, so ask which PR produced the commit — for a squash merge that
+          # is the PR whose label we want.
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -uo pipefail
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            labels="$PR_LABELS"
+          elif [ "$EVENT_NAME" = "push" ]; then
+            # A failed lookup must read as "no labels" so the tests still run:
+            # never let a transient API error skip them.
+            labels=$(gh api "repos/$REPO/commits/$SHA/pulls" \
+              --jq '[.[].labels[].name] | join(",")' 2>/dev/null) || labels=""
+          else
+            labels=""
+          fi
+          echo "Labels: ${labels:-<none>}"
+
+          run=true
+          if [[ ",$labels," == *",skip-all-tests,"* ]]; then
+            run=false
+            echo "skip-all-tests: running nothing, here or in billing."
+          elif [[ ",$labels," == *",test-cloud-only,"* ]]; then
+            run=false
+            echo "test-cloud-only: billing's composed run is the gate instead."
+          fi
+          echo "run-tests=$run" >> "$GITHUB_OUTPUT"
+
   backend-build:
     name: Build backend 🏗️
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +78,8 @@ jobs:
   backend-build-without-ee:
     name: Build backend without ee 🏗️
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     permissions:
       contents: read
     steps:
@@ -240,6 +288,8 @@ jobs:
   frontend-build:
     name: Build frontend 🏗️
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -261,6 +311,8 @@ jobs:
   frontend-code-check:
     name: Frontend static check 🪲
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -323,6 +375,8 @@ jobs:
   frontend-test:
     name: Frontend unit tests 🧪
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -346,6 +400,8 @@ jobs:
   frontend-test-without-ee:
     name: Frontend unit tests without ee 🧪
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     permissions:
       contents: read
     steps:
@@ -459,6 +515,8 @@ jobs:
   data-cy-check:
     name: DataCy Check 🏷️
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -489,6 +547,8 @@ jobs:
   e2e-code-checks:
     name: E2E Static Check 🪲
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -512,6 +572,8 @@ jobs:
   e2e-install-deps:
     name: Install E2E dependencies ⬇️
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -543,6 +605,8 @@ jobs:
   backend-code-checks:
     name: Ktlint 🪲
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -557,6 +621,8 @@ jobs:
   email-code-checks:
     name: Email templates static check 🪲
     runs-on: ubuntu-24.04
+    needs: [policy]
+    if: needs.policy.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -661,73 +727,35 @@ jobs:
     runs-on: ubuntu-24.04
     if: always()
     steps:
-      - run: |
-          # Check the results of all jobs
+      # skipped is a pass — the labels skip these on purpose. A job skipped by a
+      # failed dependency is still caught: the dependency itself reports it.
+      - env:
+          RESULTS: |
+            backend-build=${{ needs.backend-build.result }}
+            backend-build-without-ee=${{ needs.backend-build-without-ee.result }}
+            backend-test=${{ needs.backend-test.result }}
+            backend-code-checks=${{ needs.backend-code-checks.result }}
+            email-code-checks=${{ needs.email-code-checks.result }}
+            frontend-build=${{ needs.frontend-build.result }}
+            frontend-code-check=${{ needs.frontend-code-check.result }}
+            frontend-test=${{ needs.frontend-test.result }}
+            frontend-test-without-ee=${{ needs.frontend-test-without-ee.result }}
+            schema-check=${{ needs.schema-check.result }}
+            migration-check=${{ needs.migration-check.result }}
+            data-cy-check=${{ needs.data-cy-check.result }}
+            docker-slim-smoke=${{ needs.docker-slim-smoke.result }}
+            e2e=${{ needs.e2e.result }}
+            e2e-code-checks=${{ needs.e2e-code-checks.result }}
+            e2e-install-deps=${{ needs.e2e-install-deps.result }}
+        run: |
           failed_jobs=()
-
-          if [[ "${{ needs.backend-build.result }}" != "success" ]]; then
-            failed_jobs+=("backend-build")
-          fi
-
-          if [[ "${{ needs.backend-build-without-ee.result }}" != "success" ]]; then
-            failed_jobs+=("backend-build-without-ee")
-          fi
-
-          if [[ "${{ needs.backend-test.result }}" != "success" ]]; then
-            failed_jobs+=("backend-test")
-          fi
-
-          if [[ "${{ needs.backend-code-checks.result }}" != "success" ]]; then
-            failed_jobs+=("backend-code-checks")
-          fi
-
-          if [[ "${{ needs.frontend-build.result }}" != "success" ]]; then
-            failed_jobs+=("frontend-build")
-          fi
-
-          if [[ "${{ needs.frontend-code-check.result }}" != "success" ]]; then
-            failed_jobs+=("frontend-code-check")
-          fi
-
-          if [[ "${{ needs.frontend-test.result }}" != "success" ]]; then
-            failed_jobs+=("frontend-test")
-          fi
-
-          if [[ "${{ needs.frontend-test-without-ee.result }}" != "success" ]]; then
-            failed_jobs+=("frontend-test-without-ee")
-          fi
-
-          if [[ "${{ needs.schema-check.result }}" != "success" ]]; then
-            failed_jobs+=("schema-check")
-          fi
-
-          if [[ "${{ needs.migration-check.result }}" != "success" ]]; then
-            failed_jobs+=("migration-check")
-          fi
-
-          if [[ "${{ needs.data-cy-check.result }}" != "success" ]]; then
-            failed_jobs+=("data-cy-check")
-          fi
-
-          if [[ "${{ needs.docker-slim-smoke.result }}" != "success" ]]; then
-            failed_jobs+=("docker-slim-smoke")
-          fi
-
-          if [[ "${{ needs.e2e.result }}" != "success" ]]; then
-            failed_jobs+=("e2e")
-          fi
-
-          if [[ "${{ needs.e2e-code-checks.result }}" != "success" ]]; then
-            failed_jobs+=("e2e-code-checks")
-          fi
-
-          if [[ "${{ needs.e2e-install-deps.result }}" != "success" ]]; then
-            failed_jobs+=("e2e-install-deps")
-          fi
-
-          if [[ "${{ needs.email-code-checks.result }}" != "success" ]]; then
-            failed_jobs+=("email-code-checks")
-          fi
+          while IFS='=' read -r name result; do
+            [ -z "$name" ] && continue
+            case "$result" in
+              success | skipped) ;;
+              *) failed_jobs+=("$name ($result)") ;;
+            esac
+          done <<< "$RESULTS"
 
           if [[ "${#failed_jobs[@]}" -gt 0 ]]; then
             echo "The following jobs failed: ${failed_jobs[*]}"
