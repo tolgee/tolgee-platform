@@ -5,8 +5,11 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.enums.Scope
+import io.tolgee.service.apps.AppIconResolver
 import io.tolgee.service.apps.AppManifestFetcher
 import io.tolgee.service.apps.AppManifestHttpClient
+import io.tolgee.service.apps.AppManifestValidator
 import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
@@ -21,77 +24,32 @@ import org.mockito.kotlin.whenever
 import tools.jackson.module.kotlin.jacksonObjectMapper
 
 class AppManifestFetcherTest {
-  private val manifestJson =
-    """
-    {
-      "id": "test-app",
-      "name": "Test App",
-      "version": "0.1.0",
-      "baseUrl": "https://app.example.com",
-      "scopes": ["translations.view"],
-      "modules": {
-        "project-dashboard-page": [
-          {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
-        ]
-      }
-    }
-    """.trimIndent()
-
-  private val httpClient =
-    mock<AppManifestHttpClient>().apply {
-      doReturn(manifestJson).whenever(this).fetchBody(anyString())
-    }
-
-  private fun fetcher(allowLocalAddresses: Boolean): AppManifestFetcher {
-    return AppManifestFetcher(
-      httpClient,
-      jacksonObjectMapper(),
-      UrlSecurity(InternalProperties()),
-      AppsProperties().apply { this.allowLocalAddresses = allowLocalAddresses },
-      TolgeeProperties(),
-    )
-  }
-
-  private fun fetcherReturning(
-    json: String,
-    tolgeeProperties: TolgeeProperties = TolgeeProperties(),
-  ): AppManifestFetcher {
-    val client =
-      mock<AppManifestHttpClient>().apply {
-        doReturn(json).whenever(this).fetchBody(anyString())
-      }
-    return AppManifestFetcher(
-      client,
-      jacksonObjectMapper(),
-      UrlSecurity(InternalProperties()),
-      AppsProperties().apply { this.allowLocalAddresses = true },
-      tolgeeProperties,
-    )
-  }
-
   @Test
   fun `rejects a local manifest URL by default, without ever fetching it`() {
+    val client = clientReturning(VALID_MANIFEST)
     val exception =
       assertThrows<BadRequestException> {
-        fetcher(allowLocalAddresses = false).fetch("http://localhost:5181/manifest.json")
+        fetcher(client, allowLocalAddresses = false).fetch("http://localhost:5181/manifest.json")
       }
     exception.code.assert.isEqualTo(Message.URL_NOT_VALID.code)
-    verifyNoInteractions(httpClient)
+    verifyNoInteractions(client)
   }
 
   @Test
   fun `allows a local manifest URL when apps allowLocalAddresses is true`() {
+    val client = clientReturning(VALID_MANIFEST)
     assertDoesNotThrow {
-      fetcher(allowLocalAddresses = true).fetch("http://localhost:5181/manifest.json")
+      fetcher(client).fetch("http://localhost:5181/manifest.json")
     }
-    verify(httpClient).fetchBody("http://localhost:5181/manifest.json")
+    verify(client).fetchBody("http://localhost:5181/manifest.json")
   }
 
   @Test
   fun `accepts a valid dashboard-only manifest`() {
-    val result = assertDoesNotThrow { fetcherReturning(manifestJson).fetch(MANIFEST_URL) }
+    val result = assertDoesNotThrow { fetcher(clientReturning(VALID_MANIFEST)).fetch(MANIFEST_URL) }
     result.manifest.id.assert
       .isEqualTo("test-app")
+    result.scopes.assert.containsExactly(Scope.TRANSLATIONS_VIEW)
     result.manifest.modules.projectDashboardPage!!
       .single()
       .key.assert
@@ -99,49 +57,54 @@ class AppManifestFetcherTest {
   }
 
   @Test
-  fun `rejects a manifest declaring a non-dashboard module as an unsupported feature`() {
-    val json =
-      manifestJson.replace(
-        "\"modules\": {",
-        "\"modules\": {\n\"key-action\": [{\"key\": \"a\", \"type\": \"link\"}],",
-      )
-    val exception = assertThrows<BadRequestException> { fetcherReturning(json).fetch(MANIFEST_URL) }
+  fun `rejects invalid manifest JSON with the parse error and its cause`() {
+    val exception =
+      assertThrows<BadRequestException> { fetcher(clientReturning("{not json")).fetch(MANIFEST_URL) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_INVALID.code)
-    exception.params!!
-      .first()
-      .assert
-      .isEqualTo("unsupported manifest features: key-action")
+    exception.cause.assert.isNotNull
   }
 
   @Test
-  fun `rejects a manifest declaring a top-level decoratorsUrl as an unsupported feature`() {
-    val json = manifestJson.replace("\"scopes\":", "\"decoratorsUrl\": \"https://app.example.com/d\",\n\"scopes\":")
-    val exception = assertThrows<BadRequestException> { fetcherReturning(json).fetch(MANIFEST_URL) }
+  fun `runs the validator on the parsed manifest`() {
+    val json = VALID_MANIFEST.replace("\"name\": \"Test App\",", "\"name\": \"\",")
+    val exception =
+      assertThrows<BadRequestException> { fetcher(clientReturning(json)).fetch(MANIFEST_URL) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_INVALID.code)
-    exception.params!!
-      .first()
-      .assert
-      .isEqualTo("unsupported manifest features: decoratorsUrl")
+    exception.params!!.assert.contains("name must not be blank")
   }
 
   @Test
-  fun `rejects a manifest declaring a top-level webhooks feature`() {
-    val json =
-      manifestJson.replace(
-        "\"scopes\":",
-        "\"webhooks\": {\"url\": \"https://app.example.com/wh\"},\n\"scopes\":",
-      )
-    val exception = assertThrows<BadRequestException> { fetcherReturning(json).fetch(MANIFEST_URL) }
-    exception.code.assert.isEqualTo(Message.APP_MANIFEST_INVALID.code)
-    exception.params!!
-      .first()
-      .assert
-      .isEqualTo("unsupported manifest features: webhooks")
+  fun `resolves the icon into the fetch result`() {
+    val json = VALID_MANIFEST.replace("\"scopes\":", "\"icon\": \"/logo.svg\",\n\"scopes\":")
+    val result = fetcher(clientReturning(json)).fetch(MANIFEST_URL)
+    result.icon.assert.isEqualTo("https://app.example.com/logo.svg")
   }
 
-  @Test
-  fun `rejects a manifest with no dashboard page module`() {
-    val json =
+  private fun clientReturning(json: String): AppManifestHttpClient =
+    mock<AppManifestHttpClient>().apply {
+      doReturn(json).whenever(this).fetchBody(anyString())
+    }
+
+  private fun fetcher(
+    client: AppManifestHttpClient,
+    allowLocalAddresses: Boolean = true,
+    tolgeeProperties: TolgeeProperties = TolgeeProperties(),
+  ): AppManifestFetcher {
+    val iconResolver = AppIconResolver()
+    return AppManifestFetcher(
+      client,
+      jacksonObjectMapper(),
+      UrlSecurity(InternalProperties()),
+      AppsProperties().apply { this.allowLocalAddresses = allowLocalAddresses },
+      AppManifestValidator(tolgeeProperties, iconResolver),
+      iconResolver,
+    )
+  }
+
+  companion object {
+    private const val MANIFEST_URL = "https://example.com/manifest.json"
+
+    private val VALID_MANIFEST =
       """
       {
         "id": "test-app",
@@ -149,50 +112,12 @@ class AppManifestFetcherTest {
         "version": "0.1.0",
         "baseUrl": "https://app.example.com",
         "scopes": ["translations.view"],
-        "modules": {}
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
       }
       """.trimIndent()
-    val exception = assertThrows<BadRequestException> { fetcherReturning(json).fetch(MANIFEST_URL) }
-    exception.code.assert.isEqualTo(Message.APP_MANIFEST_INVALID.code)
-  }
-
-  @Test
-  fun `rejects a manifest whose baseUrl is Tolgee's own front-end origin`() {
-    val properties = TolgeeProperties().apply { frontEndUrl = "https://app.example.com" }
-    val exception =
-      assertThrows<BadRequestException> {
-        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
-      }
-    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
-  }
-
-  @Test
-  fun `rejects a manifest whose baseUrl only matches Tolgee's origin after normalization`() {
-    val properties = TolgeeProperties().apply { frontEndUrl = "https://APP.example.com:443/tolgee" }
-    val exception =
-      assertThrows<BadRequestException> {
-        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
-      }
-    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
-  }
-
-  @Test
-  fun `rejects a manifest whose baseUrl is Tolgee's own API origin`() {
-    val properties = TolgeeProperties().apply { backEndUrl = "https://app.example.com" }
-    val exception =
-      assertThrows<BadRequestException> {
-        fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL)
-      }
-    exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
-  }
-
-  @Test
-  fun `accepts a manifest served from a different host than Tolgee`() {
-    val properties = TolgeeProperties().apply { frontEndUrl = "https://tolgee.example.com" }
-    assertDoesNotThrow { fetcherReturning(manifestJson, properties).fetch(MANIFEST_URL) }
-  }
-
-  companion object {
-    private const val MANIFEST_URL = "https://example.com/manifest.json"
   }
 }

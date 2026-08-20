@@ -26,4 +26,11 @@ class AppsProperties {
         ":::\n\n",
   )
   var allowLocalAddresses: Boolean = false
+
+  @DocProperty(
+    description =
+      "Connect/read timeout in milliseconds for every request Tolgee makes to an app-controlled " +
+        "host (manifest fetches, lifecycle deliveries).",
+  )
+  var requestTimeoutMs: Long = 5000
 }

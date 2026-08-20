@@ -7,15 +7,15 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * The alpha of Tolgee Apps supports exactly one module type: `project-dashboard-page`. Any other
  * top-level property or module key a manifest declares is captured into [unknownProperties] /
- * [AppManifestModules.unknownModules] and rejected by the fetcher, so an app author gets an explicit
- * error rather than silently having an unsupported capability ignored.
+ * [AppManifestModulesDto.unknownModules] and rejected by validation, so an app author gets an
+ * explicit error rather than silently having an unsupported capability ignored.
  */
-data class AppManifest(
+data class AppManifestDto(
   val id: String,
   val name: String,
   val version: String,
   val baseUrl: String,
-  val modules: AppManifestModules,
+  val modules: AppManifestModulesDto,
   val scopes: List<String>? = null,
   /**
    * The app's logo: an emoji, a native Tolgee icon name, or an image URL (absolute, or relative to
@@ -42,9 +42,9 @@ data class AppManifest(
   }
 }
 
-data class AppManifestModules(
+data class AppManifestModulesDto(
   @JsonProperty("project-dashboard-page")
-  val projectDashboardPage: List<ProjectDashboardPageModule>? = null,
+  val projectDashboardPage: List<ProjectDashboardPageModuleDto>? = null,
 ) {
   @get:JsonIgnore
   val unknownModules: MutableSet<String> = mutableSetOf()
@@ -58,7 +58,7 @@ data class AppManifestModules(
   }
 }
 
-data class ProjectDashboardPageModule(
+data class ProjectDashboardPageModuleDto(
   val key: String,
   val title: String,
   val icon: String,

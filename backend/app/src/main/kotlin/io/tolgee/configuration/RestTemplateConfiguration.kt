@@ -64,8 +64,8 @@ class RestTemplateConfiguration {
         .setDefaultConnectionConfig(
           ConnectionConfig
             .custom()
-            .setConnectTimeout(Timeout.ofMilliseconds(APPS_TIMEOUT_MS))
-            .setSocketTimeout(Timeout.ofMilliseconds(APPS_TIMEOUT_MS))
+            .setConnectTimeout(Timeout.ofMilliseconds(appsProperties.requestTimeoutMs))
+            .setSocketTimeout(Timeout.ofMilliseconds(appsProperties.requestTimeoutMs))
             .build(),
         ).build()
 
@@ -78,8 +78,8 @@ class RestTemplateConfiguration {
         .setDefaultRequestConfig(
           RequestConfig
             .custom()
-            .setConnectionRequestTimeout(Timeout.ofMilliseconds(APPS_TIMEOUT_MS))
-            .setResponseTimeout(Timeout.ofMilliseconds(APPS_TIMEOUT_MS))
+            .setConnectionRequestTimeout(Timeout.ofMilliseconds(appsProperties.requestTimeoutMs))
+            .setResponseTimeout(Timeout.ofMilliseconds(appsProperties.requestTimeoutMs))
             .build(),
         ).build()
 
@@ -109,9 +109,5 @@ class RestTemplateConfiguration {
     clientHttpRequestFactory.setConnectTimeout(2000)
     clientHttpRequestFactory.setReadTimeout(2000)
     return clientHttpRequestFactory
-  }
-
-  companion object {
-    const val APPS_TIMEOUT_MS = 5000L
   }
 }

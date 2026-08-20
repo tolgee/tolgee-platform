@@ -28,7 +28,7 @@ class AppManifestHttpClient(
           readBounded(response.body)
         })
       } catch (e: RestClientException) {
-        throw BadRequestException(Message.APP_MANIFEST_FETCH_FAILED, listOf(e.message ?: ""))
+        throw BadRequestException(Message.APP_MANIFEST_FETCH_FAILED, listOf(e.message ?: ""), e)
       }
     return body ?: throw BadRequestException(Message.APP_MANIFEST_FETCH_FAILED)
   }
