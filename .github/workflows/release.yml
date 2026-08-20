@@ -126,3 +126,16 @@ jobs:
             -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
             https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
             -d "{\"ref\":\"main\",\"inputs\":{\"release-version\":\"${{ steps.version.outputs.VERSION }}\",\"skip-tests\":\"$SKIP_TESTS\"}}"
+
+      # Omitting release-version is what makes this signal only: billing runs the
+      # composed suite and its trigger-release job skips itself. Nothing else
+      # covers the cloud composition when skip-all-tests waived billing's run.
+      - name: Trigger Billing tests for signal only
+        if: ${{ steps.version.outputs.VERSION != '' && steps.policy.outputs.skip-billing-tests == 'true' }}
+        run: |
+          curl --fail-with-body \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
+            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
+            -d '{"ref":"main","inputs":{}}'

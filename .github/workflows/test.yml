@@ -5,6 +5,14 @@ on:
   push:
     branches: [main, release]
   pull_request:
+  # Called only by "Test (async)", to run what an emergency label waived.
+  workflow_call:
+    inputs:
+      force-run-tests:
+        description: Run the jobs even when an emergency label waived them
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   # Every job below can be skipped, but the run itself must still complete
@@ -28,9 +36,14 @@ jobs:
         id: decide
         env:
           EMERGENCY: ${{ steps.labels.outputs.emergency }}
+          FORCED: ${{ inputs.force-run-tests }}
         run: |
-          if [ "$EMERGENCY" = "true" ]; then run=false; else run=true; fi
-          echo "Emergency: $EMERGENCY -> run-tests=$run"
+          if [ "$FORCED" = "true" ] || [ "$EMERGENCY" != "true" ]; then
+            run=true
+          else
+            run=false
+          fi
+          echo "Forced: $FORCED, emergency: $EMERGENCY -> run-tests=$run"
           echo "run-tests=$run" >> "$GITHUB_OUTPUT"
 
   backend-build:

@@ -1,0 +1,37 @@
+# Runs the suite an emergency label waived, off the release path.
+#
+# The name is load-bearing: Release subscribes to `workflow_run` of the workflow
+# named "Test", so naming this one "Test" would fire a second release.
+name: Test (async)
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: test-async-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: Test policy 🚦
+    runs-on: ubuntu-24.04
+    outputs:
+      emergency: ${{ steps.labels.outputs.emergency }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve emergency labels
+        id: labels
+        uses: ./.github/actions/resolve-test-policy
+        with:
+          github-token: ${{ github.token }}
+
+  tests:
+    name: Waived tests
+    needs: [policy]
+    if: needs.policy.outputs.emergency == 'true'
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+    with:
+      force-run-tests: true
