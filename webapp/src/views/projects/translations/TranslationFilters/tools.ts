@@ -26,6 +26,8 @@ export type FiltersInternal = {
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
+  filterHasTask?: boolean;
+  filterHasNoTask?: boolean;
   filterDeletedByUserId?: number[];
 
   /*
@@ -37,6 +39,7 @@ export type FiltersInternal = {
   filterTranslationLanguage?: true | string;
   // same for suggestions
   filterSuggestionLanguage?: true | string;
+  filterTaskLanguage?: true | string;
 
   /*
    * this one differs from the two above
@@ -66,6 +69,8 @@ export type AddParams =
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
+  | ['filterHasTask']
+  | ['filterHasNoTask']
   | ['filterDeletedByUserId', number];
 
 export type FilterActions = {
@@ -77,4 +82,5 @@ export type FilterActions = {
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
   showDeletedBy?: boolean;
+  showTaskFilter?: boolean;
 };

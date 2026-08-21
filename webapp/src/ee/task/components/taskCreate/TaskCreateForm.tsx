@@ -18,7 +18,7 @@ import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
 import {
   FilterActions,
-  FiltersType,
+  FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
@@ -63,7 +63,7 @@ type Props = {
   languages: number[];
   setLanguages: (languages: number[]) => void;
   allLanguages: LanguageModel[];
-  filters: FiltersType;
+  filters: FiltersInternal;
   filterActions?: FilterActions;
   stateFilters: TranslationStateType[];
   setStateFilters: (filters: TranslationStateType[]) => void;
@@ -115,6 +115,8 @@ export const TaskCreateForm = ({
             (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
           ),
           filterOutdated: stateFilters.includes('OUTDATED'),
+          filterNeverInTask: Boolean(filters.filterHasNoTask),
+          filterHasBeenInTask: Boolean(filters.filterHasTask),
         },
       };
     })
@@ -241,10 +243,12 @@ export const TaskCreateForm = ({
               <TranslationFilters
                 value={filters}
                 actions={filterActions}
-                selectedLanguages={[]}
+                selectedLanguages={allLanguages.filter((l) =>
+                  languages.includes(l.id)
+                )}
                 projectId={projectId}
                 placeholder={t('create_task_filter_keys_placeholder')}
-                filterOptions={{ keyRelatedOnly: true }}
+                filterOptions={{ keyRelatedOnly: true, showTaskFilter: true }}
                 sx={{ width: '100%', maxWidth: '270px' }}
               />
             )}

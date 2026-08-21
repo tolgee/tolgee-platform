@@ -66,6 +66,11 @@ export {
   getQaChecksFiltersLength,
   getQaChecksFiltersName,
 } from '../ee/qa/components/SubfilterQaChecks';
+export {
+  SubfilterTasks,
+  getTaskFiltersLength,
+  getTaskFiltersName,
+} from '../ee/task/components/SubfilterTasks';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
