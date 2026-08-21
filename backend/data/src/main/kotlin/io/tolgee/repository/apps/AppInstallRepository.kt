@@ -54,13 +54,31 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
   fun countByOrganizationId(organizationId: Long): Long
 
   /**
-   * The organizations that currently have the app installed, for the owner's installations view.
-   * Ordered here (name, then id for ties) because a paged select without a total order can repeat
-   * or drop rows across pages.
+   * Installs of server-wide apps this organization does not own — the ones its projects may enable
+   * on top of the organization's own installs. This organization's own installs are excluded here,
+   * since the caller reads those separately, and the result is ordered deterministically.
    */
   @Query(
     """
-    select distinct i.organization from AppInstall i where i.app.id = :appEntityId
+    select i from AppInstall i
+    join i.app a
+    where a.availableToAllOrganizations = true and i.organization.id <> :organizationId
+    order by a.name, i.id
+    """,
+  )
+  fun findAvailableInstallsForOrganization(
+    @Param("organizationId") organizationId: Long,
+  ): List<AppInstall>
+
+  /**
+   * The organizations that currently have the app installed, for the owner's installations view.
+   * Ordered here (name, then id for ties) because a paged select without a total order can repeat
+   * or drop rows across pages. No `distinct` is needed — the unique (organization, app) constraint
+   * already gives one row per organization — and it would make Postgres reject the entity `order by`.
+   */
+  @Query(
+    """
+    select i.organization from AppInstall i where i.app.id = :appEntityId
       and (:search is null
         or lower(i.organization.name) like lower(concat('%', cast(:search as text), '%'))
         or lower(i.organization.slug) like lower(concat('%', cast(:search as text), '%')))
