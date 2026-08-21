@@ -28,6 +28,11 @@ class AppIconResolverTest {
   }
 
   @Test
+  fun `an absolute image URL on another origin is kept`() {
+    resolve("https://cdn.example.com/logo.png").assert.isEqualTo("https://cdn.example.com/logo.png")
+  }
+
+  @Test
   fun `a blank icon resolves to nothing`() {
     resolve(null).assert.isNull()
     resolve("  ").assert.isNull()
@@ -58,8 +63,8 @@ class AppIconResolverTest {
   @Test
   fun `resolve throws with all errors when the icon is invalid`() {
     val exception =
-      assertThrows<BadRequestException> { AppIconResolver("https://cdn.example.com/logo.png", BASE_URL).resolve() }
-    exception.params!!.assert.contains("must be on the app's own origin")
+      assertThrows<BadRequestException> { AppIconResolver("ftp://cdn.example.com/logo.png", BASE_URL).resolve() }
+    exception.params!!.assert.contains("must resolve to an absolute http(s) URL")
   }
 
   @Test
@@ -67,11 +72,6 @@ class AppIconResolverTest {
     errorOf("javascript://alert(1)").assert.contains("absolute http(s) URL")
     errorOf("file:///etc/passwd").assert.contains("absolute http(s) URL")
     errorOf("data:image/png;base64,AAAA").assert.contains("absolute http(s) URL")
-  }
-
-  @Test
-  fun `an image URL on another origin is refused`() {
-    errorOf("https://cdn.example.com/logo.png").assert.contains("must be on the app's own origin")
   }
 
   @Test

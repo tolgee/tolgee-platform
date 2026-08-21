@@ -151,15 +151,20 @@ class AppManifestValidatorTest {
   }
 
   @Test
-  fun `surfaces an off-origin app icon together with the other errors`() {
+  fun `surfaces an app icon error together with the other errors`() {
     val exception =
       assertThrows<BadRequestException> {
-        validate(manifest(name = "", icon = "https://cdn.evil.com/logo.png"))
+        validate(manifest(name = "", icon = "javascript:alert(1)"))
       }
     exception.params!!.assert.contains(
       "name must not be blank",
-      "icon must be on the app's own origin",
+      "icon must be an emoji, a native icon name, or an image URL",
     )
+  }
+
+  @Test
+  fun `accepts a cross-origin app icon`() {
+    assertDoesNotThrow { validate(manifest(icon = "https://cdn.example.com/logo.png")) }
   }
 
   @Test
