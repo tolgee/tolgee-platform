@@ -272,9 +272,12 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
     state: TaskState,
     type: TaskType,
     number: Long,
-  ) {
+    taskLanguage: Language = englishLanguage,
+    taskKeys: Collection<KeyBuilder> = keysInTask,
+  ): TaskBuilder {
+    lateinit var createdTask: TaskBuilder
     projectBuilder.apply {
-      blockedTask =
+      createdTask =
         addTask {
           this.number = number
           this.name = name
@@ -285,20 +288,54 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
               user,
             )
           project = projectBuilder.self
-          language = englishLanguage
+          language = taskLanguage
           author = projectUser.self
           this.state = state
         }
 
-      keysInTask.forEach {
+      taskKeys.forEach {
         addTaskKey {
-          task = blockedTask.self
+          task = createdTask.self
           key = it.self
           done = true
           author = user
         }
       }
     }
+    blockedTask = createdTask
+    return createdTask
+  }
+
+  fun addKeyWithOwnTask(
+    keyName: String,
+    number: Long,
+    taskLanguage: Language = englishLanguage,
+    type: TaskType = TaskType.TRANSLATE,
+    state: TaskState = TaskState.NEW,
+  ): KeyBuilder {
+    lateinit var createdKey: KeyBuilder
+    projectBuilder.apply {
+      createdKey =
+        addKey(null, keyName) {
+          addTranslation("en", "Translation of $keyName")
+          addTranslation("cs", "Překlad $keyName")
+        }
+      val ownTask =
+        addTask {
+          this.number = number
+          this.name = "Task of $keyName"
+          this.type = type
+          this.state = state
+          project = projectBuilder.self
+          language = taskLanguage
+          author = projectUser.self
+        }
+      addTaskKey {
+        task = ownTask.self
+        key = createdKey.self
+      }
+    }
+    return createdKey
   }
 
   fun createManyOutOfTaskKeys(): List<KeyBuilder> {

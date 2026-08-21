@@ -91,3 +91,10 @@ export type SubfilterQaChecksProps = {
   actions: FilterActions;
   selectedLanguages: LanguageModel[];
 };
+
+export type SubfilterTasksProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+  hideLanguageScope?: boolean;
+};

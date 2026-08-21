@@ -1,14 +1,17 @@
 import { Button, Dialog, DialogTitle, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import {
+  FiltersInternal,
+  FiltersType,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
 import { User } from 'tg.component/UserAccount';
 import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { StateType } from 'tg.constants/translationStates';
@@ -93,13 +96,21 @@ export const TaskCreateDialog = ({
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
-  const [filters, setFilters] = useState<FiltersType>({});
+  const [filters, setFilters] = useState<FiltersInternal>({});
+  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
+  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
+  const selectedLanguageTags = useMemo(
+    () =>
+      languages
+        .map((id) => allLanguages.find((l) => l.id === id)?.tag)
+        .filter((tag): tag is string => Boolean(tag)),
+    [languages, allLanguages]
+  );
   const { filtersQuery, ...actions } = useTranslationFilters({
     filters,
     setFilters,
+    selectedLanguages: selectedLanguageTags,
   });
-  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
-  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
 
   const selectedLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/translations/select-all',
@@ -187,6 +198,8 @@ export const TaskCreateDialog = ({
                   (i) => i !== 'OUTDATED'
                 ) as StateType[],
                 filterOutdated: stateFilters.includes('OUTDATED'),
+                filterNeverInTask: Boolean(filters.filterHasNoTask),
+                filterHasBeenInTask: Boolean(filters.filterHasTask),
               },
               content: {
                 'application/json': { tasks: data },

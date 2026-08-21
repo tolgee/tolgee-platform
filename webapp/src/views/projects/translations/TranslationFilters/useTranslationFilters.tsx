@@ -32,6 +32,14 @@ export const useTranslationFilters = ({
       newLanguages.includes(filters.filterTranslationLanguage)
     ) {
       setFilters({ filterTranslationLanguage: undefined });
+      return;
+    }
+    if (
+      typeof filters.filterTaskLanguage === 'string' &&
+      newLanguages &&
+      !newLanguages.includes(filters.filterTaskLanguage)
+    ) {
+      setFilters({ ...filters, filterTaskLanguage: undefined });
     }
   }
 
@@ -130,6 +138,18 @@ export const useTranslationFilters = ({
           filterHasNoSuggestions: true,
           filterHasSuggestions: undefined,
         });
+      case 'filterHasTask':
+        return setFilters({
+          ...filters,
+          filterHasTask: true,
+          filterHasNoTask: undefined,
+        });
+      case 'filterHasNoTask':
+        return setFilters({
+          ...filters,
+          filterHasNoTask: true,
+          filterHasTask: undefined,
+        });
       case 'filterDeletedByUserId':
         return setFilters({
           ...filters,
@@ -222,6 +242,16 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasNoSuggestions: undefined,
+        });
+      case 'filterHasTask':
+        return setFilters({
+          ...filters,
+          filterHasTask: undefined,
+        });
+      case 'filterHasNoTask':
+        return setFilters({
+          ...filters,
+          filterHasNoTask: undefined,
         });
       case 'filterDeletedByUserId':
         return setFilters({
@@ -346,6 +376,32 @@ export const useTranslationFilters = ({
         if (filters.filterHasNoSuggestions) {
           filtersQuery.filterHasNoSuggestionsInLang = add(
             filtersQuery.filterHasNoSuggestionsInLang,
+            tag
+          );
+        }
+      });
+
+    selectedLanguages
+      .filter((tag) => {
+        switch (filters.filterTaskLanguage) {
+          case undefined:
+            return tag !== baseLang;
+          case true:
+            return true;
+          default:
+            return tag === filters.filterTaskLanguage;
+        }
+      })
+      .forEach((tag) => {
+        if (filters.filterHasTask) {
+          filtersQuery.filterHasTaskInLang = add(
+            filtersQuery.filterHasTaskInLang,
+            tag
+          );
+        }
+        if (filters.filterHasNoTask) {
+          filtersQuery.filterHasNoTaskInLang = add(
+            filtersQuery.filterHasNoTaskInLang,
             tag
           );
         }
