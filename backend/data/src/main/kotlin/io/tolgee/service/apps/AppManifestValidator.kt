@@ -157,9 +157,11 @@ class AppManifestValidator(
    * app served from Tolgee's own origin: such an app shares the dashboard's `localStorage` and can
    * lift the signed-in user's JWT.
    *
-   * When neither Tolgee URL property is configured (a default installation), the origin of the
-   * current HTTP request stands in — during registration that is the origin Tolgee is actually
-   * served on.
+   * The reliable comparison is against `frontEndUrl` / `backEndUrl`; a deployment that wants this
+   * guard to hold must set one of them. When neither is configured the origin of the current HTTP
+   * request stands in, but that is derived from the client-controlled `Host` header — a registrant
+   * can spoof it, so on a bare default installation the fallback is best-effort only, not a
+   * boundary to rely on.
    */
   private fun rejectTolgeeOrigin() {
     val appOrigin = parseAbsoluteHttpUrl(manifest.baseUrl)?.let { originOf(it) } ?: return
