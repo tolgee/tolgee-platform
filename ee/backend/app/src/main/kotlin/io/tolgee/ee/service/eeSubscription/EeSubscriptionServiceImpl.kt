@@ -21,8 +21,10 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.limits.PlanLimitExceededSeatsException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
+import io.tolgee.publicBilling.MetricType
 import io.tolgee.service.InstanceIdService
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -47,6 +49,7 @@ class EeSubscriptionServiceImpl(
   @Lazy
   private val self: EeSubscriptionServiceImpl,
   private val keyService: KeyService,
+  private val organizationStatsService: OrganizationStatsService,
   private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
   private val client: TolgeeCloudLicencingClient,
   private val catchingService: EeSubscriptionErrorCatchingService,
@@ -80,6 +83,7 @@ class EeSubscriptionServiceImpl(
     logger.debug("Setting new licence key for local subscription: $licenseKey. Evicting cache.")
     val seats = userAccountService.countAllEnabled()
     val keys = keyService.countAllOnInstance()
+    val words = organizationStatsService.countAllWordsOnInstance()
     this.findSubscriptionEntity()?.let {
       throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
     }
@@ -98,6 +102,8 @@ class EeSubscriptionServiceImpl(
             seats = seats,
             keys = keys,
             instanceId = instanceIdService.getInstanceId(),
+            words = words,
+            reportedMetrics = REPORTED_METRICS,
           ),
         )
       }
@@ -108,8 +114,11 @@ class EeSubscriptionServiceImpl(
 
   fun prepareSetLicenceKey(licenseKey: String): PrepareSetEeLicenceKeyModel {
     val seats = userAccountService.countAllEnabled()
+    val words = organizationStatsService.countAllWordsOnInstance()
     return catchingService.catchingSpendingLimits {
-      client.prepareSetLicenseKeyRemote(PrepareSetLicenseKeyDto(licenseKey, seats))
+      client.prepareSetLicenseKeyRemote(
+        PrepareSetLicenseKeyDto(licenseKey, seats, words = words, reportedMetrics = REPORTED_METRICS),
+      )
     }
   }
 
@@ -258,6 +267,13 @@ class EeSubscriptionServiceImpl(
   }
 
   companion object {
+    /**
+     * What this instance can measure and report. The cloud reads a missing entry as "this instance
+     * cannot report that metric at all" — an instance released before a metric existed has no way
+     * to claim it.
+     */
+    private val REPORTED_METRICS = setOf(MetricType.KEYS_SEATS, MetricType.HOSTED_WORDS)
+
     private val REMOTE_CHECK_FAILURE_THRESHOLD = Duration.ofDays(2)
   }
 }
