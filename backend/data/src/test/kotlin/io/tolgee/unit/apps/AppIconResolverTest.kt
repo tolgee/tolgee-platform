@@ -1,8 +1,10 @@
 package io.tolgee.unit.apps
 
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.service.apps.AppIconResolver
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class AppIconResolverTest {
   @Test
@@ -40,6 +42,24 @@ class AppIconResolverTest {
   @Test
   fun `a slash-free value carrying a URI scheme is refused`() {
     errorOf("javascript:alert(1)").assert.contains("emoji, a native icon name, or an image URL")
+  }
+
+  @Test
+  fun `a slash-free value carrying markup or whitespace is refused`() {
+    errorOf("<img src=x onerror=alert(1)>").assert.contains("emoji, a native icon name, or an image URL")
+    errorOf("two words").assert.contains("emoji, a native icon name, or an image URL")
+  }
+
+  @Test
+  fun `a malformed image URL is refused`() {
+    errorOf("/logo icon.svg").assert.contains("is not a valid URL")
+  }
+
+  @Test
+  fun `resolve throws with all errors when the icon is invalid`() {
+    val exception =
+      assertThrows<BadRequestException> { AppIconResolver("https://cdn.example.com/logo.png", BASE_URL).resolve() }
+    exception.params!!.assert.contains("must be on the app's own origin")
   }
 
   @Test

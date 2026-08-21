@@ -23,12 +23,13 @@ class AppManifestFetcher(
     urlSecurity.validateUrl(url, allowLocalAddresses = appsProperties.allowLocalAddresses)
     val rawJson = appManifestHttpClient.fetchBody(url)
     val manifest = parseManifest(rawJson)
-    AppManifestValidator(manifest, tolgeeProperties).validate()
+    val iconResolver = AppIconResolver(manifest.icon, manifest.baseUrl)
+    AppManifestValidator(manifest, tolgeeProperties, iconResolver).validate()
     return FetchResult(
       manifest = manifest,
       rawJson = rawJson,
       scopes = Scope.parse(manifest.scopes),
-      icon = AppIconResolver(manifest.icon, manifest.baseUrl).resolve(),
+      icon = iconResolver.resolve(),
     )
   }
 

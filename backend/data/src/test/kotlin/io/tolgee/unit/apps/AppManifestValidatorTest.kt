@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifestDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.service.apps.AppIconResolver
 import io.tolgee.service.apps.AppManifestValidator
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -83,6 +84,18 @@ class AppManifestValidatorTest {
   }
 
   @Test
+  fun `surfaces an off-origin app icon together with the other errors`() {
+    val exception =
+      assertThrows<BadRequestException> {
+        validate(manifest(name = "", icon = "https://cdn.evil.com/logo.png"))
+      }
+    exception.params!!.assert.contains(
+      "name must not be blank",
+      "icon must be on the app's own origin",
+    )
+  }
+
+  @Test
   fun `rejects a page icon carrying a URI scheme`() {
     val exception =
       assertThrows<BadRequestException> {
@@ -143,13 +156,18 @@ class AppManifestValidatorTest {
   private fun validate(
     manifest: AppManifestDto,
     properties: TolgeeProperties = TolgeeProperties(),
-  ) = AppManifestValidator(manifest, properties).validate()
+  ) = AppManifestValidator(
+    manifest,
+    properties,
+    AppIconResolver(manifest.icon, manifest.baseUrl),
+  ).validate()
 
   private fun manifest(
     name: String = "Test App",
     scopes: String = """["translations.view"]""",
     entry: String = "/",
     pageIcon: String = "🏠",
+    icon: String = "🧩",
   ): AppManifestDto =
     parse(
       """
@@ -158,6 +176,7 @@ class AppManifestValidatorTest {
         "name": "$name",
         "version": "0.1.0",
         "baseUrl": "https://app.example.com",
+        "icon": "$icon",
         "scopes": $scopes,
         "modules": {
           "project-dashboard-page": [

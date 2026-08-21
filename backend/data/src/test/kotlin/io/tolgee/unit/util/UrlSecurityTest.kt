@@ -64,10 +64,15 @@ class UrlSecurityTest {
 
   @Test
   fun `blocks reserved IPv4 ranges`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://0.1.2.3/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.100.100.200/latest/meta-data/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.64.0.1/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.0.0.170/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.0.2.5/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.88.99.1/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://198.18.0.1/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://198.51.100.5/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://203.0.113.5/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://240.0.0.1/") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://255.255.255.255/") }
   }

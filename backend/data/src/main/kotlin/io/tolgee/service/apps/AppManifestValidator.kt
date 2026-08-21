@@ -21,6 +21,7 @@ import java.net.URI
 class AppManifestValidator(
   private val manifest: AppManifestDto,
   private val tolgeeProperties: TolgeeProperties,
+  private val appIconResolver: AppIconResolver,
 ) {
   private val errors = mutableListOf<String>()
 
@@ -84,7 +85,7 @@ class AppManifestValidator(
   }
 
   private fun validateIcon() {
-    errors += AppIconResolver(manifest.icon, manifest.baseUrl).collectErrors().map { "icon $it" }
+    errors += appIconResolver.collectErrors().map { "icon $it" }
   }
 
   private fun validateDashboardPages() {
@@ -185,7 +186,7 @@ class AppManifestValidator(
     val uri =
       try {
         URI(value)
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         return null
       }
     if (uri.scheme?.lowercase() !in HTTP_SCHEMES || uri.host.isNullOrBlank()) return null
