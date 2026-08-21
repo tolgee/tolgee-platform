@@ -84,6 +84,73 @@ class AppManifestValidatorTest {
   }
 
   @Test
+  fun `rejects an over-long top-level field`() {
+    val exception = assertThrows<BadRequestException> { validate(manifest(name = "a".repeat(256))) }
+    exception.params!!.assert.contains("name exceeds 255 characters")
+  }
+
+  @Test
+  fun `rejects a non-http baseUrl`() {
+    val json =
+      """
+      {
+        "id": "a", "name": "A", "version": "1", "baseUrl": "ftp://app.example.com",
+        "modules": {
+          "project-dashboard-page": [{"key": "home", "title": "Home", "icon": "x", "entry": "/"}]
+        }
+      }
+      """.trimIndent()
+    val exception = assertThrows<BadRequestException> { validate(parse(json)) }
+    exception.params!!.assert.contains("baseUrl must be an absolute http(s) URL")
+  }
+
+  @Test
+  fun `rejects a manifest declaring no dashboard-page module`() {
+    val json =
+      """
+      {
+        "id": "a", "name": "A", "version": "1", "baseUrl": "https://app.example.com",
+        "modules": {}
+      }
+      """.trimIndent()
+    val exception = assertThrows<BadRequestException> { validate(parse(json)) }
+    exception.params!!.assert.contains("manifest must declare at least one project-dashboard-page module")
+  }
+
+  @Test
+  fun `rejects a blank dashboard-page field`() {
+    val json =
+      """
+      {
+        "id": "a", "name": "A", "version": "1", "baseUrl": "https://app.example.com",
+        "modules": {
+          "project-dashboard-page": [{"key": "home", "title": "", "icon": "x", "entry": "/"}]
+        }
+      }
+      """.trimIndent()
+    val exception = assertThrows<BadRequestException> { validate(parse(json)) }
+    exception.params!!.assert.contains("project-dashboard-page title must not be blank")
+  }
+
+  @Test
+  fun `rejects a malformed dashboard-page entry`() {
+    val exception = assertThrows<BadRequestException> { validate(manifest(entry = "/a b")) }
+    val entryErrors =
+      exception.params!!
+        .map { it.toString() }
+        .filter { it.startsWith("invalid project-dashboard-page 'home' entry") }
+    entryErrors.assert.hasSize(1)
+  }
+
+  @Test
+  fun `rejects a dashboard-page entry that is not an http URL`() {
+    val exception = assertThrows<BadRequestException> { validate(manifest(entry = "mailto:x@example.com")) }
+    exception.params!!.assert.contains(
+      "project-dashboard-page 'home' entry must resolve to an absolute http(s) URL",
+    )
+  }
+
+  @Test
   fun `surfaces an off-origin app icon together with the other errors`() {
     val exception =
       assertThrows<BadRequestException> {
