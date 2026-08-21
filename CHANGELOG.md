@@ -1,3 +1,10 @@
+## [3.218.4](https://github.com/tolgee/tolgee-platform/compare/v3.218.3...v3.218.4) (2026-08-21)
+
+
+### Bug Fixes
+
+* add tooltip and responsive wrapping for long language names ([#3611](https://github.com/tolgee/tolgee-platform/issues/3611)) ([#3657](https://github.com/tolgee/tolgee-platform/issues/3657)) ([4d3755c](https://github.com/tolgee/tolgee-platform/commit/4d3755c1cec65211d9108b7e5a6871dc9f1da887))
+
 ## [3.218.3](https://github.com/tolgee/tolgee-platform/compare/v3.218.2...v3.218.3) (2026-08-18)
 
 
