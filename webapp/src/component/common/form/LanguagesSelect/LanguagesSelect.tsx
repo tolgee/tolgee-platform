@@ -52,8 +52,9 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
     variant: 'menu',
     PaperProps: {
       sx: {
-        width:250,
-      }
+        minWidth: 200,
+        maxWidth: 250,
+      },
     },
     id: `language-select-${props.context}-menu`,
     anchorOrigin: {
