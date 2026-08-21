@@ -6,10 +6,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
-import io.tolgee.service.apps.AppIconResolver
 import io.tolgee.service.apps.AppManifestFetcher
 import io.tolgee.service.apps.AppManifestHttpClient
-import io.tolgee.service.apps.AppManifestValidator
 import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
@@ -89,17 +87,14 @@ class AppManifestFetcherTest {
     client: AppManifestHttpClient,
     allowLocalAddresses: Boolean = true,
     tolgeeProperties: TolgeeProperties = TolgeeProperties(),
-  ): AppManifestFetcher {
-    val iconResolver = AppIconResolver()
-    return AppManifestFetcher(
+  ): AppManifestFetcher =
+    AppManifestFetcher(
       client,
       jacksonObjectMapper(),
       UrlSecurity(InternalProperties()),
       AppsProperties().apply { this.allowLocalAddresses = allowLocalAddresses },
-      AppManifestValidator(tolgeeProperties, iconResolver),
-      iconResolver,
+      tolgeeProperties,
     )
-  }
 
   companion object {
     private const val MANIFEST_URL = "https://example.com/manifest.json"

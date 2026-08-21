@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifestDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.service.apps.AppIconResolver
 import io.tolgee.service.apps.AppManifestValidator
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -25,14 +24,14 @@ class AppManifestValidatorTest {
 
   @Test
   fun `accepts a valid manifest`() {
-    assertDoesNotThrow { validator().validate(manifest()) }
+    assertDoesNotThrow { validate(manifest()) }
   }
 
   @Test
   fun `collects every content error into one rejection`() {
     val exception =
       assertThrows<BadRequestException> {
-        validator().validate(
+        validate(
           manifest(
             name = "",
             scopes = """["not-a-scope"]""",
@@ -61,7 +60,7 @@ class AppManifestValidatorTest {
         }
       }
       """.trimIndent()
-    val exception = assertThrows<BadRequestException> { validator().validate(parse(json)) }
+    val exception = assertThrows<BadRequestException> { validate(parse(json)) }
     exception.params!!.assert.contains("unsupported manifest features: decoratorsUrl, key-action")
   }
 
@@ -79,7 +78,7 @@ class AppManifestValidatorTest {
         }
       }
       """.trimIndent()
-    val exception = assertThrows<BadRequestException> { validator().validate(parse(json)) }
+    val exception = assertThrows<BadRequestException> { validate(parse(json)) }
     exception.params!!.assert.contains("duplicate project-dashboard-page key 'home'")
   }
 
@@ -87,7 +86,7 @@ class AppManifestValidatorTest {
   fun `rejects a page icon carrying a URI scheme`() {
     val exception =
       assertThrows<BadRequestException> {
-        validator().validate(manifest(pageIcon = "javascript:alert(1)"))
+        validate(manifest(pageIcon = "javascript:alert(1)"))
       }
     exception.params!!.assert.contains(
       "project-dashboard-page 'home' icon must be an emoji, a native icon name, or an image URL",
@@ -97,7 +96,7 @@ class AppManifestValidatorTest {
   @Test
   fun `an absolute entry on the app's own origin is accepted`() {
     assertDoesNotThrow {
-      validator().validate(manifest(entry = "https://app.example.com/deep/page"))
+      validate(manifest(entry = "https://app.example.com/deep/page"))
     }
   }
 
@@ -105,7 +104,7 @@ class AppManifestValidatorTest {
   fun `rejects a manifest served from Tolgee's configured origin with its own code`() {
     val properties = TolgeeProperties().apply { frontEndUrl = "https://app.example.com" }
     val exception =
-      assertThrows<BadRequestException> { validator(properties).validate(manifest()) }
+      assertThrows<BadRequestException> { validate(manifest(), properties) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
   }
 
@@ -113,7 +112,7 @@ class AppManifestValidatorTest {
   fun `rejects Tolgee's origin matched only after normalization`() {
     val properties = TolgeeProperties().apply { frontEndUrl = "https://APP.example.com:443/tolgee" }
     val exception =
-      assertThrows<BadRequestException> { validator(properties).validate(manifest()) }
+      assertThrows<BadRequestException> { validate(manifest(), properties) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
   }
 
@@ -126,7 +125,7 @@ class AppManifestValidatorTest {
     RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
 
     val exception =
-      assertThrows<BadRequestException> { validator().validate(manifest()) }
+      assertThrows<BadRequestException> { validate(manifest()) }
     exception.code.assert.isEqualTo(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE.code)
   }
 
@@ -138,11 +137,13 @@ class AppManifestValidatorTest {
     request.serverPort = 443
     RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
 
-    assertDoesNotThrow { validator().validate(manifest()) }
+    assertDoesNotThrow { validate(manifest()) }
   }
 
-  private fun validator(properties: TolgeeProperties = TolgeeProperties()): AppManifestValidator =
-    AppManifestValidator(properties, AppIconResolver())
+  private fun validate(
+    manifest: AppManifestDto,
+    properties: TolgeeProperties = TolgeeProperties(),
+  ) = AppManifestValidator(manifest, properties).validate()
 
   private fun manifest(
     name: String = "Test App",

@@ -1,6 +1,7 @@
 package io.tolgee.service.apps
 
 import io.tolgee.configuration.tolgee.AppsProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifestDto
 import io.tolgee.exceptions.BadRequestException
@@ -16,19 +17,18 @@ class AppManifestFetcher(
   private val objectMapper: ObjectMapper,
   private val urlSecurity: UrlSecurity,
   private val appsProperties: AppsProperties,
-  private val appManifestValidator: AppManifestValidator,
-  private val appIconResolver: AppIconResolver,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   fun fetch(url: String): FetchResult {
     urlSecurity.validateUrl(url, allowLocalAddresses = appsProperties.allowLocalAddresses)
     val rawJson = appManifestHttpClient.fetchBody(url)
     val manifest = parseManifest(rawJson)
-    appManifestValidator.validate(manifest)
+    AppManifestValidator(manifest, tolgeeProperties).validate()
     return FetchResult(
       manifest = manifest,
       rawJson = rawJson,
       scopes = Scope.parse(manifest.scopes),
-      icon = appIconResolver.resolve(manifest.icon, manifest.baseUrl),
+      icon = AppIconResolver(manifest.icon, manifest.baseUrl).resolve(),
     )
   }
 

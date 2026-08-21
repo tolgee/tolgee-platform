@@ -26,14 +26,15 @@ class AppIconResolverTest {
   }
 
   @Test
-  fun `an image URL on another origin is refused`() {
-    errorOf("https://cdn.example.com/logo.png").assert.contains("must be on the app's own origin")
-  }
-
-  @Test
   fun `a blank icon resolves to nothing`() {
     resolve(null).assert.isNull()
     resolve("  ").assert.isNull()
+  }
+
+  @Test
+  fun `a valid icon has no errors`() {
+    errorsOf("🧩").assert.isEmpty()
+    errorsOf("/assets/logo.svg").assert.isEmpty()
   }
 
   @Test
@@ -49,22 +50,21 @@ class AppIconResolverTest {
   }
 
   @Test
-  fun `an over-long icon is refused`() {
-    errorOf("https://cdn.example.com/" + "a".repeat(500)).assert.contains("exceeds")
+  fun `an image URL on another origin is refused`() {
+    errorOf("https://cdn.example.com/logo.png").assert.contains("must be on the app's own origin")
   }
 
   @Test
-  fun `validate collects the same error resolve would hit`() {
-    val errors = mutableListOf<String>()
-    AppIconResolver().validate("file:///etc/passwd", BASE_URL, errors)
-    errors.assert.hasSize(1)
+  fun `an over-long icon is refused`() {
+    errorOf("https://app.example.com/" + "a".repeat(500)).assert.contains("exceeds")
   }
 
-  private fun resolve(icon: String?): String? = AppIconResolver().resolve(icon, BASE_URL)
+  private fun resolve(icon: String?): String? = AppIconResolver(icon, BASE_URL).resolve()
+
+  private fun errorsOf(icon: String?): List<String> = AppIconResolver(icon, BASE_URL).collectErrors()
 
   private fun errorOf(icon: String): String {
-    val errors = mutableListOf<String>()
-    AppIconResolver().validate(icon, BASE_URL, errors)
+    val errors = errorsOf(icon)
     errors.assert.hasSize(1)
     return errors.single()
   }

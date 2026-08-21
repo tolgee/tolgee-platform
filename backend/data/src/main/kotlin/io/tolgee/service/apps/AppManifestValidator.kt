@@ -3,9 +3,9 @@ package io.tolgee.service.apps
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppManifestDto
+import io.tolgee.dtos.apps.ProjectDashboardPageModuleDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.Scope
-import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import java.net.URI
@@ -15,34 +15,33 @@ import java.net.URI
  * together as one [Message.APP_MANIFEST_INVALID], so the app author fixes the manifest in one
  * round instead of one error at a time. The same-origin rejection keeps its own code — it is a
  * security refusal, not a fixable content error.
+ *
+ * A new instance validates a single manifest, accumulating problems in [errors].
  */
-@Component
 class AppManifestValidator(
+  private val manifest: AppManifestDto,
   private val tolgeeProperties: TolgeeProperties,
-  private val appIconResolver: AppIconResolver,
 ) {
-  fun validate(manifest: AppManifestDto) {
-    val errors = mutableListOf<String>()
-    validateStringFields(manifest, errors)
-    validateUnsupportedFeatures(manifest, errors)
-    validateScopes(manifest, errors)
-    validateBaseUrl(manifest, errors)
-    validateDashboardPages(manifest, errors)
-    appIconResolver.validate(manifest.icon, manifest.baseUrl, errors)
+  private val errors = mutableListOf<String>()
+
+  fun validate() {
+    validateStringFields()
+    validateUnsupportedFeatures()
+    validateScopes()
+    validateBaseUrl()
+    validateDashboardPages()
+    validateIcon()
     if (errors.isNotEmpty()) {
       throw BadRequestException(Message.APP_MANIFEST_INVALID, errors)
     }
-    rejectTolgeeOrigin(manifest)
+    rejectTolgeeOrigin()
   }
 
   /**
    * The columns backing these fields are `VARCHAR(255)`; without this an over-long value from a
    * third-party manifest would only fail at insert time, as a 500.
    */
-  private fun validateStringFields(
-    manifest: AppManifestDto,
-    errors: MutableList<String>,
-  ) {
+  private fun validateStringFields() {
     mapOf(
       "id" to manifest.id,
       "name" to manifest.name,
@@ -63,20 +62,14 @@ class AppManifestValidator(
    * (e.g. `webhooks`, `decoratorsUrl`) or module key is rejected here so the app author sees an
    * explicit error instead of a silently-ignored capability.
    */
-  private fun validateUnsupportedFeatures(
-    manifest: AppManifestDto,
-    errors: MutableList<String>,
-  ) {
+  private fun validateUnsupportedFeatures() {
     val unsupported = manifest.unknownProperties + manifest.modules.unknownModules
     if (unsupported.isNotEmpty()) {
       errors.add("unsupported manifest features: ${unsupported.sorted().joinToString(", ")}")
     }
   }
 
-  private fun validateScopes(
-    manifest: AppManifestDto,
-    errors: MutableList<String>,
-  ) {
+  private fun validateScopes() {
     try {
       Scope.parse(manifest.scopes)
     } catch (e: BadRequestException) {
@@ -84,19 +77,17 @@ class AppManifestValidator(
     }
   }
 
-  private fun validateBaseUrl(
-    manifest: AppManifestDto,
-    errors: MutableList<String>,
-  ) {
+  private fun validateBaseUrl() {
     if (parseAbsoluteHttpUrl(manifest.baseUrl) == null) {
       errors.add("baseUrl must be an absolute http(s) URL")
     }
   }
 
-  private fun validateDashboardPages(
-    manifest: AppManifestDto,
-    errors: MutableList<String>,
-  ) {
+  private fun validateIcon() {
+    errors += AppIconResolver(manifest.icon, manifest.baseUrl).collectErrors().map { "icon $it" }
+  }
+
+  private fun validateDashboardPages() {
     val pages = manifest.modules.projectDashboardPage
     if (pages.isNullOrEmpty()) {
       errors.add("manifest must declare at least one project-dashboard-page module")
@@ -105,27 +96,33 @@ class AppManifestValidator(
 
     val seenKeys = mutableSetOf<String>()
     pages.forEach { page ->
-      mapOf(
-        "key" to page.key,
-        "title" to page.title,
-        "icon" to page.icon,
-        "entry" to page.entry,
-      ).forEach { (field, value) ->
-        if (value.isBlank()) {
-          errors.add("project-dashboard-page $field must not be blank")
-        }
-      }
+      validatePageFields(page)
       if (!seenKeys.add(page.key)) {
         errors.add("duplicate project-dashboard-page key '${page.key}'")
       }
-      appIconResolver.validate(
-        page.icon,
-        manifest.baseUrl,
-        errors,
-        field = "project-dashboard-page '${page.key}' icon",
-      )
-      validateEntry(manifest.baseUrl, page.key, page.entry, errors)
+      validatePageIcon(page)
+      validateEntry(page.key, page.entry)
     }
+  }
+
+  private fun validatePageFields(page: ProjectDashboardPageModuleDto) {
+    mapOf(
+      "key" to page.key,
+      "title" to page.title,
+      "icon" to page.icon,
+      "entry" to page.entry,
+    ).forEach { (field, value) ->
+      if (value.isBlank()) {
+        errors.add("project-dashboard-page $field must not be blank")
+      }
+    }
+  }
+
+  private fun validatePageIcon(page: ProjectDashboardPageModuleDto) {
+    errors +=
+      AppIconResolver(page.icon, manifest.baseUrl)
+        .collectErrors()
+        .map { "project-dashboard-page '${page.key}' icon $it" }
   }
 
   /**
@@ -134,12 +131,10 @@ class AppManifestValidator(
    * to Tolgee's own origin, which only [rejectTolgeeOrigin]s the base URL).
    */
   private fun validateEntry(
-    baseUrl: String,
     pageKey: String,
     entry: String,
-    errors: MutableList<String>,
   ) {
-    val base = parseAbsoluteHttpUrl(baseUrl) ?: return
+    val base = parseAbsoluteHttpUrl(manifest.baseUrl) ?: return
     val resolved =
       try {
         base.resolve(entry)
@@ -165,7 +160,7 @@ class AppManifestValidator(
    * current HTTP request stands in — during registration that is the origin Tolgee is actually
    * served on.
    */
-  private fun rejectTolgeeOrigin(manifest: AppManifestDto) {
+  private fun rejectTolgeeOrigin() {
     val appOrigin = parseAbsoluteHttpUrl(manifest.baseUrl)?.let { originOf(it) } ?: return
     if (appOrigin in tolgeeOrigins()) {
       throw BadRequestException(Message.APP_MANIFEST_SAME_ORIGIN_AS_TOLGEE, listOf(appOrigin))
