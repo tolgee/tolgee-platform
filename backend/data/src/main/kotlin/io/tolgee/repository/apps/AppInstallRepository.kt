@@ -63,7 +63,7 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
    * the enablement row id for this project (null when not enabled), in one projection query.
    */
   @Query(
-    """
+    value = """
     select new io.tolgee.dtos.apps.ProjectAppView(
       i.id, i.app.appId, i.app.name, i.app.version, i.app.baseUrl, i.app.manifestJson,
       (select e.id from AppEnabledForProject e where e.appInstall = i and e.project.id = :projectId)
@@ -72,11 +72,13 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
     where i.organization.id = :organizationId
     order by i.app.name, i.id
     """,
+    countQuery = "select count(i) from AppInstall i where i.organization.id = :organizationId",
   )
   fun findProjectAppViews(
     @Param("projectId") projectId: Long,
     @Param("organizationId") organizationId: Long,
-  ): List<io.tolgee.dtos.apps.ProjectAppView>
+    pageable: Pageable,
+  ): Page<io.tolgee.dtos.apps.ProjectAppView>
 
   @Query("select i from AppInstall i where i.app.id = :appEntityId")
   fun findAllByRegisteredAppId(

@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
 import io.tolgee.model.enums.Scope
@@ -9,8 +10,12 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,6 +33,7 @@ class ProjectAppsController(
   private val projectHolder: ProjectHolder,
   private val appEnablementService: AppEnablementService,
   private val projectAppModelAssembler: ProjectAppModelAssembler,
+  private val pagedProjectAppsAssembler: PagedResourcesAssembler<ProjectAppView>,
 ) {
   @GetMapping
   @RequiresProjectPermissions([Scope.APPS_MANAGE])
@@ -41,9 +47,10 @@ class ProjectAppsController(
   )
   fun list(
     @PathVariable projectId: Long,
-  ): CollectionModel<ProjectAppModel> {
-    val views = appEnablementService.listAppsForProject(projectHolder.projectEntity)
-    return CollectionModel.of(views.map { projectAppModelAssembler.toModel(it) })
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<ProjectAppModel> {
+    val page = appEnablementService.listAppsForProject(projectHolder.projectEntity, pageable)
+    return pagedProjectAppsAssembler.toModel(page, projectAppModelAssembler)
   }
 
   @GetMapping("/enabled")

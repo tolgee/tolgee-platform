@@ -3,6 +3,7 @@ package io.tolgee.service.apps
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.testing.assert
+import org.springframework.data.domain.Pageable
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -76,7 +77,7 @@ class AppEnablementConcurrencyTest : AbstractSpringTest() {
 
     executeInNewTransaction(platformTransactionManager) {
       appEnablementService
-        .listAppsForProject(testData.projectBuilder.self)
+        .listAppsForProject(testData.projectBuilder.self, Pageable.unpaged())
         .single()
         .enabled.assert
         .isEqualTo(true)

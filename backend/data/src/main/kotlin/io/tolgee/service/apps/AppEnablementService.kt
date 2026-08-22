@@ -8,6 +8,8 @@ import io.tolgee.model.apps.AppInstall
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
 import io.tolgee.repository.apps.AppInstallRepository
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -71,8 +73,11 @@ class AppEnablementService(
   }
 
   @Transactional(readOnly = true)
-  fun listAppsForProject(project: Project): List<ProjectAppView> {
-    return appInstallRepository.findProjectAppViews(project.id, project.organizationOwner.id)
+  fun listAppsForProject(
+    project: Project,
+    pageable: Pageable,
+  ): Page<ProjectAppView> {
+    return appInstallRepository.findProjectAppViews(project.id, project.organizationOwner.id, pageable)
   }
 
   @Transactional(readOnly = true)
