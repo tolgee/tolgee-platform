@@ -1,3 +1,10 @@
+## [3.218.5](https://github.com/tolgee/tolgee-platform/compare/v3.218.4...v3.218.5) (2026-08-22)
+
+
+### Bug Fixes
+
+* drop httpclient5 5.4.4 pin, use Spring Boot managed version ([#3865](https://github.com/tolgee/tolgee-platform/issues/3865)) ([fcee7a3](https://github.com/tolgee/tolgee-platform/commit/fcee7a3877d78e39c5a1a3f599b9a091244b9073))
+
 ## [3.218.4](https://github.com/tolgee/tolgee-platform/compare/v3.218.3...v3.218.4) (2026-08-21)
 
 
