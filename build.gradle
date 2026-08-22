@@ -157,6 +157,7 @@ subprojects {
 
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
+    ext['netty.version'] = nettyVersion
 
     // The transitive Jackson 2 stack (pulled in by swagger/springdoc for schema generation) is pinned
     // to a vulnerable 2.21.4 by Spring's dependency management; override it to the patched 2.21.5
