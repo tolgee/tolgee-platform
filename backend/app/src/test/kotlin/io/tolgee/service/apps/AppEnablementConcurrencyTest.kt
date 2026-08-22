@@ -3,7 +3,6 @@ package io.tolgee.service.apps
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.testing.assert
-import org.springframework.data.domain.Pageable
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.Pageable
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 class AppEnablementConcurrencyTest : AbstractSpringTest() {
