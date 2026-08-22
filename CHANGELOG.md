@@ -1,3 +1,10 @@
+## [3.218.6](https://github.com/tolgee/tolgee-platform/compare/v3.218.5...v3.218.6) (2026-08-22)
+
+
+### Bug Fixes
+
+* bump netty to 4.2.17 via Spring dependency-management property ([#3866](https://github.com/tolgee/tolgee-platform/issues/3866)) ([0e7563f](https://github.com/tolgee/tolgee-platform/commit/0e7563fbd8e90c86a6043c6de9ed56892cdb1d18)), closes [#3865](https://github.com/tolgee/tolgee-platform/issues/3865)
+
 ## [3.218.5](https://github.com/tolgee/tolgee-platform/compare/v3.218.4...v3.218.5) (2026-08-22)
 
 
