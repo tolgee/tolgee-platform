@@ -68,6 +68,15 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
+      - name: Refresh Snyk container snapshot
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        continue-on-error: true
+        run: |
+          npm i -g snyk
+          snyk container monitor tolgee/tolgee:latest --org=jancizmar
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: ./gradlew packResources
