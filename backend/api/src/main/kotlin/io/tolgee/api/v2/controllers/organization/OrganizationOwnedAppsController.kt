@@ -50,8 +50,8 @@ class OrganizationOwnedAppsController(
     description =
       "Registers the app described by the manifest and, unless `install` is false, installs it for " +
         "the organization. The organization becomes the app's owner, and the response is the only " +
-        "place the app-level credentials are ever disclosed. When the app is already registered, it " +
-        "is only installed and no app-level credentials are returned.",
+        "place the app-level credentials are ever disclosed. When the app is already registered the " +
+        "call fails with `app_already_registered`; installing an existing app is the install endpoint.",
   )
   fun register(
     @PathVariable organizationId: Long,

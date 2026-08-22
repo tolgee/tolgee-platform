@@ -24,7 +24,7 @@ import tools.jackson.databind.JsonNode
  * reaches every organization that installed the app and revokes its credentials in one operation,
  * which is what makes a compromised release recoverable without going tenant by tenant.
  */
-class AppOwnerRemovalTest : AuthorizedControllerTest() {
+class OwnedAppRemovalTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appInstallService: AppInstallService
 
@@ -54,7 +54,7 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
     userAccount = testData.user
     val registered = register(testData.organization.id)
     appEntityId = registered.at("/id").asLong()
-    appAvailabilityService.setAvailableToAll(appEntityId, true)
+    appAvailabilityService.setAvailableToAll(appEntityId)
 
     userAccount = testData.otherOwner
     otherInstallId = install(testData.otherOrganization.id).at("/id").asLong()
@@ -79,7 +79,7 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `an installing organization uninstalling only removes itself`() {
+  fun `an organization uninstalling only removes itself`() {
     userAccount = testData.otherOwner
     performAuthDelete("${installUrl(testData.otherOrganization.id)}/$otherInstallId").andIsOk
 
@@ -98,12 +98,18 @@ class AppOwnerRemovalTest : AuthorizedControllerTest() {
 
   private fun register(organizationId: Long): JsonNode =
     objectMapper.readTree(
-      performAuthPost(ownedUrl(organizationId), manifestBody()).andIsOk.andReturn().response.contentAsString,
+      performAuthPost(ownedUrl(organizationId), manifestBody())
+        .andIsOk
+        .andReturn()
+        .response.contentAsString,
     )
 
   private fun install(organizationId: Long): JsonNode =
     objectMapper.readTree(
-      performAuthPost(installUrl(organizationId), manifestBody()).andIsOk.andReturn().response.contentAsString,
+      performAuthPost(installUrl(organizationId), manifestBody())
+        .andIsOk
+        .andReturn()
+        .response.contentAsString,
     )
 
   private fun installUrl(organizationId: Long) = "/v2/organizations/$organizationId/apps"

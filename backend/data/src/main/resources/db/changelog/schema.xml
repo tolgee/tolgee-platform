@@ -6102,11 +6102,6 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="jcizmar" id="1787000000000-6">
-        <comment>Availability becomes a set: drop the all-or-owner boolean in favor of the app_availability
-            join table with a null-organization sentinel meaning "available to all".</comment>
-        <dropColumn columnName="available_to_all_organizations" tableName="app"/>
-    </changeSet>
     <changeSet author="jcizmar" id="1787000000000-7">
         <createTable tableName="app_availability">
             <column name="id" type="BIGINT">
@@ -6150,5 +6145,32 @@
                                  referencedTableName="organization"
                                  onDelete="CASCADE"
                                  validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1787000000000-8" runInTransaction="false">
+        <comment>At most one all-organizations sentinel per app. A partial unique index is used because the
+            plain unique constraint on (app_id, organization_id) does not restrain rows whose
+            organization_id is null.</comment>
+        <sql>CREATE UNIQUE INDEX app_availability_all_sentinel_unique ON app_availability (app_id) WHERE organization_id IS NULL</sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS app_availability_all_sentinel_unique</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jcizmar" id="1787000000000-9">
+        <comment>Carry the dropped available_to_all_organizations boolean into the new set: one sentinel row
+            for each app that was available to all. Runs before the column drop below.</comment>
+        <sql>
+            INSERT INTO app_availability (id, created_at, updated_at, app_id, organization_id)
+            SELECT nextval('hibernate_sequence'), now(), now(), a.id, NULL
+            FROM app a
+            WHERE a.available_to_all_organizations = true
+        </sql>
+        <rollback>
+            <sql>DELETE FROM app_availability WHERE organization_id IS NULL</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jcizmar" id="1787000000000-6">
+        <comment>Availability becomes a set: drop the all-or-owner boolean in favor of the app_availability
+            join table with a null-organization sentinel meaning "available to all".</comment>
+        <dropColumn columnName="available_to_all_organizations" tableName="app"/>
     </changeSet>
 </databaseChangeLog>

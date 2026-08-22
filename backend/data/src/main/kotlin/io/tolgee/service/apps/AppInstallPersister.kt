@@ -21,12 +21,15 @@ class AppInstallPersister(
   private val appService: AppService,
   private val appInstallPrincipalService: AppInstallPrincipalService,
   private val appsLimitGuard: AppsLimitGuard,
+  private val appRegisterInserter: AppRegisterInserter,
   private val entityManager: EntityManager,
 ) : Logging {
   /**
-   * Registers the app if nobody has yet - making [organizationId] its owner - and, when [install] is
-   * true, installs it in the same transaction, so a failed install never leaves behind an app its
-   * owner has no install of.
+   * Registers the app - making [organizationId] its owner - and, when [install] is true, installs it
+   * in the same transaction, so a failed install never leaves behind an app its owner has no install
+   * of. Registering an app somebody already registered is refused: installing an existing app is the
+   * separate install endpoint. A concurrent duplicate loses the unique-constraint race, and the
+   * non-transactional caller ([AppInstallService.register]) turns that into the same outcome.
    */
   @Transactional
   fun registerAndMaybeInstall(
@@ -35,17 +38,17 @@ class AppInstallPersister(
     fetched: AppManifestFetcher.FetchResult,
     install: Boolean,
   ): AppInstallService.RegisterAppResult {
-    appsLimitGuard.checkAppsLimit(
-      organizationId,
-      registersNewApp = appService.find(fetched.manifest.id) == null,
-    )
-    val resolved = appService.registerIfAbsent(organizationId, manifestUrl, fetched)
-    val app = resolved.app
+    if (appService.find(fetched.manifest.id) != null) {
+      throw BadRequestException(Message.APP_ALREADY_REGISTERED)
+    }
+    appsLimitGuard.checkAppsLimit(organizationId, registersNewApp = true)
+    val inserted = appRegisterInserter.insert(organizationId, manifestUrl, fetched)
+    val app = inserted.app
     if (!install) {
       return AppInstallService.RegisterAppResult(
         app = appService.summarize(app),
         appEntityId = app.id,
-        appCredentials = resolved.credentials,
+        appCredentials = inserted.credentials,
         install = null,
       )
     }
@@ -53,7 +56,7 @@ class AppInstallPersister(
     return AppInstallService.RegisterAppResult(
       app = appService.summarize(app),
       appEntityId = app.id,
-      appCredentials = resolved.credentials,
+      appCredentials = inserted.credentials,
       install = installEntity,
     )
   }

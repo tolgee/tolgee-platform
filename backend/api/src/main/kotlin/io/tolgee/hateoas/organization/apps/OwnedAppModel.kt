@@ -25,6 +25,8 @@ open class OwnedAppModel(
   val clientId: String?,
   @Schema(description = "How many organizations, this one included, currently have the app installed")
   val installCount: Long,
+  @Schema(description = "Whether a server admin has offered the app to every organization")
+  val availableToAll: Boolean,
   val manifestLastCheckedAt: Long?,
   @Schema(description = "Consecutive failed manifest checks; zero while the manifest is answering")
   val manifestFailureCount: Int,

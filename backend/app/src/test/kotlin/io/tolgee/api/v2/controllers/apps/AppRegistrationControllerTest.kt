@@ -138,7 +138,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `two organizations installing the same manifest get one app and two installs`() {
     val first = register(testData.organization.id)
-    appAvailabilityService.setAvailableToAll(first.at("/id").asLong(), true)
+    appAvailabilityService.setAvailableToAll(first.at("/id").asLong())
 
     userAccount = testData.otherOwner
     val secondInstallId =
@@ -162,7 +162,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `an organization installing somebody else's app never sees any credentials`() {
-    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong(), true)
+    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong())
 
     userAccount = testData.otherOwner
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
@@ -174,20 +174,21 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   }
 
   /**
-   * Registering an app somebody else already owns must not hand over its credentials either - the
-   * install is created, the ownership is not.
+   * Registering is only ever for a new app. Registering an app somebody already registered is
+   * refused: installing an existing app is the separate install endpoint, and register must never
+   * hand a second organization ownership or credentials of an app it did not publish.
    */
   @Test
-  fun `registering an already-registered app only installs it`() {
-    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong(), true)
+  fun `registering an already-registered app is refused`() {
+    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong())
 
     userAccount = testData.otherOwner
-    performAuthPost(ownedUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
-      node("clientSecret").isNull()
-      node("installId").isNumber
-    }
+    performAuthPost(ownedUrl(testData.otherOrganization.id), manifestBody())
+      .andIsBadRequest
+      .andAssertThatJson { node("code").isEqualTo("app_already_registered") }
 
     ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
+    appInstallService.findAll(testData.otherOrganization.id).assert.isEmpty()
   }
 
   @Test
@@ -200,7 +201,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
       .andAssertThatJson { node("code").isEqualTo("app_not_available_for_organization") }
     appInstallService.findAll(testData.otherOrganization.id).assert.isEmpty()
 
-    appAvailabilityService.setAvailableToAll(appEntityId, true)
+    appAvailabilityService.setAvailableToAll(appEntityId)
 
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk
     appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
@@ -209,7 +210,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `a specific-organization grant lets exactly that organization install`() {
     val appEntityId = register(testData.organization.id).at("/id").asLong()
-    appAvailabilityService.setAvailableToOrganization(appEntityId, testData.otherOrganization.id, true)
+    appAvailabilityService.addAvailableOrganization(appEntityId, testData.otherOrganization.id)
 
     userAccount = testData.otherOwner
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk

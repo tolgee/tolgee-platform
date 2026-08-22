@@ -13,7 +13,11 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface AppInstallRepository : JpaRepository<AppInstall, Long> {
-  fun findAllByOrganizationId(organizationId: Long): List<AppInstall>
+  /** The organization's installed apps; app is fetched so the list assembler does not lazy-load per row. */
+  @Query("select i from AppInstall i join fetch i.app where i.organization.id = :organizationId")
+  fun findAllByOrganizationId(
+    @Param("organizationId") organizationId: Long,
+  ): List<AppInstall>
 
   fun findByOrganizationIdAndId(
     organizationId: Long,

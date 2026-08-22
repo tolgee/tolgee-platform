@@ -22,9 +22,11 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
 
   @Query(
     """
-    select e.appInstall from AppEnabledForProject e
+    select ai from AppEnabledForProject e
+    join e.appInstall ai
+    join fetch ai.app
     where e.project.id = :projectId
-    order by e.appInstall.app.name
+    order by ai.app.name
     """,
   )
   fun findEnabledInstallsByProjectId(

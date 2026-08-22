@@ -7,6 +7,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.repository.apps.AppInstallRepository
 import org.apache.commons.codec.digest.DigestUtils
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,23 +27,25 @@ class AppInstallService(
   data class RegisterResult(
     val install: AppInstall,
     val app: AppService.AppSummary,
-    /** Non-null only when this call registered the app - see [AppService.registerIfAbsent]. */
+    /** Always null here: installing an already-registered app discloses no app-level credentials. */
     val appCredentials: AppService.AppCredentials?,
   )
 
   data class RegisterAppResult(
     val app: AppService.AppSummary,
     val appEntityId: Long,
-    /** Non-null only when this call registered the app. */
+    /** The app-level credentials, disclosed only in this response to registering the app. */
     val appCredentials: AppService.AppCredentials?,
     /** Non-null when the app was also installed for the owner (the default). */
     val install: AppInstall?,
   )
 
   /**
-   * Registers the app for the organization and, unless [install] is false, installs it. The
-   * organization owns the app unless somebody registered it first, in which case this only installs
-   * it (when [install]) and returns no credentials.
+   * Registers the app for the organization - making it the app's owner - and, unless [install] is
+   * false, installs it, all in one transaction. Registering an app that is already registered is
+   * refused with [Message.APP_ALREADY_REGISTERED]; installing an existing app is the separate
+   * install endpoint. This runs outside a transaction so the concurrent-duplicate race can be caught
+   * after the write's own transaction has fully rolled back.
    */
   fun register(
     organization: Organization,
@@ -52,7 +55,11 @@ class AppInstallService(
   ): RegisterAppResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
     verifyManifestUnchanged(manifestHash, fetched)
-    return appInstallPersister.registerAndMaybeInstall(organization.id, manifestUrl, fetched, install)
+    return try {
+      appInstallPersister.registerAndMaybeInstall(organization.id, manifestUrl, fetched, install)
+    } catch (_: DataIntegrityViolationException) {
+      throw BadRequestException(Message.APP_ALREADY_REGISTERED)
+    }
   }
 
   /**
@@ -63,7 +70,9 @@ class AppInstallService(
    *
    * The install snapshot is taken from the **registered** manifest URL, not from the one the caller
    * pasted: an app is identified by the id in its manifest, so a lookalike manifest served elsewhere
-   * would otherwise decide the scopes and base URL of an install of somebody else's app.
+   * would otherwise decide the scopes and base URL of an install of somebody else's app. The consent
+   * hash is likewise checked against that authoritative manifest - the one actually installed - not
+   * against the pasted fetch.
    */
   fun install(
     organization: Organization,
@@ -71,7 +80,6 @@ class AppInstallService(
     manifestHash: String?,
   ): AppInstall {
     val fetched = appManifestFetcher.fetch(manifestUrl)
-    verifyManifestUnchanged(manifestHash, fetched)
     val app = appService.requireRegistered(fetched.manifest.id)
     if (!appAvailabilityService.isAvailableForOrganization(app.organization.id, app.id, organization.id)) {
       throw PermissionException(Message.APP_NOT_AVAILABLE_FOR_ORGANIZATION)
@@ -80,6 +88,7 @@ class AppInstallService(
     if (authoritative.manifest.id != app.appId) {
       throw BadRequestException(Message.APP_MANIFEST_INVALID)
     }
+    verifyManifestUnchanged(manifestHash, authoritative)
     return appInstallPersister
       .create(appEntityId = app.id, organizationId = organization.id, fetched = authoritative)
       .install

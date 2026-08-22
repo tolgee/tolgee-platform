@@ -69,13 +69,13 @@ class AppsDeletionTest : AbstractSpringTest() {
   @Test
   fun `withdrawing blanket availability disables the app in non-owner projects`() {
     val install = registerOrganizationInstall()
-    appAvailabilityService.setAvailableToAll(install.appId, true)
+    appAvailabilityService.setAvailableToAll(install.appId)
     // The non-owner organization self-installs the now-available app, then enables its own install.
     val otherInstallId = installForOtherOrganization()
     enableForProject(testData.projectBuilder.self.id, install.installId)
     enableForProject(testData.otherProject.id, otherInstallId)
 
-    appAvailabilityService.setAvailableToAll(install.appId, false)
+    appAvailabilityService.clearAvailableToAll(install.appId)
 
     appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, install.installId).assert.isTrue()
     appEnablementService.isEnabledForProject(testData.otherProject.id, otherInstallId).assert.isFalse()
@@ -84,12 +84,12 @@ class AppsDeletionTest : AbstractSpringTest() {
   @Test
   fun `a specific-organization grant keeps the app enabled after the blanket offer is withdrawn`() {
     val install = registerOrganizationInstall()
-    appAvailabilityService.setAvailableToAll(install.appId, true)
+    appAvailabilityService.setAvailableToAll(install.appId)
     val otherInstallId = installForOtherOrganization()
     enableForProject(testData.otherProject.id, otherInstallId)
 
-    appAvailabilityService.setAvailableToOrganization(install.appId, testData.otherOrganization.id, true)
-    appAvailabilityService.setAvailableToAll(install.appId, false)
+    appAvailabilityService.addAvailableOrganization(install.appId, testData.otherOrganization.id)
+    appAvailabilityService.clearAvailableToAll(install.appId)
 
     appEnablementService.isEnabledForProject(testData.otherProject.id, otherInstallId).assert.isTrue()
   }

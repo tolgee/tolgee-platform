@@ -88,16 +88,16 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `passes an emoji icon through and rejects a non-http image icon`() {
+  fun `passes an emoji icon through`() {
     mockManifest(manifestWithIcon("🧩"))
     performAuthPost(registerUrl(), registerBody()).andIsOk
     performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
       node("_embedded.appInstalls[0].icon").isEqualTo("🧩")
     }
-    performAuthDelete(
-      "${appsUrl()}/${appInstallService.findAll(testData.organization.id).single().id}",
-    ).andIsOk
+  }
 
+  @Test
+  fun `rejects a non-http image icon`() {
     mockManifest(manifestWithIcon("file:///etc/passwd"))
     performAuthPost(registerUrl(), registerBody())
       .andIsBadRequest
@@ -301,12 +301,12 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `rejects duplicate app for the same organization`() {
+  fun `rejects re-registering an app that is already registered`() {
     mockManifest(validManifest())
     performAuthPost(registerUrl(), registerBody()).andIsOk
 
     performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
-      node("code").isEqualTo("app_already_installed")
+      node("code").isEqualTo("app_already_registered")
     }
   }
 

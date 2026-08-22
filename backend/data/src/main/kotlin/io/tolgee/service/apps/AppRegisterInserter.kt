@@ -2,22 +2,17 @@ package io.tolgee.service.apps
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Organization
 import io.tolgee.model.apps.App
 import io.tolgee.repository.apps.AppRepository
 import jakarta.persistence.EntityManager
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 
 /**
- * Inserts the app row and its initial secret in their own transaction so that the unique-constraint
- * violation a concurrent registration of the same manifest id raises - which Hibernate answers by
- * dooming the *current* transaction - is confined here and translated to
- * [Message.APP_ALREADY_REGISTERED], leaving the caller's transaction committable.
+ * Inserts the app row and its initial secret. It runs inside the caller's register+install
+ * transaction, so a failed install rolls the app back with it. The unique-constraint violation a
+ * concurrent registration of the same manifest id raises is flushed here and left to propagate: the
+ * non-transactional caller catches it after the rollback and reports [Message.APP_ALREADY_REGISTERED].
  */
 @Service
 class AppRegisterInserter(
@@ -32,7 +27,6 @@ class AppRegisterInserter(
     val credentials: AppService.AppCredentials,
   )
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun insert(
     organizationId: Long,
     manifestUrl: String,
@@ -55,12 +49,7 @@ class AppRegisterInserter(
         this.webhookSecret = webhookSecret
       }
     AppService.markManifestHealthy(app, currentDateProvider.date)
-    val saved =
-      try {
-        appRepository.saveAndFlush(app)
-      } catch (_: DataIntegrityViolationException) {
-        throw BadRequestException(Message.APP_ALREADY_REGISTERED)
-      }
+    val saved = appRepository.saveAndFlush(app)
     val issued = appSecretService.issueInitial(saved)
     return Inserted(
       app = saved,

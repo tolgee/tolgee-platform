@@ -13,18 +13,11 @@ import org.springframework.transaction.annotation.Transactional
 class AppService(
   private val appRepository: AppRepository,
   private val appInstallRepository: AppInstallRepository,
-  private val appRegisterInserter: AppRegisterInserter,
 ) {
   data class AppSummary(
     val id: Long,
     val appId: String,
     val name: String,
-  )
-
-  data class ResolveResult(
-    val app: App,
-    /** Non-null only when this call registered the app. */
-    val credentials: AppCredentials?,
   )
 
   @Transactional(readOnly = true)
@@ -79,22 +72,6 @@ class AppService(
   @Transactional(readOnly = true)
   fun resolveByClientId(clientId: String): App? {
     return appRepository.findByClientId(clientId)
-  }
-
-  /**
-   * Returns the app registered under the manifest's id, registering it - owned by [organizationId] -
-   * when nobody has yet. The insert runs in its own transaction (see [AppRegisterInserter]) so a
-   * concurrent duplicate surfaces as [Message.APP_ALREADY_REGISTERED] instead of dooming the caller.
-   */
-  fun registerIfAbsent(
-    organizationId: Long,
-    manifestUrl: String,
-    fetched: AppManifestFetcher.FetchResult,
-  ): ResolveResult {
-    val existing = appRepository.findByAppId(fetched.manifest.id)
-    if (existing != null) return ResolveResult(existing, null)
-    val inserted = appRegisterInserter.insert(organizationId, manifestUrl, fetched)
-    return ResolveResult(inserted.app, inserted.credentials)
   }
 
   fun summarize(app: App): AppSummary {

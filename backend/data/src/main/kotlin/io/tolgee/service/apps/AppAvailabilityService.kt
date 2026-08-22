@@ -6,6 +6,9 @@ import io.tolgee.model.apps.AppAvailability
 import io.tolgee.repository.apps.AppAvailabilityRepository
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
 import jakarta.persistence.EntityManager
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,57 +24,66 @@ class AppAvailabilityService(
   private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
   private val entityManager: EntityManager,
 ) {
-  data class Availability(
-    val availableToAll: Boolean,
-    val organizations: List<Organization>,
-  )
-
-  /** Server-admin action: offer the app to every organization, or withdraw the blanket offer. */
+  /** Server-admin action: offer the app to every organization. Idempotent. */
   @Transactional
-  fun setAvailableToAll(
-    appEntityId: Long,
-    available: Boolean,
-  ) {
-    val sentinel = appAvailabilityRepository.findByAppIdAndOrganizationIsNull(appEntityId)
-    if (available) {
-      if (sentinel != null) return
-      addRow(appEntityId, organizationId = null)
-      return
-    }
-    if (sentinel == null) return
+  fun setAvailableToAll(appEntityId: Long) {
+    if (appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)) return
+    addRow(appEntityId, organizationId = null)
+  }
+
+  /** Server-admin action: withdraw the blanket offer. */
+  @Transactional
+  fun clearAvailableToAll(appEntityId: Long) {
+    val sentinel = appAvailabilityRepository.findByAppIdAndOrganizationIsNull(appEntityId) ?: return
     appAvailabilityRepository.delete(sentinel)
     appAvailabilityRepository.flush()
     appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
   }
 
-  /** Server-admin action: make the app installable by one organization, or withdraw that grant. */
+  /** Server-admin action: make the app installable by one organization. Idempotent. */
   @Transactional
-  fun setAvailableToOrganization(
+  fun addAvailableOrganization(
     appEntityId: Long,
     organizationId: Long,
-    available: Boolean,
   ) {
-    val existing = appAvailabilityRepository.findByAppIdAndOrganizationId(appEntityId, organizationId)
-    if (available) {
-      if (existing != null) return
-      addRow(appEntityId, organizationId)
-      return
-    }
-    if (existing == null) return
+    if (appAvailabilityRepository.existsByAppIdAndOrganizationId(appEntityId, organizationId)) return
+    addRow(appEntityId, organizationId)
+  }
+
+  /** Server-admin action: withdraw one organization's grant. */
+  @Transactional
+  fun removeAvailableOrganization(
+    appEntityId: Long,
+    organizationId: Long,
+  ) {
+    val existing =
+      appAvailabilityRepository.findByAppIdAndOrganizationId(appEntityId, organizationId) ?: return
     appAvailabilityRepository.delete(existing)
     appAvailabilityRepository.flush()
     appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
   }
 
-  /** The app's whole availability set: the blanket flag and the specific organizations. */
+  /** Whether the app carries the all-organizations sentinel. */
   @Transactional(readOnly = true)
-  fun listAvailability(appEntityId: Long): Availability {
-    val availableToAll = appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)
-    val organizations =
-      appAvailabilityRepository
-        .findByAppIdAndOrganizationIsNotNullOrderByOrganizationNameAsc(appEntityId)
-        .mapNotNull { it.organization }
-    return Availability(availableToAll = availableToAll, organizations = organizations)
+  fun isAvailableToAll(appEntityId: Long): Boolean {
+    return appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)
+  }
+
+  /** Which of these apps carry the all-organizations sentinel, in one query. */
+  @Transactional(readOnly = true)
+  fun availableToAllApps(appEntityIds: Collection<Long>): Set<Long> {
+    if (appEntityIds.isEmpty()) return emptySet()
+    return appAvailabilityRepository.findAppIdsAvailableToAll(appEntityIds).toSet()
+  }
+
+  /** The organizations the app is specifically offered to, besides the owner, paged for the admin view. */
+  @Transactional(readOnly = true)
+  fun findAvailableOrganizations(
+    appEntityId: Long,
+    search: String?,
+    pageable: Pageable,
+  ): Page<Organization> {
+    return appAvailabilityRepository.findAvailableOrganizations(appEntityId, search?.ifBlank { null }, pageable)
   }
 
   /**
@@ -95,6 +107,10 @@ class AppAvailabilityService(
     appAvailabilityRepository.deleteByAppId(appEntityId)
   }
 
+  /**
+   * Inserts an availability row, treating the unique-constraint violation a concurrent grant of the
+   * same target raises as success - the row it would have added is already there.
+   */
   private fun addRow(
     appEntityId: Long,
     organizationId: Long?,
@@ -104,6 +120,10 @@ class AppAvailabilityService(
         app = entityManager.getReference(App::class.java, appEntityId)
         organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
       }
-    appAvailabilityRepository.save(row)
+    try {
+      appAvailabilityRepository.saveAndFlush(row)
+    } catch (_: DataIntegrityViolationException) {
+      // A concurrent grant of the same target won the unique-constraint race; the grant already holds.
+    }
   }
 }
