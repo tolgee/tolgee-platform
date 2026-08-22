@@ -11,11 +11,13 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.service.apps.AppInstallService
+import io.tolgee.service.apps.AppOwnerRemovalService
 import io.tolgee.service.apps.AppService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -39,6 +41,7 @@ class OrganizationOwnedAppsController(
   private val appInstallService: AppInstallService,
   private val ownedAppModelAssembler: OwnedAppModelAssembler,
   private val appRegisteredModelAssembler: AppRegisteredModelAssembler,
+  private val appOwnerRemovalService: AppOwnerRemovalService,
 ) {
   @PostMapping
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
@@ -86,5 +89,22 @@ class OrganizationOwnedAppsController(
     @PathVariable appId: Long,
   ): OwnedAppModel {
     return ownedAppModelAssembler.toModel(appService.getOwned(organizationId, appId))
+  }
+
+  @DeleteMapping("/{appId}")
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(
+    summary = "Delete an owned app",
+    description =
+      "Takes the app down across the whole server: every organization's install is removed and the " +
+        "app's credentials are revoked. Use this to retire an app or to kill a compromised one in a " +
+        "single step, rather than uninstalling it per organization.",
+  )
+  fun delete(
+    @PathVariable organizationId: Long,
+    @PathVariable appId: Long,
+  ) {
+    val app = appService.getOwned(organizationId, appId)
+    appOwnerRemovalService.removeEverywhere(app.id)
   }
 }
