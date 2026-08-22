@@ -1,53 +1,41 @@
 package io.tolgee.api.v2.controllers.administration
 
-import io.tolgee.development.testDataBuilder.data.NativeAppsTestData
+import io.tolgee.development.testDataBuilder.data.AppsWithInstallsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.service.apps.AppAvailabilityService
-import io.tolgee.service.apps.AppInstallService
-import io.tolgee.service.apps.AppManifestHttpClient
-import io.tolgee.service.apps.AppsTestFixtures
+import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 /**
  * Server-admin management of a published app: its availability set and its installations view. The
  * admin makes an app available to organizations, which then self-install it - the admin never
- * installs on their behalf. Data is prepared through the service layer, not by firing requests.
+ * installs on their behalf. The app graph, including both installations, is declared through the
+ * test-data DSL rather than registered through the service layer or over HTTP.
  */
 class AdministrationAppsControllerTest : AuthorizedControllerTest() {
   @Autowired
-  lateinit var appInstallService: AppInstallService
-
-  @Autowired
   lateinit var appAvailabilityService: AppAvailabilityService
 
-  @MockitoBean
   @Autowired
-  lateinit var appManifestHttpClient: AppManifestHttpClient
+  lateinit var appEnablementService: AppEnablementService
 
-  lateinit var testData: NativeAppsTestData
+  lateinit var testData: AppsWithInstallsTestData
   var appEntityId: Long = 0
 
   @BeforeEach
   fun setup() {
-    testData = NativeAppsTestData()
+    testData = AppsWithInstallsTestData()
     testDataService.saveTestData(testData.root)
-    AppsTestFixtures.mockManifest(appManifestHttpClient)
     userAccount = testData.admin
-    appEntityId =
-      executeInNewTransaction {
-        appInstallService
-          .register(testData.organization, AppsTestFixtures.MANIFEST_URL, null, install = true)
-          .appEntityId
-      }
+    appEntityId = testData.app.id
   }
 
   @AfterEach
@@ -109,8 +97,6 @@ class AdministrationAppsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `the installations view lists organizations that hold the app`() {
-    installForOtherOrganization()
-
     userAccount = testData.admin
     performAuthGet("$appUrl/installations").andIsOk.andAssertThatJson {
       node("_embedded.organizations").isArray.hasSize(2)
@@ -120,8 +106,6 @@ class AdministrationAppsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `the installations view is searchable and admin only`() {
-    installForOtherOrganization()
-
     userAccount = testData.admin
     performAuthGet("$appUrl/installations?search=${testData.otherOrganization.slug}").andIsOk.andAssertThatJson {
       node("_embedded.organizations").isArray.hasSize(1)
@@ -132,11 +116,25 @@ class AdministrationAppsControllerTest : AuthorizedControllerTest() {
     performAuthGet("$appUrl/installations").andIsForbidden
   }
 
-  private fun installForOtherOrganization() {
-    appAvailabilityService.setAvailableToAll(appEntityId)
-    executeInNewTransaction {
-      appInstallService.install(testData.otherOrganization, AppsTestFixtures.MANIFEST_URL, null)
-    }
+  @Test
+  fun `the DSL declares the second app available to all and to one organization`() {
+    appAvailabilityService.isAvailableToAll(testData.availableApp.id).assert.isTrue()
+
+    userAccount = testData.admin
+    performAuthGet("/v2/administration/apps/${testData.availableApp.id}/available-organizations")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.organizations").isArray.hasSize(1)
+        node("_embedded.organizations[0].id").isEqualTo(testData.otherOrganization.id)
+      }
+  }
+
+  @Test
+  fun `the DSL enables the second app for the owner project`() {
+    appEnablementService
+      .isEnabledForProject(testData.project.id, testData.enabledInstall.id)
+      .assert
+      .isTrue()
   }
 
   private val appUrl

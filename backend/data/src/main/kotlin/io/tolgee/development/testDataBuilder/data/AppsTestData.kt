@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -10,6 +11,7 @@ open class AppsTestData : BaseTestData("apps-test-owner@test.com", "test_project
   lateinit var member: UserAccount
   lateinit var otherOwner: UserAccount
   lateinit var otherOrganization: Organization
+  lateinit var otherOrganizationBuilder: OrganizationBuilder
   lateinit var otherProject: Project
   lateinit var siblingProject: Project
 
@@ -45,7 +47,8 @@ open class AppsTestData : BaseTestData("apps-test-owner@test.com", "test_project
 
       val otherOwnerBuilder = addUserAccount { username = "apps-test-other-owner@test.com" }
       otherOwner = otherOwnerBuilder.self
-      otherOrganization = otherOwnerBuilder.defaultOrganizationBuilder.self
+      otherOrganizationBuilder = otherOwnerBuilder.defaultOrganizationBuilder
+      otherOrganization = otherOrganizationBuilder.self
 
       otherProject =
         addProject {

@@ -2,7 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.UserAccount
 
-class NativeAppsTestData : AppsTestData() {
+open class NativeAppsTestData : AppsTestData() {
   lateinit var admin: UserAccount
   lateinit var supporter: UserAccount
 
