@@ -52,7 +52,11 @@ class OwnedAppRemovalTest : AuthorizedControllerTest() {
     performAuthDelete("${ownedUrl(testData.organization.id)}/$appEntityId").andIsOk
 
     executeInNewTransaction {
-      appRepository.findById(appEntityId).orElse(null).assert.isNull()
+      appRepository
+        .findById(appEntityId)
+        .orElse(null)
+        .assert
+        .isNull()
       appSecretService.list(appEntityId).assert.isEmpty()
     }
     installsOfAppIn(testData.organization.id).assert.isEmpty()
@@ -66,7 +70,12 @@ class OwnedAppRemovalTest : AuthorizedControllerTest() {
 
     installsOfAppIn(testData.otherOrganization.id).assert.isEmpty()
     installsOfAppIn(testData.organization.id).assert.hasSize(1)
-    executeInNewTransaction { appRepository.findById(appEntityId).orElse(null).assert.isNotNull }
+    executeInNewTransaction {
+      appRepository
+        .findById(appEntityId)
+        .orElse(null)
+        .assert.isNotNull
+    }
   }
 
   @Test

@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.AppBuilder
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.enums.Scope
@@ -49,6 +50,7 @@ class AppsWithInstallsTestData : NativeAppsTestData() {
         ownerOrgBuilder.addApp {
           appId = "available-app"
           name = "Available App"
+          manifestJson = AppBuilder.manifestJsonFor("available-app", "Available App")
         }
       availableApp = availableAppBuilder.self
       availableAppBuilder.addAvailableToAll()

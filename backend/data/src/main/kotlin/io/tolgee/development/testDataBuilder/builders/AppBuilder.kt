@@ -38,8 +38,14 @@ class AppBuilder(
   fun addAvailableToAll(): AppAvailabilityBuilder = addAvailability { organization = null }
 
   companion object {
-    private const val DEFAULT_MANIFEST_JSON =
-      "{\"id\":\"test-app\",\"name\":\"Test App\",\"version\":\"0.1.0\"," +
+    private val DEFAULT_MANIFEST_JSON = manifestJsonFor("test-app", "Test App")
+
+    /** A valid manifest whose id and name match the app, so a fixture that renames an app keeps them in sync. */
+    fun manifestJsonFor(
+      appId: String,
+      name: String,
+    ): String =
+      "{\"id\":\"$appId\",\"name\":\"$name\",\"version\":\"0.1.0\"," +
         "\"baseUrl\":\"https://app.example.com\"," +
         "\"modules\":{\"project-dashboard-page\":" +
         "[{\"key\":\"home\",\"title\":\"Home\",\"icon\":\"🏠\",\"entry\":\"/\"}]}}"

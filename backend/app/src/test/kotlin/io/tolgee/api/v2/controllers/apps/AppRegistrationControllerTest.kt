@@ -78,17 +78,17 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
     response
       .at("/clientId")
-      .asText()
+      .asString()
       .assert
       .startsWith(AppService.APP_CLIENT_ID_PREFIX)
     response
       .at("/clientSecret")
-      .asText()
+      .asString()
       .assert
       .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     response
       .at("/webhookSecret")
-      .asText()
+      .asString()
       .assert
       .isNotBlank()
     response
