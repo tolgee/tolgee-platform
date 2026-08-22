@@ -1,12 +1,8 @@
 package io.tolgee.service.apps
 
 import io.tolgee.model.Organization
-import io.tolgee.model.apps.App
-import io.tolgee.model.apps.AppAvailability
 import io.tolgee.repository.apps.AppAvailabilityRepository
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
-import jakarta.persistence.EntityManager
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -14,21 +10,19 @@ import org.springframework.transaction.annotation.Transactional
 
 /**
  * Decides which organizations may install an app they do not own. Availability is a set of rows on
- * [AppAvailability]: a row with a real organization makes the app installable by that organization,
- * and the single null-organization sentinel row makes it installable by every organization. The
- * owner is always available and is never stored here.
+ * [io.tolgee.model.apps.AppAvailability]: a row with a real organization makes the app installable by
+ * that organization, and the single null-organization sentinel row makes it installable by every
+ * organization. The owner is always available and is never stored here.
  */
 @Service
 class AppAvailabilityService(
   private val appAvailabilityRepository: AppAvailabilityRepository,
   private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
-  private val entityManager: EntityManager,
 ) {
   /** Server-admin action: offer the app to every organization. Idempotent. */
   @Transactional
   fun setAvailableToAll(appEntityId: Long) {
-    if (appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)) return
-    addRow(appEntityId, organizationId = null)
+    appAvailabilityRepository.insertIfAbsent(appEntityId, organizationId = null)
   }
 
   /** Server-admin action: withdraw the blanket offer. */
@@ -46,8 +40,7 @@ class AppAvailabilityService(
     appEntityId: Long,
     organizationId: Long,
   ) {
-    if (appAvailabilityRepository.existsByAppIdAndOrganizationId(appEntityId, organizationId)) return
-    addRow(appEntityId, organizationId)
+    appAvailabilityRepository.insertIfAbsent(appEntityId, organizationId)
   }
 
   /** Server-admin action: withdraw one organization's grant. */
@@ -105,25 +98,5 @@ class AppAvailabilityService(
   @Transactional
   fun removeAllForApp(appEntityId: Long) {
     appAvailabilityRepository.deleteByAppId(appEntityId)
-  }
-
-  /**
-   * Inserts an availability row, treating the unique-constraint violation a concurrent grant of the
-   * same target raises as success - the row it would have added is already there.
-   */
-  private fun addRow(
-    appEntityId: Long,
-    organizationId: Long?,
-  ) {
-    val row =
-      AppAvailability().apply {
-        app = entityManager.getReference(App::class.java, appEntityId)
-        organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
-      }
-    try {
-      appAvailabilityRepository.saveAndFlush(row)
-    } catch (_: DataIntegrityViolationException) {
-      // A concurrent grant of the same target won the unique-constraint race; the grant already holds.
-    }
   }
 }

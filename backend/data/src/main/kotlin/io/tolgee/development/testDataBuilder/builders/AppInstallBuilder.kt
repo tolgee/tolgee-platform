@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.AppInstall
+import io.tolgee.service.apps.AppInstallPrincipalService
 import java.util.UUID
 
 class AppInstallBuilder(
@@ -16,7 +17,7 @@ class AppInstallBuilder(
     UserAccountBuilder(organizationBuilder.testDataBuilder).apply {
       rawPassword = null
       self.apply {
-        username = PRINCIPAL_USERNAME_PREFIX + UUID.randomUUID().toString().replace("-", "")
+        username = AppInstallPrincipalService.USERNAME_PREFIX + UUID.randomUUID().toString().replace("-", "")
         name = "Test App [app]"
         role = UserAccount.Role.USER
         accountType = UserAccount.AccountType.MANAGED
@@ -33,9 +34,5 @@ class AppInstallBuilder(
   init {
     organizationBuilder.testDataBuilder.data.userAccounts
       .add(principalBuilder)
-  }
-
-  companion object {
-    const val PRINCIPAL_USERNAME_PREFIX = "___app_"
   }
 }

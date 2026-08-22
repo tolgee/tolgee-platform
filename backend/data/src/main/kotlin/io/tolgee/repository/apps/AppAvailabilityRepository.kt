@@ -14,6 +14,26 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface AppAvailabilityRepository : JpaRepository<AppAvailability, Long> {
+  /**
+   * Adds an availability row unless the same target already exists. `on conflict do nothing` makes
+   * the grant idempotent at the database, so a concurrent duplicate is a no-op instead of a caught
+   * exception that would poison the transaction, while a foreign-key violation still propagates.
+   * `:organizationId` null is the all-organizations sentinel.
+   */
+  @Modifying
+  @Query(
+    value = """
+      insert into app_availability (id, created_at, updated_at, app_id, organization_id)
+      values (nextval('hibernate_sequence'), now(), now(), :appId, :organizationId)
+      on conflict do nothing
+    """,
+    nativeQuery = true,
+  )
+  fun insertIfAbsent(
+    @Param("appId") appId: Long,
+    @Param("organizationId") organizationId: Long?,
+  )
+
   fun findByAppIdAndOrganizationIsNull(appId: Long): AppAvailability?
 
   fun findByAppIdAndOrganizationId(

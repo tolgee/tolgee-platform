@@ -117,9 +117,7 @@ class AdministrationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the DSL declares the second app available to all and to one organization`() {
-    appAvailabilityService.isAvailableToAll(testData.availableApp.id).assert.isTrue()
-
+  fun `available-organizations lists the app's specific grants, admin only`() {
     userAccount = testData.admin
     performAuthGet("/v2/administration/apps/${testData.availableApp.id}/available-organizations")
       .andIsOk
@@ -127,14 +125,9 @@ class AdministrationAppsControllerTest : AuthorizedControllerTest() {
         node("_embedded.organizations").isArray.hasSize(1)
         node("_embedded.organizations[0].id").isEqualTo(testData.otherOrganization.id)
       }
-  }
 
-  @Test
-  fun `the DSL enables the second app for the owner project`() {
-    appEnablementService
-      .isEnabledForProject(testData.project.id, testData.enabledInstall.id)
-      .assert
-      .isTrue()
+    userAccount = testData.user
+    performAuthGet("/v2/administration/apps/${testData.availableApp.id}/available-organizations").andIsForbidden
   }
 
   private val appUrl

@@ -49,7 +49,7 @@ class AdministrationAppsController(
   private val pagedOrganizationsAssembler: PagedResourcesAssembler<Organization>,
 ) : IController {
   @PutMapping("/{appId}/available-to-all")
-  @Operation(summary = "Offer the app to every organization")
+  @Operation(summary = "Make the app available to all organizations")
   @RequiresSuperAuthentication
   fun setAvailableToAll(
     @PathVariable appId: Long,
@@ -60,9 +60,9 @@ class AdministrationAppsController(
 
   @DeleteMapping("/{appId}/available-to-all")
   @Operation(
-    summary = "Withdraw the blanket offer",
+    summary = "Stop making the app available to all organizations",
     description =
-      "The app is disabled in every non-owner project it could only be reached through the blanket offer.",
+      "Disables the app in every non-owner project that could only reach it through availability to all organizations.",
   )
   @RequiresSuperAuthentication
   fun clearAvailableToAll(
@@ -74,7 +74,7 @@ class AdministrationAppsController(
 
   @GetMapping("/{appId}/available-organizations")
   @Operation(
-    summary = "List the organizations the app is specifically offered to",
+    summary = "List the organizations the app is available to",
     description = "The organizations granted the app besides the owner, searchable and paged.",
   )
   @RequiresSuperAuthentication
@@ -89,7 +89,7 @@ class AdministrationAppsController(
   }
 
   @PutMapping("/{appId}/available-organizations/{organizationId}")
-  @Operation(summary = "Offer the app to one organization")
+  @Operation(summary = "Make the app available to one organization")
   @RequiresSuperAuthentication
   fun addAvailableOrganization(
     @PathVariable appId: Long,
@@ -102,9 +102,9 @@ class AdministrationAppsController(
 
   @DeleteMapping("/{appId}/available-organizations/{organizationId}")
   @Operation(
-    summary = "Withdraw one organization's grant",
+    summary = "Stop making the app available to one organization",
     description =
-      "The app is disabled in that organization's projects unless it stays reachable through the blanket offer.",
+      "Disables the app in that organization's projects unless it stays reachable through availability to all organizations.",
   )
   @RequiresSuperAuthentication
   fun removeAvailableOrganization(
