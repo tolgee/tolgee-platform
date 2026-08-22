@@ -62,19 +62,36 @@ class AppsDeletionTest : AbstractSpringTest() {
     deleteRuleOf("fk_app_organization").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_install_app").assert.isEqualTo("CASCADE")
     deleteRuleOf("fk_app_secret_app").assert.isEqualTo("CASCADE")
+    deleteRuleOf("fk_app_availability_app").assert.isEqualTo("CASCADE")
+    deleteRuleOf("fk_app_availability_organization").assert.isEqualTo("CASCADE")
   }
 
   @Test
   fun `withdrawing blanket availability disables the app in non-owner projects`() {
     val install = registerOrganizationInstall()
-    appAvailabilityService.setAvailableToAllOrganizations(install.appId, true)
+    appAvailabilityService.setAvailableToAll(install.appId, true)
+    // The non-owner organization self-installs the now-available app, then enables its own install.
+    val otherInstallId = installForOtherOrganization()
     enableForProject(testData.projectBuilder.self.id, install.installId)
-    enableForProject(testData.otherProject.id, install.installId)
+    enableForProject(testData.otherProject.id, otherInstallId)
 
-    appAvailabilityService.setAvailableToAllOrganizations(install.appId, false)
+    appAvailabilityService.setAvailableToAll(install.appId, false)
 
     appEnablementService.isEnabledForProject(testData.projectBuilder.self.id, install.installId).assert.isTrue()
-    appEnablementService.isEnabledForProject(testData.otherProject.id, install.installId).assert.isFalse()
+    appEnablementService.isEnabledForProject(testData.otherProject.id, otherInstallId).assert.isFalse()
+  }
+
+  @Test
+  fun `a specific-organization grant keeps the app enabled after the blanket offer is withdrawn`() {
+    val install = registerOrganizationInstall()
+    appAvailabilityService.setAvailableToAll(install.appId, true)
+    val otherInstallId = installForOtherOrganization()
+    enableForProject(testData.otherProject.id, otherInstallId)
+
+    appAvailabilityService.setAvailableToOrganization(install.appId, testData.otherOrganization.id, true)
+    appAvailabilityService.setAvailableToAll(install.appId, false)
+
+    appEnablementService.isEnabledForProject(testData.otherProject.id, otherInstallId).assert.isTrue()
   }
 
   @Test
@@ -101,8 +118,21 @@ class AppsDeletionTest : AbstractSpringTest() {
           .register(
             organization = testData.organization,
             manifestUrl = AppsTestFixtures.MANIFEST_URL,
-          ).install
+            manifestHash = null,
+            install = true,
+          ).install!!
       RegisteredInstall(install.id, install.app.id)
+    }
+  }
+
+  private fun installForOtherOrganization(): Long {
+    return executeInNewTransaction(platformTransactionManager) {
+      appInstallService
+        .install(
+          organization = testData.otherOrganization,
+          manifestUrl = AppsTestFixtures.MANIFEST_URL,
+          manifestHash = null,
+        ).id
     }
   }
 
@@ -136,7 +166,10 @@ class AppsDeletionTest : AbstractSpringTest() {
           .register(
             organization = testData.organization,
             manifestUrl = AppsTestFixtures.MANIFEST_URL,
-          ).install.id
+            manifestHash = null,
+            install = true,
+          ).install!!
+          .id
       }
 
     executeInNewTransaction(platformTransactionManager) {

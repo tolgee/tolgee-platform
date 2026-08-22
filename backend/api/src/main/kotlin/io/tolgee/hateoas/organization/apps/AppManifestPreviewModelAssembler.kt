@@ -1,10 +1,13 @@
 package io.tolgee.hateoas.organization.apps
 
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestFetcher
 import org.springframework.stereotype.Component
 
 @Component
-class AppManifestPreviewModelAssembler {
+class AppManifestPreviewModelAssembler(
+  private val appInstallService: AppInstallService,
+) {
   fun toModel(fetched: AppManifestFetcher.FetchResult): AppManifestPreviewModel {
     return AppManifestPreviewModel(
       appId = fetched.manifest.id,
@@ -14,6 +17,7 @@ class AppManifestPreviewModelAssembler {
       icon = fetched.icon,
       modules = fetched.manifest.modules,
       requestedScopes = fetched.scopes.map { it.value },
+      manifestHash = appInstallService.manifestHash(fetched),
     )
   }
 }

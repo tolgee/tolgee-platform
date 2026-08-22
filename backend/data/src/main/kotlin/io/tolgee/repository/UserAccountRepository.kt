@@ -108,9 +108,6 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.username = :username")
   fun findAllByExactUsername(username: String?): List<UserAccount>
 
-  // An app install's principal is not a person and must never be found by the name it happens to
-  // carry: everything reached through these lookups — signing in, SSO account adoption, the sign-up
-  // duplicate guard, password reset, changing an email — is about a human account.
   @Query(
     "from UserAccount ua where lower(ua.username) = lower(:username) " +
       "and ua.deletedAt is null and ua.disabledAt is null and ua.isAppPrincipal = false",

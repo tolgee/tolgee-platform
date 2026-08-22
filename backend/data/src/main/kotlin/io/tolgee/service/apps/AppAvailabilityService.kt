@@ -1,63 +1,109 @@
 package io.tolgee.service.apps
 
-import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.Organization
+import io.tolgee.model.apps.App
+import io.tolgee.model.apps.AppAvailability
+import io.tolgee.repository.apps.AppAvailabilityRepository
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
-import io.tolgee.repository.apps.AppInstallRepository
-import io.tolgee.repository.apps.AppRepository
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 /**
- * Decides which organizations may use an app they do not own. An app is either private to its owner
- * or, when a server admin flips [io.tolgee.model.apps.App.availableToAllOrganizations], available to
- * every organization on the server. There is no per-organization grant list anymore — the flag is
- * all or the owner.
+ * Decides which organizations may install an app they do not own. Availability is a set of rows on
+ * [AppAvailability]: a row with a real organization makes the app installable by that organization,
+ * and the single null-organization sentinel row makes it installable by every organization. The
+ * owner is always available and is never stored here.
  */
 @Service
 class AppAvailabilityService(
-  private val appRepository: AppRepository,
-  private val appInstallRepository: AppInstallRepository,
+  private val appAvailabilityRepository: AppAvailabilityRepository,
   private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
+  private val entityManager: EntityManager,
 ) {
-  /** Server-admin action: offer the app to every organization, or withdraw it to the owner only. */
+  data class Availability(
+    val availableToAll: Boolean,
+    val organizations: List<Organization>,
+  )
+
+  /** Server-admin action: offer the app to every organization, or withdraw the blanket offer. */
   @Transactional
-  fun setAvailableToAllOrganizations(
+  fun setAvailableToAll(
     appEntityId: Long,
     available: Boolean,
   ) {
-    val app = appRepository.findById(appEntityId).orElse(null) ?: return
-    if (app.availableToAllOrganizations == available) return
-    app.availableToAllOrganizations = available
-    appRepository.save(app)
-
-    // Withdrawing availability must not leave the app running in projects that could only reach it
-    // through the blanket offer — every project whose organization does not own the app.
-    if (!available) {
-      appEnabledForProjectRepository.deleteByAppIdAndProjectOrganizationNotOwner(app.id)
+    val sentinel = appAvailabilityRepository.findByAppIdAndOrganizationIsNull(appEntityId)
+    if (available) {
+      if (sentinel != null) return
+      addRow(appEntityId, organizationId = null)
+      return
     }
+    if (sentinel == null) return
+    appAvailabilityRepository.delete(sentinel)
+    appAvailabilityRepository.flush()
+    appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
   }
 
-  /** An organization may use [install]'s app if it owns it or the app is offered to everyone. */
-  fun isAvailableForOrganization(
+  /** Server-admin action: make the app installable by one organization, or withdraw that grant. */
+  @Transactional
+  fun setAvailableToOrganization(
+    appEntityId: Long,
     organizationId: Long,
-    install: AppInstall,
-  ): Boolean {
-    if (install.organization.id == organizationId) return true
-    return install.app.availableToAllOrganizations
+    available: Boolean,
+  ) {
+    val existing = appAvailabilityRepository.findByAppIdAndOrganizationId(appEntityId, organizationId)
+    if (available) {
+      if (existing != null) return
+      addRow(appEntityId, organizationId)
+      return
+    }
+    if (existing == null) return
+    appAvailabilityRepository.delete(existing)
+    appAvailabilityRepository.flush()
+    appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
+  }
+
+  /** The app's whole availability set: the blanket flag and the specific organizations. */
+  @Transactional(readOnly = true)
+  fun listAvailability(appEntityId: Long): Availability {
+    val availableToAll = appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)
+    val organizations =
+      appAvailabilityRepository
+        .findByAppIdAndOrganizationIsNotNullOrderByOrganizationNameAsc(appEntityId)
+        .mapNotNull { it.organization }
+    return Availability(availableToAll = availableToAll, organizations = organizations)
   }
 
   /**
-   * Installs of server-wide apps this organization does not own — the ones its projects may enable
-   * on top of the organization's own installs.
+   * Whether [organizationId] may install (and keep enabling) the app: it owns it, the app is offered
+   * to everyone, or the app is offered to this organization specifically. Read fresh every time so a
+   * concurrently-withdrawn availability is respected at once.
    */
   @Transactional(readOnly = true)
-  fun listAvailableInstallsForOrganization(organizationId: Long): List<AppInstall> {
-    return appInstallRepository.findAvailableInstallsForOrganization(organizationId)
+  fun isAvailableForOrganization(
+    ownerOrganizationId: Long,
+    appEntityId: Long,
+    organizationId: Long,
+  ): Boolean {
+    if (ownerOrganizationId == organizationId) return true
+    if (appAvailabilityRepository.existsByAppIdAndOrganizationIsNull(appEntityId)) return true
+    return appAvailabilityRepository.existsByAppIdAndOrganizationId(appEntityId, organizationId)
   }
 
   @Transactional
-  fun removeAllForAppInstall(appInstallId: Long) {
-    // Availability is a property of the app, not the install, so there is nothing per-install to
-    // remove — kept for call-site symmetry with the enablement cleanup.
+  fun removeAllForApp(appEntityId: Long) {
+    appAvailabilityRepository.deleteByAppId(appEntityId)
+  }
+
+  private fun addRow(
+    appEntityId: Long,
+    organizationId: Long?,
+  ) {
+    val row =
+      AppAvailability().apply {
+        app = entityManager.getReference(App::class.java, appEntityId)
+        organization = organizationId?.let { entityManager.getReference(Organization::class.java, it) }
+      }
+    appAvailabilityRepository.save(row)
   }
 }

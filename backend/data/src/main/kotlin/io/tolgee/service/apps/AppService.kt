@@ -1,17 +1,11 @@
 package io.tolgee.service.apps
 
-import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.KeyGenerator
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AppNotRegisteredException
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Organization
 import io.tolgee.model.apps.App
 import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.repository.apps.AppRepository
-import jakarta.persistence.EntityManager
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,18 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 class AppService(
   private val appRepository: AppRepository,
   private val appInstallRepository: AppInstallRepository,
-  private val appSecretService: AppSecretService,
-  private val keyGenerator: KeyGenerator,
-  private val entityManager: EntityManager,
-  private val currentDateProvider: CurrentDateProvider,
+  private val appRegisterInserter: AppRegisterInserter,
 ) {
-  /** The app-level credentials, disclosed only in the response to registering the app. */
-  data class AppCredentials(
-    val clientId: String,
-    val clientSecret: String,
-    val webhookSecret: String,
-  )
-
   data class AppSummary(
     val id: Long,
     val appId: String,
@@ -55,7 +39,7 @@ class AppService(
 
   /**
    * The app, provided [organizationId] owns it. An organization that merely installed somebody
-   * else's app must not reach it here — administering an app is the owner's alone.
+   * else's app must not reach it here - administering an app is the owner's alone.
    */
   @Transactional(readOnly = true)
   fun getOwned(
@@ -67,23 +51,28 @@ class AppService(
   }
 
   @Transactional(readOnly = true)
-  fun listOwned(organizationId: Long): List<App> {
-    return appRepository.findAllByOrganizationIdOrderByNameAsc(organizationId)
+  fun getRegistered(appEntityId: Long): App {
+    return appRepository.findById(appEntityId).orElseThrow { NotFoundException(Message.APP_NOT_FOUND) }
   }
 
-  /**
-   * Apps offered to every organization that [organizationId] can still install — it neither owns nor
-   * has already installed them.
-   */
   @Transactional(readOnly = true)
-  fun listAvailableToInstall(organizationId: Long): List<App> {
-    return appRepository.findAvailableToInstall(organizationId)
+  fun listOwned(organizationId: Long): List<App> {
+    return appRepository.findAllByOrganizationIdOrderByNameAsc(organizationId)
   }
 
   /** How many organizations currently have the app installed. */
   @Transactional(readOnly = true)
   fun countInstalls(appEntityId: Long): Long {
     return appInstallRepository.countByRegisteredAppId(appEntityId)
+  }
+
+  /** How many organizations hold each app, in one query, for a list of apps. */
+  @Transactional(readOnly = true)
+  fun countInstallsByApp(appEntityIds: Collection<Long>): Map<Long, Long> {
+    if (appEntityIds.isEmpty()) return emptyMap()
+    return appInstallRepository
+      .countInstallsByAppIds(appEntityIds)
+      .associate { (it[0] as Long) to (it[1] as Long) }
   }
 
   /** Resolves an app by its app-level `client_id`. The caller must still verify the secret. */
@@ -93,9 +82,9 @@ class AppService(
   }
 
   /**
-   * Returns the app registered under the manifest's id, registering it — owned by [organizationId] —
-   * when nobody has yet. Runs in the caller's transaction so that registering and installing either
-   * both happen or neither does.
+   * Returns the app registered under the manifest's id, registering it - owned by [organizationId] -
+   * when nobody has yet. The insert runs in its own transaction (see [AppRegisterInserter]) so a
+   * concurrent duplicate surfaces as [Message.APP_ALREADY_REGISTERED] instead of dooming the caller.
    */
   fun registerIfAbsent(
     organizationId: Long,
@@ -104,46 +93,20 @@ class AppService(
   ): ResolveResult {
     val existing = appRepository.findByAppId(fetched.manifest.id)
     if (existing != null) return ResolveResult(existing, null)
-
-    val clientId = APP_CLIENT_ID_PREFIX + keyGenerator.generate(128)
-    val webhookSecret = keyGenerator.generate(256)
-    val app =
-      App().apply {
-        this.organization = entityManager.getReference(Organization::class.java, organizationId)
-        this.appId = fetched.manifest.id
-        this.manifestUrl = manifestUrl
-        this.manifestScopes = joinScopes(fetched.scopes)
-        this.name = fetched.manifest.name
-        this.version = fetched.manifest.version
-        this.baseUrl = fetched.manifest.baseUrl
-        this.icon = fetched.icon
-        this.manifestJson = fetched.rawJson
-        this.clientId = clientId
-        this.webhookSecret = webhookSecret
-      }
-    markManifestHealthy(app, currentDateProvider.date)
-    val saved =
-      try {
-        appRepository.saveAndFlush(app)
-      } catch (_: DataIntegrityViolationException) {
-        throw BadRequestException(Message.APP_ALREADY_REGISTERED)
-      }
-    val issued = appSecretService.issueInitial(saved)
-
-    return ResolveResult(
-      app = saved,
-      credentials =
-        AppCredentials(
-          clientId = clientId,
-          clientSecret = issued.plaintextSecret,
-          webhookSecret = webhookSecret,
-        ),
-    )
+    val inserted = appRegisterInserter.insert(organizationId, manifestUrl, fetched)
+    return ResolveResult(inserted.app, inserted.credentials)
   }
 
   fun summarize(app: App): AppSummary {
     return AppSummary(id = app.id, appId = app.appId, name = app.name)
   }
+
+  /** The app-level credentials, disclosed only in the response to registering the app. */
+  data class AppCredentials(
+    val clientId: String,
+    val clientSecret: String,
+    val webhookSecret: String,
+  )
 
   companion object {
     /**

@@ -77,23 +77,25 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
     val response = register(testData.organization.id)
 
     response
-      .at("/app/clientId")
+      .at("/clientId")
       .asText()
       .assert
       .startsWith(AppService.APP_CLIENT_ID_PREFIX)
     response
-      .at("/app/clientSecret")
+      .at("/clientSecret")
       .asText()
       .assert
       .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     response
-      .at("/app/webhookSecret")
+      .at("/webhookSecret")
       .asText()
       .assert
       .isNotBlank()
-    // The install carries no credentials of its own — the app-level ones above mint its tokens.
-    response.get("clientSecret").assert.isNull()
-    response.get("clientId").assert.isNull()
+    response
+      .at("/installId")
+      .asLong()
+      .assert
+      .isNotEqualTo(0L)
 
     ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
     appSecretService.list(appRepository.findByAppId("test-app")!!.id).assert.hasSize(1)
@@ -101,10 +103,23 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `registering without install registers the app but creates no install`() {
+    performAuthPost(ownedUrl(testData.organization.id), manifestBody() + mapOf("install" to false))
+      .andIsOk
+      .andAssertThatJson {
+        node("clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
+        node("installId").isNull()
+      }
+
+    ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
+    appInstallService.findAll(testData.organization.id).assert.isEmpty()
+  }
+
+  @Test
   fun `a failed install leaves no app registered behind`() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST_WITH_UNKNOWN_SCOPE)
 
-    performAuthPost(registerUrl(testData.organization.id), manifestBody()).andIsBadRequest
+    performAuthPost(ownedUrl(testData.organization.id), manifestBody()).andIsBadRequest
 
     appRepository.findByAppId("test-app").assert.isNull()
   }
@@ -114,63 +129,62 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
     register(testData.organization.id)
 
     performAuthGet(installUrl(testData.organization.id)).andIsOk.andAssertThatJson {
-      node("_embedded.appInstalls[0].app").isNull()
+      node("_embedded.appInstalls[0].clientId").isAbsent()
+      node("_embedded.appInstalls[0].clientSecret").isAbsent()
+      node("_embedded.appInstalls[0].app").isAbsent()
     }
   }
 
   @Test
   fun `two organizations installing the same manifest get one app and two installs`() {
     val first = register(testData.organization.id)
-    appAvailabilityService.setAvailableToAllOrganizations(first.at("/app/id").asLong(), true)
+    appAvailabilityService.setAvailableToAll(first.at("/id").asLong(), true)
 
     userAccount = testData.otherOwner
-    val second =
+    val secondInstallId =
       performAuthPost(installUrl(testData.otherOrganization.id), manifestBody())
         .andIsOk
         .andReturn()
         .response.contentAsString
         .let { objectMapper.readTree(it) }
+        .at("/id")
+        .asLong()
 
-    second
-      .at("/app/id")
-      .asLong()
-      .assert
-      .isEqualTo(first.at("/app/id").asLong())
-    second
-      .at("/id")
-      .asLong()
-      .assert
-      .isNotEqualTo(first.at("/id").asLong())
+    secondInstallId.assert.isNotEqualTo(first.at("/installId").asLong())
     appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
     appInstallService.findAll(testData.organization.id).assert.hasSize(1)
+    appRepository
+      .findAll()
+      .filter { it.appId == "test-app" }
+      .assert
+      .hasSize(1)
   }
 
   @Test
-  fun `an organization installing somebody else's app never sees its app-level credentials`() {
-    appAvailabilityService.setAvailableToAllOrganizations(
-      register(testData.organization.id).at("/app/id").asLong(),
-      true,
-    )
+  fun `an organization installing somebody else's app never sees any credentials`() {
+    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong(), true)
 
     userAccount = testData.otherOwner
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
-      node("app.clientId").isNull()
-      node("app.clientSecret").isNull()
-      node("app.webhookSecret").isNull()
+      node("clientId").isAbsent()
+      node("clientSecret").isAbsent()
+      node("webhookSecret").isAbsent()
+      node("app").isAbsent()
     }
   }
 
   /**
-   * Registering an app somebody else already owns must not hand over its credentials either — the
+   * Registering an app somebody else already owns must not hand over its credentials either - the
    * install is created, the ownership is not.
    */
   @Test
   fun `registering an already-registered app only installs it`() {
-    register(testData.organization.id)
+    appAvailabilityService.setAvailableToAll(register(testData.organization.id).at("/id").asLong(), true)
 
     userAccount = testData.otherOwner
-    performAuthPost(registerUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
-      node("app.clientSecret").isNull()
+    performAuthPost(ownedUrl(testData.otherOrganization.id), manifestBody()).andIsOk.andAssertThatJson {
+      node("clientSecret").isNull()
+      node("installId").isNumber
     }
 
     ownerOrganizationIdOf("test-app").assert.isEqualTo(testData.organization.id)
@@ -178,8 +192,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `installing an app another organization owns is refused until it is made available`() {
-    val first = register(testData.organization.id)
-    val appEntityId = first.at("/app/id").asLong()
+    val appEntityId = register(testData.organization.id).at("/id").asLong()
 
     userAccount = testData.otherOwner
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody())
@@ -187,33 +200,20 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
       .andAssertThatJson { node("code").isEqualTo("app_not_available_for_organization") }
     appInstallService.findAll(testData.otherOrganization.id).assert.isEmpty()
 
-    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
+    appAvailabilityService.setAvailableToAll(appEntityId, true)
 
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk
     appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
   }
 
   @Test
-  fun `the available list shows a server-wide app until this organization installs it`() {
-    val appEntityId = register(testData.organization.id).at("/app/id").asLong()
+  fun `a specific-organization grant lets exactly that organization install`() {
+    val appEntityId = register(testData.organization.id).at("/id").asLong()
+    appAvailabilityService.setAvailableToOrganization(appEntityId, testData.otherOrganization.id, true)
 
     userAccount = testData.otherOwner
-    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
-      node("_embedded").isAbsent()
-    }
-
-    appAvailabilityService.setAvailableToAllOrganizations(appEntityId, true)
-
-    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
-      node("_embedded.availableApps").isArray.hasSize(1)
-      node("_embedded.availableApps[0].appId").isEqualTo("test-app")
-    }
-
     performAuthPost(installUrl(testData.otherOrganization.id), manifestBody()).andIsOk
-
-    performAuthGet(availableUrl(testData.otherOrganization.id)).andIsOk.andAssertThatJson {
-      node("_embedded").isAbsent()
-    }
+    appInstallService.findAll(testData.otherOrganization.id).assert.hasSize(1)
   }
 
   private fun ownerOrganizationIdOf(appId: String): Long? =
@@ -223,7 +223,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   private fun register(organizationId: Long) =
     objectMapper.readTree(
-      performAuthPost(registerUrl(organizationId), manifestBody())
+      performAuthPost(ownedUrl(organizationId), manifestBody())
         .andIsOk
         .andReturn()
         .response.contentAsString,
@@ -231,9 +231,7 @@ class AppRegistrationControllerTest : AuthorizedControllerTest() {
 
   private fun installUrl(organizationId: Long) = "/v2/organizations/$organizationId/apps"
 
-  private fun availableUrl(organizationId: Long) = "${installUrl(organizationId)}/available"
-
-  private fun registerUrl(organizationId: Long) = "${installUrl(organizationId)}/register"
+  private fun ownedUrl(organizationId: Long) = "/v2/organizations/$organizationId/owned-apps"
 
   private fun manifestBody() = mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL)
 

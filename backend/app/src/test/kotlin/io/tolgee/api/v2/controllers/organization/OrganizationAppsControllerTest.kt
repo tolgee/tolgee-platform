@@ -58,15 +58,18 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
     performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
       node("name").isEqualTo("Test App")
-      node("version").isEqualTo("0.1.0")
-      node("baseUrl").isEqualTo("https://app.example.com")
-      node("modules.project-dashboard-page[0].key").isEqualTo("home")
-      node("modules.project-dashboard-page[0].title").isEqualTo("Home")
-      node("modules.project-dashboard-page[0].entry").isEqualTo("/")
-      node("scopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
+      node("clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
+      node("installId").isNumber
     }
     val install = appInstallService.findAll(testData.organization.id).single()
     install.grantedScopes.assert.containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_EDIT)
+    // The manifest details are exposed on the install listing, not on the registration response.
+    performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].version").isEqualTo("0.1.0")
+      node("_embedded.appInstalls[0].baseUrl").isEqualTo("https://app.example.com")
+      node("_embedded.appInstalls[0].modules.project-dashboard-page[0].key").isEqualTo("home")
+      node("_embedded.appInstalls[0].scopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
+    }
     // Registering read the manifest, so it already counts as the first health check.
     executeInNewTransaction {
       appService
@@ -78,16 +81,18 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `stores a relative image icon resolved against the base url`() {
     mockManifest(manifestWithIcon("/assets/logo.svg"))
-    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
-      node("icon").isEqualTo("https://app.example.com/assets/logo.svg")
+    performAuthPost(registerUrl(), registerBody()).andIsOk
+    performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].icon").isEqualTo("https://app.example.com/assets/logo.svg")
     }
   }
 
   @Test
   fun `passes an emoji icon through and rejects a non-http image icon`() {
     mockManifest(manifestWithIcon("🧩"))
-    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
-      node("icon").isEqualTo("🧩")
+    performAuthPost(registerUrl(), registerBody()).andIsOk
+    performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].icon").isEqualTo("🧩")
     }
     performAuthDelete(
       "${appsUrl()}/${appInstallService.findAll(testData.organization.id).single().id}",
@@ -132,26 +137,65 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   fun `registration discloses the app-level credentials exactly once`() {
     mockManifest(validManifest())
     performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
-      node("app.clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
-      node("app.clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+      node("clientId").isString.startsWith(AppService.APP_CLIENT_ID_PREFIX)
+      node("clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
     }
 
     performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
       node("_embedded.appInstalls[0].clientSecret").isAbsent()
-      node("_embedded.appInstalls[0].app.clientSecret").isAbsent()
+      node("_embedded.appInstalls[0].clientId").isAbsent()
     }
   }
 
   @Test
-  fun `preview returns parsed manifest with requested scopes without persisting`() {
+  fun `preview returns parsed manifest with requested scopes and a hash without persisting`() {
     mockManifest(validManifest())
     performAuthPost("${appsUrl()}/preview", registerBody()).andIsOk.andAssertThatJson {
       node("appId").isEqualTo("test-app")
       node("name").isEqualTo("Test App")
       node("version").isEqualTo("0.1.0")
       node("requestedScopes").isArray.containsExactlyInAnyOrder("translations.view", "keys.edit")
+      node("manifestHash").isString.isNotEqualTo("")
     }
     appInstallService.findAll(testData.organization.id).assert.isEmpty()
+  }
+
+  @Test
+  fun `rejects register when the manifest changed since the preview`() {
+    mockManifest(validManifest())
+    val hash =
+      objectMapper
+        .readTree(
+          performAuthPost("${appsUrl()}/preview", registerBody())
+            .andIsOk
+            .andReturn()
+            .response.contentAsString,
+        ).at("/manifestHash")
+        .asText()
+
+    // The app now asks for one more scope than the preview showed - a bait-and-switch that must be refused.
+    mockManifest(validManifest().replace("\"keys.edit\"", "\"keys.edit\", \"keys.create\""))
+    performAuthPost(registerUrl(), registerBody() + mapOf("manifestHash" to hash))
+      .andIsBadRequest
+      .andAssertThatJson { node("code").isEqualTo("app_manifest_changed") }
+    appService.find("test-app").assert.isNull()
+  }
+
+  @Test
+  fun `accepts register when the hash still matches the manifest`() {
+    mockManifest(validManifest())
+    val hash =
+      objectMapper
+        .readTree(
+          performAuthPost("${appsUrl()}/preview", registerBody())
+            .andIsOk
+            .andReturn()
+            .response.contentAsString,
+        ).at("/manifestHash")
+        .asText()
+
+    performAuthPost(registerUrl(), registerBody() + mapOf("manifestHash" to hash)).andIsOk
+    appInstallService.findAll(testData.organization.id).assert.hasSize(1)
   }
 
   @Test
@@ -179,6 +223,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
     performAuthGet(appsUrl()).andIsForbidden
     performAuthPost(appsUrl(), registerBody()).andIsForbidden
     performAuthPost(registerUrl(), registerBody()).andIsForbidden
+    performAuthGet(ownedUrl()).andIsForbidden
     performAuthPost("${appsUrl()}/preview", registerBody()).andIsForbidden
     performAuthDelete("${appsUrl()}/$installId").andIsForbidden
   }
@@ -204,11 +249,12 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `register without scopes block stores no granted scopes`() {
     mockManifest(manifestWithoutScopes())
-    performAuthPost(registerUrl(), registerBody()).andIsOk.andAssertThatJson {
-      node("scopes").isArray.isEmpty()
-    }
+    performAuthPost(registerUrl(), registerBody()).andIsOk
     val install = appInstallService.findAll(testData.organization.id).single()
     install.grantedScopes.assert.isEmpty()
+    performAuthGet(appsUrl()).andIsOk.andAssertThatJson {
+      node("_embedded.appInstalls[0].scopes").isArray.isEmpty()
+    }
   }
 
   @Test
@@ -338,7 +384,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `lists registered apps for the organization`() {
+  fun `lists installed apps for the organization`() {
     mockManifest(validManifest())
     performAuthPost(registerUrl(), registerBody()).andIsOk
 
@@ -349,7 +395,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `removes a registered app`() {
+  fun `removes an installed app`() {
     mockManifest(validManifest())
     performAuthPost(registerUrl(), registerBody()).andIsOk
     val installId = appInstallService.findAll(testData.organization.id).single().id
@@ -360,7 +406,9 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
 
   private fun appsUrl() = "/v2/organizations/${testData.organization.id}/apps"
 
-  private fun registerUrl() = "${appsUrl()}/register"
+  private fun ownedUrl() = "/v2/organizations/${testData.organization.id}/owned-apps"
+
+  private fun registerUrl() = ownedUrl()
 
   private fun registerBody() = mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL)
 

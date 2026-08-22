@@ -51,19 +51,41 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
   fun deleteByProjectId(projectId: Long)
 
   /**
-   * Disables an app in every project whose organization does not own it — used when a server admin
-   * withdraws the app's server-wide availability, so it stops running everywhere it could only be
-   * reached through that offer while staying enabled in the owner's own projects.
+   * How many projects each of these installs is enabled for, in one query, so a list of installs
+   * does not fan out into one count per install.
+   */
+  @Query(
+    """
+    select e.appInstall.id, count(e)
+    from AppEnabledForProject e
+    where e.appInstall.id in :installIds
+    group by e.appInstall.id
+    """,
+  )
+  fun countEnabledProjectsByInstallIds(
+    @Param("installIds") installIds: Collection<Long>,
+  ): List<Array<Any>>
+
+  /**
+   * Disables an app in every non-owner project that can no longer reach it - used after a change to
+   * the app's availability set, so it stops running wherever it could only be reached through an
+   * availability entry that is now gone, while staying enabled in the owner's own projects and in
+   * organizations the app is still available to.
    */
   @Query(
     """
     delete from AppEnabledForProject e
     where e.appInstall.app.id = :appEntityId
       and e.project.organizationOwner.id <> e.appInstall.app.organization.id
+      and not exists (
+        select 1 from AppAvailability av
+        where av.app.id = :appEntityId
+          and (av.organization is null or av.organization.id = e.project.organizationOwner.id)
+      )
     """,
   )
   @Modifying(clearAutomatically = true)
-  fun deleteByAppIdAndProjectOrganizationNotOwner(
+  fun disableWhereNoLongerAvailable(
     @Param("appEntityId") appEntityId: Long,
   )
 }

@@ -7,6 +7,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.repository.apps.AppInstallRepository
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
@@ -20,23 +22,40 @@ class AppInstallPersister(
   private val appInstallPrincipalService: AppInstallPrincipalService,
   private val appsLimitGuard: AppsLimitGuard,
   private val entityManager: EntityManager,
-) {
+) : Logging {
   /**
-   * Registers the app if nobody has yet — making [organizationId] its owner — and installs it in one
-   * transaction, so a failed install never leaves behind an app its owner has no install of.
+   * Registers the app if nobody has yet - making [organizationId] its owner - and, when [install] is
+   * true, installs it in the same transaction, so a failed install never leaves behind an app its
+   * owner has no install of.
    */
   @Transactional
-  fun registerAndCreate(
+  fun registerAndMaybeInstall(
     organizationId: Long,
     manifestUrl: String,
     fetched: AppManifestFetcher.FetchResult,
-  ): AppInstallService.RegisterResult {
+    install: Boolean,
+  ): AppInstallService.RegisterAppResult {
     appsLimitGuard.checkAppsLimit(
       organizationId,
       registersNewApp = appService.find(fetched.manifest.id) == null,
     )
     val resolved = appService.registerIfAbsent(organizationId, manifestUrl, fetched)
-    return persist(resolved.app, organizationId, fetched, resolved.credentials)
+    val app = resolved.app
+    if (!install) {
+      return AppInstallService.RegisterAppResult(
+        app = appService.summarize(app),
+        appEntityId = app.id,
+        appCredentials = resolved.credentials,
+        install = null,
+      )
+    }
+    val installEntity = persist(app, organizationId, fetched)
+    return AppInstallService.RegisterAppResult(
+      app = appService.summarize(app),
+      appEntityId = app.id,
+      appCredentials = resolved.credentials,
+      install = installEntity,
+    )
   }
 
   /** Installs an already-registered app. Discloses no app-level credentials. */
@@ -48,15 +67,19 @@ class AppInstallPersister(
   ): AppInstallService.RegisterResult {
     appsLimitGuard.checkAppsLimit(organizationId, registersNewApp = false)
     val app = entityManager.getReference(App::class.java, appEntityId)
-    return persist(app, organizationId, fetched, appCredentials = null)
+    val install = persist(app, organizationId, fetched)
+    return AppInstallService.RegisterResult(
+      install = install,
+      app = appService.summarize(app),
+      appCredentials = null,
+    )
   }
 
   private fun persist(
     app: App,
     organizationId: Long,
     fetched: AppManifestFetcher.FetchResult,
-    appCredentials: AppService.AppCredentials?,
-  ): AppInstallService.RegisterResult {
+  ): AppInstall {
     if (findByAppId(organizationId, fetched.manifest.id) != null) {
       throw BadRequestException(Message.APP_ALREADY_INSTALLED)
     }
@@ -69,17 +92,13 @@ class AppInstallPersister(
         this.grantedScopes = fetched.scopes.toTypedArray()
       }
 
-    val saved =
-      try {
-        appInstallRepository.saveAndFlush(install)
-      } catch (_: DataIntegrityViolationException) {
-        throw BadRequestException(Message.APP_ALREADY_INSTALLED)
-      }
-    return AppInstallService.RegisterResult(
-      install = saved,
-      app = appService.summarize(app),
-      appCredentials = appCredentials,
-    )
+    return try {
+      appInstallRepository.saveAndFlush(install)
+    } catch (e: DataIntegrityViolationException) {
+      // A concurrent install of the same app by this organization lost the unique-constraint race.
+      logger.debug("Concurrent app install collided on the unique constraint", e)
+      throw BadRequestException(Message.APP_ALREADY_INSTALLED)
+    }
   }
 
   @Transactional

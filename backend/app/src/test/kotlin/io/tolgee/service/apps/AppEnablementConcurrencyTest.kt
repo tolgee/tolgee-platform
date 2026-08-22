@@ -40,7 +40,10 @@ class AppEnablementConcurrencyTest : AbstractSpringTest() {
           .register(
             organization = testData.organization,
             manifestUrl = AppsTestFixtures.MANIFEST_URL,
-          ).install.id
+            manifestHash = null,
+            install = true,
+          ).install!!
+          .id
       }
   }
 

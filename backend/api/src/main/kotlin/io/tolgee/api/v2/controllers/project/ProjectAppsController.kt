@@ -6,7 +6,6 @@ import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
@@ -27,26 +26,24 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Project Apps")
 class ProjectAppsController(
   private val projectHolder: ProjectHolder,
-  private val authenticationFacade: AuthenticationFacade,
   private val appEnablementService: AppEnablementService,
   private val projectAppModelAssembler: ProjectAppModelAssembler,
 ) {
   @GetMapping
-  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @RequiresProjectPermissions([Scope.APPS_MANAGE])
   @Operation(
-    summary = "List apps for project",
+    summary = "List all apps for project (management view)",
     description =
-      "Returns all apps registered in the project's organization, each annotated with whether it is " +
-        "enabled for this project. Requires project.edit: it discloses the organization's whole app " +
-        "inventory, including apps not enabled for this project.",
+      "Returns every app the project's organization has installed, each annotated with whether it is " +
+        "enabled for this project. Requires apps.manage: it discloses the organization's whole app " +
+        "inventory, including apps not enabled for this project. The default project view uses the " +
+        "`/enabled` listing instead.",
   )
   fun list(
     @PathVariable projectId: Long,
   ): CollectionModel<ProjectAppModel> {
-    val project = projectHolder.projectEntity
-    val results = appEnablementService.listAppsForProject(project)
-    val models = results.map { projectAppModelAssembler.toModel(it.install, it.enabled) }
-    return CollectionModel.of(models)
+    val views = appEnablementService.listAppsForProject(projectHolder.projectEntity)
+    return CollectionModel.of(views.map { projectAppModelAssembler.toModel(it) })
   }
 
   @GetMapping("/enabled")
@@ -66,7 +63,7 @@ class ProjectAppsController(
   }
 
   @PutMapping("/{installId}")
-  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @RequiresProjectPermissions([Scope.APPS_MANAGE])
   @Operation(
     summary = "Enable app for project",
     description = "Enables the given app install for this project. Idempotent.",
@@ -84,10 +81,10 @@ class ProjectAppsController(
   }
 
   @DeleteMapping("/{installId}")
-  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @RequiresProjectPermissions([Scope.APPS_MANAGE])
   @Operation(
     summary = "Disable app for project",
-    description = "Disables the given app for this project. Idempotent — no-op if it wasn't enabled.",
+    description = "Disables the given app for this project. Idempotent - no-op if it wasn't enabled.",
   )
   fun disable(
     @PathVariable projectId: Long,

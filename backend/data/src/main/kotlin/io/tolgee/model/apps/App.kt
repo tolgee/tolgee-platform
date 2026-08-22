@@ -37,11 +37,6 @@ class App : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var organization: Organization
 
-  /** Whether a server admin offered the app to every organization, not only the owner. */
-  @Column(nullable = false)
-  @ColumnDefault("false")
-  var availableToAllOrganizations: Boolean = false
-
   /** The `id` declared in the manifest. */
   @Column(nullable = false)
   lateinit var appId: String
@@ -79,7 +74,7 @@ class App : StandardAuditModel() {
   lateinit var clientId: String
 
   /**
-   * Signs outbound lifecycle deliveries, so it is stored in plaintext — the same trade-off
+   * Signs outbound lifecycle deliveries, so it is stored in plaintext - the same trade-off
    * [io.tolgee.model.webhook.WebhookConfig.webhookSecret] makes. It authenticates nothing
    * towards Tolgee.
    */
@@ -90,7 +85,7 @@ class App : StandardAuditModel() {
   var secrets: MutableList<AppSecret> = mutableListOf()
 
   /**
-   * Access tokens issued before this moment no longer validate — set when a secret is revoked, so
+   * Access tokens issued before this moment no longer validate - set when a secret is revoked, so
    * revocation takes effect immediately instead of when the minted tokens expire.
    */
   var tokensInvalidBefore: Date? = null

@@ -6102,4 +6102,53 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jcizmar" id="1787000000000-6">
+        <comment>Availability becomes a set: drop the all-or-owner boolean in favor of the app_availability
+            join table with a null-organization sentinel meaning "available to all".</comment>
+        <dropColumn columnName="available_to_all_organizations" tableName="app"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1787000000000-7">
+        <createTable tableName="app_availability">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_availabilityPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+        <addUniqueConstraint columnNames="app_id, organization_id"
+                             constraintName="app_availability_app_organization_unique"
+                             tableName="app_availability"/>
+        <createIndex indexName="IDX_app_availability_app_id" tableName="app_availability">
+            <column name="app_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_availability_organization_id" tableName="app_availability">
+            <column name="organization_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="app_id"
+                                 baseTableName="app_availability"
+                                 constraintName="FK_app_availability_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app_availability"
+                                 constraintName="FK_app_availability_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

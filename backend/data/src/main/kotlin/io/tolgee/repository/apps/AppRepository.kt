@@ -23,25 +23,6 @@ interface AppRepository : JpaRepository<App, Long> {
   ): App?
 
   /**
-   * Apps a server admin has offered to every organization that [organizationId] neither owns nor has
-   * already installed — the ones it can still add from the "Available on this server" list.
-   */
-  @Query(
-    """
-    select a from App a
-    where a.availableToAllOrganizations = true
-      and a.organization.id <> :organizationId
-      and not exists (
-        select 1 from AppInstall i where i.app = a and i.organization.id = :organizationId
-      )
-    order by a.name asc
-    """,
-  )
-  fun findAvailableToInstall(
-    @Param("organizationId") organizationId: Long,
-  ): List<App>
-
-  /**
    * Ids only, ascending, so the manifest reaper can walk every app in bounded batches without
    * holding a transaction open across the HTTP fetches it does between them.
    */

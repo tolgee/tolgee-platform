@@ -1,11 +1,9 @@
 package io.tolgee.hateoas.organization.apps
 
 import io.tolgee.dtos.apps.AppManifestDto
-import io.tolgee.hateoas.apps.AppModel
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.service.apps.AppEnablementService
-import io.tolgee.service.apps.AppInstallService
-import io.tolgee.service.apps.AppService
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -17,36 +15,19 @@ class AppInstallModelAssembler(
   private val appEnablementService: AppEnablementService,
 ) : RepresentationModelAssembler<AppInstall, AppInstallModel> {
   override fun toModel(entity: AppInstall): AppInstallModel {
-    return build(entity, app = null)
+    return build(entity, appEnablementService.countEnabledProjectsForInstall(entity.id))
   }
 
-  /**
-   * Builds the response to registering or installing an app — the only place the app-level
-   * plaintext credentials are disclosed. [AppInstallService.RegisterResult.appCredentials] is null
-   * unless this very call registered the app, which is what keeps an organization that merely
-   * installed somebody else's app from ever seeing its app-level credentials.
-   */
-  fun toModel(result: AppInstallService.RegisterResult): AppInstallModel {
-    return build(result.install, appModel(result.app, result.appCredentials))
-  }
-
-  private fun appModel(
-    app: AppService.AppSummary,
-    credentials: AppService.AppCredentials?,
-  ): AppModel {
-    return AppModel(
-      id = app.id,
-      appId = app.appId,
-      name = app.name,
-      clientId = credentials?.clientId,
-      clientSecret = credentials?.clientSecret,
-      webhookSecret = credentials?.webhookSecret,
-    )
+  /** Builds the whole listing with the enabled-project counts fetched in a single query. */
+  override fun toCollectionModel(entities: Iterable<AppInstall>): CollectionModel<AppInstallModel> {
+    val installs = entities.toList()
+    val counts = appEnablementService.countEnabledProjectsByInstall(installs.map { it.id })
+    return CollectionModel.of(installs.map { build(it, counts[it.id] ?: 0) })
   }
 
   private fun build(
     entity: AppInstall,
-    app: AppModel?,
+    enabledProjectCount: Long,
   ): AppInstallModel {
     val registeredApp = entity.app
     val manifest = objectMapper.readValue<AppManifestDto>(registeredApp.manifestJson)
@@ -58,11 +39,9 @@ class AppInstallModelAssembler(
       version = registeredApp.version,
       baseUrl = registeredApp.baseUrl,
       icon = registeredApp.icon,
-      enabledProjectCount = appEnablementService.listEnabledProjectsForInstall(entity.id).size.toLong(),
+      enabledProjectCount = enabledProjectCount,
       modules = manifest.modules,
       scopes = entity.grantedScopes.map { it.value },
-      pendingScopes = emptyList(),
-      app = app,
     )
   }
 }

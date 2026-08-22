@@ -57,7 +57,7 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the listing rejects a project member without project edit permission`() {
+  fun `the listing rejects a project member without apps manage permission`() {
     userAccount = testData.member
     performAuthGet(projectAppsUrl()).andIsForbidden
   }
@@ -155,7 +155,7 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `enable and disable reject a project member without project edit permission`() {
+  fun `enable and disable reject a project member without apps manage permission`() {
     val installId = installId()
     userAccount = testData.member
 
@@ -202,7 +202,7 @@ class ProjectAppsControllerTest : AuthorizedControllerTest() {
   private fun registerApp() {
     mockManifest(validManifest())
     performAuthPost(
-      "/v2/organizations/${testData.organization.id}/apps/register",
+      "/v2/organizations/${testData.organization.id}/owned-apps",
       mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
     ).andIsOk
   }

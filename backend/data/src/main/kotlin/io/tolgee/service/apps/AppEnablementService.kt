@@ -1,10 +1,9 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.apps.AppEnabledProjectDto
+import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.repository.apps.AppEnabledForProjectRepository
 import io.tolgee.repository.apps.AppInstallRepository
@@ -19,11 +18,6 @@ class AppEnablementService(
   private val appEnablementInserter: AppEnablementInserter,
   private val appAvailabilityService: AppAvailabilityService,
 ) {
-  data class ProjectAppEnablement(
-    val install: AppInstall,
-    val enabled: Boolean,
-  )
-
   @Transactional
   fun enable(
     project: Project,
@@ -47,21 +41,20 @@ class AppEnablementService(
   }
 
   /**
-   * The install this organization may enable: one it owns, or one of a server-wide app another
-   * organization owns. An install it can reach neither way stays indistinguishable from a missing
-   * one (404), so this never confirms the existence of another tenant's private install.
+   * The install this organization may enable for its project: one it holds whose app is still
+   * available to it. Availability is re-read here, not taken from install time, so an app whose
+   * availability was withdrawn cannot be freshly enabled. An install the organization does not hold
+   * stays indistinguishable from a missing one (404), never confirming another tenant's install.
    */
   private fun resolveEnableableInstall(
     organizationId: Long,
     installId: Long,
   ): AppInstall {
-    val owned = appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
-    if (owned != null) return owned
-
     val install =
-      appInstallRepository.findWithAppById(installId)
+      appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    if (!appAvailabilityService.isAvailableForOrganization(organizationId, install)) {
+    val app = install.app
+    if (!appAvailabilityService.isAvailableForOrganization(app.organization.id, app.id, organizationId)) {
       throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     }
     return install
@@ -78,17 +71,8 @@ class AppEnablementService(
   }
 
   @Transactional(readOnly = true)
-  fun listAppsForProject(project: Project): List<ProjectAppEnablement> {
-    val organizationId = project.organizationOwner.id
-    val installs =
-      appInstallRepository.findAllByOrganizationId(organizationId) +
-        appAvailabilityService.listAvailableInstallsForOrganization(organizationId)
-    val enabledIds =
-      appEnabledForProjectRepository
-        .findAllByProjectId(project.id)
-        .map { it.appInstall.id }
-        .toSet()
-    return installs.map { ProjectAppEnablement(it, it.id in enabledIds) }
+  fun listAppsForProject(project: Project): List<ProjectAppView> {
+    return appInstallRepository.findProjectAppViews(project.id, project.organizationOwner.id)
   }
 
   @Transactional(readOnly = true)
@@ -96,18 +80,19 @@ class AppEnablementService(
     return appEnabledForProjectRepository.findEnabledInstallsByProjectId(projectId)
   }
 
+  /** How many of this organization's projects the install is enabled for. */
   @Transactional(readOnly = true)
-  fun listEnabledProjectsForInstall(appInstallId: Long): List<AppEnabledProjectDto> {
-    return appEnabledForProjectRepository.findEnabledProjectsByAppInstallId(appInstallId).map {
-      val organization = it.organizationOwner
-      AppEnabledProjectDto(
-        id = it.id,
-        name = it.name,
-        organizationId = organization.id,
-        organizationName = organization.name,
-        organizationSlug = organization.slug,
-      )
-    }
+  fun countEnabledProjectsForInstall(appInstallId: Long): Long {
+    return countEnabledProjectsByInstall(listOf(appInstallId))[appInstallId] ?: 0
+  }
+
+  /** The same count for many installs at once, so a list of installs stays one query. */
+  @Transactional(readOnly = true)
+  fun countEnabledProjectsByInstall(appInstallIds: Collection<Long>): Map<Long, Long> {
+    if (appInstallIds.isEmpty()) return emptyMap()
+    return appEnabledForProjectRepository
+      .countEnabledProjectsByInstallIds(appInstallIds)
+      .associate { (it[0] as Long) to (it[1] as Long) }
   }
 
   @Transactional(readOnly = true)
@@ -126,7 +111,7 @@ class AppEnablementService(
   /**
    * Enablement is consent given by one organization. Once the project belongs to another
    * organization the old consent no longer applies, and the installs may not even be visible to the
-   * new owner — so the project starts with no app enabled.
+   * new owner - so the project starts with no app enabled.
    */
   @Transactional
   fun removeAllForProject(projectId: Long) {
