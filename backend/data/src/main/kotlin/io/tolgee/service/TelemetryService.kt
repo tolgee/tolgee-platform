@@ -58,7 +58,7 @@ class TelemetryService(
     return entityManager
       .createQuery(
         """
-      select count(u) from UserAccount u
+      select count(u) from UserAccount u where u.isAppPrincipal = false
     """,
         Long::class.javaObjectType,
       ).singleResult

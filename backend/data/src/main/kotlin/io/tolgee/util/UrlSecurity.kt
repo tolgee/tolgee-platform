@@ -86,8 +86,10 @@ class UrlSecurity(
    * but all of `0.0.0.0/8` is a loopback alias on Linux (`0.1.2.3` reaches `127.0.0.1`), so the
    * whole block is a reachable SSRF bypass. The rest are never legitimate app hosts: CGNAT
    * 100.64.0.0/10 (Alibaba/Tencent cloud metadata endpoints and every Tailscale node live there),
-   * 192.0.0.0/24, benchmarking 198.18.0.0/15, 6to4-relay anycast 192.88.99.0/24, the three
-   * documentation ranges, and reserved 240.0.0.0/4 including the broadcast address.
+   * 192.0.0.0/24, benchmarking 198.18.0.0/15, and reserved 240.0.0.0/4 including the broadcast
+   * address. The documentation ranges (192.0.2/24, 198.51.100/24, 203.0.113/24) are deliberately
+   * NOT blocked: nothing internal is reachable through them, so they add no SSRF protection, and
+   * they are commonly used as public stand-ins.
    */
   private fun isReservedIpv4(address: InetAddress): Boolean {
     val bytes = address.address
@@ -98,11 +100,7 @@ class UrlSecurity(
     if (first == 0) return true
     if (first == 100 && second in 64..127) return true
     if (first == 192 && second == 0 && third == 0) return true
-    if (first == 192 && second == 0 && third == 2) return true
-    if (first == 192 && second == 88 && third == 99) return true
     if (first == 198 && second in 18..19) return true
-    if (first == 198 && second == 51 && third == 100) return true
-    if (first == 203 && second == 0 && third == 113) return true
     return first >= 240
   }
 
