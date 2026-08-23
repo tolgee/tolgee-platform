@@ -12,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Prompt
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
@@ -99,6 +100,7 @@ class ProjectBuilder(
     val branchMergeChanges = mutableListOf<BranchMergeChangeBuilder>()
     val keySnapshots = mutableListOf<KeySnapshotBuilder>()
     val tags = mutableListOf<TagBuilder>()
+    val enabledApps = mutableListOf<AppEnabledForProjectBuilder>()
   }
 
   var data = DATA()
@@ -273,6 +275,9 @@ class ProjectBuilder(
     data.qaConfig = builder
     return builder
   }
+
+  fun addEnabledApp(ft: FT<AppEnabledForProject>) =
+    addOperation(data.enabledApps, AppEnabledForProjectBuilder(this), ft)
 
   fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
 

@@ -263,8 +263,8 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
       left join ua.organizationRoles orl
       left join orl.organization o on o.deletedAt is null and o.id = :organizationId
       left join ua.permissions p on p.agency is null
-      left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId 
-      where ua.deletedAt is null and ua.disabledAt is null
+      left join p.project pr on pr.deletedAt is null and pr.organizationOwner.id = :organizationId
+      where ua.deletedAt is null and ua.disabledAt is null and ua.isAppPrincipal = false
       and (pr is not null or o is not null)"""
   }
 }

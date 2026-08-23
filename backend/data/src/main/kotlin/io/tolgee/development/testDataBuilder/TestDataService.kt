@@ -131,6 +131,7 @@ class TestDataService(
 
       executeInNewTransaction(transactionManager) {
         saveProjectData(builder)
+        saveAppData(builder)
         saveGlossaryData(builder)
         // Must run before saveTranslationMemoryData — auto-added project TMs are appended to the
         // builder tree and get persisted by the regular TM pass alongside fixture-declared ones.
@@ -218,6 +219,25 @@ class TestDataService(
 
   private fun saveProjectData(builder: TestDataBuilder) {
     saveAllProjects(builder)
+  }
+
+  /**
+   * Persists the app graph in FK order. Runs after projects are saved: an app is owned by an
+   * organization (saved with users), an enablement points at a project, and every install's
+   * principal is a real [io.tolgee.model.UserAccount] already persisted in [saveAllUsers] and
+   * cleaned up with the other users by [cleanTestData].
+   */
+  private fun saveAppData(builder: TestDataBuilder) {
+    val apps = builder.data.organizations.flatMap { it.data.apps }
+    apps.forEach { entityManager.persist(it.self) }
+    apps.flatMap { it.data.secrets }.forEach { entityManager.persist(it.self) }
+    builder.data.organizations
+      .flatMap { it.data.appInstalls }
+      .forEach { entityManager.persist(it.self) }
+    builder.data.projects
+      .flatMap { it.data.enabledApps }
+      .forEach { entityManager.persist(it.self) }
+    apps.flatMap { it.data.availabilities }.forEach { entityManager.persist(it.self) }
   }
 
   private fun saveOrganizationDependants(builder: TestDataBuilder) {

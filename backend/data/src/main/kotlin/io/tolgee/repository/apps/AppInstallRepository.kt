@@ -13,7 +13,11 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface AppInstallRepository : JpaRepository<AppInstall, Long> {
-  fun findAllByOrganizationId(organizationId: Long): List<AppInstall>
+  /** The organization's installed apps; app is fetched so the list assembler does not lazy-load per row. */
+  @Query("select i from AppInstall i join fetch i.app where i.organization.id = :organizationId")
+  fun findAllByOrganizationId(
+    @Param("organizationId") organizationId: Long,
+  ): List<AppInstall>
 
   fun findByOrganizationIdAndId(
     organizationId: Long,
@@ -33,7 +37,7 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
 
   /**
    * The app is fetched eagerly because app-token authentication reads its token cutoff from the
-   * servlet filter, outside any session — a lazy proxy there fails the request instead of
+   * servlet filter, outside any session - a lazy proxy there fails the request instead of
    * authenticating it.
    */
   @Query("select i from AppInstall i join fetch i.app where i.id = :id")
@@ -46,6 +50,40 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
     @Param("appEntityId") appEntityId: Long,
   ): Long
 
+  /** How many organizations hold each of these apps, in one query, so a list of apps does not fan out. */
+  @Query(
+    """
+    select i.app.id, count(i) from AppInstall i
+    where i.app.id in :appEntityIds
+    group by i.app.id
+    """,
+  )
+  fun countInstallsByAppIds(
+    @Param("appEntityIds") appEntityIds: Collection<Long>,
+  ): List<Array<Any>>
+
+  /**
+   * The project apps management listing: every install the project's organization holds, each with
+   * the enablement row id for this project (null when not enabled), in one projection query.
+   */
+  @Query(
+    value = """
+    select new io.tolgee.dtos.apps.ProjectAppView(
+      i.id, i.app.appId, i.app.name, i.app.version, i.app.baseUrl, i.app.manifestJson,
+      (select e.id from AppEnabledForProject e where e.appInstall = i and e.project.id = :projectId)
+    )
+    from AppInstall i
+    where i.organization.id = :organizationId
+    order by i.app.name, i.id
+    """,
+    countQuery = "select count(i) from AppInstall i where i.organization.id = :organizationId",
+  )
+  fun findProjectAppViews(
+    @Param("projectId") projectId: Long,
+    @Param("organizationId") organizationId: Long,
+    pageable: Pageable,
+  ): Page<io.tolgee.dtos.apps.ProjectAppView>
+
   @Query("select i from AppInstall i where i.app.id = :appEntityId")
   fun findAllByRegisteredAppId(
     @Param("appEntityId") appEntityId: Long,
@@ -56,11 +94,12 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
   /**
    * The organizations that currently have the app installed, for the owner's installations view.
    * Ordered here (name, then id for ties) because a paged select without a total order can repeat
-   * or drop rows across pages.
+   * or drop rows across pages. No `distinct` is needed - the unique (organization, app) constraint
+   * already gives one row per organization - and it would make Postgres reject the entity `order by`.
    */
   @Query(
     """
-    select distinct i.organization from AppInstall i where i.app.id = :appEntityId
+    select i.organization from AppInstall i where i.app.id = :appEntityId
       and (:search is null
         or lower(i.organization.name) like lower(concat('%', cast(:search as text), '%'))
         or lower(i.organization.slug) like lower(concat('%', cast(:search as text), '%')))

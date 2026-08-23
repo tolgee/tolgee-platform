@@ -38,6 +38,7 @@ class PublicConfigurationDTO(
   val slack: SlackDTO,
   val translationsViewLanguagesLimit: Int,
   val llm: PublicLlmConfigurationDTO,
+  val appsEnabled: Boolean,
 ) {
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
