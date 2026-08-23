@@ -48,29 +48,33 @@ const zeroWidthDecoration = Decoration.widget({
   side: 1,
 });
 
-function buildDecorations(state: EditorState) {
+type FoundInvisibleChar = { index: number; char: InvisibleChar };
+
+type InvisibleCharactersState = {
+  found: FoundInvisibleChar[];
+  decorations: DecorationSet;
+};
+
+function buildState(state: EditorState): InvisibleCharactersState {
+  const found = findInvisibleCharacters(state.doc.toString());
   const builder = new RangeSetBuilder<Decoration>();
-  findInvisibleCharacters(state.doc.toString()).forEach(({ index, char }) => {
+  found.forEach(({ index, char }) => {
     if (char.kind === 'zeroWidth') {
       builder.add(index, index, zeroWidthDecoration);
     } else {
       builder.add(index, index + char.value.length, nonBreakingSpaceDecoration);
     }
   });
-  return builder.finish();
+  return { found, decorations: builder.finish() };
 }
 
-const invisibleCharactersField = StateField.define<DecorationSet>({
-  create(state) {
-    return buildDecorations(state);
+const invisibleCharactersField = StateField.define<InvisibleCharactersState>({
+  create: buildState,
+  update(value, tr) {
+    return tr.docChanged ? buildState(tr.state) : value;
   },
-  update(decorations, tr) {
-    if (!tr.docChanged) {
-      return decorations;
-    }
-    return buildDecorations(tr.state);
-  },
-  provide: (field) => EditorView.decorations.from(field),
+  provide: (field) =>
+    EditorView.decorations.from(field, (value) => value.decorations),
 });
 
 export const invisibleCharactersPlugin = (): Extension[] => [
@@ -80,13 +84,14 @@ export const invisibleCharactersPlugin = (): Extension[] => [
 export const invisibleCharactersTooltip = (
   getLabel: (char: InvisibleChar) => string
 ): Extension =>
-  hoverTooltip((context, pos, side) => {
-    const found = findInvisibleCharacters(context.state.doc.toString()).find(
-      ({ index, char }) =>
+  hoverTooltip((view, pos, side) => {
+    const found = view.state
+      .field(invisibleCharactersField, false)
+      ?.found.find(({ index, char }) =>
         side < 0
           ? pos > index && pos <= index + char.value.length
           : pos >= index && pos < index + char.value.length
-    );
+      );
 
     if (!found) {
       return null;

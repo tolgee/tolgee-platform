@@ -34,7 +34,10 @@ describe('Invisible characters', () => {
       key: 'nbsp key',
       language: 'en',
     })
-      .find('[data-cy="invisible-character"][data-cy-kind="nonBreakingSpace"]')
+      .findDcyAdvanced({
+        value: 'invisible-character',
+        kind: 'nonBreakingSpace',
+      })
       .should('have.length.at.least', 1);
   });
 
@@ -46,7 +49,10 @@ describe('Invisible characters', () => {
       key: 'zero width key',
       language: 'en',
     })
-      .find('[data-cy="invisible-character"][data-cy-kind="zeroWidth"]')
+      .findDcyAdvanced({
+        value: 'invisible-character',
+        kind: 'zeroWidth',
+      })
       .should('have.length.at.least', 1);
   });
 
@@ -58,7 +64,7 @@ describe('Invisible characters', () => {
       key: 'plain key',
       language: 'en',
     })
-      .find('[data-cy="invisible-character"]')
+      .findDcy('invisible-character')
       .should('not.exist');
   });
 
@@ -67,9 +73,10 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .find(
-        '[data-cy="invisible-character-editor"][data-cy-kind="nonBreakingSpace"]'
-      )
+      .findDcyAdvanced({
+        value: 'invisible-character-editor',
+        kind: 'nonBreakingSpace',
+      })
       .should('have.length.at.least', 1);
   });
 
@@ -78,7 +85,10 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Zero');
     gcy('global-editor')
-      .find('[data-cy="invisible-character-editor"][data-cy-kind="zeroWidth"]')
+      .findDcyAdvanced({
+        value: 'invisible-character-editor',
+        kind: 'zeroWidth',
+      })
       .should('have.length.at.least', 1);
   });
 
@@ -87,9 +97,10 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .find(
-        '[data-cy="invisible-character-editor"][data-cy-kind="nonBreakingSpace"]'
-      )
+      .findDcyAdvanced({
+        value: 'invisible-character-editor',
+        kind: 'nonBreakingSpace',
+      })
       .first()
       .trigger('mousemove');
     gcy('invisible-character-tooltip').should('be.visible');
