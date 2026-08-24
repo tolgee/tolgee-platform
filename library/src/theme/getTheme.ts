@@ -197,7 +197,6 @@ export const getTheme = (mode: PaletteMode) =>
 const typography = {
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-  htmlFontSize: 15,
   h1: {
     fontSize: 42,
     fontWeight: 300,
