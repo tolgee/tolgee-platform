@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { CompactListSubheader } from 'tg.component/ListComponents';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
 import { SubfilterTasksProps } from 'eeSetup/EeModuleType';
@@ -23,12 +22,6 @@ export const SubfilterTasks = ({
   const [expanded, setExpanded] = useState(
     value.filterTaskLanguage !== undefined
   );
-  const { isEnabled } = useEnabledFeatures();
-
-  if (!isEnabled('TASKS') && !isEnabled('ORDER_TRANSLATION')) {
-    return null;
-  }
-
   const disabled = hideLanguageScope && selectedLanguages.length === 0;
 
   function toggleFilterLanguage(
