@@ -1,6 +1,7 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.apps.AppEnabledProjectDto
 import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
@@ -98,6 +99,20 @@ class AppEnablementService(
     return appEnabledForProjectRepository
       .countEnabledProjectsByInstallIds(appInstallIds)
       .associate { (it[0] as Long) to (it[1] as Long) }
+  }
+
+  @Transactional(readOnly = true)
+  fun listEnabledProjectsForInstall(appInstallId: Long): List<AppEnabledProjectDto> {
+    return appEnabledForProjectRepository.findEnabledProjectsByAppInstallId(appInstallId).map {
+      val organization = it.organizationOwner
+      AppEnabledProjectDto(
+        id = it.id,
+        name = it.name,
+        organizationId = organization.id,
+        organizationName = organization.name,
+        organizationSlug = organization.slug,
+      )
+    }
   }
 
   @Transactional(readOnly = true)

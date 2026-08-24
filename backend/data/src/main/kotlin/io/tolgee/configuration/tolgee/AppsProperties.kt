@@ -33,4 +33,17 @@ class AppsProperties {
         "host (manifest fetches, lifecycle deliveries).",
   )
   var requestTimeoutMs: Long = 5000
+
+  @DocProperty(
+    description =
+      "Lifetime of app access tokens in milliseconds — both the token the dashboard iframe uses and " +
+        "the one an app backend gets from the client-credentials grant.\n" +
+        "\n" +
+        "Deliberately much shorter than `tolgee.authentication.jwt-expiration`: an app token is " +
+        "handed to third-party code, so it should be cheap to leak. Scope changes and app " +
+        "disablement take effect immediately regardless of this value — it only bounds how long a " +
+        "*stolen* token stays usable.",
+    defaultExplanation = "= 1 hour",
+  )
+  var tokenExpiration: Long = 60 * 60 * 1000
 }

@@ -1,6 +1,7 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
@@ -159,5 +160,60 @@ class AppInstallService(
     installId: Long,
   ): AppInstall? {
     return appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
+  }
+
+  /**
+   * Resolves an install by id alone, for the app-token auth filter. Tenant safety on this path comes
+   * from the enablement re-check (the token is bound to a project the app is enabled for), not from
+   * an org-scoped lookup — the app token legitimately acts across the projects it is enabled in.
+   */
+  @Transactional(readOnly = true)
+  fun findForAppAuth(installId: Long): AppInstall? {
+    return appInstallRepository.findWithAppById(installId)
+  }
+
+  /**
+   * Resolves an install together with the identity an install-context request runs as, for the
+   * app-token auth filter.
+   *
+   * That identity is the install's own [AppInstall.principal], never the person who registered it:
+   * an install belongs to its organization and must keep working after that person is disabled or
+   * deleted, and nothing of theirs — server role, organization membership, project permissions,
+   * per-language grants — may reach the install through the principal. The principal holds none of
+   * those, so everything the install may do comes from [AppInstall.grantedScopes] — see
+   * [io.tolgee.service.security.SecurityService.getCurrentPermittedScopes].
+   */
+  @Transactional(readOnly = true)
+  fun resolveForAppAuth(installId: Long): AppAuthResolution? {
+    val install = appInstallRepository.findWithAppById(installId) ?: return null
+    return AppAuthResolution(install, UserAccountDto.fromEntity(install.principal))
+  }
+
+  data class AppAuthResolution(
+    val install: AppInstall,
+    /** The install acting as itself. */
+    val principal: UserAccountDto,
+  )
+
+  /** Every installation of the app, across organizations, for the app's own discovery call. */
+  @Transactional(readOnly = true)
+  fun findAllByRegisteredApp(appEntityId: Long): List<AppInstall> {
+    return appInstallRepository.findAllByRegisteredAppId(appEntityId)
+  }
+
+  /**
+   * The app's own install [installId], for an app minting a token with its app-level credentials.
+   *
+   * Returns null both when no such install exists and when it belongs to a different app, so an
+   * authenticated app cannot use this to learn which install ids exist outside its own.
+   */
+  @Transactional(readOnly = true)
+  fun findOwnInstall(
+    appEntityId: Long,
+    installId: Long,
+  ): AppInstall? {
+    val install = appInstallRepository.findWithAppById(installId) ?: return null
+    if (install.app.id != appEntityId) return null
+    return install
   }
 }

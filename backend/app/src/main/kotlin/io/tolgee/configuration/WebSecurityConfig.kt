@@ -19,6 +19,7 @@ package io.tolgee.configuration
 import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TransferEncodingHeaderDebugFilter
 import io.tolgee.security.authentication.AdminAccessInterceptor
+import io.tolgee.security.authentication.AppAccessInterceptor
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.EmailValidationInterceptor
@@ -74,6 +75,7 @@ class WebSecurityConfig(
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   @Lazy
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
+  private val appAccessInterceptor: AppAccessInterceptor,
   @Lazy
   private val featureAuthorizationInterceptor: FeatureAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
@@ -144,6 +146,9 @@ class WebSecurityConfig(
     registry
       .addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns(*PROJECT_ENDPOINTS)
+    // Must follow projectAuthorizationInterceptor: it decides based on whether a project context was
+    // established for the request.
+    registry.addInterceptor(appAccessInterceptor)
     registry
       .addInterceptor(adminAccessInterceptor)
       .addPathPatterns(*ADMIN_ENDPOINTS)
