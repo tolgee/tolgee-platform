@@ -68,15 +68,15 @@ describe('Invisible characters', () => {
       .should('not.exist');
   });
 
+  // The editor markers are CodeMirror decorations rendered by @tginternal/editor,
+  // which carries no data-cy attributes — the CSS class is its contract, the same
+  // way cm-keyname-space-indicator is identified.
   it('marks a non-breaking space inside the editor', () => {
     visitTranslations(projectId);
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .findDcyAdvanced({
-        value: 'invisible-character-editor',
-        kind: 'nonBreakingSpace',
-      })
+      .find('.cm-invisible-char-nbsp')
       .should('have.length.at.least', 1);
   });
 
@@ -85,10 +85,7 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Zero');
     gcy('global-editor')
-      .findDcyAdvanced({
-        value: 'invisible-character-editor',
-        kind: 'zeroWidth',
-      })
+      .find('.cm-invisible-char-zero-width')
       .should('have.length.at.least', 1);
   });
 
@@ -97,12 +94,11 @@ describe('Invisible characters', () => {
     waitForGlobalLoading();
     editCell('Bonjour');
     gcy('global-editor')
-      .findDcyAdvanced({
-        value: 'invisible-character-editor',
-        kind: 'nonBreakingSpace',
-      })
+      .find('.cm-invisible-char-nbsp')
       .first()
       .trigger('mousemove');
-    gcy('invisible-character-tooltip').should('be.visible');
+    gcy('global-editor')
+      .find('.cm-invisible-char-tooltip')
+      .should('be.visible');
   });
 });
