@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogTitle, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
@@ -111,6 +111,11 @@ export const TaskCreateDialog = ({
     setFilters,
     selectedLanguages: selectedLanguageTags,
   });
+
+  const { updateSelectedLanguages } = actions;
+  useEffect(() => {
+    updateSelectedLanguages(selectedLanguageTags);
+  }, [selectedLanguageTags]);
 
   const selectedLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/translations/select-all',

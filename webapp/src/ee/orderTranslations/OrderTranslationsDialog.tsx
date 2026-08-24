@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 
@@ -145,6 +145,12 @@ export const OrderTranslationsDialog: React.FC<
     setFilters,
     selectedLanguages: selectedLanguageTags,
   });
+
+  const { updateSelectedLanguages } = actions;
+  useEffect(() => {
+    updateSelectedLanguages(selectedLanguageTags);
+  }, [selectedLanguageTags]);
+
   const [successMessage, setSuccessMessage] = useState(false);
 
   const [_step, setStep] = useState<number | undefined>(undefined);

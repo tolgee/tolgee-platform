@@ -20,6 +20,10 @@ describe('Translation filters tasks', () => {
     waitForGlobalLoading();
   });
 
+  after(() => {
+    tasks.clean({ failOnStatusCode: false });
+  });
+
   it('filters keys never in a task', () => {
     assertFilter({
       submenu: 'Tasks',
