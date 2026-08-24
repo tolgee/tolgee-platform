@@ -1,6 +1,7 @@
 import { Box, Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 import { FilterActions, FilterOptions } from './tools';
 import { FiltersType, LanguageModel } from './tools';
@@ -46,6 +47,8 @@ export const TranslationFiltersPopup = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const { isEnabled } = useEnabledFeatures();
+  const tasksEnabled = isEnabled('TASKS') || isEnabled('ORDER_TRANSLATION');
   return (
     <Menu
       open={true}
@@ -106,14 +109,15 @@ export const TranslationFiltersPopup = ({
             )}
           </>
         )}
-        {(!filterOptions?.keyRelatedOnly || filterOptions?.showTaskFilter) && (
-          <SubfilterTasks
-            value={value}
-            actions={actions}
-            selectedLanguages={selectedLanguages}
-            hideLanguageScope={filterOptions?.keyRelatedOnly}
-          />
-        )}
+        {tasksEnabled &&
+          (!filterOptions?.keyRelatedOnly || filterOptions?.showTaskFilter) && (
+            <SubfilterTasks
+              value={value}
+              actions={actions}
+              selectedLanguages={selectedLanguages}
+              hideLanguageScope={filterOptions?.keyRelatedOnly}
+            />
+          )}
         {project.suggestionsMode !== 'DISABLED' && (
           <SubfilterSuggestions
             value={value}
