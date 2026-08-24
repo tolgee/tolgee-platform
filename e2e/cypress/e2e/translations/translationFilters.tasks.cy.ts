@@ -27,7 +27,7 @@ describe('Translation filters tasks', () => {
   it('filters keys never in a task', () => {
     assertFilter({
       submenu: 'Tasks',
-      filterOption: ['Never in a task'],
+      and: () => cy.gcy('translations-filter-never-in-task').click(),
       toSeeAfter: ['key 2', 'key 3'],
       checkAfter() {
         cy.gcy('translations-filter-select').contains('Never in a task');
@@ -38,7 +38,7 @@ describe('Translation filters tasks', () => {
   it('filters keys which have been in a task', () => {
     assertFilter({
       submenu: 'Tasks',
-      filterOption: ['Has been in a task'],
+      and: () => cy.gcy('translations-filter-has-been-in-task').click(),
       toSeeAfter: ['key 0', 'key 1'],
     });
   });
