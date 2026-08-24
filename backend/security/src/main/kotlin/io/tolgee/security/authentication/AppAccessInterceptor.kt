@@ -17,8 +17,9 @@ import org.springframework.web.method.HandlerMethod
  * [AppAuthentication.boundProjectId]. Anywhere else the token would reach an endpoint that was
  * written for a signed-in person, so it is rejected.
  *
- * The single exception is [AllowAppOwnInstallAccess], for endpoints that only ever report on the
- * caller's own install.
+ * Two exceptions: [AllowAppOwnInstallAccess], for endpoints that only ever report on the caller's
+ * own install; and [AppAccessNeutral], for the credential-authenticated `/v2/public/apps` routes
+ * that must not be denied merely because the caller also sent a bearer token.
  *
  * Must be registered after `ProjectAuthorizationInterceptor`.
  */
@@ -32,10 +33,23 @@ class AppAccessInterceptor(
     handler: HandlerMethod,
   ): Boolean {
     if (!authenticationFacade.isAppAuth) return true
+    if (isAppAccessNeutral(handler)) return true
     if (deniesAppAccess(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
-    if (allowsOwnInstallAccess(handler)) return true
+    if (allowsOwnInstallAccess(handler)) {
+      // The annotation's contract is "derive the install from the token's own claims", which only an
+      // install-context token honours; a user-context token here would read installs it never owns.
+      if (!authenticationFacade.appAuthentication.isInstallContext) {
+        throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+      }
+      return true
+    }
     if (authenticationFacade.appAuthentication.boundProjectId != null) return true
     throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  private fun isAppAccessNeutral(handler: HandlerMethod): Boolean {
+    if (AnnotationUtils.getAnnotation(handler.method, AppAccessNeutral::class.java) != null) return true
+    return AnnotationUtils.findAnnotation(handler.beanType, AppAccessNeutral::class.java) != null
   }
 
   private fun deniesAppAccess(handler: HandlerMethod): Boolean {

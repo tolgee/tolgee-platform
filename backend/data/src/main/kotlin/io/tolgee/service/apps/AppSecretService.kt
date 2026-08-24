@@ -35,6 +35,11 @@ class AppSecretService(
     val plaintextSecret: String,
   )
 
+  data class RotationResult(
+    val issued: IssueResult,
+    val previousExpiresAt: Date?,
+  )
+
   /** Issues the first secret of a freshly registered app, inside the caller's transaction. */
   fun issueInitial(app: App): IssueResult {
     val plaintext = AppService.APP_CLIENT_SECRET_PREFIX + keyGenerator.generate(256)
@@ -47,13 +52,28 @@ class AppSecretService(
     return IssueResult(appSecretRepository.save(secret), plaintext)
   }
 
-  /** Issues an additional active secret. Every existing active secret keeps authenticating. */
+  /** Every existing active secret keeps authenticating; refused past [MAX_LIVE_SECRETS]. */
   @Transactional
   fun issue(app: App): IssueResult {
     if (activeSecrets(app.id).size >= MAX_LIVE_SECRETS) {
       throw BadRequestException(Message.APP_TOO_MANY_LIVE_SECRETS)
     }
     return issueInitial(app)
+  }
+
+  /**
+   * Rolls the app's secret in one transaction: mints a replacement and puts every other active
+   * secret on a [graceSeconds] deadline. Both steps commit together, so a failure between them
+   * cannot leave the app with an extra active secret that has no deadline.
+   */
+  @Transactional
+  fun rotate(
+    app: App,
+    graceSeconds: Long,
+  ): RotationResult {
+    val issued = issue(app)
+    val previousExpiresAt = expireOthers(app.id, issued.secret.id, graceSeconds)
+    return RotationResult(issued, previousExpiresAt)
   }
 
   /**
@@ -76,12 +96,13 @@ class AppSecretService(
 
     val expiry = Date(now.time + graceSeconds * 1000L)
     others.forEach { secret ->
-      if (secret.expiresAt == null || secret.expiresAt!!.after(expiry)) {
+      val current = secret.expiresAt
+      if (current == null || current.after(expiry)) {
         secret.expiresAt = expiry
       }
     }
     appSecretRepository.saveAll(others)
-    return expiry
+    return others.mapNotNull { it.expiresAt }.maxOrNull()
   }
 
   /**
@@ -102,21 +123,24 @@ class AppSecretService(
       appSecretRepository.findByIdAndAppId(secretId, appId)
         ?: throw NotFoundException(Message.APP_SECRET_NOT_FOUND)
 
-    if (secret.revokedAt != null) return secret
-
     val now = currentDateProvider.date
-    if (!force && isActive(secret, now) && activeSecrets(appId).size <= 1) {
-      throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
-    }
-
-    secret.revokedAt = now
     if (force) {
+      // Stamped before the idempotency return below, so force fires the kill switch even for a
+      // secret already revoked normally (the "I revoked it, but now I know it leaked" case).
       // Truncated to the second because a JWT's `iat` is expressed in whole seconds: against an
       // untruncated cutoff, the token the app mints to recover from this very revocation would be
       // rejected whenever it lands in the same second. The cost is that a token issued earlier in
       // that same second survives.
       secret.app.tokensInvalidBefore = Date(now.time / 1000L * 1000L)
     }
+
+    if (secret.revokedAt != null) return appSecretRepository.save(secret)
+
+    if (!force && isActive(secret, now) && activeSecrets(appId).size <= 1) {
+      throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
+    }
+
+    secret.revokedAt = now
     return appSecretRepository.save(secret)
   }
 
@@ -157,8 +181,7 @@ class AppSecretService(
   ) {
     runSentryCatching {
       val now = currentDateProvider.date
-      val throttle = LAST_USED_THROTTLE_MS
-      if (previousLastUsedAt != null && now.time - previousLastUsedAt.time < throttle) {
+      if (previousLastUsedAt != null && now.time - previousLastUsedAt.time < LAST_USED_THROTTLE_MS) {
         return@runSentryCatching
       }
       appSecretRepository.updateLastUsedById(secretId, now)

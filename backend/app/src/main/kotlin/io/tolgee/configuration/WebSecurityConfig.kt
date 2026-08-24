@@ -75,6 +75,7 @@ class WebSecurityConfig(
   private val organizationAuthorizationInterceptor: OrganizationAuthorizationInterceptor,
   @Lazy
   private val projectAuthorizationInterceptor: ProjectAuthorizationInterceptor,
+  @Lazy
   private val appAccessInterceptor: AppAccessInterceptor,
   @Lazy
   private val featureAuthorizationInterceptor: FeatureAuthorizationInterceptor,

@@ -173,15 +173,9 @@ class AppInstallService(
   }
 
   /**
-   * Resolves an install together with the identity an install-context request runs as, for the
-   * app-token auth filter.
-   *
-   * That identity is the install's own [AppInstall.principal], never the person who registered it:
-   * an install belongs to its organization and must keep working after that person is disabled or
-   * deleted, and nothing of theirs — server role, organization membership, project permissions,
-   * per-language grants — may reach the install through the principal. The principal holds none of
-   * those, so everything the install may do comes from [AppInstall.grantedScopes] — see
-   * [io.tolgee.service.security.SecurityService.getCurrentPermittedScopes].
+   * Resolves an install together with the identity an install-context request runs as — the
+   * install's own [AppInstall.principal] (see its definition for why, and for where the install's
+   * capability comes from instead).
    */
   @Transactional(readOnly = true)
   fun resolveForAppAuth(installId: Long): AppAuthResolution? {

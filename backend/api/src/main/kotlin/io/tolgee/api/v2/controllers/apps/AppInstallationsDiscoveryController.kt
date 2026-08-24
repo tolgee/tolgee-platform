@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.apps.AppCredentialsRequest
 import io.tolgee.hateoas.apps.AppSelfInstallationModel
 import io.tolgee.hateoas.apps.AppSelfInstallationModelAssembler
+import io.tolgee.security.authentication.AppAccessNeutral
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppCredentialAuthenticator
 import io.tolgee.service.apps.AppEnablementService
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 @RestController
 @CrossOrigin(origins = ["*"])
+@AppAccessNeutral
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")
 @RequestMapping(value = ["/v2/public/apps/installations"])
 @Tag(name = "App Self Service")

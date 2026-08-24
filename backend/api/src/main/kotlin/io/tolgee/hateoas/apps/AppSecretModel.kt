@@ -10,7 +10,11 @@ open class AppSecretModel(
   @Schema(description = "How the secret is identified wherever it is shown: its start and end, e.g. `tgpubs_ab…yz`")
   val name: String,
   val createdAt: Long,
-  @Schema(description = "When this secret was last used to administer the app, or null if never")
+  @Schema(
+    description =
+      "When this secret last authenticated a request — token minting, install discovery or " +
+        "self-administration — or null if it never has.",
+  )
   val lastUsedAt: Long?,
   @Schema(
     description =

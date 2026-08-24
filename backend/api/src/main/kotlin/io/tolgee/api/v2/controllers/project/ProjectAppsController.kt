@@ -120,9 +120,9 @@ class ProjectAppsController(
         "enabled for this project.",
   )
   fun mintToken(
-    @PathVariable projectId: Long,
     @PathVariable installId: Long,
   ): AppTokenModel {
+    val projectId = projectHolder.project.id
     if (!appEnablementService.isEnabledForProject(projectId, installId)) {
       throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     }

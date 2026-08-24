@@ -120,7 +120,7 @@ class AuthenticationFacade(
   val actingPersonUserId: Long?
     get() {
       if (!isAppAuth) return authenticatedUserOrNull?.id
-      appAuthentication.actingAsUserAccount?.let { return it.id }
+      appAuthentication.actsForUserAccount?.let { return it.id }
       if (appAuthentication.isInstallContext) return null
       return authenticatedUserOrNull?.id
     }

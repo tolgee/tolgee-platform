@@ -144,7 +144,7 @@ class SecurityService(
 
     val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
 
-    val actingAs = appAuth.actingAsUserAccount
+    val actingAs = appAuth.actsForUserAccount
     if (actingAs != null) {
       return installScopes.intersect(expandedScopesOf(projectId, actingAs.id))
     }
@@ -766,9 +766,16 @@ class SecurityService(
    * to narrow it to — per-language grants belong to a person, and the install's ceiling is its
    * granted scopes. Falling back to the author here would make an app's language reach depend on
    * whoever happened to register it.
+   *
+   * Null therefore means "an install acting as itself" — the one case the per-language gate is
+   * skipped for. Every other caller resolves to a real user, so a non-app call with no security
+   * context fails closed here instead of silently bypassing the gate.
    */
   private val languageRestrictedUserId: Long?
-    get() = authenticationFacade.actingPersonUserId
+    get() {
+      if (authenticationFacade.isAppAuth) return authenticationFacade.actingPersonUserId
+      return authenticationFacade.authenticatedUser.id
+    }
 
   private val activeApiKey: ApiKeyDto?
     get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null

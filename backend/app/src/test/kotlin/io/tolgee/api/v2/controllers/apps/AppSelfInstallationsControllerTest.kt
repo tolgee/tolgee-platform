@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.apps
 
 import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.constants.Message
-import io.tolgee.development.testDataBuilder.data.NativeAppsTestData
+import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
@@ -41,13 +41,13 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appManifestHttpClient: AppManifestHttpClient
 
-  lateinit var testData: NativeAppsTestData
+  lateinit var testData: AppsTestData
   var installId: Long = 0
   lateinit var installToken: String
 
   @BeforeEach
   fun setup() {
-    testData = NativeAppsTestData()
+    testData = AppsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST)

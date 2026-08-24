@@ -112,7 +112,7 @@ class AuthenticationFilter(
           if (!appAuth.isInstallContext) {
             checkIfSsoUserStillValid(appAuth.principal)
           }
-          appAuth.actingAsUserAccount?.let { checkIfSsoUserStillValid(it) }
+          appAuth.actsForUserAccount?.let { checkIfSsoUserStillValid(it) }
           SecurityContextHolder.getContext().authentication = appAuth
           return
         }
@@ -171,6 +171,10 @@ class AuthenticationFilter(
     request: HttpServletRequest,
     token: String,
   ): AppAuthentication? {
+    // Disabling the feature is the operator's kill switch for a misbehaving app: already-minted
+    // tokens must stop authenticating too, not linger until they expire.
+    if (!tolgeeProperties.apps.enabled) return null
+
     val claims =
       try {
         appTokenService.validateToken(token)
@@ -226,13 +230,13 @@ class AuthenticationFilter(
       tokenProjectId = null,
       isInstallContext = true,
       isReadOnly = claims.isReadOnly,
-      actingAsUserAccount = resolveActingAsUser(request),
+      actsForUserAccount = resolveActingAsUser(request),
     )
   }
 
   /**
-   * Revoking any of an app's secrets stamps [io.tolgee.model.apps.App.tokensInvalidBefore], and
-   * every token minted before that moment dies with it — including user-context ones, so a
+   * Force-revoking any of an app's secrets stamps [io.tolgee.model.apps.App.tokensInvalidBefore],
+   * and every token minted before that moment dies with it — including user-context ones, so a
    * compromised app loses its dashboard sessions too and not merely its backend access.
    */
   private fun assertNotRevokedByAppCutoff(
@@ -267,7 +271,7 @@ class AuthenticationFilter(
   private fun resolveActingAsUser(request: HttpServletRequest): UserAccountDto? {
     val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
     val userId =
-      raw.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
+      raw.toLongOrNull() ?: throw AuthenticationException(Message.APP_INVALID_ACTING_AS_USER_ID)
     return userAccountService.findDto(userId)
       ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
   }

@@ -8,8 +8,10 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import tools.jackson.databind.JsonNode
 
@@ -181,15 +184,59 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
   fun `refuses to act as a disabled user`() {
     userAccountService.disable(testData.member.id)
 
-    logout()
-    perform(
-      commentRequest()
-        .header(HttpHeaders.AUTHORIZATION, "Bearer $installToken")
-        .header(ACT_AS_USER_HEADER, testData.member.id.toString()),
-    ).andIsForbidden.andHasErrorMessage(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    actingAs(commentRequest(), testData.member.id)
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+  }
+
+  /** Acting-as caps the install at the acted-as user: the app is granted comment-add, the member is not. */
+  @Test
+  fun `narrows the install to the acted-as user's project scopes`() {
+    actingAs(get("/v2/projects/${testData.project.id}/translations"), testData.member.id).andIsOk
+
+    actingAs(commentRequest(), testData.member.id)
+      .andIsForbidden
+      .andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+  }
+
+  /**
+   * Acting-as only narrows what the install may do; the write is still authored by the install
+   * principal, not the acted-as person. (Person-level attribution is the activity slice's concern.)
+   */
+  @Test
+  fun `authors a write as the install principal even while acting as a person`() {
+    actingAs(commentRequest(), testData.user.id).andIsCreated.andAssertThatJson {
+      node("comment.author.id").isEqualTo(principalId)
+    }
+  }
+
+  @Test
+  fun `rejects a malformed acting-as header as a bad credential rather than a missing member`() {
+    actingAs(commentRequest(), "not-a-number")
+      .andIsUnauthorized
+      .andHasErrorMessage(Message.APP_INVALID_ACTING_AS_USER_ID)
+  }
+
+  @Test
+  fun `refuses to act as a user id that does not exist`() {
+    actingAs(commentRequest(), 9_999_999L)
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
   }
 
   private fun commentAsApp(): ResultActions = asApp(commentRequest())
+
+  private fun actingAs(
+    builder: MockHttpServletRequestBuilder,
+    actAs: Any,
+  ): ResultActions {
+    logout()
+    return perform(
+      builder
+        .header(HttpHeaders.AUTHORIZATION, "Bearer $installToken")
+        .header(AuthenticationFilter.ACTING_AS_USER_HEADER, actAs.toString()),
+    )
+  }
 
   private fun commentRequest(): MockHttpServletRequestBuilder {
     return post("/v2/projects/${testData.project.id}/translations/create-comment")
@@ -232,8 +279,6 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
   }
 
   companion object {
-    private const val ACT_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
-
     private val MANIFEST: String =
       """
       {

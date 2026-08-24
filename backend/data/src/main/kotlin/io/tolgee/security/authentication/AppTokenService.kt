@@ -46,10 +46,6 @@ class AppTokenService(
       .setSigningKey(signingKey)
       .build()
 
-  /**
-   * Mints a user-context app token. The token authorizes API calls made on behalf of
-   * the given user, within the given project, scoped to the given install.
-   */
   fun mintUserContextToken(
     installId: Long,
     userId: Long,
@@ -69,10 +65,6 @@ class AppTokenService(
     return builder.compact()
   }
 
-  /**
-   * Mints an install-context app token for the app backend (machine-to-machine). The token is bound
-   * to the install only; it is not tied to a project or user.
-   */
   fun mintInstallContextToken(installId: Long): String {
     return baseBuilder(installId)
       .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_INSTALL)

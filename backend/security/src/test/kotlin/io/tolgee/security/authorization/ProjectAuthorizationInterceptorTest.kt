@@ -36,8 +36,10 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.WriteOperation
+import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.tracing.TolgeeTracingContext
 import org.junit.jupiter.api.AfterEach
@@ -90,6 +92,8 @@ class ProjectAuthorizationInterceptorTest {
       projectHolder,
       organizationHolder,
       activityHolder,
+      Mockito.mock(AppEnablementService::class.java),
+      Mockito.mock(PermissionService::class.java),
     )
 
   private val projectAuthenticationInterceptor =

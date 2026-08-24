@@ -18,8 +18,9 @@ open class AppSelfInstallationModel(
   val version: String,
   @Schema(
     description =
-      "True when the install belongs to no organization — a native (server-level) install a " +
-        "server admin makes available to organizations.",
+      "Whether this is a native (server-level) install rather than an organization's own. Always " +
+        "false for now — native installs arrive in a later release; the field is present so app " +
+        "backends can rely on its shape without a schema change when they do.",
   )
   val native: Boolean,
   @Schema(description = "Permission scopes granted to the install at consent time")

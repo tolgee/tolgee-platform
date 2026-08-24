@@ -152,11 +152,10 @@ class OrganizationOwnedAppsController(
   ): AppSecretRotationModel {
     val app = appService.getOwned(organizationId, appId)
     val request = body ?: RollAppSecretRequest()
-    val issued = appSecretService.issue(app)
-    val previousExpiresAt = appSecretService.expireOthers(app.id, issued.secret.id, request.graceSeconds)
+    val rotation = appSecretService.rotate(app, request.graceSeconds)
     return AppSecretRotationModel(
-      secret = appSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret),
-      previousExpiresAt = previousExpiresAt?.time,
+      secret = appSecretModelAssembler.toModelWithSecret(rotation.issued.secret, rotation.issued.plaintextSecret),
+      previousExpiresAt = rotation.previousExpiresAt?.time,
     )
   }
 

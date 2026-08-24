@@ -195,6 +195,25 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     translationsWith(mintToken(secret = second)).andIsOk
   }
 
+  /**
+   * The "I revoked it normally, then learned it had leaked" case: a plain revoke does not stamp the
+   * cutoff, so tokens the secret already minted stay live. Force-revoking the now-already-revoked
+   * secret must still fire the kill switch.
+   */
+  @Test
+  fun `force-revoking an already-revoked secret still invalidates its tokens`() {
+    issueSecret()
+    val leaked = firstSecretId()
+    val token = mintToken()
+
+    revokeSecretWithoutForce(leaked)
+    translationsWith(token).andIsOk
+
+    currentDateProvider.move(Duration.ofSeconds(2))
+    revokeSecret(leaked)
+    translationsWith(token).andExpect(status().isUnauthorized)
+  }
+
   private fun register(manifestUrl: String): String =
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/owned-apps",
@@ -243,10 +262,15 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
 
   private fun revokeSecret(secretId: Long) {
     loginAsUser()
-    // force: these cases test the cutoff itself, not the replacement-unused guard, so they revoke
-    // the old secret before anything authenticates with the new one.
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets/$secretId?force=true",
+    ).andIsOk
+  }
+
+  private fun revokeSecretWithoutForce(secretId: Long) {
+    loginAsUser()
+    performAuthDelete(
+      "/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets/$secretId",
     ).andIsOk
   }
 

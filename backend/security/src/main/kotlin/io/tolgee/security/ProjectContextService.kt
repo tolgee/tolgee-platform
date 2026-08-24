@@ -142,12 +142,20 @@ class ProjectContextService(
     if (!authenticationFacade.isAppAuth) return
     val appAuth = authenticationFacade.appAuthentication
 
-    if (appAuth.tokenProjectId != null && appAuth.tokenProjectId != project.id) {
-      throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+    // A user-context token bound to exactly this project already knows the project exists — it was
+    // minted for it — so an accurate "not enabled" leaks nothing. Every other case (an install-context
+    // token, which can name any id, or a user-context token reaching for another project) must be
+    // indistinguishable from a nonexistent id, which never resolves and later fails as
+    // APP_ACCESS_FORBIDDEN. Otherwise the differing codes let an app enumerate project ids across tenants.
+    val knowsProject = appAuth.tokenProjectId == project.id
+
+    if (appAuth.tokenProjectId != null && !knowsProject) {
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
 
     if (!appEnablementService.isEnabledForProject(project.id, appAuth.appInstall.id)) {
-      throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      if (knowsProject) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
 
     checkActingAsUserIsProjectMember(appAuth, project.id)
@@ -162,7 +170,7 @@ class ProjectContextService(
     appAuth: AppAuthentication,
     projectId: Long,
   ) {
-    val actingAs = appAuth.actingAsUserAccount ?: return
+    val actingAs = appAuth.actsForUserAccount ?: return
     val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, actingAs.id)
     if (scopes.isNullOrEmpty()) {
       throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)

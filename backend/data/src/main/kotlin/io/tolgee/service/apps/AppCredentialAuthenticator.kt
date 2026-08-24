@@ -3,6 +3,7 @@ package io.tolgee.service.apps
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.apps.App
+import io.tolgee.model.apps.AppSecret
 import org.springframework.stereotype.Service
 
 /**
@@ -26,13 +27,17 @@ class AppCredentialAuthenticator(
       appSecretService.findLiveMatching(app.id, clientSecret)
         ?: throw AuthenticationException(Message.INVALID_APP_CREDENTIALS)
 
-    // First use synchronously (the revoke guard reads it), later uses async off the hot path. Split
-    // here rather than inside the service so the @Async proxy is not bypassed by self-invocation.
+    stampUse(secret)
+    return app
+  }
+
+  // Split here rather than inside the service so Spring's @Async proxy on updateLastUsedAsync is not
+  // bypassed by self-invocation.
+  private fun stampUse(secret: AppSecret) {
     if (secret.lastUsedAt == null) {
       appSecretService.recordFirstUse(secret.id)
-    } else {
-      appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
+      return
     }
-    return app
+    appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
   }
 }

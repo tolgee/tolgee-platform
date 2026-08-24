@@ -126,16 +126,18 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
 
   @Test
   fun `is rejected on a legacy api project route for a project it is not enabled for`() {
+    // An existing-but-not-enabled project is indistinguishable from a nonexistent one, so an app
+    // cannot enumerate project ids across tenants.
     asApp(get("/api/project/${testData.siblingProject.id}/export/jsonZip"))
       .andIsForbidden
-      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
   @Test
   fun `is rejected on a v2 project route for a project it is not enabled for`() {
     asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
       .andIsForbidden
-      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
   @Test
@@ -179,7 +181,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
 
     asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
       .andIsForbidden
-      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
 
     asApp(
       post("/v2/projects/${testData.project.id}/translations")

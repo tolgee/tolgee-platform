@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
+import io.tolgee.security.authentication.AppAccessNeutral
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppCredentialAuthenticator
@@ -21,15 +22,19 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * OAuth 2.0 client-credentials token endpoint (RFC 6749 §4.4) for Tolgee Apps. An app's backend
- * posts its `client_id` + `client_secret` and receives a short-lived install-context access token,
- * so the raw secret only ever travels to this endpoint — subsequent API calls carry the token.
+ * Client-credentials token endpoint for Tolgee Apps, modelled on the OAuth 2.0 client-credentials
+ * grant (RFC 6749 §4.4) but with a JSON request body and Tolgee-shaped error envelope rather than
+ * the RFC's form encoding and `error` codes — so point Tolgee's app SDK at it, not a stock OAuth
+ * library. An app's backend posts its `client_id` + `client_secret` and receives a short-lived
+ * install-context access token, so the raw secret only ever travels to this endpoint — subsequent
+ * API calls carry the token.
  *
  * Public by path (the `/v2/public` namespace is permit-all): the request authenticates itself with
  * the client credentials, so it must not require an existing Tolgee session.
  */
 @RestController
 @CrossOrigin(origins = ["*"])
+@AppAccessNeutral
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")
 @RequestMapping(value = ["/v2/public/apps"])
 @Tag(name = "App Authentication")
