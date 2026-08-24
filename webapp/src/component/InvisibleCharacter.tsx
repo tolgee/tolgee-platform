@@ -2,10 +2,7 @@ import React from 'react';
 import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import {
-  findInvisibleCharacters,
-  InvisibleChar,
-} from 'tg.fixtures/invisibleCharacters';
+import { findInvisibleCharacters, InvisibleChar } from '@tginternal/editor';
 
 const StyledNonBreakingSpace = styled('span')`
   background-color: ${({ theme }) => theme.palette.label.lightBlue};
