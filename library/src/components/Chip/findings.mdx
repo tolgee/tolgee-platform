@@ -1,0 +1,91 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ChipStories from './stories';
+
+<Meta of={ChipStories} name="Findings" />
+
+# Chip — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## One pill, three definitions
+
+<Canvas of={ChipStories.FindingThreePills} />
+
+Three components define the same shape, and two of them agree exactly:
+
+| Definition               | Height | Radius | Font     |
+| ------------------------ | ------ | ------ | -------- |
+| `Tags/Wrapper`           | 24px   | 12px   | 14px     |
+| `StyledTranslationLabel` | 24px   | 12px   | 14px     |
+| `BaseChip` (on `Chip`)   | MUI's  | MUI's  | **15px** |
+
+The tag and the label are the same pill written twice — identical numbers, two files, neither aware
+of the other. The chip is a third, one pixel of font size away.
+
+<Callout title="Suggested fix">
+  One `Pill` at 24px, radius 12, 14px — either as an `MuiChip` entry in the
+  theme, or as the base the other two build on. Then the 15px in `BaseChip` is a
+  decision to make once rather than a difference nobody chose.
+</Callout>
+
+## Eight components draw a pill without a Chip
+
+<Canvas of={ChipStories.FindingReinvented} />
+
+| Component             | Uses | Built on        |
+| --------------------- | ---- | --------------- |
+| `TranslationLabel`    | 11   | `styled('div')` |
+| `TaskLabel`           | 9    | `styled(Box)`   |
+| `AgencyLabel`         | 8    | `styled(Box)`   |
+| `BranchNameLabel`     | 2    | `styled(Box)`   |
+| `PrimaryServiceLabel` | 2    | a bare div      |
+| `SuggestionsLabel`    | 2    | a bare div      |
+| `ServiceLabel`        | 1    | a bare div      |
+| `LanguageLabels`      | 1    | `styled(Box)`   |
+
+Against five that do use it — `DefaultChip`, `TaskTypeChip`, `DefaultBranchChip`, `TrialChip`,
+`GlossaryTermTags`.
+
+`TranslationLabel` is the one worth looking at first: 11 call sites, its own color logic in
+`labelColorUtils`, and a shape identical to `Tags/Wrapper`.
+
+`TaskLabel` is a different case — despite the name it is not a pill at all but a grid of an icon and
+text, so it should be renamed rather than folded in.
+
+<Callout title="Suggested fix">
+  `TranslationLabel`, `AgencyLabel` and `BranchNameLabel` are pills and want the
+  shared one. The three `*ServiceLabel`s are one-line text markers and should
+  probably be `Typography`, not chips. `TaskLabel` needs a name that says what
+  it is.
+</Callout>
+
+## Two components are styled from an icon
+
+```
+const BranchNameChip = styled(ShieldTick)`…`
+const TagAdd = styled(Plus)`…`
+```
+
+Both take an icon component and style it into something that is not an icon. It works, and it means
+the props are an icon's props — `width`, `height`, `stroke` — while the thing on screen is a chip
+and a button.
+
+## `MuiChip` has no theme entry
+
+The height, the radius and the colors are all Material UI's. That is why `common/chips` adjusts
+padding and font size from outside, and why the two hand-built pills chose 24px and radius 12
+independently — there was nothing to inherit.
+
+<Callout title="Suggested fix">
+  Add `MuiChip` to `getTheme.ts` with the product's pill: 24px, radius 12, 14px.
+  Then `BaseChip` shrinks to nothing and the eight hand-built ones have
+  something to move onto.
+</Callout>
+
+## Not wrong
+
+`SuccessChip` sets its background from `tokens.success.main` rather than trusting the palette, which
+is correct given the palette gap — and it is the only place in the product that works around it
+deliberately rather than by accident. `TransparentChip` exists because a chip on a colored surface
+needs a border, which is a real case and a real answer.

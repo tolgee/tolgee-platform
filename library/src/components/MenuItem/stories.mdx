@@ -1,0 +1,74 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MenuItemStories from './stories';
+
+<Meta of={MenuItemStories} />
+
+# MenuItem
+
+<Upstream docs="react-menu" />
+
+The row. **125 call sites in 74 files** — the most-used Material UI component in the product after
+`Tooltip`, and the one with the most local variants.
+
+It appears in three different hosts, which is worth knowing before styling one: inside a **Menu** it
+is an action, inside a **Select** it is an option, and inside an **Autocomplete** it is what
+`renderOption` returns.
+
+## Plain
+
+<Canvas of={MenuItemStories.Plain} />
+
+`selected` marks the current value and renders `aria-selected`. `disabled` greys it and takes it out
+of the keyboard order.
+
+## The product's row is 40px
+
+<Canvas of={MenuItemStories.Compact} />
+
+`tg.component/ListComponents` exports `CompactMenuItem` — a `MenuItem` fixed at 40px — and it is the
+base three other row types are built on:
+
+| Component         | Adds                                         | Call sites |
+| ----------------- | -------------------------------------------- | ---------- |
+| `CompactMenuItem` | height 40px                                  | 4          |
+| `SelectItem`      | `ListItemText`                               | 1          |
+| `MultiselectItem` | a checkbox and `ListItemText`                | 3          |
+| `FilterItem`      | a checkbox or radio, text, an exclude button | 30         |
+| `SubmenuItem`     | text and a chevron                           | 14         |
+
+Use `ListItemText` for the words rather than a bare string — it brings the typography and the
+truncation, and it is what every one of the row types above does.
+
+## With a checkbox
+
+<Canvas of={MenuItemStories.WithACheckbox} />
+
+Filters and multi-selects put a checkbox in the row. The `MenuItem` owns the click and the selected
+state; the checkbox is the marker.
+
+<Callout title="The checkbox should not be a second control">
+  `MultiselectItem` and `FilterItem` nest a real `Checkbox` — and `FilterItem` a
+  real `Radio` — inside a row that already carries `aria-selected`. That is two
+  controls in the accessibility tree for one choice. See **Radio → Findings**.
+</Callout>
+
+## With a submenu
+
+<Canvas of={MenuItemStories.WithASubmenu} />
+
+`SubmenuItem` is the row that opens another panel: text on the left, chevron on the right. Fourteen
+places use it, all of them in the translation and task filters.
+
+## Don't
+
+- **Don't build a row out of `Box` and `onClick`.** The keyboard behavior comes from `MenuItem`.
+- **Don't put a bare string in it.** `ListItemText`.
+- **Don't declare another `styled(MenuItem)` at 40px.** There are already two; see Findings.
+- **Don't nest a focusable control** in a row that is itself the control.
+
+## Where the styling lives
+
+`MuiMenuItem` in `getTheme.ts` sets one rule — the focus-visible background. The 40px height and
+everything else comes from `ListComponents`, in the webapp. See **Foundations → Component styles**.

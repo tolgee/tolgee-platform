@@ -1,0 +1,128 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as LabelStories from './stories';
+
+<Meta of={LabelStories} />
+
+# Labels
+
+Every control on the pages beside this one needs a name, and Tolgee gets this wrong more often than
+it gets it right. This page is the one place that says how a field is named, and what the product
+does today.
+
+<Callout title="28 of 214" kind="warning">
+  Counted across `webapp/src` on 2026-08-19: of the 214 text fields, selects,
+  checkboxes, switches, comboboxes and radios in the product, **28 have a name a
+  screen reader can read**. 26 more are named by a placeholder, which lasts
+  until somebody types. The rest are announced as "edit text", "checkbox",
+  "combobox" — and nothing else.
+</Callout>
+
+## A label is a relationship, not a position
+
+Putting words next to a control does not name it. The two have to be **connected**, and there are
+only three ways to do that:
+
+| Mechanism                        | Use it for                               |
+| -------------------------------- | ---------------------------------------- |
+| `<InputLabel htmlFor>` + `id`    | a label above a field                    |
+| `<FormControlLabel label>`       | a checkbox, switch or radio              |
+| `aria-label` / `aria-labelledby` | a control with no room for visible words |
+
+Everything else — a `Typography` in the next grid cell, a column header, a tooltip, a placeholder —
+is a label to the eye and to nothing else.
+
+## Above the field
+
+<Canvas of={LabelStories.AboveTheField} />
+
+The product's shape for text fields and selects. It needs both halves:
+
+```
+<InputLabel htmlFor={id}>{t('task_name')}</InputLabel>
+<TextField id={id} … />
+```
+
+For a `Select`, Material UI reads **`labelId`** and nothing else — `htmlFor` does not reach it:
+
+```
+<InputLabel id={labelId}>{t('type')}</InputLabel>
+<Select labelId={labelId} … />
+```
+
+<Callout title="Passing `label` to a Material UI TextField also works">
+  It wires the two itself — that is what the floating label is. Our wrapper
+  takes `label` out of the props and renders it above instead, which is the
+  shape we want and, today, the wiring we lose. See **TextField → Findings**.
+</Callout>
+
+## Beside the control
+
+<Canvas of={LabelStories.BesideTheControl} />
+
+A checkbox, switch or radio is small and reads as one line with its words. `FormControlLabel`
+places them and connects them, and it makes the words clickable — which is most of why people can
+hit these at all:
+
+```
+<FormControlLabel control={<Checkbox checked={v} onChange={…} />} label={t('include_tags')} />
+```
+
+`labelPlacement="start"` puts the words first and the control at the end of the row, which is the
+settings-screen layout, without giving up the connection.
+
+## When there is no room
+
+<Canvas of={LabelStories.NoRoomForALabel} />
+
+Toolbars, table cells and search boxes have no space for visible words. That is what `aria-label` is
+for, and it costs one attribute:
+
+```
+<TextField inputProps={{ 'aria-label': t('search_keys') }} placeholder={t('search')} … />
+```
+
+When the words are already on the screen somewhere — a row's name, a column header — point at them
+instead of repeating them:
+
+```
+<Typography id={rowId}>{language.name}</Typography>
+<Switch inputProps={{ 'aria-labelledby': rowId }} … />
+```
+
+## The two mistakes the product makes
+
+<Canvas of={LabelStories.FindingLooksTheSame} />
+
+**A label rendered as a sibling, with nothing connecting it.** Both fields above look identical. The
+left one has no `htmlFor`, so it names nothing and clicking it does not focus the field. This is our
+own wrapper, and it accounts for 70 text fields and 11 selects.
+
+<Canvas of={LabelStories.FindingLabelInAnotherCell} />
+
+**A label in the neighboring cell.** Table rows and settings grids put the words in one cell and the
+control in another. To the eye it is obviously a pair; in the accessibility tree they are unrelated
+siblings. This accounts for the 38 bare checkboxes, the 8 unnamed switches and both real radios.
+
+## Where each count lives
+
+| Component        | Controls | Named | Detail                  |
+| ---------------- | -------- | ----- | ----------------------- |
+| **TextField**    | 100      | 5     | TextField → Findings    |
+| **Checkbox**     | 49       | 11    | Checkbox → Findings     |
+| **Select**       | 30       | 3     | Select → Findings       |
+| **Switch**       | 19       | 8     | Switch → Findings       |
+| **Autocomplete** | 13       | 1     | Autocomplete → Findings |
+| **Radio**        | 3        | 0     | Radio → Findings        |
+
+The single largest fix is two files: `common/TextField` and `common/Select` already own both the
+label and the control, so wiring them there names roughly 81 call sites without touching one of
+them.
+
+## Don't
+
+- **Don't put words beside a control and call it labelled.**
+- **Don't use a placeholder as the name.** It goes away exactly when the person is using the field.
+- **Don't use a tooltip as the name** — and never one that renders only while the control is
+  disabled.
+- **Don't repeat words that are already on screen.** `aria-labelledby` points at them.

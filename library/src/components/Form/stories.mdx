@@ -1,0 +1,85 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FormStories from './stories';
+
+<Meta of={FormStories} />
+
+# Form
+
+Tolgee has one form component and **27 screens use it**: `tg.component/common/form/StandardForm`.
+It is not a Material UI component — it is formik plus the submit row, and it is the reason every
+dialog in the product ends the same way.
+
+## What it gives you
+
+<Canvas of={FormStories.TheStandard} />
+
+```
+<StandardForm
+  initialValues={{ name: '' }}
+  validationSchema={Validation.PROJECT_CREATION}
+  onSubmit={handleSubmit}
+  saveActionLoadable={createProject}
+>
+  <TextField name="name" label={t('project_name')} />
+</StandardForm>
+```
+
+Five things come with it, and none of them should be rebuilt by hand:
+
+| It handles        | How                                           |
+| ----------------- | --------------------------------------------- |
+| the submit row    | Cancel and Save, right-aligned, in that order |
+| the loading state | `saveActionLoadable` drives a `LoadingButton` |
+| server errors     | `ResourceErrorComponent` above the fields     |
+| validation        | a yup schema through `validationSchema`       |
+| cancel            | `history.goBack()` unless you pass `onCancel` |
+
+## The submit row
+
+<Canvas of={FormStories.SubmitRow} />
+
+**Cancel is a text button, Save is `contained primary`** — the one place in the product where the
+primary/secondary rule from **Button** is applied consistently, because it is applied once here
+rather than 27 times.
+
+Save is a `LoadingButton` and disables itself while the request is in flight. That is why 72 call
+sites in the product use `LoadingButton` at all.
+
+## An extra action
+
+<Canvas of={FormStories.WithACustomAction} />
+
+`customActions` puts something on the left of the row — usually Delete, which is why it is `error`
+and why it sits as far from Save as the row allows.
+
+```
+<StandardForm customActions={<Button color="error">{t('delete')}</Button>} … />
+```
+
+## Fields inside it
+
+Use the **formik** versions, which bind themselves by `name` and need no `value` or `onChange`:
+
+| You need   | Use                                         |
+| ---------- | ------------------------------------------- |
+| a text box | `tg.component/common/form/fields/TextField` |
+| a select   | `tg.component/common/form/fields/Select`    |
+| a checkbox | `tg.component/common/form/fields/Checkbox`  |
+| a switch   | `tg.component/common/form/fields/Switch`    |
+
+Everything on **TextField**, **Select**, **Checkbox** and **Switch** applies to them — they are
+those wrappers with formik wired in.
+
+## Don't
+
+- **Don't assemble your own Cancel and Save.** The order, the alignment and the loading state are
+  decided here.
+- **Don't put a bare `@mui/material` field inside it.** It will not bind, and it will not look like
+  the fields around it.
+- **Don't render your own error above the form.** `saveActionLoadable` does it.
+
+## Where it lives
+
+`webapp/src/component/common/form/StandardForm.tsx`. It is a webapp component, not a library one —
+which is why nothing on these pages can enforce it.

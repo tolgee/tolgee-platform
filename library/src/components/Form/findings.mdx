@@ -1,0 +1,51 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FormStories from './stories';
+
+<Meta of={FormStories} name="Findings" />
+
+# Form — findings
+
+Measured across `webapp/src` on 2026-08-20. 27 call sites. A work list: **done when it is empty.**
+
+## A typo that has never done anything
+
+`StandardForm` renders its spinner like this:
+
+```
+{props.loading && (
+  <Box justifyContent="cetner">
+    <SpinnerProgress />
+  </Box>
+)}
+```
+
+**`cetner`** is not a value, and `justifyContent` would do nothing here anyway — the `Box` has no
+`display: flex`. So the line has two reasons not to work and has had both since it was written. The
+spinner sits wherever the block flow puts it.
+
+<Callout title="Suggested fix">
+  `display="flex" justifyContent="center"`, or delete the prop and admit the
+  spinner is left-aligned.
+</Callout>
+
+## The form is in the webapp, so the library cannot hold the line
+
+`StandardForm` is `webapp/src/component/common/form/StandardForm.tsx`. Every rule it enforces — the
+submit row, the loading state, the error placement — lives outside the design system, so nothing in
+`@tginternal/library` can check that a new form follows it.
+
+It is the same shape as the problem on **TextField**: the component that owns the product's
+decisions is not the component the design system ships.
+
+<Callout title="Suggested fix">
+  Nothing urgent, but worth deciding: either the form moves into the library, or
+  this page is documentation of something the library does not own and should
+  say so at the top.
+</Callout>
+
+## Not wrong
+
+The submit row is the one place in the product where the primary-and-supporting rule from **Button**
+holds every time — Cancel as text, Save as contained primary, right-aligned, 27 times out of 27.
+Applying a rule once instead of at every call site is why.

@@ -1,0 +1,83 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MenuStories from './stories';
+
+<Meta of={MenuStories} name="Findings" />
+
+# Menu — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## The same popover style, three times
+
+<Canvas of={MenuStories.FindingThreePopovers} />
+
+`UserPresentAvatarMenu`, `UserUnverifiedEmailMenu` and `UserMissingAvatarMenu` each declare:
+
+```
+const StyledPopover = styled(Popover)`
+  & .paper {
+    margin-top: 5px;
+    padding: 2px 0px;
+  }
+`;
+```
+
+Identical in all three, down to the `classes={{ paper: 'paper' }}` each one passes to make the
+selector match. They are three states of one menu — the user has an avatar, has none, has an
+unverified e-mail — so they are three copies of a component that should have been one with a
+condition inside.
+
+They are also `Popover`, not `Menu`, so the list of actions inside gets no arrow keys.
+
+<Callout title="Suggested fix">
+  One `UserMenu` with the three states as content, built on `Menu`.
+</Callout>
+
+## Opening a menu is written out 83 times
+
+`anchorEl` appears in **83 files**, and `anchorOrigin` in 47. Every one of them repeats some form
+of:
+
+```
+const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+const open = Boolean(anchorEl);
+const handleClose = () => setAnchorEl(null);
+```
+
+It is three lines, which is why nobody has minded. But it is also where the differences creep in —
+some close on select and some do not, some pass `anchorOrigin` and some rely on the default, and a
+few keep `open` in a second piece of state that can disagree with `anchorEl`.
+
+<Callout title="Suggested fix">
+  A `useAnchor()` hook returning `{ anchorEl, open, handleOpen, handleClose }`.
+  Small, and it makes the behavior one decision instead of 83.
+</Callout>
+
+## A subheader copied without the parts that mattered
+
+`ListComponents` exports `CompactListSubheader`, used in seven places:
+
+```
+line-height: unset;
+padding-top: …(2);
+padding-bottom: …(0.5);
+background: inherit;
+background-image: inherit;
+position: static;
+```
+
+`TaskFilterPopover` declares its own instead, with the first three lines and not the last three —
+and then passes `disableSticky` to work around the sticky positioning that `position: static` was
+there to solve.
+
+<Callout title="Suggested fix">
+  Import `CompactListSubheader` and drop the local copy along with
+  `disableSticky`.
+</Callout>
+
+## Not wrong
+
+Menus carry `selected` where a current value exists, which is the one place in the product where
+selection state reaches the accessibility tree properly. The theme speaks for `MuiMenu`, `MuiList`
+and `MuiMenuItem` — three more entries than most form components get.

@@ -1,0 +1,91 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MenuItemStories from './stories';
+
+<Meta of={MenuItemStories} name="Findings" />
+
+# MenuItem — findings
+
+Measured across `webapp/src` on 2026-08-20, 125 call sites in 74 files. A work list: **done when it
+is empty.**
+
+## Two components both define the 40px row
+
+<Canvas of={MenuItemStories.FindingTwoCompactRows} />
+
+`tg.component/ListComponents`:
+
+```
+const StyledMenuItem = styled(MenuItem)`
+  height: 40px;
+`;
+```
+
+`tg.component/searchSelect/SearchStyled`:
+
+```
+export const StyledCompactMenuItem = styled(MenuItem)`
+  height: 40px;
+`;
+```
+
+The same declaration, in two files, neither aware of the other. `SearchStyled`'s copy is used by the
+search select's own rows, so the two 40px rows in the product come from two definitions that can
+drift apart the moment either is touched.
+
+<Callout title="Suggested fix">
+  Delete `StyledCompactMenuItem` and import `CompactMenuItem`. The search select
+  already sits beside three other row types that use it.
+</Callout>
+
+## SubmenuItem is not the shared row
+
+<Canvas of={MenuItemStories.FindingSubmenuHeight} />
+
+`SelectItem`, `MultiselectItem` and `FilterItem` all build on `CompactMenuItem`. `SubmenuItem`
+builds on `MenuItem` directly:
+
+```
+const StyledMenuItem = styled(MenuItem)`
+  display: flex;
+  justify-content: space-between;
+`;
+```
+
+So it keeps Material UI's height while the rows above and below it are 40px — and the filter menus
+mix the two, since `SubmenuItem` opens the panels that `FilterItem` fills.
+
+<Callout title="Suggested fix">
+  `styled(CompactMenuItem)` instead of `styled(MenuItem)`, and the row lines up
+  with its neighbors.
+</Callout>
+
+## Two more one-off rows
+
+| File                                       | Declares                                |
+| ------------------------------------------ | --------------------------------------- |
+| `component/languages/LanguageAutocomplete` | `styled(MenuItem)` with `gap: 12px`     |
+| `views/projects/import/…/LanguageSelector` | `styled(MenuItem)` with its own padding |
+
+Neither goes through `CompactMenuItem`, so both are a different height from every other row in the
+product. Five `styled(MenuItem)` declarations in total, of which two are identical and three
+disagree.
+
+<Callout title="Suggested fix">
+  Both want `CompactMenuItem` with the extra rule on top, not a new base.
+</Callout>
+
+## A row that contains a second control
+
+`MultiselectItem` puts a `Checkbox` inside the row, and `FilterItem` a `Checkbox` or a `Radio`. The
+`MenuItem` already carries `selected` and its `aria-selected`, so the accessibility tree gets two
+controls for one choice — and the inner one is focusable in its own right.
+
+Counted and drawn on **Radio → Findings**, which owns the fix; listed here because it is 33 of this
+component's call sites.
+
+## Not wrong
+
+Every row type uses `ListItemText` rather than a bare string, so truncation and typography are
+consistent across all of them. `CompactMenuItem` is a real base with three real users — the shape
+was right, it is the two files that went around it that need moving.

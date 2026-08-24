@@ -1,0 +1,72 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MenuStories from './stories';
+
+<Meta of={MenuStories} />
+
+# Menu
+
+<Upstream docs="react-menu" />
+
+A list of actions on a surface, anchored to the thing that opened it. **42 places** in the product
+use it — row actions, sort orders, the language picker, the user menu.
+
+A menu holds **actions**, not values. A list you pick a value from and see again next time is a
+**Select**; a searchable one is an **Autocomplete**. The line matters because it decides what a
+screen reader announces: a menu item is a command, a select option is a choice.
+
+## The surface
+
+<Canvas of={MenuStories.TheStandard} />
+
+`Menu` is a `Popover` with a `MenuList` in it, so it brings the focus trap, Escape to close, and
+arrow-key movement between items — none of which a hand-built dropdown gets for free.
+
+```
+const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+<IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+  <DotsVertical />
+</IconButton>
+<Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+  <MenuItem onClick={…}>{t('edit')}</MenuItem>
+</Menu>
+```
+
+Anchoring to `e.currentTarget` rather than a ref is the pattern the product uses throughout, and it
+is the one Material UI documents.
+
+## Marking the current value
+
+<Canvas of={MenuStories.WithASelection} />
+
+`selected` on a `MenuItem` renders `aria-selected` along with the highlight, so a menu that shows
+the current sort order says which one it is. This is the one place in the product where selection
+state is carried properly — the toggles on **ToggleButton → Findings** are not.
+
+## Menu or Popover
+
+`Menu` when the content is a list of items. **`Popover`** when it is something else — a form, a
+filter panel, a search box with a list under it. Popover is the bare surface: no list semantics, no
+arrow keys, no focus behavior beyond the trap.
+
+<Callout title="The product uses both, and not always along that line">
+  Thirteen files reach for `Popover` directly. Some are right — the filter
+  panels and the search selects hold more than a list. Three are the user's
+  avatar menu, which is a list of actions and would be a `Menu`.
+</Callout>
+
+## Where the styling lives
+
+`getTheme.ts` does speak here, unlike most of the form components:
+
+| Entry         | What it sets                      |
+| ------------- | --------------------------------- |
+| `MuiMenu`     | `list` padding 8px top and bottom |
+| `MuiList`     | the `padding` class to 0          |
+| `MuiMenuItem` | the focus-visible background      |
+
+The first two disagree on purpose — lists are flush, menus are not — but a third layer sets
+`padding: 0` by hand on Autocomplete listboxes, which is where it gets confusing. See
+**Foundations → Component styles**.

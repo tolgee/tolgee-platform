@@ -1,0 +1,75 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Upstream } from '../../../.storybook/docs/Upstream';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as ChipStories from './stories';
+
+<Meta of={ChipStories} />
+
+# Chip
+
+<Upstream docs="react-chip" />
+
+A short piece of text in a pill — a tag, a state, a marker. **23 call sites** take it straight from
+Material UI, and three shared wrappers sit on top of it.
+
+A chip is **not a button**. It labels something that is already there. If clicking it does
+something, that is a `Button` — or, if it turns on and off, a **ToggleButton**.
+
+## Plain
+
+<Canvas of={ChipStories.Plain} />
+
+`size="small"` is the one the product uses in lists and rows: the base language marker on the
+dashboard, the _Shared_ / _Project only_ marker on a translation memory, the task type.
+
+## The three the product shares
+
+<Canvas of={ChipStories.TheSharedThree} />
+
+`tg.component/common/chips` holds a base and three variants, and they are worth knowing because they
+already solve what most call sites re-solve:
+
+| Component         | What it changes                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| `BaseChip`        | 12px side padding, no label padding, **15px** text, 4px icon gap |
+| `DefaultChip`     | the icon in `text.secondary`                                     |
+| `SuccessChip`     | the `tokens.success.main` background — not Material UI's green   |
+| `TransparentChip` | an outlined chip for a colored surface                           |
+
+<Callout title="SuccessChip exists because the palette is missing a color">
+  It sets `backgroundColor` inline from `tokens.success.main`, because the theme
+  never maps `success` into the palette and Material UI would otherwise use its
+  own `#2e7d32`. The chip is a workaround for the gap on **General Findings**,
+  and it can go once the palette is fixed.
+</Callout>
+
+## Deletable
+
+<Canvas of={ChipStories.Deletable} />
+
+`onDelete` puts an X at the end. Used for tags on a key and for languages while a project is being
+created. Give `deleteIcon` an `XClose` from the library rather than accepting Material UI's default.
+
+## A badge, not a chip
+
+<Canvas of={ChipStories.AsABadge} />
+
+`Badge` is the other one — it hangs off a control rather than standing on its own. 13 call sites,
+almost all of them `QaBadge` on the QA icon and the unseen count on the notification bell.
+
+Note the colors are not the same: **QA counts in `primary`, notifications in `secondary`.** And
+`QaBadge` does not always show a number — it shows a tick when there is nothing to resolve and a
+`DotsHorizontal` when the checks have not run. See **Patterns → Tags and labels**.
+
+The line: **a chip names, a badge attaches.**
+
+## Don't
+
+- **Don't build a pill out of a `Box`.** Eight components do; see Findings.
+- **Don't use a chip for something clickable.** That is a `Button` or a **ToggleButton**.
+- **Don't set the success color by hand** — `SuccessChip` already does, once.
+
+## Where the styling lives
+
+`getTheme.ts` has no `MuiChip` entry, so the 24px height, the radius and the colors are Material
+UI's. `common/chips` adjusts padding and font size on top. See **Foundations → Component styles**.

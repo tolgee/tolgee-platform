@@ -1,0 +1,59 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MultiselectStories from './stories';
+
+<Meta of={MultiselectStories} name="Findings" />
+
+# Multiselect — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## Four ways to pick several things
+
+<Canvas of={MultiselectStories.FindingFourImplementations} />
+
+| Built as                           | Call sites | Draws                                |
+| ---------------------------------- | ---------- | ------------------------------------ |
+| `Select multiple` from Material UI | **9**      | a comma-joined string, no checkboxes |
+| `InfiniteMultiSearchSelect`        | 3          | search + checkbox rows               |
+| `LanguagesSelect`                  | 4          | chips + checkbox rows                |
+| `SearchSelectMulti`                | 1          | search + checkbox rows               |
+
+The nine `Select multiple` call sites are the ones that stand out. Material UI's own multiple select
+renders the picked values as text in the trigger and gives the rows no checkbox, so those nine look
+and behave differently from the eight beside them:
+
+| File                                                            |
+| --------------------------------------------------------------- |
+| `views/projects/export/…/LanguageSelector.tsx`                  |
+| `views/projects/export/…/NsSelector.tsx`                        |
+| `views/projects/export/…/StateSelector.tsx`                     |
+| `ee/task/…/TranslationStateFilter.tsx`                          |
+| `ee/translationMemory/…/TranslationMemoryCreateEntryDialog.tsx` |
+| `ee/task/…/TaskCreateForm.tsx`                                  |
+| `views/projects/members/…/AgencyFilter.tsx`                     |
+| `component/searchSelect/SearchSelect.tsx`                       |
+| `component/common/form/LanguagesSelect/LanguagesSelect.tsx`     |
+
+Three of them are the **export dialog** again — the same dialog that holds five of the seven
+underlined selects on **Select → Findings**.
+
+<Callout title="Suggested fix">
+  The two that already build their own rows — `SearchSelect` and
+  `LanguagesSelect` — are fine and are the model. The other seven want
+  `SearchSelectMulti` or `InfiniteMultiSearchSelect`, which bring the checkbox
+  rows with them.
+</Callout>
+
+## Every row contains a second control
+
+`MultiselectItem` puts a real `Checkbox` inside a `MenuItem` that already carries `selected` and its
+`aria-selected`. Counted and owned on **MenuItem → Findings**; it applies to every multiselect on
+this page, because they all build their rows from it.
+
+## Not wrong
+
+`InfiniteMultiSearchSelect` and `SearchSelectMulti` share `MultiselectItem`, so the row height and
+the checkbox placement are the same in all four of their call sites. The trigger conventions — chips
+for things you recognize, a count for states — are applied consistently, which is more than the
+underlying components manage.

@@ -1,0 +1,60 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as MultiselectStories from './stories';
+
+<Meta of={MultiselectStories} />
+
+# Multiselect
+
+Picking several things from a list — languages, projects, assignees, filter states. It is a **Select**
+whose value is an array, and the row carries a checkbox instead of a highlight.
+
+## With a search box
+
+<Canvas of={MultiselectStories.WithSearch} />
+
+The common shape: a search field at the top of the panel and checkbox rows below. Use
+`tg.component/searchSelect/InfiniteMultiSearchSelect` when the list is paged from the server, or
+`SearchSelectMulti` when it is already in memory. Both build their rows from `MultiselectItem`, so
+the row height and the checkbox placement come for free.
+
+## Without one
+
+<Canvas of={MultiselectStories.WithoutSearch} />
+
+Below about ten options a search box is in the way. The translation filters do this — a plain list
+of checkbox rows.
+
+## What the trigger shows
+
+<Canvas of={MultiselectStories.TheTrigger} />
+
+Two conventions, both in the product and both defensible:
+
+- **Chips** when the values are things a person recognizes — languages, people. `LanguagesSelect`
+  does this.
+- **A summary** when the values are states or options and there may be many — "2 states selected".
+
+Pick by whether the reader needs to see _which_, or only _how many_.
+
+## How to get one
+
+| You need                                   | Use                            |
+| ------------------------------------------ | ------------------------------ |
+| several values, list paged from the server | `InfiniteMultiSearchSelect`    |
+| several values, list already loaded        | `SearchSelectMulti`            |
+| languages specifically                     | `common/form/LanguagesSelect`  |
+| a row inside one of them                   | `searchSelect/MultiselectItem` |
+
+## Don't
+
+- **Don't use `Select multiple` from `@mui/material`.** It gives you a comma-joined string in the
+  trigger and no checkboxes. Nine call sites do; see Findings.
+- **Don't put a focusable checkbox in the row** — the row already carries the selection. See
+  **MenuItem → Findings**.
+- **Don't show chips for a long list.** Past a handful the trigger grows and the layout moves.
+
+## Where the styling lives
+
+Nowhere of ours. These are compositions in the webapp, not library components — `searchSelect` is
+`webapp/src/component/searchSelect`.
