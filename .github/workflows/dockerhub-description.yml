@@ -1,0 +1,23 @@
+name: Docker Hub description
+
+# Run manually from the Actions tab after changing docker/DOCKERHUB.md.
+# Updating a description requires the Docker Hub credential to have Admin on
+# the repository — push access, which is all the release workflows need, is not
+# enough.
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push description to Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: tolgee/tolgee
+          readme-filepath: ./docker/DOCKERHUB.md
+          short-description: "Open-source localization platform — self-host the whole Tolgee server in one container."
