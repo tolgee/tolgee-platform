@@ -1,0 +1,125 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as TagStories from './stories';
+
+<Meta of={TagStories} />
+
+# Tags and labels
+
+Small pieces of text attached to something else — a tag on a key, a label on a translation, _Base_
+on a language, a QA count on a button. The product draws this shape in **thirteen components**, and
+they are not thirteen kinds of thing.
+
+They are four.
+
+## The four kinds
+
+<Canvas of={TagStories.TheFourKinds} />
+
+| Kind       | Who makes it      | Colored?          | Removable |
+| ---------- | ----------------- | ----------------- | --------- |
+| **tag**    | anyone, by typing | no                | yes       |
+| **label**  | defined up front  | **one per label** | yes       |
+| **marker** | the system        | by meaning        | no        |
+| **count**  | the system        | by severity       | no        |
+
+Deciding which one you have answers everything else — whether it is deletable, whether it can be
+created, whether it needs a color, and whether it is a `Chip` or a `Badge`.
+
+### Tags — free words
+
+<Canvas of={TagStories.Tags} />
+
+Typed by whoever needs them, on a key. No color, because nobody defined them and there is nothing to
+mean. Deletable in place, and creatable from the input — see **Picking or creating**.
+
+`views/projects/translations/Tags` — `Tags`, `Tag`, `TagAdd`, `TagInput`.
+
+### Labels — a defined set
+
+<Canvas of={TagStories.Labels} />
+
+Created in project settings, each with a color somebody picked, then assigned to translations. The
+color is the point: it is what makes a label scannable in a list where tags are not.
+
+`ee/translationLabels` for the settings, `TranslationLabel` for the pill,
+`globalContext/labelColorUtils` for the color pair — background and text are derived together so the
+text stays readable on whatever was chosen.
+
+<Callout title="Tags and labels look the same and are not">
+  Both are 24px pills with 14px text. A tag is a word someone typed; a label is
+  an option someone defined. If the set is closed and colored, it is a label —
+  and it belongs in settings, not in an input.
+</Callout>
+
+### Markers — facts
+
+<Canvas of={TagStories.StateMarkers} />
+
+_Base_ on a language, _Shared_ on a translation memory, the task type, _Trial_ in the top bar.
+Nobody assigns them; they describe what the thing already is, so they are never removable.
+
+### Counts — a badge on a control
+
+<Canvas of={TagStories.Counts} />
+
+`Badge`, not `Chip`: it hangs off something rather than standing on its own. Two in the product, and
+they are not the same.
+
+**Notifications** are the simple case — `Bell01` with the unseen count in `secondary`.
+
+**QaBadge is the interesting one.** It wraps the `QaCheck` icon and has **three states, only one of
+which is a number**:
+
+| State                   | The badge shows                       |
+| ----------------------- | ------------------------------------- |
+| issues found            | the count, in `primary`               |
+| nothing to resolve      | a **tick** on a grey ground           |
+| checks have not run yet | a **DotsHorizontal** on a grey ground |
+
+So it never renders a zero. _No issues_ and _not checked yet_ are different facts and it says which,
+which is worth copying anywhere a count can be absent for two different reasons.
+
+<Callout title="A chip names, a badge attaches">
+  Not "a badge counts" — `QaBadge` shows a tick more often than a number. The
+  line is where it lives: a chip stands on its own, a badge hangs off a control
+  and describes it.
+</Callout>
+
+## Where they appear
+
+| Place                        | Kind   | Component                             |
+| ---------------------------- | ------ | ------------------------------------- |
+| key row, translations        | tag    | `Tags` / `Tag`                        |
+| translation row              | label  | `TranslationLabels`                   |
+| project settings → labels    | label  | `LabelItem`                           |
+| language stats, dashboard    | marker | `Chip` — _Base_                       |
+| translation memory list      | marker | `Chip` — _Shared_                     |
+| task list and detail         | marker | `TaskTypeChip`                        |
+| branches                     | marker | `BranchNameChip`, `DefaultBranchChip` |
+| machine translation settings | marker | `ServiceLabel` and two more           |
+| glossary term                | tag    | `GlossaryTermTags`                    |
+| top bar                      | marker | `TrialChip`                           |
+| QA button, notifications     | count  | `QaBadge`, `Badge`                    |
+
+## The shape itself
+
+All of them want the same pill, and two of them already agree on it exactly:
+
+```
+height: 24px;
+border-radius: 12px;
+font-size: 14px;
+padding: 0 10px;
+```
+
+That is `Tags/Wrapper` and `StyledTranslationLabel`, written independently. **Chip** is one pixel of
+font size away. See **Chip → Findings**.
+
+## Don't
+
+- **Don't build a pill from a `Box`.** Eight components do.
+- **Don't color a tag.** Color means something; a typed word means nothing in particular.
+- **Don't make a marker deletable.** Nobody put it there.
+- **Don't use a chip for something attached to a control.** That is a badge.
+- **Don't render a zero.** `QaBadge` shows a tick instead, and says why.

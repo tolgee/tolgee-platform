@@ -1,0 +1,142 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as DisplayStories from './stories';
+
+<Meta of={DisplayStories} />
+
+# Showing a language
+
+The other half of **Picking a language**: once a language is chosen, how it is drawn. It appears in
+more places than the pickers do — tables, stats, translation cells, activity entries, chips, list
+rows — and it is drawn **two different shapes and five different labels**.
+
+## The thing that shows first: round or square
+
+<Canvas of={DisplayStories.TheTwoShapes} />
+
+Two components draw the flag, and neither is wrong on its own:
+
+| Component             | Shape       | Uses    | How                                         |
+| --------------------- | ----------- | ------- | ------------------------------------------- |
+| `FlagImage`           | rectangular | **~25** | the SVG as it comes                         |
+| `CircledLanguageIcon` | circular    | **~27** | a round window over a flag drawn 1.4× wider |
+
+The circular one is not a cropped rectangle — it renders the flag oversized inside a round mask with
+a faint drop shadow, so it reads as an avatar. That is a real design decision and it is why the two
+cannot simply be swapped: a circle shows the middle of the flag and loses the edges. On the French
+flag that is most of the information.
+
+`InlineLanguageIcon` is a third: the same circle sized in `em` so it can sit inside a sentence. Used
+four times, all in one activity file.
+
+<Callout title="Decided: rectangular" kind="warning">
+  **A flag is drawn rectangular.** The round shape is kept for one case only —
+  a stack of several flags overlapping in a list row, where rectangles read as a
+  mess.
+
+It is the shape that shows the whole flag. A circle keeps the middle and
+loses the edges, which on the French flag is most of what tells it apart from
+the Italian one.
+
+</Callout>
+
+## Where each shape ended up
+
+### A table row — round
+
+<Canvas of={DisplayStories.InATable} />
+
+`ProjectLanguages` through `LanguageItem`: circular icon, and the only complete label in the product
+— name, original name, tag.
+
+### A stats panel — round, split over two lines
+
+<Canvas of={DisplayStories.InAStatsPanel} />
+
+Name on top, then the icon with the tag and a _Base_ chip. The only place the tag gets its own line.
+
+### A translation cell — square
+
+<Canvas of={DisplayStories.InATranslationCell} />
+
+`LanguageHeading`: rectangular flag, name only, and the base language in bold. Bold is the only
+marker — no chip, no tick.
+
+### A set with no names — round
+
+<Canvas of={DisplayStories.AsASet} />
+
+`CircledLanguageIconList` on the projects list: the project's languages as a row of round icons, each
+carrying `Name | Original` in a tooltip, with a `+5` pill past ten. They do not overlap — they simply
+sit next to each other, and the circle is what makes them read as one set rather than eight
+rectangles.
+
+## And the labels
+
+<Canvas of={DisplayStories.EveryLabelFormat} />
+
+One language, six places, five formats. `LanguageItem` renders the complete one and is used ten
+times; the rest each decided again.
+
+Note what the differences cost. `Czech` alone is ambiguous to a Czech reader who expects _čeština_.
+`Czech - čeština - cs` and `Czech | čeština (cs)` carry the same information with different
+punctuation, for no reason. And a flag on its own is unreadable past two.
+
+---
+
+## What that looks like
+
+<Canvas of={DisplayStories.Decided} />
+
+The same three views with the decision applied. Two things fall out of it that were not obvious:
+
+- **The stats panel stops needing two lines.** It splits name and tag today because the round icon
+  and the tag were competing for the same row; a rectangular flag and `Name (tag)` fit on one.
+- **The base marker can be the same everywhere.** Once the shape stops varying, a `Base` chip works
+  in the table and in the panel, and the bold-in-the-cell trick is no longer needed.
+- **The set on the projects list does not change.** It has no names, so it stays round — which is
+  the rule doing its job rather than an exception to it.
+
+---
+
+## Proposed
+
+<Canvas of={DisplayStories.Proposed} />
+
+**One component, `Language`, with three densities.** The first two are rectangular; `icon` is the
+one that stands alone, so it is round:
+
+| Density | Shows                                                       | For                                  |
+| ------- | ----------------------------------------------------------- | ------------------------------------ |
+| `full`  | flag + `Name \| Original (tag)`                             | tables, settings, anywhere with room |
+| `short` | flag + `Name (tag)`                                         | rows, chips, menu items              |
+| `icon`  | flag only, with the name as its accessible name and tooltip | stacks, dense cells                  |
+
+Three densities rather than three components, because unlike the pickers these differ only in how
+much of the same data is shown — which is exactly what a prop is for.
+
+<Callout title="`icon` is not the same as drawing a bare flag">
+  Today the task filter shows flags with no name and nothing else — no tooltip,
+  no `alt`, no accessible name. `icon` density would still carry the name; it
+  just would not print it. That is the difference between a compact control and
+  an unreadable one.
+</Callout>
+
+### Still to decide
+
+1. **Whether the base language gets a marker**, and which — a tick in the table, bold in the cell and
+   a chip in the stats panel are three answers to one question.
+2. **Whether the tag is always shown.** It is the only part that is unambiguous, and it is the part
+   most often dropped.
+
+### What already exists and should be kept
+
+`LanguageItem` is the label logic, correct and written once:
+
+```
+`${language.name}${language.name !== language.originalName ? ` | ${language.originalName}` : ''} (${language.tag})`
+```
+
+It already handles the case where the original name matches the English one — English shows as
+`English (en)`, not `English | English (en)`. The proposed `Language` component is largely this,
+plus a density prop and one flag shape.

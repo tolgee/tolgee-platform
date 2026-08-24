@@ -1,0 +1,157 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as PickerStories from './stories';
+
+<Meta of={PickerStories} />
+
+# Picking a language
+
+A pattern, not a component. Choosing a language is the single most repeated interaction in Tolgee —
+**thirteen places do it, built on nine different bases, and one of the thirteen reuses a shared
+component.**
+
+This page draws every shape that exists today, then proposes what they should collapse into.
+
+<Callout title="Why this is a pattern and not a component" kind="warning">
+  The thirteen are not thirteen mistakes. Picking a base language in a form and
+  filtering a task list by language are genuinely different jobs. What is wrong
+  is that each one decided **from scratch** what to build on — `Select`,
+  `Autocomplete`, `Menu`, `Popover`, `InfiniteSearchSelect`, and four more.
+</Callout>
+
+---
+
+## What exists today
+
+### 1. A plain select — Create project, _Base language_
+
+<Canvas of={PickerStories.SingleSelect} />
+
+`common/Select` with `MenuItem` rows. The name comes first and the flag last, which is the reverse
+of everywhere else.
+
+### 2. A search over the whole catalogue — Create project, _Find language_
+
+<Canvas of={PickerStories.SearchTheCatalogue} />
+
+`LanguageAutocomplete`, a Material UI `Autocomplete` over the full ISO list rather than the project's
+languages. Rows read `English - English - en`. Languages already added are greyed out rather than
+hidden — which is right, and nothing else does it.
+
+### 3. A multiselect with rules on top — Translations header
+
+<Canvas of={PickerStories.MultiWithRules} />
+
+`LanguagesSelect`, a `styled(Select) multiple`. Two rules above the list — _All languages_ and _Base
+language only_ — and then the languages. The trigger shows tags (`en, cs, fr, de`), the list shows
+names, and neither shows a flag.
+
+### 4. One per table row — Import
+
+<Canvas of={PickerStories.InATableRow} />
+
+A `Select` with a local `styled(MenuItem)`, underlined rather than boxed, with **+ Add new** at the
+bottom. It is the only picker that can create a language from inside itself.
+
+### 5. A submenu inside a filter — Project tasks
+
+<Canvas of={PickerStories.InsideAFilterMenu} />
+
+`SubfilterLanguages`: a `Menu` of `MenuItem` and `Checkbox`, opened from a `SubmenuItem`. **Flags in
+the trigger and names in the list** — the exact inverse of the others.
+
+### 6. Chips for what is already chosen — Create project, _Languages_
+
+<Canvas of={PickerStories.AsChips} />
+
+The only place that renders the complete label: flag, name, original name and tag. That format comes
+from `LanguageItem`, which exists, is correct, and is used almost nowhere else.
+
+### 7. Search plus checkboxes — Permissions, Glossary
+
+<Canvas of={PickerStories.SearchAndCheck} />
+
+`SearchSelectMulti` and `InfiniteMultiSearchSelect`. The closest thing to a reusable shape, and the
+one two places already share.
+
+---
+
+## The two things that vary
+
+Reading the seven above, the differences fall into exactly two groups.
+
+**What the picker does** — and here there are only ever three answers:
+
+| The person is                                 | Today          |
+| --------------------------------------------- | -------------- |
+| choosing **one** existing language            | shapes 1, 4    |
+| choosing **several** existing ones            | shapes 3, 5, 7 |
+| **adding** a language that does not exist yet | shape 2        |
+
+**How a language is drawn** — and here there are five answers where there should be one:
+
+| Format                          | Where                          |
+| ------------------------------- | ------------------------------ |
+| flag + `Name \| Original (tag)` | chips — via `LanguageItem`     |
+| flag + `Name - Original - tag`  | Find language                  |
+| flag + `Name`                   | Import                         |
+| `Name` alone                    | Translations, task filter list |
+| flag alone                      | task filter trigger            |
+
+---
+
+## Proposed
+
+<Canvas of={PickerStories.ProposedThree} />
+
+**Three components, one for each job.** Not one component with a `mode` prop — the three differ in
+what they search, what they return and whether they can create, which is too much for one API.
+
+| Component             | Returns        | Searches                | Used by                                                             |
+| --------------------- | -------------- | ----------------------- | ------------------------------------------------------------------- |
+| `LanguageSelect`      | one language   | the project's languages | base language, import row                                           |
+| `LanguageMultiSelect` | several        | the project's languages | translations, export, glossary, permissions, task filter, batch ops |
+| `LanguageAddSelect`   | a new language | the whole ISO catalogue | create project, add language dialog                                 |
+
+And **one rule that applies to all three**, which is the half that costs nothing and fixes the most:
+
+<Callout title="A language is always drawn by `LanguageItem`">
+  Flag, name, and the original name with the tag when it differs. It exists
+  today, it is correct, and it is used in one place. Everything else draws its
+  own — which is why the same language reads five different ways depending on
+  which screen you are on.
+</Callout>
+
+### What to keep from each
+
+The shapes are not all bad, and the good parts should survive the merge:
+
+- **Greying out what is already added**, from _Find language_ — better than hiding it, because the
+  person can see it is there.
+- **+ Add new inside the list**, from Import — the only picker that does not make you leave to
+  create something.
+- **All languages / Base language only**, from Translations — genuinely useful rules, and they
+  belong to `LanguageMultiSelect` as optional rows.
+- **Search plus checkboxes**, from Permissions — the shape the multi variant should take.
+
+### What to drop
+
+- **Flags in the trigger without names.** Two flags are readable; six are not, and Czech and Croatia
+  are one glance apart.
+- **Tags in the trigger without names**, for the same reason in reverse.
+- **The underlined field** in Import — that is on **TextField → Findings** already.
+
+---
+
+## Where this goes next
+
+The same argument applies to two more pickers in the product, and it is worth checking them before
+building anything:
+
+- **Picking a project** — `ProjectSearchSelectPopover`, `AssignedProjectsSelect` and the glossary's
+  own version.
+- **Picking a person** — `AssigneeSearchSelectPopover` plus the agency and member selects.
+
+If all three end up needing _one / several / add_, then the generalization is not about languages at
+all: it is **one search-select family, parameterized by what it lists** — and that is a much smaller
+thing to build than nine bases.

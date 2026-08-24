@@ -1,0 +1,148 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FilterStories from './stories';
+
+<Meta of={FilterStories} />
+
+# Filtering
+
+Narrowing a list by criteria that are not text. It sits next to **Searching** — search takes a
+string, filtering takes choices — and the two are almost always in the same row.
+
+Tolgee filters in **three families and five standalone controls**, and they draw the same picture
+from three different sets of components.
+
+## The shape
+
+<Canvas of={FilterStories.Anatomy} />
+
+Every filter family in the product is the same three parts:
+
+| Part        | What it does                                                 |
+| ----------- | ------------------------------------------------------------ |
+| **trigger** | shows what is on, opens the menu, clears everything          |
+| **menu**    | the groups — some open a submenu, some are rows on the spot  |
+| **submenu** | the rows for one group, when there are too many for the menu |
+
+A group becomes a submenu when its options are data — tags, labels, languages, people. It stays in
+the menu when the options are fixed and few — translation state, task type.
+
+## The three kinds of row
+
+<Canvas of={FilterStories.TheThreeRows} />
+
+| Row          | Means                 | Control             |
+| ------------ | --------------------- | ------------------- |
+| **checkbox** | several at once       | `Checkbox`          |
+| **radio**    | one of                | `Radio`             |
+| **exclude**  | in, or explicitly out | checkbox + a toggle |
+
+The third is the one worth knowing about, and it has a component of its own.
+
+## ButtonToggle — the exclude control
+
+<Canvas of={FilterStories.ExcludeToggle} />
+
+`tg.component/ButtonToggle` is a `Button` with `variant="contained"`, `disableElevation`, and a
+state of its own:
+
+```tsx
+<ButtonToggle active={excluded} onClick={onExclude}>
+  {excluded
+    ? t('translation_filter_item_excluded')
+    : t('translation_filter_item_exclude')}
+</ButtonToggle>
+```
+
+It is the only component in the product with **its own token set** in the theme —
+`tokens._components.buttonToggle` carries eight values, four for the surface and four for the text:
+
+| State         | Light                    | Dark                     |
+| ------------- | ------------------------ | ------------------------ |
+| `enabled`     | white on the menu        | `#182230`, white text    |
+| `hovered`     | a 4% ink wash            | near-black               |
+| `active`      | dark surface, white text | white surface, dark text |
+| `activeHover` | fully dark               | slightly dimmed white    |
+
+The rest of it is deliberate too: 13px, weight 500, `text-transform: none` so it reads as a word
+rather than a label, a 4px radius, and a `0 2px 8px` shadow that lifts it off the row it sits in.
+
+<Callout title="It inverts rather than tinting">
+  Most toggles in the product signal _on_ with a color. This one **swaps the
+  surface and the text** — the button that says _Excluded_ is a dark chip with
+  white letters. It is the clearest on/off in the product, and it is used in
+  exactly one place.
+</Callout>
+
+### In the row
+
+<Canvas of={FilterStories.ExcludeInARow} />
+
+`FilterItem` hides it until the row is hovered and keeps it once it is on:
+
+```
+& .hidden { opacity: 0; transition: opacity ease-in 0.1s; }
+&:hover .hidden { opacity: 1; }
+```
+
+Opacity rather than `display`, so the row does not change width when the pointer arrives. The row
+itself is a four-column grid — control, label, toggle, indicator — which is why the toggle can
+appear without moving the label.
+
+<Callout title="Hidden until hover has a cost" kind="warning">
+  The button is in the tab order whether or not it is visible, so a keyboard
+  user reaches an invisible control. `opacity: 0` hides it from the eye and from
+  nobody else. Adding it to the row's hover **and** focus-within would fix that
+  in one line.
+</Callout>
+
+So a tag can be _required_ or _forbidden_ rather than only _wanted_. Nothing else in the product
+does this, and it is the most powerful thing the filters can do.
+
+## What the trigger says
+
+<Canvas of={FilterStories.TwoSummaries} />
+
+The translations filter has a rule, and it is a good one:
+
+- **one filter** → its name, truncated
+- **more than one** → `2 filters`
+- **none** → the placeholder
+
+The task filter does something else entirely: it draws **avatars and flags with no words**. Same
+job, same row of the toolbar, different language. See Findings.
+
+## Clearing
+
+The trigger carries a clear button once anything is on. Clearing is all-or-nothing — there is no way
+to drop one filter from the trigger, you go back into the menu. That is a reasonable trade for a
+narrow control, and it is worth stating so nobody adds chips to it later.
+
+## What is not filtering
+
+**Prefilters** look like filters and are not. `PrefilterActivity`, `PrefilterFailedJob` and
+`PrefilterTask` narrow the translation list from outside — you arrive from an activity entry, a
+failed job or a task — and they render as a banner above the list rather than as a control. They
+cannot be composed with each other, and only one is ever active.
+
+They belong on this page only so nobody tries to fold them into the filter menu.
+
+## How to get one
+
+There is no shared filter component. Today you copy the nearest family:
+
+| You need                       | Nearest thing                                          |
+| ------------------------------ | ------------------------------------------------------ |
+| a submenu of data rows         | `TranslationFilters/SubfilterTags`                     |
+| a row with include and exclude | `TranslationFilters/FilterItem`                        |
+| a submenu opener               | `component/SubmenuItem`                                |
+| a whole filter menu            | `TranslationFilters` or `taskFilter/TaskFilterPopover` |
+
+That this table exists at all is the finding.
+
+## Don't
+
+- **Don't build a fourth family.** Three sets of components already draw this menu.
+- **Don't summarize with icons alone.** Two flags are readable, six are not.
+- **Don't put a focusable control inside a row** that already carries the selection — see
+  **MenuItem → Findings**.

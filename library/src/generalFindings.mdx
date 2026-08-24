@@ -1,0 +1,130 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../.storybook/docs/Callout';
+
+<Meta title="General Findings" />
+
+# General findings
+
+Things that are wrong across the whole product rather than inside one component. Each has a single
+cause and a single fix, and each reaches further than any one page.
+
+---
+
+## The theme tells Material UI the wrong size of a rem
+
+`getTheme.ts` declares:
+
+```
+typography: {
+  htmlFontSize: 15,
+  …
+}
+```
+
+Nothing sets the root of the document to 15px. `MuiCssBaseline` styles `html` for height only and
+puts `fontSize: 15` on **`body`**. The root stays at the browser's **16px** — as it has since the
+line was added.
+
+<Callout title="Status: measured in the app, and deliberately not shipped yet" kind="warning">
+  We took the line out of `getTheme.ts`, ran the webapp's typecheck (clean) and
+  measured what it did — then put it back, to keep changes to the app small
+  while the documentation is being written.
+
+So the fix is **understood and verified, not applied**. What is applied is a
+correction inside this Storybook only: these pages render with
+`htmlFontSize: 16`, which is why the sizes here are whole numbers. Until the
+same change lands in `getTheme.ts`, **these pages do not match production**,
+and every Spec block prints the shipped number beside the correct one wherever
+they differ.
+
+</Callout>
+
+### What the number actually does
+
+`htmlFontSize` is not a size. It is the **divisor** Material UI uses when it converts px to rem:
+
+```
+pxToRem(20)  =  20 / htmlFontSize
+```
+
+| `htmlFontSize` | Material UI writes | Browser renders it at 16px root |
+| -------------- | ------------------ | ------------------------------- |
+| **15**         | 20 ÷ 15 = 1.333rem | **21.33px**                     |
+| 16             | 20 ÷ 16 = 1.25rem  | **20px**                        |
+
+Because the number sits in the denominator, **making it smaller makes everything it touches
+bigger.** Material UI thinks one rem buys 15px, so it asks for more rem than it needs; the browser
+pays out at 16px each and overshoots by 6.7%.
+
+Put another way, it is an exchange rate. Material UI wants to pay 20px, believes the rate is 15px to
+the rem, and writes a cheque for 1.333rem. The browser cashes it at 16px to the rem and pays 21.33.
+**Nobody changed what a rem is worth — Material UI was given the wrong rate.**
+
+### What it affects
+
+Measured by removing the line and diffing the computed `font-size` and `line-height` of **every
+element** on eight pages of this Storybook.
+
+| What                                    | Today    | Corrected |
+| --------------------------------------- | -------- | --------- |
+| glyphs Material UI draws (`MuiSvgIcon`) | 21.33px  | **20px**  |
+| the same at the default size            | 25.6px   | **24px**  |
+| a small checkbox, whole control         | 39.33px  | **38px**  |
+| `IconButton`'s own font-size            | 19.2px   | 18px      |
+| **a `large` Button's label**            | **16px** | **15px**  |
+
+The first three are the visible ones. `IconButton`'s font-size is wrong today and invisible, because
+library icons carry an explicit `width` and take nothing from it.
+
+<Callout title="One piece of real text moves" kind="warning">
+  `Button` sizes its `large` variant through `pxToRem(15)`, so the label of a
+  large button goes from 16px to 15px. There are **two large buttons in the
+  product**. Everything else that reads as text is unaffected.
+</Callout>
+
+### What it does not affect
+
+Worth stating as plainly as the rest, because it is what makes the fix safe:
+
+- **The type scale does not move.** All thirteen variants — `h1` through `overline` — are written in
+  px, so no conversion touches them. The Typography page came out byte-identical.
+- **Body text stays at 15px.** That is set directly in `MuiCssBaseline`, not in rem.
+- **Library icons stay exact.** A 20px icon measures 20.00px before and after.
+- **`Button` and `Tooltip` stay put**, because the theme sets their sizes itself.
+
+### Why it is worth fixing
+
+**Every size Material UI derives for us is currently a number nobody chose.** Not Material UI, which
+asked for 20, and not us, who never said otherwise.
+
+It also costs something concrete today. Our icons and Material UI's disagree by 1.33px wherever they
+share a row — eight screens do, among them the key editor's _max character limit_, the tasks header
+and the batch toolbars. And it makes people write things like this, in `CellKey` and `TrashKeyCell`:
+
+```
+width: 38px;
+height: 38px;
+```
+
+That is not a stylistic choice. It is **the correct size, pinned by hand**, because the derived one
+was wrong — which makes the translations key list and the trash the only two places where the
+checkbox is the size it should be. Fix the divisor and the derived size is right everywhere, and
+those hardcoded numbers stop being load-bearing.
+
+### How, and in what order
+
+1. **Drop `htmlFontSize`** and let it default to 16. Setting `html { font-size: 15px }` would also
+   make the declaration true, but it overrides the reader's own browser setting, so it is the worse
+   of the two.
+2. **Then** delete `width: 38px; height: 38px` from `CellKey` and `TrashKeyCell` — not before, or
+   those two rows lose the only thing holding them right.
+3. Decide whether the two large buttons keep a 16px label; if so, set it in the theme rather than
+   leaving it to a conversion.
+
+<Callout title="Where it came from">
+  Added on 2024-06-26 in `6f5762b61`, _feat: new pricing plans design_ — a single
+  line in a commit about something else, and the only typography change in it.
+  `15` was almost certainly taken from `body: { fontSize: 15 }`, which was
+  already there and is correct. The two mean different things: one is how big our
+  text is, the other is what the browser thinks a rem is worth.
+</Callout>

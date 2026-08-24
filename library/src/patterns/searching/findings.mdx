@@ -1,0 +1,186 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SearchStories from './stories';
+
+<Meta of={SearchStories} name="Findings" />
+
+# Searching — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## One job, four components, three behaviors
+
+<Canvas of={SearchStories.FindingFourImplementations} />
+
+All four filter a list as you type. They differ in ways nobody chose:
+
+| Component                 | Lines | Debounce  | Magnifier | Clear  | Width  |
+| ------------------------- | ----- | --------- | --------- | ------ | ------ |
+| `SearchField`             | 74    | **500ms** | yes       | yes    | caller |
+| `SecondaryBarSearchField` | 29    | inherited | yes       | yes    | 250px  |
+| `HeaderSearchField`       | 66    | **none**  | yes       | yes    | 200px  |
+| `FlagSearchField`         | 31    | 500ms     | **no**    | **no** | caller |
+
+`SecondaryBarSearchField` is the model: 29 lines, wraps `SearchField`, sets a width. The other two
+rebuilt it.
+
+**`HeaderSearchField` has no debounce.** It calls `onSearchChange` on every keystroke while the
+shared one waits 500ms — and it is used by the compact tasks header and the translation trash, both
+of which filter a list from the server. It looks identical and behaves differently, which is the
+worst combination.
+
+Its name is also wrong: it is not the global header search — there is no global search in the
+product. It is a compact list filter.
+
+<Callout title="Suggested fix" kind="warning">
+  Fold `HeaderSearchField` onto `SearchField` the way the secondary bar already
+  does, and rename what is left. `FlagSearchField` should follow — it gains the
+  magnifier and the clear button it never had.
+</Callout>
+
+## The translations search cannot be scrolled
+
+<Canvas of={SearchStories.FindingOverflow} />
+
+`searchFieldStyles.ts` sets:
+
+```
+& .cm-scroller {
+  overflow-x: hidden;
+}
+```
+
+The editor never wraps — there is no `lineWrapping` extension and a transaction filter keeps the
+document on one line — so a long query runs past the right edge and is clipped. The caret stays
+visible because CodeMirror scrolls to it programmatically, but **the person cannot scroll the field
+themselves**: no wheel, no drag, no way to look at the start of a query while the caret is at the end.
+
+A native `<input>`, which every other search here contains, does this without being asked.
+
+### The overflow fix, in three declarations
+
+The second sample above is `overflow-x: auto` with the scrollbar hidden:
+
+```
+& .cm-scroller {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+& .cm-scroller::-webkit-scrollbar {
+  display: none;
+}
+```
+
+That is precisely what a native `<input>` does — it scrolls to the caret, it scrolls on wheel and on
+drag, and it never shows a bar inside a 40px control. No layout change, and the person can read the
+start of their own query again.
+
+**Wrapping is the wrong fix.** `lineWrapping` would grow the field past 40px and push the toolbar
+around it, and `resolveSingleLineDoc` deliberately flattens newlines into spaces — keeping the query
+on one line is a decision, not an accident.
+
+## The field rebuilds a TextField by hand
+
+`TranslationsSearchField` is a `div`, and `searchFieldStyles.ts` re-implements four things Material
+UI would have given it:
+
+| Written by hand                                | `TextField` gives                    |
+| ---------------------------------------------- | ------------------------------------ |
+| `height: 40px`, padding, `1px solid` border    | `size="small"`, `variant="outlined"` |
+| `:hover` border color                          | the hover state                      |
+| `:focus-within` + inset `outline: -2px`        | the focus ring                       |
+| the magnifier, the clear button, the help icon | `startAdornment` / `endAdornment`    |
+
+None of it is wrong-looking today. It is wrong in that every future change to the field shape — the
+border token, the radius, the focus ring — has to be made twice.
+
+### Proposed rewrite
+
+`TextField` takes an `inputComponent`, which replaces the inner `<input>` and keeps everything
+around it. The CodeMirror area becomes that component:
+
+```tsx
+const EditorInput = forwardRef<HTMLDivElement, InputBaseComponentProps>(
+  function EditorInput({ value, onChange, ...props }, ref) {
+    const editorRef = useSearchEditor({ … });
+    return <div {...props} ref={mergeRefs(ref, editorRef)} />;
+  }
+);
+
+export const TranslationsSearchField = ({ value, onSearchChange, languageTags, placeholder }: Props) => (
+  <TextField
+    size="small"
+    fullWidth
+    value={value}
+    placeholder={placeholder}
+    InputProps={{
+      inputComponent: EditorInput,
+      inputProps: { languageTags, onSearchChange },
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchSm width={20} height={20} />
+        </InputAdornment>
+      ),
+      endAdornment: (
+        <InputAdornment position="end">
+          {Boolean(value) && (
+            <IconButton size="small" onClick={() => onSearchChange('')} aria-label={t('clear_search')}>
+              <XClose width={20} height={20} />
+            </IconButton>
+          )}
+          <SearchSyntaxHelp languageTags={languageTags} />
+        </InputAdornment>
+      ),
+    }}
+  />
+);
+```
+
+What that buys:
+
+- **`searchFieldStyles.ts` loses `StyledRoot` entirely** — border, height, hover and focus come from
+  the theme, so the field follows **TextField** the way every other field does.
+- The remaining styles are the ones that are genuinely CodeMirror's: `.cm-line`, `.cm-content`,
+  `.cm-placeholder`, `.cm-cursor`, and the `overflow-x` above.
+- It picks up `error`, `disabled` and `size` for free, none of which it has today.
+- The clear button and the help icon become adornments, which is what they are.
+
+The pattern is already in the codebase: `TranslationFilters` passes a `div` as `inputComponent` to
+fake a select. Here it would be used for what it is for.
+
+<Callout title="One thing to watch" kind="warning">
+  `inputComponent` receives `value` and `onChange` and expects to behave like an
+  input. CodeMirror keeps its own document, so the wrapper has to accept the
+  outer `value` as the source of truth and push changes out through
+  `onSearchChange` — which `useSearchEditor` already does. The ref has to be
+  merged, because `TextField` wants one and the editor wants one.
+</Callout>
+
+## No shared empty state
+
+<Canvas of={SearchStories.NoResults} />
+
+Nothing in the product defines what a list shows when a search matches nothing. Each list decides,
+and most show an empty list — which is indistinguishable from a list that is still loading.
+
+<Callout title="Suggested fix">
+  One `NoResults` for the pattern: what was searched for, and the way out.
+</Callout>
+
+## Two search fields import icons from the package
+
+`SearchField` and `HeaderSearchField` both do:
+
+```
+import { SearchSm, XClose } from '@untitled-ui/icons-react';
+```
+
+**Foundations → Icons** asks for `@tginternal/library/icons`. With `PreparedLanguage` on
+**Showing a language → Findings**, that is four files taking icons from the package rather than the
+library — and these two are the ones in shared components, where the next person copies from.
+
+## Not wrong
+
+Every one of the four uses the same translated placeholder string, so nothing hardcodes English.
+`SecondaryBarSearchField` is 29 lines because it does the right thing — it wraps rather than
+rebuilds, and it is the shape the other two should take.

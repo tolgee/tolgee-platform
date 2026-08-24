@@ -1,0 +1,114 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as SearchStories from './stories';
+
+<Meta of={SearchStories} />
+
+# Searching
+
+Five search fields exist in the product. They are not four mistakes and one original — **four of
+them do the same job** and one is genuinely different.
+
+Which one you need is decided by three questions, and none of them is about how it looks.
+
+| Question                        | If…                                                              |
+| ------------------------------- | ---------------------------------------------------------------- |
+| **Does it filter or navigate?** | filters → the list below narrows · navigates → it takes you away |
+| **Instant or on Enter?**        | instant needs a debounce and a layout that does not jump         |
+| **How many items?**             | under about twenty, a search box is in the way                   |
+
+Tolgee's answers are the same nearly everywhere: **it filters, it is instant, and the list is long.**
+That is why there is one shape and one component.
+
+## Filtering a list
+
+<Canvas of={SearchStories.FilterAList} />
+
+The default. `tg.component/common/form/fields/SearchField`:
+
+```
+<SearchField
+  initial={search}
+  onSearch={setSearch}
+  placeholder={t('standard_search_label')}
+/>
+```
+
+What comes with it, and what a hand-built copy loses:
+
+| Behavior         | Rule                                                      |
+| ---------------- | --------------------------------------------------------- |
+| debounce         | **500ms** — the list narrows once the person stops typing |
+| the magnifier    | at the start, 20px, from the icon library                 |
+| the clear button | at the end, **only once there is a value**                |
+| the placeholder  | the shared `standard_search_label` string                 |
+| Escape           | clears the field                                          |
+
+<Callout title="The debounce is the part that is invisible and matters most">
+  Without it the list re-renders on every keystroke, and on a long list that is
+  what makes typing feel heavy. One of the four implementations has no debounce
+  at all — and it looks identical. See Findings.
+</Callout>
+
+## Searching with syntax
+
+<Canvas of={SearchStories.WithSyntax} />
+
+The translations search accepts `state:untranslated`, `key:`, `tag:` and language filters. That is a
+language, not a string, so it is a **CodeMirror editor** rather than an input — and it is the one
+search in the product with a reason to be different.
+
+It is not a `TextField`. It is a 40px bordered row built by hand, and everything lives inside that
+border:
+
+```
+<StyledRoot>            40px, 1px border, radius from the theme, background.default
+  <StyledSearchIcon />  the magnifier, 20px
+  <StyledEditorArea />  the CodeMirror editor — grid, flex-grow, min-width 0
+  <IconButton>          clear, only once there is a value
+  <SearchSyntaxHelp />  the ? that teaches the syntax
+</StyledRoot>
+```
+
+The focus ring is its own too: the border turns primary and an inset `outline` is drawn at
+`-2px`, which is what `TextField` would have given it for free.
+
+Two things belong to this pattern and not to the one above:
+
+- **A help affordance.** Syntax nobody can discover is syntax nobody uses; `SearchSyntaxHelp` is part
+  of the control, not decoration next to it.
+- **One line, always.** `resolveSingleLineDoc` flattens anything pasted with newlines into spaces, so
+  a query stays a single line however it arrives.
+
+## When nothing is found
+
+<Canvas of={SearchStories.NoResults} />
+
+**The product has no shared empty state for search**, so each list invents one or shows nothing. It
+belongs here because it is part of searching, not part of the list: say what was searched for, and
+offer the way out.
+
+## What is not searching
+
+Two things look like this pattern and are not:
+
+- **Finding a language to add** — _Find language_ searches a catalogue of things that do not exist in
+  your project yet. It returns an action, not a filter. See **Picking a language**.
+- **A select with a search box in it** — `SearchSelectMulti` and friends. The search narrows the
+  options of a control; it does not change what is on the page.
+
+## How to get it
+
+| You need                       | Use                                           |
+| ------------------------------ | --------------------------------------------- |
+| filter a list                  | `tg.component/common/form/fields/SearchField` |
+| the same in a secondary bar    | `SecondaryBarSearchField`, which wraps it     |
+| search with syntax             | `TranslationsSearchField`                     |
+| narrow the options of a select | `searchSelect` — see **Multiselect**          |
+
+## Don't
+
+- **Don't assemble the adornments again.** Two components do; both drifted.
+- **Don't skip the debounce** because the list is short today.
+- **Don't leave out the clear button.** A search you cannot undo in one click is a trap on a filter.
+- **Don't put a search box above a list of ten.**

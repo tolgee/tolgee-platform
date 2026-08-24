@@ -1,0 +1,166 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as PickCreateStories from './stories';
+
+<Meta of={PickCreateStories} />
+
+# Picking or creating
+
+Choosing something from a list **that you may need to add to first** — a namespace, a tag, an
+organization, a language. It is a variant of **Picking a language** rather than a thing of its own,
+but it turns up across the product and it is drawn three different ways.
+
+## The namespace selector
+
+<Canvas of={PickCreateStories.PlusBesideSearch} />
+
+`tg.component/NamespaceSelector` is the reference, and it is thin — the work is done by
+`SearchSelect`:
+
+```tsx
+<SearchSelect
+  items={existingOptions}
+  value={value ?? ''}
+  onSelect={onChange}
+  searchPlaceholder={t('namespace_select_search')}
+  onAddNew={(searchValue) => { setLastSearch(searchValue); setDialogOpen(true); }}
+  addNewTooltip={t('namespace_select_new')}
+/>
+{dialogOpen && <NamespaceNewDialog namespace={lastSearch} … />}
+```
+
+Two things about it are worth copying.
+
+**`onAddNew` is part of the shared component, not of the namespace.** `SearchSelect`,
+`SearchSelectContent`, `SearchSelectMulti` and `SwitchPopover` all take `onAddNew` and
+`addNewTooltip`, and render a `Plus` icon button at the end of the search row. Anything built on them
+can create without inventing anything.
+
+**It hands over what you typed.**
+
+<Canvas of={PickCreateStories.CarriesTheSearch} />
+
+`onAddNew` receives the current search string, so the dialog opens with the name already filled in.
+Typing a namespace that does not exist and pressing `+` is one gesture, not two.
+
+The list also always contains `<none>` — the current value is prepended if it is not among the used
+namespaces, so the control can always show what is selected even when it is empty.
+
+## Where else this happens
+
+| Where                   | Creates         | How                                          |
+| ----------------------- | --------------- | -------------------------------------------- |
+| **Namespace selector**  | a namespace     | `onAddNew` → `NamespaceNewDialog`            |
+| **Organization switch** | an organization | `onAddNew` → the create route                |
+| Import → language       | a language      | a last row in the list                       |
+| Tag input               | a tag           | a row that appears when nothing matches      |
+| Create project → find   | a language      | picks from the ISO catalogue and prepares it |
+
+The first two use the shared capability. The rest each built their own.
+
+## Four implementations, and what actually varies
+
+<Canvas of={PickCreateStories.FindingFourPositions} />
+
+Put side by side, the four differ on **two axes and nothing else**:
+
+| Where                | Position          | Visible                   |
+| -------------------- | ----------------- | ------------------------- |
+| `NamespaceSelector`  | in the search row | **always**                |
+| Add languages dialog | **first** row     | only once you type        |
+| Import → language    | **last** row      | always                    |
+| `TagInput`           | a popup row       | only when nothing matches |
+
+Three positions, two rules about when. Nobody chose four designs — four people each answered two
+questions on their own.
+
+### What each position costs
+
+<Canvas of={PickCreateStories.RowAtTheEnd} />
+
+**Last row.** It scrolls away with the list, so in a long one you have to reach the bottom to find
+out that creating is possible at all. The import selector is otherwise fine — its `+` reads well and
+is the right color; it is only in the wrong place. (Its field is underlined, which is a separate
+problem, counted on **TextField → Findings**.)
+
+<Canvas of={PickCreateStories.RowAtTheTop} />
+
+**First row.** It competes with the options: _New custom language_ sits above the language you were
+looking for, and in a catalogue of hundreds the thing you want is always below the thing you almost
+never want. It is also **only there once you type**, so before the first keystroke nothing says a
+custom language is possible.
+
+<Canvas of={PickCreateStories.AppearsWhenNothingMatches} />
+
+**Only when nothing matches.** The most useful thing on screen at the moment it appears — you typed
+something new, and there it is, already carrying the text. And invisible before that: nothing tells
+you a tag can be created until you try one that cannot be found.
+
+<Canvas of={PickCreateStories.PlusBesideSearch} />
+
+**In the search row.** Never scrolls, never moves, never competes with an option, always in the same
+place across the product — and it carries the typed text into the dialog. This is `onAddNew`.
+
+## The ideal shape
+
+<Callout title="A + in the search row, always — plus a row when nothing matches">
+  **The `+` is the discoverable route.** It is visible before you type, it does
+  not move, and once it is in the search row of every picker, its position is
+  learned once and applies everywhere.
+
+**The _Create X: “…”_ row is the fast route.** When a search finds nothing,
+the most likely next action is to create what was typed, and a full-width row
+saying so is better than a 20px button in the corner.
+
+They are not alternatives. The `+` teaches that creating is possible; the row
+catches the moment it is needed. Two of the four implementations have one of
+the two, and none has both.
+
+</Callout>
+
+The first and last rows should go. Neither is discoverable when it needs to be, and both spend a
+list row on something that is not an option.
+
+## It has to look like something to click
+
+<Canvas of={PickCreateStories.FindingNotInviting} />
+
+Position is only half of it. Creating is the one thing in a list of options that is **not an
+option** — it does something rather than selecting something — and it should read that way before
+it is read at all.
+
+<Callout title="Always primary, always a plus, always “New …”">
+  | | |
+  | --- | --- |
+  | **color** | `primary.main`, never the text color |
+  | **icon** | `Plus`, at the start |
+  | **label** | **New** followed by the thing — _New namespace_, _New language_, _New tag_ |
+
+The color is what makes it read as an action rather than a row you happened to
+scroll past. The word is what says what will exist afterwards.
+
+</Callout>
+
+**One of the four does this today.** The import selector sets
+`color: theme.palette.primary.main` on its row; the other three inherit the text color and blend
+into the options above them.
+
+The labels disagree too — _Add new_, _New custom language_, `Add "tag"`, and the namespace `+` has
+no label at all, only a tooltip. **New** is the better half of that split: _Add_ describes what you
+are doing, _New_ names what you will get, and a list of things is easier to scan by what they are.
+
+<Callout title="The bare + needs a label too" kind="warning">
+  `SearchSelect` renders the create affordance as an icon button with a tooltip
+  and nothing else. A tooltip is not a label — it does not appear on touch, it
+  does not appear until you hover, and it is not what a screen reader reads
+  first. The `+` should carry _New namespace_ next to it, or at minimum an
+  `aria-label` that says it.
+</Callout>
+
+## Don't
+
+- **Don't build the create affordance yourself.** `onAddNew` exists on all four search selects.
+- **Don't lose what was typed.** The dialog should open filled in.
+- **Don't hide creating behind an empty result.**
+- **Don't offer it where the person cannot create.** The organization switch passes `onAddNew` only
+  when permissions allow, and the `+` disappears — which is right.

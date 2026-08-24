@@ -1,0 +1,149 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as FilterStories from './stories';
+
+<Meta of={FilterStories} name="Findings" />
+
+# Filtering — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## Where filtering happens
+
+Three families and five standalone controls, **2,272 lines** in the translations family alone.
+
+| Family / control                   | Where                          | Subfilters | Built from                         |
+| ---------------------------------- | ------------------------------ | ---------- | ---------------------------------- |
+| **Translation filters**            | translations header            | **9**      | `FilterItem` + `SubmenuItem`       |
+| **Task filters**                   | project and global tasks       | **4**      | raw `MenuItem` + `Checkbox`        |
+| **QA checks**                      | inside both of the above       | 1          | `CheckTypeFilterItem`, its own row |
+| `AgencyFilter`                     | project members                | —          | `common/Select`                    |
+| `TranslationStateFilter`           | task creation                  | —          | `@mui/material` `Select multiple`  |
+| `PrefilterTaskHideDoneSwitch`      | translations, when prefiltered | —          | a `Switch`                         |
+| `Prefilter*` (activity, job, task) | translations                   | —          | a banner, not a control            |
+
+The nine translation subfilters are Comments, Deleted by, Description, Labels, Namespaces,
+Screenshots, Suggestions, Tags and Translations. The four task ones are Agencies, Assignees,
+Languages and Projects.
+
+## Three families draw one picture
+
+<Canvas of={FilterStories.FindingThreeFamilies} />
+
+The row is written three times:
+
+| Family       | Row                                                            |
+| ------------ | -------------------------------------------------------------- |
+| Translations | `FilterItem` — `CompactMenuItem` + checkbox or radio + exclude |
+| Tasks        | raw `MenuItem` + `Checkbox` + `ListItemText`, inline           |
+| QA           | `CheckTypeFilterItem` — its own again                          |
+
+Only the translations one has **Exclude**. So the same tag can be forbidden in one filter menu and
+merely unwanted in another, and which you get depends on which screen you are on.
+
+The submenu opener is shared — `component/SubmenuItem`, used by both families — which shows the
+split is not deliberate. One part was extracted and the rest was not.
+
+<Callout title="Suggested fix" kind="warning">
+  `FilterItem` is the complete one. Move the task and QA rows onto it and the
+  exclude behavior arrives everywhere for free. `SubfilterLanguages` is the
+  smallest place to start: it is a `Menu` of four rows, and it is on **Picking a
+  language → Findings** for a second reason.
+</Callout>
+
+## The trigger is a text field pretending to be a select
+
+<Canvas of={FilterStories.FindingFakeField} />
+
+`TranslationFilters` renders its trigger as:
+
+```tsx
+<TextField
+  readOnly
+  InputProps={{
+    onClick: handleClick,
+    inputComponent: FakeInput,
+    value:
+      numberOfFilters === 1 ? (
+        getFilterName(value)
+      ) : (
+        <T keyName="translations_filters_text" />
+      ),
+  }}
+/>
+```
+
+A `div` is passed as `inputComponent` so the value can be a React node rather than a string. It
+works, and it means a screen reader is told this is **a text box that cannot be typed into** — no
+`role="combobox"`, no `aria-expanded`, no announcement that a menu opened.
+
+`BranchLabelInput` does the same thing. Both are already counted on **TextField → Findings**.
+
+<Callout title="Suggested fix">
+  It is a combobox. Either use one, or give the trigger `role="combobox"`,
+  `aria-expanded` and `aria-haspopup="menu"` — three attributes, no visual
+  change.
+</Callout>
+
+## The exclude toggle is invisible to the eye and not to the keyboard
+
+<Canvas of={FilterStories.ExcludeInARow} />
+
+`FilterItem` hides the toggle with `opacity: 0` and reveals it on `:hover`. Opacity keeps the row
+from resizing, which is why it was chosen — but it also leaves the button **in the tab order while
+invisible**. Tabbing through a filter menu stops on a control nobody can see.
+
+```
+& .hidden { opacity: 0; transition: opacity ease-in 0.1s; }
+&:hover .hidden { opacity: 1; }
+```
+
+<Callout title="Suggested fix">
+  Add `&:focus-within .hidden { opacity: 1; }`. One line, and the button appears
+  for the person who reached it with the keyboard.
+</Callout>
+
+## `min-height: 0px !important` on the exclude toggle
+
+`ButtonToggle` overrides the theme's 40px minimum with `!important`, because a 13px chip inside a
+40px row cannot be 40px tall. The `!important` is there to beat `MuiButton`'s `root`, which sets
+`minHeight: 40`.
+
+It is one of three heights off the scale on **Button → Findings**. The honest fix is not to delete
+the override but to give the theme a size this button can ask for — it is a real shape, used
+deliberately, and it will be used again the moment anything else needs a chip-sized button.
+
+## One component, one caller
+
+`ButtonToggle` is used in exactly one place, `FilterItem`. It has eight design tokens, four states
+and a considered shadow — more care than most components in the product get — and it filters tags in
+one menu.
+
+That is not waste. It is a sign the pattern was meant to spread and did not: the task filters and the
+QA filters have no exclude at all.
+
+## Two summaries for one job
+
+<Canvas of={FilterStories.TwoSummaries} />
+
+The translations filter says `Untranslated` for one and `2 filters` for more. The task filter draws
+**avatars and flags with no words at all** — readable at two, unreadable at six, and it is the same
+row of the same kind of toolbar.
+
+<Callout title="Suggested fix">
+  One rule: the name when there is one filter, a count when there are several.
+  Icons can stay as an extra, not as the whole summary.
+</Callout>
+
+## Every filter row contains a second control
+
+`FilterItem` puts a `Checkbox` or a `Radio` inside a `MenuItem` that already carries `selected` and
+its `aria-selected`. That is 30 call sites of this component alone. Owned on **Radio → Findings**;
+listed here because the filters are where it happens most.
+
+## Not wrong
+
+The three parts — trigger, menu, submenu — are the same everywhere, so the mental model is
+consistent even where the code is not. `SubmenuItem` is genuinely shared. Clearing is all-or-nothing
+in both families, which is the right trade for a control this narrow. And the exclude behavior in
+`FilterItem` is the most capable thing the filters do — it should spread, not be dropped.

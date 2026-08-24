@@ -1,0 +1,92 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as PickCreateStories from './stories';
+
+<Meta of={PickCreateStories} name="Findings" />
+
+# Picking or creating — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## Five places create from inside a picker, four ways
+
+<Canvas of={PickCreateStories.FindingFourPositions} />
+
+| Where                       | Position          | Visible                   | Uses `onAddNew` |
+| --------------------------- | ----------------- | ------------------------- | --------------- |
+| `NamespaceSelector`         | in the search row | always                    | **yes**         |
+| `OrganizationSwitch`        | in the search row | always                    | **yes**         |
+| Import → `LanguageSelector` | last row          | always                    | no              |
+| `CreateLanguagesField`      | first row         | only once you type        | no              |
+| `TagInput`                  | a popup row       | only when nothing matches | no              |
+
+Three positions and two rules about when — from two questions nobody wrote down. The capability is
+already shared: `onAddNew` and `addNewTooltip` are props on `SearchSelect`, `SearchSelectContent`,
+`SearchSelectMulti` and `SwitchPopover`, and all four render the same `Plus` button in the same
+place. **Two of five callers use it.**
+
+The import selector is the closest to right and the easiest to move: its `+` is a real row with the
+right color, it is simply at the bottom of a list it should be above.
+
+<Callout title="Suggested fix">
+  The import language selector is the clearest win: it is already a select with
+  a list, and `+ Add new` at the bottom becomes `onAddNew` at the top without
+  changing what it does.
+</Callout>
+
+## Only one of the four looks clickable
+
+<Canvas of={PickCreateStories.FindingNotInviting} />
+
+| Where                       | Color                | Icon   | Label                 |
+| --------------------------- | -------------------- | ------ | --------------------- |
+| Import → `LanguageSelector` | **`primary.main`**   | `Plus` | _Add new_             |
+| `CreateLanguagesField`      | inherited text color | `Plus` | _New custom language_ |
+| `NamespaceSelector`         | inherited icon color | `Plus` | **none** — a tooltip  |
+| `TagInput`                  | inherited text color | none   | `Add "tag"`           |
+
+Creating is the one row in a list of options that is not an option, and three of the four are drawn
+exactly like the options around them.
+
+<Callout title="Suggested fix" kind="warning">
+  `primary.main`, a `Plus`, and **New** followed by the thing — _New namespace_,
+  _New language_, _New tag_. The import selector already does the color; the
+  rest is one line each.
+
+The namespace `+` needs the label as well. A tooltip does not survive touch,
+does not appear before hover, and is not what a screen reader reads first.
+
+</Callout>
+
+## The same prop under two names
+
+`SearchSelectMulti` takes the props and immediately renames them:
+
+```tsx
+onAction: onAddNew,
+actionTooltip: addNewTooltip,
+```
+
+So the multi variant's public API says `onAction` while the single one says `onAddNew`, for the same
+button doing the same thing. Anyone moving a call site from one to the other has to notice.
+
+<Callout title="Suggested fix">
+  One name. `onAddNew` is the one three of the four already use.
+</Callout>
+
+## `SwitchPopover` carries its own copy
+
+`SwitchPopover` declares `onAddNew` and `addNewTooltip` itself and renders its own `Tooltip` +
+`IconButton` + `Plus`, rather than going through `SearchSelectContent`. It is the same block of JSX
+in a second place — and it is one of the seven duplicated popovers already counted on
+**Autocomplete → Findings**.
+
+## Not wrong
+
+`NamespaceSelector` is the model and it is 100 lines: it delegates the search, the list and the `+`
+to `SearchSelect`, and its own job is fetching used namespaces, keeping the current value in the list
+even when it is empty, and opening a dialog. That is the right amount of component.
+
+Passing `onAddNew` only when the person may create — as `OrganizationPopover` does with
+`canCreateOrganizations` — makes the button disappear rather than fail, which is the correct way to
+handle a permission in a control.

@@ -1,0 +1,71 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as TagStories from './stories';
+
+<Meta of={TagStories} name="Findings" />
+
+# Tags and labels — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## Thirteen components, one shape
+
+<Canvas of={TagStories.FindingThirteen} />
+
+| On `Chip` (5)       | Uses | On a `Box` or a div (8) | Uses |
+| ------------------- | ---- | ----------------------- | ---- |
+| `TaskTypeChip`      | 7    | `TranslationLabel`      | 11   |
+| `DefaultChip`       | 4    | `TaskLabel`             | 9    |
+| `BranchNameChip`\*  | 5    | `AgencyLabel`           | 8    |
+| `DefaultBranchChip` | 2    | `BranchNameLabel`       | 2    |
+| `TrialChip`         | 2    | `PrimaryServiceLabel`   | 2    |
+| `GlossaryTermTags`  | 2    | `SuggestionsLabel`      | 2    |
+|                     |      | `ServiceLabel`          | 1    |
+|                     |      | `LanguageLabels`        | 1    |
+
+\* `BranchNameChip` is `styled(ShieldTick)` — an **icon** styled into a chip.
+
+The eight on the left of nothing are the work. `TranslationLabel` first: 11 call sites, its own
+color logic, and a shape identical to `Tags/Wrapper` down to the pixel.
+
+<Callout title="Suggested fix" kind="warning">
+  One pill in the theme — `MuiChip` at 24px, radius 12, 14px — and then
+  `TranslationLabel`, `AgencyLabel` and `BranchNameLabel` move onto it. The
+  three `*ServiceLabel`s are not pills at all, only text markers, and should be
+  `Typography`.
+</Callout>
+
+## Two names that lie
+
+`TaskLabel` is not a label. It is a grid of an icon and text, 9 call sites, and nothing about it is a
+pill. `BranchNameChip` is not a chip — it is `styled(ShieldTick)`, so its props are an icon's props
+while what renders is a chip.
+
+<Callout title="Suggested fix">
+  Rename `TaskLabel` to what it is. Give `BranchNameChip` a real root and let
+  the icon be a child.
+</Callout>
+
+## The label color logic is the good part
+
+`globalContext/labelColorUtils` derives the background **and** the text color from one chosen color,
+so a label stays readable whatever somebody picks. It is the only place in the product that solves
+contrast rather than assuming it.
+
+It is also used by exactly one component. Anything else that lets a person choose a color — and the
+language flag editor already does — should use it rather than repeat the calculation.
+
+## Tags and labels are one shape with two meanings
+
+Nothing on screen distinguishes a tag from a label except the color, and an uncolored label looks
+exactly like a tag. Both sit on a translation row, both are 24px pills, both are removable.
+
+That is a product question rather than a bug, and it is worth a decision: either labels always carry
+their color, or the two need a shape that tells them apart.
+
+## Not wrong
+
+`SuccessChip` works around the missing `success` palette entry deliberately, which is the right thing
+to do until **General Findings** is cleared. `TransparentChip` exists for chips on a colored surface —
+a real case with a real answer. And the four kinds — tag, label, marker, count — are used correctly
+everywhere: nothing in the product makes a marker deletable or a tag colored.

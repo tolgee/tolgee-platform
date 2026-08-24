@@ -1,0 +1,84 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as PickerStories from './stories';
+
+<Meta of={PickerStories} name="Findings" />
+
+# Picking a language — findings
+
+Measured across `webapp/src` on 2026-08-20. A work list: **done when it is empty.**
+
+## Thirteen pickers, nine bases, one reuse
+
+| Where                          | Built on                            | Should be                                 |
+| ------------------------------ | ----------------------------------- | ----------------------------------------- |
+| Create project → base language | `common/Select` + `MenuItem`        | `LanguageSelect`                          |
+| Language settings → base       | `InfiniteSearchSelect`              | `LanguageSelect`                          |
+| Import → language              | `Select` + local `styled(MenuItem)` | `LanguageSelect` + create                 |
+| Create project → find language | `LanguageAutocomplete`              | `LanguageAddSelect`                       |
+| Add language dialog            | `CreateLanguagesField`              | `LanguageAddSelect`                       |
+| Translations → languages       | `styled(Select) multiple`           | `LanguageMultiSelect`                     |
+| Export → languages             | `Select` + `Checkbox`               | `LanguageMultiSelect`                     |
+| Glossary → languages           | `InfiniteMultiSearchSelect`         | `LanguageMultiSelect`                     |
+| Task filter → languages        | `Menu` + `Checkbox`                 | `LanguageMultiSelect`                     |
+| Permissions → languages        | `Popover` + `SearchSelectMulti`     | `LanguageMultiSelect`                     |
+| Batch ops → languages          | `LanguagesSelect` ✓                 | `LanguageMultiSelect`                     |
+| Top bar → UI language          | `styled(Menu)`                      | a different thing — the app's own locale  |
+| User menu → UI language        | `styled(Select)`                    | the same, and it should match the top bar |
+
+**One of the thirteen reuses a shared component.** Batch operations goes through `LanguagesSelect`;
+everything else decided again from scratch.
+
+<Callout title="Suggested fix" kind="warning">
+  Three components — `LanguageSelect`, `LanguageMultiSelect`,
+  `LanguageAddSelect` — as set out on **Docs**. Start with the multi variant: it
+  covers six of the thirteen, and `SearchSelectMulti` is most of the way there
+  already.
+</Callout>
+
+## `BaseLanguageSelect` exists twice
+
+`component/languages/BaseLanguageSelect.tsx` is built on `InfiniteSearchSelect`.
+`views/projects/project/components/BaseLanguageSelect.tsx` is built on `common/Select`. Same name,
+same job, two implementations, and neither imports the other.
+
+<Callout title="Suggested fix">
+  Keep the infinite one — it pages the language list from the server, which the
+  other cannot — and delete the second.
+</Callout>
+
+## The UI language and the project language are the same picture
+
+<Canvas of={PickerStories.SingleSelect} />
+
+The top bar picks the language **the app is displayed in**; every other picker on this page picks a
+language **the project translates into**. They look alike and mean entirely different things, and
+the two UI-language pickers do not even match each other — one is a `styled(Menu)`, the other a
+`styled(Select)`.
+
+<Callout title="Suggested fix">
+  Give the UI language a shape of its own, and make the two agree. Whatever it
+  is, it should not be mistakable for a project language.
+</Callout>
+
+## What is worth keeping
+
+<Canvas of={PickerStories.SearchTheCatalogue} />
+
+Three behaviors exist in exactly one picker each and should survive into the shared components:
+
+- **Greying out what is already added** rather than hiding it — _Find language_. The person can see
+  it is there.
+- **Creating from inside the list** — Import's `+ Add new`. Nothing else lets you avoid leaving.
+- **Editing before it exists** — Create project's `PreparedLanguage`, which lets you change the name
+  and flag of a language you have not saved yet.
+
+## What to drop
+
+<Canvas of={PickerStories.InsideAFilterMenu} />
+
+- **Flags in a trigger with no names.** Two are readable, six are not, and Czech and Croatia are one
+  glance apart. See **Showing a language → Findings**.
+- **Tags in a trigger with no names** — `en, cs, fr, de` in the translations header, for the same
+  reason in reverse.
+- **The underlined field** in Import — already counted among the 21 on **TextField → Findings**.

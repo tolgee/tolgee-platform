@@ -1,0 +1,100 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks';
+import { Callout } from '../../../.storybook/docs/Callout';
+import * as DisplayStories from './stories';
+
+<Meta of={DisplayStories} name="Findings" />
+
+# Showing a language — findings
+
+Measured across `webapp/src` on 2026-08-20 with a TypeScript parser. A work list: **done when it is
+empty.**
+
+The rule this list is measured against: **a flag next to a name is rectangular, a set of flags with
+no names is round.**
+
+## Round where there is a name — 13 places
+
+<Canvas of={DisplayStories.TheTwoShapes} />
+
+`CircledLanguageIcon` is used 14 times. One of those is inside `LanguageItem`, which is the shared
+label component — so **changing that one file moves ten more call sites with it.**
+
+| File                                                       | Line   |
+| ---------------------------------------------------------- | ------ |
+| `component/languages/LanguageItem.tsx`                     | 17     |
+| `component/PermissionsSettings/LaguagesHint.tsx`           | 59     |
+| `component/activity/references/KeyReference.tsx`           | 63     |
+| `component/activity/references/LanguageReference.tsx`      | 16     |
+| `component/activity/types/getBatchLanguageIdChange.tsx`    | 21     |
+| `component/activity/types/getBatchLanguageIdsChange.tsx`   | 20     |
+| `component/languages/LanguagesPermittedList.tsx`           | 63     |
+| `component/layout/TopBar/LanguageMenu.tsx`                 | 59, 92 |
+| `component/security/LanguagePermissionsMenu.tsx`           | 154    |
+| `component/security/UserMenu/LanguageItem.tsx`             | 42     |
+| `ee/qa/components/QaLanguageStats.tsx`                     | 96     |
+| `views/projects/dashboard/LanguageStats/LanguageStats.tsx` | 205    |
+| `views/projects/translations/KeyCreateForm/FormBody.tsx`   | 270    |
+
+<Callout title="Suggested fix">
+  `LanguageItem` first — one file, ten call sites, and it is the component the
+  label format should come from anyway. Then the twelve direct ones, each of
+  which draws a flag beside a name.
+</Callout>
+
+## Not to change
+
+`CircledLanguageIconList` — projects list, glossary list, translation memory list. Three call sites,
+all of them a set of flags with no names, all of them correctly round.
+
+`InlineLanguageIcon` sizes the circle in `em` so it sits inside a sentence, in
+`getLanguageFlagChange`. Four uses, one file. It is a set of one with no name, so round is right —
+but it is worth checking that a flag inside running text reads at all at `1em`.
+
+## Five label formats where there should be one
+
+<Canvas of={DisplayStories.EveryLabelFormat} />
+
+| Format                          | Where                                 |
+| ------------------------------- | ------------------------------------- |
+| flag + `Name \| Original (tag)` | `LanguageItem` — 10 call sites        |
+| flag + `Name - Original - tag`  | Find language                         |
+| flag + `Name`                   | Import, translation cell              |
+| `Name` alone                    | Translations filter, task filter list |
+| flag alone                      | task filter trigger                   |
+
+`LanguageItem` already handles the case where the original name matches the English one, so English
+reads `English (en)` and not `English | English (en)`. Nothing else does.
+
+<Callout title="Suggested fix">
+  Every one of these should render through `LanguageItem`. The task filter
+  trigger is the one that needs a decision rather than a change — flags with no
+  names in a trigger is the `icon` density, and it needs the tooltip that
+  `CircledLanguageIconList` already gives its icons and the trigger does not.
+</Callout>
+
+## A file name is misspelled
+
+`component/PermissionsSettings/LaguagesHint.tsx` — **Laguages**. It is one of the thirteen files
+drawing a round flag beside a name, so it will be opened anyway.
+
+## The base language is marked three ways
+
+A tick in the project languages table, **bold** in the translation cell, a `Base` chip in the stats
+panel. Three answers to one question, and the bold one is invisible to anyone who cannot compare two
+rows.
+
+<Callout title="Suggested fix">
+  One marker. The chip is the only one that says the word.
+</Callout>
+
+## Two components import icons from the package
+
+`PreparedLanguage` takes `XClose` and `Edit02` from `@untitled-ui/icons-react` rather than
+`@tginternal/library/icons`. Same violation as the two search fields on **TextField → Findings**,
+which makes four in total.
+
+## Not wrong
+
+`FlagImage` falls back to a white flag when a language has no emoji, so a missing flag never renders
+as a broken image. `CircledLanguageIconList` puts the full label in a tooltip on every icon, which is
+exactly what the `icon` density needs — the name is available without being printed.
