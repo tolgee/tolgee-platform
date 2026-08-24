@@ -170,51 +170,98 @@ field in the sense this page means.
 
 ## Every occurrence to fix
 
-The samples above say what is wrong. This is where each one lives.
+Located with a TypeScript parser across `webapp/src`, so each row is the file, the line and the route
+the field takes to get there. **105 elements, 100 of them a plain `<TextField>`.**
 
-### Underline instead of a box — 21 in 11 files
+<Callout
+  title="One shape on this page does not exist in the product"
+  kind="warning"
+>
+  An earlier version listed a **floating label** with one call site,
+  `ResetPasswordView`. Measured properly, that field goes through the formik
+  wrapper, so its label is rendered above and not floating. Of the 22 fields
+  taken straight from Material UI, five pass a `label` — and all five also pass
+  `variant="standard"`, so they are underlined, not floating. **There is no
+  outlined floating label anywhere in Tolgee.**
+</Callout>
 
-Fix: delete `variant="standard"`. Eleven of these go through the formik field, whose own default is
-already `outlined` — so removing the prop is the whole change.
+### Underlined instead of an outlined box — 21 in 11 files
 
-| File                                                             |     |
-| ---------------------------------------------------------------- | --- |
-| `views/organizations/sso/CreateProviderSsoForm.tsx`              | 5   |
-| `component/languages/LanguageModifyFields.tsx`                   | 3   |
-| `views/organizations/components/OrganizationFields.tsx`          | 3   |
-| `component/SensitiveOperationAuthDialog.tsx`                     | 2   |
-| `views/projects/project/components/ProjectTransferModal.tsx`     | 2   |
-| `component/common/ConfirmationDialog.tsx`                        | 1   |
-| `ee/developer/webhook/WebhookEditDialog.tsx`                     | 1   |
-| `views/organizations/members/InviteDialog.tsx`                   | 1   |
-| `views/projects/developer/contentDelivery/CdDialog.tsx`          | 1   |
-| `views/projects/developer/contentDelivery/CdStorageSelector.tsx` | 1   |
-| `views/projects/members/component/InviteDialog.tsx`              | 1   |
+`variant="standard"` renders a line under the text instead of a box. Fifteen of these go through the formik field, whose own default is already `outlined` — for those, deleting the prop is the whole change. The other six take `TextField` straight from Material UI and need to move onto the wrapper as well.
 
-### Floating label — 1
+| File                                                             | Count | Lines                 | Comes from      |
+| ---------------------------------------------------------------- | ----- | --------------------- | --------------- |
+| `component/SensitiveOperationAuthDialog.tsx`                     | 2     | 77, 87                | formik field    |
+| `component/common/ConfirmationDialog.tsx`                        | 1     | 62                    | `@mui/material` |
+| `component/languages/LanguageModifyFields.tsx`                   | 3     | 29, 35, 54            | formik field    |
+| `ee/developer/webhook/WebhookEditDialog.tsx`                     | 1     | 138                   | formik field    |
+| `views/organizations/components/OrganizationFields.tsx`          | 3     | 51, 64, 85            | formik field    |
+| `views/organizations/members/InviteDialog.tsx`                   | 1     | 153                   | `@mui/material` |
+| `views/organizations/sso/CreateProviderSsoForm.tsx`              | 5     | 85, 95, 105, 115, 125 | formik field    |
+| `views/projects/developer/contentDelivery/CdDialog.tsx`          | 1     | 143                   | formik field    |
+| `views/projects/developer/contentDelivery/CdStorageSelector.tsx` | 1     | 37                    | formik field    |
+| `views/projects/members/component/InviteDialog.tsx`              | 1     | 228                   | `@mui/material` |
+| `views/projects/project/components/ProjectTransferModal.tsx`     | 2     | 119, 143              | `@mui/material` |
 
-`component/security/ResetPasswordView.tsx`. Fix: import the field from
-`tg.component/common/form/fields/TextField` and let the label sit above.
+<Callout title="Suggested fix">
+  Delete `variant="standard"`. `CreateProviderSsoForm` alone accounts for five
+  of the twenty-one.
+</Callout>
 
-### Search fields that rebuild the shared one — 3
+### No name of any kind — 15 in 12 files
 
-| File                                                        | Fix                                                        |
-| ----------------------------------------------------------- | ---------------------------------------------------------- |
-| `component/layout/HeaderSearchField.tsx`                    | fold onto `SearchField`, as the secondary bar already does |
-| `component/languages/FlagSelector/FlagSearchField.tsx`      | same, and it gains the icon and clear button it lacks      |
-| `views/projects/translations/…/TranslationsSearchField.tsx` | keep the editor, borrow the shell — see below              |
+No `label`, no `placeholder`, no `aria-label`. A screen reader announces "edit text" and nothing else. These are the ones that need a decision per call site, because the words that belong to them are usually somewhere else on the screen.
 
-### Fields that are not fields — 2
+| File                                                                  | Count | Lines    | Comes from       |
+| --------------------------------------------------------------------- | ----- | -------- | ---------------- |
+| `component/common/form/CharLimitCheckbox.tsx`                         | 1     | 58       | `@mui/material`  |
+| `component/common/form/PluralFormCheckbox.tsx`                        | 1     | 47       | `@mui/material`  |
+| `component/entriesList/EditableTextCellForm.tsx`                      | 1     | 53       | `@mui/material`  |
+| `component/security/PasswordFieldWithValidation.tsx`                  | 1     | 76       | formik field     |
+| `ee/branching/components/BranchForm.tsx`                              | 1     | 58       | formik field     |
+| `ee/glossary/components/GlossaryTermPreview.tsx`                      | 1     | 223      | local `styled()` |
+| `ee/translationLabels/Settings/LabelForm.tsx`                         | 2     | 55, 73   | formik field     |
+| `ee/translationMemory/components/form/PenaltyCell.tsx`                | 1     | 132      | `@mui/material`  |
+| `ee/translationMemory/views/TranslationMemoryCreateEntryDialog.tsx`   | 2     | 228, 252 | `@mui/material`  |
+| `views/projects/project/ProjectCreateView.tsx`                        | 1     | 101      | formik field     |
+| `views/projects/project/ProjectSettingsGeneral.tsx`                   | 2     | 199, 211 | formik field     |
+| `views/projects/translations/ToolsPanel/panels/Comments/Comments.tsx` | 1     | 153      | local `styled()` |
 
-| File                                                                    | Fix                                                                                |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `views/projects/translations/TranslationFilters/TranslationFilters.tsx` | it is a select; use one, or give the trigger `role="combobox"` and `aria-expanded` |
-| `component/branching/BranchLabelInput.tsx`                              | same                                                                               |
+<Callout title="Suggested fix">
+  A `label` where the layout has room for one, `aria-labelledby` pointing at the
+  heading or cell that already names it where it does not.
+</Callout>
 
-### Icons imported from the package instead of the library — 2
+### Named only by a placeholder — 14 in 14 files
 
-`component/common/form/fields/SearchField.tsx` and `component/layout/HeaderSearchField.tsx` both
-import `SearchSm` and `XClose` from `@untitled-ui/icons-react`. Fix: `@tginternal/library/icons`.
+A placeholder is a name only while the field is empty, which for a search box is until the first keystroke. Several of these are search fields and toolbars where a visible label would not fit — those want `aria-label`, not a label.
+
+| File                                                                    | Count | Lines | Comes from         |
+| ----------------------------------------------------------------------- | ----- | ----- | ------------------ |
+| `component/NamespaceSelector/NamespaceNewDialog.tsx`                    | 1     | 43    | `@mui/material`    |
+| `component/common/form/fields/ColorPaletteField.tsx`                    | 1     | 153   | `@mui/material`    |
+| `component/common/form/fields/SearchField.tsx`                          | 1     | 36    | `@mui/material`    |
+| `component/languages/FlagSelector/FlagSearchField.tsx`                  | 1     | 20    | local `styled()`   |
+| `component/languages/LanguageAutocomplete.tsx`                          | 1     | 110   | `@mui/material`    |
+| `ee/llm/AiContextData/AiLanguageDescriptionDialog.tsx`                  | 1     | 89    | `@mui/material`    |
+| `ee/llm/AiContextData/AiProjectDescriptionDialog.tsx`                   | 1     | 78    | `@mui/material`    |
+| `ee/task/components/taskFilter/TaskFilter.tsx`                          | 1     | 182   | `common/TextField` |
+| `ee/task/components/tasksHeader/TasksHeaderBig.tsx`                     | 1     | 80    | `common/TextField` |
+| `ee/translationMemory/components/form/AssignedProjectsEditor.tsx`       | 1     | 194   | `@mui/material`    |
+| `views/projects/translations/BatchOperations/BatchSelect.tsx`           | 1     | 75    | `@mui/material`    |
+| `views/projects/translations/Namespace/NamespaceRenameDialog.tsx`       | 1     | 110   | `@mui/material`    |
+| `views/projects/translations/TranslationFilters/TranslationFilters.tsx` | 1     | 68    | `common/TextField` |
+| `views/projects/translations/trash/TrashBatchBar.tsx`                   | 1     | 253   | `@mui/material`    |
+
+<Callout title="Suggested fix">
+  `aria-label` alongside the placeholder. One attribute, no visual change.
+</Callout>
+
+### Every field that bypasses the wrapper
+
+Twenty-two `TextField`s are imported straight from `@mui/material`, so none of the rules on **Docs**
+reach them: no label above, no 64px row, no outlined default. They are the pool the three lists above
+are drawn from.
 
 ## The advanced search overflows on its own
 

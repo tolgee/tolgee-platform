@@ -1,10 +1,7 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 import { ContrastCheck } from '../../../.storybook/docs/ContrastCheck';
 import { Callout } from '../../../.storybook/docs/Callout';
-import {
-  ButtonInventory,
-  ButtonSummary,
-} from '../../../.storybook/docs/ButtonInventory';
+import { ButtonInventory } from '../../../.storybook/docs/ButtonInventory';
 import * as ButtonStories from './stories';
 
 <Meta of={ButtonStories} name="Findings" />
@@ -39,14 +36,10 @@ Fails in Light, passes in Dark. A palette decision, not a component bug.
   give contained primary a dark label.
 </Callout>
 
-## How much of each we use
+## Buttons built by hand
 
-Every combination in the product, each sample drawn at the size that row is mostly used at. Nothing
-here is a finding — it is the ground to weigh a change against.
-
-<ButtonSummary />
-
-## Call sites
+Every call site that does not match a row of the summary on **Docs** — hardcoded colors, sizes off
+the scale, shapes assembled rather than composed. Each one drawn as it renders.
 
 <ButtonInventory />
 
@@ -118,20 +111,6 @@ once, on the _Test_ button in Developer settings → Storage.
 
 ## Not covered yet
 
-This page counts `Button` and `LoadingButton` only. Three button families sit outside it and need
-their own pass:
-
-|                | Uses | Files |
-| -------------- | ---- | ----- |
-| `IconButton`   | 98   | 77    |
-| `ButtonGroup`  | 11   | 11    |
-| `ToggleButton` | 4    | 1     |
-| `Fab`          | 1    | 1     |
-
-`IconButton` is the big one — a third as common as `Button` and completely unexamined. `Fab` used
-once is worth a look on its own: a floating action button that exists in a single place is either a
-pattern or a leftover.
-
-<Callout title="Suggested fix">
-  Give `IconButton` its own findings page next, built the same way as this one.
-</Callout>
+This page counts `Button` and `LoadingButton` only. The other button families now have pages of
+their own — **IconButton**, **ButtonGroup**, **ToggleButton** and **Fab** — and each carries its own
+findings.

@@ -1,6 +1,7 @@
 import { Canvas, Meta } from '@storybook/addon-docs/blocks';
 import { Upstream } from '../../../.storybook/docs/Upstream';
 import { Callout } from '../../../.storybook/docs/Callout';
+import { ButtonSummary } from '../../../.storybook/docs/ButtonInventory';
 import * as ButtonStories from './stories';
 
 <Meta of={ButtonStories} />
@@ -102,6 +103,16 @@ Which is why `contained` + `error` should stay rare: it claims to be both the pr
 destructive one, and that combination belongs on a confirmation dialog, not on a settings page.
 
 </Callout>
+
+## Every button in the app
+
+What the product actually contains, drawn at the size each row is mostly used at. Not a finding —
+the ground to weigh a change against.
+
+<ButtonSummary />
+
+The call sites that do not match any of these rows — hand-built shapes, hardcoded colors — are on
+**Findings**.
 
 ## Anything that waits uses LoadingButton
 

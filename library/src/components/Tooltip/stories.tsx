@@ -65,6 +65,7 @@ export const Interactive = {
 
 /** A tooltip with an empty title renders nothing — and gives its child no name either. */
 export const FindingNoTitle = {
+  tags: ['!dev'],
   args: { title: '', children: <span /> },
   render: () => (
     <Box sx={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>

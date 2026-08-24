@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@mui/material';
 
 const meta = {
   title: 'Components/Forms/Select',
@@ -37,18 +44,27 @@ const Note = ({
   </Box>
 );
 
+/** Rebuilt from common/Select: the label, then a grid that reserves 64px for the
+ *  control and whatever message appears under it. */
 const Field = ({
   label,
+  error,
   children,
 }: {
   label: ReactNode;
+  error?: string;
   children: ReactNode;
 }) => (
-  <Box sx={{ display: 'grid', minHeight: 64 }}>
+  <Box sx={{ display: 'grid' }}>
     <InputLabel sx={{ fontSize: 14, fontWeight: 400, mb: 0.5 }}>
       {label}
     </InputLabel>
-    {children}
+    <Box sx={{ display: 'grid', alignItems: 'start', minHeight: 64 }}>
+      {children}
+      {error && (
+        <FormHelperText sx={{ color: 'error.main' }}>{error}</FormHelperText>
+      )}
+    </Box>
   </Box>
 );
 
@@ -78,14 +94,11 @@ export const WithAMessage = {
   args: {},
   render: () => (
     <Box sx={{ width: 300 }}>
-      <Field label="Type">
+      <Field label="Type" error="Pick a type">
         <Select size="small" value="translate" fullWidth error>
           {Options}
         </Select>
       </Field>
-      <Box sx={{ typography: 'caption', color: 'error.main', mt: -2 }}>
-        Pick a type
-      </Box>
     </Box>
   ),
 } satisfies Story;
@@ -104,6 +117,7 @@ export const InAToolbar = {
 
 /** Three ways a select is named, and the one that names nothing. */
 export const FindingHowItIsNamed = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -138,6 +152,7 @@ export const FindingHowItIsNamed = {
 
 /** The export dialog, rebuilt from its own code. */
 export const FindingUnderlinedSelects = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'grid', gap: 2, width: 260 }}>

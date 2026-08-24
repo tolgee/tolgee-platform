@@ -96,6 +96,7 @@ export const Disabled = {
 
 /** The title is on the screen. It is not attached to the switch. */
 export const FindingLabelNotAttached = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
@@ -141,6 +142,7 @@ export const FindingLabelNotAttached = {
 
 /** A tooltip that only exists while the switch is unusable names nothing. */
 export const FindingTooltipOnlyWhenDisabled = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>

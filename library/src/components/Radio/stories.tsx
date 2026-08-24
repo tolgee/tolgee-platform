@@ -91,6 +91,7 @@ export const AsCards = {
 
 /** Loose radios versus a group. The picture is the same; the keyboard is not. */
 export const FindingNoRadioGroup = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>

@@ -39,6 +39,7 @@ export const Sizes = {
 
 /** The defect is invisible: both look and behave the same under a mouse. */
 export const FindingNameOnWrapper = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>

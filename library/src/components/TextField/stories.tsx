@@ -138,6 +138,7 @@ const Deviation = ({
 
 /** Three shapes for one field, all of them in the product today. */
 export const FindingThreeShapes = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
@@ -166,6 +167,7 @@ export const FindingThreeShapes = {
 
 /** The wrapper states the standard but lets any caller walk over it. */
 export const FindingOverridable = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
@@ -240,6 +242,7 @@ export const TheOnlyModel = {
 
 /** What each shape is called by a screen reader. Measured on this page. */
 export const FindingNoAccessibleName = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>

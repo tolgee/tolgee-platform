@@ -30,8 +30,19 @@ Nothing connects them. The `<label>` has no `for`, the input gets an id nobody p
 | floating label                 | "Task name"     |
 | underline                      | "Task name"     |
 
-**The two shapes this page calls defects are the two that name the field.** Material UI wires
-`label` to the input itself; the wrapper took the label away from Material UI and never rewired it.
+Material UI wires `label` to the input itself. The wrapper takes `label` out of the props, renders
+it as a sibling and passes nothing down — so **whether a field is named depends only on whether the
+label went through Material UI**, not on how the field looks:
+
+| How the label is passed             | Call sites | Named       |
+| ----------------------------------- | ---------- | ----------- |
+| `label` to the wrapper              | **70**     | no          |
+| `label` straight to `@mui/material` | 5          | yes         |
+| `placeholder` only                  | 12         | while empty |
+| nothing at all                      | 13         | no          |
+
+**Five of the hundred fields can be named out loud.** That includes the eleven underlined formik
+fields, which pass a label and still come out anonymous, because it is the wrapper they pass it to.
 
 It costs more than the announcement: a `<label>` without `for` is not clickable either, so the
 label above a Tolgee field does not focus it the way a label is supposed to.
@@ -119,18 +130,12 @@ invisible — the fallback is 400 anyway — which is exactly why it survived.
 
 ## The theme declares a root font size nothing sets
 
-`htmlFontSize: 15` tells Material UI that one `rem` is 15px, and every conversion it makes between
-px and rem is based on that number. Nothing sets the root to 15px though — `MuiCssBaseline` styles
-`html` for height only, and puts `fontSize: 15` on `body`. The root stays at the browser's 16px.
+`htmlFontSize: 15` while the document root is 16px, so every size Material UI derives comes out 6.7%
+high — including the field's own glyphs and the checkbox and select beside it.
 
-The typography scale is written in px, so most of it is unaffected. What is affected is anything
-Material UI expresses in rem on our behalf, which comes out about 7% larger than the theme intends.
-
-<Callout title="Suggested fix">
-  Either set `html { font-size: 15px }` in `MuiCssBaseline` so the declaration becomes true, or drop
-  `htmlFontSize` and let it be 16. Both are one line; leaving them disagreeing is the only wrong
-  option.
-</Callout>
+It is not a TextField problem, and it does not belong on this page: it reaches every component
+Material UI sizes for itself. Written up in full, with the measurements and the order to fix it in,
+on **General Findings**.
 
 ## Five search fields, one of them shared
 

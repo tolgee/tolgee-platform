@@ -131,6 +131,7 @@ export const NotEveryPairIsAToggle = {
 
 /** Left: the state carried by color. Right: the component that carries it. */
 export const FindingSegmentedByHand = {
+  tags: ['!dev'],
   args: { value: 'list' },
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -160,6 +161,7 @@ export const FindingSegmentedByHand = {
 
 /** The editor's code switch, as built and as it would be. */
 export const FindingIconByColor = {
+  tags: ['!dev'],
   args: { value: 'code' },
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -184,6 +186,7 @@ export const FindingIconByColor = {
 
 /** The real component next to ours: nothing in the theme speaks for it. */
 export const FindingNoThemeEntry = {
+  tags: ['!dev'],
   args: { value: 'list' },
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>

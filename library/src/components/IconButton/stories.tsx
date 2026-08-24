@@ -83,6 +83,7 @@ const Sample = ({
 
 /** The finding is that these two are indistinguishable — only one of them can be read out. */
 export const FindingNoName = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -102,6 +103,7 @@ export const FindingNoName = {
 
 /** Four hand-written squares, ten call sites. */
 export const FindingHandSizes = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end' }}>
@@ -126,6 +128,7 @@ export const FindingHandSizes = {
 
 /** Two glyphs, one meaning. */
 export const FindingTwoCloseIcons = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 4 }}>
@@ -145,6 +148,7 @@ export const FindingTwoCloseIcons = {
 
 /** The scale is 16, 20, 24. These are what the product actually renders. */
 export const FindingGlyphSizes = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
@@ -161,6 +165,7 @@ export const FindingGlyphSizes = {
 
 /** Two are documented, two are not. */
 export const FindingSizes = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-end' }}>

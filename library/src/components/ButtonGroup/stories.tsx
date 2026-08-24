@@ -77,6 +77,7 @@ export const Sizes = {
 
 /** A child that sets its own size breaks the shared block. */
 export const FindingChildOverride = {
+  tags: ['!dev'],
   args: {},
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>

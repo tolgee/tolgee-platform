@@ -118,6 +118,7 @@ export const Multiple = {
 
 /** One picture. Seven implementations of it. */
 export const FindingSevenCopies = {
+  tags: ['!dev'],
   args: { options: [], renderInput: () => null },
   render: () => (
     <Box>
@@ -136,6 +137,7 @@ export const FindingSevenCopies = {
 
 /** The tag input builds its own field out of a bare input element. */
 export const FindingTagInput = {
+  tags: ['!dev'],
   args: { options: [], renderInput: () => null },
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -191,6 +193,7 @@ export const FindingTagInput = {
 
 /** The one Autocomplete that draws a label draws the wrong one. */
 export const FindingUnderlined = {
+  tags: ['!dev'],
   args: { options: [], renderInput: () => null },
   render: () => (
     <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
