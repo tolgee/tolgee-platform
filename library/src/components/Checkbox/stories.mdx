@@ -1,6 +1,8 @@
 import { Canvas, Meta } from '@storybook/addon-docs/blocks';
 import { Upstream } from '../../../.storybook/docs/Upstream';
 import { Callout } from '../../../.storybook/docs/Callout';
+import { Spec } from '../../../.storybook/docs/Spec';
+import { Checkbox } from '@mui/material';
 import * as CheckboxStories from './stories';
 
 <Meta of={CheckboxStories} />
@@ -9,71 +11,148 @@ import * as CheckboxStories from './stories';
 
 <Upstream docs="react-checkbox" />
 
-A choice that stands on its own: each box is independent, and ticking one says nothing about the
-others. If the options are mutually exclusive it is a radio, and if the thing takes effect the
-moment you touch it, it is a `Switch`.
+**Tolgee uses the checkbox in exactly two ways.** This page documents those two and nothing else —
+Material UI offers more, and the extra options are not choices we make.
 
-Used **49 times** across the product, all of them with no color set, which is right — the theme's
-default is the one to use.
+A checkbox is a value you are setting, and it is submitted or applied with the rest of the form. A
+setting that takes effect the moment you click it is a **Switch**; one of several options where only
+one may win is a **Radio**.
 
-## It needs a label
+## 1. In a list — the common one
 
-<Canvas of={CheckboxStories.WithLabel} />
+<Canvas of={CheckboxStories.InAList} />
 
-A checkbox is a 20px square with nothing to read. `FormControlLabel` pairs it with text and makes
-that text part of the hit area, so the label is clickable too:
+Selecting rows: keys in Translations, entries in Translation memory, terms in the glossary,
+languages in a filter. `size="small"`, standing alone, with the row's own text beside it. **32 of
+the 59 checkboxes in the product are this.**
+
+The reference is `views/projects/translations/CellKey.tsx` — the checkbox beside a key:
 
 ```
-<FormControlLabel control={<Checkbox size="small" />} label={t('reviewed')} />
+<Checkbox
+  size="small"
+  checked={isSelected}
+  onChange={handleToggleSelect}
+  onClick={stopBubble()}
+  data-cy="translations-row-checkbox"
+/>
 ```
 
-<Callout title="Most boxes here have no label of their own" kind="warning">
-  Of the 49, **11 sit inside a `FormControlLabel`** and **none carry an `aria-label`**. The other 38
-  are in table rows and lists where the label is a separate cell — which works visually, but a
-  screen reader reaching the box alone has nothing to announce. Worth a pass with `inputProps={{
-  'aria-label': … }}`.
+`stopBubble()` is there because the whole cell is clickable — without it, ticking the box also opens
+the key.
+
+The header checkbox above the list is the same control with `indeterminate`, which is the state for
+"some but not all".
+
+## 2. In a form — beside its own label
+
+<Canvas of={CheckboxStories.InAForm} />
+
+Options in a dialog: what to include in an export, what a glossary term is, which automatic
+translation to switch on. **Default size, inside `FormControlLabel`** — 17 call sites.
+
+```
+<FormControlLabel
+  control={<Checkbox checked={value} onChange={toggle} />}
+  label={t('project_languages_enable_for_import')}
+/>
+```
+
+## One size, and one that nobody chose
+
+<Canvas of={CheckboxStories.TheTwoSizes} />
+
+`size="small"` is written **39 times**. `size="medium"` is written **zero times** — in the whole of
+`webapp/src`, for `Checkbox`, `Switch`, `Select` and `Radio` alike. The 20 checkboxes that come out
+at Material UI's 24px do not ask for it; they simply say nothing, and 24px is what Material UI gives
+you when you say nothing.
+
+| What the prop says | Call sites |
+| ------------------ | ---------- |
+| `size="small"`     | **39**     |
+| `size="medium"`    | **0**      |
+| no size prop       | 20         |
+
+So the product does not have two sizes on purpose. **It has one size and a gap**, and where the two
+meet you can see it — see Findings.
+
+<Callout title="The standard is small" kind="warning">
+  20px is the size 39 call sites deliberately asked for, and it is the one in
+  Translations. The theme has no `MuiCheckbox` entry at all, so nothing makes it
+  the default and every caller has to remember. Setting
+  `defaultProps: { size: 'small' }` in the theme would make it true everywhere
+  and let the 39 props go.
+</Callout>
+
+## What it is made of
+
+Measured in your browser as this page renders. **These are the sizes the checkbox is meant to
+have** — this Storybook is the specification, so it renders with `htmlFontSize: 16`, which is what
+the document root actually is.
+
+<Spec>
+  <Checkbox size="small" defaultChecked />
+</Spec>
+
+<Spec>
+  <Checkbox defaultChecked />
+</Spec>
+
+| Size    | Glyph | Padding | Control  |
+| ------- | ----- | ------- | -------- |
+| `small` | 20px  | 9px     | **38px** |
+| default | 24px  | 9px     | **42px** |
+
+The padding is **hit area** — the box you can click is nearly twice the box you can see, which is
+what makes a checkbox usable in a dense row. It is 9px either way, so the two sizes differ only by
+the glyph.
+
+<Callout title="The app does not render these numbers yet" kind="warning">
+  Where a `(app: …)` appears above, the product currently renders something
+  else: the theme it ships declares a rem to be 15px while the root is 16, so
+  every size Material UI derives lands 6.7% high — 39.33px instead of 38. One
+  line fixes it, and **General Findings** has the measurements and the order to
+  do it in.
+</Callout>
+
+## Before you write a component
+
+The product already has these. Reach for one before building another:
+
+| It exists                     | For                                           |
+| ----------------------------- | --------------------------------------------- |
+| `common/form/fields/Checkbox` | a checkbox bound to formik                    |
+| `SelectAllCheckbox`           | the header box over a selectable list         |
+| `MultiselectItem`             | a checkbox row inside a menu or search select |
+| `FilterItem`                  | a filter row, with include and exclude        |
+| `LoadingCheckboxWithSkeleton` | a checkbox whose value is still loading       |
+| `CharLimitCheckbox`           | the character-limit option on a key           |
+| `PluralFormCheckbox`          | the plural option on a key                    |
+
+<Callout
+  title="If you are about to write your own, check this list first"
+  kind="warning"
+>
+  Seven of these already exist and several were written more than once. A new
+  checkbox component is worth writing when the behavior is genuinely new — not
+  when the difference is a size, a margin or a label position.
 </Callout>
 
 ## States
 
 <Canvas of={CheckboxStories.States} />
 
-Five, and the third one earns its keep: **indeterminate** is for a parent box whose children are
-partly selected. It is not a third value — the box is still on or off, `indeterminate` only changes
-what is drawn.
-
-```
-<Checkbox
-  checked={all}
-  indeterminate={some && !all}
-  onChange={toggleAll}
-/>
-```
-
-## Size
-
-<Canvas of={CheckboxStories.Sizes} />
-
-`small` in dense places — table rows, filter lists, anywhere a row is 40px or less. The default
-everywhere else. The split in the product is 29 small to 20 default.
-
-## In a list
-
-<Canvas of={CheckboxStories.InARow} />
-
-Keep the boxes on one vertical line and let the labels run right. A list of checkboxes is read down
-the left edge, so anything that breaks that column makes it slower.
+`indeterminate` is the header state for a partly-selected list. `disabled` keeps the value visible
+while explaining you cannot change it.
 
 ## Don't
 
-- **Don't use one for an instant action.** A checkbox states an intention that a Save button
-  commits. Something that applies immediately is a `Switch`.
-- **Don't use two for an either-or.** That is a radio group.
-- **Don't set a color.** All 49 in the product leave it alone; the theme handles it.
-- **Don't leave it unnamed.** Either a `FormControlLabel` or an `aria-label`.
+- **Don't set a color.** All 59 leave it alone and the theme decides.
+- **Don't pick the size by eye.** Row means `small`, `FormControlLabel` means default.
+- **Don't put words beside it without `FormControlLabel`** — see **Labels**.
+- **Don't hand-size it with `sx`.** Two call sites do; the size prop exists.
 
 ## Where the styling lives
 
-Nowhere of ours — `MuiCheckbox` has no entry in the theme, so this is Material UI's own look
-throughout. It is also the reason `styled(Checkbox)` appears six times in the app: with no central
-style, every adjustment is made locally. See **Foundations → Component styles**.
+Nowhere of ours. `getTheme.ts` has no `MuiCheckbox` entry, so the box is Material UI's at Material
+UI's colors. See **Foundations → Component styles**.

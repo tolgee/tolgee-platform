@@ -6,19 +6,84 @@ import * as CheckboxStories from './stories';
 
 # Checkbox — findings
 
-Measured by hand on 2026-08-18 across 49 call sites. A work list: **done when it is empty.**
+Measured across `webapp/src` on 2026-08-20 with a TypeScript parser, so a checkbox inside
+`FormControlLabel control={…}` is seen as labelled rather than counted as bare. **59 call sites.** A
+work list: **done when it is empty.**
 
-## Not one carries a name of its own
+<Callout title="These numbers replace an earlier hand count" kind="warning">
+  The first version of this page said 11 labelled and 38 bare. That was counted
+  by reading, and it missed the ones passed through a `control=` prop. The real
+  split is below.
+</Callout>
+
+## 24 checkboxes have no name
 
 <Canvas of={CheckboxStories.FindingNoName} />
 
-11 sit inside a `FormControlLabel` and are announced by it. **None of the 49 has an `aria-label`.**
-The other 38 are in table rows and lists where the label is a separate cell — visually clear, silent
-to a screen reader that lands on the box.
+| Named by                | Count  |
+| ----------------------- | ------ |
+| `FormControlLabel`      | 19     |
+| a surrounding `Tooltip` | 4      |
+| `aria-label`            | 1      |
+| **nothing**             | **24** |
+
+The 24 are the list rows — keys, translation-memory entries, glossary terms, languages in a filter.
+In each of them the row's text is right there on screen and is not attached, so a screen reader
+lands on the box and says "checkbox, checked".
+
+The one `aria-label` in the whole product is worth copying: it names the row, not the column.
 
 <Callout title="Suggested fix">
-  `inputProps={{ 'aria-label': … }}` on the 38, naming the row rather than the column: "Select
-  key homepage.title", not "Select".
+  `inputProps={{ 'aria-label': … }}` naming the row — "Select key
+  homepage.title", not "Select". The list rows already have the string.
+</Callout>
+
+## 20 checkboxes are a size nobody picked
+
+<Canvas of={CheckboxStories.FindingTwoSizesOneDialog} />
+
+`size="medium"` does not appear anywhere in `webapp/src`. Not on `Checkbox`, not on `Switch`, not on
+`Select`, not on `Radio`. The larger box is never requested — it is what Material UI renders when
+the prop is left off, and 20 call sites leave it off.
+
+| What the prop says | Call sites |
+| ------------------ | ---------- |
+| `size="small"`     | **39**     |
+| `size="medium"`    | **0**      |
+| no size prop       | 20         |
+
+The dialog above is _Machine translation settings_, rebuilt from its own code. The service table
+uses `size="small"`; the options below it pass no size. **20px and 24px, one dialog, a few
+centimeters apart.**
+
+### Three sizes today, and none of them round
+
+Counting what the product renders rather than what the code says, a checkbox comes out at one of
+three sizes:
+
+| Renders     | Where                             |
+| ----------- | --------------------------------- |
+| **39.33px** | `size="small"` — 39 call sites    |
+| **43.59px** | no size prop — 20 call sites      |
+| **38.00px** | the two cells that pin it by hand |
+
+Two of those are not numbers anyone picked, and the third is right by accident.
+
+<Callout title="Worth settling: one size, and it should be 38" kind="warning">
+  **Preferred — one size.** `MuiCheckbox` in `getTheme.ts` with
+  `defaultProps: { size: 'small' }`. Every checkbox in the product becomes 38px,
+  the 39 `size="small"` props can go, and the two hand-pinned cells stop being
+  special. `MuiSwitch`, `MuiSelect` and `MuiRadio` have the same gap and the
+  same one-line answer.
+
+**At worst — two sizes**, 38px in dense rows and 42px beside a label in a
+form. That is defensible, but only if it is chosen: today the second size is
+simply what is left when nobody sets the prop.
+
+**Either way, `htmlFontSize` has to be fixed first.** Without it the two sizes
+are 39.33 and 43.59 rather than 38 and 42 — numbers that cannot be designed
+with, reasoned about or checked in a test. See **General Findings**.
+
 </Callout>
 
 ## Three doors into one checkbox
@@ -44,21 +109,42 @@ overridable by accident.
   field, which earns its place.
 </Callout>
 
-## The theme says nothing about it
+## Six components cancel the padding, in four different ways
 
 <Canvas of={CheckboxStories.FindingHandSized} />
 
-`MuiCheckbox` has no entry in the theme at all, so this is Material UI's own look throughout — and
-that is why `styled(Checkbox)` appears six times. Three of those change shape or color: the key
-cell and the trash cell both hand-size it to `height`/`width`, and the filter item overrides
-`color`.
+`MuiCheckbox` has no entry in the theme at all, so the box is Material UI's throughout — and that is
+why `styled(Checkbox)` appears six times. Every one of them is there for the same reason: the 9px of
+padding that makes the hit area also pushes the box away from whatever sits beside it.
 
-<Callout title="Suggested fix">
-  Decide whether the product wants its own checkbox before those six become
-  twelve. The two hand-sized cells are the same override written twice.
+| Where                           | Written as                                         |
+| ------------------------------- | -------------------------------------------------- |
+| `CellKey`, `TrashKeyCell`       | `width/height: 38px` + `margin: 3px -9px -9px 3px` |
+| `MultiselectItem`, `FilterItem` | `margin: -8px -8px -8px 0px`                       |
+| `BatchToolbarShell`             | `margin: spacing(0, -1.5, 0, -1)`                  |
+| `GlossaryListTermCell`          | `margin-left/top: spacing(-1.5)`                   |
+
+The negative margins are the right technique — they pull the box back without shrinking the hit
+area.
+
+The first row is the interesting one. **`width: 38px` is not a restatement — it is a correction.**
+Left alone, our theme renders that checkbox at 39.33px, for the reason set out on
+**TextField → Findings**. Those two files pin it back to the 38px Material UI was asked for, which
+makes the translations key list and the trash the **only two places in the product where the
+checkbox is the size it should be.**
+
+Measured side by side: pinned **38.00px**, unpinned **39.33px**. The glyph inside stays 21.33px
+either way, so the box comes out right and the tick is still 1.33px too big.
+
+<Callout title="Suggested fix" kind="warning">
+  Do not delete the `38px` before the rem problem is fixed — it is the only
+  thing holding those two rows to the right size. Fix `htmlFontSize` first, and
+  then it becomes a genuine restatement and can go with it. Settle the negative
+  margin on one value at the same time: `-8px`, `-9px` and `spacing(-1.5)` are
+  three answers to one question.
 </Callout>
 
 ## Not wrong
 
-All 49 leave `color` alone, which is right. The `small` to default split, 29 against 20, matches
-where they sit — dense rows against forms.
+All 59 leave `color` alone, which is right — the theme decides. The one `aria-label` in the product
+names the row rather than the column, which is the pattern the other 24 want.
