@@ -10,6 +10,12 @@ function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
 
+const LANGUAGE_SCOPES = [
+  'filterTranslationLanguage',
+  'filterSuggestionLanguage',
+  'filterTaskLanguage',
+] as const satisfies readonly (keyof FiltersInternal)[];
+
 type Props = {
   filters: FiltersInternal;
   setFilters: (value: FiltersInternal) => void;
@@ -26,21 +32,21 @@ export const useTranslationFilters = ({
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
   function updateSelectedLanguages(newLanguages: string[] | undefined) {
-    if (
-      typeof filters.filterTranslationLanguage === 'string' &&
-      newLanguages &&
-      newLanguages.includes(filters.filterTranslationLanguage)
-    ) {
-      setFilters({ filterTranslationLanguage: undefined });
+    if (!newLanguages) {
       return;
     }
-    if (
-      typeof filters.filterTaskLanguage === 'string' &&
-      newLanguages &&
-      !newLanguages.includes(filters.filterTaskLanguage)
-    ) {
-      setFilters({ ...filters, filterTaskLanguage: undefined });
+    const dangling = LANGUAGE_SCOPES.filter((scope) => {
+      const value = filters[scope];
+      return typeof value === 'string' && !newLanguages.includes(value);
+    });
+    if (!dangling.length) {
+      return;
     }
+    const updated = { ...filters };
+    dangling.forEach((scope) => {
+      updated[scope] = undefined;
+    });
+    setFilters(updated);
   }
 
   function addFilter(...params: AddParams) {
