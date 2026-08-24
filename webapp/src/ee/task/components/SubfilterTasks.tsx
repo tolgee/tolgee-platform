@@ -86,12 +86,14 @@ export const SubfilterTasks = ({
               </CompactListSubheader>
             )}
             <FilterItem
+              data-cy="translations-filter-has-been-in-task"
               label={t('translation_filters_has_task', 'Has been in a task')}
               selected={Boolean(value.filterHasTask)}
               disabled={disabled}
               onClick={() => handleToggleHasTask(!value.filterHasTask)}
             />
             <FilterItem
+              data-cy="translations-filter-never-in-task"
               label={t('translation_filters_has_no_task', 'Never in a task')}
               selected={Boolean(value.filterHasNoTask)}
               disabled={disabled}
