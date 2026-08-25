@@ -16,7 +16,7 @@ type Props = {
   onSelect: (value: OrganizationModel) => void;
   anchorEl: HTMLElement;
   selected: OrganizationModel | undefined;
-  onAddNew: () => void;
+  onAddNew?: () => void;
   ownedOnly?: boolean;
   onCommunityNavigate?: () => void;
   communitySelected?: boolean;

@@ -4,9 +4,9 @@ import React from 'react';
 
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { ProjectSwitch } from 'tg.component/projectSwitch/ProjectSwitch';
+import { LINKS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
 import { CriticalUsageCircle } from 'tg.ee';
@@ -26,7 +26,7 @@ export const BaseProjectView: React.FC<React.PropsWithChildren<Props>> = ({
   ...otherProps
 }) => {
   const project = useProject() as ReturnType<typeof useProject> | undefined;
-  const { withBranchLink, withBranchUrl } = useBranchLinks();
+  const { withBranchUrl } = useBranchLinks();
   const history = useHistory();
 
   const handleOrganizationChange = () => {
@@ -39,11 +39,9 @@ export const BaseProjectView: React.FC<React.PropsWithChildren<Props>> = ({
 
   if (project) {
     prefixNavigation.push([
-      project.name,
-      withBranchLink(LINKS.PROJECT_DASHBOARD, {
-        [PARAMS.PROJECT_ID]: project.id,
-      }),
-      <SmallProjectAvatar key="avatar" project={project} />,
+      <ProjectSwitch key="project" project={project} />,
+      undefined,
+      undefined,
       branching ? <GlobalBranchSelector key="branch" /> : undefined,
     ]);
   }
