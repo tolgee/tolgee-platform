@@ -178,13 +178,20 @@ class AuthenticationFilter(
     if (claims.isInstallContext) {
       return installContextAuth(request, token, claims)
     }
-    return userContextAuth(token, claims)
+    return userContextAuth(request, token, claims)
   }
 
   private fun userContextAuth(
+    request: HttpServletRequest,
     token: String,
     claims: AppTokenClaims,
   ): AppAuthentication {
+    // Acting-as is install-context only; a user-context token is already a specific person, so the
+    // header must be rejected rather than silently ignored.
+    if (request.getHeader(ACTING_AS_USER_HEADER) != null) {
+      throw AuthenticationException(Message.APP_INVALID_ACTING_AS_USER_ID)
+    }
+
     val install =
       appInstallService.findForAppAuth(claims.installId)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)

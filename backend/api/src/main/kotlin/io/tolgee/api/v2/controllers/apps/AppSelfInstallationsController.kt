@@ -10,7 +10,6 @@ import io.tolgee.security.authentication.AllowAppOwnInstallAccess
 import io.tolgee.security.authentication.AppAuthentication
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.apps.AppEnablementService
-import io.tolgee.service.apps.AppInstallService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "App Self Service")
 class AppSelfInstallationsController(
   private val authenticationFacade: AuthenticationFacade,
-  private val appInstallService: AppInstallService,
   private val appEnablementService: AppEnablementService,
   private val appSelfInstallationModelAssembler: AppSelfInstallationModelAssembler,
 ) {

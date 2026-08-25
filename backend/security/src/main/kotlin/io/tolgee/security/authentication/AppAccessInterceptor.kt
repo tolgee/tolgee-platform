@@ -3,6 +3,7 @@ package io.tolgee.security.authentication
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.authorization.AbstractAuthorizationInterceptor
+import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.annotation.AnnotationUtils
@@ -23,9 +24,11 @@ class AppAccessInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    // The error dispatch re-enters here with nothing bound; leave the original error response intact.
+    if (request.dispatcherType == DispatcherType.ERROR) return true
     if (!authenticationFacade.isAppAuth) return true
-    if (isAppAccessNeutral(handler)) return true
-    if (deniesAppAccess(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    if (hasAnnotation(handler, AppAccessNeutral::class.java)) return true
+    if (hasAnnotation(handler, DenyAppAccess::class.java)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     if (allowsOwnInstallAccess(handler)) {
       // The annotation's contract is "derive the install from the token's own claims", which only an
       // install-context token honours; a user-context token here would read installs it never owns.
@@ -38,14 +41,12 @@ class AppAccessInterceptor(
     throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
   }
 
-  private fun isAppAccessNeutral(handler: HandlerMethod): Boolean {
-    if (AnnotationUtils.getAnnotation(handler.method, AppAccessNeutral::class.java) != null) return true
-    return AnnotationUtils.findAnnotation(handler.beanType, AppAccessNeutral::class.java) != null
-  }
-
-  private fun deniesAppAccess(handler: HandlerMethod): Boolean {
-    if (AnnotationUtils.getAnnotation(handler.method, DenyAppAccess::class.java) != null) return true
-    return AnnotationUtils.findAnnotation(handler.beanType, DenyAppAccess::class.java) != null
+  private fun <A : Annotation> hasAnnotation(
+    handler: HandlerMethod,
+    type: Class<A>,
+  ): Boolean {
+    if (AnnotationUtils.getAnnotation(handler.method, type) != null) return true
+    return AnnotationUtils.findAnnotation(handler.beanType, type) != null
   }
 
   private fun allowsOwnInstallAccess(handler: HandlerMethod): Boolean {

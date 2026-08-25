@@ -1,5 +1,7 @@
 package io.tolgee.security.authentication
 
+import io.jsonwebtoken.JwtBuilder
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.tolgee.component.CurrentDateProvider
@@ -71,6 +73,81 @@ class AppTokenServiceTest {
     val exception = assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
     exception.code.assert.isEqualTo(Message.INVALID_JWT_TOKEN.code)
   }
+
+  @Test
+  fun `rejects a token whose audience is not the apps audience`() {
+    val token =
+      rawToken {
+        setAudience("not.tg.app")
+        claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
+        claim(AppTokenService.JWT_APP_TOKEN_CONTEXT_CLAIM, AppTokenService.CONTEXT_INSTALL)
+      }
+    assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
+      .code.assert
+      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
+  }
+
+  @Test
+  fun `rejects a token that carries no install id`() {
+    val token =
+      rawToken {
+        setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
+        claim(AppTokenService.JWT_APP_TOKEN_CONTEXT_CLAIM, AppTokenService.CONTEXT_INSTALL)
+      }
+    assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
+      .code.assert
+      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
+  }
+
+  @Test
+  fun `treats a token with no context claim as user context`() {
+    val token =
+      rawToken {
+        setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
+        setSubject(USER_ID.toString())
+        claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
+        claim(AppTokenService.JWT_APP_TOKEN_PROJECT_ID_CLAIM, PROJECT_ID)
+      }
+    appTokenService
+      .validateToken(token)
+      .isInstallContext.assert
+      .isFalse()
+  }
+
+  @Test
+  fun `rejects a user-context token with no subject`() {
+    val token =
+      rawToken {
+        setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
+        claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
+        claim(AppTokenService.JWT_APP_TOKEN_PROJECT_ID_CLAIM, PROJECT_ID)
+      }
+    assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
+      .code.assert
+      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
+  }
+
+  @Test
+  fun `rejects a user-context token with no project id`() {
+    val token =
+      rawToken {
+        setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
+        setSubject(USER_ID.toString())
+        claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
+      }
+    assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
+      .code.assert
+      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
+  }
+
+  private fun rawToken(configure: JwtBuilder.() -> Unit): String =
+    Jwts
+      .builder()
+      .signWith(signingKey)
+      .setIssuedAt(Date(NOW))
+      .setExpiration(Date(NOW + TOKEN_LIFETIME))
+      .apply(configure)
+      .compact()
 
   private fun mintUserToken(isReadOnly: Boolean): String {
     return appTokenService.mintUserContextToken(

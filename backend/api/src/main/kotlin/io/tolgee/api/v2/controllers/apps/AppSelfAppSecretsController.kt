@@ -8,7 +8,6 @@ import io.tolgee.dtos.request.apps.AppSecretRevokeRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.apps.AppSecretModel
 import io.tolgee.hateoas.apps.AppSecretModelAssembler
-import io.tolgee.model.apps.App
 import io.tolgee.security.authentication.AppAccessNeutral
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppCredentialAuthenticator
@@ -47,7 +46,7 @@ class AppSelfAppSecretsController(
   fun list(
     @RequestBody @Valid body: AppCredentialsRequest,
   ): CollectionModel<AppSecretModel> {
-    val app = authenticate(body.clientId, body.clientSecret)
+    val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
     return appSecretModelAssembler.toCollectionModel(appSecretService.list(app.id))
   }
 
@@ -63,7 +62,7 @@ class AppSelfAppSecretsController(
   fun issue(
     @RequestBody @Valid body: AppCredentialsRequest,
   ): AppSecretModel {
-    val app = authenticate(body.clientId, body.clientSecret)
+    val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
     val issued = appSecretService.issue(app)
     return appSecretModelAssembler.toModelWithSecret(issued.secret, issued.plaintextSecret)
   }
@@ -80,13 +79,8 @@ class AppSelfAppSecretsController(
   fun revoke(
     @RequestBody @Valid body: AppSecretRevokeRequest,
   ): AppSecretModel {
-    val app = authenticate(body.clientId, body.clientSecret)
+    val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
     val secretId = body.secretId ?: throw BadRequestException(Message.APP_SECRET_ID_REQUIRED)
     return appSecretModelAssembler.toModel(appSecretService.revoke(app.id, secretId, force = false))
   }
-
-  private fun authenticate(
-    clientId: String,
-    clientSecret: String,
-  ): App = appCredentialAuthenticator.authenticate(clientId, clientSecret)
 }

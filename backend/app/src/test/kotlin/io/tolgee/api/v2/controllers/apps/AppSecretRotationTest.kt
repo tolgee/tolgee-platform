@@ -87,10 +87,25 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
       .asText()
       .assert
       .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
-    rolled.at("/previousExpiresAt").asLong().assert.isGreaterThan(0)
+    rolled
+      .at("/previousExpiresAt")
+      .asLong()
+      .assert
+      .isGreaterThan(0)
 
     appSelfList(appClientSecret).andIsOk
     appSelfList(newSecretOf(rolled)).andIsOk
+    activeSecretIds().assert.hasSize(2)
+  }
+
+  /** A secret already scheduled to die sooner must keep that deadline, not be pushed out by a later roll. */
+  @Test
+  fun `a later long-grace rotation does not extend a secret already expiring sooner`() {
+    roll(graceSeconds = 60)
+    roll(graceSeconds = ONE_DAY)
+
+    currentDateProvider.move(Duration.ofSeconds(120))
+    appSelfList(appClientSecret).andIsUnauthorized
     activeSecretIds().assert.hasSize(2)
   }
 

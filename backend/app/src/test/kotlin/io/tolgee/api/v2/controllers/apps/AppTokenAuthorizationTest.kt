@@ -125,6 +125,28 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
+  /**
+   * A super-auth endpoint is reserved for a freshly-authenticated human; an app token, whose
+   * synthetic principal never needs a super JWT, must be denied rather than passing the gate vacuously.
+   */
+  @Test
+  fun `cannot reach a super-authentication endpoint even when its grant covers the scope`() {
+    AppsTestFixtures.mockManifest(appManifestHttpClient, PROJECT_EDIT_MANIFEST)
+    val registration =
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/owned-apps",
+        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
+      ).andIsOk.andReturn().response.contentAsString
+    val json = objectMapper.readTree(registration)
+    val editInstallId = json.get("installId").asLong()
+    performAuthPut("/v2/projects/${testData.project.id}/apps/$editInstallId", null).andIsOk
+    val editToken = requestInstallToken(json)
+
+    asToken(editToken, delete("/v2/projects/${testData.project.id}"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
   @Test
   fun `is rejected on a legacy api project route for a project it is not enabled for`() {
     // An existing-but-not-enabled project is indistinguishable from a nonexistent one, so an app
@@ -199,6 +221,42 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asApp(get("/v2/projects/${testData.project.id}/translations"))
       .andIsUnauthorized
       .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
+  }
+
+  /** A user-context token bound to one project must be opaque on another — no cross-tenant probing. */
+  @Test
+  fun `refuses a user-context token on a project other than the one it was minted for`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  /** For its own (known) project the token gets the specific not-enabled error, not the opaque one. */
+  @Test
+  fun `reports the specific not-enabled error for a user-context token's own disabled project`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    userAccount = testData.user
+    performAuthDelete("/v2/projects/${testData.project.id}/apps/$installId").andIsOk
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
   /**
@@ -316,6 +374,22 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
         "version": "0.1.0",
         "baseUrl": "https://app.example.com",
         "scopes": ["translations.edit"],
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
+      }
+      """.trimIndent()
+
+    private val PROJECT_EDIT_MANIFEST: String =
+      """
+      {
+        "id": "editor-app",
+        "name": "Editor App",
+        "version": "0.1.0",
+        "baseUrl": "https://editor.example.com",
+        "scopes": ["project.edit"],
         "modules": {
           "project-dashboard-page": [
             {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}

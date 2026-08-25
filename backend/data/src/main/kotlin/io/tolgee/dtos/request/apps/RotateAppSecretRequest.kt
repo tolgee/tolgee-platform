@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 
-/** Owner-driven roll of an app's client secret. */
-data class RollAppSecretRequest(
+/** Owner-driven rotation of an app's client secret. */
+data class RotateAppSecretRequest(
   @Schema(
     description =
       "How long the outgoing secret keeps working — the window the app (or an operator copying the " +

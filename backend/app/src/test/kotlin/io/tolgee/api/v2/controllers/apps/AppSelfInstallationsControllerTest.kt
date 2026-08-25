@@ -9,7 +9,6 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AppTokenService
-import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.testing.AuthorizedControllerTest
@@ -33,9 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appTokenService: AppTokenService
-
-  @Autowired
-  lateinit var appInstallService: AppInstallService
 
   @MockitoBean
   @Autowired

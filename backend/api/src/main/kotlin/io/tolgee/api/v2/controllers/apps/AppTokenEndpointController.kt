@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
  * Client-credentials token endpoint. Modelled on the OAuth 2.0 client-credentials grant (RFC 6749
  * §4.4) but JSON-encoded with a Tolgee error envelope, so use Tolgee's app SDK, not a stock OAuth
  * library. An app's backend exchanges its `client_id` + `client_secret` for a short-lived
- * install-context token; the raw secret only ever travels here.
+ * install-context token, so subsequent API calls carry the token rather than the raw secret.
  */
 @RestController
 @CrossOrigin(origins = ["*"])

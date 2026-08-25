@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.organization
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.RegisterAppRequest
-import io.tolgee.dtos.request.apps.RollAppSecretRequest
+import io.tolgee.dtos.request.apps.RotateAppSecretRequest
 import io.tolgee.hateoas.apps.AppRegisteredModel
 import io.tolgee.hateoas.apps.AppRegisteredModelAssembler
 import io.tolgee.hateoas.apps.AppSecretModel
@@ -13,6 +13,7 @@ import io.tolgee.hateoas.organization.apps.OwnedAppModel
 import io.tolgee.hateoas.organization.apps.OwnedAppModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppOwnerRemovalService
@@ -135,8 +136,9 @@ class OrganizationOwnedAppsController(
 
   @PostMapping("/{appId}/secrets/rotate")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   @Operation(
-    summary = "Roll the app's client secret",
+    summary = "Rotate the app's client secret",
     description =
       "Mints a replacement secret and puts every other active one on a deadline. The new secret is " +
         "returned here — the only place it is disclosed. The old secrets keep working until " +
@@ -145,13 +147,13 @@ class OrganizationOwnedAppsController(
         "Refused while the app already has the maximum number of active secrets. Installs, " +
         "availability and per-project enablements are untouched.",
   )
-  fun rollSecret(
+  fun rotateSecret(
     @PathVariable organizationId: Long,
     @PathVariable appId: Long,
-    @RequestBody(required = false) @Valid body: RollAppSecretRequest?,
+    @RequestBody(required = false) @Valid body: RotateAppSecretRequest?,
   ): AppSecretRotationModel {
     val app = appService.getOwned(organizationId, appId)
-    val request = body ?: RollAppSecretRequest()
+    val request = body ?: RotateAppSecretRequest()
     val rotation = appSecretService.rotate(app, request.graceSeconds)
     return AppSecretRotationModel(
       secret = appSecretModelAssembler.toModelWithSecret(rotation.issued.secret, rotation.issued.plaintextSecret),
@@ -161,13 +163,16 @@ class OrganizationOwnedAppsController(
 
   @DeleteMapping("/{appId}/secrets/{secretId}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
   @Operation(
     summary = "Revoke an app-level client secret",
     description =
-      "Ends a secret at once — how a rotation's grace window is cut short, and the kill switch for a " +
-        "leaked credential. Revoking the app's only active secret is refused unless `force=true`, so " +
-        "an ordinary revoke cannot cut the app off by mistake; `force` also invalidates every access " +
-        "token already minted from the app's secrets. Idempotent.",
+      "Ends this one secret at once — how a rotation's grace window is cut short, and how a leaked " +
+        "credential is retired. Revoking the app's only active secret is refused unless `force=true`, " +
+        "so an ordinary revoke cannot cut the app off by mistake; `force` also invalidates every " +
+        "access token already minted from the app's secrets. It does not touch the app's OTHER live " +
+        "secrets, so to fully contain a compromise revoke each secret (a holder of a live secret can " +
+        "mint more) or delete the app, which retires every credential in one step. Idempotent.",
   )
   fun revokeSecret(
     @PathVariable organizationId: Long,

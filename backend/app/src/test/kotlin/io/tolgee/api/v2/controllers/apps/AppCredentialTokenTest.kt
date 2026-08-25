@@ -4,7 +4,6 @@ import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
-import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.testing.AuthorizedControllerTest
@@ -27,9 +26,6 @@ import java.time.Duration
  * one of those credentials take effect on tokens it already minted.
  */
 class AppCredentialTokenTest : AuthorizedControllerTest() {
-  @Autowired
-  lateinit var appInstallService: AppInstallService
-
   @MockitoBean
   @Autowired
   lateinit var appManifestHttpClient: AppManifestHttpClient

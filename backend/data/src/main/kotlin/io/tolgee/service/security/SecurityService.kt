@@ -197,7 +197,7 @@ class SecurityService(
     requiredScope: Scope,
   ) {
     if (getCurrentPermittedScopes(projectId).contains(requiredScope)) return
-    throw PermissionException(Message.OPERATION_NOT_PERMITTED, listOf(requiredScope))
+    throw PermissionException(listOf(requiredScope))
   }
 
   fun checkTaskEditScopeOrAssigned(
