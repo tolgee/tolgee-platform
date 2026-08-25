@@ -16,6 +16,7 @@ import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -30,6 +31,7 @@ class ProjectContextService(
   private val activityHolder: ActivityHolder,
   private val appEnablementService: AppEnablementService,
   private val permissionService: PermissionService,
+  private val userAccountService: UserAccountService,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -161,14 +163,19 @@ class ProjectContextService(
   }
 
   /**
-   * An install may narrow itself to a project member, never widen itself to a stranger.
+   * Resolves the acted-as user (only now that the project is known — see [AppAuthentication.actsForUserId])
+   * and confirms it is an active member of this project: an install may narrow itself to a member, never
+   * widen itself to a stranger. A missing/disabled user and a non-member get the same error, so nothing
+   * about which user ids exist leaks.
    */
   private fun checkActingAsUserIsProjectMember(
     appAuth: AppAuthentication,
     projectId: Long,
   ) {
-    val actingAs = appAuth.actsForUserAccount ?: return
-    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, actingAs.id)
+    val actsForUserId = appAuth.actsForUserId ?: return
+    userAccountService.findDto(actsForUserId)
+      ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, actsForUserId)
     if (scopes.isNullOrEmpty()) {
       throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
     }

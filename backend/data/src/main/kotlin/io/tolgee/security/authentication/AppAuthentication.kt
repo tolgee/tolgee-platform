@@ -5,9 +5,10 @@ import io.tolgee.model.apps.AppInstall
 
 /**
  * Authentication for an app JWT. Install-context: `userAccount` is the install's [AppInstall.principal].
- * User-context: `userAccount` is the iframe user, [tokenProjectId] set. [actsForUserAccount] is its own
- * field (not the base `actingAsUserAccount`, whose direction is inverted). [boundProjectId] is set by
- * `ProjectContextService`.
+ * User-context: `userAccount` is the iframe user, [tokenProjectId] set. [actsForUserId] is the person the
+ * install acts *for* (the `X-Tolgee-Act-As-User-Id` header), resolved and membership-checked lazily by
+ * `ProjectContextService` — never in the filter, so a route that binds no project cannot probe which user
+ * ids exist. [boundProjectId] is set by `ProjectContextService`.
  */
 class AppAuthentication(
   credentials: Any?,
@@ -16,7 +17,7 @@ class AppAuthentication(
   val tokenProjectId: Long?,
   val isInstallContext: Boolean,
   isReadOnly: Boolean,
-  val actsForUserAccount: UserAccountDto? = null,
+  val actsForUserId: Long? = null,
 ) : TolgeeAuthentication(
     credentials = credentials,
     deviceId = null,

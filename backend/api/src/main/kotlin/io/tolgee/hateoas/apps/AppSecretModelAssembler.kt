@@ -25,7 +25,7 @@ class AppSecretModelAssembler : RepresentationModelAssembler<AppSecret, AppSecre
     return AppSecretModel(
       id = entity.id,
       name = entity.name,
-      createdAt = entity.createdAt?.time ?: 0,
+      createdAt = entity.createdAt!!.time,
       lastUsedAt = entity.lastUsedAt?.time,
       expiresAt = entity.expiresAt?.time,
       revokedAt = entity.revokedAt?.time,

@@ -40,6 +40,8 @@ class McpRequestContext(
     // so unauthenticated tool calls reach this point and must be rejected here.
     requireAuthenticated()
     // Order mirrors the HTTP interceptor chain:
+    // 0. AppAccessInterceptor — MCP has no app-specific route, so app tokens are denied outright.
+    denyAppTokens()
     // 1. RateLimitInterceptor
     applyRateLimit(spec)
     // 2. AuthenticationInterceptor (token type check)
@@ -68,6 +70,13 @@ class McpRequestContext(
   private fun requireAuthenticated() {
     if (authenticationFacade.authenticatedUserOrNull == null) {
       throw AuthenticationException(Message.UNAUTHENTICATED)
+    }
+  }
+
+  /** Mirrors [io.tolgee.security.authentication.AppAccessInterceptor], which does not run off the MVC chain. */
+  private fun denyAppTokens() {
+    if (authenticationFacade.isAppAuth) {
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
   }
 

@@ -210,6 +210,46 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     translationsWith(token).andExpect(status().isUnauthorized)
   }
 
+  /** The SDK often keeps its current app token in a default Authorization header; the body-authenticated
+   *  token endpoint must ignore it rather than 403 the very call that renews the token. */
+  @Test
+  fun `the token endpoint ignores a valid app token in the Authorization header`() {
+    val token = mintToken()
+    logout()
+    perform(
+      post("/v2/public/apps/token")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(
+          objectMapper.writeValueAsString(
+            mapOf(
+              "grant_type" to "client_credentials",
+              "client_id" to appClientId,
+              "client_secret" to appClientSecret,
+              "install_id" to installId,
+            ),
+          ),
+        ),
+    ).andIsOk
+  }
+
+  /** The cutoff is truncated to whole seconds, so a recovery token minted in the same second survives it. */
+  @Test
+  fun `a recovery token minted in the same second as a force-revoke survives the cutoff`() {
+    currentDateProvider.forcedDate = currentDateProvider.date
+    val second = issueSecret()
+    revokeSecret(firstSecretId())
+
+    translationsWith(mintToken(secret = second)).andIsOk
+  }
+
+  @Test
+  fun `authenticating with app credentials stamps the secret's lastUsedAt`() {
+    ownedSecretsList().andAssertThatJson { node("_embedded.appSecrets[0].lastUsedAt").isNull() }
+    mintToken()
+    ownedSecretsList().andAssertThatJson { node("_embedded.appSecrets[0].lastUsedAt").isNumber }
+  }
+
   private fun register(manifestUrl: String): String =
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/owned-apps",
@@ -243,13 +283,13 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     return objectMapper.readTree(response).get("secret").asText()
   }
 
-  private fun firstSecretId(): Long {
+  private fun ownedSecretsList(): ResultActions {
     loginAsUser()
-    val response =
-      performAuthGet("/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets")
-        .andIsOk
-        .andReturn()
-        .response.contentAsString
+    return performAuthGet("/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets").andIsOk
+  }
+
+  private fun firstSecretId(): Long {
+    val response = ownedSecretsList().andReturn().response.contentAsString
     val secrets = objectMapper.readTree(response).get("_embedded").get("appSecrets")
     val oldest = secrets.minByOrNull { it.get("createdAt").asLong() }
     oldest.assert.isNotNull

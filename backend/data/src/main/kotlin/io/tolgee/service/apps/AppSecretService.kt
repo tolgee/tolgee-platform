@@ -32,7 +32,8 @@ class AppSecretService(
     val previousExpiresAt: Date?,
   )
 
-  fun issueInitial(app: App): IssueResult {
+  /** Mints and persists a secret in the caller's transaction, with no cap check (used at registration). */
+  fun mintSecret(app: App): IssueResult {
     val plaintext = AppService.APP_CLIENT_SECRET_PREFIX + keyGenerator.generate(256)
     val secret =
       AppSecret().apply {
@@ -48,7 +49,7 @@ class AppSecretService(
     if (activeSecrets(app.id).size >= MAX_LIVE_SECRETS) {
       throw BadRequestException(Message.APP_TOO_MANY_LIVE_SECRETS)
     }
-    return issueInitial(app)
+    return mintSecret(app)
   }
 
   /** issue + expireOthers in one transaction, so a failure cannot leave a deadline-less extra secret. */

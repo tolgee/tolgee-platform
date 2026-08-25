@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AppTokenService
+import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.testing.AuthorizedControllerTest
@@ -120,6 +121,20 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     asToken(userToken, get(SELF_INSTALLATIONS))
       .andIsForbidden
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  /**
+   * Acting-as is only resolved once a project is bound; on this route it never is, so a nonexistent
+   * user id must not turn into a 403 that reveals which ids exist. It is simply ignored.
+   */
+  @Test
+  fun `does not resolve the acting-as header on a route that binds no project`() {
+    logout()
+    perform(
+      get(SELF_INSTALLATIONS)
+        .header(HttpHeaders.AUTHORIZATION, "Bearer $installToken")
+        .header(AuthenticationFilter.ACTING_AS_USER_HEADER, "9999999"),
+    ).andIsOk
   }
 
   @Test

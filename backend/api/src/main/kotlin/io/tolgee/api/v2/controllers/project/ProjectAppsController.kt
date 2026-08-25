@@ -13,6 +13,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.DenyAppAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
@@ -112,6 +113,9 @@ class ProjectAppsController(
 
   @PostMapping("/{installId}/token")
   @UseDefaultPermissions
+  // Minting is a POST but does not mutate anything; a read-only (e.g. supporter) session must be able
+  // to mint, and the token it gets carries that read-only flag.
+  @ReadOnlyOperation
   @Operation(
     summary = "Mint a user-context app token",
     description =

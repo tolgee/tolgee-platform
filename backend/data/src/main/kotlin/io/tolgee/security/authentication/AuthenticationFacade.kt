@@ -110,23 +110,16 @@ class AuthenticationFacade(
         ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   /**
-   * The person this request is on behalf of, or null when an install acts as itself (use
-   * [actingAppInstallId] then). For anything about a person — attribution, per-language grants —
-   * prefer this over the principal, which on the install-context path is only a synthetic identity.
+   * The person this request is on behalf of, or null when an install acts as itself. For anything
+   * about a person — attribution, per-language grants — prefer this over the principal, which on the
+   * install-context path is only a synthetic identity.
    */
   val actingPersonUserId: Long?
     get() {
       if (!isAppAuth) return authenticatedUserOrNull?.id
-      appAuthentication.actsForUserAccount?.let { return it.id }
+      appAuthentication.actsForUserId?.let { return it }
       if (appAuthentication.isInstallContext) return null
       return authenticatedUserOrNull?.id
-    }
-
-  /** The install a change was made through, or null when no app token was used. */
-  val actingAppInstallId: Long?
-    get() {
-      if (!isAppAuth) return null
-      return appAuthentication.appInstall.id
     }
 
   val projectApiKey: ApiKeyDto

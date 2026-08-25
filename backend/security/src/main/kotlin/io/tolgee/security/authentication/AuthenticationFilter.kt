@@ -22,7 +22,6 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
@@ -108,7 +107,6 @@ class AuthenticationFilter(
           if (!appAuth.isInstallContext) {
             checkIfSsoUserStillValid(appAuth.principal)
           }
-          appAuth.actsForUserAccount?.let { checkIfSsoUserStillValid(it) }
           SecurityContextHolder.getContext().authentication = appAuth
           return
         }
@@ -228,7 +226,7 @@ class AuthenticationFilter(
       tokenProjectId = null,
       isInstallContext = true,
       isReadOnly = claims.isReadOnly,
-      actsForUserAccount = resolveActingAsUser(request),
+      actsForUserId = resolveActingAsUserId(request),
     )
   }
 
@@ -258,13 +256,14 @@ class AuthenticationFilter(
     return user
   }
 
-  /** Project membership of the acted-as user is enforced later, in [io.tolgee.security.ProjectContextService]. */
-  private fun resolveActingAsUser(request: HttpServletRequest): UserAccountDto? {
+  /**
+   * Parses the acted-as user id only. Its existence and project membership are checked later, in
+   * [io.tolgee.security.ProjectContextService] once the project is known — resolving it here would
+   * turn a route that binds no project into a server-wide user-id existence oracle.
+   */
+  private fun resolveActingAsUserId(request: HttpServletRequest): Long? {
     val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
-    val userId =
-      raw.toLongOrNull() ?: throw AuthenticationException(Message.APP_INVALID_ACTING_AS_USER_ID)
-    return userAccountService.findDto(userId)
-      ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
+    return raw.toLongOrNull() ?: throw AuthenticationException(Message.APP_INVALID_ACTING_AS_USER_ID)
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

@@ -143,9 +143,9 @@ class SecurityService(
 
     val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
 
-    val actingAs = appAuth.actsForUserAccount
-    if (actingAs != null) {
-      return installScopes.intersect(expandedScopesOf(projectId, actingAs.id))
+    val actingAsUserId = appAuth.actsForUserId
+    if (actingAsUserId != null) {
+      return installScopes.intersect(expandedScopesOf(projectId, actingAsUserId))
     }
 
     if (appAuth.isInstallContext) return installScopes
