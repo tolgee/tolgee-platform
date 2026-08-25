@@ -3,17 +3,11 @@ package io.tolgee.api.v2.controllers.apps
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
-import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
-import io.tolgee.model.apps.App
 import io.tolgee.security.authentication.AppAccessNeutral
-import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.ratelimit.RateLimited
-import io.tolgee.service.apps.AppCredentialAuthenticator
-import io.tolgee.service.apps.AppInstallService
+import io.tolgee.service.apps.AppTokenGrantService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -35,9 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/public/apps"])
 @Tag(name = "App Authentication")
 class AppTokenEndpointController(
-  private val appCredentialAuthenticator: AppCredentialAuthenticator,
-  private val appInstallService: AppInstallService,
-  private val appTokenService: AppTokenService,
+  private val appTokenGrantService: AppTokenGrantService,
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping("/token")
@@ -55,32 +47,17 @@ class AppTokenEndpointController(
   fun token(
     @RequestBody @Valid body: AppClientCredentialsRequest,
   ): AppAccessTokenModel {
-    if (body.grantType != GRANT_TYPE_CLIENT_CREDENTIALS) {
-      throw BadRequestException(Message.APP_UNSUPPORTED_GRANT_TYPE)
-    }
-
-    val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
-
-    val token = mintToken(app, body.installId)
+    val token =
+      appTokenGrantService.issueFromClientCredentials(
+        grantType = body.grantType,
+        clientId = body.clientId,
+        clientSecret = body.clientSecret,
+        installId = body.installId,
+      )
     return AppAccessTokenModel(
       accessToken = token,
       tokenType = "Bearer",
       expiresIn = tolgeeProperties.apps.tokenExpiration / 1000,
     )
-  }
-
-  private fun mintToken(
-    app: App,
-    installId: Long?,
-  ): String {
-    if (installId == null) return appTokenService.mintAppLevelToken(app.id)
-    val install =
-      appInstallService.findOwnInstall(app.id, installId)
-        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    return appTokenService.mintInstallContextToken(install.id)
-  }
-
-  companion object {
-    private const val GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
   }
 }
