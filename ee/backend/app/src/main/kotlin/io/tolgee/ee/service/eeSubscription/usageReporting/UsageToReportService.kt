@@ -5,7 +5,6 @@ import io.tolgee.constants.Caches
 import io.tolgee.ee.data.usageReporting.UsageToReportDto
 import io.tolgee.ee.model.UsageToReport
 import io.tolgee.service.key.KeyService
-import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -33,7 +32,6 @@ class UsageToReportService(
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
   private val userAccountService: UserAccountService,
-  private val organizationStatsService: OrganizationStatsService,
 ) {
   /**
    * Retrieves the current usage data and reporting status.
@@ -78,6 +76,8 @@ class UsageToReportService(
           |     lru.keysToReport,
           |     lru.seatsToReport,
           |     lru.wordsToReport,
+          |     lru.wordsDirty,
+          |     lru.wordsCountedAt,
           |     lru.reportedAt)
           |from UsageToReport lru
           |
@@ -92,7 +92,9 @@ class UsageToReportService(
       UsageToReport().apply {
         keysToReport = keyService.countAllOnInstance()
         seatsToReport = userAccountService.countAllEnabled()
-        wordsToReport = organizationStatsService.countAllWordsOnInstance()
+        // Not counted here: on a word-metered instance the flag makes the first periodic report
+        // take the count, and on any other instance nothing pays for an aggregation it cannot use.
+        wordsDirty = true
         // we can use this far in past distant date, because we haven't reported yes
         reportedAt = Date(1)
       }
@@ -124,18 +126,6 @@ class UsageToReportService(
       .executeUpdate()
   }
 
-  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
-  fun storeCurrentWordsUsage(words: Long) {
-    entityManager
-      .createQuery(
-        """
-      update UsageToReport lru
-      set lru.wordsToReport = :wordsToReport
-      """,
-      ).setParameter("wordsToReport", words)
-      .executeUpdate()
-  }
-
   /**
    * Stores current usage data without reporting it immediately.
    *
@@ -147,10 +137,11 @@ class UsageToReportService(
    * @param seats The current number of seats, or null if unchanged
    * @param words The current number of words, or null if unchanged
    */
+  @Transactional
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeCurrentUsage(
-    keys: Long?,
-    seats: Long?,
+    keys: Long? = null,
+    seats: Long? = null,
     words: Long? = null,
   ) {
     if (keys != null) {
@@ -162,6 +153,79 @@ class UsageToReportService(
     if (words != null) {
       storeCurrentWordsUsage(words)
     }
+  }
+
+  private fun storeCurrentWordsUsage(words: Long) {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsToReport = :wordsToReport,
+          lru.wordsCountedAt = :countedAt
+      """,
+      ).setParameter("wordsToReport", words)
+      .setParameter("countedAt", currentDateProvider.date)
+      .executeUpdate()
+  }
+
+  // Unconditional on purpose: the row lock is what makes takeWordsDirty wait for a writer that has
+  // raised the flag and not yet committed. The price is that it is taken before the activity
+  // revision is written and held to commit, so concurrent translation commits on a word-metered
+  // instance serialise behind the largest in-flight write's activity storage.
+  @Transactional
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun markWordsDirty() {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsDirty = true
+      """,
+      ).executeUpdate()
+  }
+
+  /**
+   * Reads and clears the flag in one statement, so the answer comes from the row rather than from
+   * the cached DTO — an eviction that lands before the raising writer commits would otherwise let a
+   * concurrent read repopulate the cache with a stale `false` that nothing evicts again.
+   *
+   * Its own transaction, so the row lock is not held across the caller's word count. That also
+   * means a caller whose own transaction already touched this row would block on itself — only the
+   * reporting path may call it.
+   *
+   * The eviction condition keeps an idle word-metered instance from evicting the cache on every
+   * tick: the recount window stays open until something is actually counted, so this otherwise runs
+   * once a minute forever and clears nothing. `#result` requires beforeInvocation to stay false.
+   *
+   * @return whether the flag was raised, and therefore whether a recount is owed
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1", condition = "#result")
+  fun takeWordsDirty(): Boolean =
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsDirty = false
+      where lru.wordsDirty = true
+      """,
+      ).executeUpdate() > 0
+
+  /** For the reporting path's own failure recovery, which cannot use the writer-path variant. */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun markWordsDirtyInNewTransaction() {
+    markWordsDirty()
+  }
+
+  /**
+   * Its own transaction: the caller counts words outside any lock, so this must not extend the
+   * reporting transaction's hold on the row across the licence-server call that follows.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun storeRecountedWords(words: Long) {
+    storeCurrentWordsUsage(words)
   }
 
   /**
@@ -176,6 +240,7 @@ class UsageToReportService(
    * @param seats The number of seats that were reported, or null if unchanged
    * @param words The number of words that were reported, or null if unchanged
    */
+  @Transactional
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeOnReport(
     keys: Long?,
@@ -229,12 +294,10 @@ class UsageToReportService(
         """
       update UsageToReport lru
       set lru.lastReportedWords = :lastReportedWords,
-          lru.wordsToReport = :wordsToReport,
-          lru.reportedAt = :reportedAt
+          lru.wordsToReport = :wordsToReport
       """,
       ).setParameter("lastReportedWords", words)
       .setParameter("wordsToReport", words)
-      .setParameter("reportedAt", currentDateProvider.date)
       .executeUpdate()
   }
 }

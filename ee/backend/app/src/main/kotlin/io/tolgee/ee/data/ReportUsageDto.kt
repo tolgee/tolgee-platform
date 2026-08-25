@@ -19,7 +19,7 @@ class ReportUsageDto(
   var seats: Long? = null,
   @field:Min(0)
   @Schema(
-    description = "Number of words in the project. If not provided, the number of words will not be updated.",
+    description = "Number of words on the instance. If not provided, the number of words will not be updated.",
   )
   var words: Long? = null,
 )

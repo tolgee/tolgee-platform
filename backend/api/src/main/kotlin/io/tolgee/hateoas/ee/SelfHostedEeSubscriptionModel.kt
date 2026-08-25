@@ -27,9 +27,9 @@ open class SelfHostedEeSubscriptionModel(
   val estimatedCosts: BigDecimal? = 0.toBigDecimal(),
   val limits: SelfHostedUsageLimitsModel,
   val boostEndsAt: Long? = null,
-  val autoUpgradeEnabled: Boolean = true,
+  /** The customer's setting, for display. Enforcement reads limits.autoUpgradeEffective. */
+  val autoUpgradeEnabled: Boolean = false,
   val scheduledDowngrade: SelfHostedEePlanModel? = null,
-  // Nullable so a self-hosted server on an older version still deserializes this model.
   val currency: Currency? = null,
 ) : RepresentationModel<SelfHostedEeSubscriptionModel>(),
   Serializable

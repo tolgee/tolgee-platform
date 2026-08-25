@@ -3157,6 +3157,7 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "plan_word_limit_exceeded"
+        | "words_spending_limit_exceeded"
         | "auto_upgrade_cannot_be_disabled_over_limit"
         | "instance_not_using_license_key"
         | "invalid_path"
@@ -5961,7 +5962,7 @@ export interface components {
       usedMtCredits: number;
       /**
        * Format: int64
-       * @description How many hosted words can be stored until reaching the limit.
+       * @description Total number of hosted words the organization can store (-1 for unlimited). For pay-as-you-go, the top limit is the spending limit.
        */
       wordsLimit: number;
     };
@@ -7089,6 +7090,7 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "plan_word_limit_exceeded"
+        | "words_spending_limit_exceeded"
         | "auto_upgrade_cannot_be_disabled_over_limit"
         | "instance_not_using_license_key"
         | "invalid_path"

@@ -3,22 +3,29 @@ import { BILLING_CRITICAL_FRACTION } from './constants';
 
 type UsageModel = components['schemas']['PublicUsageModel'];
 
+/**
+ * Mirrors `UsageLimits.Limit.isEnforced` on the backend. Not `!== -1`: -2 (negotiated) is a second
+ * unenforced sentinel, and treating it as a ceiling renders "of -2 words" and a nonsense ratio.
+ */
+export const isLimitEnforced = (limit: number) => limit >= 0;
+
 export const getProgressData = ({ usage }: { usage: UsageModel }) => {
   const stringsProgress = new ProgressItem(
     usage.includedTranslations,
-    usage.currentTranslations
+    usage.currentTranslations,
+    isLimitEnforced(usage.translationsLimit)
   );
 
-  const keysProgress = new ProgressItem(usage.includedKeys, usage.currentKeys);
+  const keysProgress = new ProgressItem(
+    usage.includedKeys,
+    usage.currentKeys,
+    isLimitEnforced(usage.keysLimit)
+  );
 
-  // A word plan neither charges nor enforces per seat — the server reports its seat limit as
-  // unlimited — yet the plan still carries an includedSeats allowance for the free tier. Showing
-  // a bar for it puts an organization permanently over a limit that does not exist, in red, with
-  // the top-bar critical warning stuck on.
-  const seatsEnforced = usage.seatsLimit !== -1;
   const seatsProgress = new ProgressItem(
-    seatsEnforced ? usage.includedSeats : 0,
-    usage.currentSeats
+    usage.includedSeats,
+    usage.currentSeats,
+    isLimitEnforced(usage.seatsLimit)
   );
 
   const creditProgress = new ProgressItem(
@@ -28,7 +35,8 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
 
   const wordsProgress = new ProgressItem(
     usage.includedWords,
-    usage.currentWords
+    usage.currentWords,
+    isLimitEnforced(usage.wordsLimit)
   );
 
   const mostCriticalProgress = Math.max(
@@ -59,8 +67,12 @@ export type ProgressData = ReturnType<typeof getProgressData>;
 export class ProgressItem {
   isInUse: boolean;
 
-  constructor(public included: number, public used: number) {
-    this.isInUse = included > 0;
+  /**
+   * A plan that does not charge for a metric has its limit reported as -1; a bar for the allowance
+   * it still carries would pin an organization over a limit that does not exist.
+   */
+  constructor(public included: number, public used: number, enforced = true) {
+    this.isInUse = enforced && included > 0;
   }
 
   get progress() {

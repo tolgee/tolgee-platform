@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Validation } from './GlobalValidationSchema';
 
-/**
- * An annual-only plan zeroes every monthly price and stops rendering the monthly column, so a
- * schema demanding a monthly price makes such a plan unsaveable — and silently, since the error
- * attaches to a field that is no longer on screen.
- */
 describe('word-tier prices', () => {
   const plan = (tier: Record<string, unknown>) => ({
     name: 'Words',
@@ -49,9 +44,54 @@ describe('word-tier prices', () => {
     expect(error.inner.map((i: any) => i.path)).toContain('tiers[0].eurYearly');
   });
 
+  // Both forms share one tiers schema, so each branch is pinned from both entry points.
   it('accepts a self-hosted tier priced yearly only', async () => {
     await expect(
       Validation.EE_PLAN_FORM.validate(plan({ eurMonthly: 0, eurYearly: 990 }))
     ).resolves.toBeTruthy();
+  });
+
+  it('rejects a self-hosted tier with no EUR price at all', async () => {
+    await expect(
+      Validation.EE_PLAN_FORM.validate(plan({ eurMonthly: 0, eurYearly: 0 }))
+    ).rejects.toThrow();
+  });
+
+  it('accepts a free self-hosted tier with no price at all', async () => {
+    await expect(
+      Validation.EE_PLAN_FORM.validate({
+        ...plan({ eurMonthly: 0, eurYearly: 0 }),
+        free: true,
+      })
+    ).resolves.toBeTruthy();
+  });
+
+  it('applies the default tier schema to a self-hosted keys-and-seats plan', async () => {
+    await expect(
+      Validation.EE_PLAN_FORM.validate({
+        ...plan({}),
+        metricType: 'KEYS_SEATS',
+        tiers: [{ includedKeys: 1000, includedSeats: 5, eurMonthly: 20 }],
+      })
+    ).resolves.toBeTruthy();
+  });
+
+  it('accepts a free tier with no price at all', async () => {
+    await expect(
+      Validation.CLOUD_PLAN_FORM.validate({
+        ...plan({ eurMonthly: 0, eurYearly: 0 }),
+        free: true,
+      })
+    ).resolves.toBeTruthy();
+  });
+
+  it('still requires the word allowance on a free tier, as the server does', async () => {
+    await expect(
+      Validation.CLOUD_PLAN_FORM.validate({
+        ...plan({ eurMonthly: 0, eurYearly: 0 }),
+        free: true,
+        tiers: [{ includedMtCredits: 1000 }],
+      })
+    ).rejects.toThrow();
   });
 });

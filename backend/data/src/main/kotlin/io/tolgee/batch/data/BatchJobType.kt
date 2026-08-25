@@ -123,8 +123,8 @@ enum class BatchJobType(
   ),
   BILLING_AUTO_UPGRADE_RENEWAL(
     maxRetries = 3,
-    // long enough to outlast transient Stripe unavailability (e.g. test-clock advancement
-    // blocking subscription modifications) — the default 2s burns all retries within seconds
+    // Stripe rejects subscription modifications while the customer has another operation in
+    // flight; the default 2s burns all three retries before it clears.
     defaultRetryWaitTimeInMs = 30_000,
     processor = AutoUpgradeRenewalProcessor::class,
   ),

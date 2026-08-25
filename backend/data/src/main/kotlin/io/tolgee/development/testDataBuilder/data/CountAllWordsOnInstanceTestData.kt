@@ -4,17 +4,6 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.branching.Branch
 
-/**
- * Test data for OrganizationStatsService.countAllWordsOnInstance scenarios.
- *
- * Two projects in two different organizations:
- *   - firstOrg: single key, EN "hello world" = 2 words.
- *   - secondOrg: use_branching = true; same key name on main branch ("one" = 1 word)
- *     and on a feature branch ("hello world there" = 3 words). MAX(1, 3) = 3 — should
- *     contribute the max, not the sum (4), to the instance-wide total.
- *
- * Expected instance-wide total contributed by this test data: 2 + 3 = 5.
- */
 class CountAllWordsOnInstanceTestData {
   val root = TestDataBuilder()
 

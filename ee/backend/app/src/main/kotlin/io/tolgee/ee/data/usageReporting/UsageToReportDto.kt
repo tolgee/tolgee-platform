@@ -9,5 +9,7 @@ data class UsageToReportDto(
   override val keysToReport: Long,
   override val seatsToReport: Long,
   override val wordsToReport: Long,
+  override val wordsDirty: Boolean,
+  override val wordsCountedAt: Date,
   override val reportedAt: Date,
 ) : IUsageToReport

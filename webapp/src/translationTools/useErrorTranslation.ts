@@ -483,6 +483,26 @@ export function useErrorTranslation() {
           'plan_word_limit_exceeded',
           'Plan word limit exceeded. Upgrade your plan or enable auto-upgrade.'
         );
+      case 'words_spending_limit_exceeded':
+        return t(
+          'words_spending_limit_exceeded',
+          'Word spending limit exceeded.'
+        );
+      case 'auto_upgrade_cannot_be_disabled_over_limit':
+        return t(
+          'auto_upgrade_cannot_be_disabled_over_limit',
+          'Auto-upgrade cannot be turned off while your organization is over its word allowance. Reduce your content or upgrade your plan first.'
+        );
+      case 'cannot_downgrade_word_tier':
+        return t(
+          'cannot_downgrade_word_tier',
+          'This plan includes fewer words than your organization currently uses. Reduce your content first, or pick a bigger tier.'
+        );
+      case 'organization_currency_already_set':
+        return t(
+          'organization_currency_already_set',
+          'This organization already has a billing currency and it cannot be changed.'
+        );
       case 'keys_spending_limit_exceeded':
         return t('keys_spending_limit_exceeded');
 

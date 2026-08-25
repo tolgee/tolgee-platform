@@ -15,5 +15,9 @@ interface IUsageToReport {
 
   val wordsToReport: Long
 
+  val wordsDirty: Boolean
+
+  val wordsCountedAt: Date
+
   val reportedAt: Date
 }

@@ -547,6 +547,7 @@ declare namespace DataCy {
         "plan-limit-dialog-close": true;
         "plan-limit-dialog-enable-auto-upgrade": true;
         "plan-limit-dialog-words-auto-upgrade-hint": true;
+        "plan-limit-dialog-words-auto-upgrade-ineffective": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
         "profile": true;

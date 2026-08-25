@@ -1,12 +1,16 @@
 package io.tolgee.ee.projectExportImport
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.api.SubscriptionStatus
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ProjectExportImportTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportBranchedSourceTestData
 import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
+import io.tolgee.ee.model.EeSubscription
+import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.service.branching.BranchMergeService
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.exceptions.BadRequestException
@@ -44,6 +48,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.util.Base64
+import java.util.Date
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -66,6 +71,9 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   @Autowired
   private lateinit var bigMetaService: BigMetaService
 
+  @Autowired
+  private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+
   private lateinit var source: ProjectExportImportTestData
   private lateinit var target: ProjectImportTargetTestData
 
@@ -83,6 +91,8 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   fun cleanup() {
     testDataService.cleanTestData(target.root)
     testDataService.cleanTestData(source.root)
+    // Singleton row, so a subscription saved by one test would limit every test after it.
+    eeSubscriptionRepository.deleteAll()
   }
 
   @Test
@@ -167,6 +177,37 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
 
     assertThat(keyNames(target.siblingProject.id)).containsExactly(target.siblingKeyName)
     assertThat(labelNames(target.siblingProject.id)).containsExactly(target.siblingLabelName)
+  }
+
+  @Test
+  fun `is not refused by the self-hosted key and word limits it momentarily appears to exceed`() {
+    // The wipe is bulk JPQL, so it emits no delete events: without the ContentReplacementScope
+    // marker both limit listeners add the re-inserted content to a baseline that still counts the
+    // content it replaces, and the whole import rolls back.
+    saveTightlyLimitedSubscription()
+
+    importSourceOntoTarget()
+
+    assertThat(keyNames(target.targetProject.id)).contains("greeting")
+  }
+
+  private fun saveTightlyLimitedSubscription() {
+    eeSubscriptionRepository.save(
+      EeSubscription().apply {
+        licenseKey = "mock"
+        name = "Tightly limited"
+        status = SubscriptionStatus.ACTIVE
+        currentPeriodEnd = Date()
+        enabledFeatures = Feature.entries.toTypedArray()
+        lastValidCheck = Date()
+        includedKeys = 1
+        keysLimit = 1
+        includedSeats = -1
+        seatsLimit = -1
+        includedWords = 1
+        wordsLimit = 1
+      },
+    )
   }
 
   @Test

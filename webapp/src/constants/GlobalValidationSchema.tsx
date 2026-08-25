@@ -91,6 +91,63 @@ const isValidBranchName = (name: string | undefined): boolean => {
   return true;
 };
 
+const DEFAULT_TIER_SCHEMA = Yup.object({
+  includedMtCredits: Yup.number().min(0),
+  eurMonthly: Yup.number().min(0),
+  eurYearly: Yup.number().min(0),
+  usdMonthly: Yup.number().min(0),
+  usdYearly: Yup.number().min(0),
+  pricePerThousandKeys: Yup.number().min(0),
+  pricePerSeat: Yup.number().min(0),
+  pricePerThousandTranslations: Yup.number().min(0),
+});
+
+const wordTierSchema = (free: boolean) => {
+  // The server requires the allowance on every word tier; only the EUR price is waived when free.
+  if (free) {
+    return Yup.object({
+      includedWords: Yup.number().moreThan(0).required(),
+      includedMtCredits: Yup.number().min(0),
+      eurMonthly: Yup.number().min(0),
+      eurYearly: Yup.number().min(0),
+      usdMonthly: Yup.number().min(0),
+      usdYearly: Yup.number().min(0),
+    });
+  }
+  return Yup.object().shape(
+    {
+      includedWords: Yup.number().moreThan(0).required(),
+      includedMtCredits: Yup.number().min(0),
+      // Required from both sides so the message lands on a field the current mode actually renders.
+      eurMonthly: Yup.number().when('eurYearly', {
+        is: (eurYearly: any) => !(Number(eurYearly) > 0),
+        then: Yup.number().moreThan(0).required(),
+        otherwise: Yup.number().min(0),
+      }),
+      eurYearly: Yup.number().when('eurMonthly', {
+        is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
+        then: Yup.number().moreThan(0).required(),
+        otherwise: Yup.number().min(0),
+      }),
+      usdMonthly: Yup.number().min(0),
+      usdYearly: Yup.number().min(0),
+    },
+    [['eurMonthly', 'eurYearly']]
+  );
+};
+
+const tiersSchema = () =>
+  Yup.array().when(['metricType', 'free'], {
+    is: (metricType: any, free: any) => metricType === 'HOSTED_WORDS' && !free,
+    then: Yup.array().of(wordTierSchema(false)),
+    otherwise: Yup.array().when(['metricType', 'free'], {
+      is: (metricType: any, free: any) =>
+        metricType === 'HOSTED_WORDS' && Boolean(free),
+      then: Yup.array().of(wordTierSchema(true)),
+      otherwise: Yup.array().of(DEFAULT_TIER_SCHEMA),
+    }),
+  });
+
 export class Validation {
   static readonly USER_PASSWORD = (t: TranslateFunction) =>
     Yup.string().min(8).max(50).required();
@@ -397,48 +454,9 @@ export class Validation {
       is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
-    tiers: Yup.array().when(['metricType', 'free'], {
-      is: (metricType: any, free: any) =>
-        metricType === 'HOSTED_WORDS' && !free,
-      then: Yup.array().of(
-        Yup.object().shape(
-          {
-            includedWords: Yup.number().moreThan(0).required(),
-            includedMtCredits: Yup.number().min(0),
-            // A tier needs a EUR price, but not necessarily a monthly one: an annual-only
-            // plan zeroes every monthly field and hides the column. The backend asks the
-            // same — a EUR price in either period. Required from both sides so the message
-            // lands on a field the current mode actually renders; the pair is declared
-            // below to keep Yup from seeing a cycle.
-            eurMonthly: Yup.number().when('eurYearly', {
-              is: (eurYearly: any) => !(Number(eurYearly) > 0),
-              then: Yup.number().moreThan(0).required(),
-              otherwise: Yup.number().min(0),
-            }),
-            eurYearly: Yup.number().when('eurMonthly', {
-              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
-              then: Yup.number().moreThan(0).required(),
-              otherwise: Yup.number().min(0),
-            }),
-            usdMonthly: Yup.number().min(0),
-            usdYearly: Yup.number().min(0),
-          },
-          [['eurMonthly', 'eurYearly']]
-        )
-      ),
-      otherwise: Yup.array().of(
-        Yup.object({
-          includedMtCredits: Yup.number().min(0),
-          eurMonthly: Yup.number().min(0),
-          eurYearly: Yup.number().min(0),
-          usdMonthly: Yup.number().min(0),
-          usdYearly: Yup.number().min(0),
-          pricePerThousandKeys: Yup.number().min(0),
-          pricePerSeat: Yup.number().min(0),
-          pricePerThousandTranslations: Yup.number().min(0),
-        })
-      ),
-    }),
+    tiers: tiersSchema(),
+    mtOverageEur: Yup.number().min(0),
+    mtOverageUsd: Yup.number().min(0),
     free: Yup.boolean(),
     stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
       is: (free: any, newStripeProduct: any) => !free && newStripeProduct,
@@ -452,32 +470,7 @@ export class Validation {
       is: false,
       then: Yup.string().required(),
     }),
-    tiers: Yup.array().when(['metricType', 'free'], {
-      is: (metricType: any, free: any) =>
-        metricType === 'HOSTED_WORDS' && !free,
-      then: Yup.array().of(
-        Yup.object().shape(
-          {
-            includedWords: Yup.number().moreThan(0).required(),
-            includedMtCredits: Yup.number().min(0),
-            // Same EUR-price rule as the cloud tier schema above.
-            eurMonthly: Yup.number().when('eurYearly', {
-              is: (eurYearly: any) => !(Number(eurYearly) > 0),
-              then: Yup.number().moreThan(0).required(),
-              otherwise: Yup.number().min(0),
-            }),
-            eurYearly: Yup.number().when('eurMonthly', {
-              is: (eurMonthly: any) => !(Number(eurMonthly) > 0),
-              then: Yup.number().moreThan(0).required(),
-              otherwise: Yup.number().min(0),
-            }),
-            usdMonthly: Yup.number().min(0),
-            usdYearly: Yup.number().min(0),
-          },
-          [['eurMonthly', 'eurYearly']]
-        )
-      ),
-    }),
+    tiers: tiersSchema(),
   });
 
   static readonly STORAGE_FORM_AZURE_CREATE = Yup.object({

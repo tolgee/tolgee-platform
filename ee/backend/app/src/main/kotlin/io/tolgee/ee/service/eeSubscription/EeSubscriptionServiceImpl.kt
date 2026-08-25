@@ -16,6 +16,7 @@ import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.service.eeSubscription.cloudClient.TolgeeCloudLicencingClient
+import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.limits.PlanLimitExceededSeatsException
@@ -56,6 +57,8 @@ class EeSubscriptionServiceImpl(
   private val schedulingManager: SchedulingManager,
   private val eeProperties: EeProperties,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  @Lazy
+  private val usageToReportService: UsageToReportService,
 ) : EeSubscriptionProvider,
   Logging {
   var bypassSeatCountCheck = false
@@ -81,12 +84,12 @@ class EeSubscriptionServiceImpl(
   @CacheEvict(Caches.EE_SUBSCRIPTION, key = "1")
   fun setLicenceKey(licenseKey: String): EeSubscription {
     logger.debug("Setting new licence key for local subscription: $licenseKey. Evicting cache.")
-    val seats = userAccountService.countAllEnabled()
-    val keys = keyService.countAllOnInstance()
-    val words = organizationStatsService.countAllWordsOnInstance()
     this.findSubscriptionEntity()?.let {
       throw BadRequestException(Message.THIS_INSTANCE_IS_ALREADY_LICENSED)
     }
+    val seats = userAccountService.countAllEnabled()
+    val keys = keyService.countAllOnInstance()
+    val words = organizationStatsService.countAllWordsOnInstance()
 
     val entity =
       EeSubscription().apply {
@@ -108,7 +111,9 @@ class EeSubscriptionServiceImpl(
         )
       }
 
+    val wordMeteringBefore = entity.wordMetering()
     SubscriptionFromModelAssigner(entity, response, currentDateProvider.date).assign()
+    onWordMeteringAssigned(entity, wordMeteringBefore, freshWordCount = words)
     return self.saveAndPublishFeaturesChanged(entity, emptyArray())
   }
 
@@ -140,7 +145,11 @@ class EeSubscriptionServiceImpl(
         try {
           catchingService.catchingLicenseNotFound {
             catchingService.catchingLicenseUsedByAnotherInstance {
-              client.getRemoteSubscriptionInfo(subscription.licenseKey, instanceIdService.getInstanceId())
+              client.getRemoteSubscriptionInfo(
+                subscription.licenseKey,
+                instanceIdService.getInstanceId(),
+                REPORTED_METRICS,
+              )
             }
           }
         } catch (e: Exception) {
@@ -158,10 +167,45 @@ class EeSubscriptionServiceImpl(
   ) {
     if (responseBody != null) {
       val oldFeatures = subscription.enabledFeatures.copyOf()
+      val wordMeteringBefore = subscription.wordMetering()
       SubscriptionFromModelAssigner(subscription, responseBody, currentDateProvider.date).assign()
       self.saveAndPublishFeaturesChanged(subscription, oldFeatures)
+      onWordMeteringAssigned(subscription, wordMeteringBefore, freshWordCount = null)
     }
   }
+
+  /**
+   * Nothing counts words while a plan does not meter them, so a plan that starts metering has no
+   * figure behind it and the cloud would bill on whatever the keys-and-seats era left behind.
+   */
+  private fun onWordMeteringAssigned(
+    subscription: EeSubscription,
+    before: WordMetering,
+    freshWordCount: Long?,
+  ) {
+    if (!subscription.metricType.useWords) {
+      return
+    }
+    if (before == subscription.wordMetering()) {
+      return
+    }
+    // Both writes below are bulk updates that silently match nothing until the row exists, and on
+    // an instance licensed before its first key or seat change nothing has created it yet.
+    usageToReportService.findOrCreateUsageToReport()
+    if (freshWordCount != null) {
+      usageToReportService.storeCurrentUsage(words = freshWordCount)
+      return
+    }
+    usageToReportService.markWordsDirty()
+  }
+
+  private data class WordMetering(
+    val meters: Boolean,
+    val included: Long,
+    val limit: Long,
+  )
+
+  private fun EeSubscription.wordMetering() = WordMetering(metricType.useWords, includedWords, wordsLimit)
 
   private fun handleConstantlyFailingRemoteCheck(subscription: EeSubscription) {
     subscription.lastValidCheck?.let {
@@ -268,9 +312,9 @@ class EeSubscriptionServiceImpl(
 
   companion object {
     /**
-     * What this instance can measure and report. The cloud reads a missing entry as "this instance
-     * cannot report that metric at all" — an instance released before a metric existed has no way
-     * to claim it.
+     * The cloud reads a missing entry as "this instance cannot report that metric at all". Sent on
+     * every licence call, refresh included, so a subscription moved onto a new metric after
+     * activation is not the one case the declaration never reaches.
      */
     private val REPORTED_METRICS = setOf(MetricType.KEYS_SEATS, MetricType.HOSTED_WORDS)
 

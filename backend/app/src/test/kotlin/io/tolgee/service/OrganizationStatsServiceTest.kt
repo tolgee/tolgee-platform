@@ -1,9 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.CountAllWordsOnInstanceTestData
 import io.tolgee.development.testDataBuilder.data.OrganizationStatsTestData
-import io.tolgee.development.testDataBuilder.data.OrganizationStatsWordCountTestData
 import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -108,58 +106,5 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // First project: 5 + Second project: 3 + Third project: 2 = 10
     val translationCount = organizationStatsService.getTranslationCount(testData.organization.id)
     assertThat(translationCount).isEqualTo(10)
-  }
-
-  @Test
-  fun `getWordCount sums word counts across all languages for a single key`() {
-    // One key with two language translations:
-    // EN "hello world" = 2 words, DE "foo bar baz" = 3 words → total = 5
-    val wcData = OrganizationStatsWordCountTestData()
-    testDataService.saveTestData(wcData.root)
-    val wordCount = organizationStatsService.getWordCount(wcData.multiLangOrg.id)
-    assertThat(wordCount).isEqualTo(5)
-  }
-
-  @Test
-  fun `getWordCount takes MAX word count across branches for the same key and language`() {
-    // bd-key1 in EN: main branch has "one" (1 word), feature branch has "hello world" (2 words)
-    // MAX(1, 2) = 2 — should not double-count
-    val wcData = OrganizationStatsWordCountTestData()
-    testDataService.saveTestData(wcData.root)
-    val wordCount = organizationStatsService.getWordCount(wcData.branchDedupOrg.id)
-    assertThat(wordCount).isEqualTo(2)
-  }
-
-  @Test
-  fun `getWordCount excludes non-default branch keys when use_branching is false`() {
-    // nb-wc-key1 on null branch (2 words) is counted; nb-wc-key2 on orphan branch (3 words) is excluded
-    val wcData = OrganizationStatsWordCountTestData()
-    testDataService.saveTestData(wcData.root)
-    val wordCount = organizationStatsService.getWordCount(wcData.noBranchingOrg.id)
-    assertThat(wordCount).isEqualTo(2)
-  }
-
-  @Test
-  fun `getWordCount excludes empty translations`() {
-    // et-key1 has EN translation with empty text — contributes 0 words
-    val wcData = OrganizationStatsWordCountTestData()
-    testDataService.saveTestData(wcData.root)
-    val wordCount = organizationStatsService.getWordCount(wcData.emptyTranslationOrg.id)
-    assertThat(wordCount).isEqualTo(0)
-  }
-
-  @Test
-  fun `countAllWordsOnInstance sums branch-deduped word counts across the whole instance`() {
-    // firstOrg: EN "hello world" = 2 words
-    // secondOrg (use_branching = true): same key on main ("one" = 1) and feature
-    // ("hello world there" = 3) branches — MAX(1, 3) = 3, not the sum (4)
-    // Total contributed by this test data: 2 + 3 = 5
-    val baseline = organizationStatsService.countAllWordsOnInstance()
-
-    val cawData = CountAllWordsOnInstanceTestData()
-    testDataService.saveTestData(cawData.root)
-
-    val wordCount = organizationStatsService.countAllWordsOnInstance()
-    assertThat(wordCount - baseline).isEqualTo(5)
   }
 }

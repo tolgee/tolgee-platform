@@ -8,12 +8,9 @@ import {
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import {
-  useBillingApiMutation,
-  useBillingApiQuery,
-} from 'tg.service/http/useQueryApi';
 import { getProgressData } from '../component/getProgressData';
 import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
+import { useWordsAutoUpgrade } from './useWordsAutoUpgrade';
 import React from 'react';
 
 type Props = {
@@ -25,59 +22,20 @@ export const PlanLimitPopoverCloud: React.FC<
   React.PropsWithChildren<Props>
 > = ({ open, onClose }) => {
   const { preferredOrganization } = usePreferredOrganization();
-  const { usage } = useOrganizationUsage();
+  const { usage, planLimitErrorCode } = useOrganizationUsage();
   const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
   const history = useHistory();
 
-  const subscriptionLoadable = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/subscription',
-    method: 'get',
-    path: {
-      organizationId: preferredOrganization?.id || 0,
-    },
-    options: {
-      enabled: open && isOwner && preferredOrganization?.id !== undefined,
-    },
-  });
-
-  const subscription = subscriptionLoadable.data;
   const progressData = usage && getProgressData({ usage });
 
-  // The popover opens for any plan-limit error, including a batch job running out of MT credits,
-  // which shares the same counter. Offering auto-upgrade off the plan's metric alone told those
-  // users their word limit was exhausted and put a billing setting one click away for a problem
-  // that had nothing to do with words — so the words have to actually be exhausted.
-  const wordsExhausted = Boolean(
-    progressData?.wordsProgress.isInUse &&
-      progressData.wordsProgress.progress >= 1
-  );
-  const wordsAutoUpgradeAvailable = Boolean(
-    subscription &&
-      subscription.plan.metricType === 'HOSTED_WORDS' &&
-      !subscription.plan.free &&
-      !subscription.autoUpgradeEnabled &&
-      wordsExhausted
-  );
+  // The rejected write is not persisted, so the reported usage does not show the overshoot that
+  // caused it. Only the error code says which limit was hit.
+  const wordsExhausted = planLimitErrorCode === 'plan_word_limit_exceeded';
 
-  const autoUpgradeMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/auto-upgrade',
-    method: 'put',
-    invalidatePrefix: '/v2/organizations',
+  const wordsAutoUpgrade = useWordsAutoUpgrade({
+    enabled: open && isOwner,
+    wordsExhausted,
   });
-
-  const handleEnableAutoUpgrade = () => {
-    autoUpgradeMutation.mutate(
-      {
-        path: { organizationId: preferredOrganization!.id },
-        content: { 'application/json': { enabled: true } },
-      },
-      {
-        onSuccess: () => {
-          onClose();
-        },
-      }
-    );
-  };
 
   const handleConfirm = () => {
     onClose();
@@ -95,24 +53,34 @@ export const PlanLimitPopoverCloud: React.FC<
       isPayAsYouGo={usage?.isPayAsYouGo}
       progressData={progressData}
       additionalContent={
-        wordsAutoUpgradeAvailable && (
-          <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-hint">
-            <T
-              keyName="plan_limit_dialog_words_auto_upgrade_hint"
-              defaultValue="Your plan's word limit was reached and auto-upgrade is disabled, so adding more content is blocked. Enable auto-upgrade to move to a higher word tier automatically, or upgrade your plan manually."
-            />
-          </DialogContentText>
-        )
+        <>
+          {wordsAutoUpgrade.available && (
+            <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-hint">
+              <T
+                keyName="plan_limit_dialog_words_auto_upgrade_hint"
+                defaultValue="Your plan's word limit was reached and auto-upgrade is disabled, so adding more content is blocked. Enable auto-upgrade to move to a higher word tier automatically, or upgrade your plan manually."
+              />
+            </DialogContentText>
+          )}
+          {wordsAutoUpgrade.ineffective && (
+            <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-ineffective">
+              <T
+                keyName="plan_limit_dialog_words_auto_upgrade_ineffective"
+                defaultValue="Your plan's word limit was reached. Auto-upgrade is already on, but it cannot be applied to this subscription — there may be no higher word tier available, or a plan change is already scheduled. Contact us to find the right plan."
+              />
+            </DialogContentText>
+          )}
+        </>
       }
       actionButton={
         isOwner && (
           <>
-            {wordsAutoUpgradeAvailable && (
+            {wordsAutoUpgrade.available && (
               <LoadingButton
                 data-cy="plan-limit-dialog-enable-auto-upgrade"
                 color="primary"
-                loading={autoUpgradeMutation.isLoading}
-                onClick={handleEnableAutoUpgrade}
+                loading={wordsAutoUpgrade.isEnabling}
+                onClick={() => wordsAutoUpgrade.enable(onClose)}
               >
                 <T
                   keyName="plan_limit_dialog_enable_auto_upgrade"

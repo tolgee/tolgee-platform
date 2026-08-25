@@ -94,7 +94,9 @@ open class PublicUsageModel(
   )
   val currentWords: Long,
   @Schema(
-    description = "How many hosted words can be stored until reaching the limit.",
+    description =
+      "Total number of hosted words the organization can store (-1 for unlimited). " +
+        "For pay-as-you-go, the top limit is the spending limit.",
   )
   val wordsLimit: Long,
 ) : RepresentationModel<PublicUsageModel>(),

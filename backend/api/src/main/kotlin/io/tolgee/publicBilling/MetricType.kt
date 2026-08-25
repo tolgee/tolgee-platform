@@ -1,5 +1,7 @@
 package io.tolgee.publicBilling
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+
 enum class MetricType(
   val useSeats: Boolean,
   val useKeys: Boolean,
@@ -9,6 +11,7 @@ enum class MetricType(
   /**
    * Non-free plans, where user cay be charged by their usage
    */
+  @JsonEnumDefaultValue
   KEYS_SEATS(useSeats = true, useKeys = true, useStrings = false, useWords = false),
   STRINGS(useSeats = false, useKeys = false, useStrings = true, useWords = false),
   HOSTED_WORDS(useSeats = false, useKeys = false, useStrings = false, useWords = true),

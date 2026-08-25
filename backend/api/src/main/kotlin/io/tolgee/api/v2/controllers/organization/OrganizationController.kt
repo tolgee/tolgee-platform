@@ -321,10 +321,9 @@ class OrganizationController(
     val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
-    val currentTranslations = organizationStatsService.getTranslationCount(organization.id)
+    val translationsAndWords = organizationStatsService.getTranslationAndWordCount(organization.id)
     val currentSeats = organizationStatsService.getSeatCountToCountSeats(organization.id)
     val currentKeys = organizationStatsService.getKeyCount(organization.id)
-    val currentWords = organizationStatsService.getWordCount(organization.id)
     val limits = limitsProvider.getLimits(organization.id)
 
     return PublicUsageModel(
@@ -336,7 +335,7 @@ class OrganizationController(
       creditBalanceNextRefillAt = creditBalances.nextRefillAt.time,
       currentPayAsYouGoMtCredits = currentPayAsYouGoMtCredits,
       availablePayAsYouGoMtCredits = availablePayAsYouGoMtCredits,
-      currentTranslations = currentTranslations,
+      currentTranslations = translationsAndWords.translations,
       includedTranslations = limits.strings.included,
       translationsLimit = limits.strings.limit,
       includedKeys = limits.keys.included,
@@ -347,7 +346,7 @@ class OrganizationController(
       currentSeats = currentSeats,
       usedMtCredits = creditBalances.usedCredits / 100,
       includedWords = limits.words.included,
-      currentWords = currentWords,
+      currentWords = translationsAndWords.words,
       wordsLimit = limits.words.limit,
     )
   }

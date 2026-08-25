@@ -13,6 +13,7 @@ class SelfHostedLimitsProviderTest {
   private fun subscriptionDto(
     includedWords: Long,
     wordsLimit: Long,
+    metersWords: Boolean = true,
   ) = EeSubscriptionDto(
     licenseKey = "mock",
     name = "Plan",
@@ -24,6 +25,7 @@ class SelfHostedLimitsProviderTest {
     seatsLimit = -1,
     includedWords = includedWords,
     wordsLimit = wordsLimit,
+    metersWords = metersWords,
   )
 
   private fun provider(dto: EeSubscriptionDto): SelfHostedLimitsProvider {
@@ -39,7 +41,9 @@ class SelfHostedLimitsProviderTest {
         .getLimits()
         .words
 
-    assertThat(limits).isEqualTo(UsageLimits.Limit(included = 100000, limit = 100000))
+    assertThat(limits).isEqualTo(
+      UsageLimits.Limit(included = 100000, limit = 100000, autoUpgradeEffective = false),
+    )
   }
 
   @Test
@@ -49,6 +53,40 @@ class SelfHostedLimitsProviderTest {
         .getLimits()
         .words
 
-    assertThat(limits).isEqualTo(UsageLimits.Limit(included = -1, limit = -1))
+    assertThat(limits).isEqualTo(
+      UsageLimits.Limit(included = -1, limit = -1, autoUpgradeEffective = false),
+    )
+  }
+
+  /**
+   * The numbers cannot answer this: a keys-and-seats licence and a word plan with an unlimited or
+   * negotiated allowance both arrive as Limit(-1, -1) / Limit(-2, -2).
+   */
+  @Test
+  fun `meters words on a word plan whose allowance carries no number`() {
+    listOf(-1L, -2L).forEach { allowance ->
+      assertThat(
+        provider(subscriptionDto(includedWords = allowance, wordsLimit = allowance))
+          .getLimits()
+          .metersWords,
+      ).withFailMessage("allowance %d should still be metered", allowance).isTrue()
+    }
+  }
+
+  @Test
+  fun `does not meter words on a keys-and-seats licence, whatever the word numbers say`() {
+    assertThat(
+      provider(subscriptionDto(includedWords = 100000, wordsLimit = 100000, metersWords = false))
+        .getLimits()
+        .metersWords,
+    ).isFalse()
+  }
+
+  @Test
+  fun `meters nothing without a subscription`() {
+    val service = mock<EeSubscriptionServiceImpl>()
+    whenever(service.findSubscriptionDto()).thenReturn(null)
+
+    assertThat(SelfHostedLimitsProvider(service).getLimits().metersWords).isFalse()
   }
 }

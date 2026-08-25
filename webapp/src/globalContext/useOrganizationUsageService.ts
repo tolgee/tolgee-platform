@@ -22,6 +22,7 @@ export const useOrganizationUsageService = ({
     UsageModel | undefined
   >(undefined);
   const [planLimitErrors, setPlanLimitErrors] = useState(0);
+  const [planLimitErrorCode, setPlanLimitErrorCode] = useState<string>();
   const [spendingLimitErrors, setSpendingLimitErrors] = useState(0);
 
   const usageEnabled =
@@ -58,7 +59,8 @@ export const useOrganizationUsageService = ({
         : val
     );
 
-  const incrementPlanLimitErrors = () => {
+  const incrementPlanLimitErrors = (code?: string) => {
+    setPlanLimitErrorCode(code);
     setPlanLimitErrors((v) => v + 1);
   };
 
@@ -108,6 +110,7 @@ export const useOrganizationUsageService = ({
     state: {
       usage: organizationUsage,
       planLimitErrors,
+      planLimitErrorCode,
       spendingLimitErrors,
     },
     actions: {

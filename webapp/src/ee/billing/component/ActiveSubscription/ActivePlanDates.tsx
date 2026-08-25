@@ -1,8 +1,6 @@
 import { T } from '@tolgee/react';
 import { Box, Typography } from '@mui/material';
 
-import { useDateFormatter } from 'tg.hooks/useLocale';
-
 type Props = {
   createdAt?: number;
   periodStart?: number;
@@ -14,17 +12,18 @@ export const ActivePlanDates = ({
   periodStart,
   periodEnd,
 }: Props) => {
-  const formatDate = useDateFormatter();
-
   return (
     <Box display="grid">
-      {createdAt && (
+      {Boolean(createdAt) && (
         <Typography
           variant="caption"
           data-cy="billing-active-card-subscribed-at"
         >
-          <T keyName="active-plan-subscribed-at-tooltip" />:{' '}
-          {formatDate(createdAt)}
+          <T
+            keyName="active-plan-subscribed-at"
+            defaultValue="Subscribed at {date, date}"
+            params={{ date: createdAt }}
+          />
         </Typography>
       )}
       {Boolean(periodStart && periodEnd) && (

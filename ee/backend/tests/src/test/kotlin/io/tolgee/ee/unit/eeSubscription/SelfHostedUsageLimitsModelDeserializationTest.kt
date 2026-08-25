@@ -5,11 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.jacksonObjectMapper
 
-/**
- * An instance can run a newer version than the licensing server it talks to, so the licence
- * response may predate any field added here. A missing field must not fail the whole model —
- * that would break the entire licence check, not just the fields it lacks.
- */
 class SelfHostedUsageLimitsModelDeserializationTest {
   private val objectMapper = jacksonObjectMapper()
 

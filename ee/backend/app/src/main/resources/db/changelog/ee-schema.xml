@@ -167,7 +167,28 @@
     </changeSet>
     <changeSet author="dkrizan" id="1751900000000-4">
         <addColumn tableName="ee_subscription">
-            <column name="auto_upgrade_enabled" type="BOOLEAN" defaultValueBoolean="false">
+            <column name="auto_upgrade_effective" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-5">
+        <addColumn tableName="usage_to_report">
+            <column name="words_dirty" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-6">
+        <addColumn tableName="usage_to_report">
+            <column name="words_counted_at" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueDate="1970-01-01T00:00:00">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1751900000000-8">
+        <addColumn tableName="ee_subscription">
+            <column name="metric_type" type="VARCHAR(255)" defaultValue="KEYS_SEATS">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

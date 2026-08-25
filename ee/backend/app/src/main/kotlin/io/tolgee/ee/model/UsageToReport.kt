@@ -2,6 +2,7 @@ package io.tolgee.ee.model
 
 import io.tolgee.ee.data.usageReporting.IUsageToReport
 import io.tolgee.model.AuditModel
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
@@ -55,6 +56,23 @@ class UsageToReport :
    */
   @ColumnDefault("0")
   override var wordsToReport: Long = 0
+
+  /**
+   * Raised by write paths; the periodic report takes the count, because counting words on the
+   * instance is a full aggregation.
+   */
+  @ColumnDefault("false")
+  override var wordsDirty: Boolean = false
+
+  /**
+   * When the instance word count was last taken. Its own clock, because the shared [reportedAt] is
+   * advanced by every key and seat report, so on an instance with steady key activity it would
+   * never reopen — and it throttles the count rather than the send, because the count is the
+   * expensive half.
+   */
+  @ColumnDefault("'1970-01-01 00:00:00'")
+  @Column(nullable = false)
+  override var wordsCountedAt: Date = Date(0)
 
   /**
    * Timestamp of when the last report was made

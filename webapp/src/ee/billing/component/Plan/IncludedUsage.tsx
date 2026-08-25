@@ -11,22 +11,17 @@ import {
 } from '../IncludedItem';
 import { Stars } from 'tg.component/CustomIcons';
 
-/**
- * The chip carries a sentence rather than a label, and MUI chips keep their content width, so
- * without wrapping it spills out of a narrow plan card.
- */
 const StyledBoostChip = styled(SecondaryChip)`
   align-self: center;
-  margin-top: 10px;
+  margin-top: ${({ theme }) => theme.spacing(1)};
   max-width: 100%;
   height: auto;
 
   & .MuiChip-label {
     white-space: normal;
     text-align: center;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    font-size: 12px;
+    padding: ${({ theme }) => theme.spacing(0.5)} 0;
+    font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
   }
 `;
 
@@ -36,6 +31,7 @@ type Props = {
   sx?: SxProps<Theme>;
   className?: string;
   metricType: PlanType['metricType'];
+  free?: PlanType['free'];
   onboardingBoostMonths?: number;
   onboardingBoostCredits?: number;
 };
@@ -43,15 +39,15 @@ type Props = {
 export const IncludedUsage = ({
   includedUsage,
   metricType,
+  free,
   highlightColor,
   sx,
   className,
   onboardingBoostMonths,
   onboardingBoostCredits,
 }: Props) => {
-  // Both halves are needed for the sentence to say anything: a boost of no credits, or credits for
-  // no months, is not a boost.
   const hasBoost = Boolean(onboardingBoostMonths && onboardingBoostCredits);
+  const wordPlanSeats = free ? includedUsage?.seats ?? -1 : -1;
   return (
     <Box
       display="flex"
@@ -80,7 +76,7 @@ export const IncludedUsage = ({
             <IncludedSeats
               data-cy={'billing-plan-included-seats'}
               className="seats"
-              count={includedUsage?.seats ?? -1}
+              count={wordPlanSeats}
               highlightColor={highlightColor}
             />
           </>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { isMenuItemSelected } from 'tg.fixtures/menuSelection';
 import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material';
@@ -47,13 +48,9 @@ export const SettingsMenuItem: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const match = useLocation();
 
-  // Prefix must end at a path-segment boundary — otherwise /billing also
-  // matches /billing-test-clock-helper.
-  const isSelected = selected
-    ? true
-    : matchAsPrefix
-    ? match.pathname === linkTo || match.pathname.startsWith(`${linkTo}/`)
-    : match.pathname === linkTo;
+  const isSelected =
+    selected ||
+    isMenuItemSelected(match.pathname, String(linkTo), matchAsPrefix);
 
   return (
     <StyledItem>

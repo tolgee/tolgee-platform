@@ -16,6 +16,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.hateoas.ee.uasge.current.CurrentUsageModel
+import io.tolgee.publicBilling.MetricType
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
@@ -38,11 +39,12 @@ class TolgeeCloudLicencingClient(
   internal fun getRemoteSubscriptionInfo(
     licenseKey: String,
     instanceId: String,
+    reportedMetrics: Set<MetricType>,
   ): SelfHostedEeSubscriptionModel? {
     val responseBody =
       postRequest<SelfHostedEeSubscriptionModel>(
         SUBSCRIPTION_INFO_PATH,
-        GetMySubscriptionDto(licenseKey, instanceId),
+        GetMySubscriptionDto(licenseKey, instanceId, reportedMetrics),
       )
     return responseBody
   }
@@ -97,7 +99,13 @@ class TolgeeCloudLicencingClient(
     url: String,
     body: Any,
   ): T {
-    return httpClient.requestForJson("${eeProperties.licenseServer}$url", body, HttpMethod.POST, T::class.java)
+    return httpClient.requestForJson(
+      "${eeProperties.licenseServer}$url",
+      body,
+      HttpMethod.POST,
+      T::class.java,
+      lenientEnums = true,
+    )
   }
 
   fun getUsageRemote(licenseKey: String): CurrentUsageModel {

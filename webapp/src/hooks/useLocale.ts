@@ -10,27 +10,41 @@ export const MoneyCurrencyContext = createContext<string>('EUR');
 
 export const MoneyCurrencyProvider = MoneyCurrencyContext.Provider;
 
+export const moneyFractionDigits = (options?: Intl.NumberFormatOptions) => {
+  const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
+  return {
+    maximumFractionDigits,
+    minimumFractionDigits: Math.min(
+      options?.minimumFractionDigits ?? 2,
+      maximumFractionDigits
+    ),
+  };
+};
+
+export const formatMoney = (
+  language: string | undefined,
+  currency: string,
+  number: number | undefined,
+  options?: Intl.NumberFormatOptions
+) => {
+  const { maximumFractionDigits, minimumFractionDigits } =
+    moneyFractionDigits(options);
+  const rounded = Number(number?.toFixed(maximumFractionDigits)) || 0;
+
+  return new Intl.NumberFormat(language, {
+    style: 'currency',
+    currency,
+    ...options,
+    maximumFractionDigits,
+    minimumFractionDigits,
+  }).format(rounded);
+};
+
 export const useMoneyFormatter = () => {
   const language = useCurrentLanguage();
   const contextCurrency = useContext(MoneyCurrencyContext);
-  return (number: number | undefined, options?: Intl.NumberFormatOptions) => {
-    const maximumFractionDigits = options?.maximumFractionDigits ?? 2;
-    const rounded = Number(number?.toFixed(maximumFractionDigits)) || 0;
-    // Intl throws a RangeError when the minimum exceeds the maximum, so a caller asking for
-    // fewer digits than the default minimum must not have to pass both bounds.
-    const minimumFractionDigits = Math.min(
-      options?.minimumFractionDigits ?? 2,
-      maximumFractionDigits
-    );
-
-    return new Intl.NumberFormat(language, {
-      style: 'currency',
-      currency: contextCurrency,
-      ...options,
-      maximumFractionDigits,
-      minimumFractionDigits,
-    }).format(rounded);
-  };
+  return (number: number | undefined, options?: Intl.NumberFormatOptions) =>
+    formatMoney(language, contextCurrency, number, options);
 };
 
 export const useDateFormatter = () => {

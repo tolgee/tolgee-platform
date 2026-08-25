@@ -2,32 +2,23 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 
-/**
- * Test data for OrganizationStatsService.getWordCount scenarios.
- *
- * Each scenario lives in its own organization so assertions stay isolated.
- *
- * Word counts used:
- *   "hello world" = 2 words
- *   "foo bar baz" = 3 words
- *   "one"         = 1 word
- */
 class OrganizationStatsWordCountTestData {
   val root = TestDataBuilder()
 
-  // Scenario 1: multi-language sum
+  lateinit var multiLangUser: UserAccount
+
   lateinit var multiLangOrg: Organization
 
-  // Scenario 2: branch dedup (use_branching = true, MAX across branches)
   lateinit var branchDedupOrg: Organization
 
-  // Scenario 3: non-branching excludes non-default-branch keys
   lateinit var noBranchingOrg: Organization
 
-  // Scenario 4: empty translations contribute 0
   lateinit var emptyTranslationOrg: Organization
+
+  lateinit var nullBranchDedupOrg: Organization
 
   init {
     root.apply {
@@ -35,18 +26,17 @@ class OrganizationStatsWordCountTestData {
       addBranchDedupScenario()
       addNoBranchingScenario()
       addEmptyTranslationScenario()
+      addNullBranchDedupScenario()
     }
   }
 
-  /**
-   * One key, two languages: EN "hello world" (2) + DE "foo bar baz" (3) = 5 words total.
-   */
   private fun TestDataBuilder.addMultiLangScenario() {
     val userBuilder =
       addUserAccount {
         username = "wc-multi-lang-user"
       }
 
+    multiLangUser = userBuilder.self
     multiLangOrg = userBuilder.defaultOrganizationBuilder.self
 
     addProject {
@@ -73,11 +63,6 @@ class OrganizationStatsWordCountTestData {
     }
   }
 
-  /**
-   * Same key in two branches, one language:
-   * main = "one" (1 word), feature = "hello world" (2 words).
-   * MAX(1, 2) = 2 — should not sum to 3.
-   */
   private fun TestDataBuilder.addBranchDedupScenario() {
     val userBuilder =
       addUserAccount {
@@ -100,6 +85,11 @@ class OrganizationStatsWordCountTestData {
         originalName = "English"
         this@build.self.baseLanguage = this
       }
+      addLanguage {
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
+      }
 
       addBranch {
         name = "main"
@@ -118,22 +108,18 @@ class OrganizationStatsWordCountTestData {
         branch = mainBranch
       }.build {
         addTranslation("en", "one")
+        addTranslation("de", "eins zwei drei vier")
       }
       addKey {
         name = "bd-key1"
         branch = featureBranch
       }.build {
         addTranslation("en", "hello world")
+        addTranslation("de", "eins zwei")
       }
     }
   }
 
-  /**
-   * use_branching = false:
-   * nb-wc-key1 on null branch (2 words) is counted;
-   * nb-wc-key2 on orphan branch (3 words) is excluded.
-   * Expected = 2.
-   */
   private fun TestDataBuilder.addNoBranchingScenario() {
     val userBuilder =
       addUserAccount {
@@ -168,12 +154,10 @@ class OrganizationStatsWordCountTestData {
           originBranch = mainBranch
         }.build { self }.self
 
-      // On null branch (no branch_id) — counted
       addKey { name = "nb-wc-key1" }.build {
         addTranslation("en", "hello world")
       }
 
-      // On orphan branch — excluded (branching disabled)
       addKey {
         name = "nb-wc-key2"
         branch = orphanBranch
@@ -183,11 +167,6 @@ class OrganizationStatsWordCountTestData {
     }
   }
 
-  /**
-   * Empty translation: text is "" which the StateListener converts to null on persist,
-   * and the SQL filters out (text is not null and text <> '').
-   * Expected word count = 0.
-   */
   private fun TestDataBuilder.addEmptyTranslationScenario() {
     val userBuilder =
       addUserAccount {
@@ -210,6 +189,50 @@ class OrganizationStatsWordCountTestData {
 
       addKey { name = "et-key1" }.build {
         addTranslation("en", "")
+      }
+    }
+  }
+
+  /**
+   * The same name on a branch and on no branch at all, in a branching project. Both are counted, so
+   * they must still collapse to one — this is the case the unique indexes allow and the reason the
+   * branch collapse keys on the name rather than on the branch.
+   */
+  private fun TestDataBuilder.addNullBranchDedupScenario() {
+    val userBuilder =
+      addUserAccount {
+        username = "wc-null-branch-dedup-user"
+      }
+
+    nullBranchDedupOrg = userBuilder.defaultOrganizationBuilder.self
+
+    addProject {
+      name = "Null Branch Dedup WC Project"
+      organizationOwner = nullBranchDedupOrg
+      useBranching = true
+    }.build {
+      addLanguage {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        this@build.self.baseLanguage = this
+      }
+
+      val featureBranch =
+        addBranch {
+          name = "feature"
+          project = self
+        }.build { self }
+          .self
+
+      addKey { name = "nbd-key1" }.build {
+        addTranslation("en", "one")
+      }
+      addKey {
+        name = "nbd-key1"
+        branch = featureBranch
+      }.build {
+        addTranslation("en", "hello world there")
       }
     }
   }

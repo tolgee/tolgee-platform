@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getProgressData } from './getProgressData';
 
-/**
- * A word plan carries an includedSeats allowance for its free tier, but nothing enforces it —
- * the server reports seatsLimit as unlimited. Rendering a bar for it puts an organization
- * permanently over a limit that does not exist.
- */
 describe('usage progress', () => {
   const usage = (overrides = {}) =>
     ({
@@ -20,6 +15,7 @@ describe('usage progress', () => {
       usedMtCredits: 0,
       includedWords: 50_000,
       currentWords: 100,
+      wordsLimit: 50_000,
       isPayAsYouGo: false,
       ...overrides,
     } as any);
@@ -44,5 +40,51 @@ describe('usage progress', () => {
 
     expect(seatsProgress.isInUse).toBe(true);
     expect(seatsProgress.progress).toBeGreaterThan(1);
+  });
+
+  it('shows the word bar on a word plan', () => {
+    const { wordsProgress } = getProgressData({ usage: usage() });
+
+    expect(wordsProgress.isInUse).toBe(true);
+    expect(wordsProgress.progress).toBe(100 / 50_000);
+  });
+
+  it('hides the word bar when the plan does not meter words', () => {
+    const { wordsProgress } = getProgressData({
+      usage: usage({ includedWords: -1, wordsLimit: -1 }),
+    });
+
+    expect(wordsProgress.isInUse).toBe(false);
+    expect(wordsProgress.progress).toBe(0);
+  });
+
+  it('hides the word bar for an allowance the server does not enforce', () => {
+    // A keys-and-seats plan carrying a residual word allowance.
+    const { wordsProgress, isCritical } = getProgressData({
+      usage: usage({
+        includedWords: 50_000,
+        currentWords: 60_000,
+        wordsLimit: -1,
+      }),
+    });
+
+    expect(wordsProgress.isInUse).toBe(false);
+    expect(isCritical).toBe(false);
+  });
+
+  it('does not let an unmetered word count raise the critical warning', () => {
+    const { isCritical } = getProgressData({
+      usage: usage({ includedWords: -1, currentWords: 100_000 }),
+    });
+
+    expect(isCritical).toBe(false);
+  });
+
+  it('raises the critical warning once the word allowance runs low', () => {
+    const { isCritical } = getProgressData({
+      usage: usage({ currentWords: 49_000 }),
+    });
+
+    expect(isCritical).toBe(true);
   });
 });

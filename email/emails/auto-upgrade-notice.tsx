@@ -93,19 +93,19 @@ export default function AutoUpgradeNoticeEmail() {
               <If.Then>
                 <LocalizedText
                   keyName="auto-upgrade-notice-price-from"
-                  defaultValue="Based on your usage today that would go from <b>{currentPrice}</b> to <b>{newPrice}</b> per {periodNoun}."
+                  defaultValue="Based on your usage today that would go from <b>{currentPrice}</b> to <b>{newPrice}</b> per {period, select, YEARLY {year} other {month}}."
                   demoParams={{
                     newPrice: '€495',
                     currentPrice: '€395',
-                    periodNoun: 'month',
+                    period: 'MONTHLY',
                   }}
                 />
               </If.Then>
               <If.Else>
                 <LocalizedText
                   keyName="auto-upgrade-notice-price"
-                  defaultValue="Based on your usage today that would be <b>{newPrice}</b> per {periodNoun}."
-                  demoParams={{ newPrice: '€495', periodNoun: 'month' }}
+                  defaultValue="Based on your usage today that would be <b>{newPrice}</b> per {period, select, YEARLY {year} other {month}}."
+                  demoParams={{ newPrice: '€495', period: 'MONTHLY' }}
                 />
               </If.Else>
             </If>

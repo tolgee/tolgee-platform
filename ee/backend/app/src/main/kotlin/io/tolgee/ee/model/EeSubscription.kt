@@ -6,6 +6,7 @@ import io.tolgee.api.PlanWithIncludedKeysAndSeats
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.model.AuditModel
+import io.tolgee.publicBilling.MetricType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -71,7 +72,8 @@ class EeSubscription :
       seatsLimit = seatsLimit,
       includedWords = includedWords,
       wordsLimit = wordsLimit,
-      autoUpgradeEnabled = autoUpgradeEnabled,
+      autoUpgradeEffective = autoUpgradeEffective,
+      metersWords = metricType.useWords,
     )
   }
 
@@ -115,10 +117,18 @@ class EeSubscription :
   var wordsLimit: Long = -1L
 
   /**
-   * Whether the subscription auto-upgrades to a covering tier instead of blocking over the word limit.
-   * Defaults to false (blocking) so instances on an older server version that don't send this field
-   * on the license stay blocking.
+   * False (blocking) when the licence server predates the field — see [io.tolgee.dtos.UsageLimits].
    */
   @ColumnDefault("false")
-  var autoUpgradeEnabled: Boolean = false
+  var autoUpgradeEffective: Boolean = false
+
+  /**
+   * Which metric the plan bills on. KEYS_SEATS when the licence server predates the field, and the
+   * fallback for a metric this instance is too old to know — an instance must not meter on a metric
+   * whose limits it cannot interpret.
+   */
+  @Enumerated(EnumType.STRING)
+  @ColumnDefault("'KEYS_SEATS'")
+  @Column(nullable = false)
+  var metricType: MetricType = MetricType.KEYS_SEATS
 }

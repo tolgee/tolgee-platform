@@ -2,8 +2,8 @@ import { components } from 'tg.service/billingApiSchema.generated';
 
 type CloudPlanTierModel = components['schemas']['CloudPlanTierModel'];
 
-// The self-hosted plan models and the synthetic Enterprise card share this shape, and neither
-// carries an onboarding boost — it is a cloud-only offering field.
+// Also the shape of the self-hosted plan models and of the synthetic Enterprise card, neither of
+// which carries prices, included usage or an onboarding boost.
 export type PlanType = Omit<
   CloudPlanTierModel,
   | 'prices'
