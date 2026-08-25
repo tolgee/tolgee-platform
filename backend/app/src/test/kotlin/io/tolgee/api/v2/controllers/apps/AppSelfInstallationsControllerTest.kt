@@ -27,8 +27,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 
 /**
- * Covers what an app backend learns about itself from `/v2/apps/self/installations` — and, just as
- * importantly, that nothing but an install-context token learns it.
+ * Discovery from `/v2/apps/self/installations`: an app-level token lists the app's installations, and
+ * nothing but an app-level token reaches it.
  */
 class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   @Autowired
@@ -40,7 +40,9 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
   lateinit var testData: AppsTestData
   var installId: Long = 0
-  lateinit var installToken: String
+  lateinit var appClientId: String
+  lateinit var appClientSecret: String
+  lateinit var appLevelToken: String
 
   @BeforeEach
   fun setup() {
@@ -51,8 +53,10 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
     val registration = registerOrganizationInstall()
     installId = registration.first
+    appClientId = registration.second
+    appClientSecret = registration.third
     performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
-    installToken = requestInstallToken(registration.second, registration.third, registration.first)
+    appLevelToken = requestToken(appClientId, appClientSecret, installId = null)
   }
 
   @AfterEach
@@ -61,8 +65,8 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `reports its own install with the projects it is enabled for`() {
-    asToken(installToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
+  fun `lists the app's installations with the projects each is enabled for`() {
+    asToken(appLevelToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
       node("_embedded.installations").isArray.hasSize(1)
       node("_embedded.installations[0].id").isEqualTo(installId)
       node("_embedded.installations[0].appId").isEqualTo("test-app")
@@ -83,11 +87,9 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `omits a project the app is not enabled for until it is enabled`() {
+  fun `reflects a project becoming enabled`() {
     enabledProjectIds().assert.containsExactly(testData.project.id)
 
-    // Calling as the app logs the session out, and the getter would otherwise fall back to the
-    // server's initial user, who cannot see this organization's projects.
     userAccount = testData.user
     performAuthPut("/v2/projects/${testData.siblingProject.id}/apps/$installId", null).andIsOk
 
@@ -99,15 +101,23 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `drops a project once the app is disabled for it`() {
+    enabledProjectIds().assert.containsExactly(testData.project.id)
+
+    userAccount = testData.user
     performAuthDelete("/v2/projects/${testData.project.id}/apps/$installId").andIsOk
 
     enabledProjectIds().assert.isEmpty()
   }
 
-  /**
-   * A user-context token acts for one signed-in user, who need not be a member of every project the
-   * install is enabled for — and the iframe is handed its project in the init payload anyway.
-   */
+  @Test
+  fun `refuses an install-context token`() {
+    val installToken = requestToken(appClientId, appClientSecret, installId)
+
+    asToken(installToken, get(SELF_INSTALLATIONS))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
   @Test
   fun `refuses a user-context token`() {
     val userToken =
@@ -123,16 +133,13 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
-  /**
-   * Acting-as is only resolved once a project is bound; on this route it never is, so a nonexistent
-   * user id must not turn into a 403 that reveals which ids exist. It is simply ignored.
-   */
+  /** Acting-as is meaningless for an app-level token; the header is ignored, never resolved to a user. */
   @Test
-  fun `does not resolve the acting-as header on a route that binds no project`() {
+  fun `ignores an acting-as header on the app-level route`() {
     logout()
     perform(
       get(SELF_INSTALLATIONS)
-        .header(HttpHeaders.AUTHORIZATION, "Bearer $installToken")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer $appLevelToken")
         .header(AuthenticationFilter.ACTING_AS_USER_HEADER, "9999999"),
     ).andIsOk
   }
@@ -157,7 +164,7 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
   private fun enabledProjectIds(): List<Long> {
     val response =
-      asToken(installToken, get(SELF_INSTALLATIONS))
+      asToken(appLevelToken, get(SELF_INSTALLATIONS))
         .andIsOk
         .andReturn()
         .response.contentAsString
@@ -188,25 +195,24 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
     return perform(builder.header(HttpHeaders.AUTHORIZATION, "Bearer $token"))
   }
 
-  private fun requestInstallToken(
+  private fun requestToken(
     clientId: String,
     clientSecret: String,
-    installId: Long,
+    installId: Long?,
   ): String {
+    logout()
+    val body =
+      mutableMapOf<String, Any>(
+        "grant_type" to "client_credentials",
+        "client_id" to clientId,
+        "client_secret" to clientSecret,
+      )
+    installId?.let { body["install_id"] = it }
     val response =
       perform(
         post("/v2/public/apps/token")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(
-            objectMapper.writeValueAsString(
-              mapOf(
-                "grant_type" to "client_credentials",
-                "client_id" to clientId,
-                "client_secret" to clientSecret,
-                "install_id" to installId,
-              ),
-            ),
-          ),
+          .content(objectMapper.writeValueAsString(body)),
       ).andIsOk.andReturn().response.contentAsString
     return objectMapper.readTree(response).get("access_token").asText()
   }

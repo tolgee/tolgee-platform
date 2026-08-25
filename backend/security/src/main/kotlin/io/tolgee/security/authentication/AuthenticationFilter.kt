@@ -103,8 +103,9 @@ class AuthenticationFilter(
         // App token first; null means not an app token, fall through to the user JWT.
         val appAuth = tryAppTokenAuth(request, token)
         if (appAuth != null) {
-          // The install principal has no identity provider; only real people are SSO-checked.
-          if (!appAuth.isInstallContext) {
+          // Only a user-context token carries a real person; install and app-level principals are
+          // synthetic and have no identity provider to verify against.
+          if (!appAuth.isInstallContext && !appAuth.isAppLevel) {
             checkIfSsoUserStillValid(appAuth.principal)
           }
           SecurityContextHolder.getContext().authentication = appAuth
@@ -173,6 +174,13 @@ class AuthenticationFilter(
         return null
       }
 
+    if (claims.isAppContext) {
+      return AppAuthentication.appLevel(
+        credentials = token,
+        appId = claims.appId!!,
+        isReadOnly = claims.isReadOnly,
+      )
+    }
     if (claims.isInstallContext) {
       return installContextAuth(request, token, claims)
     }
@@ -191,7 +199,7 @@ class AuthenticationFilter(
     }
 
     val install =
-      appInstallService.findForAppAuth(claims.installId)
+      appInstallService.findForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     assertNotRevokedByAppCutoff(install, claims)
@@ -200,7 +208,8 @@ class AuthenticationFilter(
 
     return AppAuthentication(
       credentials = token,
-      appInstall = install,
+      appInstallOrNull = install,
+      appId = install.app.id,
       userAccount = user,
       tokenProjectId = claims.projectId,
       isInstallContext = false,
@@ -214,14 +223,15 @@ class AuthenticationFilter(
     claims: AppTokenClaims,
   ): AppAuthentication {
     val resolution =
-      appInstallService.resolveForAppAuth(claims.installId)
+      appInstallService.resolveForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     assertNotRevokedByAppCutoff(resolution.install, claims)
 
     return AppAuthentication(
       credentials = token,
-      appInstall = resolution.install,
+      appInstallOrNull = resolution.install,
+      appId = resolution.install.app.id,
       userAccount = resolution.principal,
       tokenProjectId = null,
       isInstallContext = true,

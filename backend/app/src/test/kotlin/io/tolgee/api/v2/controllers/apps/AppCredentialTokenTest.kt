@@ -73,10 +73,11 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `refuses app credentials that name no install`() {
-    tokenRequest(appClientId, appClientSecret, installId = null)
-      .andExpect(status().isBadRequest)
-      .andAssertThatJson { node("code").isEqualTo("app_install_id_required") }
+  fun `mints an app-level token when no install is named`() {
+    tokenRequest(appClientId, appClientSecret, installId = null).andIsOk.andAssertThatJson {
+      node("access_token").isString.isNotEmpty()
+      node("token_type").isEqualTo("Bearer")
+    }
   }
 
   @Test
@@ -122,40 +123,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     tokenRequest(appClientId, appClientSecret, otherInstallId)
       .andExpect(status().isNotFound)
       .andAssertThatJson { node("code").isEqualTo("app_install_not_found") }
-  }
-
-  @Test
-  fun `discovers its installations with the app credentials alone`() {
-    logout()
-    perform(
-      post("/v2/public/apps/installations/list")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(
-          objectMapper.writeValueAsString(
-            mapOf("client_id" to appClientId, "client_secret" to appClientSecret),
-          ),
-        ),
-    ).andIsOk.andAssertThatJson {
-      node("_embedded.installations").isArray.hasSize(1)
-      node("_embedded.installations[0].id").isEqualTo(installId)
-      node("_embedded.installations[0].enabledProjects").isArray.hasSize(1)
-      node("_embedded.installations[0].enabledProjects[0].id").isEqualTo(testData.project.id)
-    }
-  }
-
-  @Test
-  fun `discovery refuses wrong credentials`() {
-    logout()
-    perform(
-      post("/v2/public/apps/installations/list")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(
-          objectMapper.writeValueAsString(
-            mapOf("client_id" to appClientId, "client_secret" to "tgpubs_wrong"),
-          ),
-        ),
-    ).andExpect(status().isUnauthorized)
-      .andAssertThatJson { node("code").isEqualTo("invalid_app_credentials") }
   }
 
   @Test

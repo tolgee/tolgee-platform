@@ -142,6 +142,9 @@ class ProjectContextService(
   private fun bindAppToProject(project: ProjectDto) {
     if (!authenticationFacade.isAppAuth) return
     val appAuth = authenticationFacade.appAuthentication
+    // An app-level token has no install and no project scopes; it binds nothing and resolves to no
+    // access, and the AppAccessInterceptor refuses it on any project route.
+    if (appAuth.isAppLevel) return
 
     // A user-context token minted for this project may get an accurate "not enabled"; every other
     // case must be indistinguishable from a nonexistent id (which fails as APP_ACCESS_FORBIDDEN),

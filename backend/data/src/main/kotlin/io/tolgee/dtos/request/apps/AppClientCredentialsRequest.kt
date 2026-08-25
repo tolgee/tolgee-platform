@@ -14,7 +14,7 @@ data class AppClientCredentialsRequest(
   @JsonProperty("client_secret")
   @field:NotBlank
   val clientSecret: String = "",
-  /** Nullable only so its absence yields a specific error; credentials alone cannot imply an install. */
+  /** Omit for an app-level token; set to mint an install-context token for that install. */
   @JsonProperty("install_id")
   val installId: Long? = null,
 )

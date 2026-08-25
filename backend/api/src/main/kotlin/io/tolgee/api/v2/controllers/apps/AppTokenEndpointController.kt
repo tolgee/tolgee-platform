@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.apps.AppAccessTokenModel
+import io.tolgee.model.apps.App
 import io.tolgee.security.authentication.AppAccessNeutral
 import io.tolgee.security.authentication.AppTokenService
 import io.tolgee.security.ratelimit.RateLimited
@@ -48,8 +49,8 @@ class AppTokenEndpointController(
     description =
       "OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an " +
         "installation via `install_id`, and returns a short-lived access token the app's backend " +
-        "uses to call Tolgee's REST API as that install. Install ids come from " +
-        "`POST /v2/public/apps/installations/list`.",
+        "uses to call Tolgee's REST API as that install. Omit `install_id` to get an app-level token " +
+        "for app-level operations (installation discovery); the install ids come from there.",
   )
   fun token(
     @RequestBody @Valid body: AppClientCredentialsRequest,
@@ -60,19 +61,23 @@ class AppTokenEndpointController(
 
     val app = appCredentialAuthenticator.authenticate(body.clientId, body.clientSecret)
 
-    // App-level credentials identify an app installed by any number of organizations, so they
-    // cannot imply an install on their own.
-    val installId = body.installId ?: throw BadRequestException(Message.APP_INSTALL_ID_REQUIRED)
-    val install =
-      appInstallService.findOwnInstall(app.id, installId)
-        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-
-    val token = appTokenService.mintInstallContextToken(install.id)
+    val token = mintToken(app, body.installId)
     return AppAccessTokenModel(
       accessToken = token,
       tokenType = "Bearer",
       expiresIn = tolgeeProperties.apps.tokenExpiration / 1000,
     )
+  }
+
+  private fun mintToken(
+    app: App,
+    installId: Long?,
+  ): String {
+    if (installId == null) return appTokenService.mintAppLevelToken(app.id)
+    val install =
+      appInstallService.findOwnInstall(app.id, installId)
+        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    return appTokenService.mintInstallContextToken(install.id)
   }
 
   companion object {

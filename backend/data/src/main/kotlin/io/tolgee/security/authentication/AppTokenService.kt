@@ -59,6 +59,19 @@ class AppTokenService(
       .compact()
   }
 
+  /** App-level token: identifies the app itself, for app-level operations (installation discovery). */
+  fun mintAppLevelToken(appId: Long): String {
+    return Jwts
+      .builder()
+      .signWith(signingKey)
+      .setIssuedAt(currentDateProvider.date)
+      .setAudience(JWT_APP_TOKEN_AUDIENCE)
+      .setExpiration(Date(currentDateProvider.date.time + appsProperties.tokenExpiration))
+      .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_APP)
+      .claim(JWT_APP_TOKEN_APP_ID_CLAIM, appId)
+      .compact()
+  }
+
   private fun baseBuilder(installId: Long) =
     Jwts
       .builder()
@@ -91,6 +104,22 @@ class AppTokenService(
 
     if (jws.body.audience != JWT_APP_TOKEN_AUDIENCE) {
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
+    if (jws.body[JWT_APP_TOKEN_CONTEXT_CLAIM] == CONTEXT_APP) {
+      val appId =
+        (jws.body[JWT_APP_TOKEN_APP_ID_CLAIM] as? Number)?.toLong()
+          ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+      return AppTokenClaims(
+        installId = null,
+        appId = appId,
+        isInstallContext = false,
+        isAppContext = true,
+        userId = null,
+        projectId = null,
+        issuedAt = jws.body.issuedAt,
+        isReadOnly = false,
+      )
     }
 
     val installId =
@@ -130,19 +159,23 @@ class AppTokenService(
   companion object {
     const val JWT_APP_TOKEN_AUDIENCE = "tg.app"
     const val JWT_APP_TOKEN_INSTALL_ID_CLAIM = "tg.app.inst"
+    const val JWT_APP_TOKEN_APP_ID_CLAIM = "tg.app.app"
     const val JWT_APP_TOKEN_PROJECT_ID_CLAIM = "tg.app.proj"
     const val JWT_APP_TOKEN_CONTEXT_CLAIM = "tg.app.ctx"
     const val JWT_APP_TOKEN_READ_ONLY_CLAIM = "tg.app.ro"
     const val CONTEXT_USER = "user"
     const val CONTEXT_INSTALL = "install"
+    const val CONTEXT_APP = "app"
   }
 }
 
 data class AppTokenClaims(
-  val installId: Long,
+  val installId: Long?,
   val isInstallContext: Boolean,
   val userId: Long?,
   val projectId: Long?,
   val issuedAt: Date,
   val isReadOnly: Boolean,
+  val appId: Long? = null,
+  val isAppContext: Boolean = false,
 )

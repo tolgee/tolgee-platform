@@ -26,12 +26,22 @@ class AppAccessInterceptor(
   ): Boolean {
     // The error dispatch re-enters here with nothing bound; leave the original error response intact.
     if (request.dispatcherType == DispatcherType.ERROR) return true
-    if (!authenticationFacade.isAppAuth) return true
+    if (!authenticationFacade.isAppAuth) {
+      // The app-only endpoints exist for app tokens; a non-app caller (session/PAK/PAT) is refused here.
+      if (isAppOnly(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+      return true
+    }
     if (hasAnnotation(handler, AppAccessNeutral::class.java)) return true
     if (hasAnnotation(handler, DenyAppAccess::class.java)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
-    if (allowsOwnInstallAccess(handler)) {
+    if (allowsMethod(handler, AllowAppLevelAccess::class.java)) {
+      if (!authenticationFacade.appAuthentication.isAppLevel) {
+        throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+      }
+      return true
+    }
+    if (allowsMethod(handler, AllowAppOwnInstallAccess::class.java)) {
       // The annotation's contract is "derive the install from the token's own claims", which only an
-      // install-context token honours; a user-context token here would read installs it never owns.
+      // install-context token honours; a user- or app-level token here would read installs it never owns.
       if (!authenticationFacade.appAuthentication.isInstallContext) {
         throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
       }
@@ -49,7 +59,12 @@ class AppAccessInterceptor(
     return AnnotationUtils.findAnnotation(handler.beanType, type) != null
   }
 
-  private fun allowsOwnInstallAccess(handler: HandlerMethod): Boolean {
-    return AnnotationUtils.getAnnotation(handler.method, AllowAppOwnInstallAccess::class.java) != null
-  }
+  private fun isAppOnly(handler: HandlerMethod): Boolean =
+    allowsMethod(handler, AllowAppLevelAccess::class.java) ||
+      allowsMethod(handler, AllowAppOwnInstallAccess::class.java)
+
+  private fun <A : Annotation> allowsMethod(
+    handler: HandlerMethod,
+    type: Class<A>,
+  ): Boolean = AnnotationUtils.getAnnotation(handler.method, type) != null
 }
