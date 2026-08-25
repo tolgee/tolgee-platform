@@ -93,8 +93,8 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
       .assert
       .isGreaterThan(0)
 
-    appSelfList(appClientSecret).andIsOk
-    appSelfList(newSecretOf(rolled)).andIsOk
+    secretAuthenticates(appClientSecret).andIsOk
+    secretAuthenticates(newSecretOf(rolled)).andIsOk
     activeSecretIds().assert.hasSize(2)
   }
 
@@ -105,7 +105,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     roll(graceSeconds = ONE_DAY)
 
     currentDateProvider.move(Duration.ofSeconds(120))
-    appSelfList(appClientSecret).andIsUnauthorized
+    secretAuthenticates(appClientSecret).andIsUnauthorized
     activeSecretIds().assert.hasSize(2)
   }
 
@@ -113,10 +113,10 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   fun `the old secret stops working once the grace window passes`() {
     val rolled = roll(graceSeconds = 60)
 
-    appSelfList(appClientSecret).andIsOk
+    secretAuthenticates(appClientSecret).andIsOk
     currentDateProvider.move(Duration.ofSeconds(120))
-    appSelfList(appClientSecret).andIsUnauthorized
-    appSelfList(newSecretOf(rolled)).andIsOk
+    secretAuthenticates(appClientSecret).andIsUnauthorized
+    secretAuthenticates(newSecretOf(rolled)).andIsOk
     activeSecretIds().assert.hasSize(1)
   }
 
@@ -158,8 +158,8 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$oldId").andIsOk
 
-    appSelfList(appClientSecret).andIsUnauthorized
-    appSelfList(newSecretOf(rolled)).andIsOk
+    secretAuthenticates(appClientSecret).andIsUnauthorized
+    secretAuthenticates(newSecretOf(rolled)).andIsOk
   }
 
   @Test
@@ -178,42 +178,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the app rotates its own app-level secret unattended`() {
-    val issued =
-      objectMapper.readTree(
-        appSelf("issue", appClientSecret)
-          .andIsOk
-          .andReturn()
-          .response.contentAsString,
-      )
-
-    issued
-      .get("secret")
-      .asText()
-      .assert
-      .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
-    appSelfList(appClientSecret).andIsOk
-    appSelfList(issued.get("secret").asText()).andIsOk
-
-    val newId = issued.get("id").asLong()
-    val oldId = activeSecretIds().first { it != newId }
-    appSelf("revoke", issued.get("secret").asText(), oldId).andIsOk
-    appSelfList(appClientSecret).andIsUnauthorized
-  }
-
-  /** An app authenticates with a secret, so revoking its only active one would lock it out for good. */
-  @Test
-  fun `the app may not revoke its own last active app-level secret`() {
-    val secretId = activeSecretIds().single()
-
-    appSelf("revoke", appClientSecret, secretId)
-      .andIsBadRequest
-      .andHasErrorMessage(Message.APP_CANNOT_REVOKE_LAST_SECRET)
-
-    appSelfList(appClientSecret).andIsOk
-  }
-
-  @Test
   fun `the owner cannot revoke the app's only active secret without force`() {
     val secretId = activeSecretIds().single()
 
@@ -222,7 +186,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
       .andIsBadRequest
       .andHasErrorMessage(Message.APP_CANNOT_REVOKE_LAST_SECRET)
 
-    appSelfList(appClientSecret).andIsOk
+    secretAuthenticates(appClientSecret).andIsOk
   }
 
   @Test
@@ -232,7 +196,7 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     userAccount = testData.user
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$secretId?force=true").andIsOk
 
-    appSelfList(appClientSecret).andIsUnauthorized
+    secretAuthenticates(appClientSecret).andIsUnauthorized
   }
 
   @Test
@@ -295,22 +259,8 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
   private fun ownedAppsUrl() = "/v2/organizations/${testData.organization.id}/owned-apps"
 
-  private fun appSelfList(clientSecret: String): ResultActions = appSelf("list", clientSecret)
-
-  private fun appSelf(
-    action: String,
-    clientSecret: String,
-    secretId: Long? = null,
-  ): ResultActions {
-    logout()
-    val body = mutableMapOf<String, Any>("client_id" to appClientId, "client_secret" to clientSecret)
-    secretId?.let { body["secret_id"] = it }
-    return perform(
-      post("/v2/public/apps/app-secrets/$action")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(body)),
-    )
-  }
+  /** Probes whether a secret still authenticates by exchanging it for a token. */
+  private fun secretAuthenticates(clientSecret: String): ResultActions = tokenRequest(appClientId, clientSecret)
 
   private fun tokenRequest(
     clientId: String,

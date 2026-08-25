@@ -265,22 +265,20 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     return objectMapper.readTree(response).get("access_token").asText()
   }
 
-  /** Issues an additional app-level secret alongside the current one and returns its plaintext. */
+  /**
+   * Puts a second active secret alongside the current one (owner rotation, long grace so the old one
+   * stays live) and returns the new plaintext.
+   */
   private fun issueSecret(): String {
-    logout()
+    loginAsUser()
     val response =
-      perform(
-        post("/v2/public/apps/app-secrets/issue")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(
-            objectMapper.writeValueAsString(
-              mapOf("client_id" to appClientId, "client_secret" to appClientSecret),
-            ),
-          ),
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId/secrets/rotate",
+        mapOf("graceSeconds" to 86_400L),
       ).andIsOk
         .andReturn()
         .response.contentAsString
-    return objectMapper.readTree(response).get("secret").asText()
+    return objectMapper.readTree(response).at("/secret/secret").asText()
   }
 
   private fun ownedSecretsList(): ResultActions {
