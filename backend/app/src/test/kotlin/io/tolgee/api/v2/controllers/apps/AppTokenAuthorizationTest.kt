@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import tools.jackson.databind.JsonNode
+import java.time.Duration
 import java.util.Date
 
 /**
@@ -196,6 +197,50 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       Date(currentDateProvider.date.time + tolgeeProperties.apps.tokenExpiration + 10_000)
 
     asApp(get("/v2/projects/${testData.project.id}/translations"))
+      .andIsUnauthorized
+      .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
+  }
+
+  /**
+   * The install grants translations.edit, but a user-context token minted for a VIEW-only member is
+   * capped at the intersection — read passes, write does not.
+   */
+  @Test
+  fun `narrows a user-context token to the iframe user's own project scopes`() {
+    val memberToken =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.member.id,
+        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+
+    asToken(memberToken, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    asToken(
+      memberToken,
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"member-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+  }
+
+  @Test
+  fun `rejects a user-context token once the iframe user's tokens are globally invalidated`() {
+    currentDateProvider.forcedDate = currentDateProvider.date
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    currentDateProvider.move(Duration.ofSeconds(2))
+    userAccountService.invalidateTokens(userAccountService.get(testData.user.id))
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations"))
       .andIsUnauthorized
       .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
   }

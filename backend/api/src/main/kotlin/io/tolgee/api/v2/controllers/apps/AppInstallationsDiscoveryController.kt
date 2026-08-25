@@ -20,12 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * Lets an app discover its installations with nothing but its app-level credentials — the entry
- * point of the machine-to-machine flow. Everything else needs an install-scoped token, and minting
- * one needs an install id, which is exactly what this call answers.
- *
- * Public by path for the same reason [AppTokenEndpointController] is: the request carries its own
- * authentication.
+ * Lets an app discover its installations from its app-level credentials alone — the entry point of
+ * the M2M flow, since minting an install-scoped token needs the install id this call returns.
  */
 @RestController
 @CrossOrigin(origins = ["*"])

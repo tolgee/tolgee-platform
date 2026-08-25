@@ -138,8 +138,7 @@ class SecurityService(
 
   private fun getAppPermittedScopes(projectId: Long): Set<Scope> {
     val appAuth = authenticationFacade.appAuthentication
-    // Only ProjectContextService binds a project, and only after verifying the install is enabled
-    // for it — an unbound project is one the app was never granted access to.
+    // An unbound project is one the install was never enabled for.
     if (appAuth.boundProjectId != projectId) return emptySet()
 
     val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
@@ -149,12 +148,9 @@ class SecurityService(
       return installScopes.intersect(expandedScopesOf(projectId, actingAs.id))
     }
 
-    if (appAuth.isInstallContext) {
-      // M2M token without an acting-as user — the app's own granted scopes, no user intersection.
-      return installScopes
-    }
+    if (appAuth.isInstallContext) return installScopes
 
-    // User-context JWT — intersect with the iframe user's project scopes.
+    // User-context: cap by the iframe user's own project scopes.
     return installScopes.intersect(expandedScopesOf(projectId, appAuth.principal.id))
   }
 
@@ -169,9 +165,6 @@ class SecurityService(
    * Checks if the user has required permission for the project. If no user or API key is provided,
    * uses the currently authenticated user and active API key.
    * Always checks permissions for the current user even when using the API key for security reasons.
-   *
-   * Under app authentication the install's granted scopes are the ceiling — the author's own
-   * permissions never widen it, and never keep it working either.
    */
   fun checkProjectPermission(
     projectId: Long,
@@ -233,10 +226,7 @@ class SecurityService(
     }
   }
 
-  /**
-   * Task assignment belongs to a person, not to an install — an app must never widen its granted
-   * scopes through a task the principal happens to be assigned to.
-   */
+  /** A task assignment belongs to a person, so it never widens an install's scopes. */
   private fun translationInTask(
     keyId: Long,
     languageId: Long,
@@ -541,10 +531,7 @@ class SecurityService(
     this.checkLanguageStateChangePermission(projectId, languageIds, keyId)
   }
 
-  /**
-   * An API key belongs to a person and carries that person's scopes. An install is not a person and
-   * has nobody to draw them from, so app authentication is refused outright rather than guessing.
-   */
+  /** An API key carries a person's scopes; an install has none to draw from, so app auth is refused. */
   fun checkApiKeyScopes(
     scopes: Set<Scope>,
     project: Project?,
@@ -739,10 +726,7 @@ class SecurityService(
     }
   }
 
-  /**
-   * The server-role bypasses apply to a person acting in the UI. An install has no server role, and
-   * an install-context principal is stripped of the author's — so these always run under app auth.
-   */
+  /** Server-role bypasses are for people; an install has none, so the guarded body always runs for it. */
   private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
     if (authenticationFacade.isAppAuth || !activeUser.isAdmin()) {
       runnable()
@@ -759,17 +743,8 @@ class SecurityService(
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
 
   /**
-   * The user whose per-language restrictions apply, or null when no person's restrictions do.
-   *
-   * An install-context app token narrowed with `X-Tolgee-Act-As-User-Id` must not reach languages
-   * that user cannot reach. Without such a narrowing the install acts as itself and there is nobody
-   * to narrow it to — per-language grants belong to a person, and the install's ceiling is its
-   * granted scopes. Falling back to the author here would make an app's language reach depend on
-   * whoever happened to register it.
-   *
-   * Null therefore means "an install acting as itself" — the one case the per-language gate is
-   * skipped for. Every other caller resolves to a real user, so a non-app call with no security
-   * context fails closed here instead of silently bypassing the gate.
+   * The person whose per-language restrictions apply. Null means an install acting as itself (the one
+   * skip); a non-app caller with no context throws rather than silently skipping the gate.
    */
   private val languageRestrictedUserId: Long?
     get() {

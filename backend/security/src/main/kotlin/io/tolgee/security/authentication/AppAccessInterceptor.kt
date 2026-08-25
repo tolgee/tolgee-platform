@@ -10,18 +10,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * Denies app tokens everywhere except the project-scoped routes they exist for.
- *
- * Only the project-scoped path caps an app token to the install's granted scopes — via
- * [io.tolgee.security.ProjectContextService], which is also the only thing that sets
- * [AppAuthentication.boundProjectId]. Anywhere else the token would reach an endpoint that was
- * written for a signed-in person, so it is rejected.
- *
- * Two exceptions: [AllowAppOwnInstallAccess], for endpoints that only ever report on the caller's
- * own install; and [AppAccessNeutral], for the credential-authenticated `/v2/public/apps` routes
- * that must not be denied merely because the caller also sent a bearer token.
- *
- * Must be registered after `ProjectAuthorizationInterceptor`.
+ * Denies app tokens everywhere except the project-scoped routes that cap them to the install's
+ * granted scopes (via [io.tolgee.security.ProjectContextService], which sets [AppAuthentication.boundProjectId]).
+ * Exceptions: [AllowAppOwnInstallAccess] and [AppAccessNeutral]. Must run after `ProjectAuthorizationInterceptor`.
  */
 @Component
 class AppAccessInterceptor(

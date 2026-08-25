@@ -23,14 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * Lets a published app rotate its **app-level** credentials unattended, across every Tolgee it is
- * installed on, without an operator copying anything by hand.
- *
- * The call authenticates with the app-level credentials themselves rather than with a token. That is
- * deliberate: app-level credentials must never become a session, or they would start reaching
- * endpoints that touch a tenant's data. Nothing here reads or writes anything but the app's own
- * secrets. Public by path for the same reason [AppTokenEndpointController] is — the request carries
- * its own authentication.
+ * Lets a published app manage its own app-level secrets unattended. Authenticates with the app-level
+ * credentials themselves, not a token — those credentials never become a session, and nothing here
+ * touches anything but the app's own secrets.
  */
 @RestController
 @CrossOrigin(origins = ["*"])

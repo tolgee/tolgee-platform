@@ -133,20 +133,17 @@ class ProjectContextService(
   }
 
   /**
-   * Binds an app authentication to the request's project. Until this runs the app has no project it
-   * may act on, so [SecurityService.getCurrentPermittedScopes] resolves to nothing — every project
-   * route therefore has to pass through here, and one that never reaches it denies rather than
-   * silently skipping the enablement check.
+   * Binds an app authentication to the request's project after checking enablement. Until this runs
+   * the app has no bound project, so permission resolution returns nothing — a route that never
+   * reaches here denies rather than skipping the check.
    */
   private fun bindAppToProject(project: ProjectDto) {
     if (!authenticationFacade.isAppAuth) return
     val appAuth = authenticationFacade.appAuthentication
 
-    // A user-context token bound to exactly this project already knows the project exists — it was
-    // minted for it — so an accurate "not enabled" leaks nothing. Every other case (an install-context
-    // token, which can name any id, or a user-context token reaching for another project) must be
-    // indistinguishable from a nonexistent id, which never resolves and later fails as
-    // APP_ACCESS_FORBIDDEN. Otherwise the differing codes let an app enumerate project ids across tenants.
+    // A user-context token minted for this project may get an accurate "not enabled"; every other
+    // case must be indistinguishable from a nonexistent id (which fails as APP_ACCESS_FORBIDDEN),
+    // else the differing codes let an app enumerate project ids across tenants.
     val knowsProject = appAuth.tokenProjectId == project.id
 
     if (appAuth.tokenProjectId != null && !knowsProject) {

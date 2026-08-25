@@ -162,11 +162,7 @@ class AppInstallService(
     return appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
   }
 
-  /**
-   * Resolves an install by id alone, for the app-token auth filter. Tenant safety on this path comes
-   * from the enablement re-check (the token is bound to a project the app is enabled for), not from
-   * an org-scoped lookup — the app token legitimately acts across the projects it is enabled in.
-   */
+  /** Install by id alone, for the auth filter; tenant safety comes from the later enablement check. */
   @Transactional(readOnly = true)
   fun findForAppAuth(installId: Long): AppInstall? {
     return appInstallRepository.findWithAppById(installId)

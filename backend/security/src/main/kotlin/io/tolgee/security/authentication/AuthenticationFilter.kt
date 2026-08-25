@@ -101,14 +101,10 @@ class AuthenticationFilter(
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
 
-        // Try app-token (audience `tg.app`) first. If validation returns null the token is not an
-        // app token (wrong audience / signature) and we fall through to the user JWT path. A
-        // well-formed app token that references a revoked or disabled entity throws instead.
+        // App token first; null means not an app token, fall through to the user JWT.
         val appAuth = tryAppTokenAuth(request, token)
         if (appAuth != null) {
-          // An install-context token runs as the install's own principal, which belongs to no
-          // identity provider and has nothing to verify there. A user-context token really is a
-          // person acting through the app, so it is still checked.
+          // The install principal has no identity provider; only real people are SSO-checked.
           if (!appAuth.isInstallContext) {
             checkIfSsoUserStillValid(appAuth.principal)
           }
@@ -160,19 +156,14 @@ class AuthenticationFilter(
   }
 
   /**
-   * Returns an [AppAuthentication] if the token parses as an app token and live entity resolution
-   * succeeds. Returns null when the token is not an app token (so the caller falls back to user JWT
-   * validation). Throws for app tokens that are well-formed but reference revoked/missing entities.
-   *
-   * The project the token may act on is not known here — the URL has not been matched to a handler
-   * yet. [io.tolgee.security.ProjectContextService] performs the enablement check once it is.
+   * [AppAuthentication] for a valid app token, or null when it is not an app token (caller falls back
+   * to the user JWT). Throws for a well-formed app token referencing a revoked/missing entity.
    */
   private fun tryAppTokenAuth(
     request: HttpServletRequest,
     token: String,
   ): AppAuthentication? {
-    // Disabling the feature is the operator's kill switch for a misbehaving app: already-minted
-    // tokens must stop authenticating too, not linger until they expire.
+    // Kill switch: disabling the feature must stop already-minted tokens, not just new ones.
     if (!tolgeeProperties.apps.enabled) return null
 
     val claims =
@@ -234,11 +225,7 @@ class AuthenticationFilter(
     )
   }
 
-  /**
-   * Force-revoking any of an app's secrets stamps [io.tolgee.model.apps.App.tokensInvalidBefore],
-   * and every token minted before that moment dies with it — including user-context ones, so a
-   * compromised app loses its dashboard sessions too and not merely its backend access.
-   */
+  /** A force-revoke cutoff kills every earlier token, user-context ones included. */
   private fun assertNotRevokedByAppCutoff(
     install: AppInstall,
     claims: AppTokenClaims,
@@ -264,10 +251,7 @@ class AuthenticationFilter(
     return user
   }
 
-  /**
-   * Resolves the optional acted-as user for an install-context request. Membership of the request's
-   * project is enforced later, by [io.tolgee.security.ProjectContextService].
-   */
+  /** Project membership of the acted-as user is enforced later, in [io.tolgee.security.ProjectContextService]. */
   private fun resolveActingAsUser(request: HttpServletRequest): UserAccountDto? {
     val raw = request.getHeader(ACTING_AS_USER_HEADER) ?: return null
     val userId =

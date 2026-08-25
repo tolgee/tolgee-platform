@@ -110,12 +110,9 @@ class AuthenticationFacade(
         ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   /**
-   * The person this request is on behalf of, or null when an app install acts as itself.
-   *
-   * An install-context app token is not a person: it belongs to an organization and outlives whoever
-   * registered it. Anything that is about a person — who a change is attributed to, whose
-   * per-language grants narrow the request — must use this rather than the principal, which on that
-   * path is only the registering user's identity. [actingAppInstallId] identifies the actor instead.
+   * The person this request is on behalf of, or null when an install acts as itself (use
+   * [actingAppInstallId] then). For anything about a person — attribution, per-language grants —
+   * prefer this over the principal, which on the install-context path is only a synthetic identity.
    */
   val actingPersonUserId: Long?
     get() {

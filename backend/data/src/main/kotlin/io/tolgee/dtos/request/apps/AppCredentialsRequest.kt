@@ -3,10 +3,7 @@ package io.tolgee.dtos.request.apps
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.constraints.NotBlank
 
-/**
- * App-level credentials presented on a self-service call that needs nothing else, such as install
- * discovery. They authenticate the request itself; nothing is exchanged for a session.
- */
+/** App-level credentials for a self-service call that needs nothing else (e.g. install discovery). */
 data class AppCredentialsRequest(
   @JsonProperty("client_id")
   @field:NotBlank

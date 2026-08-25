@@ -17,20 +17,8 @@ import java.security.Key
 import java.util.Date
 
 /**
- * Mints and validates the JWTs Tolgee Apps use to call the REST API. Two token contexts exist:
- *
- *  - **user-context** — minted for the dashboard iframe. Bound to (install, project, user); the
- *    app acts on behalf of a signed-in user and is capped to the intersection of the install's
- *    granted scopes and that user's project permissions.
- *  - **install-context** — minted for the app's backend (machine-to-machine) after it authenticates
- *    with its OAuth client credentials. Bound to the install only; the app acts with the install's
- *    full granted scopes (optionally narrowed to an acted-as project member).
- *
- * Either way the token is a thin pointer: it carries identity claims but no permissions. Permissions
- * are resolved from the database on every request, so revocation takes effect immediately.
- *
- * Signed with a dedicated app-token key ([AuthenticationConfig.appsJwtSigningKey]), domain-separated
- * from the user-session key.
+ * Mints and validates the app JWTs. A token carries identity claims only — permissions are resolved
+ * per request, so revocation is immediate. Signed with a dedicated, domain-separated key.
  */
 @Service
 class AppTokenService(

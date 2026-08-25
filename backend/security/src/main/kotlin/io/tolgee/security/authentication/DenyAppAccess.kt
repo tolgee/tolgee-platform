@@ -1,11 +1,8 @@
 package io.tolgee.security.authentication
 
 /**
- * Refuses app tokens on an endpoint that would otherwise be reachable because it is project-scoped.
- *
- * For endpoints that administer apps themselves: they are gated on the caller's project scopes, but
- * an app holding those scopes could use them to grant itself another install's — so an app is never
- * allowed to manage apps.
+ * Refuses app tokens on an otherwise-reachable project-scoped endpoint. For app-management endpoints:
+ * an app holding the required scope could grant itself another install's, so apps never manage apps.
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 annotation class DenyAppAccess
