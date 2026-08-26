@@ -11,11 +11,15 @@ import {
   generatePlaceholdersStyle,
   KeyNamePlugin,
   generateKeyNameStyle,
+  InvisibleCharactersPlugin,
+  invisibleCharactersTooltip,
+  generateInvisibleCharactersStyle,
 } from '@tginternal/editor';
 
 import { Direction } from 'tg.fixtures/getLanguageDirection';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
+import { useInvisibleCharacterLabel } from 'tg.component/InvisibleCharacter';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -115,6 +119,7 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
     onFocus,
     onBlur,
   });
+  const invisibleCharacterLabelRef = useRefGroup(useInvisibleCharacterLabel());
   const languageCompartment = useRef<Compartment>(new Compartment());
 
   const StyledEditorWrapper = useMemo(() => {
@@ -127,12 +132,20 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
       colors: theme.palette.placeholders,
       component: StyledEditor,
     });
-    return generateKeyNameStyle({
+    const withKeyName = generateKeyNameStyle({
       styled,
       colors: theme.palette.placeholders.variant,
       component: withPlaceholders,
     });
-  }, [theme.palette.placeholders]);
+    return generateInvisibleCharactersStyle({
+      styled,
+      colors: {
+        nonBreakingSpaceBackground: theme.palette.label.lightBlue,
+        zeroWidthMarker: theme.palette.label.orange,
+      },
+      component: withKeyName,
+    });
+  }, [theme.palette.placeholders, theme.palette.label]);
 
   keyBindings.current = shortcuts;
 
@@ -152,6 +165,10 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
           minimalSetup,
           Prec.highest(keymap.of(shortcutsUptoDate ?? [])),
           EditorView.lineWrapping,
+          InvisibleCharactersPlugin(),
+          invisibleCharactersTooltip(
+            (char) => invisibleCharacterLabelRef.current?.(char) ?? ''
+          ),
           EditorView.updateListener.of((v: ViewUpdate) => {
             if (v.focusChanged) {
               if (v.view.hasFocus) {

@@ -3,6 +3,7 @@ import { generatePlaceholdersStyle, getPlaceholders } from '@tginternal/editor';
 import { styled, useTheme } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { placeholderToElement } from 'tg.views/projects/translations/translationVisual/placeholderToElement';
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 
 const StyledWrapper = styled('div')`
   white-space: pre-wrap;
@@ -41,41 +42,50 @@ export const TmEntryText: React.VFC<Props> = ({ text, locale }) => {
     [theme.palette.placeholders]
   );
 
-  if (placeholders.length === 0) {
-    return (
-      <StyledPlaceholdersWrapper dir={direction} lang={locale}>
-        {text}
-      </StyledPlaceholdersWrapper>
-    );
-  }
+  const content = useMemo(() => {
+    if (placeholders.length === 0) {
+      return renderWithInvisibleCharacters(text, 'tm-entry-text');
+    }
 
-  const sorted = [...placeholders].sort(
-    (a, b) => a.position.start - b.position.start
-  );
-  const chunks: React.ReactNode[] = [];
-  let index = 0;
-  for (const placeholder of sorted) {
-    if (placeholder.position.start < index) {
-      continue;
-    }
-    if (placeholder.position.start > index) {
-      chunks.push(text.substring(index, placeholder.position.start));
-    }
-    chunks.push(
-      placeholderToElement({
-        placeholder,
-        key: placeholder.position.start,
-      })
+    const sorted = [...placeholders].sort(
+      (a, b) => a.position.start - b.position.start
     );
-    index = placeholder.position.end;
-  }
-  if (index < text.length) {
-    chunks.push(text.substring(index));
-  }
+    const chunks: React.ReactNode[] = [];
+    let index = 0;
+    for (const placeholder of sorted) {
+      if (placeholder.position.start < index) {
+        continue;
+      }
+      if (placeholder.position.start > index) {
+        chunks.push(
+          ...renderWithInvisibleCharacters(
+            text.substring(index, placeholder.position.start),
+            `chunk-${index}`
+          )
+        );
+      }
+      chunks.push(
+        placeholderToElement({
+          placeholder,
+          key: placeholder.position.start,
+        })
+      );
+      index = placeholder.position.end;
+    }
+    if (index < text.length) {
+      chunks.push(
+        ...renderWithInvisibleCharacters(
+          text.substring(index),
+          `chunk-${index}`
+        )
+      );
+    }
+    return chunks;
+  }, [text, placeholders]);
 
   return (
     <StyledPlaceholdersWrapper dir={direction} lang={locale}>
-      {chunks}
+      {content}
     </StyledPlaceholdersWrapper>
   );
 };
