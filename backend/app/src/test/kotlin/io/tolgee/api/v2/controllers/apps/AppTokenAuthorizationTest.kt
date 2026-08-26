@@ -255,7 +255,11 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
-  /** A project the iframe user cannot see stays indistinguishable from a nonexistent id. */
+  /**
+   * A project in a different organization stays indistinguishable from a nonexistent id — even when
+   * the iframe user is a member of it (they are a member of `otherProject`), so an app cannot
+   * enumerate the user's memberships in organizations it was never installed in.
+   */
   @Test
   fun `stays opaque on a foreign organization's project`() {
     val token =

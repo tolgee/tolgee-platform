@@ -217,6 +217,46 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     ownedSecretsList().andAssertThatJson { node("_embedded.appSecrets[0].lastUsedAt").isNumber }
   }
 
+  @Test
+  fun `force-revoking a secret also invalidates an app-level token`() {
+    val token = mintAppLevelToken()
+    installationsWith(token).andIsOk
+
+    issueSecret()
+    currentDateProvider.move(Duration.ofSeconds(2))
+    revokeSecret(firstSecretId())
+
+    installationsWith(token).andExpect(status().isUnauthorized)
+  }
+
+  @Test
+  fun `an app-level token stops authenticating once the app is deleted`() {
+    val token = mintAppLevelToken()
+    installationsWith(token).andIsOk
+
+    loginAsUser()
+    performAuthDelete("/v2/organizations/${testData.organization.id}/owned-apps/$appEntityId").andIsOk
+
+    installationsWith(token).andExpect(status().isUnauthorized)
+  }
+
+  private fun mintAppLevelToken(): String {
+    val response =
+      tokenRequest(appClientId, appClientSecret, installId = null)
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+    return objectMapper.readTree(response).get("access_token").asText()
+  }
+
+  private fun installationsWith(token: String): ResultActions {
+    logout()
+    return perform(
+      get("/v2/apps/self/installations")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer $token"),
+    )
+  }
+
   private fun register(manifestUrl: String): String =
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/owned-apps",

@@ -50,11 +50,19 @@ open class AppsTestData : BaseTestData("apps-test-owner@test.com", "test_project
       otherOrganizationBuilder = otherOwnerBuilder.defaultOrganizationBuilder
       otherOrganization = otherOrganizationBuilder.self
 
-      otherProject =
+      val otherProjectBuilder =
         addProject {
           name = "other_project"
           organizationOwner = otherOwnerBuilder.defaultOrganizationBuilder.self
-        }.self
+        }
+      otherProject = otherProjectBuilder.self
+      // The main org's owner is also a member of a project in the OTHER organization, so a
+      // user-context token must still stay opaque there (no cross-org membership enumeration).
+      otherProjectBuilder.addPermission {
+        this.project = otherProjectBuilder.self
+        this.user = this@AppsTestData.user
+        this.type = ProjectPermissionType.VIEW
+      }
     }
   }
 }

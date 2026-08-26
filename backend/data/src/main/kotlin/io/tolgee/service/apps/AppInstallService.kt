@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
+import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.repository.apps.AppInstallRepository
 import org.apache.commons.codec.digest.DigestUtils
@@ -205,5 +206,11 @@ class AppInstallService(
     val install = appInstallRepository.findWithAppById(installId) ?: return null
     if (install.app.id != appEntityId) return null
     return install
+  }
+
+  /** The app itself, for authenticating an app-level token in the auth filter. */
+  @Transactional(readOnly = true)
+  fun findAppForAppAuth(appEntityId: Long): App? {
+    return appService.findForAppAuth(appEntityId)
   }
 }

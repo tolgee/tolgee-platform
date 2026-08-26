@@ -151,7 +151,7 @@ class ProjectContextService(
       // every other case must be indistinguishable from a nonexistent id (which fails as
       // APP_ACCESS_FORBIDDEN), else the differing codes let an app enumerate project ids across
       // tenants.
-      if (userKnowsProject(appAuth, project.id)) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      if (userKnowsProject(appAuth, project)) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
       throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
 
@@ -162,10 +162,15 @@ class ProjectContextService(
 
   private fun userKnowsProject(
     appAuth: AppAuthentication,
-    projectId: Long,
+    project: ProjectDto,
   ): Boolean {
     if (appAuth.isInstallContext) return false
-    return !permissionService.getProjectPermissionScopesNoApiKey(projectId, appAuth.principal.id).isNullOrEmpty()
+    // The accurate "not enabled" error may only reveal a project of the install's own organization —
+    // the token is organization-wide within that org. A project of any other organization stays
+    // indistinguishable from a nonexistent id, so an app cannot enumerate the acting user's
+    // memberships in organizations it was never installed in.
+    if (project.organizationOwnerId != appAuth.appInstall.organization.id) return false
+    return !permissionService.getProjectPermissionScopesNoApiKey(project.id, appAuth.principal.id).isNullOrEmpty()
   }
 
   /**

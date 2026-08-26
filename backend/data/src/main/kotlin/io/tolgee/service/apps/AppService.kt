@@ -48,6 +48,12 @@ class AppService(
     return appRepository.findById(appEntityId).orElseThrow { NotFoundException(Message.APP_NOT_FOUND) }
   }
 
+  /** App by id alone, for authenticating an app-level token in the auth filter. */
+  @Transactional(readOnly = true)
+  fun findForAppAuth(appEntityId: Long): App? {
+    return appRepository.findById(appEntityId).orElse(null)
+  }
+
   @Transactional(readOnly = true)
   fun listOwned(organizationId: Long): List<App> {
     return appRepository.findAllByOrganizationIdOrderByNameAsc(organizationId)

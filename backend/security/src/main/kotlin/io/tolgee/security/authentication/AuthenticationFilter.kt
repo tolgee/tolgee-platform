@@ -175,16 +175,36 @@ class AuthenticationFilter(
       }
 
     if (claims.isAppContext) {
-      return AppAuthentication.appLevel(
-        credentials = token,
-        appId = claims.appId!!,
-        isReadOnly = claims.isReadOnly,
-      )
+      return appLevelAuth(token, claims)
     }
     if (claims.isInstallContext) {
       return installContextAuth(request, token, claims)
     }
     return userContextAuth(request, token, claims)
+  }
+
+  private fun appLevelAuth(
+    token: String,
+    claims: AppTokenClaims,
+  ): AppAuthentication {
+    // Load the app so a deleted app's token stops authenticating, and so the force-revoke cutoff
+    // (App.tokensInvalidBefore) applies to app-level tokens too — otherwise they would outlive a
+    // secret revocation until natural expiry, unlike install- and user-context tokens.
+    val app =
+      appInstallService.findAppForAppAuth(claims.appId!!)
+        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
+    app.tokensInvalidBefore?.let { cutoff ->
+      if (claims.issuedAt.before(cutoff)) {
+        throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+      }
+    }
+
+    return AppAuthentication.appLevel(
+      credentials = token,
+      appId = app.id,
+      isReadOnly = claims.isReadOnly,
+    )
   }
 
   private fun userContextAuth(
