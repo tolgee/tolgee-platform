@@ -27,6 +27,7 @@ class EePermissionService(
     scopes: Set<Scope>,
     languages: LanguagePermissions,
   ): Permission {
+    Scope.assertProjectAssignable(scopes)
     validateLanguagePermissions(
       languagePermissions = languages,
       scopes = scopes,
@@ -46,6 +47,7 @@ class EePermissionService(
     organizationId: Long,
     scopes: Set<Scope>,
   ) {
+    Scope.assertProjectAssignable(scopes)
     val permission = organizationService.get(organizationId).basePermission
     permission.scopes = scopes.toTypedArray()
     permission.type = null

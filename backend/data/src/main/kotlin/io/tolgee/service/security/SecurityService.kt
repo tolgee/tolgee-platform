@@ -487,6 +487,7 @@ class SecurityService(
     project: Project?,
     user: UserAccount? = null,
   ) {
+    Scope.assertProjectAssignable(scopes)
     try {
       val availableScopes = apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!)
       val userCanSelectTheScopes = availableScopes.toList().containsAll(scopes)

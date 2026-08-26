@@ -82,6 +82,17 @@ enum class Scope(
   companion object {
     val readOnlyScopes by lazy { ALL_VIEW.expand() }
 
+    /**
+     * Organization-level scopes ([organizationLevel]) are held via the organization role and must
+     * never be stored on a project permission or a project API key. Call this before persisting any
+     * caller-supplied project scope set.
+     */
+    fun assertProjectAssignable(scopes: Collection<Scope>) {
+      if (scopes.any { it.organizationLevel }) {
+        throw BadRequestException(Message.ORGANIZATION_SCOPE_NOT_ASSIGNABLE_TO_PROJECT)
+      }
+    }
+
     private val keysView = HierarchyItem(KEYS_VIEW)
     private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))
     private val screenshotsView = HierarchyItem(SCREENSHOTS_VIEW, listOf(keysView))

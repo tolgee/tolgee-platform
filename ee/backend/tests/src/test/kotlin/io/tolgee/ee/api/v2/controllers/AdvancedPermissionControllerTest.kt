@@ -63,6 +63,14 @@ class AdvancedPermissionControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `rejects an organization-level scope on a project permission`() {
+    permissionTestUtil
+      .performSetPermissions("") { _ -> "scopes=organization-members.manage" }
+      .andIsBadRequest
+      .andHasErrorMessage(Message.ORGANIZATION_SCOPE_NOT_ASSIGNABLE_TO_PROJECT)
+  }
+
+  @Test
   fun `validates permissions (view languages and scopes)`() {
     permissionTestUtil
       .performSetPermissions(
