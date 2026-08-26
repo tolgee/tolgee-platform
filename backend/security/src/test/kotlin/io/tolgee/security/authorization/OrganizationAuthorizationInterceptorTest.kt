@@ -273,7 +273,7 @@ class OrganizationAuthorizationInterceptorTest {
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-owner")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwner(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
@@ -285,27 +285,27 @@ class OrganizationAuthorizationInterceptorTest {
     ) = "hello from org #$id!"
 
     @PostMapping("/v2/organizations/{id}/requires-owner-write-method")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerWriteMethod(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-owner-write-annotation")
     @WriteOperation
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerWriteAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @PostMapping("/v2/organizations/{id}/requires-owner-read-annotation")
     @ReadOnlyOperation
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerReadAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/nonsense-perms")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     @UseDefaultPermissions
     fun nonsensePerms(
       @PathVariable id: Long,

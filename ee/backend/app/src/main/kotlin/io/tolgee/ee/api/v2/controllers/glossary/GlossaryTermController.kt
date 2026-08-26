@@ -17,12 +17,12 @@ import io.tolgee.ee.data.glossary.CreateUpdateGlossaryTermResponse
 import io.tolgee.ee.data.glossary.DeleteMultipleGlossaryTermsRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -56,7 +56,7 @@ class GlossaryTermController(
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARY_TERMS_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_CREATE)
@@ -78,7 +78,7 @@ class GlossaryTermController(
   @DeleteMapping("/terms")
   @Operation(summary = "Batch delete multiple terms")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARY_TERMS_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
@@ -93,7 +93,7 @@ class GlossaryTermController(
   @PutMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Update glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARY_TERMS_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_UPDATE)
@@ -113,7 +113,7 @@ class GlossaryTermController(
   @DeleteMapping("/terms/{termId:[0-9]+}")
   @Operation(summary = "Delete glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARY_TERMS_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)

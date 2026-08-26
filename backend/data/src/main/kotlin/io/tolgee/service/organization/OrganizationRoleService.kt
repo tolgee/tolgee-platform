@@ -29,7 +29,6 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.EnumSet
 
 @Service
 @Suppress("SelfReferenceConstructorParameter")
@@ -109,33 +108,6 @@ class OrganizationRoleService(
     }
   }
 
-  /**
-   * Verifies the user has a role equal or higher than a given role.
-   *
-   * @param userId The user to check.
-   * @param organizationId The organization to check role in.
-   * @param role The minimum role the user should have.
-   * @return Whether the user has at least the [role] role in the organization.
-   */
-  fun isUserOfRole(
-    userId: Long,
-    organizationId: Long,
-    role: OrganizationRoleType,
-  ): Boolean {
-    // The use of a when here is an intentional code design choice.
-    // If a new role gets added, this will not compile and will need to be addressed.
-    return when (role) {
-      OrganizationRoleType.MEMBER ->
-        hasAnyOrganizationRole(userId, organizationId)
-
-      OrganizationRoleType.OWNER ->
-        isUserOwner(userId, organizationId)
-
-      OrganizationRoleType.MAINTAINER ->
-        isUserOwnerOrMaintainer(userId, organizationId)
-    }
-  }
-
   /** The organization-level scopes the user holds, derived from their role (empty for a non-member). */
   fun getOrganizationScopes(
     userId: Long,
@@ -144,64 +116,30 @@ class OrganizationRoleService(
     return findType(userId, organizationId)?.availableScopes?.toSet() ?: emptySet()
   }
 
-  fun checkUserIsOwnerOrServerAdmin(organizationId: Long) {
+  /**
+   * Throws unless the current user holds [scope] on the organization. Server admins always pass. The
+   * programmatic counterpart of [io.tolgee.security.authorization.RequiresOrganizationScopes] for
+   * endpoints whose organization is not on the request path (e.g. a project's owning organization).
+   */
+  fun checkOrganizationScope(
+    organizationId: Long,
+    scope: Scope,
+    message: Message = Message.USER_IS_NOT_OWNER_OF_ORGANIZATION,
+  ) {
     val user = authenticationFacade.authenticatedUser
-    if (this.isUserOwner(user.id, organizationId)) {
-      return
-    }
-
     if (user.isAdmin()) {
       return
     }
-
-    throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
-  }
-
-  fun checkUserCanDeleteInvitation(organizationId: Long) {
-    checkUserIsOwnerOrServerAdmin(organizationId)
-  }
-
-  fun checkUserCanTransferProjectToOrganization(organizationId: Long) {
-    checkUserIsOwnerOrServerAdmin(organizationId)
-  }
-
-  fun checkUserIsOwnerOrMaintainerOrServerAdmin(organizationId: Long) {
-    val user = authenticationFacade.authenticatedUser
-    if (this.isUserOwnerOrMaintainer(user.id, organizationId)) {
+    if (getOrganizationScopes(user.id, organizationId).contains(scope)) {
       return
     }
-
-    if (user.isAdmin()) {
-      return
-    }
-
-    throw PermissionException(Message.USER_IS_NOT_OWNER_OR_MAINTAINER_OF_ORGANIZATION)
-  }
-
-  fun checkUserCanCreateProject(organizationId: Long) {
-    this.checkUserIsOwnerOrMaintainerOrServerAdmin(organizationId)
+    throw PermissionException(message)
   }
 
   fun hasAnyOrganizationRole(
     userId: Long,
     organizationId: Long,
   ): Boolean = findType(userId, organizationId) != null
-
-  fun isUserOwner(
-    userId: Long,
-    organizationId: Long,
-  ): Boolean {
-    val role = self.getDto(organizationId, userId)
-    return role.type == OrganizationRoleType.OWNER
-  }
-
-  fun isUserOwnerOrMaintainer(
-    userId: Long,
-    organizationId: Long,
-  ): Boolean {
-    val role = self.getDto(organizationId, userId)
-    return OWNER_OR_MAINTAINER_ROLES.contains(role.type)
-  }
 
   fun find(id: Long): OrganizationRole? {
     return organizationRoleRepository.findById(id).orElse(null)
@@ -445,9 +383,5 @@ class OrganizationRoleService(
   @Transactional
   fun getOwners(organization: Organization): List<UserAccount> {
     return organizationRoleRepository.getOwners(organization)
-  }
-
-  companion object {
-    private val OWNER_OR_MAINTAINER_ROLES = EnumSet.of(OrganizationRoleType.OWNER, OrganizationRoleType.MAINTAINER)
   }
 }

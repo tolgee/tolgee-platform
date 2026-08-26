@@ -5,7 +5,6 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.mcp.RateLimitSpec
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AuthTokenType
 import org.junit.jupiter.api.Test
@@ -57,7 +56,7 @@ class ExecutionOrderTest : McpToolEndpointSpecTestBase() {
         isGlobalRoute = false,
         requiredScopes = arrayOf(Scope.KEYS_VIEW),
         useDefaultPermissions = false,
-        requiredOrgRole = OrganizationRoleType.MEMBER,
+        requiredOrgScopes = arrayOf(Scope.ORGANIZATION_MEMBERS_VIEW),
         isWriteOperation = true,
         requiredFeatures = features,
         activityType = ActivityType.CREATE_KEY,

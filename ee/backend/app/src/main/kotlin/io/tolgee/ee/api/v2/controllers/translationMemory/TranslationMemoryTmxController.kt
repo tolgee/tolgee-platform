@@ -10,12 +10,12 @@ import io.tolgee.ee.data.translationMemory.TmxImportResult
 import io.tolgee.ee.service.translationMemory.SharedTranslationMemoryService
 import io.tolgee.ee.service.translationMemory.TranslationMemoryTmxService
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -41,7 +41,7 @@ class TranslationMemoryTmxController(
   @PostMapping("/import", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Import TMX file into translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_IMPORT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   @Transactional
@@ -63,7 +63,7 @@ class TranslationMemoryTmxController(
   @GetMapping("/export")
   @Operation(summary = "Export translation memory as TMX file")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun exportTmx(
     @PathVariable organizationId: Long,

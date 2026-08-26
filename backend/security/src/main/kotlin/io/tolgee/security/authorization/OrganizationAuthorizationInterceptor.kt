@@ -37,7 +37,7 @@ import org.springframework.web.method.HandlerMethod
 /**
  * This interceptor performs an authorization step to access organization-related endpoints.
  * By default it enforces the org view floor (see [OrganizationRoleService.canUserViewStrictOrPublic]).
- * Anything beyond viewing must require a role via `@RequiresOrganizationRole`.
+ * Anything beyond viewing must require scopes via `@RequiresOrganizationScopes`.
  */
 @Component
 class OrganizationAuthorizationInterceptor(
@@ -126,31 +126,28 @@ class OrganizationAuthorizationInterceptor(
 
   /**
    * The organization scopes an endpoint requires, or null when it only needs the view floor
-   * (`@UseDefaultPermissions`). A `@RequiresOrganizationRole(level)` is translated to that level's
-   * scope set, so the check is scope-based while the level annotation keeps working.
+   * (`@UseDefaultPermissions`).
    */
   private fun getRequiredScopes(
     request: HttpServletRequest,
     handler: HandlerMethod,
   ): Set<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
-    val orgRole = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationRole::class.java)
     val orgScopes = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationScopes::class.java)
 
-    val present = listOfNotNull(defaultPerms, orgRole, orgScopes)
+    val present = listOfNotNull(defaultPerms, orgScopes)
     if (present.isEmpty()) {
       // A permission policy MUST be explicitly defined.
       throw RuntimeException("No permission policy have been set for URI ${request.requestURI}!")
     }
     if (present.size > 1) {
       throw RuntimeException(
-        "Only one of `@UseDefaultPermissions`, `@RequiresOrganizationRole`, `@RequiresOrganizationScopes` " +
+        "Only one of `@UseDefaultPermissions`, `@RequiresOrganizationScopes` " +
           "may be set for URI ${request.requestURI}!",
       )
     }
 
     orgScopes?.let { return it.scopes.toSet() }
-    orgRole?.let { return it.role.availableScopes.toSet() }
     return null
   }
 

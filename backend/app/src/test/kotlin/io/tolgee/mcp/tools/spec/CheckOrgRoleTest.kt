@@ -4,6 +4,7 @@ import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -15,7 +16,7 @@ import org.mockito.kotlin.whenever
 class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `no required role skips check`() {
-    sut.executeAs(spec(requiredOrgRole = null)) {}
+    sut.executeAs(spec(requiredOrgScopes = null)) {}
 
     verify(organizationRoleService, never()).getOrganizationScopes(any(), any())
   }
@@ -24,7 +25,7 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
   fun `no org in holder skips check`() {
     whenever(organizationHolder.organizationOrNull).thenReturn(null)
 
-    sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
+    sut.executeAs(spec(requiredOrgScopes = arrayOf(Scope.ORGANIZATION_SETTINGS_MANAGE))) {}
 
     verify(organizationRoleService, never()).getOrganizationScopes(any(), any())
   }
@@ -42,7 +43,7 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
     whenever(organizationRoleService.getOrganizationScopes(7L, 42L))
       .thenReturn(OrganizationRoleType.OWNER.availableScopes.toSet())
 
-    sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
+    sut.executeAs(spec(requiredOrgScopes = arrayOf(Scope.ORGANIZATION_SETTINGS_MANAGE))) {}
   }
 
   @Test
@@ -59,7 +60,7 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
       .thenReturn(OrganizationRoleType.MEMBER.availableScopes.toSet())
 
     assertThatThrownBy {
-      sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
+      sut.executeAs(spec(requiredOrgScopes = arrayOf(Scope.ORGANIZATION_SETTINGS_MANAGE))) {}
     }.isInstanceOf(PermissionException::class.java)
   }
 }

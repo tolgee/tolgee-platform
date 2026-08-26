@@ -7,9 +7,9 @@ import io.tolgee.hateoas.apps.AppRegisteredModel
 import io.tolgee.hateoas.apps.AppRegisteredModelAssembler
 import io.tolgee.hateoas.organization.apps.OwnedAppModel
 import io.tolgee.hateoas.organization.apps.OwnedAppModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppOwnerRemovalService
 import io.tolgee.service.apps.AppService
@@ -44,7 +44,7 @@ class OrganizationOwnedAppsController(
   private val appOwnerRemovalService: AppOwnerRemovalService,
 ) {
   @PostMapping
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "Register a Tolgee app",
     description =
@@ -68,7 +68,7 @@ class OrganizationOwnedAppsController(
   }
 
   @GetMapping
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "List the apps this organization owns",
     description =
@@ -82,7 +82,7 @@ class OrganizationOwnedAppsController(
   }
 
   @GetMapping("/{appId}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(summary = "Get an owned app")
   fun get(
     @PathVariable organizationId: Long,
@@ -92,7 +92,7 @@ class OrganizationOwnedAppsController(
   }
 
   @DeleteMapping("/{appId}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "Delete an owned app",
     description =

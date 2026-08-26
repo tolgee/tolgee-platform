@@ -9,9 +9,7 @@ enum class Scope(
   @get:JsonValue
   var value: String,
   /**
-   * True for scopes that govern organization-level resources. They are resolved from the
-   * organization role (see [OrganizationRoleType.availableScopes]) and must be kept out of every
-   * project context (project API keys, the project side of app manifest consent).
+   * True for scopes that govern organization-level resources.
    */
   val organizationLevel: Boolean = false,
 ) {
@@ -61,11 +59,20 @@ enum class Scope(
   ORGANIZATION_USAGE_VIEW("organization-usage.view", organizationLevel = true),
   ORGANIZATION_PROJECTS_CREATE("organization-projects.create", organizationLevel = true),
   ORGANIZATION_SETTINGS_MANAGE("organization-settings.manage", organizationLevel = true),
+  ORGANIZATION_DELETE("organization.delete", organizationLevel = true),
   ORGANIZATION_APPS_MANAGE("organization-apps.manage", organizationLevel = true),
-  ORGANIZATION_GLOSSARIES_VIEW("organization-glossaries.view", organizationLevel = true),
+  ORGANIZATION_SLACK_MANAGE("organization-slack.manage", organizationLevel = true),
+  ORGANIZATION_AI_MANAGE("organization-ai.manage", organizationLevel = true),
   ORGANIZATION_GLOSSARIES_MANAGE("organization-glossaries.manage", organizationLevel = true),
+  ORGANIZATION_GLOSSARY_TERMS_MANAGE("organization-glossary-terms.manage", organizationLevel = true),
   ORGANIZATION_TRANSLATION_MEMORY_VIEW("organization-translation-memory.view", organizationLevel = true),
   ORGANIZATION_TRANSLATION_MEMORY_MANAGE("organization-translation-memory.manage", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE(
+    "organization-translation-memory-entries.manage",
+    organizationLevel = true,
+  ),
+  ORGANIZATION_BILLING_VIEW("organization-billing.view", organizationLevel = true),
+  ORGANIZATION_BILLING_MANAGE("organization-billing.manage", organizationLevel = true),
   ;
 
   fun expand() = Scope.expand(this)
