@@ -82,6 +82,9 @@ enum class Scope(
   companion object {
     val readOnlyScopes by lazy { ALL_VIEW.expand() }
 
+    /** Every scope grantable in a project context, i.e. all but the [organizationLevel] ones. */
+    val projectAssignable by lazy { entries.filter { !it.organizationLevel }.toSet() }
+
     /**
      * Organization-level scopes ([organizationLevel]) are held via the organization role and must
      * never be stored on a project permission or a project API key. Call this before persisting any

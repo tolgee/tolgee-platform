@@ -90,7 +90,7 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     )
   }
 
-  fun createTestDataWithPak(scopes: Set<Scope> = Scope.entries.toSet()): McpPakTestData {
+  fun createTestDataWithPak(scopes: Set<Scope> = Scope.projectAssignable): McpPakTestData {
     var apiKey: ApiKey? = null
     val base = BaseTestData(userName = "pak_test_user", projectName = "pak_test_project")
     base.projectBuilder.build {

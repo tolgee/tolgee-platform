@@ -60,6 +60,7 @@ class EePermissionService(
   ): Permission {
     val scopes = Scope.parse(params.scopes)
 
+    Scope.assertProjectAssignable(scopes)
     validateLanguagePermissions(params.languagePermissions, scopes)
 
     val permission =
