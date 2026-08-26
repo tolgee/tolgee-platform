@@ -86,10 +86,10 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
-    val isOAuth = authenticationFacade.isOAuthTokenAuth
+    val isScoped = authenticationFacade.isScopedCredential
     if (
-      getProjectPermissionScopesNoApiKey(projectId, bypassAdminRights = isOAuth).isNullOrEmpty() &&
-      (isOAuth || !activeUser.isSupporterOrAdmin())
+      getProjectPermissionScopesNoApiKey(projectId, bypassAdminRights = isScoped).isNullOrEmpty() &&
+      (isScoped || !activeUser.isSupporterOrAdmin())
     ) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
@@ -131,14 +131,13 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val isOAuth = authenticationFacade.isOAuthTokenAuth
     var scopes =
       Scope
         .expand(
           getProjectPermissionScopesNoApiKey(
             projectId,
             authenticationFacade.authenticatedUser.id,
-            bypassAdminRights = isOAuth,
+            bypassAdminRights = authenticationFacade.isScopedCredential,
           ),
         ).toSet()
 
@@ -171,7 +170,7 @@ class SecurityService(
       projectId,
       requiredPermission,
       user,
-      bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+      bypassAdminRights = authenticationFacade.isScopedCredential,
     )
 
     authenticationFacade.oauthTokenCredentials?.let { checkOAuthTokenPermission(projectId, requiredPermission, it) }
@@ -466,7 +465,7 @@ class SecurityService(
       permissionService.getProjectPermissionData(
         projectId,
         authenticationFacade.authenticatedUser.id,
-        bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+        bypassAdminRights = authenticationFacade.isScopedCredential,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -482,7 +481,7 @@ class SecurityService(
         permissionService.getProjectPermissionData(
           projectId,
           authenticationFacade.authenticatedUser.id,
-          bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+          bypassAdminRights = authenticationFacade.isScopedCredential,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -727,16 +726,16 @@ class SecurityService(
     }
   }
 
-  // An OAuth token never inherits the admin/supporter bypass: the per-language check must run for it even when the
-  // underlying user is a server admin/supporter, so the token stays bound to that user's real language restrictions.
+  // A scoped credential never inherits the admin/supporter bypass: the per-language check must run for it even when the
+  // underlying user is a server admin/supporter, so it stays bound to that user's real language restrictions.
   private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
-    if (authenticationFacade.isOAuthTokenAuth || !activeUser.isAdmin()) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
   private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
-    if (authenticationFacade.isOAuthTokenAuth || !activeUser.isSupporterOrAdmin()) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }

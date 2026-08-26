@@ -221,7 +221,7 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         projectIdNotNull,
         authenticationFacade.authenticatedUser.id,
-        bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+        bypassAdminRights = authenticationFacade.isScopedCredential,
       )
 
     val computed = permissionData.computedPermissions
@@ -241,7 +241,7 @@ class ApiKeyController(
 
   // A scoped credential (PAK or OAuth token) has no single project "type"; its authority is the scope list.
   private fun resolveReportedPermissionType(computedType: ProjectPermissionType?): ProjectPermissionType? {
-    if (authenticationFacade.isProjectApiKeyAuth || authenticationFacade.isOAuthTokenAuth) return null
+    if (authenticationFacade.isScopedCredential) return null
     return computedType
   }
 

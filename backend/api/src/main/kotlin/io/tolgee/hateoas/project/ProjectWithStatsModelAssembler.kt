@@ -42,7 +42,7 @@ class ProjectWithStatsModelAssembler(
         view.directPermission,
         authenticationFacade.authenticatedUserOrNull?.role,
         isProjectPublic = view.public,
-        bypassAdminRights = authenticationFacade.isOAuthTokenAuth,
+        bypassAdminRights = authenticationFacade.isScopedCredential,
       )
 
     return ProjectWithStatsModel(

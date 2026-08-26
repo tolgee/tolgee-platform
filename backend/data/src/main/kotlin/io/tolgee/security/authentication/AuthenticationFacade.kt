@@ -111,12 +111,22 @@ class AuthenticationFacade(
       return authentication.credentials as? OAuth2TokenCredentials
     }
 
-  // The author-self elevation ("you may act on what you created") belongs to the user acting directly — a webapp JWT or
-  // a PAT, which carry the user's full authority. A project API key and an OAuth token are scoped capabilities: they
-  // must carry the real scope instead, or the elevation would let them act past the scope list they were issued with.
-  // One home so a new self-access site can't forget the exclusion.
+  /**
+   * Whether the request is made with a credential whose authority is narrower than the user's own.
+   *
+   * A project API key and an OAuth token are capabilities: bounded by the scope list they were issued with, and by the
+   * user's real project membership. A webapp JWT and a PAT are the user acting directly and carry the user's full
+   * authority, server-admin reach included.
+   *
+   * Every "the credential may do less than the user" rule reads this, so a new one cannot pick a different answer.
+   */
+  val isScopedCredential: Boolean
+    get() = isProjectApiKeyAuth || isOAuthTokenAuth
+
+  // The author-self elevation ("you may act on what you created") is a user-authority path: a scoped credential must
+  // carry the real scope instead, or the elevation would let it act past the scope list it was issued with.
   val canUseAuthorSelfAccess: Boolean
-    get() = !isProjectApiKeyAuth && !isOAuthTokenAuth
+    get() = !isScopedCredential
 
   fun isAuthorSelfAccess(authorId: Long?): Boolean {
     if (!canUseAuthorSelfAccess) return false
