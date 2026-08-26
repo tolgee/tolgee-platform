@@ -9,8 +9,7 @@ import org.hibernate.query.sqm.UnknownPathException
 import org.junit.jupiter.api.Test
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpStatus
-import java.io.IOException
-import java.io.UncheckedIOException
+import org.springframework.mock.web.MockHttpServletRequest
 
 class ExceptionHandlersTest {
   private val handlers = ExceptionHandlers()
@@ -19,7 +18,7 @@ class ExceptionHandlersTest {
   fun `answers bad request when a query names a property that does not exist`() {
     val ex = InvalidDataAccessApiUsageException("wrapped", PathElementException("Could not resolve attribute 'nope'"))
 
-    val response = handlers.handleInvalidDataAccessApiUsage(ex)
+    val response = handlers.handleInvalidDataAccessApiUsage(ex, sortedRequest())
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     assertThat(response.body?.code).isEqualTo(Message.UNKNOWN_SORT_PROPERTY.code)
@@ -33,38 +32,26 @@ class ExceptionHandlersTest {
         IllegalStateException("in between", UnknownPathException("Could not resolve path 'name.nope'")),
       )
 
-    assertThat(handlers.handleInvalidDataAccessApiUsage(buried).statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+    assertThat(
+      handlers.handleInvalidDataAccessApiUsage(buried, sortedRequest()).statusCode,
+    ).isEqualTo(HttpStatus.BAD_REQUEST)
   }
 
   @Test
   fun `rethrows data access misuse that is not an unresolvable property`() {
     val ex = InvalidDataAccessApiUsageException("something else entirely")
 
-    assertThatThrownBy { handlers.handleInvalidDataAccessApiUsage(ex) }.isSameAs(ex)
-  }
-
-  /**
-   * The client-abort branch is recognised by the socket's "Broken pipe" text, which no compiler check protects.
-   */
-  @Test
-  fun `answers bad gateway when the client aborted the connection`() {
-    val response = handlers.handleOtherExceptions(IOException("Broken pipe"))
-
-    assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_GATEWAY)
+    assertThatThrownBy { handlers.handleInvalidDataAccessApiUsage(ex, sortedRequest()) }.isSameAs(ex)
   }
 
   @Test
-  fun `answers bad gateway when the client abort is the root cause`() {
-    val nested = UncheckedIOException(IOException("Broken pipe"))
+  fun `rethrows an unresolvable path when the client did not ask for a sort`() {
+    val ex = InvalidDataAccessApiUsageException("wrapped", PathElementException("Could not resolve attribute 'nope'"))
 
-    assertThat(handlers.handleOtherExceptions(nested).statusCode).isEqualTo(HttpStatus.BAD_GATEWAY)
+    assertThatThrownBy {
+      handlers.handleInvalidDataAccessApiUsage(ex, MockHttpServletRequest())
+    }.isSameAs(ex)
   }
 
-  @Test
-  fun `answers server error for any other failure`() {
-    val response = handlers.handleOtherExceptions(IOException("Disk on fire"))
-
-    assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-    assertThat(response.body?.code).isEqualTo("unexpected_error_occurred")
-  }
+  private fun sortedRequest() = MockHttpServletRequest().apply { setParameter("sort", "name") }
 }

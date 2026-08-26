@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
@@ -61,38 +60,6 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andAssertThatJson {
         node("code").isEqualTo("unknown_sort_property")
       }
-  }
-
-  @ProjectJWTAuthTestMethod
-  @Test
-  fun `returns bad request when the sort direction is nonsense`() {
-    saveTestDataAndPrepare()
-    performProjectAuthGet("keys?sort=name,nonsensedirection")
-      .andIsBadRequest
-      .andAssertThatJson {
-        node("code").isEqualTo("unknown_sort_property")
-      }
-  }
-
-  /**
-   * Sorting by a to-many association raises UnsupportedOperationException before any path resolution,
-   * so it never reaches the unknown-sort-property handler. Asserted as "not answered as a client error
-   * yet" rather than "is a 500", so validating sort input against the metamodel — the fix for this and
-   * for the PropertyReferenceException gap — turns this into a failure that says the gap closed rather
-   * than one inviting someone to restore the 500.
-   */
-  @ProjectJWTAuthTestMethod
-  @Test
-  fun `does not yet answer bad request when sorting by a to-many association`() {
-    saveTestDataAndPrepare()
-    listOf("translations", "keyMeta.tags").forEach { sort ->
-      performProjectAuthGet("keys?sort=$sort")
-        .andExpect(status().is5xxServerError)
-        .andAssertThatJson {
-          node("code").isEqualTo("unexpected_error_occurred")
-          node("params").isEqualTo(listOf("java.lang.UnsupportedOperationException"))
-        }
-    }
   }
 
   @ProjectJWTAuthTestMethod

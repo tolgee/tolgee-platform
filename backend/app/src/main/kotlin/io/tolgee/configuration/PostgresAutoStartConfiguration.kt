@@ -38,10 +38,6 @@ class PostgresAutoStartConfiguration(
     return dataSourceBuilder.build()
   }
 
-  /** 57P03 is what Postgres reports while starting; the message it pairs with it is localized. */
-  internal fun isStartingUp(e: Throwable): Boolean =
-    ExceptionUtils.getThrowableList(e).any { it is SQLException && it.sqlState == POSTGRES_CANNOT_CONNECT_NOW }
-
   private fun waitForPostgresRunning(postgresRunner: PostgresRunner) {
     val localDataSource = buildDataSource(postgresRunner)
     val maxRetries = postgresAutostartProperties.maxWaitTime
@@ -65,6 +61,9 @@ class PostgresAutoStartConfiguration(
       }
     }
   }
+
+  internal fun isStartingUp(e: Throwable): Boolean =
+    ExceptionUtils.getThrowableList(e).any { it is SQLException && it.sqlState == POSTGRES_CANNOT_CONNECT_NOW }
 
   companion object {
     private const val POSTGRES_CANNOT_CONNECT_NOW = "57P03"

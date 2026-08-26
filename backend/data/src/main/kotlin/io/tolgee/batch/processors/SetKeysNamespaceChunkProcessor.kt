@@ -44,18 +44,17 @@ class SetKeysNamespaceChunkProcessor(
     try {
       fn.invoke()
     } catch (e: Exception) {
-      if (!violatesKeyUniqueness(e)) {
-        throw e
+      if (violatesKeyUniqueness(e)) {
+        throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
       }
-      throw FailedDontRequeueException(Message.KEY_EXISTS_IN_NAMESPACE, listOf(), e)
+      throw e
     }
   }
 
   /**
-   * Reads the constraint from the driver's ErrorResponse rather than from
-   * ConstraintViolationException.constraintName: Hibernate fills that in by searching the server's
+   * Not ConstraintViolationException.constraintName: Hibernate fills that in by searching the server
    * message for the English `violates unique constraint "`, so it is empty under a non-English
-   * lc_messages. The wire-protocol field is an identifier the server never localizes.
+   * lc_messages.
    */
   fun violatesKeyUniqueness(e: Throwable) =
     ExceptionUtils
@@ -87,12 +86,8 @@ class SetKeysNamespaceChunkProcessor(
   ): Int = 5000
 
   companion object {
-    /**
-     * The unique indexes on `key` as created by schema.xml. Both were renamed once already —
-     * key_project_id_name_idx and key_project_id_name_namespace_id_idx were dropped by
-     * changeSet 1758202102054-2 — and the old guard went on matching the dropped names.
-     */
-    val KEY_UNIQUENESS_INDEXES =
+    /** The unique indexes on `key` as created by schema.xml. */
+    private val KEY_UNIQUENESS_INDEXES =
       setOf("key_project_branch_name_no_ns", "key_project_branch_name_ns")
   }
 }

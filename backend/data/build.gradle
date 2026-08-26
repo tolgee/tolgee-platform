@@ -253,29 +253,7 @@ tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)
-    // The wiring scan runs as its own task, so a test source change elsewhere in the repository does
-    // not invalidate this one.
-    filter { excludeTestsMatching 'io.tolgee.unit.ProjectJwtAuthTestMethodWiringTest' }
 }
-
-// Scans every module's test sources, so those files are its inputs rather than :data:test's — without
-// that it would be reported up-to-date on exactly the commits that add a wrongly annotated test.
-tasks.register('checkJwtAuthTestWiring', Test) {
-    useJUnitPlatform()
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    filter { includeTestsMatching 'io.tolgee.unit.ProjectJwtAuthTestMethodWiringTest' }
-    systemProperty 'jwtAuthWiringScanRoot', rootDir
-    inputs.files(
-            fileTree(rootDir) {
-                include '**/src/test/**/*.kt'
-                exclude '**/build/**'
-                exclude '**/node_modules/**'
-            }
-    ).withPropertyName('jwtAuthWiringScanSources').withPathSensitivity(PathSensitivity.RELATIVE)
-}
-
-tasks.named('check') { dependsOn 'checkJwtAuthTestWiring' }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

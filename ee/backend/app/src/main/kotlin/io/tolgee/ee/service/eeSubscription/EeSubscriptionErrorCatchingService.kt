@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.web.client.HttpClientErrorException
-import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class EeSubscriptionErrorCatchingService(

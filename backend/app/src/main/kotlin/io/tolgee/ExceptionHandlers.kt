@@ -229,8 +229,12 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
-  fun handleInvalidDataAccessApiUsage(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
-    if (ExceptionUtils.getThrowableList(ex).any { it.isUnresolvablePath() }) {
+  fun handleInvalidDataAccessApiUsage(
+    ex: InvalidDataAccessApiUsageException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
+    val sortedByClient = request.getParameter("sort") != null
+    if (sortedByClient && ExceptionUtils.getThrowableList(ex).any { it.isUnresolvablePath() }) {
       logger.debug("Unresolvable property in a query", ex)
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
@@ -240,12 +244,6 @@ class ExceptionHandlers : Logging {
     Sentry.captureException(ex)
     throw ex
   }
-
-  /**
-   * PathElementException is an IllegalArgumentException and PathException a SemanticException, so
-   * neither term implies the other and both are needed.
-   */
-  private fun Throwable.isUnresolvablePath() = this is PathElementException || this is PathException
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
@@ -319,4 +317,6 @@ class ExceptionHandlers : Logging {
     val headerXFF = request.getHeader("X-FORWARDED-FOR")
     logger.warn(message, request.method, request.requestURL, request.remoteAddr, headerXFF)
   }
+
+  private fun Throwable.isUnresolvablePath() = this is PathElementException || this is PathException
 }

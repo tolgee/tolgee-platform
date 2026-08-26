@@ -8,19 +8,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
-/**
- * SetKeysNamespaceChunkProcessor recognises "this key name is taken" by the violated index name, so the
- * names it holds have to be the ones the database actually creates. The previous pair,
- * key_project_id_name_idx and key_project_id_name_namespace_id_idx, was dropped by changeSet
- * 1758202102054-2 while the guard went on matching them, which left it silently dead.
- *
- * These drive the guard itself against a real violation, so they fail if the index names, the driver's
- * ErrorResponse field, or Hibernate's wrapping stop lining up.
- */
-@SpringBootTest
 class KeyUniquenessConstraintNameTest : AbstractSpringTest() {
   @Autowired
   private lateinit var processor: SetKeysNamespaceChunkProcessor
@@ -43,6 +32,7 @@ class KeyUniquenessConstraintNameTest : AbstractSpringTest() {
         entityManager.flush()
       }
 
+    assertThat(thrown).describedAs("saving a duplicate key must violate the unique index").isNotNull()
     assertThat(processor.violatesKeyUniqueness(thrown!!))
       .describedAs("the guard must recognise a duplicate outside a namespace")
       .isTrue()
@@ -68,6 +58,7 @@ class KeyUniquenessConstraintNameTest : AbstractSpringTest() {
         entityManager.flush()
       }
 
+    assertThat(thrown).describedAs("saving a duplicate key must violate the unique index").isNotNull()
     assertThat(processor.violatesKeyUniqueness(thrown!!))
       .describedAs("the guard must recognise a duplicate inside a namespace")
       .isTrue()

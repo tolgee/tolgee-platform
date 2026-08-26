@@ -1,7 +1,6 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.InternalProperties
-import org.apache.commons.lang3.exception.ExceptionUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.context.event.ApplicationFailedEvent
@@ -27,26 +26,17 @@ class ApplicationStopper(
     }
   }
 
-  /**
-   * Spring translates the schema failure into InvalidDataAccessResourceUsageException, so it arrives
-   * wrapped rather than as the thrown exception.
-   */
-  internal fun exitStatusFor(exception: Throwable?): Int {
-    val schemaFailure =
-      ExceptionUtils.getThrowableList(exception).any {
-        it.javaClass.name.contains("SQLGrammarException")
-      }
-    if (schemaFailure) {
-      return 0
-    }
-    return 1
-  }
-
   @EventListener(ApplicationFailedEvent::class)
   fun handleApplicationFailed(event: ApplicationFailedEvent) {
     if (internalProperties.stopRightAfterStart) {
       log.info("Exiting: StopRightAfterStart property is set to true")
-      val exitStatus = exitStatusFor(event.exception)
+      var exitStatus = 1
+      if (event.exception.javaClass.name
+          .contains("SQLGrammarException")
+      ) {
+        exitStatus = 0
+      }
+
       SpringApplication.exit(applicationContext, { exitStatus })
       exitProcess(exitStatus)
     }
