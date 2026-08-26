@@ -26,6 +26,7 @@ export const StyledRoot = styled('div')`
   & .cm-editor {
     outline: none;
     width: 100%;
+    min-width: 0;
   }
 
   & .cm-scroller {
