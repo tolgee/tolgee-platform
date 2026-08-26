@@ -6,6 +6,8 @@ import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.oauth2.OAuth2AudienceResolver
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.testing.AbstractControllerTest
@@ -20,13 +22,13 @@ import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 /**
- * An OAuth token currently inherits the task-assignee elevation, matching the API-key behavior: a user assigned to a
- * task may act on it even without the underlying scope. This is intentional for now (see the TODO in
- * SecurityService.checkTaskScopeOrAssigned) and to be tightened later with a dedicated scope that grants it explicitly.
+ * The task-assignee elevation is gated on [Scope.TASKS_ASSIGNED_ACCESS]. A credential that does not carry that scope
+ * cannot ride the assignment past its own authority, whatever the underlying user is assigned to.
  */
 class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
@@ -64,20 +66,35 @@ class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `an OAuth token reaches a task via assignment even when its scope does not cover the operation`() {
-    // projectUser is assigned to the translate task; the assignment lets a token scoped only to translations.view act
-    // on it (as an API key would). The request is NOT permission-denied (403) — it passes the permission gate and is
-    // rejected only by the business rule that the task isn't finished, proving the assignee elevation is applied.
+  fun `an OAuth token without tasks assigned-access cannot ride the assignment`() {
+    // projectUser IS assigned to the translate task, but the token's scope set omits TASKS_ASSIGNED_ACCESS, so the
+    // elevation must not apply and the request is permission-denied rather than reaching the business rule.
     val token = mint(subject = testData.projectUser.self.id, scopes = listOf("translations.view"))
 
-    mvc
-      .perform(
-        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-          .put("/v2/projects/${testData.projectBuilder.self.id}/tasks/${testData.translateTask.self.number}/finish")
-          .headers(bearer(token)),
-      ).andIsBadRequest
+    finishTranslateTask(token).andIsForbidden
+  }
+
+  @Test
+  fun `an OAuth token with tasks assigned-access reaches a task via assignment`() {
+    // Same assignment, but the scope is consented. The request is NOT permission-denied — it passes the permission gate
+    // and is rejected only by the business rule that the task isn't finished, proving the elevation is applied.
+    val token =
+      mint(
+        subject = testData.projectUser.self.id,
+        scopes = listOf("translations.view", Scope.TASKS_ASSIGNED_ACCESS.value),
+      )
+
+    finishTranslateTask(token)
+      .andIsBadRequest
       .andHasErrorMessage(Message.TASK_NOT_FINISHED)
   }
+
+  private fun finishTranslateTask(token: String) =
+    mvc.perform(
+      MockMvcRequestBuilders
+        .put("/v2/projects/${testData.projectBuilder.self.id}/tasks/${testData.translateTask.self.number}/finish")
+        .headers(bearer(token)),
+    )
 
   private fun bearer(token: String) = HttpHeaders().apply { add(HttpHeaders.AUTHORIZATION, "Bearer $token") }
 

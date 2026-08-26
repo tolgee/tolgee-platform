@@ -197,6 +197,17 @@ class SecurityService(
     }
   }
 
+  /**
+   * Whether the credential may use the task-assignee elevation at all.
+   *
+   * Must go through [getCurrentPermittedScopes], not a raw permission lookup: that is what intersects the PAK's scope
+   * list and the OAuth token's scope ∩ project set with the user's live permissions, so this one gate binds every
+   * credential kind. A direct permission lookup here would let a scoped credential ride the elevation past its own
+   * authority.
+   */
+  private fun hasTaskAssignedAccess(projectId: Long): Boolean =
+    getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
+
   fun checkTaskEditScopeOrAssigned(
     projectId: Long,
     taskNumber: Long,
@@ -215,10 +226,9 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
-      // TODO: an OAuth token rides the task-assignee elevation to act past its consented scope here and in the
-      //  translationInTask/translationsInTask fallbacks (checkLanguageTranslatePermission,
-      //  checkLanguageStateChangePermission, checkScopeOrAssignedToTask). Intentional for now (matches API-key
-      //  behavior); to be tightened later with a dedicated scope that explicitly grants the assignee elevation.
+      if (!hasTaskAssignedAccess(projectId)) {
+        throw err
+      }
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
@@ -355,16 +365,9 @@ class SecurityService(
   ): Boolean {
     checkLanguageViewPermission(projectId, languageIds)
 
-    if (keyId != null && languageIds.isNotEmpty()) {
-      languageIds.forEach {
-        if (!translationInTask(keyId, it, taskType)) {
-          return false
-        }
-      }
-    } else {
-      return false
-    }
-    return true
+    if (!hasTaskAssignedAccess(projectId)) return false
+    if (keyId == null || languageIds.isEmpty()) return false
+    return languageIds.all { translationInTask(keyId, it, taskType) }
   }
 
   fun checkLanguageTranslatePermission(
@@ -434,6 +437,9 @@ class SecurityService(
       checkProjectPermission(projectHolder.project.id, scope)
     } catch (e: PermissionException) {
       checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
+      if (!hasTaskAssignedAccess(projectHolder.project.id)) {
+        throw e
+      }
       if (!translationInTask(keyId, languageId, taskType)) {
         throw e
       }
