@@ -71,10 +71,15 @@ class AppManifestValidator(
   }
 
   private fun validateScopes() {
-    try {
-      Scope.parse(manifest.scopes)
-    } catch (e: BadRequestException) {
-      errors.add("unknown scope: ${e.params?.firstOrNull() ?: ""}")
+    val scopes =
+      try {
+        Scope.parse(manifest.scopes)
+      } catch (e: BadRequestException) {
+        errors.add("unknown scope: ${e.params?.firstOrNull() ?: ""}")
+        return
+      }
+    scopes.filter { it.organizationLevel }.forEach {
+      errors.add("organization-level scope not allowed in manifest: ${it.value}")
     }
   }
 

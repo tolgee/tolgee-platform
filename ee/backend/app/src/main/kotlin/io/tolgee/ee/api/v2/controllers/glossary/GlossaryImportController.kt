@@ -9,12 +9,12 @@ import io.tolgee.ee.data.glossary.GlossaryImportResult
 import io.tolgee.ee.service.glossary.GlossaryImportService
 import io.tolgee.ee.service.glossary.GlossaryService
 import io.tolgee.ee.service.glossary.GlossaryTermService
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
@@ -37,7 +37,7 @@ class GlossaryImportController(
   @PostMapping("/import", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Import glossary terms from CSV")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARIES_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @RequestActivity(ActivityType.GLOSSARY_IMPORT)
   @Transactional

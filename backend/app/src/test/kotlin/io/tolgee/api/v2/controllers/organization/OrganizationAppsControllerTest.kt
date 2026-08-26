@@ -247,6 +247,15 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `rejects manifest with an organization-level scope`() {
+    mockManifest(validManifest().replace("\"keys.edit\"", "\"organization-members.manage\""))
+    performAuthPost(registerUrl(), registerBody()).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("app_manifest_invalid")
+      node("params[0]").isEqualTo("organization-level scope not allowed in manifest: organization-members.manage")
+    }
+  }
+
+  @Test
   fun `register without scopes block stores no granted scopes`() {
     mockManifest(manifestWithoutScopes())
     performAuthPost(registerUrl(), registerBody()).andIsOk

@@ -15,11 +15,11 @@ import io.tolgee.ee.data.translationMemory.TranslationMemoryEntryRequest
 import io.tolgee.ee.service.translationMemory.TmRow
 import io.tolgee.ee.service.translationMemory.TranslationMemoryEntryManagementService
 import io.tolgee.ee.service.translationMemory.TranslationMemoryRowListingService
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -58,7 +58,7 @@ class TranslationMemoryEntryController(
         "row to a subset of target languages; rows themselves still appear with empty cells " +
         "so the user can add a translation.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun list(
@@ -88,7 +88,7 @@ class TranslationMemoryEntryController(
         "long list for client-side `Select all` flows. Virtual rows are not included " +
         "(they have no entry IDs).",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAllStoredEntryIds(
@@ -107,7 +107,7 @@ class TranslationMemoryEntryController(
 
   @GetMapping("/{entryId:[0-9]+}")
   @Operation(summary = "Get a single translation memory entry")
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun get(
@@ -121,7 +121,7 @@ class TranslationMemoryEntryController(
 
   @PostMapping
   @Operation(summary = "Create a translation memory entry")
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_CREATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
@@ -144,7 +144,7 @@ class TranslationMemoryEntryController(
         "result if a later language failed. The same target language must not appear twice in " +
         "the same request.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_CREATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
@@ -160,7 +160,7 @@ class TranslationMemoryEntryController(
 
   @PutMapping("/{entryId:[0-9]+}")
   @Operation(summary = "Update a translation memory entry")
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_UPDATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
@@ -177,7 +177,7 @@ class TranslationMemoryEntryController(
 
   @DeleteMapping("/{entryId:[0-9]+}")
   @Operation(summary = "Delete a translation memory entry")
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_DELETE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
@@ -198,7 +198,7 @@ class TranslationMemoryEntryController(
         "source text (and key). The request is deduplicated to distinct groups so passing " +
         "multiple entries from the same row is a no-op past the first one.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_DELETE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
@@ -222,7 +222,7 @@ class TranslationMemoryEntryController(
       "Deletes every entry that shares the same source text (and key) as the given " +
         "entry — i.e. the entire translation-unit group visible as one row in the UI.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE])
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_ENTRY_DELETE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)

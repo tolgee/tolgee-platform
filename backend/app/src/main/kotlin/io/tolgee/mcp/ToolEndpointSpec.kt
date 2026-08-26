@@ -3,7 +3,6 @@ package io.tolgee.mcp
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
@@ -13,7 +12,7 @@ import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOneOfFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.security.ratelimit.RateLimited
@@ -37,7 +36,7 @@ data class ToolEndpointSpec(
   val isWriteOperation: Boolean,
   val useDefaultPermissions: Boolean = false,
   val isGlobalRoute: Boolean = false,
-  val requiredOrgRole: OrganizationRoleType? = null,
+  val requiredOrgScopes: Array<Scope>? = null,
   val requiredFeatures: Array<out Feature>? = null,
   val requiredOneOfFeatures: Array<out Feature>? = null,
   val activityType: ActivityType? = null,
@@ -84,7 +83,7 @@ private fun buildSpecFromMethod(
     requiredScopes = AnnotationUtils.getAnnotation(method, RequiresProjectPermissions::class.java)?.scopes,
     useDefaultPermissions = AnnotationUtils.getAnnotation(method, UseDefaultPermissions::class.java) != null,
     isGlobalRoute = AnnotationUtils.getAnnotation(method, IsGlobalRoute::class.java) != null,
-    requiredOrgRole = AnnotationUtils.getAnnotation(method, RequiresOrganizationRole::class.java)?.role,
+    requiredOrgScopes = AnnotationUtils.getAnnotation(method, RequiresOrganizationScopes::class.java)?.scopes,
     requiredFeatures = AnnotationUtils.getAnnotation(method, RequiresFeatures::class.java)?.features,
     requiredOneOfFeatures = AnnotationUtils.getAnnotation(method, RequiresOneOfFeatures::class.java)?.features,
     allowedTokenType = allowApiAccess.tokenType,

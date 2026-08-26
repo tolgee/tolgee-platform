@@ -9,9 +9,9 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderSimpleModelAssembler
 import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.hateoas.llmProvider.LlmProviderModel
 import io.tolgee.hateoas.llmProvider.LlmProviderSimpleModel
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.LlmPropertiesService
 import jakarta.validation.Valid
@@ -82,7 +82,7 @@ class LlmProviderController(
   }
 
   @GetMapping("")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_AI_MANAGE])
   @Operation(summary = "Get all organization-specific providers")
   fun getAll(
     @PathVariable organizationId: Long,
@@ -92,7 +92,7 @@ class LlmProviderController(
   }
 
   @GetMapping("server-providers")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_AI_MANAGE])
   @Operation(summary = "Get all server-configured providers")
   fun getServerProviders(
     @PathVariable organizationId: Long,
@@ -102,7 +102,7 @@ class LlmProviderController(
   }
 
   @PostMapping("")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_AI_MANAGE])
   @Operation(summary = "Create organization-specific provider")
   fun createProvider(
     @PathVariable organizationId: Long,
@@ -113,7 +113,7 @@ class LlmProviderController(
   }
 
   @PutMapping("/{providerId:[0-9]+}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_AI_MANAGE])
   @Operation(summary = "Update organization-specific provider")
   fun updateProvider(
     @PathVariable organizationId: Long,
@@ -125,7 +125,7 @@ class LlmProviderController(
   }
 
   @DeleteMapping("/{providerId:[0-9]+}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_AI_MANAGE])
   @Operation(summary = "Delete organization-specific provider")
   fun deleteProvider(
     @PathVariable organizationId: Long,
