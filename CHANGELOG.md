@@ -1,3 +1,10 @@
+## [3.219.1](https://github.com/tolgee/tolgee-platform/compare/v3.219.0...v3.219.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* Text overflow in keys Search field/[#3852](https://github.com/tolgee/tolgee-platform/issues/3852) ([#3875](https://github.com/tolgee/tolgee-platform/issues/3875)) ([44fa434](https://github.com/tolgee/tolgee-platform/commit/44fa43436469d4c12ea0cf0daede769fb1262c50))
+
 # [3.219.0](https://github.com/tolgee/tolgee-platform/compare/v3.218.6...v3.219.0) (2026-08-26)
 
 
