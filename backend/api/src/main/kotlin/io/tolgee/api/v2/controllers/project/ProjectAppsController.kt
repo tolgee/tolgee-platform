@@ -119,9 +119,10 @@ class ProjectAppsController(
   @Operation(
     summary = "Mint a user-context app token",
     description =
-      "Issues a short-lived JWT bound to (install, project, current user) that the dashboard iframe " +
-        "uses to call Tolgee's REST API on behalf of the user. Returns 404 if the install is not " +
-        "enabled for this project.",
+      "Issues a short-lived JWT bound to (install, current user) that the dashboard iframe uses to " +
+        "call Tolgee's REST API on behalf of the user. The token is organization-wide: it works on " +
+        "every project the install is enabled for, always capped by the user's own permissions " +
+        "there. Returns 404 if the install is not enabled for this project.",
   )
   fun mintToken(
     @PathVariable installId: Long,
@@ -134,7 +135,6 @@ class ProjectAppsController(
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = authenticationFacade.authenticatedUser.id,
-        projectId = projectId,
         isReadOnly = authenticationFacade.isReadOnly,
       )
     return AppTokenModel(token = token)

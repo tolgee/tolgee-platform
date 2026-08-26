@@ -223,30 +223,63 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
   }
 
-  /** A user-context token bound to one project must be opaque on another — no cross-tenant probing. */
+  /** The token is organization-wide: one mint reaches every project the install is enabled for. */
   @Test
-  fun `refuses a user-context token on a project other than the one it was minted for`() {
+  fun `a user-context token works on every enabled project of the organization`() {
+    userAccount = testData.user
+    performAuthPut("/v2/projects/${testData.siblingProject.id}/apps/$installId", null).andIsOk
+
     val token =
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.user.id,
-        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+    asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations")).andIsOk
+  }
+
+  /** Where the app is not enabled, a project the token's own user can see gets the accurate error. */
+  @Test
+  fun `reports the specific not-enabled error for a project the iframe user is a member of`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
         isReadOnly = false,
       )
 
     asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations"))
       .andIsForbidden
-      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
-  /** For its own (known) project the token gets the specific not-enabled error, not the opaque one. */
+  /** A project the iframe user cannot see stays indistinguishable from a nonexistent id. */
   @Test
-  fun `reports the specific not-enabled error for a user-context token's own disabled project`() {
+  fun `stays opaque on a foreign organization's project`() {
     val token =
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.user.id,
-        projectId = testData.project.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.otherProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+    asToken(token, get("/v2/projects/999999999/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  /** Disabling the app cuts off an already-minted token, with the accurate error for a member. */
+  @Test
+  fun `reports the specific not-enabled error once the project's enablement is revoked`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
         isReadOnly = false,
       )
     asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
@@ -269,7 +302,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.member.id,
-        projectId = testData.project.id,
         isReadOnly = false,
       )
 
@@ -290,7 +322,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.user.id,
-        projectId = testData.project.id,
         isReadOnly = false,
       )
     asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
@@ -309,7 +340,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.user.id,
-        projectId = testData.project.id,
         isReadOnly = true,
       )
 

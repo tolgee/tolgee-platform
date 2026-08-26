@@ -124,7 +124,6 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
       appTokenService.mintUserContextToken(
         installId = installId,
         userId = testData.user.id,
-        projectId = testData.project.id,
         isReadOnly = false,
       )
 

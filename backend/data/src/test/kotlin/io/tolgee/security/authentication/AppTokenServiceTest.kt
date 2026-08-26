@@ -106,7 +106,6 @@ class AppTokenServiceTest {
         setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
         setSubject(USER_ID.toString())
         claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
-        claim(AppTokenService.JWT_APP_TOKEN_PROJECT_ID_CLAIM, PROJECT_ID)
       }
     appTokenService
       .validateToken(token)
@@ -119,20 +118,6 @@ class AppTokenServiceTest {
     val token =
       rawToken {
         setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
-        claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
-        claim(AppTokenService.JWT_APP_TOKEN_PROJECT_ID_CLAIM, PROJECT_ID)
-      }
-    assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
-      .code.assert
-      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
-  }
-
-  @Test
-  fun `rejects a user-context token with no project id`() {
-    val token =
-      rawToken {
-        setAudience(AppTokenService.JWT_APP_TOKEN_AUDIENCE)
-        setSubject(USER_ID.toString())
         claim(AppTokenService.JWT_APP_TOKEN_INSTALL_ID_CLAIM, INSTALL_ID)
       }
     assertThrows<AuthenticationException> { appTokenService.validateToken(token) }
@@ -153,7 +138,6 @@ class AppTokenServiceTest {
     return appTokenService.mintUserContextToken(
       installId = INSTALL_ID,
       userId = USER_ID,
-      projectId = PROJECT_ID,
       isReadOnly = isReadOnly,
     )
   }
@@ -163,6 +147,5 @@ class AppTokenServiceTest {
     private const val TOKEN_LIFETIME = 60 * 1000L
     private const val INSTALL_ID = 42L
     private const val USER_ID = 1337L
-    private const val PROJECT_ID = 7L
   }
 }

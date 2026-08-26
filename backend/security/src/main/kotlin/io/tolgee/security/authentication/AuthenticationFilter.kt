@@ -211,7 +211,6 @@ class AuthenticationFilter(
       appInstallOrNull = install,
       appId = install.app.id,
       userAccount = user,
-      tokenProjectId = claims.projectId,
       isInstallContext = false,
       isReadOnly = claims.isReadOnly,
     )
@@ -233,7 +232,6 @@ class AuthenticationFilter(
       appInstallOrNull = resolution.install,
       appId = resolution.install.app.id,
       userAccount = resolution.principal,
-      tokenProjectId = null,
       isInstallContext = true,
       isReadOnly = claims.isReadOnly,
       actsForUserId = resolveActingAsUserId(request),

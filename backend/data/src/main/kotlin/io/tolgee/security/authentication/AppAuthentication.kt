@@ -7,7 +7,7 @@ import io.tolgee.model.apps.AppInstall
 /**
  * Authentication for an app JWT, in one of three contexts:
  *  - **install-context**: `userAccount` is the install's [AppInstall.principal]; [appInstall] is set.
- *  - **user-context**: `userAccount` is the iframe user; [tokenProjectId] is set.
+ *  - **user-context**: `userAccount` is the iframe user; valid for any of the install's enabled projects.
  *  - **app-level** ([isAppLevel]): identifies the app itself for app-level operations (installation
  *    discovery). There is no install and no per-app person, so `userAccount` is a synthetic,
  *    permission-less principal; the [AppAccessInterceptor] confines these tokens to
@@ -23,7 +23,6 @@ class AppAuthentication(
   userAccount: UserAccountDto,
   private val appInstallOrNull: AppInstall?,
   val appId: Long,
-  val tokenProjectId: Long?,
   val isInstallContext: Boolean,
   isReadOnly: Boolean,
   val actsForUserId: Long? = null,
@@ -55,7 +54,6 @@ class AppAuthentication(
         userAccount = syntheticAppPrincipal(appId),
         appInstallOrNull = null,
         appId = appId,
-        tokenProjectId = null,
         isInstallContext = false,
         isReadOnly = isReadOnly,
       )

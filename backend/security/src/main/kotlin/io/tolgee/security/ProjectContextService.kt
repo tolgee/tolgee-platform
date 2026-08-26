@@ -146,23 +146,26 @@ class ProjectContextService(
     // access, and the AppAccessInterceptor refuses it on any project route.
     if (appAuth.isAppLevel) return
 
-    // A user-context token minted for this project may get an accurate "not enabled"; every other
-    // case must be indistinguishable from a nonexistent id (which fails as APP_ACCESS_FORBIDDEN),
-    // else the differing codes let an app enumerate project ids across tenants.
-    val knowsProject = appAuth.tokenProjectId == project.id
-
-    if (appAuth.tokenProjectId != null && !knowsProject) {
-      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
-    }
-
     if (!appEnablementService.isEnabledForProject(project.id, appAuth.appInstall.id)) {
-      if (knowsProject) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
+      // A user-context caller may get an accurate "not enabled" for a project its own user can see;
+      // every other case must be indistinguishable from a nonexistent id (which fails as
+      // APP_ACCESS_FORBIDDEN), else the differing codes let an app enumerate project ids across
+      // tenants.
+      if (userKnowsProject(appAuth, project.id)) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
       throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
 
     checkActingAsUserIsProjectMember(appAuth, project.id)
 
     appAuth.boundProjectId = project.id
+  }
+
+  private fun userKnowsProject(
+    appAuth: AppAuthentication,
+    projectId: Long,
+  ): Boolean {
+    if (appAuth.isInstallContext) return false
+    return !permissionService.getProjectPermissionScopesNoApiKey(projectId, appAuth.principal.id).isNullOrEmpty()
   }
 
   /**

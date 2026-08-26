@@ -37,14 +37,12 @@ class AppTokenService(
   fun mintUserContextToken(
     installId: Long,
     userId: Long,
-    projectId: Long,
     isReadOnly: Boolean,
   ): String {
     val builder =
       baseBuilder(installId)
         .setSubject(userId.toString())
         .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_USER)
-        .claim(JWT_APP_TOKEN_PROJECT_ID_CLAIM, projectId)
 
     if (isReadOnly) {
       builder.claim(JWT_APP_TOKEN_READ_ONLY_CLAIM, true)
@@ -116,7 +114,6 @@ class AppTokenService(
         isInstallContext = false,
         isAppContext = true,
         userId = null,
-        projectId = null,
         issuedAt = jws.body.issuedAt,
         isReadOnly = false,
       )
@@ -133,7 +130,6 @@ class AppTokenService(
         installId = installId,
         isInstallContext = true,
         userId = null,
-        projectId = null,
         issuedAt = jws.body.issuedAt,
         isReadOnly = isReadOnly,
       )
@@ -142,15 +138,11 @@ class AppTokenService(
     val userId =
       jws.body.subject?.toLongOrNull()
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    val projectId =
-      (jws.body[JWT_APP_TOKEN_PROJECT_ID_CLAIM] as? Number)?.toLong()
-        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     return AppTokenClaims(
       installId = installId,
       isInstallContext = false,
       userId = userId,
-      projectId = projectId,
       issuedAt = jws.body.issuedAt,
       isReadOnly = isReadOnly,
     )
@@ -160,7 +152,6 @@ class AppTokenService(
     const val JWT_APP_TOKEN_AUDIENCE = "tg.app"
     const val JWT_APP_TOKEN_INSTALL_ID_CLAIM = "tg.app.inst"
     const val JWT_APP_TOKEN_APP_ID_CLAIM = "tg.app.app"
-    const val JWT_APP_TOKEN_PROJECT_ID_CLAIM = "tg.app.proj"
     const val JWT_APP_TOKEN_CONTEXT_CLAIM = "tg.app.ctx"
     const val JWT_APP_TOKEN_READ_ONLY_CLAIM = "tg.app.ro"
     const val CONTEXT_USER = "user"
@@ -173,7 +164,6 @@ data class AppTokenClaims(
   val installId: Long?,
   val isInstallContext: Boolean,
   val userId: Long?,
-  val projectId: Long?,
   val issuedAt: Date,
   val isReadOnly: Boolean,
   val appId: Long? = null,
