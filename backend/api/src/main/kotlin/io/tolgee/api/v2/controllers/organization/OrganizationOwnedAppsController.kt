@@ -118,7 +118,7 @@ class OrganizationOwnedAppsController(
   }
 
   @GetMapping("/{appId}/secrets")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "List the app-level client secrets",
     description =
@@ -135,7 +135,7 @@ class OrganizationOwnedAppsController(
   }
 
   @PostMapping("/{appId}/secrets/rotate")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @RequiresSuperAuthentication
   @Operation(
     summary = "Rotate the app's client secret",
@@ -162,7 +162,7 @@ class OrganizationOwnedAppsController(
   }
 
   @DeleteMapping("/{appId}/secrets/{secretId}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @RequiresSuperAuthentication
   @Operation(
     summary = "Revoke an app-level client secret",
