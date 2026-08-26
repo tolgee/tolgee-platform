@@ -2281,6 +2281,7 @@
   "project_settings_use_namespaces_hint": "Spațiile de nume sunt o modalitate de a separa traducerile în mai multe fișiere, care pot fi descărcate doar la nevoie.\n\nSpațiile de nume nu pot fi dezactivate dacă există deja vreunul.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Utilizați substituenții Tolgee Universal ICU",
   "projects_search_placeholder": "Caută proiect...",
+  "projects_switch_label": "Schimbă proiect",
   "projects_title": "Proiecte",
   "project_successfully_edited_message": "Setările proiectului au fost salvate cu succes.",
   "project_successfully_left": "Proiect părăsit.",

@@ -2286,6 +2286,7 @@
   "project_settings_use_namespaces_hint": "命名空间是一种将翻译分隔到多个文件的方法，只有在需要时才会下载这些文件。\n\n如果已存在命名空间，则无法禁用。\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "使用 Tolgee 通用 ICU 占位符",
   "projects_search_placeholder": "搜索项目...",
+  "projects_switch_label": "切换项目",
   "projects_title": "项目",
   "project_successfully_edited_message": "项目设置已成功保存。",
   "project_successfully_left": "您已离开该项目。",

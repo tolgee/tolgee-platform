@@ -2282,6 +2282,7 @@
   "project_settings_use_namespaces_hint": "Namespaces sind eine Möglichkeit, Übersetzungen in mehrere Dateien zu unterteilen, die nur bei Bedarf heruntergeladen werden können.\n\nNamespaces können nicht deaktiviert werden, wenn bereits welche existieren.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Tolgee Universal ICU-Platzhalter verwenden",
   "projects_search_placeholder": "Projekt suchen...",
+  "projects_switch_label": "Projekt wechseln",
   "projects_title": "Projekte",
   "project_successfully_edited_message": "Projekteinstellungen erfolgreich gespeichert.",
   "project_successfully_left": "Projekt links.",

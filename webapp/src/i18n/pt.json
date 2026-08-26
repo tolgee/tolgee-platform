@@ -2278,6 +2278,7 @@
   "project_settings_use_namespaces_hint": "Namespaces são uma forma de separar traduções em vários arquivos, que podem ser baixados apenas quando necessário.\n\nOs namespaces não podem ser desativados se já existirem.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Usar espaços reservados universais do Tolgee ICU",
   "projects_search_placeholder": "Pesquisar projeto...",
+  "projects_switch_label": "Alternar projeto",
   "projects_title": "Projetos",
   "project_successfully_edited_message": "Configurações do projeto salvas com sucesso.",
   "project_successfully_left": "Saiu do projeto.",

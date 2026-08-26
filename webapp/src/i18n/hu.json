@@ -2278,6 +2278,7 @@
   "project_settings_use_namespaces_hint": "A névterek lehetővé teszik, hogy a fordításokat több fájlba szétválasszuk, amelyeket csak szükség esetén lehet letölteni.\n\nHa már léteznek névterek, nem lehet őket letiltani.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Használja a Tolgee Universal ICU helykitöltőket",
   "projects_search_placeholder": "Projekt keresése...",
+  "projects_switch_label": "Projekt váltása",
   "projects_title": "Projektek",
   "project_successfully_edited_message": "A projekt beállításai sikeresen mentve.",
   "project_successfully_left": "Projekt elhagyva.",

@@ -2052,6 +2052,7 @@
   "project_settings_use_namespaces_hint": "Przestrzenie nazw to sposób na rozdzielenie tłumaczeń na wiele plików, które mogą być pobierane tylko wtedy, gdy są potrzebne.\n\nNie można wyłączyć przestrzeni nazw, jeśli jakiekolwiek już istnieją.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Użyj uniwersalnych symboli zastępczych ICU Tolgee",
   "projects_search_placeholder": "Szukaj projektu...",
+  "projects_switch_label": "Przełącz projekt",
   "projects_title": "Projekty",
   "project_successfully_edited_message": "Ustawienia projektu zostały pomyślnie zapisane.",
   "project_successfully_left": "Projekt opuszczony.",

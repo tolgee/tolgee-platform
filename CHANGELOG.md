@@ -1,3 +1,10 @@
+# [3.219.0](https://github.com/tolgee/tolgee-platform/compare/v3.218.6...v3.219.0) (2026-08-26)
+
+
+### Features
+
+* show non-breaking and zero-width characters in the web UI ([#3850](https://github.com/tolgee/tolgee-platform/issues/3850)) ([6f2f89b](https://github.com/tolgee/tolgee-platform/commit/6f2f89b062e9d95567345af75d4501edef7dd9a4)), closes [#3041](https://github.com/tolgee/tolgee-platform/issues/3041)
+
 ## [3.218.6](https://github.com/tolgee/tolgee-platform/compare/v3.218.5...v3.218.6) (2026-08-22)
 
 

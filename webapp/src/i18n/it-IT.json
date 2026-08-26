@@ -2244,6 +2244,7 @@
   "project_settings_use_namespaces_hint": "I namespace sono un modo per separare le traduzioni in più file, che possono essere scaricati solo quando necessario.\n\nI namespace non possono essere disattivati se ne esistono già.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Usa i segnaposto Tolgee Universal ICU",
   "projects_search_placeholder": "Cerca progetto...",
+  "projects_switch_label": "Cambia progetto",
   "projects_title": "Progetti",
   "project_successfully_edited_message": "Impostazioni del progetto salvate con successo.",
   "project_successfully_left": "Progetto abbandonato.",

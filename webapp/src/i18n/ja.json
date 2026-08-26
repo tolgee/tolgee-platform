@@ -2292,6 +2292,7 @@
   "project_settings_use_namespaces_hint": "名前空間は、翻訳を複数のファイルに分割し、必要な場合にのみダウンロードできるようにする方法です。\n\n名前空間が既に存在する場合、無効にすることはできません。\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Universal ICUプレースホルダーを使用する",
   "projects_search_placeholder": "プロジェクト検索...",
+  "projects_switch_label": "プロジェクトを切り替え",
   "projects_title": "プロジェクト",
   "project_successfully_edited_message": "プロジェクト設定が正常に保存されました.",
   "project_successfully_left": "プロジェクトから脱退しました。",

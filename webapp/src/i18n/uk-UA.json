@@ -2055,6 +2055,7 @@
   "project_settings_use_namespaces_hint": "Простори імен дозволяють розділяти переклади на кілька файлів, які можна завантажувати лише за потреби.\n\nНеможливо вимкнути простори імен, якщо хоча б один уже існує.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Використовуйте універсальні ICU заповнювачі Tolgee",
   "projects_search_placeholder": "Шукати проєкт...",
+  "projects_switch_label": "Змінити проєкт",
   "projects_title": "Проєкти",
   "project_successfully_edited_message": "Налаштування проєкту успішно збережено.",
   "project_successfully_left": "Проєкт залишено.",

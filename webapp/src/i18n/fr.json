@@ -2280,6 +2280,7 @@
   "project_settings_use_namespaces_hint": "Les espaces de noms permettent de séparer les traductions en plusieurs fichiers, qui peuvent être téléchargés uniquement en cas de besoin.\n\nLes espaces de noms ne peuvent pas être désactivés s'il en existe déjà.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Utiliser les espaces réservés Tolgee Universal ICU",
   "projects_search_placeholder": "Rechercher un projet...",
+  "projects_switch_label": "Changer de projet",
   "projects_title": "Projets",
   "project_successfully_edited_message": "Paramètres du projet enregistrés avec succès.",
   "project_successfully_left": "Projet a été abandonné.",

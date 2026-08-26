@@ -2292,6 +2292,7 @@
   "project_settings_use_namespaces_hint": "Namespaces jsou způsob, jak rozdělit překlady do více souborů, které lze stáhnout pouze v případě potřeby.\n\nNamespaces nelze deaktivovat, pokud již nějaké existují.\n\n<LearnMore></LearnMore>",
   "project_settings_use_tolgee_placeholders_label": "Použít Tolgee Universal ICU placeholdery",
   "projects_search_placeholder": "Hledat projekt...",
+  "projects_switch_label": "Přepnout projekt",
   "projects_title": "Projekty",
   "project_successfully_edited_message": "Nastavení projektu bylo uloženo.",
   "project_successfully_left": "Projekt byl opuštěn.",
