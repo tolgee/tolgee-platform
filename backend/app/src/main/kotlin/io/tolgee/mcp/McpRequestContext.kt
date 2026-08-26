@@ -108,13 +108,13 @@ class McpRequestContext(
     }
   }
 
-  /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.isUserOfRole] */
+  /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.getOrganizationScopes] */
   private fun checkOrgRole(spec: ToolEndpointSpec) {
-    val requiredRole = spec.requiredOrgRole ?: return
+    val requiredScopes = spec.requiredOrgScopes?.toSet() ?: return
     val orgId = organizationHolder.organizationOrNull?.id ?: return
     val userId = authenticationFacade.authenticatedUser.id
 
-    if (!organizationRoleService.isUserOfRole(userId, orgId, requiredRole)) {
+    if (!organizationRoleService.getOrganizationScopes(userId, orgId).containsAll(requiredScopes)) {
       throw PermissionException()
     }
   }

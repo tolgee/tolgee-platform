@@ -15,14 +15,13 @@ import io.tolgee.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authentication.WriteOperation
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.TranslationAgencyService
 import io.tolgee.service.invitation.EeInvitationService
@@ -104,8 +103,9 @@ class V2InvitationController(
     }
 
     invitation.organizationRole?.let {
-      organizationRoleService.checkUserCanDeleteInvitation(
+      organizationRoleService.checkOrganizationScope(
         invitation.organizationRole!!.organization!!.id,
+        Scope.ORGANIZATION_MEMBERS_MANAGE,
       )
     }
 
@@ -190,7 +190,7 @@ class V2InvitationController(
       "Generates invitation link for organization, so users can join organization. " +
         "The invitation can also be sent to an e-mail address.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_MANAGE])
   @RequiresSuperAuthentication
   fun inviteUser(
     @RequestBody @Valid
@@ -214,7 +214,7 @@ class V2InvitationController(
 
   @GetMapping("/v2/organizations/{organizationId}/invitations")
   @Operation(summary = "Get all invitations to organization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_MANAGE])
   @RequiresSuperAuthentication
   fun getInvitations(
     @PathVariable("organizationId") id: Long,

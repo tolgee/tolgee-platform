@@ -8,11 +8,9 @@ import io.tolgee.ee.data.SetProjectPromptCustomizationRequest
 import io.tolgee.ee.service.AiPromptCustomizationService
 import io.tolgee.hateoas.aiPtomptCustomization.LanguageAiPromptCustomizationModel
 import io.tolgee.hateoas.aiPtomptCustomization.ProjectAiPromptCustomizationModel
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.language.LanguageService
@@ -38,7 +36,6 @@ class AiPromptCustomizationController(
 ) {
   @GetMapping("projects/{projectId:[0-9]+}/ai-prompt-customization")
   @Operation(summary = "Returns project level prompt customization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @UseDefaultPermissions
   fun getPromptProjectCustomization(): ProjectAiPromptCustomizationModel {
     return ProjectAiPromptCustomizationModel(
@@ -48,7 +45,6 @@ class AiPromptCustomizationController(
 
   @PutMapping("projects/{projectId:[0-9]+}/ai-prompt-customization")
   @Operation(summary = "Sets project level prompt customization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT])
   fun setPromptProjectCustomization(
     @Valid @RequestBody dto: SetProjectPromptCustomizationRequest,
@@ -61,7 +57,6 @@ class AiPromptCustomizationController(
 
   @PutMapping("projects/{projectId:[0-9]+}/languages/{languageId:[0-9]+}/ai-prompt-customization")
   @Operation(summary = "Sets language level prompt customization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
   fun setLanguagePromptCustomization(
     @Valid @RequestBody dto: SetLanguagePromptCustomizationRequest,
@@ -78,7 +73,6 @@ class AiPromptCustomizationController(
 
   @GetMapping("projects/{projectId:[0-9]+}/language-ai-prompt-customizations")
   @Operation(summary = "Returns language level prompt customization")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
   fun getLanguagePromptCustomizations(): CollectionModel<LanguageAiPromptCustomizationModel> {
     val languages =

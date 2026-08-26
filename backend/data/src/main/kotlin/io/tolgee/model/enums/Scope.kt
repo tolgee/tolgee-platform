@@ -8,6 +8,10 @@ import io.tolgee.exceptions.NotFoundException
 enum class Scope(
   @get:JsonValue
   var value: String,
+  /**
+   * True for scopes that govern organization-level resources.
+   */
+  val organizationLevel: Boolean = false,
 ) {
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
@@ -48,6 +52,27 @@ enum class Scope(
   BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
   ORGANIZATION_QUOTAS_VIEW("organization-quotas.view"),
   APPS_MANAGE("apps.manage"),
+
+  // Organization-level scopes. Held via the organization role, never selectable in a project context.
+  ORGANIZATION_MEMBERS_VIEW("organization-members.view", organizationLevel = true),
+  ORGANIZATION_MEMBERS_MANAGE("organization-members.manage", organizationLevel = true),
+  ORGANIZATION_USAGE_VIEW("organization-usage.view", organizationLevel = true),
+  ORGANIZATION_PROJECTS_CREATE("organization-projects.create", organizationLevel = true),
+  ORGANIZATION_SETTINGS_MANAGE("organization-settings.manage", organizationLevel = true),
+  ORGANIZATION_DELETE("organization.delete", organizationLevel = true),
+  ORGANIZATION_APPS_MANAGE("organization-apps.manage", organizationLevel = true),
+  ORGANIZATION_SLACK_MANAGE("organization-slack.manage", organizationLevel = true),
+  ORGANIZATION_AI_MANAGE("organization-ai.manage", organizationLevel = true),
+  ORGANIZATION_GLOSSARIES_MANAGE("organization-glossaries.manage", organizationLevel = true),
+  ORGANIZATION_GLOSSARY_TERMS_MANAGE("organization-glossary-terms.manage", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_VIEW("organization-translation-memory.view", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_MANAGE("organization-translation-memory.manage", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_ENTRIES_MANAGE(
+    "organization-translation-memory-entries.manage",
+    organizationLevel = true,
+  ),
+  ORGANIZATION_BILLING_VIEW("organization-billing.view", organizationLevel = true),
+  ORGANIZATION_BILLING_MANAGE("organization-billing.manage", organizationLevel = true),
   ;
 
   fun expand() = Scope.expand(this)
@@ -56,6 +81,20 @@ enum class Scope(
 
   companion object {
     val readOnlyScopes by lazy { ALL_VIEW.expand() }
+
+    /** Every scope grantable in a project context, i.e. all but the [organizationLevel] ones. */
+    val projectAssignable by lazy { entries.filter { !it.organizationLevel }.toSet() }
+
+    /**
+     * Organization-level scopes ([organizationLevel]) are held via the organization role and must
+     * never be stored on a project permission or a project API key. Call this before persisting any
+     * caller-supplied project scope set.
+     */
+    fun assertProjectAssignable(scopes: Collection<Scope>) {
+      if (scopes.any { it.organizationLevel }) {
+        throw BadRequestException(Message.ORGANIZATION_SCOPE_NOT_ASSIGNABLE_TO_PROJECT)
+      }
+    }
 
     private val keysView = HierarchyItem(KEYS_VIEW)
     private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))

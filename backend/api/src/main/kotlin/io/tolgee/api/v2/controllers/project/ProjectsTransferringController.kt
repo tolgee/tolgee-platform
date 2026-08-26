@@ -73,7 +73,7 @@ class ProjectsTransferringController(
     @PathVariable projectId: Long,
     @PathVariable organizationId: Long,
   ) {
-    organizationRoleService.checkUserCanTransferProjectToOrganization(organizationId)
+    organizationRoleService.checkOrganizationScope(organizationId, Scope.ORGANIZATION_SETTINGS_MANAGE)
     projectService.transferToOrganization(projectId, organizationId)
   }
 }

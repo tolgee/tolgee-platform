@@ -52,7 +52,10 @@ class ProjectsPublishingController(
     @RequestBody @Valid
     dto: SetProjectPublicRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwnerOrServerAdmin(projectHolder.project.organizationOwnerId)
+    organizationRoleService.checkOrganizationScope(
+      projectHolder.project.organizationOwnerId,
+      Scope.ORGANIZATION_SETTINGS_MANAGE,
+    )
     val project = projectService.setPublic(projectHolder.project.id, dto.public)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }

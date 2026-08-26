@@ -7,9 +7,9 @@ import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.service.apps.AppInstallService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -35,7 +35,7 @@ class OrganizationAppsController(
   private val appManifestPreviewModelAssembler: AppManifestPreviewModelAssembler,
 ) {
   @PostMapping("/preview")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "Preview a Tolgee app manifest",
     description =
@@ -52,7 +52,7 @@ class OrganizationAppsController(
   }
 
   @PostMapping
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "Install a Tolgee app",
     description =
@@ -76,7 +76,7 @@ class OrganizationAppsController(
   }
 
   @GetMapping
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "List installed apps",
     description = "Returns every app this organization has installed.",
@@ -88,7 +88,7 @@ class OrganizationAppsController(
   }
 
   @DeleteMapping("/{installId}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @Operation(
     summary = "Remove app",
     description = "Uninstalls the app from the organization.",

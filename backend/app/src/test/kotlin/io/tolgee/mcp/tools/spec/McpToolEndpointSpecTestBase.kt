@@ -7,7 +7,6 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.RateLimitSpec
 import io.tolgee.mcp.ToolEndpointSpec
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
@@ -65,7 +64,7 @@ abstract class McpToolEndpointSpecTestBase {
     requiredScopes: Array<Scope>? = null,
     useDefaultPermissions: Boolean = false,
     isGlobalRoute: Boolean = true,
-    requiredOrgRole: OrganizationRoleType? = null,
+    requiredOrgScopes: Array<Scope>? = null,
     requiredFeatures: Array<out Feature>? = null,
     requiredOneOfFeatures: Array<out Feature>? = null,
     activityType: ActivityType? = null,
@@ -78,7 +77,7 @@ abstract class McpToolEndpointSpecTestBase {
     isWriteOperation = isWriteOperation,
     useDefaultPermissions = useDefaultPermissions,
     isGlobalRoute = isGlobalRoute,
-    requiredOrgRole = requiredOrgRole,
+    requiredOrgScopes = requiredOrgScopes,
     requiredFeatures = requiredFeatures,
     requiredOneOfFeatures = requiredOneOfFeatures,
     activityType = activityType,

@@ -190,7 +190,7 @@ class StartupImportService(
       val apiKey =
         ApiKey(
           key = "${project.name.lowercase(Locale.getDefault())}-${userAccount.name}-imported-project-implicit",
-          scopesEnum = Scope.values().toMutableSet(),
+          scopesEnum = Scope.projectAssignable.toMutableSet(),
           userAccount = userAccount,
           project = project,
         )

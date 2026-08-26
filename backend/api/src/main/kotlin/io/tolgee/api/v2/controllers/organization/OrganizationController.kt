@@ -27,6 +27,7 @@ import io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModelAssemb
 import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -36,7 +37,7 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.IsGlobalRoute
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
@@ -170,7 +171,7 @@ class OrganizationController(
 
   @PutMapping("/{id:[0-9]+}")
   @Operation(summary = "Update organization data")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(5)
   fun update(
@@ -184,7 +185,7 @@ class OrganizationController(
 
   @DeleteMapping("/{id:[0-9]+}")
   @Operation(summary = "Delete organization", description = "Deletes organization and all its data including projects")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_DELETE])
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(6)
   fun delete(
@@ -201,7 +202,7 @@ class OrganizationController(
       "Returns all users in organization. " +
         "The result also contains users who are only members of projects in the organization.",
   )
-  @RequiresOrganizationRole
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_VIEW])
   @RequiresSuperAuthentication
   fun getAllUsers(
     @PathVariable("id") id: Long,
@@ -240,7 +241,7 @@ class OrganizationController(
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
   @Operation(summary = "Set user role", description = "Sets user role in organization. Owner or Member.")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_MANAGE])
   @RequiresSuperAuthentication
   fun setUserRole(
     @PathVariable organizationId: Long,
@@ -261,7 +262,7 @@ class OrganizationController(
         "If user is managed by the organization, their account is disabled instead."
     ),
   )
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_MANAGE])
   @RequiresSuperAuthentication
   fun removeUser(
     @PathVariable organizationId: Long,
@@ -273,7 +274,7 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload organizations avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
     @PathVariable id: Long,
@@ -288,7 +289,7 @@ class OrganizationController(
   @DeleteMapping("/{id:[0-9]+}/avatar")
   @Operation(summary = "Delete organization avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
   fun removeAvatar(
     @PathVariable id: Long,
   ): OrganizationModel {
@@ -303,7 +304,7 @@ class OrganizationController(
     summary = "Set organization base permission",
     description = "Sets default (level-based) permission for organization",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
   fun setBasePermissions(
     @PathVariable organizationId: Long,
     @PathVariable permissionType: ProjectPermissionType,
@@ -313,7 +314,7 @@ class OrganizationController(
 
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
   @Operation(summary = "Get current organization usage")
-  @RequiresOrganizationRole
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_USAGE_VIEW])
   fun getUsage(
     @PathVariable organizationId: Long,
   ): PublicUsageModel {

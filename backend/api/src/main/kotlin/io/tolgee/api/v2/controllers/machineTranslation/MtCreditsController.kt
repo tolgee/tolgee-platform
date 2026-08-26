@@ -7,7 +7,7 @@ import io.tolgee.hateoas.machineTranslation.CreditBalanceModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
 import io.tolgee.service.organization.OrganizationService
@@ -44,7 +44,7 @@ class MtCreditsController(
     summary = "Get credit balance for organization",
     description = "Returns machine translation credit balance for organization",
   )
-  @RequiresOrganizationRole
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_USAGE_VIEW])
   @AllowApiAccess
   fun getOrganizationCredits(
     @PathVariable organizationId: Long,
