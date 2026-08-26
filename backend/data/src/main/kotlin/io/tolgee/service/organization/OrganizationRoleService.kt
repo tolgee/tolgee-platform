@@ -15,6 +15,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -133,6 +134,14 @@ class OrganizationRoleService(
       OrganizationRoleType.MAINTAINER ->
         isUserOwnerOrMaintainer(userId, organizationId)
     }
+  }
+
+  /** The organization-level scopes the user holds, derived from their role (empty for a non-member). */
+  fun getOrganizationScopes(
+    userId: Long,
+    organizationId: Long,
+  ): Set<Scope> {
+    return findType(userId, organizationId)?.availableScopes?.toSet() ?: emptySet()
   }
 
   fun checkUserIsOwnerOrServerAdmin(organizationId: Long) {

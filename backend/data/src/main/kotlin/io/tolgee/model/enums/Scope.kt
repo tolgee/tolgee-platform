@@ -8,6 +8,12 @@ import io.tolgee.exceptions.NotFoundException
 enum class Scope(
   @get:JsonValue
   var value: String,
+  /**
+   * True for scopes that govern organization-level resources. They are resolved from the
+   * organization role (see [OrganizationRoleType.availableScopes]) and must be kept out of every
+   * project context (project API keys, the project side of app manifest consent).
+   */
+  val organizationLevel: Boolean = false,
 ) {
   TRANSLATIONS_VIEW("translations.view"),
   TRANSLATIONS_EDIT("translations.edit"),
@@ -48,6 +54,18 @@ enum class Scope(
   BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
   ORGANIZATION_QUOTAS_VIEW("organization-quotas.view"),
   APPS_MANAGE("apps.manage"),
+
+  // Organization-level scopes. Held via the organization role, never selectable in a project context.
+  ORGANIZATION_MEMBERS_VIEW("organization-members.view", organizationLevel = true),
+  ORGANIZATION_MEMBERS_MANAGE("organization-members.manage", organizationLevel = true),
+  ORGANIZATION_USAGE_VIEW("organization-usage.view", organizationLevel = true),
+  ORGANIZATION_PROJECTS_CREATE("organization-projects.create", organizationLevel = true),
+  ORGANIZATION_SETTINGS_MANAGE("organization-settings.manage", organizationLevel = true),
+  ORGANIZATION_APPS_MANAGE("organization-apps.manage", organizationLevel = true),
+  ORGANIZATION_GLOSSARIES_VIEW("organization-glossaries.view", organizationLevel = true),
+  ORGANIZATION_GLOSSARIES_MANAGE("organization-glossaries.manage", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_VIEW("organization-translation-memory.view", organizationLevel = true),
+  ORGANIZATION_TRANSLATION_MEMORY_MANAGE("organization-translation-memory.manage", organizationLevel = true),
   ;
 
   fun expand() = Scope.expand(this)

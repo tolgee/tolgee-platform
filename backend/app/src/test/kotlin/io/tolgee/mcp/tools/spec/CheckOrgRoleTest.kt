@@ -17,7 +17,7 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
   fun `no required role skips check`() {
     sut.executeAs(spec(requiredOrgRole = null)) {}
 
-    verify(organizationRoleService, never()).isUserOfRole(any(), any(), any())
+    verify(organizationRoleService, never()).getOrganizationScopes(any(), any())
   }
 
   @Test
@@ -26,7 +26,7 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
 
     sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
 
-    verify(organizationRoleService, never()).isUserOfRole(any(), any(), any())
+    verify(organizationRoleService, never()).getOrganizationScopes(any(), any())
   }
 
   @Test
@@ -39,7 +39,8 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
     whenever(userDto.id).thenReturn(7L)
     whenever(authenticationFacade.authenticatedUser).thenReturn(userDto)
 
-    whenever(organizationRoleService.isUserOfRole(7L, 42L, OrganizationRoleType.OWNER)).thenReturn(true)
+    whenever(organizationRoleService.getOrganizationScopes(7L, 42L))
+      .thenReturn(OrganizationRoleType.OWNER.availableScopes.toSet())
 
     sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
   }
@@ -54,7 +55,8 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
     whenever(userDto.id).thenReturn(7L)
     whenever(authenticationFacade.authenticatedUser).thenReturn(userDto)
 
-    whenever(organizationRoleService.isUserOfRole(7L, 42L, OrganizationRoleType.OWNER)).thenReturn(false)
+    whenever(organizationRoleService.getOrganizationScopes(7L, 42L))
+      .thenReturn(OrganizationRoleType.MEMBER.availableScopes.toSet())
 
     assertThatThrownBy {
       sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}

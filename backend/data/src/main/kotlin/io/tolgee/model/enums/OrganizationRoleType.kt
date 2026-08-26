@@ -1,10 +1,43 @@
 package io.tolgee.model.enums
 
-/** Ordinal-persisted by [io.tolgee.model.OrganizationRole.type] — do not reorder. */
+// Cumulative so OWNER ⊇ MAINTAINER ⊇ MEMBER. File-level vals (not companion) to avoid the enum
+// constructor referencing an uninitialised companion.
+private val ORG_MEMBER_SCOPES =
+  arrayOf(
+    Scope.ORGANIZATION_MEMBERS_VIEW,
+    Scope.ORGANIZATION_USAGE_VIEW,
+    Scope.ORGANIZATION_GLOSSARIES_VIEW,
+    Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW,
+  )
+
+private val ORG_MAINTAINER_SCOPES =
+  ORG_MEMBER_SCOPES +
+    arrayOf(
+      Scope.ORGANIZATION_PROJECTS_CREATE,
+      Scope.ORGANIZATION_GLOSSARIES_MANAGE,
+      Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE,
+    )
+
+private val ORG_OWNER_SCOPES =
+  ORG_MAINTAINER_SCOPES +
+    arrayOf(
+      Scope.ORGANIZATION_MEMBERS_MANAGE,
+      Scope.ORGANIZATION_SETTINGS_MANAGE,
+      Scope.ORGANIZATION_APPS_MANAGE,
+    )
+
+/**
+ * Ordinal-persisted by [io.tolgee.model.OrganizationRole.type] — do not reorder.
+ *
+ * Each level maps to a set of organization-level [Scope]s ([availableScopes]), the way
+ * [ProjectPermissionType] maps to project scopes. Enforcement checks these scopes; the level is kept
+ * only for storage and the UI.
+ */
 enum class OrganizationRoleType(
   val isReadOnly: Boolean,
+  val availableScopes: Array<Scope>,
 ) {
-  MEMBER(true),
-  OWNER(false),
-  MAINTAINER(false),
+  MEMBER(true, ORG_MEMBER_SCOPES),
+  OWNER(false, ORG_OWNER_SCOPES),
+  MAINTAINER(false, ORG_MAINTAINER_SCOPES),
 }

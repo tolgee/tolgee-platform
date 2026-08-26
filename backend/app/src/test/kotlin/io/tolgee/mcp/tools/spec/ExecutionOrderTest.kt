@@ -40,7 +40,11 @@ class ExecutionOrderTest : McpToolEndpointSpecTestBase() {
     whenever(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
     whenever(authenticationFacade.isPersonalAccessTokenAuth).thenReturn(false)
     whenever(authenticationFacade.isReadOnly).thenReturn(false)
-    whenever(organizationRoleService.isUserOfRole(any(), any(), any())).thenReturn(true)
+    whenever(organizationRoleService.getOrganizationScopes(any(), any()))
+      .thenReturn(
+        io.tolgee.model.enums.OrganizationRoleType.OWNER.availableScopes
+          .toSet(),
+      )
 
     val policy = RateLimitSpec(limit = 10, refillDurationInMs = 1000)
     val features = arrayOf(Feature.GRANULAR_PERMISSIONS)
