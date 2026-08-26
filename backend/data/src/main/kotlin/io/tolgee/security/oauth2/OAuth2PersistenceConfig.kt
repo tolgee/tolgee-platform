@@ -29,8 +29,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 // SAS built-in schema — see db/changelog/oauth2/oauth2-server.xml.
 @Configuration
 class OAuth2PersistenceConfig {
-  @Bean("jdbcRegisteredClientRepository")
-  fun jdbcRegisteredClientRepository(jdbcTemplate: JdbcTemplate): JdbcRegisteredClientRepository {
+  @Bean
+  fun registeredClientRepository(jdbcTemplate: JdbcTemplate): RegisteredClientRepository {
     return JdbcRegisteredClientRepository(jdbcTemplate)
   }
 

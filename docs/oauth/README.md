@@ -165,40 +165,26 @@ two, treat `back-end-url` as required.)
 
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
-`redirect_uris` (so a stolen code can't be sent to an attacker's URL). There are three ways to do that.
+`redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
+**pre-registration**: the browser extension and CLI are seeded as fixed clients with a known `client_id`
+(`PreRegisteredClients.kt`). Simple and safe, but it only works for apps *we* control.
 
-**a) Pre-registration (what our own apps use).** The browser extension and CLI are seeded as fixed
-clients with a known `client_id` (`PreRegisteredClients.kt`). Simple and safe, but only works for apps
-*we* control — we can't pre-register every third-party MCP tool in the world.
+Onboarding third-party clients (the MCP round) needs one of two mechanisms, neither of which is built:
 
-**b) CIMD — Client ID Metadata Document (supported, for third-party MCP clients).** Instead of a made-up
-id, the client's `client_id` **is an HTTPS URL** that points at a small JSON document describing itself
-(its name, `redirect_uris`, that it's a public+PKCE client). The first time such a `client_id` arrives,
-Tolgee **fetches that URL, validates the document, and uses it** — no manual registration, nothing stored
-long-term. See `CimdMetadataFetcher` / `CimdRegisteredClientRepository`.
+- **CIMD — Client ID Metadata Document.** The `client_id` *is* an HTTPS URL serving a small JSON document
+  describing the client. Tolgee would fetch and validate it on first use, so there is nothing to store or
+  expire. The catch is that it makes an outbound request to a URL an untrusted client chose, which is the
+  most security-sensitive surface in the whole feature — it needs an https-only, no-redirect, size- and
+  timeout-capped fetch behind an SSRF guard *and* a host allow-list, because a CIMD host controls the
+  redirect URIs of the client it registers.
+- **DCR — Dynamic Client Registration (RFC 7591).** The client POSTs its metadata to a public `/register`
+  endpoint and the server stores it. Widely specified and stable across metadata changes, but it is an
+  open, unauthenticated write endpoint: a spam, abuse and storage-growth surface that has to be rate
+  limited and pruned.
 
-Because Tolgee makes an outbound HTTP request to a URL an untrusted client chose, this is the most
-security-sensitive surface, so the fetch is hardened: **https only**, optional host allow-list, the shared
-SSRF guard (no internal / loopback / link-local targets), **no redirects**, and hard size + timeout caps.
-The document's `client_id` must equal the URL, and every `redirect_uri` must be same-origin as it. The
-generated internal id includes a hash of the redirect URIs, so if a client later changes its redirect
-URIs the id changes and the user is asked to consent again.
-
-- **Pros:** zero-touch onboarding of any spec-compliant client; nothing to store or expire; the client
-  "owns" its own metadata at a URL it controls.
-- **Cons:** requires an outbound fetch (SSRF risk to manage); the client must host a reachable HTTPS
-  document; metadata can change under us (mitigated by re-consent on redirect change).
-
-**c) DCR — Dynamic Client Registration (RFC 7591, NOT built in v1).** DCR is the older approach: the
-client `POST`s its metadata to a public `/register` endpoint on the server, and the server stores it and
-hands back a freshly-minted `client_id`. 
-
-- **Pros:** the client is persisted server-side (stable across metadata changes); widely specified.
-- **Cons:** it's an **open, unauthenticated write endpoint** — anyone can create client records, which is a
-  spam/abuse and storage-growth surface that must be rate-limited and pruned; and it needs a second,
-  parallel registration code path. The MCP clients we target already support CIMD, and Anthropic
-  recommends CIMD as the default, so we deliberately skipped DCR in v1 to avoid the extra attack surface.
-  It remains a possible fast-follow only if we hit a DCR-only client.
+An implementation of CIMD was written and then removed from this round, because nothing consumes it until
+the MCP client work lands and it is not the kind of code to carry unused. It is preserved in history —
+recover it with `git revert` of the commit that removed it rather than writing it again.
 
 ## Where it lives in the code
 
@@ -211,7 +197,6 @@ hands back a freshly-minted `client_id`.
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
 | Connected apps / revoke | `ConnectedAppsController.kt` |
-| CIMD | `CimdMetadataFetcher.kt`, `CimdRegisteredClientRepository.kt` |
 | Grant/consent/client storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
 
 ## Round-1 limitations (tracked follow-ups)

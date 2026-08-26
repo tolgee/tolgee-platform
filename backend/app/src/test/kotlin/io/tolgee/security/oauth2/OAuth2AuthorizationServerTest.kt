@@ -50,8 +50,6 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
         node("token_endpoint").isString
         // No JWK set is published, so discovery must not advertise a jwks_uri that would 404.
         node("jwks_uri").isAbsent()
-        // CIMD support is advertised so spec-aware clients know they can self-register with a URL-form client_id
-        node("client_id_metadata_document_supported").isEqualTo(true)
       }
   }
 }

@@ -75,22 +75,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
               "is set.",
           defaultValue = "",
         ),
-        DocProperty(
-          name = "cimd.enabled",
-          description = "Whether URL-form (Client ID Metadata Document) client ids are resolved at all.",
-          defaultValue = "false",
-        ),
-        DocProperty(
-          name = "cimd.allowed-hosts",
-          description =
-            "Hosts allowed as CIMD client-id URLs. CIMD resolves nothing while this is empty (fail-closed), even " +
-              "when enabled — the allow-list is the primary bound on the outbound fetch, on top of the SSRF guard.\n" +
-              "\n" +
-              ":::danger\n" +
-              "Only add hosts you fully trust: a CIMD host controls the redirect URIs of the client it registers.\n" +
-              ":::\n\n",
-          defaultValue = "",
-        ),
       ],
     ),
   ],

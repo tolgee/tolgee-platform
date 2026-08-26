@@ -36,8 +36,8 @@ class OAuth2ConnectedAppsAndDiscoveryTest : AuthorizedControllerTest() {
 
   @Test
   fun `omits a grant whose registered client can no longer be resolved`() {
-    // A CIMD grant can outlive its client's cache entry, and a removed pre-registered client leaves the same orphan;
-    // list() drops the unresolvable row (the grant is still killable via logout-everywhere).
+    // A removed pre-registered client leaves grants pointing at a client that no longer resolves; list() drops the
+    // unresolvable row (the grant is still killable via logout-everywhere).
     val principal = userAccount!!.id.toString()
     jdbcTemplate.update(
       "INSERT INTO oauth2_authorization " +
