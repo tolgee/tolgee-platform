@@ -119,7 +119,7 @@ class TranslationCommentController(
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
     }
-    if (authenticationFacade.isOAuthTokenAuth) {
+    if (!authenticationFacade.isAuthorSelfAccess(comment.author.id)) {
       checkEditPermission()
     }
     translationCommentService.update(dto, comment)
@@ -158,16 +158,25 @@ class TranslationCommentController(
     @PathVariable commentId: Long,
   ) {
     val comment = translationCommentService.get(projectHolder.project.id, translationId, commentId)
-    when {
-      authenticationFacade.isOAuthTokenAuth -> checkEditPermission()
-      comment.author.id != authenticationFacade.authenticatedUser.id ->
-        try {
-          checkEditPermission()
-        } catch (e: PermissionException) {
-          throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
-        }
-    }
+    checkCanDeleteComment(comment)
     translationCommentService.delete(comment)
+  }
+
+  private fun checkCanDeleteComment(comment: TranslationComment) {
+    if (authenticationFacade.isAuthorSelfAccess(comment.author.id)) return
+
+    // A scoped credential (PAK/OAuth) deleting its own author's comment still needs the scope, but reporting that as
+    // CAN_EDIT_ONLY_OWN_COMMENT would be actively misleading — it *is* their own comment. Surface the permission error.
+    if (comment.author.id == authenticationFacade.authenticatedUser.id) {
+      checkEditPermission()
+      return
+    }
+
+    try {
+      checkEditPermission()
+    } catch (e: PermissionException) {
+      throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
+    }
   }
 
   private fun checkEditPermission() {

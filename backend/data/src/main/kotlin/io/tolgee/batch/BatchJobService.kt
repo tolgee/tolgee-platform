@@ -285,12 +285,9 @@ class BatchJobService(
       securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW)
       null
     } catch (e: PermissionException) {
-      // The "own jobs only" fallback is a user-authority path; an OAuth token whose scope∩project set excludes
-      // BATCH_JOBS_VIEW must not ride it (that would widen the token past its ceiling), same as a PAK.
-      if (authenticationFacade.isOAuthTokenAuth) {
-        throw e
-      }
-      if (authenticationFacade.isProjectApiKeyAuth) {
+      // The "own jobs only" fallback is a user-authority path: a scoped credential lacking BATCH_JOBS_VIEW must not
+      // ride it, or it would act past the scope list it was issued with.
+      if (!authenticationFacade.canUseAuthorSelfAccess) {
         throw e
       }
       authenticationFacade.authenticatedUser.id
