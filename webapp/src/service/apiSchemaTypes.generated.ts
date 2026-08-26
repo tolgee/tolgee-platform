@@ -73,7 +73,6 @@ export type ComplexTagKeysRequest = components['schemas']['ComplexTagKeysRequest
 export type ComputedPermissionModel = components['schemas']['ComputedPermissionModel'];
 export type ConnectToSlackDto = components['schemas']['ConnectToSlackDto'];
 export type ConnectToSlackUrlModel = components['schemas']['ConnectToSlackUrlModel'];
-export type ConnectedAppModel = components['schemas']['ConnectedAppModel'];
 export type ConsentInfoModel = components['schemas']['ConsentInfoModel'];
 export type ContentDeliveryConfigModel = components['schemas']['ContentDeliveryConfigModel'];
 export type ContentDeliveryConfigRequest = components['schemas']['ContentDeliveryConfigRequest'];

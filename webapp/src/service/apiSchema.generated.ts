@@ -483,7 +483,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_5"];
+    get: operations["list_4"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -743,7 +743,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_9"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -1067,7 +1067,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_7"];
+    get: operations["list_6"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1292,12 +1292,6 @@ export interface paths {
   "/v2/user/avatar": {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
-  };
-  "/v2/user/connected-apps": {
-    get: operations["list_4"];
-  };
-  "/v2/user/connected-apps/{clientId}": {
-    delete: operations["revoke"];
   };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
@@ -2238,13 +2232,6 @@ export interface components {
     };
     ConnectToSlackUrlModel: {
       url: string;
-    };
-    ConnectedAppModel: {
-      clientId: string;
-      clientName: string;
-      /** Format: int64 */
-      lastAuthorizedAt?: number;
-      scopes: string[];
     };
     ConsentInfoModel: {
       appName: string;
@@ -15840,7 +15827,7 @@ export interface operations {
       };
     };
   };
-  list_5: {
+  list_4: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -19769,7 +19756,7 @@ export interface operations {
       };
     };
   };
-  list_9: {
+  list_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -25869,7 +25856,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_7: {
+  list_6: {
     parameters: {
       path: {
         projectId: number;
@@ -29943,91 +29930,6 @@ export interface operations {
           "application/json": components["schemas"]["PrivateUserAccountModel"];
         };
       };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  list_4: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ConnectedAppModel"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  revoke: {
-    parameters: {
-      path: {
-        clientId: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
       /** Bad Request */
       400: {
         content: {

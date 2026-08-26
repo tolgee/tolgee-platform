@@ -30,47 +30,8 @@ class OAuth2AuthorizationJdbcRepository(
   fun deleteRegisteredClient(clientId: String): Int =
     jdbcTemplate.update("DELETE FROM oauth2_registered_client WHERE client_id = ?", clientId)
 
-  fun findAuthorizedClients(principalName: String): List<AuthorizedClient> {
-    // A row exists at /authorize before consent; the token-value filter keeps abandoned pre-consent rows off the list.
-    return jdbcTemplate.query(
-      """
-      SELECT registered_client_id, MAX(access_token_issued_at) AS last_authorized_at
-      FROM oauth2_authorization
-      WHERE principal_name = ? AND (access_token_value IS NOT NULL OR refresh_token_value IS NOT NULL)
-      GROUP BY registered_client_id
-      """.trimIndent(),
-      { rs, _ ->
-        AuthorizedClient(
-          registeredClientId = rs.getString("registered_client_id"),
-          lastAuthorizedAt = rs.getTimestamp("last_authorized_at")?.toInstant(),
-        )
-      },
-      principalName,
-    )
-  }
-
-  fun deleteConsentByClientAndPrincipal(
-    registeredClientId: String,
-    principalName: String,
-  ): Int =
-    jdbcTemplate.update(
-      "DELETE FROM oauth2_authorization_consent WHERE registered_client_id = ? AND principal_name = ?",
-      registeredClientId,
-      principalName,
-    )
-
   fun deleteConsentByPrincipal(principalName: String): Int =
     jdbcTemplate.update("DELETE FROM oauth2_authorization_consent WHERE principal_name = ?", principalName)
-
-  fun deleteByClientAndPrincipal(
-    registeredClientId: String,
-    principalName: String,
-  ): Int =
-    jdbcTemplate.update(
-      "DELETE FROM oauth2_authorization WHERE registered_client_id = ? AND principal_name = ?",
-      registeredClientId,
-      principalName,
-    )
 
   fun deleteByPrincipal(principalName: String): Int =
     jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name = ?", principalName)
@@ -92,9 +53,4 @@ class OAuth2AuthorizationJdbcRepository(
       ts,
     )
   }
-
-  data class AuthorizedClient(
-    val registeredClientId: String,
-    val lastAuthorizedAt: Instant?,
-  )
 }

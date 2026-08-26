@@ -80,8 +80,8 @@ for the *old* account (and, with consent already remembered, without even showin
 the session at code issuance forces the next connect to re-bootstrap, so a token is always minted for whoever
 is signed into the webapp *now*.
 
-**Why not just revoke consent on disconnect instead.** Revoking the consent row (via
-`DELETE /v2/user/connected-apps/{id}`) when the client disconnects would only re-show the consent *screen* — it
+**Why not just revoke consent on disconnect instead.** Revoking the consent row when the client
+disconnects would only re-show the consent *screen* — it
 does nothing to the stale session, so the reconnect still authenticates as the old account and still mints its
 token (and the consent screen, fetched with the current JWT, would even disagree with the grant, bound to the
 session's old principal). It would also force a re-prompt on *every* reconnect, breaking same-account
@@ -196,12 +196,18 @@ recover it with `git revert` of the commit that removed it rather than writing i
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
-| Connected apps / revoke | `ConnectedAppsController.kt` |
 | Grant/consent/client storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
 
 ## Round-1 limitations (tracked follow-ups)
 
 These are known gaps, deferred to the client rounds that first exercise them:
+
+- **There is no way for a user to see or revoke an authorized app.** Grants are killed only wholesale, by
+  changing the password or signing out everywhere (`revokeAllForPrincipal`). A per-app list-and-revoke API
+  and screen were written and then removed from this round, because the planned Session management feature
+  will own that surface for OAuth apps and sessions together, and shipping a separate Connected apps page
+  first would mean replacing it immediately. Recover the implementation with `git revert` of the commit that
+  removed it rather than writing it again.
 
 - **Refresh is stock rotate-on-use.** Public clients *do* get rotating refresh tokens — SAS withholds
   them by default (both on the code grant and by refusing to authenticate a public client on the
@@ -302,8 +308,9 @@ step reads it), open the extension popup on the **Login** tab, set the **Server*
 consent → Allow → "Connected". The access token is injected into the page as `__tolgee_authToken`; the
 refresh token stays in the service worker.
 
-To re-show the consent screen after a first approval (Spring remembers consent per client+user), revoke
-the grant: `DELETE /v2/user/connected-apps/tolgee-browser-extension` with your JWT.
+To re-show the consent screen after a first approval (Spring remembers consent per client+user), delete the
+user's rows from `oauth2_authorization_consent` and `oauth2_authorization`. There is no revocation API in this
+round — see below.
 
 ### 5. Edit in-context against a local build of the editor
 

@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 
 /**
- * `principal_name` scoping is the only thing keeping one user from listing or revoking another user's OAuth grants, so
- * cross-user isolation of findAuthorizedClients (info leak) and revoke (irreversible cross-tenant deletion) is asserted.
+ * `principal_name` scoping is the only thing keeping a revoke from reaching another user's OAuth grants, so the
+ * cross-user isolation of revokeAllForPrincipal (irreversible cross-tenant deletion) is asserted.
  */
 class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
   @Autowired
@@ -41,31 +41,6 @@ class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
   fun cleanup() {
     jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name IN (?, ?)", userA, userB)
     jdbcTemplate.update("DELETE FROM oauth2_authorization_consent WHERE principal_name IN (?, ?)", userA, userB)
-  }
-
-  @Test
-  fun `findAuthorizedClients returns only the requesting user's grants`() {
-    insertGrant("a-shared", "shared-client", userA)
-    insertGrant("a-only", "only-a-client", userA)
-    insertGrant("b-shared", "shared-client", userB)
-
-    val forB = queryService.findAuthorizedClients(userB).map { it.registeredClientId }
-    assertThat(forB).contains("shared-client").doesNotContain("only-a-client")
-  }
-
-  @Test
-  fun `revoke deletes only the requesting user's rows for the client, not another user's`() {
-    insertGrant("a-shared", "shared-client", userA)
-    insertGrant("b-shared", "shared-client", userB)
-    insertConsent("shared-client", userA)
-    insertConsent("shared-client", userB)
-
-    queryService.revoke("shared-client", userA)
-
-    assertThat(authorizationExists("a-shared")).isFalse()
-    assertThat(authorizationExists("b-shared")).isTrue()
-    assertThat(consentExists("shared-client", userA)).isFalse()
-    assertThat(consentExists("shared-client", userB)).isTrue()
   }
 
   @Test

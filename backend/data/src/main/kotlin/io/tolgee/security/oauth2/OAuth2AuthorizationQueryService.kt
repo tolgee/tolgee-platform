@@ -26,18 +26,6 @@ import java.time.Instant
 class OAuth2AuthorizationQueryService(
   private val repository: OAuth2AuthorizationJdbcRepository,
 ) {
-  fun findAuthorizedClients(principalName: String): List<OAuth2AuthorizationJdbcRepository.AuthorizedClient> =
-    repository.findAuthorizedClients(principalName)
-
-  /** Deletes the user's authorizations and consents for the client; returns the authorization-row (not consent) count. */
-  fun revoke(
-    registeredClientId: String,
-    principalName: String,
-  ): Int {
-    repository.deleteConsentByClientAndPrincipal(registeredClientId, principalName)
-    return repository.deleteByClientAndPrincipal(registeredClientId, principalName)
-  }
-
   /** Deletes ALL of the user's authorizations and consents (logout-everywhere); returns the authorization-row count. */
   fun revokeAllForPrincipal(principalName: String): Int {
     repository.deleteConsentByPrincipal(principalName)

@@ -164,11 +164,6 @@ export class LINKS {
     `edit/${p(PARAMS.PAT_ID)}`
   );
 
-  static USER_CONNECTED_APPS = Link.ofParent(
-    LINKS.USER_SETTINGS,
-    'connected-apps'
-  );
-
   static USER_PROFILE = Link.ofParent(LINKS.USER_SETTINGS, 'profile');
 
   static USER_ACCOUNT_SECURITY = Link.ofParent(LINKS.USER_SETTINGS, 'security');

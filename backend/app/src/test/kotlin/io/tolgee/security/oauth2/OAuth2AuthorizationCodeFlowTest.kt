@@ -161,32 +161,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .build(),
       ).build()
 
-  @Test
-  fun `connected-apps excludes a consent-required client the user reached but never approved`() {
-    val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-    mvc.perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
-
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", CONSENT_CLIENT_ID)
-        .queryParam("redirect_uri", CONSENT_REDIRECT)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "state-consent")
-        .build()
-        .toUriString()
-    // Reaching /oauth2/authorize for a consent-required client persists a pending (token-less) authorization row.
-    mvc.perform(get(authorizeUrl).session(session))
-
-    assertThat(connectedApps(jwt)).doesNotContain("\"$CONSENT_CLIENT_ID\"")
-  }
-
-  @AfterEach
   fun cleanup() {
     // Consent is remembered per client+user; without clearing it a later test whose user id repeats would have SAS skip
     // the consent screen (making startPendingConsent capture the client state, not the pending-authorization state).
@@ -287,21 +261,20 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .response.status
     assertThat(status).isEqualTo(400)
 
-    // Detecting the invalidated grant on refresh also revokes it — the authorization row is gone. (Checked directly
-    // rather than via the connected-apps endpoint, whose JWT would itself be rejected by the future cutoff above.)
-    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+    // Detecting the invalidated grant on refresh also revokes it — the authorization row is gone.
+    assertThat(authorizationRowsForUser()).isZero()
   }
 
   @Test
   fun `changing the password revokes the user's OAuth grants`() {
     authorizationCodeTokenResponse(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
-    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isNotEmpty()
+    assertThat(authorizationRowsForUser()).isNotZero()
 
     // A password change must delete the grants, not only bump tokensValidNotBefore (which the refresh gate reads from a
     // per-node-cached DTO that lags without Redis), so a stolen refresh token can't keep minting on a stale replica.
     userAccountService.setUserPassword(userAccountService.get(testData.user.id), "new-password-123")
 
-    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+    assertThat(authorizationRowsForUser()).isZero()
   }
 
   @Test
@@ -326,20 +299,17 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         ).andReturn()
         .response.status
     assertThat(status).isEqualTo(400)
-    assertThat(oauth2AuthorizationQueryService.findAuthorizedClients(testData.user.id.toString())).isEmpty()
+    assertThat(authorizationRowsForUser()).isZero()
   }
 
   @Test
-  fun `disconnecting the app kills its already-issued access token on the next request`() {
+  fun `revoking the grant kills its already-issued access token on the next request`() {
     val accessToken = runAuthorizationCodeFlow()
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsOk
 
-    val superJwt = jwtService.emitToken(testData.user.id, isSuper = true)
-    mvc
-      .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $superJwt"))
-      .andIsOk
+    oauth2AuthorizationQueryService.revokeAllForPrincipal(testData.user.id.toString())
 
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
@@ -358,8 +328,15 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsUnauthorized
-    assertThat(connectedApps(jwtService.emitToken(testData.user.id))).doesNotContain("\"$TEST_CLIENT_ID\"")
+    assertThat(authorizationRowsForUser()).isZero()
   }
+
+  private fun authorizationRowsForUser(): Int =
+    jdbcTemplate.queryForObject(
+      "SELECT COUNT(*) FROM oauth2_authorization WHERE principal_name = ?",
+      Int::class.java,
+      testData.user.id.toString(),
+    ) ?: 0
 
   @Test
   fun `a scope deselected at consent is absent from the issued token`() {
@@ -617,22 +594,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
     assertThat(decodeClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM).asString())
       .isEqualTo(OAuth2Constants.ALL_PROJECTS)
-  }
-
-  @Test
-  fun `connected-apps surfaces the granted scopes and last-authorized time`() {
-    val jwt = jwtService.emitToken(testData.user.id)
-    // Drive the consent client so a real consent row (with granted scopes) is recorded for the app.
-    val pending = startPendingConsent(jwt)
-    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
-    completeConsent(pending)
-
-    val entry =
-      jacksonObjectMapper()
-        .readTree(connectedApps(jwt))
-        .first { it.get("clientId").asString() == CONSENT_CLIENT_ID }
-    assertThat(entry.get("scopes").toString()).contains("translations.view")
-    assertThat(entry.get("lastAuthorizedAt").isNull).isFalse()
   }
 
   @Test
@@ -963,37 +924,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(continueUrl).contains("state=state-123")
     assertThat(continueUrl).contains("code_challenge=")
   }
-
-  @Test
-  fun `connected-apps lists authorized apps and revoking one leaves the others intact`() {
-    runAuthorizationCodeFlow(clientId = TEST_CLIENT_ID, redirect = CLI_REDIRECT)
-    runAuthorizationCodeFlow(clientId = SECOND_CLIENT_ID, redirect = SECOND_REDIRECT)
-    val jwt = jwtService.emitToken(testData.user.id)
-
-    assertThat(connectedApps(jwt)).contains("\"$TEST_CLIENT_ID\"").contains("\"$SECOND_CLIENT_ID\"")
-
-    val plainDeleteStatus =
-      mvc
-        .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $jwt"))
-        .andReturn()
-        .response.status
-    assertThat(plainDeleteStatus).isGreaterThanOrEqualTo(400)
-    assertThat(connectedApps(jwt)).contains("\"$TEST_CLIENT_ID\"")
-
-    val superJwt = jwtService.emitToken(testData.user.id, isSuper = true)
-    mvc
-      .perform(delete("/v2/user/connected-apps/$TEST_CLIENT_ID").header("Authorization", "Bearer $superJwt"))
-      .andIsOk
-
-    assertThat(connectedApps(jwt)).doesNotContain("\"$TEST_CLIENT_ID\"").contains("\"$SECOND_CLIENT_ID\"")
-  }
-
-  private fun connectedApps(jwt: String): String =
-    mvc
-      .perform(get("/v2/user/connected-apps").header("Authorization", "Bearer $jwt"))
-      .andIsOk
-      .andReturn()
-      .response.contentAsString
 
   private fun runAuthorizationCodeFlow(
     extraAuthorizeParams: Map<String, String> = emptyMap(),

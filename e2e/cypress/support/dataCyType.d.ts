@@ -151,11 +151,6 @@ declare namespace DataCy {
         "community-projects-view": true;
         "community-translation-banner": true;
         "community-translation-item": true;
-        "connected-apps-list": true;
-        "connected-apps-list-item": true;
-        "connected-apps-list-item-disconnect-button": true;
-        "connected-apps-list-item-last-authorized": true;
-        "connected-apps-list-item-name": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
