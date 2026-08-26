@@ -128,8 +128,8 @@ project(':server-app').projectDir = new File('backend/app')
 include ':data'
 project(':data').projectDir = new File('backend/data')
 
-gradle.ext.billingAppDirectory = new File('/Users/jenik/IdeaProjects/tolgee-company/feature-apps-alpha-org-scopes/billing/app')
-gradle.ext.billingTestDirectory = new File('/Users/jenik/IdeaProjects/tolgee-company/feature-apps-alpha-org-scopes/billing/tests')
+gradle.ext.billingAppDirectory = new File('../billing/app')
+gradle.ext.billingTestDirectory = new File('../billing/tests')
 gradle.ext.eeAppDirectory = new File('./ee/backend/app')
 gradle.ext.eeAppDirectoryExists = gradle.ext.eeAppDirectory.exists()
 
