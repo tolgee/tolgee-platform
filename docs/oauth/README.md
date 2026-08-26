@@ -15,12 +15,12 @@ hand one out at all.
 
 **The idea.** With OAuth, the app sends the user to Tolgee in the browser, the user logs in and
 approves ("this app may suggest translations on Project X"), and the app gets back a **short-lived
-access token**. The token is a signed JWT that the existing API already understands as a
+access token**. The token is an opaque string the existing API already understands as an
 `Authorization: Bearer <token>` header.
 
 **Two halves:**
-- **Authorization server** (new) — mints tokens: the `/oauth2/authorize`, `/oauth2/token`,
-  `/oauth2/jwks` endpoints.
+- **Authorization server** (new) — mints tokens: the `/oauth2/authorize` and `/oauth2/token`
+  endpoints.
 - **Resource server** (already existed) — the REST API that accepts the token. We only had to teach
   it to recognize these new tokens next to the old ones.
 
@@ -40,9 +40,9 @@ sequenceDiagram
     U->>AS: 3. Allow
     AS->>C: 4. redirect back with a one-time code
     C->>AS: 5. POST /oauth2/token (code + PKCE code_verifier)
-    AS->>C: 6. access_token (short-lived JWT) + refresh_token
+    AS->>C: 6. access_token (short-lived, opaque) + refresh_token
     C->>API: 7. GET /v2/... with Authorization: Bearer <access_token>
-    API->>API: 8. verify signature via JWKS, then<br/>allow = token scopes ∩ user's live permissions
+    API->>API: 8. look the grant up, then<br/>allow = token scopes ∩ user's live permissions
     API->>C: 9. data
 ```
 
@@ -120,32 +120,33 @@ browser extension or CLI). PKCE replaces the missing secret with a one-time proo
 So even if someone steals the one-time code in transit, it's useless without the `code_verifier` that
 never left the app. PKCE is required for every Tolgee OAuth client.
 
-### JWT (JSON Web Token)
-The access token is a JWT: three base64 parts (`header.payload.signature`). The payload holds claims
-like `sub` (the user id), `scope`, `aud` (audience), `exp` (expiry), and Tolgee's `tg.prj` (which
-projects the token is bound to). It's **signed**, so the API can trust it without a database lookup —
-that's why token validation on the API hot path costs nothing but a signature check.
+### Opaque access tokens (why not a JWT)
+The access token is an **opaque** random string. It carries no readable content: the claims that describe
+it — `sub` (the user id), `scope`, and Tolgee's `tg.prj` (which projects it is bound to) — live on the
+`oauth2_authorization` row the token points at, and `OAuth2AccessTokenResolver` reads them on every
+request.
 
-### JWK and JWKS
-- A **JWK** (JSON Web Key) is just a cryptographic key written as JSON.
-- **JWKS** (JWK Set) is the list of the server's **public** keys, published at `/oauth2/jwks`.
+The alternative, a self-contained signed JWT, is the more common choice for an authorization server, and
+we deliberately did not take it:
 
-Tolgee signs tokens with a **private** RSA key (kept secret, on the server). Anyone — including our own
-API — verifies a token's signature using the matching **public** key fetched from `/oauth2/jwks`. The
-private key never leaves the server; only public keys are published. (See `OAuth2KeyConfig`.)
+- **Revocation actually works.** Deleting the grant kills its access tokens immediately. A signed JWT is
+  valid until it expires, no matter what the server thinks, so revoking one needs a denylist that has to
+  be consulted per request anyway — the lookup a JWT was supposed to avoid.
+- **No key lifecycle.** No signing keypair to generate, persist, share between replicas or rotate, and no
+  JWK set to publish. That is a whole class of operational failure removed rather than managed.
+- **It matches the rest of Tolgee.** Project API keys and PATs are opaque strings looked up (and cached)
+  the same way. OAuth tokens are not a special case.
 
-### `kid` (Key ID)
-A server may have more than one key at a time (e.g. during key rotation: a new key while the old one is
-still honored until its tokens expire). Each key gets a unique **`kid`**. The token's header records
-which `kid` signed it, so a verifier knows exactly which public key from the JWKS to use. In
-`OAuth2KeyConfig` we generate the `kid` when the key is created and **persist it with the key**, so it
-stays stable across restarts and replicas — otherwise tokens signed before a restart would suddenly
-fail to verify.
+What is given up is offline validation by a *third-party* resource server. Tolgee's own API is the only
+resource server, so nothing needs it. If that ever changes, that is the moment to reconsider — not before.
+
+One consequence worth knowing: refresh rotation replaces the grant's single access token, so refreshing
+supersedes the previous access token immediately rather than leaving it usable until it expires.
 
 ### issuer
-The base URL that identifies this authorization server; it's the `iss` claim in tokens and the root of
-discovery (`{issuer}/.well-known/oauth-authorization-server`), and Spring builds every endpoint URL
-relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/jwks`,
+The base URL that identifies this authorization server; it's the `iss` parameter on the code redirect and
+the root of discovery (`{issuer}/.well-known/oauth-authorization-server`), and Spring builds every endpoint URL
+relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`,
 …) are actually reachable — i.e. the **backend / API URL** (`back-end-url`).
 
 We compute it as `backEndUrl ?: frontEndUrl` (`OAuth2AudienceResolver.serverBaseUrl`, read by
@@ -203,9 +204,9 @@ hands back a freshly-minted `client_id`.
 
 | Concern | Files |
 |---|---|
-| Signing keys / JWKS | `backend/data/.../security/oauth2/OAuth2KeyConfig.kt` |
+| Token generation (opaque) | `backend/data/.../security/oauth2/OAuth2TokenGeneratorConfig.kt` |
 | Auth-server filter chain, issuer | `backend/app/.../configuration/OAuth2AuthorizationServerConfig.kt` |
-| Token claims (`sub`, `scope`, `tg.prj`, `aud`) | `TolgeeOAuth2TokenCustomizer.kt` |
+| Token claims (`sub`, `scope`, `tg.prj`) | `TolgeeOAuth2TokenCustomizer.kt` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
@@ -226,20 +227,11 @@ These are known gaps, deferred to the client rounds that first exercise them:
   `invalid_grant` on a near-simultaneous second refresh. Follow-up: replace
   `OAuth2RefreshTokenAuthenticationProvider` with one that accepts a just-superseded token within a
   short grace window and revokes the whole authorization family on replay of an already-rotated token.
-- **Disconnect kills the refresh token immediately, but access tokens live out their TTL.** Access
-  tokens are self-contained RS256 JWTs verified against the JWKS, so `DELETE /v2/user/connected-apps/{id}`
-  (which deletes the authorization + consent rows) stops all *future* tokens and kills the refresh token
-  at once, but an already-issued access token keeps working until it expires — up to
-  `tolgee.oauth2.access-token-validity-minutes` (default 30). This is standard stateless-JWT behaviour;
-  keep the access-token TTL short. The pitch's optional Redis revocation denylist (reject a token by
-  `jti` until its TTL passes) is the follow-up for immediate revocation and lands with the MCP round.
-- **Signing key rotation is a follow-up.** `OAuth2KeyConfig` persists a single active RSA key via
-  `FileStorage` (shared across replicas) and coordinates first-boot generation with `LockingProvider` so a
-  fresh multi-replica deployment converges on one `kid`. There is no overlap-rotation mechanism yet — a
-  two-key JWKS would need verify-only key selection (SAS's `JwtGenerator` sets no `kid`, so two RS256
-  signing candidates make `NimbusJwtEncoder` ambiguous). A rotation-with-overlap story (refreshable
-  `JWKSource` + verify-only previous key) is the follow-up. There is no compliance requirement for periodic
-  rotation, and the stable key has no user-facing impact (tokens keep validating; nobody is logged out).
+- **A grant resolves on every request.** Opaque tokens are looked up in `oauth2_authorization` per
+  request, which is what makes revocation immediate — but it is also an uncached database read on the API
+  hot path. Project API keys and PATs cache their lookup by token hash (`Caches.PROJECT_API_KEYS`); doing
+  the same here is the obvious follow-up if it ever shows up in profiling, and it must come with the same
+  evict-on-revoke discipline or it reintroduces exactly the revocation lag the opaque token removed.
 
 ## Testing the browser extension locally (development)
 
@@ -253,13 +245,13 @@ to reproduce the flow against a local dev checkout, where the webapp (vite, `:39
 ### 1. Single-origin dev server (vite proxy)
 
 `webapp/vite.config.ts` proxies the backend-owned paths (`/v2`, `/api`, `/oauth2/authorize`,
-`/oauth2/token`, `/oauth2/jwks`, `/.well-known`) to the backend, leaving `/oauth2/consent` and
+`/oauth2/token`, `/.well-known`) to the backend, leaving `/oauth2/consent` and
 `/oauth2/bootstrap` as SPA routes:
 
 ```ts
 // webapp/vite.config.ts — inside defineConfig(...).server
 proxy: Object.fromEntries(
-  ['/v2', '/api', '/oauth2/authorize', '/oauth2/token', '/oauth2/jwks', '/.well-known'].map((path) => [
+  ['/v2', '/api', '/oauth2/authorize', '/oauth2/token', '/.well-known'].map((path) => [
     path,
     {
       target: process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',

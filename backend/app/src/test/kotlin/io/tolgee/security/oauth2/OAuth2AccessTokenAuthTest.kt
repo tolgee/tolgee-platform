@@ -16,14 +16,9 @@
 
 package io.tolgee.security.oauth2
 
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.crypto.MACSigner
-import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
+import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -41,14 +36,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
-import org.springframework.security.oauth2.jwt.JwsHeader
-import org.springframework.security.oauth2.jwt.JwtClaimsSet
-import org.springframework.security.oauth2.jwt.JwtEncoder
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters
-import java.security.KeyPairGenerator
-import java.security.interfaces.RSAPrivateKey
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
@@ -60,10 +49,12 @@ import java.util.Date
  */
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var jwtEncoder: JwtEncoder
+  private lateinit var authorizationService: OAuth2AuthorizationService
 
   @Autowired
-  private lateinit var jdbcTemplate: JdbcTemplate
+  private lateinit var registeredClientRepository: RegisteredClientRepository
+
+  private lateinit var tokens: OAuth2TestTokens
 
   private lateinit var testData: BaseTestData
   private lateinit var viewOnlyUser: UserAccount
@@ -139,79 +130,19 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
           totalItems = 1
         }.self
     testDataService.saveTestData(testData.root)
-    // Tokens are minted directly (bypassing SAS), so no real authorization row exists — insert one the liveness check
-    // can find, since the resolver now rejects any OAuth token whose authorization is gone.
-    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
-    jdbcTemplate.update(
-      "INSERT INTO oauth2_authorization (id, registered_client_id, principal_name, authorization_grant_type) " +
-        "VALUES (?, ?, ?, ?)",
-      LIVE_AUTHORIZATION_ID,
-      "test-client",
-      testData.user.id.toString(),
-      "authorization_code",
-    )
+    tokens = OAuth2TestTokens(authorizationService, registeredClientRepository)
   }
 
   @AfterEach
   fun cleanup() {
-    jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", LIVE_AUTHORIZATION_ID)
+    tokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
 
   @Test
-  fun `accepts a valid scoped RS256 token`() {
+  fun `accepts a valid scoped token`() {
     val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet(translationsUrl(), bearer(token)).andIsOk
-  }
-
-  @Test
-  fun `rejects a wrong-audience token`() {
-    val token =
-      mint(
-        scopes = listOf("translations.view"),
-        projects = OAuth2Constants.ALL_PROJECTS,
-        audience = "https://not-tolgee",
-      )
-    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
-  }
-
-  @Test
-  fun `rejects an RS256 token signed by a key outside the JWKS`() {
-    val keyPair = KeyPairGenerator.getInstance("RSA").apply { initialize(2048) }.generateKeyPair()
-    val claims =
-      JWTClaimsSet
-        .Builder()
-        .subject(testData.user.id.toString())
-        .audience(apiAudience)
-        .issueTime(Date())
-        .expirationTime(Date(System.currentTimeMillis() + 600_000))
-        .claim("scope", listOf("translations.view"))
-        .claim(OAuth2Constants.PROJECTS_CLAIM, OAuth2Constants.ALL_PROJECTS)
-        .build()
-    val forged = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS256).build(), claims)
-    forged.sign(RSASSASigner(keyPair.private as RSAPrivateKey))
-
-    performGet(translationsUrl(), bearer(forged.serialize())).andIsUnauthorized
-  }
-
-  @Test
-  fun `rejects an HS-signed token even when it bears the API audience`() {
-    // The aud claim routes this into the OAuth path; the RSA-only JWKS decoder must still reject an HMAC signature
-    // (an algorithm-confusion attempt), not accept it.
-    val claims =
-      JWTClaimsSet
-        .Builder()
-        .subject(testData.user.id.toString())
-        .audience(apiAudience)
-        .issueTime(Date())
-        .expirationTime(Date(System.currentTimeMillis() + 600_000))
-        .claim("scope", listOf("translations.view"))
-        .claim(OAuth2Constants.PROJECTS_CLAIM, OAuth2Constants.ALL_PROJECTS)
-        .build()
-    val forged = SignedJWT(JWSHeader(JWSAlgorithm.HS256), claims)
-    forged.sign(MACSigner("an-attacker-chosen-secret-at-least-32-bytes-long!!"))
-
-    performGet(translationsUrl(), bearer(forged.serialize())).andIsUnauthorized
   }
 
   @Test
@@ -229,7 +160,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `fails closed on an unrecognized project claim shape`() {
-    val token = mint(scopes = listOf("translations.view"), projects = 999L)
+    val token = mint(scopes = listOf("translations.view"), projects = "nonsense")
     performGet(translationsUrl(), bearer(token)).andIsNotFound
   }
 
@@ -289,16 +220,31 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `rejects a token that carries no authorization-id claim`() {
-    val token =
-      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), authorizationId = null)
+  fun `a revoked token stops working at once`() {
+    // The point of opaque tokens: the grant is read on every request, so deleting it kills already-issued access
+    // tokens rather than leaving them valid until they expire.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performGet(translationsUrl(), bearer(token)).andIsOk
+
+    tokens.revoke(token)
+
     performGet(translationsUrl(), bearer(token)).andIsUnauthorized
   }
 
   @Test
-  fun `rejects a token whose authorization no longer exists`() {
+  fun `rejects an opaque token that was never issued`() {
+    performGet(translationsUrl(), bearer("test-never-issued-token")).andIsUnauthorized
+  }
+
+  @Test
+  fun `rejects an expired token`() {
     val token =
-      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), authorizationId = "gone")
+      mint(
+        scopes = listOf("translations.view"),
+        projects = listOf(testData.project.id),
+        issuedAt = Instant.now().minus(2, ChronoUnit.HOURS),
+        expiresAt = Instant.now().minus(1, ChronoUnit.HOURS),
+      )
     performGet(translationsUrl(), bearer(token)).andIsUnauthorized
   }
 
@@ -391,33 +337,15 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   private fun mint(
     scopes: List<String>,
     projects: Any,
-    audience: String = apiAudience,
     subject: Long = testData.user.id,
-    authorizationId: String? = LIVE_AUTHORIZATION_ID,
-  ): String {
-    val now = Instant.now()
-    val claims =
-      JwtClaimsSet
-        .builder()
-        .subject(subject.toString())
-        .audience(listOf(audience))
-        .issuedAt(now)
-        .expiresAt(now.plus(30, ChronoUnit.MINUTES))
-        .claim("scope", scopes)
-        .claim(OAuth2Constants.PROJECTS_CLAIM, projects)
-        .apply { authorizationId?.let { claim(OAuth2Constants.AUTHORIZATION_ID_CLAIM, it) } }
-        .build()
-    val header = JwsHeader.with(SignatureAlgorithm.RS256).build()
-    return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue
-  }
-
-  companion object {
-    private const val LIVE_AUTHORIZATION_ID = "oauth-access-token-auth-test-authz"
-  }
-
-  private val apiAudience: String
-    get() =
-      tolgeeProperties.backEndUrl
-        ?: tolgeeProperties.frontEndUrl
-        ?: OAuth2AudienceResolver.DEFAULT_API_AUDIENCE
+    issuedAt: Instant = Instant.now(),
+    expiresAt: Instant = issuedAt.plus(30, ChronoUnit.MINUTES),
+  ): String =
+    tokens.issue(
+      subject = subject,
+      scopes = scopes,
+      projects = projects,
+      issuedAt = issuedAt,
+      expiresAt = expiresAt,
+    )
 }

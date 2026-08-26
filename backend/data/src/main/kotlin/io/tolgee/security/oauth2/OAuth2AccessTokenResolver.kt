@@ -16,7 +16,6 @@
 
 package io.tolgee.security.oauth2
 
-import com.nimbusds.jwt.SignedJWT
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.AuthExpiredException
@@ -24,40 +23,46 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.UserAccountService
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.security.oauth2.jwt.JwtException
+import org.springframework.security.oauth2.core.OAuth2AccessToken
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.stereotype.Component
 
+/**
+ * Resolves an opaque OAuth2 access token by looking the grant up in `oauth2_authorization`.
+ *
+ * Because the lookup happens on every request, deleting the row revokes the token immediately — that is the point of
+ * issuing opaque tokens rather than self-contained ones.
+ */
 @Component
 class OAuth2AccessTokenResolver(
-  @Qualifier("oauth2AccessTokenDecoder")
-  private val decoder: JwtDecoder,
+  private val authorizationService: OAuth2AuthorizationService,
   private val userAccountService: UserAccountService,
-  private val audienceResolver: OAuth2AudienceResolver,
-  private val authorizationLivenessService: OAuth2AuthorizationLivenessService,
 ) {
   fun tryResolve(token: String): TolgeeAuthentication? {
-    if (!hasOAuthAudience(token)) return null
+    // Tolgee's own JWTs are the other kind of Bearer token on this path. They always carry the two dots of a JWS,
+    // which an opaque token (base64url, no padding) never does — so this rules them out without a store lookup.
+    if (token.contains('.')) return null
 
-    val jwt = decode(token)
-    validateAudience(jwt)
+    val authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN) ?: return null
+    val accessToken = authorization.accessToken ?: return null
+    if (!accessToken.isActive) {
+      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+    }
 
-    val userId = jwt.subject?.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    val userId = authorization.principalName?.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     val user =
       userAccountService.findDto(userId)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    if (user.isTokenInvalidated(jwt.issuedAt)) {
+    if (user.isTokenInvalidated(accessToken.token.issuedAt)) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
-    rejectIfAuthorizationRevoked(jwt)
-
     return TolgeeAuthentication(
-      credentials = OAuth2TokenCredentials(parseScopes(jwt), parseProjects(jwt)),
-      deviceId = jwt.id,
+      credentials = OAuth2TokenCredentials(parseScopes(accessToken), parseProjects(accessToken)),
+      deviceId = accessToken.claims?.get(JTI_CLAIM)?.toString(),
       userAccount = user,
       actingAsUserAccount = null,
       isReadOnly = false,
@@ -65,62 +70,22 @@ class OAuth2AccessTokenResolver(
     )
   }
 
-  private fun hasOAuthAudience(token: String): Boolean {
-    return try {
-      SignedJWT
-        .parse(token)
-        .jwtClaimsSet.audience
-        .hasApiAudience()
-    } catch (_: Exception) {
-      false
-    }
-  }
-
-  private fun List<String>?.hasApiAudience() = this?.contains(audienceResolver.apiAudience) == true
-
-  private fun decode(token: String): Jwt {
-    return try {
-      decoder.decode(token)
-    } catch (_: JwtException) {
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    }
-  }
-
-  private fun validateAudience(jwt: Jwt) {
-    if (!jwt.audience.hasApiAudience()) {
-      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    }
-  }
-
-  private fun rejectIfAuthorizationRevoked(jwt: Jwt) {
-    val authorizationId =
-      jwt.getClaimAsString(OAuth2Constants.AUTHORIZATION_ID_CLAIM)
-        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
-    if (!authorizationLivenessService.isLive(authorizationId)) {
-      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
-    }
-  }
-
-  private fun parseScopes(jwt: Jwt): Set<Scope> {
-    val raw = jwt.claims["scope"]
-    val values =
-      when (raw) {
-        is Collection<*> -> raw.map { it.toString() }
-        is String -> raw.split(" ")
-        else -> emptyList()
-      }
-    return values
-      .filter { it.isNotBlank() }
+  private fun parseScopes(accessToken: OAuth2Authorization.Token<OAuth2AccessToken>): Set<Scope> =
+    accessToken.token.scopes
       .mapNotNull { runCatching { Scope.fromValue(it) }.getOrNull() }
       .toSet()
-  }
 
-  private fun parseProjects(jwt: Jwt): Set<Long>? {
-    val raw = jwt.claims[OAuth2Constants.PROJECTS_CLAIM] ?: return null
+  private fun parseProjects(accessToken: OAuth2Authorization.Token<OAuth2AccessToken>): Set<Long>? {
+    val raw = accessToken.claims?.get(OAuth2Constants.PROJECTS_CLAIM) ?: return null
     if (raw == OAuth2Constants.ALL_PROJECTS) return null
     if (raw is Collection<*>) {
       return raw.mapNotNull { it.toString().toLongOrNull() }.toSet()
     }
+    // An unrecognized claim shape must not read as "all projects"; deny every project instead.
     return emptySet()
+  }
+
+  companion object {
+    private const val JTI_CLAIM = "jti"
   }
 }

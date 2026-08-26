@@ -25,7 +25,6 @@ import java.time.Instant
 @Service
 class OAuth2AuthorizationQueryService(
   private val repository: OAuth2AuthorizationJdbcRepository,
-  private val authorizationLivenessService: OAuth2AuthorizationLivenessService,
 ) {
   fun findAuthorizedClients(principalName: String): List<OAuth2AuthorizationJdbcRepository.AuthorizedClient> =
     repository.findAuthorizedClients(principalName)
@@ -35,20 +34,14 @@ class OAuth2AuthorizationQueryService(
     registeredClientId: String,
     principalName: String,
   ): Int {
-    val ids = repository.findIdsByClientAndPrincipal(registeredClientId, principalName)
     repository.deleteConsentByClientAndPrincipal(registeredClientId, principalName)
-    val deleted = repository.deleteByClientAndPrincipal(registeredClientId, principalName)
-    ids.forEach { authorizationLivenessService.evict(it) }
-    return deleted
+    return repository.deleteByClientAndPrincipal(registeredClientId, principalName)
   }
 
   /** Deletes ALL of the user's authorizations and consents (logout-everywhere); returns the authorization-row count. */
   fun revokeAllForPrincipal(principalName: String): Int {
-    val ids = repository.findIdsByPrincipal(principalName)
     repository.deleteConsentByPrincipal(principalName)
-    val deleted = repository.deleteByPrincipal(principalName)
-    ids.forEach { authorizationLivenessService.evict(it) }
-    return deleted
+    return repository.deleteByPrincipal(principalName)
   }
 
   // Runs in its own transaction: the caller (the token customizer detecting an invalidated refresh grant) throws right
@@ -56,7 +49,6 @@ class OAuth2AuthorizationQueryService(
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun revokeByIdInNewTransaction(authorizationId: String) {
     repository.deleteById(authorizationId)
-    authorizationLivenessService.evict(authorizationId)
   }
 
   fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(cutoff)

@@ -49,29 +49,6 @@ class OAuth2AuthorizationJdbcRepository(
     )
   }
 
-  fun existsById(id: String): Boolean {
-    val count =
-      jdbcTemplate.queryForObject("SELECT COUNT(*) FROM oauth2_authorization WHERE id = ?", Int::class.java, id) ?: 0
-    return count > 0
-  }
-
-  fun findIdsByClientAndPrincipal(
-    registeredClientId: String,
-    principalName: String,
-  ): List<String> =
-    jdbcTemplate
-      .queryForList(
-        "SELECT id FROM oauth2_authorization WHERE registered_client_id = ? AND principal_name = ?",
-        String::class.java,
-        registeredClientId,
-        principalName,
-      ).filterNotNull()
-
-  fun findIdsByPrincipal(principalName: String): List<String> =
-    jdbcTemplate
-      .queryForList("SELECT id FROM oauth2_authorization WHERE principal_name = ?", String::class.java, principalName)
-      .filterNotNull()
-
   fun deleteConsentByClientAndPrincipal(
     registeredClientId: String,
     principalName: String,

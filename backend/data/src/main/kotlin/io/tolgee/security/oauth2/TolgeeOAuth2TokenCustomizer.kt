@@ -23,28 +23,25 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
-import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenClaimsContext
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.stereotype.Component
 
 @Component
 class TolgeeOAuth2TokenCustomizer(
-  private val audienceResolver: OAuth2AudienceResolver,
   private val userAccountService: UserAccountService,
   private val authorizationQueryService: OAuth2AuthorizationQueryService,
-) : OAuth2TokenCustomizer<JwtEncodingContext> {
-  override fun customize(context: JwtEncodingContext) {
+) : OAuth2TokenCustomizer<OAuth2TokenClaimsContext> {
+  override fun customize(context: OAuth2TokenClaimsContext) {
     if (context.tokenType != OAuth2TokenType.ACCESS_TOKEN) return
 
     rejectRefreshOfInvalidatedTokens(context)
     context.claims.claim(OAuth2Constants.PROJECTS_CLAIM, projectSet(context))
-    context.getAuthorization()?.id?.let { context.claims.claim(OAuth2Constants.AUTHORIZATION_ID_CLAIM, it) }
-    context.claims.audience(listOf(audienceResolver.apiAudience))
   }
 
   // A refresh-minted access token carries a fresh iat, so it slips the resolver's tokensValidNotBefore check; gate the
   // refresh grant here instead.
-  private fun rejectRefreshOfInvalidatedTokens(context: JwtEncodingContext) {
+  private fun rejectRefreshOfInvalidatedTokens(context: OAuth2TokenClaimsContext) {
     if (context.authorizationGrantType != AuthorizationGrantType.REFRESH_TOKEN) return
     val authorization = context.getAuthorization() ?: return
     val userId = authorization.principalName?.toLongOrNull() ?: return
@@ -59,7 +56,7 @@ class TolgeeOAuth2TokenCustomizer(
     authorizationQueryService.revokeByIdInNewTransaction(authorization.id)
   }
 
-  private fun projectSet(context: JwtEncodingContext): Any {
+  private fun projectSet(context: OAuth2TokenClaimsContext): Any {
     // Stamp ids as strings: SAS's JDBC polymorphic-type validator rejects java.lang.Long when it deserializes the
     // stored claims on the refresh grant, which would otherwise make a project-bound token unrefreshable.
     consentSelection(context)?.let { return projectSetFor(it) }
@@ -78,6 +75,6 @@ class TolgeeOAuth2TokenCustomizer(
     return listOf(selection)
   }
 
-  private fun consentSelection(context: JwtEncodingContext): String? =
+  private fun consentSelection(context: OAuth2TokenClaimsContext): String? =
     context.getAuthorization()?.getAttribute<String>(OAuth2Constants.PROJECT_ATTRIBUTE)
 }

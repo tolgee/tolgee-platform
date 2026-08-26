@@ -37,7 +37,10 @@ class OAuth2ServerProperties {
   fun tokenSettings(): TokenSettings {
     return TokenSettings
       .builder()
-      .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+      // Opaque, not self-contained: the token is looked up in oauth2_authorization on every request, so revoking a
+      // grant kills its access tokens at once. A signed JWT would need its own signing-key lifecycle and could only be
+      // revoked on expiry. Tolgee's other credentials (PAK, PAT) are opaque and looked up the same way.
+      .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
       .accessTokenTimeToLive(Duration.ofMinutes(accessTokenValidityMinutes))
       .refreshTokenTimeToLive(Duration.ofDays(refreshTokenValidityDays))
       .reuseRefreshTokens(false)

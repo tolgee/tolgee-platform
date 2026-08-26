@@ -25,20 +25,19 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 
 /**
  * Boots the full application context to verify the OAuth2 authorization-server filter chain coexists with the main
- * stateless chain, and that the discovery + JWKS endpoints (which prove the asymmetric keys and settings are wired)
- * are served.
+ * stateless chain, and that the discovery endpoint is served.
  */
 class OAuth2AuthorizationServerTest : AbstractControllerTest() {
   @Test
-  fun `serves the JWKS with an RSA public key`() {
-    val body =
+  fun `publishes no JWK set`() {
+    // Access tokens are opaque, so the server holds no signing key and Spring registers no JWK-set endpoint. If this
+    // ever starts returning a key set, a key lifecycle has been reintroduced without anything needing one.
+    assertThat(
       mvc
         .perform(get("/oauth2/jwks"))
-        .andIsOk
         .andReturn()
-        .response.contentAsString
-    assertThat(body).contains("\"kty\":\"RSA\"")
-    assertThat(body).doesNotContain("\"d\":")
+        .response.status,
+    ).isNotEqualTo(200)
   }
 
   @Test
@@ -49,7 +48,8 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
       .andAssertThatJson {
         node("authorization_endpoint").isString
         node("token_endpoint").isString
-        node("jwks_uri").isString
+        // No JWK set is published, so discovery must not advertise a jwks_uri that would 404.
+        node("jwks_uri").isAbsent()
         // CIMD support is advertised so spec-aware clients know they can self-register with a URL-form client_id
         node("client_id_metadata_document_supported").isEqualTo(true)
       }

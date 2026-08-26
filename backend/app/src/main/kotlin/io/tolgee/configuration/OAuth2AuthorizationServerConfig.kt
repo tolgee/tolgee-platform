@@ -68,6 +68,9 @@ class OAuth2AuthorizationServerConfig(
         configurer.authorizationServerMetadataEndpoint { metadata ->
           metadata.authorizationServerMetadataCustomizer { claims ->
             claims.claim("client_id_metadata_document_supported", true)
+            // Spring advertises jwks_uri unconditionally, but access tokens are opaque so no JWK set is published and
+            // the advertised URL would 404. Drop the claim rather than point discovery at a dead endpoint.
+            claims.claims { it.remove("jwks_uri") }
           }
         }
       }.authorizeHttpRequests { it.anyRequest().authenticated() }

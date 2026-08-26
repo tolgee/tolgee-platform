@@ -99,7 +99,6 @@ export default defineConfig(({ mode }) => {
           '/api',
           '/oauth2/authorize',
           '/oauth2/token',
-          '/oauth2/jwks',
           '/.well-known',
         ].map((path) => [
           path,

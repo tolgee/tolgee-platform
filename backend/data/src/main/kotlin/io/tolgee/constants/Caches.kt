@@ -6,7 +6,6 @@ interface Caches {
     const val USER_ACCOUNTS = "userAccounts"
     const val PROJECT_API_KEYS = "projectApiKeys"
     const val PERSONAL_ACCESS_TOKENS = "personalAccessTokens"
-    const val OAUTH2_AUTHORIZATIONS = "oauth2Authorizations"
     const val ORGANIZATIONS = "organizations"
     const val PROJECTS = "projects"
     const val PERMISSIONS = "permissions"

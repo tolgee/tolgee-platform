@@ -32,6 +32,8 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
@@ -49,6 +51,7 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.time.Instant
 import java.util.Base64
 import java.util.Date
 
@@ -72,6 +75,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @Autowired
   private lateinit var jdbcTemplate: JdbcTemplate
+
+  @Autowired
+  private lateinit var authorizationService: OAuth2AuthorizationService
 
   private lateinit var testData: BaseTestData
   private lateinit var otherUser: UserAccount
@@ -150,7 +156,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       ).tokenSettings(
         TokenSettings
           .builder()
-          .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+          .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
           .reuseRefreshTokens(false)
           .build(),
       ).build()
@@ -210,6 +216,11 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val refreshToken = firstResponse.get("refresh_token")?.asString()
     assertThat(refreshToken).isNotNull()
 
+    val firstAccessToken = firstResponse.get("access_token").asString()
+    // Read before refreshing: rotation replaces the authorization's single access token, so the superseded one no
+    // longer resolves.
+    val initialClaims = decodeClaims(firstAccessToken)
+
     val refreshResponse =
       mvc
         .perform(
@@ -226,12 +237,19 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(refreshedAccessToken).isNotNull()
     assertThat(refreshed.get("refresh_token")?.asString()).isNotNull().isNotEqualTo(refreshToken)
 
-    val initialClaims = decodeClaims(firstResponse.get("access_token").asString())
     val refreshedClaims = decodeClaims(refreshedAccessToken!!)
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
     assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
     assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
+
+    // Rotation supersedes the previous access token as well as the refresh token: opaque tokens are read from the
+    // grant on every request, so the old value stops working at once instead of living out its TTL.
+    mvc
+      .perform(
+        get("/v2/projects/${testData.project.id}/translations")
+          .header("Authorization", "Bearer $firstAccessToken"),
+      ).andIsUnauthorized
 
     val replayStatus =
       mvc
@@ -628,6 +646,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val refreshToken = first.get("refresh_token")?.asString()
     assertThat(refreshToken).isNotNull()
 
+    // Read before refreshing: rotation supersedes the previous access token, which then no longer resolves.
+    val initialClaims = decodeClaims(first.get("access_token").asString())
+
     val refreshed =
       jacksonObjectMapper().readTree(
         mvc
@@ -641,7 +662,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .response.contentAsString,
       )
 
-    val initialClaims = decodeClaims(first.get("access_token").asString())
     val refreshedClaims = decodeClaims(refreshed.get("access_token").asString())
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
@@ -1039,11 +1059,17 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     return tree
   }
 
+  // Access tokens are opaque, so the claims live on the stored authorization rather than inside the token value.
+  // Rotation replaces the row's single access token, so a superseded token no longer resolves — read claims before
+  // refreshing.
   private fun decodeClaims(token: String): JsonNode {
-    val part = token.split(".")[1]
-    val padded = part + "=".repeat((4 - part.length % 4) % 4)
-    val payload = String(Base64.getUrlDecoder().decode(padded), Charsets.UTF_8)
-    return jacksonObjectMapper().readTree(payload)
+    val authorization =
+      authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN)
+        ?: throw AssertionError("no authorization stored for the access token")
+    val claims = authorization.accessToken?.claims ?: throw AssertionError("access token carries no claims")
+    // Instants have no natural JSON mapping without the time module; the timestamps are not what any assertion reads.
+    val normalized = claims.mapValues { (_, value) -> if (value is Instant) value.epochSecond else value }
+    return jacksonObjectMapper().valueToTree(normalized)
   }
 
   private fun randomVerifier(): String {

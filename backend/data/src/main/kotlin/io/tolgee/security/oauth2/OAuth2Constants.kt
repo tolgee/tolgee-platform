@@ -19,9 +19,6 @@ package io.tolgee.security.oauth2
 object OAuth2Constants {
   const val PROJECTS_CLAIM = "tg.prj"
 
-  // Id of the minting oauth2_authorization row; lets the resolver reject a token whose grant was revoked.
-  const val AUTHORIZATION_ID_CLAIM = "tg.aid"
-
   /** [PROJECTS_CLAIM] sentinel: not narrowed to any project subset (still bounded by live permissions). */
   const val ALL_PROJECTS = "*"
 
