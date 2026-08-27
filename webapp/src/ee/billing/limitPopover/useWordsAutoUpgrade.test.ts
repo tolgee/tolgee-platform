@@ -82,43 +82,41 @@ describe('words auto-upgrade offer', () => {
         { id: 1, includedWords: 50_000 },
         { id: 2, includedWords: 200_000 },
       ];
-      const onTier = (currentTierId: number, extra = {}) =>
-        subscription({
-          autoUpgradeEnabled: true,
-          plan: {
-            metricType: 'HOSTED_WORDS',
-            free: false,
-            tiers: ladder,
-            currentTierId,
-          },
-          ...extra,
-        });
+      // the subscription no longer carries the ladder; it arrives from the plans listing
+      const offering = (currentTierId: number) => ({
+        tiers: ladder,
+        currentTierId,
+      });
+      const onTier = (extra = {}) =>
+        subscription({ autoUpgradeEnabled: true, ...extra });
 
       it('is the largest tier when there is nothing bigger to move to', () => {
-        expect(wordsAutoUpgradeIneffectiveReason(onTier(2))).toBe(
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(), offering(2))).toBe(
           'largestTier'
         );
       });
 
       it('is the scheduled change when one is pending', () => {
-        const withDowngrade = onTier(1, {
+        const withDowngrade = onTier({
           scheduledDowngrade: { name: 'Translate' },
         });
-        expect(wordsAutoUpgradeIneffectiveReason(withDowngrade)).toBe(
+        expect(
+          wordsAutoUpgradeIneffectiveReason(withDowngrade, offering(1))
+        ).toBe('scheduledChange');
+      });
+
+      it('prefers the scheduled change, which is the one the customer can undo', () => {
+        const both = onTier({ scheduledDowngrade: { name: 'Translate' } });
+        expect(wordsAutoUpgradeIneffectiveReason(both, offering(2))).toBe(
           'scheduledChange'
         );
       });
 
-      it('prefers the scheduled change, which is the one the customer can undo', () => {
-        const both = onTier(2, {
-          scheduledDowngrade: { name: 'Translate' },
-        });
-        expect(wordsAutoUpgradeIneffectiveReason(both)).toBe('scheduledChange');
-      });
-
       it('falls back to other when neither applies', () => {
         // e.g. cancelling at period end, or a non-active status
-        expect(wordsAutoUpgradeIneffectiveReason(onTier(1))).toBe('other');
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(), offering(1))).toBe(
+          'other'
+        );
       });
 
       it('falls back to other before the subscription has loaded', () => {

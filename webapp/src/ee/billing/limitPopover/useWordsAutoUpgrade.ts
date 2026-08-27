@@ -13,6 +13,15 @@ type Props = {
 
 type Subscription = components['schemas']['CloudSubscriptionModel'] | undefined;
 
+/**
+ * The subscription's own plan model is assembled from the active tier alone, so it carries neither
+ * `tiers` nor `currentTierId`. The ladder only comes back from the plans listing.
+ */
+type Offering = {
+  tiers?: { id: number; includedWords: number }[];
+  currentTierId?: number | null;
+};
+
 const isWordPlan = (subscription: Subscription) =>
   Boolean(
     subscription &&
@@ -49,14 +58,13 @@ export type WordsAutoUpgradeReason =
  * plan change wins over the largest tier: it is the one the customer can undo themselves.
  */
 export const wordsAutoUpgradeIneffectiveReason = (
-  subscription: Subscription
+  subscription: Subscription,
+  offering?: Offering
 ): WordsAutoUpgradeReason => {
   if (subscription?.scheduledDowngrade) {
     return 'scheduledChange';
   }
-  if (
-    isLargestTier(subscription?.plan.tiers, subscription?.plan.currentTierId)
-  ) {
+  if (isLargestTier(offering?.tiers, offering?.currentTierId)) {
     return 'largestTier';
   }
   return 'other';
@@ -77,7 +85,21 @@ export const useWordsAutoUpgrade = ({ enabled, wordsExhausted }: Props) => {
     },
   });
 
+  const plansLoadable = useBillingApiQuery({
+    url: '/v2/organizations/{organizationId}/billing/plans',
+    method: 'get',
+    path: {
+      organizationId: organizationId ?? 0,
+    },
+    options: {
+      enabled: enabled && wordsExhausted && organizationId !== undefined,
+    },
+  });
+
   const subscription = subscriptionLoadable.data;
+  const offering = plansLoadable.data?._embedded?.plans?.find((candidate) =>
+    Boolean(candidate.currentTierId)
+  );
 
   const available = isWordsAutoUpgradeAvailable(subscription, wordsExhausted);
   const ineffective = isWordsAutoUpgradeIneffective(
@@ -107,7 +129,7 @@ export const useWordsAutoUpgrade = ({ enabled, wordsExhausted }: Props) => {
   return {
     available,
     ineffective,
-    reason: wordsAutoUpgradeIneffectiveReason(subscription),
+    reason: wordsAutoUpgradeIneffectiveReason(subscription, offering),
     enable,
     isEnabling: autoUpgradeMutation.isLoading,
   };
