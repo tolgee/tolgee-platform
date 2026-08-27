@@ -58,6 +58,14 @@ above is a plain browser navigation, which **can't** send that JWT. So when the 
 short-lived server session (a cookie), then continues to `/oauth2/authorize`. After that the standard
 flow above runs.
 
+**This hop is forced, not incidental — don't try to remove it.** A top-level navigation carries no
+`Authorization` header, and Tolgee deliberately has no auth cookie (which is what makes the API stateless
+and CSRF-free by construction). Something has to bridge the two, and the authorization endpoint needs a
+`Principal` before it will issue a code. The only ways around it are to hand-roll `/oauth2/authorize`
+ourselves — taking on redirect-URI matching, PKCE storage, and single-use/expiring codes, i.e. the most
+attack-exposed half of the protocol — or to replace Spring's
+`OAuth2AuthorizationCodeRequestAuthenticationProvider`. Both are worse than one short-lived session.
+
 This bootstrap session is the *only* stateful part of the otherwise-stateless app. To keep it working on
 multi-replica deployments (Tolgee Cloud, self-hosted HA) without requiring load-balancer session affinity,
 the HTTP session is backed by **Spring Session JDBC** over the existing Postgres (`spring.session.store-type:

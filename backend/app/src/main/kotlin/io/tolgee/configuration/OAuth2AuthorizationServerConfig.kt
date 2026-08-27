@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 
 // [AuthenticationFilter] is deliberately NOT on this chain: the principal comes only from the session bootstrap, so a
@@ -75,7 +76,13 @@ class OAuth2AuthorizationServerConfig(
       }.authorizeHttpRequests { it.anyRequest().authenticated() }
       .csrf { it.ignoringRequestMatchers(endpointsMatcher) }
       .cors(Customizer.withDefaults())
-      .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .headers { headers ->
+        // This chain gets Spring's default headers, but not the ones the main chain adds — and Referrer-Policy is not
+        // a Spring default. It matters most here: /oauth2/authorize answers with redirects and error pages whose URLs
+        // carry `code` and `state`, which a full Referer would leak to whatever the client navigates to next.
+        headers.referrerPolicy { it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN) }
+        headers.frameOptions { it.deny() }
+      }.addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalUserRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .exceptionHandling {

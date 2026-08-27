@@ -75,6 +75,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties
               "is set.",
           defaultValue = "",
         ),
+        DocProperty(
+          name = "cli-redirect-uris",
+          description =
+            "Loopback redirect URIs of the Tolgee CLI (RFC 8252), e.g. `http://127.0.0.1:9876/callback`. The CLI " +
+              "OAuth client is only registered when this is set.\n" +
+              "\n" +
+              ":::info\n" +
+              "A loopback redirect cannot be tied to one local application, so any process on the machine that knows " +
+              "the client id can start an authorization for it. The user still has to approve the consent screen, " +
+              "but leave this unset unless the CLI is actually in use.\n" +
+              ":::\n\n",
+          defaultValue = "",
+        ),
       ],
     ),
   ],

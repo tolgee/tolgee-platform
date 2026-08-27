@@ -25,8 +25,13 @@ import java.time.Duration
 class OAuth2ServerProperties {
   var browserExtensionRedirectUris: List<String> = listOf()
 
-  /** Loopback redirect URIs for the Tolgee CLI (RFC 8252). */
-  var cliRedirectUris: List<String> = listOf("http://127.0.0.1:9876/callback")
+  /**
+   * Loopback redirect URIs for the Tolgee CLI (RFC 8252).
+   *
+   * Empty by default, like [browserExtensionRedirectUris]: a client that exists on every instance is a client any
+   * local process can start a consent prompt against, and nothing ships that uses this one yet.
+   */
+  var cliRedirectUris: List<String> = listOf()
 
   var accessTokenValidityMinutes: Long = 30
 

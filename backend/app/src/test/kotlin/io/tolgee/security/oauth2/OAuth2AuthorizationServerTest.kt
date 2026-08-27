@@ -29,6 +29,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
  */
 class OAuth2AuthorizationServerTest : AbstractControllerTest() {
   @Test
+  fun `sets a referrer policy on the authorization endpoint`() {
+    // /oauth2/authorize answers with redirects and error pages whose URLs carry `code` and `state`. Spring sets no
+    // Referrer-Policy by default, and this chain does not inherit the main chain's headers, so it must set its own.
+    val response = mvc.perform(get("/oauth2/authorize")).andReturn().response
+    assertThat(response.getHeader("Referrer-Policy")).isEqualTo("strict-origin-when-cross-origin")
+  }
+
+  @Test
   fun `publishes no JWK set`() {
     // Access tokens are opaque, so the server holds no signing key and Spring registers no JWK-set endpoint. If this
     // ever starts returning a key set, a key lifecycle has been reintroduced without anything needing one.

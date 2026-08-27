@@ -56,8 +56,8 @@ import java.util.Base64
 import java.util.Date
 
 /**
- * Drives the whole browser flow through MockMvc against the pre-registered CLI client (consent disabled, so no page is
- * needed): session bootstrap -> /oauth2/authorize -> code -> /oauth2/token -> use the access token on the REST API.
+ * Drives the whole browser flow through MockMvc against a test client registered below (consent disabled, so no page
+ * is needed): session bootstrap -> /oauth2/authorize -> code -> /oauth2/token -> use the access token on the REST API.
  * This is the end-to-end proof that a real authorization-code token works — including that `sub` is the numeric user id.
  */
 class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
