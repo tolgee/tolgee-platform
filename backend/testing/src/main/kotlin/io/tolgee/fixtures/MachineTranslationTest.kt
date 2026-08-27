@@ -56,7 +56,7 @@ open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
       keyService.get(this.id).translations.find {
         it.language == lang
       } ?: throw IllegalStateException("Translation not found")
-    }!!
+    }
   }
 
   protected fun createAnotherThisIsBeautifulKey() {

@@ -127,7 +127,8 @@ class QaCheckPreviewWebSocketHandler(
       return
     }
 
-    val text = json.get("text")?.asText() ?: ""
+    // asString() throws on objects and arrays, and handleTextMessage doesn't catch
+    val text = json.get("text")?.takeIf { it.isValueNode }?.asString() ?: ""
 
     state.cancelAndSetJob {
       scope.launch { runChecks(session, state, text) }
@@ -140,14 +141,14 @@ class QaCheckPreviewWebSocketHandler(
   ) {
     try {
       val token =
-        json.get("token")?.asText()
+        json.get("token")?.asString()
           ?: throw IllegalArgumentException("Missing token")
       val projectId =
         json.get("projectId")?.asLong()
           ?: throw IllegalArgumentException("Missing projectId")
       val keyId = json.get("keyId")?.asLong()
       val languageTag =
-        json.get("languageTag")?.asText()
+        json.get("languageTag")?.asString()
           ?: throw IllegalArgumentException("Missing languageTag")
 
       checkAuth(token, projectId)

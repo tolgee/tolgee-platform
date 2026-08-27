@@ -53,7 +53,7 @@ class TolgeeApiService(
         extractTolgeeErrorOrThrow(e)
       }
 
-    return response?.body ?: throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
+    return response.body ?: throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
   }
 
   fun extractTolgeeErrorOrThrow(e: BadRequest): Nothing {
@@ -63,8 +63,8 @@ class TolgeeApiService(
           .runCatching {
             jacksonObjectMapper().readValue(e.responseBodyAsString, JsonNode::class.java)
           }.getOrNull()
-      val eCode = json?.get("code")?.runCatching { this.asText() }?.getOrNull()
-      val eParams = json?.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
+      val eCode = json?.get("code")?.runCatching { this.asString() }?.getOrNull()
+      val eParams = json?.get("params")?.runCatching { this.asIterable().map { it.asString() } }?.getOrNull()
       val message = eCode?.runCatching { Message.valueOf(this.uppercase()) }?.getOrNull()
       message?.let { throw FailedDependencyException(message, params = eParams, e) }
     }

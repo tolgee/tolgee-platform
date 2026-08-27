@@ -12,6 +12,7 @@ import kotlin.reflect.full.hasAnnotation
 
 @Component
 class InternalPropertiesSetterFacade {
+  @Suppress("UNCHECKED_CAST")
   fun setProperty(
     root: Any,
     setPropertyDto: SetPropertyDto,

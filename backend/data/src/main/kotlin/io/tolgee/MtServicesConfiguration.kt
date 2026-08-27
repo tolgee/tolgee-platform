@@ -39,7 +39,7 @@ class MtServicesConfiguration(
         awsMachineTranslationProperties.accessKey.isNullOrEmpty() ||
           awsMachineTranslationProperties.secretKey.isNullOrEmpty()
       ) {
-        true -> DefaultCredentialsProvider.create()
+        true -> DefaultCredentialsProvider.builder().build()
         false ->
           StaticCredentialsProvider.create(
             AwsBasicCredentials.create(

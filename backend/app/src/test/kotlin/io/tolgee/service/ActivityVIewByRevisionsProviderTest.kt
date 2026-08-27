@@ -73,7 +73,7 @@ class ActivityVIewByRevisionsProviderTest : ProjectAuthControllerTest() {
       entityManager
         .createQuery(
           "select ame.branchId from ActivityModifiedEntity ame where ame.activityRevision.id = :revisionId",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("revisionId", revision.first().id)
         .resultList
 

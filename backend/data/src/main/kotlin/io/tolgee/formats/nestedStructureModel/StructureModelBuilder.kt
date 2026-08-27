@@ -131,7 +131,7 @@ class StructureModelBuilder(
         when (parentNode) {
           is ArrayStructuredModelItem -> {
             val targetNode =
-              getTargetNodeForArrayItem(parentNode, pathItem, pathItemsMutable) ?: return
+              getTargetNodeForArrayItem(parentNode, pathItem, pathItemsMutable)
             addToContent(targetNode, pathItemsMutable, fullPath, value)
           }
 

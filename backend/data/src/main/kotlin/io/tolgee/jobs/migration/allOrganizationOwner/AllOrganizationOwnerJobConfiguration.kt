@@ -101,7 +101,8 @@ class AllOrganizationOwnerJobConfiguration {
 
   fun getNoOrgProjectsStep(jobRepository: JobRepository): Step {
     return StepBuilder("noOrProjectStep", jobRepository)
-      .chunk<Project, Project>(STEP_SIZE, platformTransactionManager)
+      .chunk<Project, Project>(STEP_SIZE)
+      .transactionManager(platformTransactionManager)
       .reader(noOrgProjectReader)
       .writer(noOrgProjectWriter)
       .build()
@@ -123,7 +124,8 @@ class AllOrganizationOwnerJobConfiguration {
 
   fun getNoRoleUserStep(jobRepository: JobRepository): Step =
     StepBuilder("noRoleUserStep", jobRepository)
-      .chunk<UserAccount, UserAccount>(STEP_SIZE, platformTransactionManager)
+      .chunk<UserAccount, UserAccount>(STEP_SIZE)
+      .transactionManager(platformTransactionManager)
       .reader(noRoleUserReader)
       .writer(noRoleUserWriter)
       .build()

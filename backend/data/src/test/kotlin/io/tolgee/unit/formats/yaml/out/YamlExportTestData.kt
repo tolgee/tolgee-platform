@@ -104,7 +104,7 @@ object YamlExportTestData {
       filePathProvider =
         ExportFilePathProvider(
           template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "yaml",
+          extension = params.format.extension,
         ),
     )
   }

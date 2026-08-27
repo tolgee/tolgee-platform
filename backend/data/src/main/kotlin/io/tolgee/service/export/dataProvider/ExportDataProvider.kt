@@ -71,18 +71,21 @@ class ExportDataProvider(
   }
 
   private fun addSelect() {
-    query.multiselect(
-      key.get(Key_.id),
-      key.get(Key_.name),
-      keyMetaJoin.get(KeyMeta_.custom),
-      keyMetaJoin.get(KeyMeta_.description),
-      namespaceJoin.get(Namespace_.name),
-      key.get(Key_.isPlural),
-      languageJoin.get(Language_.id),
-      languageJoin.get(Language_.tag),
-      translationJoin.get(Translation_.id),
-      translationJoin.get(Translation_.text),
-      translationJoin.get(Translation_.state),
+    query.select(
+      cb.construct(
+        ExportDataView::class.java,
+        key.get(Key_.id),
+        key.get(Key_.name),
+        keyMetaJoin.get(KeyMeta_.custom),
+        keyMetaJoin.get(KeyMeta_.description),
+        namespaceJoin.get(Namespace_.name),
+        key.get(Key_.isPlural),
+        languageJoin.get(Language_.id),
+        languageJoin.get(Language_.tag),
+        translationJoin.get(Translation_.id),
+        translationJoin.get(Translation_.text),
+        translationJoin.get(Translation_.state),
+      ),
     )
   }
 

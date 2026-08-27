@@ -51,7 +51,7 @@ class XliffFileExporterTest {
         filePathProvider =
           ExportFilePathProvider(
             template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-            extension = params.format?.extension ?: "xliff",
+            extension = params.format.extension,
           ),
       ).produceFiles()
 
@@ -129,7 +129,7 @@ class XliffFileExporterTest {
         filePathProvider =
           ExportFilePathProvider(
             template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-            extension = params.format?.extension ?: "xliff",
+            extension = params.format.extension,
           ),
       ).produceFiles()
 
@@ -176,7 +176,7 @@ class XliffFileExporterTest {
                   ),
                 ),
               ).validateAndGetTemplate(),
-            extension = params.format?.extension ?: "xliff",
+            extension = params.format.extension,
           ),
       ).produceFiles()
 
@@ -270,7 +270,7 @@ class XliffFileExporterTest {
         filePathProvider =
           ExportFilePathProvider(
             template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-            extension = params.format?.extension ?: "xliff",
+            extension = params.format.extension,
           ),
       ).produceFiles()
 

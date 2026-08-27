@@ -265,6 +265,7 @@ class QueryGlobalFiltering(
     )
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun filterUntranslatedAny() {
     if (params.filterUntranslatedAny != true) return
     val selectedLangIds = queryBase.languages.map { it.id }
@@ -289,7 +290,7 @@ class QueryGlobalFiltering(
     val cteQuery = cb.createTupleQuery()
     val tRoot = cteQuery.from(Translation::class.java)
     val keyIdPath = tRoot.get(Translation_.key).get(Key_.id)
-    cteQuery.multiselect(keyIdPath.alias("keyId"))
+    cteQuery.select(cb.tuple(keyIdPath.alias("keyId")))
     cteQuery.where(
       cb.and(
         tRoot.get(Translation_.language).get(Language_.id).`in`(selectedLangIds),
@@ -300,7 +301,7 @@ class QueryGlobalFiltering(
     cteQuery.groupBy(keyIdPath)
     cteQuery.having(cb.equal(cb.count(tRoot), cb.literal(selectedLangIds.size.toLong())))
 
-    val cte = (queryBase.query as JpaCteContainer).with(cteQuery)
+    val cte = (queryBase.query as JpaCteContainer).with("fullyTranslatedKeys", cteQuery)
     cte.setMaterialization(CteMaterialization.MATERIALIZED)
     return cte
   }

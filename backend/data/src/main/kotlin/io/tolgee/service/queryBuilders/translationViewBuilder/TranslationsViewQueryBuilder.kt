@@ -62,7 +62,7 @@ class TranslationsViewQueryBuilder(
       val query = cb.createQuery(Array<Any?>::class.java)
       val queryBase = getBaseQuery(query)
       val paths = queryBase.querySelection.values.toTypedArray()
-      query.multiselect(*paths)
+      query.select(cb.array(*paths))
       val orderList = getOrderList(queryBase)
 
       query.where(*getWhereConditions(queryBase).toTypedArray())

@@ -58,7 +58,7 @@ class MtProviderCatching(
             Message.LLM_RATE_LIMITED,
             successfulTargets,
             e,
-            e.retryAt?.let { (e.retryAt - currentDateProvider.date.time).toInt() } ?: 100,
+            (e.retryAt - currentDateProvider.date.time).toInt(),
             increaseFactor = 1,
             maxRetries = -1,
           ),

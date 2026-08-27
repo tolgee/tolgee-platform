@@ -479,6 +479,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     return (response["id"] as Number).toLong()
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun getFirstConflictId(mergeId: Long): Long {
     val response =
       performProjectAuthGet("branches/merge/$mergeId/conflicts")

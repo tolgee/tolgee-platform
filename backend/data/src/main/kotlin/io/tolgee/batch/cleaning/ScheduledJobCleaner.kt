@@ -118,6 +118,7 @@ class ScheduledJobCleaner(
       .executeUpdate()
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun getStuckCompletedJobs(): List<StuckCompletedJob> {
     val chunkIncompleteStatuses = BatchJobChunkExecutionStatus.entries.filter { !it.completed }.map { it.name }
     val jobIncompleteStatuses = BatchJobStatus.entries.filter { !it.completed }.map { it.name }

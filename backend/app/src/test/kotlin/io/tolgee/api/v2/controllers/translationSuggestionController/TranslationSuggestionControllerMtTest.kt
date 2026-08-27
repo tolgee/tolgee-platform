@@ -460,6 +460,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     )
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun verifyServiceFirst(service: String) {
     val result = performMtRequest().andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
     val services = (result["machineTranslations"] as Map<String, String>).keys.toList()

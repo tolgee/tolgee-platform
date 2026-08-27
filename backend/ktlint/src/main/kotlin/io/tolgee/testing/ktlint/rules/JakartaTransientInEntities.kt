@@ -21,7 +21,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType
 import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
-import com.pinterest.ktlint.rule.engine.core.api.children
 import com.pinterest.ktlint.rule.engine.core.api.children20
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
@@ -50,9 +49,9 @@ class JakartaTransientInEntities :
 
       ElementType.ANNOTATION_ENTRY -> {
         node
-          .children()
+          .children20
           .find { it.elementType == ElementType.CONSTRUCTOR_CALLEE }
-          ?.children()
+          ?.children20
           ?.toList()
           ?.find { it.elementType == ElementType.TYPE_REFERENCE }
           ?.let {

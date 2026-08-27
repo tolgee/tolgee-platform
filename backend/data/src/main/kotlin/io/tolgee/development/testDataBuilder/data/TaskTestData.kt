@@ -35,7 +35,7 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
   var unrelatedProject: ProjectBuilder
   var unrelatedUser: UserAccountBuilder
   var unrelatedEnglish: LanguageBuilder
-  lateinit var unrelatedKey: KeyBuilder
+  var unrelatedKey: KeyBuilder
 
   lateinit var blockedTask: TaskBuilder
 

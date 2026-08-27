@@ -9,7 +9,7 @@ class SoftDeleteKeysTestData :
     projectName = "Soft delete test",
   ) {
   val czechLanguage = projectBuilder.addCzech().self
-  lateinit var user2: UserAccount
+  var user2: UserAccount
 
   init {
     root.apply {
@@ -20,9 +20,9 @@ class SoftDeleteKeysTestData :
         }
       user2 = user2Builder.self
 
-      projectBuilder.apply {
+      projectBuilder.apply project@{
         addPermission {
-          project = this@apply.self
+          project = this@project.self
           user = user2
           type = ProjectPermissionType.MANAGE
         }

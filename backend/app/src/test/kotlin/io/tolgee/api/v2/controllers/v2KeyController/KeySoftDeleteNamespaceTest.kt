@@ -88,6 +88,6 @@ class KeySoftDeleteNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
       .path("_embedded")
       .path("namespaces")
       .values()
-      .map { it.path("name").textValue() }
+      .map { it.path("name").stringValue() }
   }
 }

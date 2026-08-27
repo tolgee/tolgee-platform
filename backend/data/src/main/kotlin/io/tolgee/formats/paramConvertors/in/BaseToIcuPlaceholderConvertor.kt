@@ -24,7 +24,7 @@ class BaseToIcuPlaceholderConvertor(
     matchResult: MatchResult,
     isInPlural: Boolean,
   ): String {
-    val parsed = parser.parse(matchResult) ?: return matchResult.value.escapeIcu(isInPlural)
+    val parsed = parser.parse(matchResult)
 
     if (parsed.specifier == "%") {
       return "%"

@@ -5,8 +5,8 @@ import io.tolgee.model.branching.Branch
 
 class SingleStepImportBranchTestData : BaseTestData() {
   val germanLanguage = projectBuilder.addGerman()
-  lateinit var defaultBranch: Branch
-  lateinit var featureBranch: Branch
+  var defaultBranch: Branch
+  var featureBranch: Branch
 
   init {
     this.root.apply {

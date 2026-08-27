@@ -64,6 +64,7 @@ class LanguageStatsProvider(
       query.setParameter("branchId", branchId)
     }
 
+    @Suppress("UNCHECKED_CAST")
     return (query.resultList as List<Array<Any?>>).map { row ->
       ProjectLanguageStatsResultView(
         projectId = (row[0] as Number).toLong(),

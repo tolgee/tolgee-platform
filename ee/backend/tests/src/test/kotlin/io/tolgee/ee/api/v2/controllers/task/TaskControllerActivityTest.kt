@@ -175,6 +175,7 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Suppress("UNCHECKED_CAST")
   fun PropertyModification.toLongLists(): Pair<List<Long>?, List<Long>> {
     return (this.old as List<Int>?)?.map { it.toLong() } to (this.new as List<Int>).map { it.toLong() }
   }

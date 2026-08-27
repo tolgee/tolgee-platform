@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -29,7 +29,7 @@ class RestTemplateConfiguration {
   }
 
   private fun RestTemplate.removeXmlConverter(): RestTemplate {
-    messageConverters.removeIf { it is MappingJackson2XmlHttpMessageConverter }
+    messageConverters.removeIf { it is JacksonXmlHttpMessageConverter }
     return this
   }
 

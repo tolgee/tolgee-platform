@@ -74,7 +74,8 @@ class TranslationStatsJobConfiguration {
   val step: Step
     get() =
       StepBuilder("step", jobRepository)
-        .chunk<StatsMigrationTranslationView, TranslationStats>(100, platformTransactionManager)
+        .chunk<StatsMigrationTranslationView, TranslationStats>(100)
+        .transactionManager(platformTransactionManager)
         .reader(reader)
         .processor(TranslationProcessor())
         .writer(writer)

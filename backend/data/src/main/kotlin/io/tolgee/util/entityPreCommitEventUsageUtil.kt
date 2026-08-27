@@ -46,7 +46,7 @@ fun EntityPreCommitEvent<*>.getUsageIncreaseAmount(): Long {
 private fun OnEntityPreUpdate<*>.getSoftDeleteUsageChange(): Long {
   val current = entity
   if (current !is SoftDeletable || propertyNames == null || previousState == null) return 0
-  val deletedAtIndex = propertyNames!!.indexOf("deletedAt")
+  val deletedAtIndex = propertyNames.indexOf("deletedAt")
   if (deletedAtIndex < 0) return 0
   @Suppress("UNCHECKED_CAST")
   val oldValue = (previousState as Array<Any?>)[deletedAtIndex]

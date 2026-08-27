@@ -30,7 +30,7 @@ import io.tolgee.util.flushAndClear
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.apache.commons.codec.digest.DigestUtils.sha256Hex
-import org.hibernate.LockOptions
+import org.hibernate.Timeouts
 import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -353,10 +353,11 @@ class BatchJobService(
       ).setParameter("jobIds", jobIds)
       .setHint(
         "jakarta.persistence.lock.timeout",
-        LockOptions.SKIP_LOCKED,
+        Timeouts.SKIP_LOCKED_MILLI,
       ).resultList
   }
 
+  @Suppress("UNCHECKED_CAST")
   fun getProcessor(type: BatchJobType): ChunkProcessor<Any, Any, Any> =
     applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
@@ -416,12 +417,11 @@ class BatchJobService(
           and j.type = :type
           and j.status not in :completedStatuses
         """.trimIndent(),
-        java.lang.Boolean::class.java,
+        Boolean::class.javaObjectType,
       ).setParameter("projectId", projectId)
       .setParameter("type", type)
       .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
       .singleResult
-      .booleanValue()
   }
 
   fun getExecutions(batchJobId: Long): List<BatchJobChunkExecution> {

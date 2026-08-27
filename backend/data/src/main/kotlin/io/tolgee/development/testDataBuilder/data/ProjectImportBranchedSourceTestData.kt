@@ -20,14 +20,14 @@ import io.tolgee.model.key.Key
  */
 class ProjectImportBranchedSourceTestData :
   BaseTestData(userName = "branched-source-owner", projectName = "branched-source-project") {
-  lateinit var defaultBranch: Branch
-  lateinit var featureBranch: Branch
+  var defaultBranch: Branch
+  var featureBranch: Branch
 
   lateinit var sharedDefaultKey: Key
   lateinit var sharedFeatureKey: Key
   lateinit var sharedScreenshot: Screenshot
-  lateinit var danglingFeatureKey1: Key
-  lateinit var danglingFeatureKey2: Key
+  var danglingFeatureKey1: Key
+  var danglingFeatureKey2: Key
 
   val defaultKeyName = "default-branch-key"
   val featureKeyName = "feature-branch-key"

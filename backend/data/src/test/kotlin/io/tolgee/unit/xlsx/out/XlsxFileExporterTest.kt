@@ -14,7 +14,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.Date
 
 class XlsxFileExporterTest {
@@ -22,7 +23,7 @@ class XlsxFileExporterTest {
 
   @BeforeEach
   fun setup() {
-    val now = Date(Date.UTC(2025 - 1900, Calendar.JANUARY, 10, 0, 0, 0))
+    val now = Date.from(LocalDate.of(2025, 1, 10).atStartOfDay(ZoneOffset.UTC).toInstant())
     Mockito.`when`(currentDateProvider.date).thenReturn(now)
   }
 

@@ -9,15 +9,15 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 
 class QaLanguageStatsBranchTestData : BaseTestData() {
-  lateinit var frenchLanguage: Language
+  var frenchLanguage: Language
 
-  lateinit var mainBranch: Branch
-  lateinit var featureBranch: Branch
+  var mainBranch: Branch
+  var featureBranch: Branch
 
-  lateinit var mainKey: Key
+  var mainKey: Key
   lateinit var mainFrTranslation: Translation
 
-  lateinit var featureKey: Key
+  var featureKey: Key
   lateinit var featureFrTranslation: Translation
 
   init {

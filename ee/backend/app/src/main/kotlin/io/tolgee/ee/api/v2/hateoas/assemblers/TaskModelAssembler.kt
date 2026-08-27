@@ -36,7 +36,7 @@ class TaskModelAssembler(
         },
       dueDate = entity.dueDate?.time,
       assignees = entity.assignees.map { simpleUserAccountModelAssembler.toModel(it) }.toMutableSet(),
-      author = entity.author?.let { simpleUserAccountModelAssembler.toModel(it) },
+      author = simpleUserAccountModelAssembler.toModel(entity.author),
       createdAt = entity.createdAt?.time,
       closedAt = entity.closedAt?.time,
       totalItems = entity.totalItems,

@@ -11,8 +11,8 @@ import io.tolgee.model.qa.ProjectQaConfig
 
 class QaE2eTestData : BaseTestData() {
   lateinit var frenchLanguage: Language
-  lateinit var qaConfig: ProjectQaConfig
-  lateinit var disabledProjectBuilder: ProjectBuilder
+  var qaConfig: ProjectQaConfig
+  var disabledProjectBuilder: ProjectBuilder
 
   init {
     project.useQaChecks = true

@@ -101,6 +101,7 @@ class KeyMetaService(
     return result
   }
 
+  @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(project: Project): List<KeyMeta> {
     var result: List<KeyMeta> =
       entityManager
