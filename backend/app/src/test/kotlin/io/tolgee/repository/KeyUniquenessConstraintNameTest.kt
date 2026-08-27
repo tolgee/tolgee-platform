@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.key.Key
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -14,10 +15,17 @@ class KeyUniquenessConstraintNameTest : AbstractSpringTest() {
   @Autowired
   private lateinit var processor: SetKeysNamespaceChunkProcessor
 
+  private lateinit var testData: BaseTestData
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @Test
   @Transactional
   fun `a duplicate key outside a namespace reports the index the guard knows`() {
-    val testData = BaseTestData()
+    testData = BaseTestData()
     testData.projectBuilder.addKey { name = "duplicated" }
     testDataService.saveTestData(testData.root)
 
@@ -41,7 +49,7 @@ class KeyUniquenessConstraintNameTest : AbstractSpringTest() {
   @Test
   @Transactional
   fun `a duplicate key inside a namespace reports the index the guard knows`() {
-    val testData = BaseTestData()
+    testData = BaseTestData()
     testData.projectBuilder.addKey(keyName = "duplicated", namespace = "homepage")
     testDataService.saveTestData(testData.root)
     val existing = keyService.find(testData.project.id, "duplicated", "homepage")
