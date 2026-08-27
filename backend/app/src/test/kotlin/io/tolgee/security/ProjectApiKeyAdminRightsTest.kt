@@ -2,6 +2,7 @@ package io.tolgee.security
 
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -24,6 +25,8 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
   private lateinit var outsideAdmin: UserAccount
   private lateinit var outsideSupporter: UserAccount
   private lateinit var memberAdmin: UserAccount
+  private lateinit var languageRestrictedAdmin: UserAccount
+  private var germanId: Long = 0
 
   @BeforeEach
   fun setup() {
@@ -52,6 +55,26 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
       user = memberAdmin
       type = ProjectPermissionType.VIEW
     }
+    // A server admin who is a member with a per-language restriction (TRANSLATE, German only), to prove the key
+    // reports that restriction rather than the admin's unrestricted reach.
+    val german =
+      testData.projectBuilder
+        .addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "German"
+        }.self
+    languageRestrictedAdmin =
+      testData.root
+        .addUserAccount {
+          username = "pak_lang_restricted_admin"
+          role = UserAccount.Role.ADMIN
+        }.self
+    testData.projectBuilder.addPermission {
+      user = languageRestrictedAdmin
+      type = ProjectPermissionType.TRANSLATE
+      translateLanguages = mutableSetOf(german)
+    }
     // An existing key, so the write test exercises the permission check rather than a missing-key 404.
     testData.projectBuilder
       .addKey { name = EXISTING_KEY }
@@ -62,6 +85,7 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
         }
       }
     testDataService.saveTestData(testData.root)
+    germanId = german.id
   }
 
   @AfterEach
@@ -93,6 +117,18 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
       "$translationsUrl?ak=${key(memberAdmin, Scope.TRANSLATIONS_EDIT)}",
       SetTranslationsWithKeyDto(key = EXISTING_KEY, translations = mapOf("en" to "Hello")),
     ).andIsForbidden
+  }
+
+  @Test
+  fun `current-key permissions report the real language restriction, not the admin's reach`() {
+    // /v2/api-keys/current answers for the calling key, so it must describe what that key can actually do. Reporting
+    // the admin-bypassed set here would contradict what the write path now enforces.
+    performGet("/v2/api-keys/current?ak=${key(languageRestrictedAdmin, Scope.TRANSLATIONS_EDIT)}")
+      .andIsOk
+      .andAssertThatJson {
+        node("permittedLanguageIds").isArray.hasSize(1)
+        node("permittedLanguageIds").isArray.contains(germanId)
+      }
   }
 
   private val translationsUrl: String

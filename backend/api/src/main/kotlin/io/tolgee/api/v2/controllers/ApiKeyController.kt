@@ -128,6 +128,9 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         apiKey.project.id,
         authenticationFacade.authenticatedUser.id,
+        // The caller is a project API key, which does not inherit the user's server-admin reach. Without this the
+        // reported languages would be the admin-bypassed set, contradicting what the key can actually translate.
+        bypassAdminRights = authenticationFacade.isScopedCredential,
       )
 
     val translateLanguageIds =
