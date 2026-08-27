@@ -54,18 +54,21 @@ export type WordsAutoUpgradeReason =
   | 'other';
 
 /**
- * Why auto-upgrade cannot be applied, so the limit dialog can say something specific. A pending
- * plan change wins over the largest tier: it is the one the customer can undo themselves.
+ * Why auto-upgrade cannot be applied, so the limit dialog can say something specific.
+ *
+ * The largest tier is checked first even when a plan change is also pending: cancelling that change
+ * only helps if there is a bigger tier for auto-upgrade to move to, so telling someone already at
+ * the top to cancel it would send them to undo something that changes nothing.
  */
 export const wordsAutoUpgradeIneffectiveReason = (
   subscription: Subscription,
   offering?: Offering
 ): WordsAutoUpgradeReason => {
-  if (subscription?.scheduledDowngrade) {
-    return 'scheduledChange';
-  }
   if (isLargestTier(offering?.tiers, offering?.currentTierId)) {
     return 'largestTier';
+  }
+  if (subscription?.scheduledDowngrade) {
+    return 'scheduledChange';
   }
   return 'other';
 };

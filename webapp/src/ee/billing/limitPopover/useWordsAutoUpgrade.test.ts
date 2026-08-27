@@ -105,9 +105,17 @@ describe('words auto-upgrade offer', () => {
         ).toBe('scheduledChange');
       });
 
-      it('prefers the scheduled change, which is the one the customer can undo', () => {
+      it('still says largest tier when a change is also pending, because cancelling it would not help', () => {
+        // Nothing above tier 2, so undoing the scheduled change gives auto-upgrade nowhere to go.
         const both = onTier({ scheduledDowngrade: { name: 'Translate' } });
         expect(wordsAutoUpgradeIneffectiveReason(both, offering(2))).toBe(
+          'largestTier'
+        );
+      });
+
+      it('says scheduled change mid-ladder, where cancelling does restore the headroom', () => {
+        const midLadder = onTier({ scheduledDowngrade: { name: 'Translate' } });
+        expect(wordsAutoUpgradeIneffectiveReason(midLadder, offering(1))).toBe(
           'scheduledChange'
         );
       });
