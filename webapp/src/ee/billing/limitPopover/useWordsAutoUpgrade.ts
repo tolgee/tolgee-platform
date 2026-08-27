@@ -4,7 +4,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { isLargestTier } from 'tg.billing/component/Plan/largestTier';
+import { isLargestTier } from 'tg.component/billing/largestTier';
 
 type Props = {
   enabled: boolean;
