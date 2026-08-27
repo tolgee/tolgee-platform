@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isWordsAutoUpgradeAvailable,
   isWordsAutoUpgradeIneffective,
+  wordsAutoUpgradeIneffectiveReason,
 } from './useWordsAutoUpgrade';
 
 describe('words auto-upgrade offer', () => {
@@ -74,6 +75,57 @@ describe('words auto-upgrade offer', () => {
 
     it('says nothing before the subscription has loaded', () => {
       expect(isWordsAutoUpgradeIneffective(undefined, true)).toBe(false);
+    });
+
+    describe('the reason it cannot be applied', () => {
+      const ladder = [
+        { id: 1, includedWords: 50_000 },
+        { id: 2, includedWords: 200_000 },
+      ];
+      const onTier = (currentTierId: number, extra = {}) =>
+        subscription({
+          autoUpgradeEnabled: true,
+          plan: {
+            metricType: 'HOSTED_WORDS',
+            free: false,
+            tiers: ladder,
+            currentTierId,
+          },
+          ...extra,
+        });
+
+      it('is the largest tier when there is nothing bigger to move to', () => {
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(2))).toBe(
+          'largestTier'
+        );
+      });
+
+      it('is the scheduled change when one is pending', () => {
+        const withDowngrade = onTier(1, {
+          scheduledDowngrade: { name: 'Translate' },
+        });
+        expect(wordsAutoUpgradeIneffectiveReason(withDowngrade)).toBe(
+          'scheduledChange'
+        );
+      });
+
+      it('prefers the scheduled change, which is the one the customer can undo', () => {
+        const both = onTier(2, {
+          scheduledDowngrade: { name: 'Translate' },
+        });
+        expect(wordsAutoUpgradeIneffectiveReason(both)).toBe(
+          'scheduledChange'
+        );
+      });
+
+      it('falls back to other when neither applies', () => {
+        // e.g. cancelling at period end, or a non-active status
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(1))).toBe('other');
+      });
+
+      it('falls back to other before the subscription has loaded', () => {
+        expect(wordsAutoUpgradeIneffectiveReason(undefined)).toBe('other');
+      });
     });
   });
 

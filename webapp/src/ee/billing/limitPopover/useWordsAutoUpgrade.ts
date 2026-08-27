@@ -4,6 +4,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/billingApiSchema.generated';
+import { isLargestTier } from 'tg.billing/component/Plan/largestTier';
 
 type Props = {
   enabled: boolean;
@@ -37,6 +38,24 @@ export const isWordsAutoUpgradeIneffective = (
 ) =>
   Boolean(isWordPlan(subscription) && subscription!.autoUpgradeEnabled) &&
   wordsExhausted;
+
+export type WordsAutoUpgradeReason = 'largestTier' | 'scheduledChange' | 'other';
+
+/**
+ * Why auto-upgrade cannot be applied, so the limit dialog can say something specific. A pending
+ * plan change wins over the largest tier: it is the one the customer can undo themselves.
+ */
+export const wordsAutoUpgradeIneffectiveReason = (
+  subscription: Subscription
+): WordsAutoUpgradeReason => {
+  if (subscription?.scheduledDowngrade) {
+    return 'scheduledChange';
+  }
+  if (isLargestTier(subscription?.plan.tiers, subscription?.plan.currentTierId)) {
+    return 'largestTier';
+  }
+  return 'other';
+};
 
 export const useWordsAutoUpgrade = ({ enabled, wordsExhausted }: Props) => {
   const { preferredOrganization } = usePreferredOrganization();
@@ -83,6 +102,7 @@ export const useWordsAutoUpgrade = ({ enabled, wordsExhausted }: Props) => {
   return {
     available,
     ineffective,
+    reason: wordsAutoUpgradeIneffectiveReason(subscription),
     enable,
     isEnabling: autoUpgradeMutation.isLoading,
   };
