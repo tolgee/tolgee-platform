@@ -39,7 +39,10 @@ export const isWordsAutoUpgradeIneffective = (
   Boolean(isWordPlan(subscription) && subscription!.autoUpgradeEnabled) &&
   wordsExhausted;
 
-export type WordsAutoUpgradeReason = 'largestTier' | 'scheduledChange' | 'other';
+export type WordsAutoUpgradeReason =
+  | 'largestTier'
+  | 'scheduledChange'
+  | 'other';
 
 /**
  * Why auto-upgrade cannot be applied, so the limit dialog can say something specific. A pending
@@ -51,7 +54,9 @@ export const wordsAutoUpgradeIneffectiveReason = (
   if (subscription?.scheduledDowngrade) {
     return 'scheduledChange';
   }
-  if (isLargestTier(subscription?.plan.tiers, subscription?.plan.currentTierId)) {
+  if (
+    isLargestTier(subscription?.plan.tiers, subscription?.plan.currentTierId)
+  ) {
     return 'largestTier';
   }
   return 'other';

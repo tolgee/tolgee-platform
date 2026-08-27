@@ -113,9 +113,7 @@ describe('words auto-upgrade offer', () => {
         const both = onTier(2, {
           scheduledDowngrade: { name: 'Translate' },
         });
-        expect(wordsAutoUpgradeIneffectiveReason(both)).toBe(
-          'scheduledChange'
-        );
+        expect(wordsAutoUpgradeIneffectiveReason(both)).toBe('scheduledChange');
       });
 
       it('falls back to other when neither applies', () => {
