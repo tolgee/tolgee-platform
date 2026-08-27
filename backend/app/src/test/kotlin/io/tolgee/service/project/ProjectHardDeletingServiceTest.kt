@@ -10,8 +10,10 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigBranchingTestData
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
+import io.tolgee.development.testDataBuilder.data.ProjectImportTargetTestData
 import io.tolgee.development.testDataBuilder.data.ProjectWithQaEntitiesTestData
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.development.testDataBuilder.data.TaskTestData
@@ -130,6 +132,32 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     executeInNewRepeatableTransaction(platformTransactionManager) {
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+  }
+
+  @Test
+  fun `deletes project with content delivery configs on branches`() {
+    val testData = ContentDeliveryConfigBranchingTestData()
+    testDataService.saveTestData(testData.root)
+    executeInNewRepeatableTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.projectBuilder.self.id).assert.isNull()
+    }
+  }
+
+  @Test
+  fun `deletes project with branch merges and snapshots`() {
+    val testData = ProjectImportTargetTestData()
+    testDataService.saveTestData(testData.root)
+    executeInNewRepeatableTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.targetProject.refresh())
+    }
+
+    executeInNewTransaction {
+      projectService.find(testData.targetProject.id).assert.isNull()
     }
   }
 

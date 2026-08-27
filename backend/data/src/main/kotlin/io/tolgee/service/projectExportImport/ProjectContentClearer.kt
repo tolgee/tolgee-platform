@@ -73,8 +73,6 @@ class ProjectContentClearer(
     val projectId = project.id
 
     clearTasks(projectId)
-    // branch_merge_change FKs key (no cascade) — must go before keys, and before its branch_merge parent.
-    deleteBranchMergeChanges(projectId)
     clearImports(projectId)
     translationMemoryManagementService.deleteAllByProject(projectId)
 
@@ -99,8 +97,6 @@ class ProjectContentClearer(
     entityManager.clear()
 
     bigMetaService.deleteAllByProjectId(projectId)
-    detachKeptConfigFromBranches(projectId)
-    deleteBranchMergesAndSnapshots(projectId)
     branchService.deleteAllByProjectId(projectId)
     projectQaConfigRepository.deleteAllByProjectId(projectId)
 
@@ -121,16 +117,6 @@ class ProjectContentClearer(
     jpqlUpdate("DELETE FROM Task t WHERE t.project.id = :projectId", projectId)
   }
 
-  private fun deleteBranchMergeChanges(projectId: Long) {
-    nativeUpdate(
-      "DELETE FROM branch_merge_change WHERE branch_merge_id IN (" +
-        "SELECT bm.id FROM branch_merge bm WHERE " +
-        "bm.source_branch_id IN (SELECT id FROM branch WHERE project_id = :projectId) OR " +
-        "bm.target_branch_id IN (SELECT id FROM branch WHERE project_id = :projectId))",
-      projectId,
-    )
-  }
-
   private fun clearImports(projectId: Long) {
     // Imports FK both branch and language (no cascade) and are transient upload state, never transferred.
     importService.getAllByProject(projectId).forEach { importService.hardDeleteImport(it) }
@@ -141,41 +127,6 @@ class ProjectContentClearer(
     // TranslationSuggestionServiceOssImpl.deleteAllByProject is a no-op on OSS, so the languageService
     // cascade won't remove suggestions here — delete them explicitly or they leak into the mirror import.
     jpqlUpdate("DELETE FROM TranslationSuggestion ts WHERE ts.project.id = :projectId", projectId)
-  }
-
-  private fun detachKeptConfigFromBranches(projectId: Long) {
-    // content_delivery_config is kept (project-level config, not content) but its nullable branch FK would
-    // block the branch wipe; detach it. A re-import recreates branches, so a branch-pinned delivery config
-    // falls back to the default branch — acceptable for a wipe-and-replace.
-    nativeUpdate(
-      "UPDATE content_delivery_config SET branch_id = NULL WHERE project_id = :projectId",
-      projectId,
-    )
-  }
-
-  private fun deleteBranchMergesAndSnapshots(projectId: Long) {
-    // Snapshot and merge rows FK branch (no DB cascade), so they must go before the branch rows. Mirrors
-    // the table relationships in the EE branch-scoped BranchCleanupService.
-    nativeUpdate(
-      "DELETE FROM branch_translation_snapshot WHERE key_snapshot_id IN " +
-        "(SELECT id FROM branch_key_snapshot WHERE project_id = :projectId)",
-      projectId,
-    )
-    nativeUpdate(
-      "DELETE FROM branch_key_meta_snapshot WHERE key_snapshot_id IN " +
-        "(SELECT id FROM branch_key_snapshot WHERE project_id = :projectId)",
-      projectId,
-    )
-    nativeUpdate("DELETE FROM branch_key_snapshot WHERE project_id = :projectId", projectId)
-    nativeUpdate(
-      "DELETE FROM branch_merge WHERE " +
-        "source_branch_id IN (SELECT id FROM branch WHERE project_id = :projectId) OR " +
-        "target_branch_id IN (SELECT id FROM branch WHERE project_id = :projectId)",
-      projectId,
-    )
-    // Detach the branch self-reference so the entity-based branch delete below can't FK-violate on an
-    // origin branch that happens to be removed first (the FK has no DB-level ON DELETE).
-    nativeUpdate("UPDATE branch SET origin_branch_id = NULL WHERE project_id = :projectId", projectId)
   }
 
   /**

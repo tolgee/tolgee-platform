@@ -11,6 +11,10 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.repository.branching.BranchRepositoryOss
+import io.tolgee.repository.branching.KeyMetaSnapshotRepository
+import io.tolgee.repository.branching.KeySnapshotRepositoryOss
+import io.tolgee.repository.branching.TranslationSnapshotRepository
+import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -19,7 +23,18 @@ import org.springframework.stereotype.Service
 class BranchServiceOssStub(
   branchRepository: BranchRepositoryOss,
   branchMergeService: BranchMergeService,
-) : AbstractBranchService(branchRepository, branchMergeService) {
+  contentDeliveryConfigRepository: ContentDeliveryConfigRepository,
+  keySnapshotRepository: KeySnapshotRepositoryOss,
+  translationSnapshotRepository: TranslationSnapshotRepository,
+  keyMetaSnapshotRepository: KeyMetaSnapshotRepository,
+) : AbstractBranchService(
+    branchRepository,
+    branchMergeService,
+    contentDeliveryConfigRepository,
+    keySnapshotRepository,
+    translationSnapshotRepository,
+    keyMetaSnapshotRepository,
+  ) {
   override fun getBranches(
     projectId: Long,
     page: Pageable,

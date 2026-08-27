@@ -12,4 +12,15 @@ interface BranchMergeChangeRepositoryOss : JpaRepository<BranchMergeChange, Long
   @Modifying
   @Query("delete from BranchMergeChange bmc where bmc.sourceKey.id in :ids or bmc.targetKey.id in :ids")
   fun deleteBySourceOrTargetIds(ids: Collection<Long>)
+
+  @Modifying
+  @Query(
+    """
+    delete from BranchMergeChange bmc where bmc.branchMerge.id in (
+      select bm.id from BranchMerge bm
+      where bm.sourceBranch.project.id = :projectId or bm.targetBranch.project.id = :projectId
+    )
+  """,
+  )
+  fun deleteAllByProjectId(projectId: Long)
 }
