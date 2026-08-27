@@ -1,3 +1,10 @@
+## [3.219.2](https://github.com/tolgee/tolgee-platform/compare/v3.219.1...v3.219.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* bump Spring Boot to 4.1.1 to patch Snyk-reported vulnerabilities ([#3876](https://github.com/tolgee/tolgee-platform/issues/3876)) ([3abfbb5](https://github.com/tolgee/tolgee-platform/commit/3abfbb58b1a4892bc11c5edcf0002df28e432e81)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3866](https://github.com/tolgee/tolgee-platform/issues/3866)
+
 ## [3.219.1](https://github.com/tolgee/tolgee-platform/compare/v3.219.0...v3.219.1) (2026-08-26)
 
 
