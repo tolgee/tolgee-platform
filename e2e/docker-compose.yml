@@ -10,6 +10,9 @@ services:
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}
+      # Registers the browser-extension OAuth client so the consent flow can be driven in e2e. Clients come from
+      # configuration, so this is the only way to have one; the callback is served by OAuth2ConsentE2eDataController.
+      - tolgee.oauth2.browser-extension-redirect-uris=http://localhost:${TOLGEE_E2E_PORT:-8201}/internal/e2e-data/oauth2-consent/callback
   fakesmtp:
     image: axllent/mailpit:v1.29.2
     ports:
