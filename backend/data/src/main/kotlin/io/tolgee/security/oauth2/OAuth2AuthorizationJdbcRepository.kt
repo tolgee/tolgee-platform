@@ -25,11 +25,6 @@ import java.time.Instant
 class OAuth2AuthorizationJdbcRepository(
   private val jdbcTemplate: JdbcTemplate,
 ) {
-  // SAS's JdbcRegisteredClientRepository has no delete, so honoring "disable a pre-registered client by emptying its
-  // redirect config" (rather than leaving a stale full-scope row usable) needs this direct delete.
-  fun deleteRegisteredClient(clientId: String): Int =
-    jdbcTemplate.update("DELETE FROM oauth2_registered_client WHERE client_id = ?", clientId)
-
   fun deleteConsentByPrincipal(principalName: String): Int =
     jdbcTemplate.update("DELETE FROM oauth2_authorization_consent WHERE principal_name = ?", principalName)
 

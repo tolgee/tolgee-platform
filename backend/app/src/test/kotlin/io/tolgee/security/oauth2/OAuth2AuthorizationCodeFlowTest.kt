@@ -113,7 +113,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     testDataService.saveTestData(testData.root)
     otherProjectId = otherProjectBuilder.self.id
     publicProjectId = publicProjectBuilder.self.id
-    // Tolgee's per-test DB reset wipes the startup-seeded clients, so register self-contained ones here.
+    // Self-contained clients, so the test does not depend on which clients the running configuration seeds.
     registeredClientRepository.save(flowClient(TEST_CLIENT_ID, CLI_REDIRECT))
     registeredClientRepository.save(flowClient(SECOND_CLIENT_ID, SECOND_REDIRECT))
     registeredClientRepository.save(

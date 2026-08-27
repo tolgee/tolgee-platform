@@ -196,7 +196,8 @@ recover it with `git revert` of the commit that removed it rather than writing i
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
-| Grant/consent/client storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
+| Grant/consent storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
+| Client registry (from config, not stored) | `PreRegisteredClients.kt`, `TolgeeRegisteredClientRepository.kt` |
 
 ## Round-1 limitations (tracked follow-ups)
 

@@ -17,39 +17,23 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.model.enums.Scope
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.stereotype.Component
 
-// Idempotent: the registered-client row id is the client id, so re-runs update in place rather than duplicating.
+/**
+ * The OAuth2 clients Tolgee ships, built from configuration.
+ *
+ * A client with no redirect URIs configured is simply absent, which is how an operator turns it off. Nothing is
+ * persisted, so there is no stale registration that could outlive that intent.
+ */
 @Component
 class PreRegisteredClients(
-  private val registeredClientRepository: RegisteredClientRepository,
-  private val jdbcRepository: OAuth2AuthorizationJdbcRepository,
   private val properties: OAuth2ServerProperties,
-) : ApplicationRunner {
-  override fun run(args: ApplicationArguments) {
-    registerOrDisable(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID, browserExtensionClient())
-    registerOrDisable(OAuth2Constants.CLI_CLIENT_ID, cliClient())
-  }
-
-  // Emptying a client's redirect config disables it: save the new registration, or delete a prior one so a stale
-  // full-scope row can't outlive the operator's intent to turn the client off.
-  private fun registerOrDisable(
-    clientId: String,
-    client: RegisteredClient?,
-  ) {
-    if (client != null) {
-      registeredClientRepository.save(client)
-      return
-    }
-    jdbcRepository.deleteRegisteredClient(clientId)
-  }
+) {
+  fun clients(): List<RegisteredClient> = listOfNotNull(browserExtensionClient(), cliClient())
 
   private fun browserExtensionClient(): RegisteredClient? {
     if (properties.browserExtensionRedirectUris.isEmpty()) return null

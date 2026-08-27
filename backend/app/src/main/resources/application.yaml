@@ -9,9 +9,15 @@ spring:
       repositories:
         enabled: false
   session:
-    # JDBC-backed HTTP sessions (shared across replicas) for the OAuth2 consent flow; the app is otherwise stateless.
+    # JDBC-backed HTTP sessions (shared across replicas) for the OAuth2 consent flow, which is the only stateful
+    # request path in the app — the main security chain is SessionCreationPolicy.STATELESS and creates none. The store
+    # type is necessarily global (Spring Session has no per-path store), so the bound on it is the timeout below.
     # The schema is created by Liquibase (db/changelog/spring-session), not by Spring Session.
     store-type: jdbc
+    # A consent session exists only between the bootstrap redirect and the user pressing Allow, and is invalidated the
+    # moment a code is issued. Ten minutes is generous for that and keeps an abandoned flow from lingering for the
+    # 30-minute servlet default.
+    timeout: 10m
     jdbc:
       initialize-schema: never
   mvc:

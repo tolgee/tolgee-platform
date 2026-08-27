@@ -7,36 +7,9 @@
         Spring Authorization Server built-in JDBC schema (spring-security-oauth2-authorization-server).
         Adapted for PostgreSQL per the notes in the shipped schema SQL: 'blob' -> 'text', 'timestamp' -> 'timestamptz'.
         These tables are NOT JPA entities, so they are listed in gradle/liquibase.gradle excludeObjects to keep
-        diffChangeLog from emitting DROPs for them.
+        diffChangeLog from emitting DROPs for them. There is no oauth2_registered_client table: clients are built from
+        configuration at startup (see TolgeeRegisteredClientRepository), not stored.
     -->
-
-    <changeSet author="dbocharov" id="oauth2-registered-client">
-        <comment>
-            Source: classpath resource org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql
-            (spring-security-oauth2-authorization-server jar). PostgreSQL adaptation: 'timestamp' -> 'timestamptz'.
-        </comment>
-        <sql dbms="postgresql" splitStatements="false">
-            CREATE TABLE oauth2_registered_client (
-                id varchar(100) NOT NULL,
-                client_id varchar(100) NOT NULL,
-                client_id_issued_at timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                client_secret varchar(200) DEFAULT NULL,
-                client_secret_expires_at timestamptz DEFAULT NULL,
-                client_name varchar(200) NOT NULL,
-                client_authentication_methods varchar(1000) NOT NULL,
-                authorization_grant_types varchar(1000) NOT NULL,
-                redirect_uris varchar(1000) DEFAULT NULL,
-                post_logout_redirect_uris varchar(1000) DEFAULT NULL,
-                scopes varchar(1000) NOT NULL,
-                client_settings varchar(2000) NOT NULL,
-                token_settings varchar(2000) NOT NULL,
-                PRIMARY KEY (id)
-            );
-        </sql>
-        <rollback>
-            <sql>DROP TABLE oauth2_registered_client;</sql>
-        </rollback>
-    </changeSet>
 
     <changeSet author="dbocharov" id="oauth2-authorization">
         <comment>
