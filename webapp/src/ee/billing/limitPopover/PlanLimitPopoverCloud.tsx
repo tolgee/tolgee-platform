@@ -62,14 +62,33 @@ export const PlanLimitPopoverCloud: React.FC<
               />
             </DialogContentText>
           )}
-          {wordsAutoUpgrade.ineffective && (
-            <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-ineffective">
-              <T
-                keyName="plan_limit_dialog_words_auto_upgrade_ineffective"
-                defaultValue="Your plan's word limit was reached. Auto-upgrade is already on, but it cannot be applied to this subscription — there may be no higher word tier available, or a plan change is already scheduled. Contact us to find the right plan."
-              />
-            </DialogContentText>
-          )}
+          {wordsAutoUpgrade.ineffective &&
+            wordsAutoUpgrade.reason === 'largestTier' && (
+              <DialogContentText data-cy="plan-limit-dialog-words-largest-tier">
+                <T
+                  keyName="plan_limit_dialog_words_largest_tier"
+                  defaultValue="You're on the largest plan we sell, so auto-upgrade has nothing bigger to move to. Contact us and we'll size a plan to your volume."
+                />
+              </DialogContentText>
+            )}
+          {wordsAutoUpgrade.ineffective &&
+            wordsAutoUpgrade.reason === 'scheduledChange' && (
+              <DialogContentText data-cy="plan-limit-dialog-words-scheduled-change">
+                <T
+                  keyName="plan_limit_dialog_words_scheduled_change"
+                  defaultValue="A plan change is already scheduled, so auto-upgrade is paused until it applies. Cancel the scheduled change to let auto-upgrade raise your tier."
+                />
+              </DialogContentText>
+            )}
+          {wordsAutoUpgrade.ineffective &&
+            wordsAutoUpgrade.reason === 'other' && (
+              <DialogContentText data-cy="plan-limit-dialog-words-auto-upgrade-ineffective">
+                <T
+                  keyName="plan_limit_dialog_words_auto_upgrade_ineffective"
+                  defaultValue="Your plan's word limit was reached. Auto-upgrade is already on, but it cannot be applied to this subscription. Contact us to find the right plan."
+                />
+              </DialogContentText>
+            )}
         </>
       }
       actionButton={
@@ -88,6 +107,19 @@ export const PlanLimitPopoverCloud: React.FC<
                 />
               </LoadingButton>
             )}
+            {wordsAutoUpgrade.ineffective &&
+              wordsAutoUpgrade.reason === 'largestTier' && (
+                <Button
+                  data-cy="plan-limit-dialog-contact-us"
+                  color="primary"
+                  href="mailto:info@tolgee.io"
+                >
+                  <T
+                    keyName="plan_limit_dialog_contact_us"
+                    defaultValue="Contact us"
+                  />
+                </Button>
+              )}
             <Button
               data-cy="global-confirmation-confirm"
               color="primary"

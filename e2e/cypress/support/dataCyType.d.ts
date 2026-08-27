@@ -545,9 +545,13 @@ declare namespace DataCy {
         "permissions-menu-reset-to-organization": true;
         "permissions-menu-save": true;
         "plan-limit-dialog-close": true;
+        "plan-limit-dialog-contact-us": true;
         "plan-limit-dialog-enable-auto-upgrade": true;
+        "plan-limit-dialog-self-hosted-words": true;
         "plan-limit-dialog-words-auto-upgrade-hint": true;
         "plan-limit-dialog-words-auto-upgrade-ineffective": true;
+        "plan-limit-dialog-words-largest-tier": true;
+        "plan-limit-dialog-words-scheduled-change": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
         "profile": true;
