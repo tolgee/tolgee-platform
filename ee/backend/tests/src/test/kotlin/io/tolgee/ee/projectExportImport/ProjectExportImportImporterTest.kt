@@ -27,6 +27,7 @@ import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translationMemory.TranslationMemoryProject
 import io.tolgee.model.translationMemory.TranslationMemoryType
+import io.tolgee.publicBilling.MetricType
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.bigMeta.KeysDistanceDto
@@ -206,6 +207,9 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         seatsLimit = -1
         includedWords = 1
         wordsLimit = 1
+        // Without this the licence meters keys, and the word listener returns before it can
+        // refuse anything - leaving the word half of this test inert.
+        metricType = MetricType.HOSTED_WORDS
       },
     )
   }

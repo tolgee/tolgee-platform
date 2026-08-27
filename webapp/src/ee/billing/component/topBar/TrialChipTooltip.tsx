@@ -122,6 +122,7 @@ export const TrialChipTooltip: FC<
                 />
                 <IncludedUsage
                   metricType={plan.metricType}
+                  free={plan.free}
                   includedUsage={plan.includedUsage}
                   highlightColor={highlightColor}
                   sx={(theme: Theme) => ({

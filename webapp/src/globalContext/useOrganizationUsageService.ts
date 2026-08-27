@@ -73,6 +73,9 @@ export const useOrganizationUsageService = ({
    * We don't want to disturb the translators that much with the error.
    */
   const increaseCreditPlanLimitErrors = () => {
+    // Not a word limit: PlanLimitPopoverCloud reads this code to decide whether to offer the
+    // word auto-upgrade, and it is never reset on its own.
+    setPlanLimitErrorCode(undefined);
     setPlanLimitErrors((v) => {
       if (v > 0) {
         return v;

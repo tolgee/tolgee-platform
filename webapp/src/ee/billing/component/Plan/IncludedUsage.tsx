@@ -31,7 +31,7 @@ type Props = {
   sx?: SxProps<Theme>;
   className?: string;
   metricType: PlanType['metricType'];
-  free?: PlanType['free'];
+  free: PlanType['free'];
   onboardingBoostMonths?: number;
   onboardingBoostCredits?: number;
 };
