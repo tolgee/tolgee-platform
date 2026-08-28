@@ -7,6 +7,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
@@ -37,25 +38,28 @@ import java.util.Date
 )
 class OAuth2Authorization : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   @NotNull
   lateinit var userAccount: UserAccount
 
+  @Column(nullable = false)
   @NotNull
   var clientId: String = ""
 
+  @Column(nullable = false, length = 2000)
   @NotNull
-  @Column(length = 2000)
   var redirectUri: String = ""
 
   @Column(length = 2000)
   var clientState: String? = null
 
+  @Column(nullable = false)
   @NotNull
   var codeChallenge: String = ""
 
   /** Space-delimited scope values the client asked for on `/oauth2/authorize`. */
+  @Column(nullable = false, length = 4000)
   @NotNull
-  @Column(length = 4000)
   var requestedScopes: String = ""
 
   /** Space-delimited scope values the user approved; null until consent. */

@@ -67,6 +67,7 @@ import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationSetting
+import io.tolgee.model.oauth2.OAuth2Authorization
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.qa.TranslationQaIssue
@@ -134,6 +135,7 @@ object ProjectExportImportPolicyRegistry {
         ApiKey::class,
         Invitation::class,
         Pat::class,
+        OAuth2Authorization::class,
         UserPreferences::class,
         EmailVerification::class,
         SsoTenant::class,
