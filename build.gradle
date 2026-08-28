@@ -170,6 +170,9 @@ subprojects {
                     entry 'jackson-databind'
                     entry 'jackson-core'
                 }
+                // azure-core-amqp pins proton-j 0.34.1 (CVE-2026-66273/66274/66275/66276);
+                // no Azure SDK release ships the patched version yet.
+                dependency 'org.apache.qpid:proton-j:0.35.0'
             }
         }
     }
