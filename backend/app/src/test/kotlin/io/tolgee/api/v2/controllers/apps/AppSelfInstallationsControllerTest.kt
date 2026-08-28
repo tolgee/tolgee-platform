@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AppTokenService
@@ -65,24 +66,33 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `lists the app's installations with the projects each is enabled for`() {
+  fun `lists the app's installations`() {
     asToken(appLevelToken, get(SELF_INSTALLATIONS)).andIsOk.andAssertThatJson {
       node("_embedded.installations").isArray.hasSize(1)
-      node("_embedded.installations[0].id").isEqualTo(installId)
-      node("_embedded.installations[0].appId").isEqualTo("test-app")
-      node("_embedded.installations[0].name").isEqualTo("Test App")
-      node("_embedded.installations[0].version").isEqualTo("0.1.0")
-      node("_embedded.installations[0].scopes").isArray.containsExactly("activity.view")
-      node("_embedded.installations[0].enabledProjects").isArray.hasSize(1)
-      node("_embedded.installations[0].enabledProjects[0].id").isEqualTo(testData.project.id)
-      node("_embedded.installations[0].enabledProjects[0].name").isEqualTo(testData.project.name)
-      node("_embedded.installations[0].enabledProjects[0].organization.id")
-        .isEqualTo(testData.organization.id)
-      node("_embedded.installations[0].enabledProjects[0].organization.name")
-        .isEqualTo(testData.organization.name)
-      node("_embedded.installations[0].enabledProjects[0].organization.slug")
-        .isEqualTo(testData.organization.slug)
+      node("_embedded.installations[0]").node("id").isEqualTo(installId)
+      node("_embedded.installations[0]").node("appId").isEqualTo("test-app")
+      node("_embedded.installations[0]").node("name").isEqualTo("Test App")
+      node("_embedded.installations[0]").node("version").isEqualTo("0.1.0")
+      node("_embedded.installations[0]").node("scopes").isArray.containsExactly("activity.view")
     }
+  }
+
+  @Test
+  fun `lists the projects an installation is enabled for as standard project models`() {
+    asToken(appLevelToken, get(selfProjects(installId))).andIsOk.andAssertThatJson {
+      node("_embedded.projects").isArray.hasSize(1)
+      node("_embedded.projects[0]").node("id").isEqualTo(testData.project.id)
+      node("_embedded.projects[0]").node("name").isEqualTo(testData.project.name)
+      node("_embedded.projects[0]").node("slug").isEqualTo(testData.project.slug)
+      node("page").node("totalElements").isEqualTo(1)
+    }
+  }
+
+  @Test
+  fun `returns not found when listing projects of an unknown installation`() {
+    asToken(appLevelToken, get(selfProjects(installId + 9999)))
+      .andIsNotFound
+      .andHasErrorMessage(Message.APP_INSTALL_NOT_FOUND)
   }
 
   @Test
@@ -162,11 +172,11 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
 
   private fun enabledProjectIds(): List<Long> {
     val response =
-      asToken(appLevelToken, get(SELF_INSTALLATIONS))
+      asToken(appLevelToken, get(selfProjects(installId)))
         .andIsOk
         .andReturn()
         .response.contentAsString
-    val projects = objectMapper.readTree(response).at("/_embedded/installations/0/enabledProjects")
+    val projects = objectMapper.readTree(response).at("/_embedded/projects")
     return projects.toList().map { it.get("id").asLong() }
   }
 
@@ -214,6 +224,8 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
       ).andIsOk.andReturn().response.contentAsString
     return objectMapper.readTree(response).get("access_token").asText()
   }
+
+  private fun selfProjects(installId: Long) = "$SELF_INSTALLATIONS/$installId/projects"
 
   companion object {
     private const val SELF_INSTALLATIONS = "/v2/apps/self/installations"
