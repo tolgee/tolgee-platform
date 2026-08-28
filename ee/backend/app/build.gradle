@@ -113,7 +113,7 @@ dependencies {
     /**
      * HANDLEBARS
      */
-    implementation('com.github.jknack:handlebars:4.4.0')
+    implementation('com.github.jknack:handlebars:4.5.4')
 
     ktlint(project(":ktlint"))
 }

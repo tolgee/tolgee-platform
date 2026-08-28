@@ -60,7 +60,7 @@ dependencies {
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
-    testImplementation('com.github.jknack:handlebars:4.4.0')
+    testImplementation('com.github.jknack:handlebars:4.5.4')
     testImplementation platform(libs.mcpBom)
     testImplementation libs.mcp
     ktlint(project(":ktlint"))
