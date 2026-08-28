@@ -84,7 +84,7 @@ exchanges are back-channel and sessionless, so nothing needs it afterwards.
 the JWT in local storage — logging out of the webapp drops that JWT and does **not** touch the cookie. Without
 invalidation, a lingering session keeps authenticating `/oauth2/authorize` as whoever bootstrapped it, so
 after a user signs out and back in as a **different** account, the next connect would silently mint a token
-for the *old* account (and, with consent already remembered, without even showing the consent screen). Killing
+for the *old* account. Killing
 the session at code issuance forces the next connect to re-bootstrap, so a token is always minted for whoever
 is signed into the webapp *now*.
 
@@ -92,8 +92,7 @@ is signed into the webapp *now*.
 disconnects would only re-show the consent *screen* — it
 does nothing to the stale session, so the reconnect still authenticates as the old account and still mints its
 token (and the consent screen, fetched with the current JWT, would even disagree with the grant, bound to the
-session's old principal). It would also force a re-prompt on *every* reconnect, breaking same-account
-consent-skip, and it only runs if the client remembers to call it. Session invalidation fixes the actual cause
+session's old principal). It only runs if the client remembers to call it. Session invalidation fixes the actual cause
 (the principal) server-side, unconditionally. Consent revocation stays reserved for its real purpose — a user
 explicitly **revoking an app's access** (killing its refresh token + grant), not routine disconnect.
 
@@ -157,13 +156,34 @@ the root of discovery (`{issuer}/.well-known/oauth-authorization-server`), and S
 relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`,
 …) are actually reachable — i.e. the **backend / API URL** (`back-end-url`).
 
-We compute it as `backEndUrl ?: frontEndUrl` (`OAuth2AudienceResolver.serverBaseUrl`, read by
-`OAuth2AuthorizationServerConfig`). The `frontEndUrl`
+`OAuth2IssuerResolver` owns it, and exposes two forms. `configuredBaseUrl` is `backEndUrl ?: frontEndUrl`,
+with a blank treated as unset and any trailing slash stripped; the startup `AuthorizationServerSettings`
+bean reads it, and leaves the issuer unset when nothing is configured. `issuerUrl` is the same value, or
+the request's own container-visible origin when nothing is configured, and it is what every in-request
+caller uses — the RFC 9728 document, the bootstrap `continue` URL and the `iss` on the code redirect.
+Note the request fallback reads what the container saw, *not* `X-Forwarded-*`, which the app does not
+trust: behind a reverse proxy you must set `back-end-url` or the issuer will be the internal URL. The
+`frontEndUrl`
 fallback is **not** "use the web app as the issuer" — it only exists for deployments that serve the API
 and the web app from **one origin** (the backend also serves the built SPA), where `back-end-url` is
 often left unset and `front-end-url` *is* that single origin. If your backend runs on a separate URL you
 **must set `back-end-url`**, and then the fallback never fires. (If your topology always separates the
 two, treat `back-end-url` as required.)
+
+### Consent is never remembered
+
+Every authorization shows the consent screen, and `AlwaysPromptConsentService` is what makes that true —
+SAS would otherwise skip the screen once a stored consent covers the requested scopes.
+
+The reason is the project picker. A token is bound to a project, that choice is made on the screen, and it
+is per-authorization state with nowhere to be stored. Skipping the screen leaves the authorization with no
+project selection at all, and the only remaining candidates would be the `project` request parameter (the
+client's own choice) or "every project this user can reach" — neither of which anybody approved. So
+remembering consent requires making the project selection durable first; until then, re-prompting is what
+lets a reconnect mint a token at all.
+
+`oauth2_authorization_consent` is therefore written and read by nothing. The table stays because it is part
+of the stock SAS schema; dropping it is a migration decision, not a code one.
 
 ### scope vs. project set
 - **scope** = a capability verb (`translations.suggest`, `translation-comments.add`) — *what* the token
@@ -203,7 +223,7 @@ recover it with `git revert` of the commit that removed it rather than writing i
 | Token claims (`sub`, `scope`, `tg.prj`) | `TolgeeOAuth2TokenCustomizer.kt` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
-| Bootstrap session killed on code issuance | `backend/app/.../configuration/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
+| Bootstrap session killed on code issuance | `backend/data/.../security/oauth2/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
 | Grant/consent storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
 | Client registry (from config, not stored) | `PreRegisteredClients.kt`, `TolgeeRegisteredClientRepository.kt` |
 
@@ -212,7 +232,7 @@ recover it with `git revert` of the commit that removed it rather than writing i
 These are known gaps, deferred to the client rounds that first exercise them:
 
 - **There is no way for a user to see or revoke an authorized app.** Grants are killed only wholesale, by
-  changing the password or signing out everywhere (`revokeAllForPrincipal`). A per-app list-and-revoke API
+  changing the password or signing out everywhere (`revokeAllForUser`). A per-app list-and-revoke API
   and screen were written and then removed from this round, because the planned Session management feature
   will own that surface for OAuth apps and sessions together, and shipping a separate Connected apps page
   first would mean replacing it immediately. Recover the implementation with `git revert` of the commit that
@@ -300,6 +320,11 @@ backend config, then restart the backend so `PreRegisteredClients` seeds the cli
 
 ```yaml
 tolgee:
+  # The dev topology is split (vite on :3995 in front of the backend on :8995) and X-Forwarded-* is
+  # deliberately not trusted, so the issuer has to be stated explicitly. Without this the bootstrap
+  # `continue` URL, the `iss` on the code redirect and the RFC 9728 document all come out as
+  # `http://localhost:3995` — wrong scheme — and the flow in §4 redirects somewhere vite will not answer.
+  back-end-url: https://localhost:3995
   oauth2:
     browser-extension-redirect-uris:
       - https://<your-unpacked-extension-id>.chromiumapp.org/
@@ -317,9 +342,8 @@ step reads it), open the extension popup on the **Login** tab, set the **Server*
 consent → Allow → "Connected". The access token is injected into the page as `__tolgee_authToken`; the
 refresh token stays in the service worker.
 
-To re-show the consent screen after a first approval (Spring remembers consent per client+user), delete the
-user's rows from `oauth2_authorization_consent` and `oauth2_authorization`. There is no revocation API in this
-round — see below.
+The consent screen re-appears on every connect (see "Consent is never remembered"), so there is nothing to
+clear between attempts. There is no revocation API in this round — see below.
 
 ### 5. Edit in-context against a local build of the editor
 
