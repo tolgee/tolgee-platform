@@ -231,7 +231,8 @@ class OrganizationController(
     @PathVariable("id") id: Long,
   ) {
     organizationService.find(id)?.let {
-      if (!organizationService.isThereAnotherOwner(id)) {
+      val isOwner = organizationRoleService.findType(id) == OrganizationRoleType.OWNER
+      if (isOwner && !organizationService.isThereAnotherOwner(id)) {
         throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
       organizationRoleService.leave(id)
@@ -254,7 +255,12 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
-  @Operation(summary = "Remove user from organization")
+  @Operation(
+    summary = "Remove user from organization",
+    description =
+      "Removes the user from the organization. Users managed by the organization cannot be removed; " +
+        "disable them instead.",
+  )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun removeUser(
@@ -271,7 +277,7 @@ class OrganizationController(
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
-  fun disableUser(
+  fun disableManagedUser(
     @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
@@ -288,7 +294,7 @@ class OrganizationController(
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
-  fun enableUser(
+  fun enableManagedUser(
     @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {

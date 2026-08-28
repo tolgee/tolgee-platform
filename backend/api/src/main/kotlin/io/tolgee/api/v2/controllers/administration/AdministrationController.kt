@@ -124,7 +124,7 @@ class AdministrationController(
   fun enableUser(
     @PathVariable userId: Long,
   ) {
-    userAccountService.enable(userId)
+    userAccountService.enable(userId, UserDisabledBy.ADMIN)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])

@@ -25,6 +25,7 @@ export const EnableUserButton = (props: {
       message: (
         <T
           keyName="really_enable_user_confirmation"
+          defaultValue="Do you really want to re-enable user {userName}? They will regain access to the organization."
           params={{ userName: props.userName }}
         />
       ),
@@ -39,7 +40,10 @@ export const EnableUserButton = (props: {
           {
             onSuccess: () => {
               messageService.success(
-                <T keyName="organization_user_enabled_message" />
+                <T
+                  keyName="organization_user_enabled_message"
+                  defaultValue="User re-enabled"
+                />
               );
             },
           }
@@ -48,7 +52,7 @@ export const EnableUserButton = (props: {
   };
 
   return (
-    <Tooltip title={t('organization_users_enable_user')}>
+    <Tooltip title={t('organization_users_enable_user', 'Re-enable')}>
       <IconButton
         data-cy="organization-members-enable-user-button"
         onClick={enableUser}
