@@ -250,6 +250,55 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a NONE-only permission holder can still leave, a pure floor viewer cannot`() {
+    userAccount = testData.noneOnlyUser
+    performAuthPut("/v2/organizations/${testData.otherOrg.id}/leave", null).andIsOk
+
+    userAccount = testData.nonMember
+    performAuthPut("/v2/organizations/${testData.otherOrg.id}/leave", null)
+      .andIsNotFound
+      .andAssertThatJson {
+        node("code").isEqualTo("user_is_not_member_of_organization")
+      }
+  }
+
+  @Test
+  fun `a direct-permission collaborator can shed it even when the org has a sole owner`() {
+    userAccount = testData.guestWithPermission
+    performAuthPut("/v2/organizations/${testData.otherOrg.id}/leave", null).andIsOk
+    performAuthGet("/v2/projects/${testData.otherOrgPrivateProject.id}").andIsNotFound
+  }
+
+  @Test
+  fun `a permission in another organization is not something to leave this one with`() {
+    userAccount = testData.revokedOnlyUser
+    performAuthPut("/v2/organizations/${testData.otherOrg.id}/leave", null)
+      .andIsNotFound
+      .andAssertThatJson {
+        node("code").isEqualTo("user_is_not_member_of_organization")
+      }
+  }
+
+  @Test
+  fun `staff cannot view a soft-deleted organization`() {
+    executeInNewTransaction {
+      val admin = userAccountService.getDto(testData.serverAdmin.id)
+      organizationRoleService
+        .canUserView(admin, testData.softDeletedOrg.id)
+        .assert
+        .isFalse()
+      organizationRoleService
+        .canUserViewOrPublic(admin, testData.softDeletedOrg.id)
+        .assert
+        .isFalse()
+      organizationRoleService
+        .canUserViewAtLeastMember(admin, testData.softDeletedOrg.id)
+        .assert
+        .isFalse()
+    }
+  }
+
+  @Test
   fun `a NONE-only permission on a private-only org grants no org access`() {
     userAccount = testData.revokedOnlyUser
     performAuthGet("/v2/organizations/${testData.noPublicOrg.id}").andIsNotFound

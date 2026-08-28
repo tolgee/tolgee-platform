@@ -1,14 +1,15 @@
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { billingLinkFor } from 'tg.fixtures/billingLink';
 import { useRouteMatch } from 'react-router-dom';
+import { memberCloudSubscription } from 'tg.fixtures/organizationEntitlement';
 import { useTestClock } from 'tg.service/useTestClock';
 import { Theme, useMediaQuery } from '@mui/material';
 
 export const useTrialInfo = () => {
   const { preferredOrganization } = usePreferredOrganization();
 
-  const subscriptionsLink = LINKS.ORGANIZATION_SUBSCRIPTIONS.build({
-    [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug ?? '',
+  const subscriptionsLink = billingLinkFor({
+    slug: preferredOrganization?.slug ?? '',
   });
 
   const isCurrentSubscriptionPage = useRouteMatch(subscriptionsLink);
@@ -19,8 +20,9 @@ export const useTrialInfo = () => {
     theme.breakpoints.down('md')
   );
 
-  const activeCloudSubscription =
-    preferredOrganization?.activeCloudSubscription;
+  const activeCloudSubscription = memberCloudSubscription(
+    preferredOrganization
+  );
 
   const trialEnd = activeCloudSubscription?.trialEnd;
 

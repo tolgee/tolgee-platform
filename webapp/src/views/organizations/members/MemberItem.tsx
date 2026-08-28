@@ -68,11 +68,14 @@ const StyledItemUser = styled('div')`
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
   organizationId: number;
+  /** Writes; see the floor named in OrganizationMembersView. */
+  canManageMembers: boolean;
 };
 
 export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
   user,
   organizationId,
+  canManageMembers,
 }) => {
   const { t } = useTranslate();
   const currentUser = useUser();
@@ -93,7 +96,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
       </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (
-          <UpdateRoleButton user={user} />
+          <UpdateRoleButton user={user} disabled={!canManageMembers} />
         ) : (
           <>
             <Tooltip title={t('organization_users_project_access_hint')}>
@@ -116,7 +119,9 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
             </IconButton>
           </Tooltip>
         ) : (
-          <RemoveUserButton userId={user.id} userName={user.username} />
+          canManageMembers && (
+            <RemoveUserButton userId={user.id} userName={user.username} />
+          )
         )}
       </StyledItemActions>
       {projectsOpen && (

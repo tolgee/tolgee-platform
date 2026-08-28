@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
 import io.tolgee.component.translationsLimitProvider.LimitsProvider
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -18,7 +16,6 @@ import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.organization.PublicUsageModel
@@ -27,7 +24,6 @@ import io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModelAssemb
 import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.OrganizationHolder
@@ -83,7 +79,6 @@ class OrganizationController(
   >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
-  private val tolgeeProperties: TolgeeProperties,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
@@ -105,22 +100,11 @@ class OrganizationController(
     @RequestBody @Valid
     dto: OrganizationDto,
   ): ResponseEntity<OrganizationModel> {
-    if (!this.tolgeeProperties.authentication.userCanCreateOrganizations &&
-      !authenticationFacade.authenticatedUser.isAdmin()
-    ) {
-      throw PermissionException()
-    }
-    if (authenticationFacade.authenticatedUserEntity.thirdPartyAuthType === ThirdPartyAuthType.SSO &&
-      !authenticationFacade.authenticatedUser.isAdmin()
-    ) {
-      throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
-    }
-    this.organizationService.create(dto).let {
-      return ResponseEntity(
-        organizationModelAssembler.toModel(OrganizationView.of(it, OrganizationRoleType.OWNER)),
-        HttpStatus.CREATED,
-      )
-    }
+    val organization = organizationService.createAsCurrentUser(dto)
+    return ResponseEntity(
+      organizationModelAssembler.toModel(OrganizationView.of(organization, OrganizationRoleType.OWNER)),
+      HttpStatus.CREATED,
+    )
   }
 
   @GetMapping("/{id:[0-9]+}")
@@ -230,12 +214,12 @@ class OrganizationController(
   fun leaveOrganization(
     @PathVariable("id") id: Long,
   ) {
-    organizationService.find(id)?.let {
-      if (!organizationService.isThereAnotherOwner(id)) {
-        throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
-      }
-      organizationRoleService.leave(id)
-    } ?: throw NotFoundException()
+    organizationService.find(id) ?: throw NotFoundException()
+    val isOwner = organizationRoleService.isUserOwner(authenticationFacade.authenticatedUser.id, id)
+    if (isOwner && !organizationService.isThereAnotherOwner(id)) {
+      throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+    }
+    organizationRoleService.leave(id)
   }
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")

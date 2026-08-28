@@ -69,13 +69,19 @@ export const UserPresentAvatarMenu: React.FC<
 
   const handleSelectOrganization = async (organization: OrganizationModel) => {
     setAnchorEl(null);
-    await updatePreferredOrganization(organization.id);
-    history.push(LINKS.PROJECTS.build());
+    if (await updatePreferredOrganization(organization.id)) {
+      history.push(LINKS.PROJECTS.build());
+    }
   };
 
   const handleCreateNewOrganization = () => {
     setAnchorEl(null);
     history.push(LINKS.ORGANIZATIONS_ADD.build());
+  };
+
+  const handleCommunityProjects = () => {
+    setAnchorEl(null);
+    history.push(LINKS.COMMUNITY_PROJECTS.build());
   };
 
   const getOrganizationMenuItems = () =>
@@ -162,6 +168,7 @@ export const UserPresentAvatarMenu: React.FC<
             <OrganizationSwitch
               onSelect={handleSelectOrganization}
               onCreateNew={handleCreateNewOrganization}
+              onCommunity={handleCommunityProjects}
             />
           </>
         )}

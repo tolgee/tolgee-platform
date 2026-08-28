@@ -6,6 +6,7 @@ import {
 } from 'tg.component/layout/QuickStartGuide/enums';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { isOwnerOrgRole } from 'tg.fixtures/organizationRole';
 import type { useInitialDataService } from './useInitialDataService';
 
 export const useQuickStartGuideService = (
@@ -20,8 +21,9 @@ export const useQuickStartGuideService = (
   const projectIdParam = match?.params[PARAMS.PROJECT_ID];
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
   const organizationSlug = initialData.state?.preferredOrganization?.slug;
-  const isOwner =
-    initialData.state?.preferredOrganization?.currentUserRole === 'OWNER';
+  const isOwner = isOwnerOrgRole(
+    initialData.state?.preferredOrganization?.currentUserRole
+  );
 
   const projects = useApiQuery({
     url: '/v2/organizations/{slug}/projects',
@@ -43,10 +45,7 @@ export const useQuickStartGuideService = (
     ? projectId
     : projects.data?._embedded?.projects?.[0]?.id;
 
-  const completed =
-    initialData.state?.preferredOrganization?.quickStart?.completedSteps || [];
-
-  const allCompleted = completed;
+  const completed = initialData.state?.quickStart?.completedSteps || [];
 
   function quickStartBegin(step: ItemStep, items: HighlightItem[]) {
     setActiveStep(step);
@@ -77,19 +76,18 @@ export const useQuickStartGuideService = (
   }
 
   const enabled =
-    initialData.state?.preferredOrganization?.quickStart?.finished === false &&
+    initialData.state?.quickStart?.finished === false &&
     isEmailVerified &&
     isOwner;
 
-  const open =
-    enabled && initialData.state?.preferredOrganization?.quickStart?.open;
+  const open = enabled && initialData.state?.quickStart?.open;
 
   const state = {
     enabled,
     open,
     active: active[0],
     lastProjectId,
-    completed: allCompleted,
+    completed,
     floatingOpen,
     floatingForced,
   };

@@ -172,7 +172,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
   fun `auto-enables QA on project creation when org has feature`() {
     val project =
       executeInNewTransaction(platformTransactionManager) {
-        projectCreationService.createProject(
+        projectCreationService.createProjectWithoutAuthorization(
           CreateProjectRequest(
             name = "qa-auto-enable-test",
             organizationId = testData.userAccountBuilder.defaultOrganizationBuilder.self.id,
@@ -206,7 +206,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
     val project =
       executeInNewTransaction(platformTransactionManager) {
-        projectCreationService.createProject(
+        projectCreationService.createProjectWithoutAuthorization(
           CreateProjectRequest(
             name = "qa-no-auto-enable-test",
             organizationId = testData.userAccountBuilder.defaultOrganizationBuilder.self.id,

@@ -14,12 +14,25 @@ import {
   organizationTestData,
   publicProjectsData,
 } from '../../common/apiCalls/testData/testData';
-import { gcy, gcyAdvanced, switchToOrganization } from '../../common/shared';
+import {
+  gcy,
+  gcyAdvanced,
+  switchToOrganization,
+  openOrganizationSwitch,
+  visitRootAndSettle,
+} from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 
 const disableMyContributions = () => {
-  gcy('community-my-contributions-toggle').click();
-  waitForGlobalLoading();
+  gcy('community-my-contributions-toggle').then(($toggle) => {
+    if ($toggle.find('input:checked').length) {
+      cy.wrap($toggle).click();
+      waitForGlobalLoading();
+    }
+  });
+  gcy('community-my-contributions-toggle')
+    .find('input')
+    .should('not.be.checked');
 };
 
 describe('Community projects navigation', () => {
@@ -48,19 +61,13 @@ describe('Community projects navigation', () => {
     cy.waitForDom();
   };
 
-  const openSwitch = () => {
-    cy.waitForDom();
-    gcy('organization-switch').click();
-    cy.waitForDom();
-  };
-
   const visitCommunity = () => {
     cy.visit(`${HOST}/community-projects`);
     cy.waitForDom();
   };
 
   it('navigates to the community page via the dropdown entry (mouse)', () => {
-    openSwitch();
+    openOrganizationSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
       action: 'organization-switch-community',
@@ -69,7 +76,7 @@ describe('Community projects navigation', () => {
   });
 
   it('navigates to the community page via the dropdown entry (keyboard)', () => {
-    openSwitch();
+    openOrganizationSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
       action: 'organization-switch-community',
@@ -121,7 +128,7 @@ describe('Community projects navigation', () => {
 
   it('highlights no org row while on the community page but still offers the community entry', () => {
     visitCommunity();
-    openSwitch();
+    openOrganizationSwitch();
     gcy('switch-popover-item').should('exist');
     gcy('switch-popover-item').filter('.Mui-selected').should('not.exist');
     gcyAdvanced({
@@ -134,7 +141,7 @@ describe('Community projects navigation', () => {
     cy.visit(
       `${HOST}/organizations/${organizationData['Tolgee'].slug}/members`
     );
-    openSwitch();
+    openOrganizationSwitch();
     gcy('switch-popover-item').should('exist');
     gcyAdvanced({
       value: 'switch-popover-footer-action',
@@ -145,7 +152,7 @@ describe('Community projects navigation', () => {
   it('does not offer the community entry for a user with no contributions', () => {
     communityContributionData.clean();
     visitProjects();
-    openSwitch();
+    openOrganizationSwitch();
     gcy('switch-popover-item').should('exist');
     gcyAdvanced({
       value: 'switch-popover-footer-action',
@@ -165,7 +172,7 @@ describe('Community projects navigation', () => {
   });
 
   it('closes the popover on Escape from the footer entry', () => {
-    openSwitch();
+    openOrganizationSwitch();
     gcyAdvanced({
       value: 'switch-popover-footer-action',
       action: 'organization-switch-community',
@@ -206,6 +213,12 @@ describe('Community projects email-verification gate', () => {
     deleteUserSql(changedEmail);
     deleteAllEmails();
     disableEmailVerification();
+  });
+
+  it('keeps an unverified user on the root rather than sending them to the community projects', () => {
+    visitRootAndSettle();
+    cy.url().should('not.include', '/community-projects');
+    gcy('resend-email-button').should('be.visible');
   });
 
   it('shows EmailNotVerifiedView instead of the switcher for unverified users', () => {

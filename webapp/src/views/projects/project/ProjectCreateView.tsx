@@ -12,23 +12,18 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { CreateProjectFormValues } from 'tg.views/projects/project/types';
 import {
-  useCanCreateProject,
-  usePreferredOrganization,
+  useIsSwitchingOrganization,
+  usePreferredOrganizationResolution,
+  useProjectCreationRefusal,
 } from 'tg.globalContext/helpers';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { NoPermissionsView } from 'tg.component/common/NoPermissionsView';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { messageService } from 'tg.service/MessageService';
 
 import { BaseLanguageSelect } from 'tg.views/projects/project/components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from 'tg.views/projects/project/components/CreateProjectLanguagesArrayField';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
-
-const RefusalMessage: FunctionComponent<
-  React.PropsWithChildren<{ dataCy: string }>
-> = ({ dataCy, children }) => (
-  <Typography variant="body2" color="error" data-cy={dataCy}>
-    {children}
-  </Typography>
-);
 
 export const ProjectCreateView: FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -42,13 +37,25 @@ export const ProjectCreateView: FunctionComponent<
     invalidatePrefix: '/v2/projects',
   });
   const { t } = useTranslate();
-  const { preferredOrganization } = usePreferredOrganization();
-  const { canCreateProject, isFetching } = useCanCreateProject();
+  const creationRefusal = useProjectCreationRefusal();
+  const isSwitchingOrganization = useIsSwitchingOrganization();
+  const resolution = usePreferredOrganizationResolution();
+
+  if (resolution.status === 'resolving') {
+    return (
+      <DashboardPage>
+        <BoxLoading />
+      </DashboardPage>
+    );
+  }
+
+  if (resolution.status === 'missing') {
+    return <NoPermissionsView reason="no-organization" />;
+  }
+
+  const organizationId = resolution.organization.id;
 
   const onSubmit = (values: CreateProjectFormValues) => {
-    if (!preferredOrganization) {
-      return;
-    }
     createProjectLoadable.mutate(
       {
         content: {
@@ -56,7 +63,7 @@ export const ProjectCreateView: FunctionComponent<
             ...values,
             name: values.name.trim(),
             languages: values.languages.filter((l) => !!l),
-            organizationId: preferredOrganization.id,
+            organizationId,
           },
         },
       },
@@ -81,21 +88,37 @@ export const ProjectCreateView: FunctionComponent<
     icuPlaceholders: true,
   };
 
-  const refusalMessage = preferredOrganization ? (
-    <RefusalMessage dataCy="project-create-no-permission-message">
+  const switchingReason = (
+    <Typography variant="body2" data-cy="project-create-switching-message">
+      <T
+        keyName="switching_organization_message"
+        defaultValue="Switching organization…"
+      />
+    </Typography>
+  );
+
+  const refusalReason = (
+    <Typography
+      variant="body2"
+      color="error"
+      data-cy="project-create-no-permission-message"
+    >
       <T
         keyName="project_create_no_permission_message"
         defaultValue="You don't have permission to create a project in this organization."
       />
-    </RefusalMessage>
-  ) : (
-    <RefusalMessage dataCy="project-create-no-organization-message">
-      <T
-        keyName="project_create_no_organization_message"
-        defaultValue="You are not a member of any organization."
-      />
-    </RefusalMessage>
+    </Typography>
   );
+
+  const submitDisabledReason = () => {
+    if (isSwitchingOrganization) {
+      return switchingReason;
+    }
+    if (creationRefusal === 'not-owner-or-maintainer') {
+      return refusalReason;
+    }
+    return undefined;
+  };
 
   return (
     <DashboardPage>
@@ -107,8 +130,7 @@ export const ProjectCreateView: FunctionComponent<
         onSubmit={onSubmit}
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
-        disabled={isFetching}
-        submitDisabledReason={!canCreateProject ? refusalMessage : undefined}
+        submitDisabledReason={submitDisabledReason()}
         switcher={<OrganizationSwitch />}
       >
         {(props: FormikProps<CreateProjectFormValues>) => {

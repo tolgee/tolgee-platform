@@ -293,12 +293,7 @@ class ProjectBuilder(
       ?.self
   }
 
-  /**
-   * Declares a PROJECT-type TM for this project on its parent organization. Mirrors what
-   * `ProjectCreationService.createProject` does in production. The TM is added to the
-   * organization's TM list and is persisted alongside any explicitly-declared shared TMs by
-   * the regular TM persistence pass.
-   */
+  /** Mirrors `TranslationMemoryManagementService.createProjectTm`. */
   fun addProjectTm(ft: FT<TranslationMemory> = {}): TranslationMemoryBuilder {
     val org =
       testDataBuilder.data.organizations

@@ -130,8 +130,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val userAccount = dbPopulator.createUserIfNotExists("testuser")
     val organization = dbPopulator.createOrganization("Test Organization", userAccount)
     loginAsUser("testuser")
-    val request =
-      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    val request = createProjectRequest(organization.id)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("icuPlaceholders").isBoolean.isTrue
       node("id").asNumber().satisfies {
@@ -149,8 +148,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
     organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
     loginAsUser("maintainerUser")
-    val request =
-      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    val request = createProjectRequest(organization.id)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("icuPlaceholders").isBoolean.isTrue
       node("id").asNumber().satisfies {
@@ -165,16 +163,66 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `grants an owner no explicit project permission - the organization role carries it`() {
+    val owner = dbPopulator.createUserIfNotExists("ownerCreatingUser")
+    val organization = dbPopulator.createOrganization("Owner Organization", owner)
+    loginAsUser("ownerCreatingUser")
+
+    performAuthPost("/v2/projects", createProjectRequest(organization.id)).andIsOk.andAssertThatJson {
+      node("id").asNumber().satisfies {
+        assertThat(permissionService.getUserProjectPermission(it.toLong(), owner.id)).isNull()
+      }
+    }
+  }
+
+  @Test
+  fun `refuses project creation for a plain member of the organization`() {
+    val owner = dbPopulator.createUserIfNotExists("memberOrgOwner")
+    val organization = dbPopulator.createOrganization("Member Organization", owner)
+    val memberAccount = dbPopulator.createUserIfNotExists("plainMemberUser")
+    organizationRoleService.grantRoleToUser(memberAccount, organization, OrganizationRoleType.MEMBER)
+    loginAsUser("plainMemberUser")
+
+    val request = createProjectRequest(organization.id)
+    performAuthPost("/v2/projects", request).andIsForbidden
+
+    assertThat(projectService.findAllInOrganization(organization.id)).isEmpty()
+  }
+
+  @Test
+  fun `refuses project creation for a user with no role in the organization`() {
+    val owner = dbPopulator.createUserIfNotExists("nonMemberOrgOwner")
+    val organization = dbPopulator.createOrganization("Non Member Organization", owner)
+    dbPopulator.createUserIfNotExists("nonMemberUser")
+    loginAsUser("nonMemberUser")
+
+    val request = createProjectRequest(organization.id)
+    performAuthPost("/v2/projects", request).andIsForbidden
+
+    assertThat(projectService.findAllInOrganization(organization.id)).isEmpty()
+  }
+
+  @Test
+  fun `refuses project creation for a server supporter who is not a member`() {
+    val owner = dbPopulator.createUserIfNotExists("supporterOrgOwner")
+    val organization = dbPopulator.createOrganization("Supporter Organization", owner)
+    dbPopulator.createUserIfNotExists("serverSupporterUser", role = UserAccount.Role.SUPPORTER)
+    loginAsUser("serverSupporterUser")
+
+    val request = createProjectRequest(organization.id)
+    performAuthPost("/v2/projects", request).andIsForbidden
+
+    assertThat(projectService.findAllInOrganization(organization.id)).isEmpty()
+  }
+
+  @Test
   fun `creates project for server admin who is not a member of the organization`() {
     val owner = dbPopulator.createUserIfNotExists("outsiderOrgOwner")
     val organization = dbPopulator.createOrganization("Outsider Organization", owner)
-    val adminAccount = dbPopulator.createUserIfNotExists("serverAdminUser")
-    adminAccount.role = UserAccount.Role.ADMIN
-    userAccountService.save(adminAccount)
+    val adminAccount = dbPopulator.createUserIfNotExists("serverAdminUser", role = UserAccount.Role.ADMIN)
     loginAsUser("serverAdminUser")
 
-    val request =
-      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    val request = createProjectRequest(organization.id)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
         projectService.get(it.toLong()).let { project ->
@@ -194,8 +242,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val maintainerAccount = dbPopulator.createUserIfNotExists("maintainerUser")
     organizationRoleService.grantRoleToUser(maintainerAccount, organization, OrganizationRoleType.MAINTAINER)
     loginAsUser("testuser")
-    val request =
-      CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    val request = createProjectRequest(organization.id)
     var project: Project? = null
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
@@ -312,4 +359,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     performAuthPost("/v2/projects", createForLanguagesDto.apply { this.baseLanguageTag = "not_exists" })
       .andIsBadRequest
   }
+
+  private fun createProjectRequest(organizationId: Long) =
+    CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organizationId, icuPlaceholders = true)
 }

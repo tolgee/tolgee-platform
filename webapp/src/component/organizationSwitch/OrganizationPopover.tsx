@@ -5,7 +5,7 @@ import { OrganizationItem } from './OrganizationItem';
 import { CommunityTranslationItem } from './CommunityTranslationItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
-import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
+import { useCanCreateOrganization } from 'tg.globalContext/helpers';
 import { SwitchPopover } from 'tg.component/SwitchPopover/SwitchPopover';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
@@ -15,10 +15,10 @@ type Props = {
   onClose: () => void;
   onSelect: (value: OrganizationModel) => void;
   anchorEl: HTMLElement;
-  selected: OrganizationModel | undefined;
+  selectedId?: number;
   onAddNew: () => void;
-  onCommunityNavigate?: () => void;
-  communitySelected?: boolean;
+  offersCommunityFooter: boolean;
+  onCommunity: () => void;
 };
 
 export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
@@ -26,20 +26,17 @@ export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   onSelect,
   anchorEl,
-  selected,
+  selectedId,
   onAddNew,
-  onCommunityNavigate,
-  communitySelected,
+  offersCommunityFooter,
+  onCommunity,
 }) => {
   const { t } = useTranslate();
   const [search, setSearch] = useState('');
 
-  const config = useConfig();
-  const canCreateOrganizations =
-    useIsAdmin() || config.userCanCreateOrganizations;
+  const canCreateOrganizations = useCanCreateOrganization();
 
   const query = {
-    filterCurrentUserOwner: false,
     search: search || undefined,
     size: 20,
     sort: ['name'],
@@ -80,17 +77,13 @@ export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
     setSearch(value);
   }, []);
 
-  if (!selected) {
-    return null;
-  }
-
   return (
     <SwitchPopover
       open={open}
       onClose={onClose}
       onSelect={onSelect}
       anchorEl={anchorEl}
-      selectedId={communitySelected ? undefined : selected.id}
+      selectedId={selectedId}
       items={items || []}
       isLoading={organizationsLoadable.isFetching}
       hasNextPage={organizationsLoadable.hasNextPage ?? false}
@@ -103,10 +96,10 @@ export const OrganizationPopover: React.FC<React.PropsWithChildren<Props>> = ({
       onAddNew={canCreateOrganizations ? onAddNew : undefined}
       addNewTooltip={t('organizations_add_new')}
       footerAction={
-        onCommunityNavigate
+        offersCommunityFooter
           ? {
               content: <CommunityTranslationItem />,
-              onClick: onCommunityNavigate,
+              onClick: onCommunity,
               dataCyAction: 'organization-switch-community',
             }
           : undefined

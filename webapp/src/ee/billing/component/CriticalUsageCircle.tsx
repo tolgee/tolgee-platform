@@ -4,13 +4,13 @@ import { Link } from 'react-router-dom';
 import { Box, keyframes, styled, Tooltip } from '@mui/material';
 
 import { CircularBillingProgress } from './CircularBillingProgress';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import {
+  useBillingOrganization,
   useOrganizationUsage,
-  usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { UsageDetailed } from './UsageDetailed';
 import { getProgressData } from './getProgressData';
+import { billingLinkFor } from 'tg.fixtures/billingLink';
 
 export const USAGE_ELEMENT_ID = 'billing_organization_usage';
 
@@ -56,8 +56,7 @@ const StyledTitle = styled('div')`
 `;
 
 export const CriticalUsageCircle: FC<React.PropsWithChildren<unknown>> = () => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const { planLimitErrors } = useOrganizationUsage();
+  const { planLimitErrors, usage } = useOrganizationUsage();
 
   const previousShown = useRef(true);
   const firstRender = useRef(true);
@@ -75,10 +74,7 @@ export const CriticalUsageCircle: FC<React.PropsWithChildren<unknown>> = () => {
     firstRender.current = false;
   }, [planLimitErrors]);
 
-  const isOrganizationOwner =
-    preferredOrganization?.currentUserRole === 'OWNER';
-
-  const { usage } = useOrganizationUsage();
+  const billingOrganization = useBillingOrganization();
 
   const progressData = usage && getProgressData({ usage });
 
@@ -89,12 +85,8 @@ export const CriticalUsageCircle: FC<React.PropsWithChildren<unknown>> = () => {
   const OptionalLink: React.FC<React.PropsWithChildren<unknown>> = ({
     children,
   }) =>
-    isOrganizationOwner ? (
-      <Link
-        to={LINKS.ORGANIZATION_BILLING.build({
-          [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-        })}
-      >
+    billingOrganization ? (
+      <Link to={billingLinkFor({ slug: billingOrganization.slug })}>
         {children}
       </Link>
     ) : (

@@ -1,65 +1,50 @@
 import { useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useIsAdmin } from 'tg.globalContext/helpers';
+import {
+  useCanSeeBilling,
+  useIsAdmin,
+  useIsBillingEnabled,
+} from 'tg.globalContext/helpers';
 
 export function useFeatureMissingExplanation() {
   const subscription = useGlobalContext((c) => c.initialData.eeSubscription);
   const isAdmin = useIsAdmin();
-  const billingEnabled = useGlobalContext(
-    (c) => c.initialData.serverConfiguration.billing.enabled
-  );
-  const isOrganizationOwner = useGlobalContext(
-    (c) => c.initialData.preferredOrganization?.currentUserRole === 'OWNER'
-  );
+  const billingEnabled = useIsBillingEnabled();
+  const canSeeBilling = useCanSeeBilling();
 
   const { t } = useTranslate();
 
-  function ifAdmin<T>(value: T) {
-    if (isAdmin) {
-      return value;
-    } else {
-      return undefined;
-    }
-  }
+  const ifAdmin = <T,>(value: T) => (isAdmin ? value : undefined);
 
-  function ifOrgOwner<T>(value: T) {
-    if (isOrganizationOwner) {
-      return value;
-    } else {
-      return undefined;
-    }
-  }
+  const ifCanSeeBilling = <T,>(value: T) => (canSeeBilling ? value : undefined);
 
   if (billingEnabled) {
     return {
       message: t('feature-explanation-plan-not-sufficient'),
-      actionTitle: ifOrgOwner(t('feature-explanation-upgrade-subscription')),
-      link: ifOrgOwner(LINKS.GO_TO_CLOUD_BILLING.build()),
+      actionTitle: ifCanSeeBilling(
+        t('feature-explanation-upgrade-subscription')
+      ),
+      link: ifCanSeeBilling(LINKS.GO_TO_CLOUD_BILLING.build()),
     };
   }
 
-  if (subscription && subscription.status === 'ACTIVE') {
+  if (subscription) {
     return {
-      message: t('feature-explanation-license-not-sufficient'),
+      message:
+        subscription.status === 'ACTIVE'
+          ? t('feature-explanation-license-not-sufficient')
+          : t('feature-explanation-license-not-active'),
       actionTitle: ifAdmin(t('feature-explanation-check-license-action')),
       link: ifAdmin(LINKS.ADMINISTRATION_EE_LICENSE.build()),
     };
   }
 
-  if (subscription && subscription.status !== 'ACTIVE') {
-    return {
-      message: t('feature-explanation-license-not-active'),
-      actionTitle: ifAdmin(t('feature-explanation-check-license-action')),
-      link: ifAdmin(LINKS.ADMINISTRATION_EE_LICENSE.build()),
-    };
-  }
-
-  if (!subscription && isAdmin) {
+  if (isAdmin) {
     return {
       message: t('feature-explanation-no-license'),
-      actionTitle: ifAdmin(t('feature-explanation-setup-license')),
-      link: ifAdmin(LINKS.ADMINISTRATION_EE_LICENSE.build()),
+      actionTitle: t('feature-explanation-setup-license'),
+      link: LINKS.ADMINISTRATION_EE_LICENSE.build(),
     };
   }
 

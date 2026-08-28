@@ -1,39 +1,23 @@
-import { components } from 'tg.service/apiSchema.generated';
 import { Feature } from 'tg.service/apiSchemaTypes';
+import { ContextOrganizationModel } from 'tg.globalContext/types';
+import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
-type PrivateOrganization = components['schemas']['PrivateOrganizationModel'];
-
-export const organizationHasSupportChat = (
-  organization: PrivateOrganization | undefined
-): boolean =>
-  isOrganizationEntitledTo(organization, 'STANDARD_SUPPORT') ||
-  isOrganizationEntitledTo(organization, 'PREMIUM_SUPPORT');
-
-export const organizationCompanyInfo = (
-  organization: PrivateOrganization | undefined
-) => {
-  const subscription = organization?.activeCloudSubscription;
-
-  if (!organization || !subscription) {
-    return null;
-  }
-
-  return {
-    company_id: organization.id,
-    name: organization.name,
-    plan: subscription.plan.name,
-    subscriptionStatus: subscription.status,
-    enabledFeatures: organization.enabledFeatures.join(', '),
-  };
-};
-
-const isOrganizationEntitledTo = (
-  organization: PrivateOrganization | undefined,
+export const memberIsEntitledTo = (
+  organization: ContextOrganizationModel | undefined,
   feature: Feature
-): boolean => {
-  if (!organization || organization.limitedView) {
-    return false;
-  }
+): boolean =>
+  isAtLeastMemberOrgRole(organization?.currentUserRole) &&
+  organizationOwnedFeatures(organization).includes(feature);
 
-  return organization.enabledFeatures.includes(feature);
-};
+export const memberCloudSubscription = (
+  organization: ContextOrganizationModel | undefined
+) =>
+  isAtLeastMemberOrgRole(organization?.currentUserRole)
+    ? organization?.activeCloudSubscription
+    : undefined;
+
+const NO_FEATURES: Feature[] = [];
+
+export const organizationOwnedFeatures = (
+  organization: ContextOrganizationModel | undefined
+): Feature[] => organization?.enabledFeatures ?? NO_FEATURES;

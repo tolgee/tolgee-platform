@@ -1,29 +1,30 @@
-import { useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { usePreferredOrganizationResolution } from 'tg.globalContext/helpers';
 
 export const PreferredOrganizationRedirect = () => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const history = useHistory();
   const location = useLocation();
+  const resolution = usePreferredOrganizationResolution();
 
-  useEffect(() => {
-    if (preferredOrganization) {
-      const queryParameters = new URLSearchParams(location.search);
-      const path = queryParameters.get('path');
-      const fullPath = [
-        LINKS.ORGANIZATION.build({
-          [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-        }),
-        path,
-      ]
-        .filter(Boolean)
-        .join('/');
-      history.replace(fullPath);
-    }
-  }, [preferredOrganization]);
-  return <BoxLoading />;
+  if (resolution.status === 'resolving') {
+    return <FullPageLoading />;
+  }
+
+  if (resolution.status === 'missing') {
+    return <Redirect to={LINKS.COMMUNITY_PROJECTS.build()} />;
+  }
+
+  const path = new URLSearchParams(location.search).get('path');
+  const target = [
+    LINKS.ORGANIZATION.build({
+      [PARAMS.ORGANIZATION_SLUG]: resolution.organization.slug,
+    }),
+    path,
+  ]
+    .filter(Boolean)
+    .join('/');
+
+  return <Redirect to={target} />;
 };

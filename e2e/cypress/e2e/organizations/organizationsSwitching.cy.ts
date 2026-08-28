@@ -7,6 +7,7 @@ import {
   switchToOrganization,
   switchToOrganizationWithSearch,
 } from '../../common/shared';
+import { organizationSettingsMenuItem } from '../../common/organizationSettingsMenu';
 
 describe('Organization switching', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -51,13 +52,12 @@ describe('Organization switching', () => {
     assertOrganizationIsPreferred('Tolgee');
   });
 
-  it('switches correctly when in organization settings', () => {
+  it('adopts the newly routed organization while staying inside organization settings', () => {
     visitMembers();
     switchToOrganization('Microsoft');
     cy.waitForDom();
-    gcy('settings-menu-item')
-      .contains('Organization profile')
-      .should('have.class', 'selected');
+    organizationSettingsMenuItem('profile').should('have.class', 'selected');
+    assertOrganizationIsPreferred('Microsoft');
   });
 
   it('switches organization correctly from user menu', () => {

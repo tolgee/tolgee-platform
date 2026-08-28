@@ -1,100 +1,56 @@
-import { components } from 'tg.service/apiSchema.generated';
 import {
-  organizationCompanyInfo,
-  organizationHasSupportChat,
+  organizationOwnedFeatures,
+  memberIsEntitledTo,
 } from 'tg.fixtures/organizationEntitlement';
+import { organization } from 'tg.fixtures/__tests__/organizationTestData';
 
-type PrivateOrganization = components['schemas']['PrivateOrganizationModel'];
-type CloudSubscription = NonNullable<
-  PrivateOrganization['activeCloudSubscription']
->;
-
-const organization = (
-  data: Partial<PrivateOrganization>
-): PrivateOrganization =>
-  ({
-    id: 1,
-    name: 'Org',
-    slug: 'org',
-    basePermissions: {},
-    enabledFeatures: [],
-    limitedView: false,
-    ...data,
-  } as PrivateOrganization);
-
-const subscription = (): CloudSubscription =>
-  ({
-    plan: { name: 'Premium' },
-    status: 'ACTIVE',
-  } as CloudSubscription);
-
-describe('organizationHasSupportChat', () => {
-  it('accepts either support tier', () => {
-    expect(
-      organizationHasSupportChat(
-        organization({ enabledFeatures: ['STANDARD_SUPPORT'] })
-      )
-    ).toBe(true);
-    expect(
-      organizationHasSupportChat(
-        organization({ enabledFeatures: ['PREMIUM_SUPPORT'] })
-      )
-    ).toBe(true);
-  });
-
-  it('rejects an organization with neither support tier', () => {
-    expect(organizationHasSupportChat(organization({}))).toBe(false);
-  });
-
-  it('rejects both support tiers on a limited-view organization', () => {
-    expect(
-      organizationHasSupportChat(
-        organization({
-          limitedView: true,
-          enabledFeatures: ['STANDARD_SUPPORT'],
-        })
-      )
-    ).toBe(false);
-    expect(
-      organizationHasSupportChat(
-        organization({
-          limitedView: true,
-          enabledFeatures: ['PREMIUM_SUPPORT'],
-        })
-      )
-    ).toBe(false);
-  });
-
-  it('rejects a viewer without any organization', () => {
-    expect(organizationHasSupportChat(undefined)).toBe(false);
-  });
-});
-
-describe('organizationCompanyInfo', () => {
-  it('maps an organization that has an active cloud subscription', () => {
-    expect(
-      organizationCompanyInfo(
-        organization({
-          id: 42,
-          name: 'Acme',
-          enabledFeatures: ['STANDARD_SUPPORT', 'TASKS'],
-          activeCloudSubscription: subscription(),
-        })
-      )
-    ).toEqual({
-      company_id: 42,
-      name: 'Acme',
-      plan: 'Premium',
-      subscriptionStatus: 'ACTIVE',
-      enabledFeatures: 'STANDARD_SUPPORT, TASKS',
+describe('organizationOwnedFeatures vs memberIsEntitledTo', () => {
+  it('reports whatever features the payload carries, whatever the viewer role', () => {
+    const roleless = organization({
+      currentUserRole: undefined,
+      enabledFeatures: ['GLOSSARY'],
     });
+
+    expect(organizationOwnedFeatures(roleless)).toContain('GLOSSARY');
+    expect(memberIsEntitledTo(roleless, 'GLOSSARY')).toBe(false);
   });
 
-  it('returns null for an organization without a cloud subscription', () => {
-    expect(organizationCompanyInfo(organization({}))).toBeNull();
+  it("carries a limited-view organization's own features, but entitles the viewer to none", () => {
+    const limitedView = organization({
+      limitedView: true,
+      currentUserRole: undefined,
+      enabledFeatures: ['GLOSSARY'],
+    });
+
+    // A project inherits its organization's features whoever is browsing it, so the array is not
+    // redacted; membership is what `memberIsEntitledTo` answers, and there is none.
+    expect(organizationOwnedFeatures(limitedView)).toEqual(['GLOSSARY']);
+    expect(memberIsEntitledTo(limitedView, 'GLOSSARY')).toBe(false);
   });
 
-  it('returns null for a viewer without any organization', () => {
-    expect(organizationCompanyInfo(undefined)).toBeNull();
+  it('reports both for an organization the viewer belongs to', () => {
+    const own = organization({
+      enabledFeatures: ['GLOSSARY'],
+      currentUserRole: 'MEMBER',
+    });
+
+    expect(organizationOwnedFeatures(own)).toContain('GLOSSARY');
+    expect(memberIsEntitledTo(own, 'GLOSSARY')).toBe(true);
+  });
+
+  it('refuses the viewer entitlement to an admin reading a customer organization unlimited', () => {
+    const customer = organization({
+      enabledFeatures: ['GLOSSARY'],
+      limitedView: false,
+      currentUserRole: undefined,
+    });
+
+    expect(organizationOwnedFeatures(customer)).toContain('GLOSSARY');
+    expect(memberIsEntitledTo(customer, 'GLOSSARY')).toBe(false);
+  });
+
+  it('reports nothing without an organization', () => {
+    expect(organizationOwnedFeatures(undefined)).toEqual([]);
+    expect(memberIsEntitledTo(undefined, 'GLOSSARY')).toBe(false);
   });
 });

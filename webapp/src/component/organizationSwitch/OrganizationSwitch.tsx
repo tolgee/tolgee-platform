@@ -7,15 +7,11 @@ import { OrganizationItem } from './OrganizationItem';
 import { CommunityTranslationItem } from './CommunityTranslationItem';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import {
-  useHasCommunityContributions,
-  usePreferredOrganization,
-} from 'tg.globalContext/helpers';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { OrganizationPopover } from './OrganizationPopover';
+import { useOrganizationSwitchShape } from 'tg.component/organizationSwitch/useOrganizationSwitchShape';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-
-export type SwitchSurface = 'organization' | 'community';
 
 const StyledLink = styled(Link, {
   shouldForwardProp: (prop) => prop !== 'plain',
@@ -30,20 +26,17 @@ const StyledLink = styled(Link, {
 
 type Props = {
   onSelect?: (organization: OrganizationModel) => void;
-  selectedSurface?: SwitchSurface;
   plain?: boolean;
 };
 
 export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
   onSelect,
-  selectedSurface = 'organization',
   plain,
 }) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
-  const hasCommunityContributions = useHasCommunityContributions();
   const history = useHistory();
 
   const handleClose = () => {
@@ -56,8 +49,9 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
 
   const handleSelectOrganization = async (organization: OrganizationModel) => {
     handleClose();
-    await updatePreferredOrganization(organization.id);
-    onSelect?.(organization);
+    if (await updatePreferredOrganization(organization.id)) {
+      onSelect?.(organization);
+    }
   };
 
   const handleCreateNewOrg = () => {
@@ -65,12 +59,18 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
     history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
 
-  const isCommunitySurface = selectedSurface === 'community';
+  const handleCommunity = () => {
+    handleClose();
+    history.push(LINKS.COMMUNITY_PROJECTS.build());
+  };
 
-  if (!preferredOrganization) {
-    if (!isCommunitySurface) {
-      return null;
-    }
+  const shape = useOrganizationSwitchShape();
+
+  if (shape.render === 'hidden') {
+    return null;
+  }
+
+  if (shape.render === 'community-label') {
     return (
       <Box display="flex" overflow="hidden">
         <CommunityTranslationItem />
@@ -78,11 +78,14 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
     );
   }
 
-  const switchLabel = isCommunitySurface ? (
-    <CommunityTranslationItem />
-  ) : (
-    <OrganizationItem data={preferredOrganization} />
-  );
+  const switchLabel =
+    // `&& preferredOrganization` narrows for the compiler; the rule itself lives in
+    // organizationSwitchShape, which only answers 'organization' when there is one.
+    shape.label === 'organization' && preferredOrganization ? (
+      <OrganizationItem data={preferredOrganization} />
+    ) : (
+      <CommunityTranslationItem />
+    );
 
   return (
     <Box display="flex" data-cy="organization-switch" overflow="hidden">
@@ -94,16 +97,14 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
       <OrganizationPopover
         open={isOpen}
         onClose={handleClose}
-        selected={preferredOrganization}
+        selectedId={
+          shape.communitySelected ? undefined : preferredOrganization?.id
+        }
         onSelect={handleSelectOrganization}
         anchorEl={anchorEl.current!}
         onAddNew={handleCreateNewOrg}
-        communitySelected={isCommunitySurface}
-        onCommunityNavigate={
-          hasCommunityContributions
-            ? () => history.push(LINKS.COMMUNITY_PROJECTS.build())
-            : undefined
-        }
+        offersCommunityFooter={shape.offersCommunityFooter}
+        onCommunity={handleCommunity}
       />
     </Box>
   );

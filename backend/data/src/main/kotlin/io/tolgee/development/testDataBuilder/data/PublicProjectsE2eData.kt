@@ -1,20 +1,16 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
 class PublicProjectsE2eData(
   count: Int = 6,
-  scenario: Scenario = Scenario.FULL,
+  withCommunityPersonas: Boolean = true,
+  withForeignOrgProject: Boolean = true,
 ) : BaseTestData("publicProjectsUser", "Private project") {
-  enum class Scenario {
-    FULL,
-
-    /** Omits the extra personas and the foreign-organization project. */
-    MINIMAL,
-  }
-
   init {
     root.apply {
       val communityUserBuilder =
@@ -23,43 +19,11 @@ class PublicProjectsE2eData(
           name = "Community User"
         }
 
-      addUserAccountWithoutOrganization {
-        username = "orgLessCommunityUser"
-        name = "Org Less Community User"
+      if (withCommunityPersonas) {
+        addCommunityPersonas(communityUserBuilder)
       }
 
-      if (scenario == Scenario.FULL) {
-        val supporterBuilder =
-          addUserAccountWithoutOrganization {
-            username = "supporterCommunityUser"
-            name = "Supporter Community User"
-            role = UserAccount.Role.SUPPORTER
-          }
-
-        val dualOrgBuilder =
-          addUserAccount {
-            username = "dualOrgCommunityUser"
-            name = "Dual Org Member"
-          }
-
-        // Without this the server picks the organization this user only belongs to.
-        dualOrgBuilder.build {
-          setUserPreferences {
-            preferredOrganization = dualOrgBuilder.defaultOrganizationBuilder.self
-          }
-        }
-
-        communityUserBuilder.defaultOrganizationBuilder.build {
-          addRole {
-            user = supporterBuilder.self
-            type = OrganizationRoleType.MEMBER
-          }
-          addRole {
-            user = dualOrgBuilder.self
-            type = OrganizationRoleType.MEMBER
-          }
-        }
-
+      if (withForeignOrgProject) {
         addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {
           name = "Community Outsider"
           public = true
@@ -76,6 +40,66 @@ class PublicProjectsE2eData(
         }.build {
           addBaseLanguage()
         }
+      }
+    }
+  }
+
+  private fun TestDataBuilder.addCommunityPersonas(communityUserBuilder: UserAccountBuilder) {
+    addUserAccountWithoutOrganization {
+      username = "orgLessCommunityUser"
+      name = "Org Less Community User"
+    }
+
+    val membersOnlyBuilder =
+      addUserAccountWithoutOrganization {
+        username = "membersOnlyUser"
+        name = "Members Only User"
+      }
+
+    val membersOnlyOrganization =
+      addOrganization {
+        name = "Members Only Outfit"
+      }.build {
+        addRole {
+          user = membersOnlyBuilder.self
+          type = OrganizationRoleType.OWNER
+        }
+      }
+
+    addProject(organizationOwner = membersOnlyOrganization.self) {
+      name = "Members only private project"
+      public = false
+    }.build {
+      addBaseLanguage()
+    }
+
+    val supporterBuilder =
+      addUserAccountWithoutOrganization {
+        username = "supporterCommunityUser"
+        name = "Supporter Community User"
+        role = UserAccount.Role.SUPPORTER
+      }
+
+    val dualOrgBuilder =
+      addUserAccount {
+        username = "dualOrgCommunityUser"
+        name = "Dual Org Member"
+      }
+
+    dualOrgBuilder.build {
+      setUserPreferences {
+        preferredOrganization = dualOrgBuilder.defaultOrganizationBuilder.self
+      }
+    }
+
+    communityUserBuilder.defaultOrganizationBuilder.build {
+      addRole {
+        user = supporterBuilder.self
+        type = OrganizationRoleType.MEMBER
+      }
+      addRole {
+        user = dualOrgBuilder.self
+        type = OrganizationRoleType.MEMBER
       }
     }
   }

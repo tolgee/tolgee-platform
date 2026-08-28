@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
+
+import {
+  LimitErrorEvent,
+  limitErrorCounters,
+  noLimitErrors,
+} from 'tg.fixtures/limitErrorCounters';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
-type UsageModel = components['schemas']['PublicUsageModel'];
 
 type Props = {
   organization?: OrganizationModel;
@@ -18,11 +23,8 @@ export const useOrganizationUsageService = ({
   const isOrganizationMember = isAtLeastMemberOrgRole(
     organization?.currentUserRole
   );
-  const [organizationUsage, setOrganizationUsage] = useState<
-    UsageModel | undefined
-  >(undefined);
-  const [planLimitErrors, setPlanLimitErrors] = useState(0);
-  const [spendingLimitErrors, setSpendingLimitErrors] = useState(0);
+  const [counters, setCounters] = useState(() => noLimitErrors());
+  const { planLimitErrors, spendingLimitErrors } = counters;
 
   const usageEnabled =
     organization?.id !== undefined && enabled && isOrganizationMember;
@@ -42,55 +44,29 @@ export const useOrganizationUsageService = ({
       refetchOnMount: false,
       cacheTime: Infinity,
       enabled: usageEnabled,
-      onSuccess(data) {
-        setOrganizationUsage(data);
-      },
     },
   });
 
-  const updateUsageData = (data: Partial<UsageModel>) =>
-    setOrganizationUsage((val) =>
-      val
-        ? {
-            ...val,
-            ...data,
-          }
-        : val
+  useEffect(() => {
+    setCounters((state) =>
+      limitErrorCounters(state, { kind: 'organization-changed' })
     );
+  }, [organization?.id]);
 
-  const incrementPlanLimitErrors = () => {
-    setPlanLimitErrors((v) => v + 1);
-  };
+  const organizationUsage = usageLoadable.data;
 
-  const incrementSpendingLimitErrors = () => {
-    setSpendingLimitErrors((v) => v + 1);
-  };
+  const report = (event: LimitErrorEvent) =>
+    setCounters((state) => limitErrorCounters(state, event));
 
-  /**
-   * For MT credit error, we want to show the error only once.
-   * We don't want to disturb the translators that much with the error.
-   */
-  const increaseCreditPlanLimitErrors = () => {
-    setPlanLimitErrors((v) => {
-      if (v > 0) {
-        return v;
-      }
-      return v + 1;
-    });
-  };
+  const incrementPlanLimitErrors = () => report({ kind: 'plan-limit' });
 
-  /**
-   * For MT credit error, we want to show the error only once.
-   * We don't want to disturb the translators that much with the error.
-   */
-  const increaseCreditSpendingLimitErrors = () => {
-    setSpendingLimitErrors((v) => {
-      if (v > 0) {
-        return v;
-      }
-      return v + 1;
-    });
-  };
+  const incrementSpendingLimitErrors = () => report({ kind: 'spending-limit' });
+
+  const increaseCreditPlanLimitErrors = () =>
+    report({ kind: 'credit-plan-limit' });
+
+  const increaseCreditSpendingLimitErrors = () =>
+    report({ kind: 'credit-spending-limit' });
 
   const refetchUsage = () => {
     if (usageEnabled) {
@@ -112,7 +88,6 @@ export const useOrganizationUsageService = ({
     },
     actions: {
       refetchUsage,
-      updateUsageData,
       incrementPlanLimitErrors,
       incrementSpendingLimitErrors,
       increaseCreditPlanLimitErrors,

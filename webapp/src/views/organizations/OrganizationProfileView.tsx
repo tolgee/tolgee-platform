@@ -10,7 +10,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { messageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
@@ -19,7 +19,11 @@ import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { useIsAdmin } from 'tg.globalContext/helpers';
-import { isAtLeastMemberOrgRole } from 'tg.fixtures/organizationRole';
+import {
+  isAtLeastMemberOrgRole,
+  canManageOrganization,
+} from 'tg.fixtures/organizationRole';
+import { useOrganizationLoadable } from 'tg.views/organizations/useOrganization';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -34,11 +38,7 @@ export const OrganizationProfileView: FunctionComponent<
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 
-  const organization = useApiQuery({
-    url: '/v2/organizations/{slug}',
-    method: 'get',
-    path: { slug: organizationSlug },
-  });
+  const organization = useOrganizationLoadable();
 
   const editOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
@@ -54,8 +54,11 @@ export const OrganizationProfileView: FunctionComponent<
 
   const isAdmin = useIsAdmin();
 
-  const readOnly = organization.data?.currentUserRole !== 'OWNER' && !isAdmin;
-  const hasNoRole = !isAtLeastMemberOrgRole(organization.data?.currentUserRole);
+  const readOnly = !canManageOrganization(
+    organization.data?.currentUserRole,
+    isAdmin
+  );
+  const isMember = isAtLeastMemberOrgRole(organization.data?.currentUserRole);
 
   const onSubmit = (values: OrganizationBody) => {
     const toSave = {
@@ -151,7 +154,7 @@ export const OrganizationProfileView: FunctionComponent<
                 color="secondary"
                 variant="outlined"
                 onClick={handleLeave}
-                disabled={hasNoRole}
+                disabled={!isMember}
               >
                 <T keyName="organization_leave_button" />
               </Button>
@@ -164,29 +167,32 @@ export const OrganizationProfileView: FunctionComponent<
           </>
         </StandardForm>
 
-        <Box mt={2} mb={1}>
-          <Typography variant={'h5'}>
-            <T keyName="project_settings_danger_zone_title" />
-          </Typography>
-        </Box>
-        <DangerZone
-          actions={[
-            {
-              description: (
-                <T keyName="this_will_delete_organization_forever" />
-              ),
-              button: (
-                <DangerButton
-                  onClick={handleDelete}
-                  disabled={readOnly}
-                  data-cy="organization-profile-delete-button"
-                >
-                  <T keyName="organization_delete_button" />
-                </DangerButton>
-              ),
-            },
-          ]}
-        />
+        {!readOnly && (
+          <>
+            <Box mt={2} mb={1}>
+              <Typography variant={'h5'}>
+                <T keyName="project_settings_danger_zone_title" />
+              </Typography>
+            </Box>
+            <DangerZone
+              actions={[
+                {
+                  description: (
+                    <T keyName="this_will_delete_organization_forever" />
+                  ),
+                  button: (
+                    <DangerButton
+                      onClick={handleDelete}
+                      data-cy="organization-profile-delete-button"
+                    >
+                      <T keyName="organization_delete_button" />
+                    </DangerButton>
+                  ),
+                },
+              ]}
+            />
+          </>
+        )}
       </Box>
     </BaseOrganizationSettingsView>
   );

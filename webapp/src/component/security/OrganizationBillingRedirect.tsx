@@ -1,34 +1,41 @@
-import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { LINKS } from 'tg.constants/links';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import {
+  useBillingRefusal,
+  usePreferredOrganizationResolution,
+} from 'tg.globalContext/helpers';
+import { NoPermissionsView } from 'tg.component/common/NoPermissionsView';
+import { billingLinkFor } from 'tg.fixtures/billingLink';
 
 type Props = {
   selfHosted: boolean;
 };
 
 export const OrganizationBillingRedirect = ({ selfHosted }: Props) => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const history = useHistory();
+  const resolution = usePreferredOrganizationResolution();
+  const refusal = useBillingRefusal();
 
-  useEffect(() => {
-    if (preferredOrganization) {
-      if (selfHosted) {
-        history.replace(
-          LINKS.ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE.build({
-            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-          })
-        );
-      } else {
-        history.replace(
-          LINKS.ORGANIZATION_BILLING.build({
-            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-          })
-        );
-      }
-    }
-  }, [preferredOrganization, selfHosted]);
-  return <FullPageLoading />;
+  if (resolution.status === 'resolving') {
+    return <FullPageLoading />;
+  }
+
+  if (resolution.status === 'missing') {
+    return <Redirect to={LINKS.COMMUNITY_PROJECTS.build()} />;
+  }
+
+  if (refusal === 'billing-disabled') {
+    return <Redirect to={LINKS.PROJECTS.build()} />;
+  }
+
+  if (refusal) {
+    return <NoPermissionsView reason={refusal} />;
+  }
+
+  return (
+    <Redirect
+      to={billingLinkFor({ slug: resolution.organization.slug, selfHosted })}
+    />
+  );
 };

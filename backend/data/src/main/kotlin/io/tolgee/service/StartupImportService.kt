@@ -151,7 +151,7 @@ class StartupImportService(
         .toList()
 
     val project =
-      projectCreationService.createProject(
+      projectCreationService.createProjectWithoutAuthorization(
         CreateProjectRequest(
           name = projectName,
           languages = languages,

@@ -6,9 +6,9 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.facade.PrivateOrganizationModelFacade
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -21,18 +21,17 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/preferred-organization"])
 @Tag(name = "Preferred organization")
 class PreferredOrganizationController(
-  private val preferredOrganizationFacade: PreferredOrganizationFacade,
+  private val privateOrganizationModelFacade: PrivateOrganizationModelFacade,
 ) {
   @GetMapping("")
   @Operation(
     summary = "Get preferred organization",
     description =
-      "Returns preferred organization. " +
-        "If server allows users to create organization, preferred organization is automatically created " +
-        "if user doesn't have access to any organization.",
+      "Returns the preferred organization, or 403 when the user has none they can view.",
   )
   @OpenApiHideFromPublicDocs
   fun getPreferred(): PrivateOrganizationModel {
-    return preferredOrganizationFacade.getPreferred() ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
+    return privateOrganizationModelFacade.getPreferred()
+      ?: throw PermissionException(Message.CANNOT_CREATE_ORGANIZATION)
   }
 }

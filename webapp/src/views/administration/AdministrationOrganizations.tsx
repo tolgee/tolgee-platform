@@ -89,9 +89,10 @@ export const AdministrationOrganizations = ({
                     <Button
                       data-cy="administration-organizations-projects-button"
                       variant="contained"
-                      onClick={() => {
-                        updatePreferredOrganization(o.id);
-                        history.push(LINKS.PROJECTS.build());
+                      onClick={async () => {
+                        if (await updatePreferredOrganization(o.id)) {
+                          history.push(LINKS.PROJECTS.build());
+                        }
                       }}
                     >
                       <T keyName="administration_organization_projects" />

@@ -7,6 +7,9 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.UserStorageResponse
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.facade.PrivateOrganizationModelFacade
+import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.userPreferences.UserPreferencesModel
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
@@ -14,6 +17,7 @@ import io.tolgee.security.authentication.BypassForcedSsoAuthentication
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserPreferencesService
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,6 +35,7 @@ class UserPreferencesController(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val organizationService: OrganizationService,
+  private val privateOrganizationModelFacade: PrivateOrganizationModelFacade,
 ) {
   @GetMapping("")
   @Operation(summary = "Get user's preferences")
@@ -54,12 +59,15 @@ class UserPreferencesController(
 
   @PutMapping("/set-preferred-organization/{organizationId}")
   @Operation(summary = "Set user preferred organization")
+  @Transactional
   fun setPreferredOrganization(
     @PathVariable organizationId: Long,
-  ) {
+  ): PrivateOrganizationModel {
     val organization = organizationService.get(organizationId)
-    organizationRoleService.checkUserCanViewOrPublic(organization.id)
+    organizationRoleService.checkUserCanViewOrPublic(organizationId)
     userPreferencesService.setPreferredOrganization(organization, authenticationFacade.authenticatedUserEntity)
+    return privateOrganizationModelFacade.getPrivateModelWithoutAuthorization(organizationId)
+      ?: throw NotFoundException()
   }
 
   @GetMapping("/storage/{fieldName}")

@@ -23,7 +23,7 @@ class ProjectCreationService(
 ) {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectRequest): Project {
+  fun createProjectWithoutAuthorization(dto: CreateProjectRequest): Project {
     val project = Project()
     project.name = dto.name
     project.icuPlaceholders = dto.icuPlaceholders

@@ -7,12 +7,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.api.isMfaEnabled
-import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.facade.PrivateOrganizationModelFacade
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
@@ -66,7 +66,7 @@ class V2UserController(
   private val publicSsoTenantModelAssembler: PublicSsoTenantModelAssembler,
   private val imageUploadService: ImageUploadService,
   private val organizationService: OrganizationService,
-  private val preferredOrganizationFacade: PreferredOrganizationFacade,
+  private val privateOrganizationModelFacade: PrivateOrganizationModelFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
@@ -245,7 +245,7 @@ class V2UserController(
     val userAccount = authenticationFacade.authenticatedUser
     val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return ResponseEntity.noContent().build()
     val model =
-      preferredOrganizationFacade.getPrivateModel(org.id)
+      privateOrganizationModelFacade.getPrivateModelWithoutAuthorization(org.id)
         ?: return ResponseEntity.noContent().build()
     return ResponseEntity.ok(model)
   }

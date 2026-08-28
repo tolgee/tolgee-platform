@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.EeSubscriptionProvider
-import io.tolgee.component.PreferredOrganizationFacade
+import io.tolgee.facade.PrivateOrganizationModelFacade
 import io.tolgee.hateoas.auth.AuthInfoModelAssembler
 import io.tolgee.hateoas.initialData.InitialDataEeSubscriptionModel
 import io.tolgee.hateoas.initialData.InitialDataModel
@@ -33,7 +33,7 @@ class InitialDataController(
   private val configurationController: ConfigurationController,
   private val authenticationFacade: AuthenticationFacade,
   private val userPreferencesService: UserPreferencesService,
-  private val preferredOrganizationFacade: PreferredOrganizationFacade,
+  private val privateOrganizationModelFacade: PrivateOrganizationModelFacade,
   private val announcementController: AnnouncementController,
   private val tenantService: TenantService,
   private val authInfoModelAssembler: AuthInfoModelAssembler,
@@ -59,7 +59,7 @@ class InitialDataController(
       data.authInfo = authInfoModelAssembler.toModel(authenticationFacade.authentication)
       data.userInfo = privateUserAccountModelAssembler.toModel(userAccountView)
       data.ssoInfo = tenant?.let { publicSsoTenantModelAssembler.toModel(it) }
-      data.preferredOrganization = preferredOrganizationFacade.getPreferred()
+      data.preferredOrganization = privateOrganizationModelFacade.getPreferred()
       data.languageTag = userPreferencesService.find(userAccount.id)?.language
       data.announcement = announcementController.getLatest()
       data.eeSubscription = getEeSubscriptionModel()

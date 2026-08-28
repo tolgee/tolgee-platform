@@ -19,7 +19,7 @@ open class PrivateOrganizationModel(
   val activeCloudSubscription: PublicCloudSubscriptionModel?,
   @get:Schema(
     example = "false",
-    description = "Whether the user views the organization purely via public-project access",
+    description = "True when the viewer reaches this organization only through its public projects",
   )
   val limitedView: Boolean,
 ) : RepresentationModel<PrivateOrganizationModel>(),

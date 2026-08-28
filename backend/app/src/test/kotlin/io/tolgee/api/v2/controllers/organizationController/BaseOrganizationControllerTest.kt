@@ -36,7 +36,7 @@ class BaseOrganizationControllerTest : AuthorizedControllerTest() {
   protected fun withOwnerInOrganization(
     fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit,
   ) {
-    executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+    executeInNewTransaction { this.organizationService.createWithoutAuthorization(dummyDto, userAccount!!) }
       .let { organization ->
         dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
           OrganizationRole(

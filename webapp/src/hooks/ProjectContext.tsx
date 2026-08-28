@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createProvider } from 'tg.fixtures/createProvider';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BatchJobProgress } from 'tg.websocket-client/WebsocketClient';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useOrganizationAdoption } from 'tg.globalContext/useOrganizationAdoption';
 import { GlobalError } from '../error/GlobalError';
 import { useApiQuery } from '../service/http/useQueryApi';
 import {
@@ -132,15 +132,12 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       }
     }, [id, client]);
 
-    const { updatePreferredOrganization } = usePreferredOrganization();
+    const { awaitingFirstOrganization } = useOrganizationAdoption(
+      project.data?.organizationOwner?.id
+    );
 
-    useEffect(() => {
-      if (project.data?.organizationOwner) {
-        updatePreferredOrganization(project.data.organizationOwner.id);
-      }
-    }, [project.data]);
-
-    const isLoading = project.isLoading || settings.isLoading;
+    const isLoading =
+      project.isLoading || settings.isLoading || awaitingFirstOrganization;
 
     useGlobalLoading(isLoading);
 

@@ -164,7 +164,7 @@ export const getTextAreaByName = (name: string): Chainable => {
 };
 
 export const switchToOrganizationWithSearch = (name: string): Chainable => {
-  cy.gcy('organization-switch').click();
+  openOrganizationSwitch();
   cy.gcy('switch-popover-search').type(name);
   cy.waitForDom();
 
@@ -181,10 +181,14 @@ export const switchToOrganization = (name: string): Chainable => {
   return assertSwitchedToOrganization(name);
 };
 
-export const selectOrganizationInSwitch = (name: string): Chainable => {
+export const openOrganizationSwitch = () => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
+};
+
+export const selectOrganizationInSwitch = (name: string): Chainable => {
+  openOrganizationSwitch();
   return cy.gcy('switch-popover-item').contains(name).scrollIntoView().click();
 };
 
@@ -223,6 +227,11 @@ export const visitProjectDeveloperStorage = (projectId: number) => {
 
 export const visitProjectDeveloperHooks = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/developer/webhooks`);
+};
+
+export const visitRootAndSettle = () => {
+  cy.visit(HOST);
+  waitForGlobalLoading();
 };
 
 export const dismissMenu = () => {

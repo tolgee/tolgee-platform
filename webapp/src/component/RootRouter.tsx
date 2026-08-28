@@ -7,7 +7,7 @@ import { AdministrationView } from 'tg.views/administration/AdministrationView';
 import { routes } from 'tg.ee';
 
 import { PrivateRoute } from './common/PrivateRoute';
-import { DashboardRouter } from './DashboardRouter';
+import { DashboardRouter } from 'tg.component/DashboardRouter';
 import { OrganizationBillingRedirect } from './security/OrganizationBillingRedirect';
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';

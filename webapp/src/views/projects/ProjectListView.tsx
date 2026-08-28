@@ -52,8 +52,7 @@ export const ProjectListView = () => {
     !isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) &&
     isAdminOrSupporter;
 
-  const { canCreateProject, isFetching } = useCanCreateProject();
-  const addAllowed = canCreateProject || isFetching;
+  const canCreateProject = useCanCreateProject();
 
   const showSearch = useLatchedSearchVisibility(
     listPermitted.data?.page?.totalElements,
@@ -79,7 +78,7 @@ export const ProjectListView = () => {
         maxWidth={1000}
         allCentered
         addComponent={
-          addAllowed && (
+          canCreateProject && (
             <QuickStartHighlight itemKey="add_project">
               <BaseViewAddButton
                 addLinkTo={LINKS.PROJECT_ADD.build()}
@@ -101,7 +100,7 @@ export const ProjectListView = () => {
             <EmptyListMessage
               loading={listPermitted.isFetching}
               hint={
-                addAllowed ? (
+                canCreateProject ? (
                   <Button
                     component={Link}
                     to={LINKS.PROJECT_ADD.build()}

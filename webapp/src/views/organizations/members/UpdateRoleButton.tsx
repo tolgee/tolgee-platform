@@ -14,6 +14,7 @@ import { useOrganization } from '../useOrganization';
 export const UpdateRoleButton: FunctionComponent<
   React.PropsWithChildren<{
     user: components['schemas']['UserAccountWithOrganizationRoleModel'];
+    disabled?: boolean;
   }>
 > = (props) => {
   const queryClient = useQueryClient();
@@ -50,7 +51,9 @@ export const UpdateRoleButton: FunctionComponent<
     <RoleMenu
       onSelect={(role) => handleSet(role)}
       role={props.user.organizationRole}
-      buttonProps={{ disabled: props.user.id === currentUser?.id }}
+      buttonProps={{
+        disabled: props.disabled || props.user.id === currentUser?.id,
+      }}
     />
   );
 };

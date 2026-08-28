@@ -22,6 +22,7 @@ import { IncludedFeatures } from 'tg.ee.module/billing/component/Plan/IncludedFe
 import { IncludedUsage } from '../Plan/IncludedUsage';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { Link } from 'react-router-dom';
+import { memberCloudSubscription } from 'tg.fixtures/organizationEntitlement';
 
 const CustomWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -45,7 +46,7 @@ export const TrialChipTooltip: FC<
 > = ({ children, onOpen, open, onClose }) => {
   const { preferredOrganization: organization } = usePreferredOrganization();
 
-  const activeSubscription = organization?.activeCloudSubscription;
+  const activeSubscription = memberCloudSubscription(organization);
 
   const { subscriptionsLink } = useTrialInfo();
 

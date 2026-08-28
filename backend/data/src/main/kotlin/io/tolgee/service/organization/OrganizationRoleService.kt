@@ -47,16 +47,16 @@ class OrganizationRoleService(
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
-  fun canUserViewStrict(
-    userId: Long,
-    organizationId: Long,
-  ) = this.organizationRepository.canUserView(userId, organizationId)
-
   fun checkUserCanViewOrPublic(organizationId: Long) {
-    if (canUserViewOrPublic(authenticationFacade.authenticatedUser, organizationId)) {
-      return
+    if (!canUserViewOrPublic(authenticationFacade.authenticatedUser, organizationId)) {
+      throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
     }
-    throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
+  }
+
+  fun checkUserCanView(organizationId: Long) {
+    if (!canUserView(authenticationFacade.authenticatedUser, organizationId)) {
+      throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
+    }
   }
 
   fun canUserViewOrPublic(
@@ -72,41 +72,42 @@ class OrganizationRoleService(
     organizationId: Long,
   ): Boolean {
     if (user.isSupporterOrAdmin()) {
-      return organizationRepository.find(organizationId) != null
+      return staffCanReach(organizationId)
     }
     return canUserViewStrictOrPublic(user.id, organizationId)
+  }
+
+  fun canUserView(
+    user: UserAccountDto,
+    organizationId: Long,
+  ): Boolean {
+    if (user.isSupporterOrAdmin()) {
+      return staffCanReach(organizationId)
+    }
+    return canUserViewStrict(user.id, organizationId)
   }
 
   fun canUserViewAtLeastMember(
     user: UserAccountDto,
     organizationId: Long,
-  ): Boolean = user.isSupporterOrAdmin() || hasAnyOrganizationRole(user.id, organizationId)
+  ): Boolean {
+    if (user.isSupporterOrAdmin()) {
+      return staffCanReach(organizationId)
+    }
+    return hasAnyOrganizationRole(user.id, organizationId)
+  }
+
+  private fun staffCanReach(organizationId: Long) = organizationRepository.find(organizationId) != null
 
   fun canUserViewStrictOrPublic(
     userId: Long,
     organizationId: Long,
   ): Boolean = canUserViewStrict(userId, organizationId) || projectService.hasPublicProjects(organizationId)
 
-  fun checkUserCanView(organizationId: Long) {
-    checkUserCanView(
-      authenticationFacade.authenticatedUser,
-      organizationId,
-    )
-  }
-
-  private fun checkUserCanView(
-    user: UserAccountDto,
+  private fun canUserViewStrict(
+    userId: Long,
     organizationId: Long,
-  ) {
-    if (!user.isSupporterOrAdmin() &&
-      !canUserViewStrict(
-        user.id,
-        organizationId,
-      )
-    ) {
-      throw PermissionException(Message.USER_CANNOT_VIEW_THIS_ORGANIZATION)
-    }
-  }
+  ) = this.organizationRepository.canUserView(userId, organizationId)
 
   /**
    * Verifies the user has a role equal or higher than a given role.

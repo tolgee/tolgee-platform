@@ -27,7 +27,6 @@ import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectFeatureGuard
-import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -84,13 +83,16 @@ class SecurityService(
     return requestedProjectIds.filter { it in accessibleSet }
   }
 
-  fun checkAnyProjectPermission(projectId: Long) {
-    if (
-      getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !activeUser.isSupporterOrAdmin()
-    ) {
-      throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+  fun hasAnyProjectPermission(projectId: Long): Boolean {
+    val user = authenticationFacade.authenticatedUserOrNull ?: return false
+    // Before the staff bypass, which would otherwise answer true for a project that does not exist.
+    if (projectService.findDto(projectId) == null) {
+      return false
     }
+    if (user.isSupporterOrAdmin()) {
+      return true
+    }
+    return !getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty()
   }
 
   fun currentPermittedScopesContain(scope: Scope): Boolean {

@@ -1,6 +1,5 @@
 package io.tolgee.jobs.migration.allOrganizationOwner
 
-import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.OrganizationRepository
@@ -77,14 +76,7 @@ class AllOrganizationOwnerJobConfiguration {
       items.forEach { project ->
         val organization =
           organizationRepository.findUsersDefaultOrganization(project.userOwner!!)
-            ?: let {
-              val ownerName = project.userOwner!!.name
-              val ownerNameSafe = if (ownerName.length >= 3) ownerName else "$ownerName Organization"
-              organizationService.create(
-                OrganizationDto(name = ownerNameSafe),
-                project.userOwner!!,
-              )
-            }
+            ?: organizationService.createPreferredWithoutAuthorization(project.userOwner!!)
 
         val permission =
           permissionService.find(
@@ -117,7 +109,7 @@ class AllOrganizationOwnerJobConfiguration {
   val noRoleUserWriter: ItemWriter<UserAccount> =
     ItemWriter { items ->
       items.forEach { userAccount ->
-        organizationService.create(OrganizationDto(name = userAccount.name), userAccount)
+        organizationService.createPreferredWithoutAuthorization(userAccount)
       }
     }
 

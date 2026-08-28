@@ -2,10 +2,12 @@ package io.tolgee.unit
 
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
+import io.tolgee.dtos.queryResults.organization.QuickStartView
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.hateoas.permission.PermissionModel
+import io.tolgee.hateoas.quickStart.QuickStartModel
 import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
 import io.tolgee.publicBilling.CloudSubscriptionModelProvider
 import io.tolgee.publicBilling.PublicCloudSubscriptionModel
@@ -52,7 +54,7 @@ class PrivateOrganizationModelAssemblerTest {
   }
 
   @Test
-  fun `a below-member reader gets no subscription and maps the passed limitedView`() {
+  fun `a limited reader sees the organization's entitlements but not its subscription`() {
     setup()
 
     val model =
@@ -74,7 +76,7 @@ class PrivateOrganizationModelAssemblerTest {
   }
 
   @Test
-  fun `a below-member with standing gets no subscription but a non-limited view`() {
+  fun `a below-member with standing gets the entitlements but no subscription`() {
     setup()
 
     val model =
@@ -85,9 +87,32 @@ class PrivateOrganizationModelAssemblerTest {
         limitedView = false,
       )
 
+    model.enabledFeatures
+      .toSet()
+      .assert
+      .isEqualTo(setOf(Feature.GLOSSARY))
     model.limitedView.assert.isEqualTo(false)
     model.activeCloudSubscription.assert.isNull()
     verify(cloudSubscriptionModelProvider, never()).provide(any())
+  }
+
+  @Test
+  fun `it carries the viewer's quick start for the organization`() {
+    setup()
+    val quickStart = Mockito.mock(QuickStartView::class.java)
+    val quickStartModel = Mockito.mock(QuickStartModel::class.java)
+    whenever(view.quickStart).thenReturn(quickStart)
+    whenever(quickStartModelAssembler.toModel(quickStart)).thenReturn(quickStartModel)
+
+    val model =
+      underTest.toModel(
+        view,
+        arrayOf(Feature.GLOSSARY),
+        isAtLeastMember = true,
+        limitedView = false,
+      )
+
+    model.quickStart.assert.isEqualTo(quickStartModel)
   }
 
   @Test

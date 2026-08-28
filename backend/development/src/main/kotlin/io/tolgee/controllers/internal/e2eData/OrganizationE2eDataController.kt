@@ -27,7 +27,7 @@ class OrganizationE2eDataController(
   fun createOrganizations(): Map<String, Map<String, String>> {
     val organizations =
       data.map {
-        organizationService.create(
+        organizationService.createWithoutAuthorization(
           it.dto,
           this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name),
         )

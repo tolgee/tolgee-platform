@@ -1,16 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
+import { ContextOrganizationModel } from 'tg.globalContext/types';
 import { useTolgee } from '@tolgee/react';
+import {
+  SwitchHandlers,
+  OrganizationSwitchTo,
+  createOrganizationSwitchSequencer,
+} from 'tg.globalContext/organizationSwitchSequencer';
+import {
+  isSwitchInProgress,
+  noSwitchInProgress,
+  switchProgress,
+} from 'tg.fixtures/switchProgress';
 
 type PrivateOrganizationModel =
   components['schemas']['PrivateOrganizationModel'];
+
 type AnnouncementDto = components['schemas']['AnnouncementDto'];
 type QuickStartModel = components['schemas']['QuickStartModel'];
 type InitialDataModel = components['schemas']['InitialDataModel'];
 
 export const useInitialDataService = () => {
-  const [isSwitchingOrganization, setIsSwitchingOrganization] = useState(false);
+  const [progress, setProgress] = useState(noSwitchInProgress);
+  const switchHandlersRef = useRef<SwitchHandlers<PrivateOrganizationModel>>(
+    undefined as never
+  );
+  const switchToRef = useRef<OrganizationSwitchTo | undefined>(undefined);
+  if (!switchToRef.current) {
+    switchToRef.current = createOrganizationSwitchSequencer({
+      write: (organizationId) =>
+        switchHandlersRef.current.write(organizationId),
+      apply: (data) => switchHandlersRef.current.apply(data),
+      onRequested: (request) => switchHandlersRef.current.onRequested(request),
+      onSettled: (request) => switchHandlersRef.current.onSettled(request),
+    });
+  }
+  const switchTo = switchToRef.current;
+  const isSwitchingOrganization = isSwitchInProgress(progress);
   const tolgee = useTolgee();
 
   const [organization, setOrganization] = useState<
@@ -48,8 +75,6 @@ export const useInitialDataService = () => {
   useEffect(() => {
     // once initial data are loaded for first time
     if (initialData) {
-      // set organization data only if missing
-      setOrganization((org) => (org ? org : initialData.preferredOrganization));
       if (initialData.languageTag) {
         // switch ui language, once user is signed in
         tolgee.changeLanguage(initialData.languageTag);
@@ -57,14 +82,10 @@ export const useInitialDataService = () => {
     }
   }, [Boolean(initialData)]);
 
-  const preferredOrganizationLoadable = useApiMutation({
-    url: '/v2/preferred-organization',
-    method: 'get',
-  });
-
   const setPreferredOrganization = useApiMutation({
     url: '/v2/user-preferences/set-preferred-organization/{organizationId}',
     method: 'put',
+    options: { noGlobalLoading: true },
   });
 
   const dismissAnnouncementLoadable = useApiMutation({
@@ -143,27 +164,26 @@ export const useInitialDataService = () => {
   const preferredOrganization =
     organization ?? initialData?.preferredOrganization;
 
-  const updatePreferredOrganization = async (organizationId: number) => {
-    if (organizationId !== preferredOrganization?.id) {
-      setIsSwitchingOrganization(true);
-      try {
-        // set preferred organization
-        await setPreferredOrganization.mutateAsync({
-          path: { organizationId },
-        });
-
-        // load new preferred organization
-        const data = await preferredOrganizationLoadable.mutateAsync({});
-        setQuickStart(data.quickStart);
-        setOrganization(data);
-      } catch {
-        // the global API error handler already surfaced the failure; callers fire-and-forget
-        // this on every project open, so a rethrow would be an unhandled rejection
-      } finally {
-        setIsSwitchingOrganization(false);
-      }
-    }
+  switchHandlersRef.current = {
+    write: (organizationId: number) =>
+      setPreferredOrganization.mutateAsync({ path: { organizationId } }),
+    apply: (data) => {
+      setQuickStart(data.quickStart);
+      setOrganization(data);
+    },
+    onRequested: (request) =>
+      setProgress((state) =>
+        switchProgress(state, { kind: 'requested', request })
+      ),
+    onSettled: (request) =>
+      setProgress((state) =>
+        switchProgress(state, { kind: 'settled', request })
+      ),
   };
+
+  const updatePreferredOrganization = (
+    organizationId: number
+  ): Promise<boolean> => switchTo(organizationId, preferredOrganization?.id);
 
   const refetchInitialData = () => {
     setQuickStart(undefined);
@@ -188,21 +208,22 @@ export const useInitialDataService = () => {
     );
   };
 
-  const isFetching =
-    initialDataLoadable.isFetching ||
-    setPreferredOrganization.isLoading ||
-    preferredOrganizationLoadable.isLoading ||
-    dismissAnnouncementLoadable.isLoading ||
-    isSwitchingOrganization;
+  const publishedPreferredOrganization: ContextOrganizationModel | undefined =
+    useMemo(() => {
+      if (!preferredOrganization) {
+        return undefined;
+      }
+      const { quickStart: _quickStart, ...rest } = preferredOrganization;
+      return rest;
+    }, [preferredOrganization]);
 
   const state = initialData
     ? {
-        ...initialData!,
-        preferredOrganization: preferredOrganization
-          ? { ...preferredOrganization, quickStart }
-          : undefined,
+        ...initialData,
+        preferredOrganization: publishedPreferredOrganization,
+        quickStart,
         announcement,
-        isFetching,
+        isSwitchingOrganization,
       }
     : undefined;
 

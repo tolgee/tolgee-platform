@@ -3,10 +3,13 @@ package io.tolgee.component.reporting
 import com.posthog.server.PostHog
 import io.tolgee.component.reporting.PostHogGroupIdentifier.Companion.GROUP_TYPE
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
 import io.tolgee.util.filterValueNotNull
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -22,15 +25,16 @@ class PostHogBusinessEventReporter(
   private val userAccountService: UserAccountService,
   private val entityManager: EntityManager,
   private var postHogGroupIdentifier: PostHogGroupIdentifier?,
-) {
+  private val organizationRoleService: OrganizationRoleService,
+) : Logging {
   @Lazy
   @Autowired
   private lateinit var selfProxied: PostHogBusinessEventReporter
 
   @Async
-  fun captureAsync(data: OnBusinessEventToCaptureEvent) {
-    val filledData = fillOtherData(data)
-    captureWithPostHog(filledData)
+  fun captureAsync(published: OnBusinessEventToCaptureEvent) {
+    val filled = fillOtherData(published)
+    captureWithPostHog(filled, organizationMember(published.actorId(), filled.organizationId))
   }
 
   @EventListener
@@ -51,21 +55,32 @@ class PostHogBusinessEventReporter(
     )
   }
 
-  private fun captureWithPostHog(data: OnBusinessEventToCaptureEvent) {
+  private fun captureWithPostHog(
+    data: OnBusinessEventToCaptureEvent,
+    organizationMember: Boolean?,
+  ) {
+    if (isReservedEventName(data.eventName)) {
+      logger.warn("Refusing to report business event with a reserved name: {}", data.eventName)
+      return
+    }
+
     val id = data.userAccountDto?.id ?: data.instanceId ?: data.anonymousUserId
     val setEntry = getIdentificationMapForPostHog(data)
-
-    val map =
+    val clientSupplied = withoutReservedProperties((data.utmData ?: emptyMap()) + (data.data ?: emptyMap()))
+    val authorizedAttribution =
       mapOf(
         "${'$'}groups" to
           mapOf(
             "project" to data.projectDto?.id,
             GROUP_TYPE to data.organizationId,
           ),
+        "projectId" to data.projectDto?.id,
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
+        "organizationMember" to organizationMember,
         "glossaryId" to data.glossaryId,
-      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+      )
+    val map = clientSupplied + authorizedAttribution + setEntry
 
     postHog?.capture(
       id.toString(),
@@ -75,6 +90,11 @@ class PostHogBusinessEventReporter(
 
     postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)
   }
+
+  private fun isReservedEventName(eventName: String) = eventName.startsWith(RESERVED_PREFIX)
+
+  private fun withoutReservedProperties(properties: Map<String, Any?>) =
+    properties.filterKeys { !it.startsWith(RESERVED_PREFIX) }
 
   /**
    * PostHog accepts user information in $set property.
@@ -130,6 +150,16 @@ class PostHogBusinessEventReporter(
     )
   }
 
+  private fun OnBusinessEventToCaptureEvent.actorId(): Long? = userAccountId ?: userAccountDto?.id
+
+  private fun organizationMember(
+    actorId: Long?,
+    organizationId: Long?,
+  ): Boolean? {
+    if (actorId == null || organizationId == null) return null
+    return organizationRoleService.hasAnyOrganizationRole(actorId, organizationId)
+  }
+
   private fun findOwnerUserByOrganizationId(organizationId: Long?): Long? {
     organizationId ?: return null
     return entityManager
@@ -145,5 +175,9 @@ class PostHogBusinessEventReporter(
       ).setParameter("organizationId", organizationId)
       .resultList
       .firstOrNull()
+  }
+
+  companion object {
+    private const val RESERVED_PREFIX = '$'
   }
 }

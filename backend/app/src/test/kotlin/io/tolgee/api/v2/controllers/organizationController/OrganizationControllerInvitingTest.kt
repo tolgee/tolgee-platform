@@ -54,7 +54,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   fun testGetAllInvitations() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
+    this.organizationService.createWithoutAuthorization(dummyDto, helloUser).let { organization ->
       val invitation =
         invitationService.create(
           CreateOrganizationInvitationParams(
@@ -79,7 +79,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
     loginAsUser(helloUser.username)
 
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
+    this.organizationService.createWithoutAuthorization(dummyDto, helloUser).let { organization ->
       val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
       performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson {
         node("code").isString.hasSize(50).satisfies {
@@ -94,7 +94,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   fun testAcceptInvitation() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
+    this.organizationService.createWithoutAuthorization(dummyDto, helloUser).let { organization ->
       val invitation =
         invitationService.create(
           CreateOrganizationInvitationParams(
@@ -117,7 +117,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   fun `it prevents accepting invitation again already a member`() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
+    this.organizationService.createWithoutAuthorization(dummyDto, helloUser).let { organization ->
       val invitation =
         invitationService.create(
           CreateOrganizationInvitationParams(
@@ -150,7 +150,7 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
 
   private fun prepareTestOrganization(): Organization {
     val helloUser = dbPopulator.createUserIfNotExists(TEST_USERNAME)
-    val organization = organizationService.create(dummyDto, helloUser)
+    val organization = organizationService.createWithoutAuthorization(dummyDto, helloUser)
     loginAsUser(helloUser.username)
     return organization
   }

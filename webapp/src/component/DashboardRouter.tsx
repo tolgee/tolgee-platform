@@ -1,4 +1,4 @@
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 
 import { LINKS } from 'tg.constants/links';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
@@ -6,18 +6,19 @@ import { CommunityProjectsView } from 'tg.views/projects/CommunityProjectsView';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { RootView } from 'tg.views/RootView';
 
-import { PrivateRoute } from './common/PrivateRoute';
-import { RequirePreferredOrganization } from './common/RequirePreferredOrganization';
-import { HelpMenu } from './HelpMenu';
+import { PrivateRoute } from 'tg.component/common/PrivateRoute';
+import { RequirePreferredOrganization } from 'tg.component/common/RequirePreferredOrganization';
+import { HelpMenu } from 'tg.component/HelpMenu';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 
 export const DashboardRouter = () => {
+  const isEmailVerified = useIsEmailVerified();
+
   return (
     <>
       <Switch>
-        {/* Must stay above the gate: these are what a user with no preference
-            can reach, and ProjectContext is what then adopts one. */}
         <PrivateRoute exact path={LINKS.PROJECTS.template}>
-          <Redirect to={LINKS.ROOT.template} />
+          <Redirect to={LINKS.ROOT.build()} />
         </PrivateRoute>
         <PrivateRoute path={LINKS.PROJECTS.template}>
           <ProjectsRouter />
@@ -25,19 +26,20 @@ export const DashboardRouter = () => {
         <PrivateRoute exact path={LINKS.COMMUNITY_PROJECTS.template}>
           <CommunityProjectsView />
         </PrivateRoute>
-
-        <Route>
-          <RequirePreferredOrganization>
-            <Switch>
-              <PrivateRoute exact path={LINKS.ROOT.template}>
-                <RootView />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.ORGANIZATIONS.template}>
-                <OrganizationsRouter />
-              </PrivateRoute>
-            </Switch>
-          </RequirePreferredOrganization>
-        </Route>
+        <PrivateRoute exact path={LINKS.ROOT.template}>
+          {isEmailVerified ? (
+            <RequirePreferredOrganization
+              fallback={<Redirect to={LINKS.COMMUNITY_PROJECTS.build()} />}
+            >
+              <RootView />
+            </RequirePreferredOrganization>
+          ) : (
+            <RootView />
+          )}
+        </PrivateRoute>
+        <PrivateRoute path={LINKS.ORGANIZATIONS.template}>
+          <OrganizationsRouter />
+        </PrivateRoute>
       </Switch>
 
       <HelpMenu />

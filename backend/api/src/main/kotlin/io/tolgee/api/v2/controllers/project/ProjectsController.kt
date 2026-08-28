@@ -15,6 +15,7 @@ import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.facade.ProjectCreationFacade
 import io.tolgee.facade.ProjectPermissionFacade
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.hateoas.project.ProjectModel
@@ -22,7 +23,6 @@ import io.tolgee.hateoas.project.ProjectModelAssembler
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModel
 import io.tolgee.hateoas.userAccount.UserAccountInProjectModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -37,8 +37,6 @@ import io.tolgee.security.authorization.IsGlobalRoute
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
-import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
@@ -79,11 +77,10 @@ class ProjectsController(
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
-  private val organizationRoleService: OrganizationRoleService,
   private val imageUploadService: ImageUploadService,
   private val projectPermissionFacade: ProjectPermissionFacade,
   private val projectWithStatsFacade: ProjectWithStatsFacade,
-  private val projectCreationService: ProjectCreationService,
+  private val projectCreationFacade: ProjectCreationFacade,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create project", description = "Creates a new project with languages and initial settings.")
@@ -95,12 +92,7 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserCanCreateProject(dto.organizationId)
-    val project = projectCreationService.createProject(dto)
-    if (organizationRoleService.findType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
-      // Maintainers get full access to projects they create
-      permissionService.grantFullAccessToProject(authenticationFacade.authenticatedUserEntity, project)
-    }
+    val project = projectCreationFacade.createProjectAsCurrentUser(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 

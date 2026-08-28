@@ -257,7 +257,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun testEdit() {
     executeInNewTransaction {
-      this.organizationService.create(dummyDto, userAccount!!).let {
+      this.organizationService.createWithoutAuthorization(dummyDto, userAccount!!).let {
         performAuthPut(
           "/v2/organizations/${it.id}",
           dummyDto.also { organization ->
@@ -302,7 +302,7 @@ class OrganizationControllerTest : BaseOrganizationControllerTest() {
 
   private fun createOrganization(organizationDto: OrganizationDto) =
     executeInNewTransaction {
-      organizationService.create(
+      organizationService.createWithoutAuthorization(
         organizationDto,
         userAccount!!,
       )

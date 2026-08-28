@@ -11,6 +11,7 @@ import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
@@ -29,6 +30,8 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserPreferencesService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.logger
+import io.tolgee.util.surrogateSafeEnd
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -71,12 +74,14 @@ class OrganizationService(
   lateinit var projectService: ProjectService
 
   @Transactional
-  fun create(createDto: OrganizationDto): Organization {
-    return create(createDto, authenticationFacade.authenticatedUserEntity)
+  fun createAsCurrentUser(createDto: OrganizationDto): Organization {
+    val userAccount = authenticationFacade.authenticatedUserEntity
+    checkUserCanCreateOrganization(userAccount)
+    return createWithoutAuthorization(createDto, userAccount)
   }
 
   @Transactional
-  fun create(
+  fun createWithoutAuthorization(
     createDto: OrganizationDto,
     userAccount: UserAccount,
   ): Organization {
@@ -84,9 +89,11 @@ class OrganizationService(
       throw ValidationException(Message.SLUG_NOT_UNIQUE)
     }
 
+    val name = boundedOrganizationName(createDto.name)
+
     val slug =
       createDto.slug
-        ?: generateSlug(createDto.name)
+        ?: generateSlug(name)
 
     val basePermission =
       Permission(
@@ -95,7 +102,7 @@ class OrganizationService(
 
     val organization =
       Organization(
-        name = createDto.name,
+        name = name,
         description = createDto.description,
         slug = slug,
       )
@@ -110,17 +117,33 @@ class OrganizationService(
     return organization
   }
 
-  fun createPreferred(
+  fun createPreferredWithoutAuthorization(
     userAccount: UserAccount,
     name: String = userAccount.name,
   ): Organization {
-    val safeName =
-      if (name.isNotEmpty() || name.length >= 3) {
-        name
-      } else {
-        "${userAccount.username.take(3)} Organization"
-      }
-    return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
+    val safeName = organizationNameFor(name, userAccount)
+    return this.createWithoutAuthorization(OrganizationDto(name = safeName), userAccount = userAccount)
+  }
+
+  private fun organizationNameFor(
+    name: String,
+    userAccount: UserAccount,
+  ): String {
+    if (name.length >= 3) {
+      return name
+    }
+    val username = userAccount.username
+    val prefix = name.ifEmpty { username.take(surrogateSafeEnd(username, 3)) }
+    return "$prefix Organization"
+  }
+
+  private fun boundedOrganizationName(name: String): String {
+    if (name.length <= Organization.NAME_MAX_LENGTH) {
+      return name
+    }
+    val end = surrogateSafeEnd(name, Organization.NAME_MAX_LENGTH)
+    logger.info("Truncating organization name of length ${name.length} to $end characters")
+    return name.substring(0, end)
   }
 
   private fun generateSlug(name: String) =
@@ -128,9 +151,6 @@ class OrganizationService(
       this.validateSlugUniqueness(it)
     }
 
-  /**
-   * Returns any organizations accessible by user.
-   */
   @Transactional(readOnly = true)
   fun findPreferred(
     userAccountId: Long,
@@ -145,23 +165,37 @@ class OrganizationService(
       .firstOrNull()
   }
 
-  /**
-   * Returns existing or created organization which seems to be potentially preferred.
-   */
   fun findOrCreatePreferred(
     userAccount: UserAccount,
     exceptOrganizationId: Long = 0,
   ): Organization? {
-    return findPreferred(userAccount.id, exceptOrganizationId) ?: let {
-      val canCreateOrganizations =
-        tolgeeProperties.authentication.userCanCreateOrganizations &&
-          userAccount.thirdPartyAuthType !== ThirdPartyAuthType.SSO
-
-      if (canCreateOrganizations || userAccount.isAdmin()) {
-        return@let createPreferred(userAccount)
-      }
-      null
+    findPreferred(userAccount.id, exceptOrganizationId)?.let { return it }
+    if (!canUserCreateOrganization(userAccount)) {
+      return null
     }
+    return createPreferredWithoutAuthorization(userAccount)
+  }
+
+  fun checkUserCanCreateOrganization(userAccount: UserAccount) {
+    organizationCreationRefusal(userAccount)?.let { throw PermissionException(it) }
+  }
+
+  fun canUserCreateOrganization(userAccount: UserAccount): Boolean = organizationCreationRefusal(userAccount) == null
+
+  private fun organizationCreationRefusal(userAccount: UserAccount): Message? {
+    if (userAccount.isAdmin()) {
+      return null
+    }
+
+    if (!tolgeeProperties.authentication.userCanCreateOrganizations) {
+      return Message.OPERATION_NOT_PERMITTED
+    }
+
+    if (userAccount.thirdPartyAuthType == ThirdPartyAuthType.SSO) {
+      return Message.SSO_USER_CANNOT_CREATE_ORGANIZATION
+    }
+
+    return null
   }
 
   @Transactional(readOnly = true)

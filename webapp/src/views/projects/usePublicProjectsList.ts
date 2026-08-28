@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useHasCommunityContributions } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 
@@ -10,8 +11,12 @@ type Options = {
 export const usePublicProjectsList = ({ contributionFilter }: Options = {}) => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const hasCommunityContributions = useHasCommunityContributions();
+  const defaultToContributions = Boolean(
+    contributionFilter && hasCommunityContributions
+  );
   const [myContributionsOnly, setMyContributionsOnly] = useState(
-    Boolean(contributionFilter)
+    defaultToContributions
   );
 
   const loadable = useApiQuery({

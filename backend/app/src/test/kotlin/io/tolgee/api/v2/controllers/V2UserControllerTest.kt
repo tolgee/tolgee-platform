@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.development.testDataBuilder.data.ManagingOrganizationTestData
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -307,6 +308,22 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   fun `it returns no content for managed by`() {
     // EE dependant endpoint - without EE always returns no content
     performAuthGet("/v2/user/managed-by").andIsNoContent
+  }
+
+  @Test
+  fun `it returns the managing organization when there is one`() {
+    val managing = ManagingOrganizationTestData()
+    testDataService.saveTestData(managing.root)
+    try {
+      loginAsUser(managing.managedUser)
+
+      performAuthGet("/v2/user/managed-by").andIsOk.andAssertThatJson {
+        node("id").isEqualTo(managing.managingOrganization.id)
+        node("name").isEqualTo("Managing org")
+      }
+    } finally {
+      testDataService.cleanTestData(managing.root)
+    }
   }
 
   private fun assertSingleOwned(

@@ -5263,7 +5263,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       /**
-       * @description Whether the user views the organization purely via public-project access
+       * @description True when the viewer reaches this organization only through its public projects
        * @example false
        */
       limitedView: boolean;
@@ -29500,7 +29500,11 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "application/json": components["schemas"]["PrivateOrganizationModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

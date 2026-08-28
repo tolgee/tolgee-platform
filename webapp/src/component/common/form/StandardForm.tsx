@@ -1,4 +1,4 @@
-import { default as React, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Box, Button, SxProps } from '@mui/material';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { T } from '@tolgee/react';
@@ -17,6 +17,25 @@ export interface LoadableType {
   error?: ApiError | null;
 }
 
+type BuiltInFooter = {
+  submitButtons?: undefined;
+  submitButtonInner?: ReactNode;
+  customActions?: ReactNode;
+  hideCancel?: boolean;
+};
+
+type FooterExclusivity =
+  | (BuiltInFooter & { submitDisabledReason?: ReactNode; disabled?: never })
+  | (BuiltInFooter & { submitDisabledReason?: never; disabled?: boolean })
+  | {
+      submitButtons: ReactNode;
+      submitDisabledReason?: never;
+      submitButtonInner?: never;
+      customActions?: never;
+      hideCancel?: never;
+      disabled?: never;
+    };
+
 interface FormPropsBase<T> {
   initialValues: T;
   onSubmit: (values: T, formikHelpers: FormikHelpers<T>) => void | Promise<any>;
@@ -30,25 +49,7 @@ interface FormPropsBase<T> {
   formId?: string;
 }
 
-type FooterProps =
-  | {
-      submitButtons?: undefined;
-      submitDisabledReason?: ReactNode;
-      submitButtonInner?: ReactNode;
-      customActions?: ReactNode;
-      hideCancel?: boolean;
-      disabled?: boolean;
-    }
-  | {
-      submitButtons: ReactNode;
-      submitDisabledReason?: never;
-      submitButtonInner?: never;
-      customActions?: never;
-      hideCancel?: never;
-      disabled?: never;
-    };
-
-type FormProps<T> = FormPropsBase<T> & FooterProps;
+type FormProps<T> = FormPropsBase<T> & FooterExclusivity;
 
 export function StandardForm<T extends FormikValues>({
   initialValues,
@@ -67,7 +68,7 @@ export function StandardForm<T extends FormikValues>({
     props.saveActionLoadable?.isLoading || props.saveActionLoadable?.loading;
 
   const submitBlocked = Boolean(
-    props.loading || disabled || submitDisabledReason
+    actionLoading || props.loading || disabled || submitDisabledReason
   );
 
   return (
@@ -81,6 +82,7 @@ export function StandardForm<T extends FormikValues>({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, helpers) => {
+          // Enter and requestSubmit() submit without going through the disabled button
           if (submitBlocked) {
             helpers.setSubmitting(false);
             return;
@@ -97,7 +99,7 @@ export function StandardForm<T extends FormikValues>({
               : history.goBack();
 
           return (
-            <Form id={formId}>
+            <Form id={formId} data-cy="standard-form">
               {typeof props.children === 'function'
                 ? !props.loading && props.children(formikProps)
                 : props.children}
@@ -108,39 +110,37 @@ export function StandardForm<T extends FormikValues>({
               )}
               {props.submitButtons || (
                 <Box display="flex" justifyContent="flex-end" sx={rootSx}>
-                  <React.Fragment>
-                    {props.customActions && (
-                      <Box flexGrow={1}>{props.customActions}</Box>
+                  {props.customActions && (
+                    <Box flexGrow={1}>{props.customActions}</Box>
+                  )}
+                  <Box display="flex" alignItems="flex-end">
+                    {!hideCancel && (
+                      <Button
+                        data-cy="global-form-cancel-button"
+                        onClick={onCancel}
+                      >
+                        <T keyName="global_form_cancel" />
+                      </Button>
                     )}
-                    <Box display="flex" alignItems="flex-end">
-                      {!hideCancel && (
-                        <Button
-                          data-cy="global-form-cancel-button"
-                          onClick={onCancel}
-                        >
-                          <T keyName="global_form_cancel" />
-                        </Button>
-                      )}
-                      <Box ml={1}>
-                        <LoadingButton
-                          data-cy="global-form-save-button"
-                          loading={actionLoading}
-                          color="primary"
-                          variant="contained"
-                          disabled={submitBlocked}
-                          type="submit"
-                        >
-                          {props.submitButtonInner || (
-                            <T keyName="global_form_save" />
-                          )}
-                        </LoadingButton>
-                      </Box>
+                    <Box ml={1}>
+                      <LoadingButton
+                        data-cy="global-form-save-button"
+                        loading={actionLoading}
+                        color="primary"
+                        variant="contained"
+                        disabled={submitBlocked}
+                        type="submit"
+                      >
+                        {props.submitButtonInner || (
+                          <T keyName="global_form_save" />
+                        )}
+                      </LoadingButton>
                     </Box>
-                  </React.Fragment>
+                  </Box>
                 </Box>
               )}
               {props.loading && (
-                <Box justifyContent="cetner">
+                <Box display="flex" justifyContent="center">
                   <SpinnerProgress />
                 </Box>
               )}

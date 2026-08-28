@@ -17,6 +17,7 @@ import { useGlobalContext } from '../globalContext/GlobalContext';
 import { useUserTasks } from '../globalContext/useUserTasks';
 import { AdministrationEeLicenseView } from 'tg.ee.module/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
+import { RequireOrganizationAccess } from 'tg.component/common/RequireOrganizationAccess';
 import {
   useConfig,
   useEnabledFeatures,
@@ -135,16 +136,36 @@ export const routes = {
   ),
   Organization: () => {
     const config = useConfig();
+    // billingModule.OrganizationRoutes has no path of its own: a redirecting guard wrapped around
+    // it fires on every organization URL.
+    const onManageBillingRoute = Boolean(
+      useRouteMatch([
+        LINKS.ORGANIZATION_SUBSCRIPTIONS.template,
+        LINKS.ORGANIZATION_INVOICES.template,
+        LINKS.ORGANIZATION_BILLING.template,
+        LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.template,
+      ])
+    );
     return (
       <>
         {config.llm.enabled && (
           <PrivateRoute path={LINKS.ORGANIZATION_LLM_PROVIDERS.template}>
-            <OrganizationLlmProvidersView />
+            <RequireOrganizationAccess level="manage">
+              <OrganizationLlmProvidersView />
+            </RequireOrganizationAccess>
           </PrivateRoute>
         )}
-        <billingModule.OrganizationRoutes />
+        {onManageBillingRoute ? (
+          <RequireOrganizationAccess level="manage">
+            <billingModule.OrganizationRoutes />
+          </RequireOrganizationAccess>
+        ) : (
+          <billingModule.OrganizationRoutes />
+        )}
         <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
-          <OrganizationSsoView />
+          <RequireOrganizationAccess level="manage">
+            <OrganizationSsoView />
+          </RequireOrganizationAccess>
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARIES.template}>
           <GlossariesListView />
@@ -156,13 +177,17 @@ export const routes = {
           exact
           path={LINKS.ORGANIZATION_TRANSLATION_MEMORIES.template}
         >
-          <TranslationMemoriesListView />
+          <RequireOrganizationAccess level="member">
+            <TranslationMemoriesListView />
+          </RequireOrganizationAccess>
         </PrivateRoute>
         <PrivateRoute
           exact
           path={LINKS.ORGANIZATION_TRANSLATION_MEMORY.template}
         >
-          <TranslationMemoryView />
+          <RequireOrganizationAccess level="member">
+            <TranslationMemoryView />
+          </RequireOrganizationAccess>
         </PrivateRoute>
       </>
     );

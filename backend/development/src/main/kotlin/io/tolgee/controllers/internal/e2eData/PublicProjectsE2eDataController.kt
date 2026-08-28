@@ -21,7 +21,8 @@ class PublicProjectsE2eDataController(
     return generatingService.generate(
       PublicProjectsE2eData(
         count = 5,
-        scenario = PublicProjectsE2eData.Scenario.MINIMAL,
+        withCommunityPersonas = false,
+        withForeignOrgProject = false,
       ).root,
     )
   }

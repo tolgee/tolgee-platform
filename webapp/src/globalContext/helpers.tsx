@@ -1,5 +1,17 @@
 import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
-import { organizationHasSupportChat } from 'tg.fixtures/organizationEntitlement';
+import { QaCheckCategoryModel } from 'tg.service/apiSchemaTypes.generated';
+import { organizationHasSupportChat } from 'tg.fixtures/supportChat';
+import {
+  canCreateOrganization,
+  organizationCreationRefusal,
+} from 'tg.fixtures/organizationCreation';
+import { preferredOrganizationResolution } from 'tg.fixtures/preferredOrganizationResolution';
+import {
+  canCreateProject,
+  projectCreationRefusal,
+} from 'tg.fixtures/projectCreation';
+import { billingRefusal, canSeeBilling } from 'tg.fixtures/billingAccess';
+import { organizationOwnedFeatures } from 'tg.fixtures/organizationEntitlement';
 import { isOwnerOrMaintainerOrgRole } from 'tg.fixtures/organizationRole';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
@@ -47,12 +59,33 @@ export const usePreferredOrganization = () => {
   const preferredOrganization = useGlobalContext(
     (c) => c.initialData.preferredOrganization
   );
-  const isFetching = useGlobalContext((c) => c.initialData.isFetching);
-
   return {
     preferredOrganization,
     updatePreferredOrganization,
-    isFetching,
+  };
+};
+
+export const useIsBillingEnabled = () =>
+  useGlobalContext((c) => c.initialData.serverConfiguration.billing.enabled);
+
+export const useCanSeeBilling = () => canSeeBilling(useBillingAccessParams());
+
+export const useBillingRefusal = () => billingRefusal(useBillingAccessParams());
+
+export const useBillingOrganization = () => {
+  const params = useBillingAccessParams();
+  return canSeeBilling(params) ? params.organization : undefined;
+};
+
+const useBillingAccessParams = () => {
+  const billingEnabled = useIsBillingEnabled();
+  const { preferredOrganization } = usePreferredOrganization();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
+
+  return {
+    billingEnabled,
+    isAdminOrSupporter,
+    organization: preferredOrganization,
   };
 };
 
@@ -61,16 +94,48 @@ export const useIsOrganizationOwnerOrMaintainer = () => {
   return isOwnerOrMaintainerOrgRole(preferredOrganization?.currentUserRole);
 };
 
-export const useCanCreateProject = () => {
-  const { preferredOrganization, isFetching } = usePreferredOrganization();
+export const useCanCreateOrganization = () =>
+  canCreateOrganization(useOrganizationCreationParams());
+
+export const useOrganizationCreationRefusal = () =>
+  organizationCreationRefusal(useOrganizationCreationParams());
+
+const useOrganizationCreationParams = () => {
   const isAdmin = useIsAdmin();
+  const config = useConfig();
+  const user = useUser();
 
   return {
-    isFetching,
-    canCreateProject:
-      isAdmin ||
-      isOwnerOrMaintainerOrgRole(preferredOrganization?.currentUserRole),
+    isAdmin,
+    thirdPartyAuthType: user?.thirdPartyAuthType,
+    userCanCreateOrganizations: config.userCanCreateOrganizations,
   };
+};
+
+export const useIsSwitchingOrganization = () =>
+  useGlobalContext((c) => c.initialData.isSwitchingOrganization);
+
+export const usePreferredOrganizationResolution = () => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const isSwitching = useIsSwitchingOrganization();
+
+  return preferredOrganizationResolution({
+    organization: preferredOrganization,
+    isSwitching,
+  });
+};
+
+export const useCanCreateProject = () =>
+  canCreateProject(useProjectCreationParams());
+
+export const useProjectCreationRefusal = () =>
+  projectCreationRefusal(useProjectCreationParams());
+
+const useProjectCreationParams = () => {
+  const isAdmin = useIsAdmin();
+  const { preferredOrganization } = usePreferredOrganization();
+
+  return { isAdmin, organization: preferredOrganization };
 };
 
 export const useOrganizationUsage = () => {
@@ -86,10 +151,8 @@ export const useQaCheckTypes = (): QaCheckType[] => {
 };
 
 export const useEnabledFeatures = () => {
-  const features =
-    useGlobalContext(
-      (c) => c.initialData.preferredOrganization?.enabledFeatures
-    ) || EMPTY_LIST;
+  const { preferredOrganization } = usePreferredOrganization();
+  const features = organizationOwnedFeatures(preferredOrganization);
 
   return {
     features,
@@ -99,7 +162,10 @@ export const useEnabledFeatures = () => {
   };
 };
 
-export const useHasSupportChat = () =>
-  organizationHasSupportChat(usePreferredOrganization().preferredOrganization);
+export const useHasSupportChat = () => {
+  const { preferredOrganization } = usePreferredOrganization();
 
-const EMPTY_LIST = [];
+  return organizationHasSupportChat(preferredOrganization);
+};
+
+const EMPTY_LIST: QaCheckCategoryModel[] = [];

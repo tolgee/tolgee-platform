@@ -59,7 +59,7 @@ class TranslationMemoryServiceTest : AbstractSpringTest() {
     val orgId = testData.projectWithoutTm.organizationOwner.id
 
     val project =
-      projectCreationService.createProject(
+      projectCreationService.createProjectWithoutAuthorization(
         CreateProjectRequest(
           name = "New TM Project",
           languages = listOf(LanguageRequest(name = "English", originalName = "English", tag = "en")),

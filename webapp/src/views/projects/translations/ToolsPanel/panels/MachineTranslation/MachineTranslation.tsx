@@ -149,6 +149,12 @@ export const MachineTranslation: React.FC<
                   {t('machine_translation_upgrade_plan')}
                 </Button>
               )}
+              fallback={
+                <T
+                  keyName="machine_translation_ask_owner_to_upgrade"
+                  defaultValue="Ask an organization owner to upgrade the plan."
+                />
+              }
             />
           </StyledError>
         </OutOfCreditsWrapper>

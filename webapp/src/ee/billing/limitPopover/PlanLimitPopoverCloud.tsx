@@ -2,14 +2,14 @@ import { Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
 import {
+  useBillingOrganization,
   useOrganizationUsage,
-  usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { getProgressData } from '../component/getProgressData';
 import { GenericPlanLimitPopover } from './generic/GenericPlanLimitPopover';
 import React from 'react';
+import { billingLinkFor } from 'tg.fixtures/billingLink';
 
 type Props = {
   onClose: () => void;
@@ -19,18 +19,16 @@ type Props = {
 export const PlanLimitPopoverCloud: React.FC<
   React.PropsWithChildren<Props>
 > = ({ open, onClose }) => {
-  const { preferredOrganization } = usePreferredOrganization();
   const { usage } = useOrganizationUsage();
-  const isOwner = preferredOrganization?.currentUserRole === 'OWNER';
+  const billingOrganization = useBillingOrganization();
   const history = useHistory();
 
   const handleConfirm = () => {
+    if (!billingOrganization) {
+      return;
+    }
     onClose();
-    history.push(
-      LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization!.slug,
-      })
-    );
+    history.push(billingLinkFor({ slug: billingOrganization.slug }));
   };
 
   const progressData = usage && getProgressData({ usage });
@@ -42,7 +40,7 @@ export const PlanLimitPopoverCloud: React.FC<
       isPayAsYouGo={usage?.isPayAsYouGo}
       progressData={progressData}
       actionButton={
-        isOwner && (
+        billingOrganization && (
           <Button
             data-cy="global-confirmation-confirm"
             color="primary"

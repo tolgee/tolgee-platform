@@ -8,7 +8,7 @@ const MenuList = styled('nav')`
 export type SettingsMenuItem = {
   link: string;
   label: string;
-  'data-cy'?: string;
+  dataCyItem?: string;
 };
 
 type Props = {
@@ -27,7 +27,7 @@ export const SettingsMenu: React.FC<React.PropsWithChildren<Props>> = ({
             matchAsPrefix={true}
             linkTo={item.link}
             text={item.label}
-            dataCyItem={item['data-cy']}
+            dataCyItem={item.dataCyItem}
           />
         ))}
       </MenuList>

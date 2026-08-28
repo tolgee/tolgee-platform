@@ -63,20 +63,26 @@ class DbPopulatorReal(
     username: String,
     password: String? = null,
     name: String? = null,
+    role: UserAccount.Role? = null,
   ): UserAccount {
-    return userAccountService.findActive(username) ?: let {
-      val rawPassword =
-        password
-          ?: initialPasswordManager.initialPassword
-
-      userAccountService.createUser(
-        UserAccount(
-          name = name ?: username,
-          username = username,
-          password = passwordEncoder.encode(rawPassword),
-        ),
-      )
+    val existing = userAccountService.findActive(username)
+    if (existing != null) {
+      require(role == null || existing.role == role) {
+        "User $username already exists with role ${existing.role}, but role $role was requested"
+      }
+      return existing
     }
+
+    val rawPassword = password ?: initialPasswordManager.initialPassword
+
+    return userAccountService.createUser(
+      UserAccount(
+        name = name ?: username,
+        username = username,
+        password = passwordEncoder.encode(rawPassword),
+        role = role ?: UserAccount.Role.USER,
+      ),
+    )
   }
 
   fun createOrganization(
@@ -84,7 +90,7 @@ class DbPopulatorReal(
     userAccount: UserAccount,
   ): Organization {
     val slug = slugGenerator.generate(name, 3, 100) { true }
-    return organizationService.create(OrganizationDto(name, slug), userAccount)
+    return organizationService.createWithoutAuthorization(OrganizationDto(name, slug), userAccount)
   }
 
   @Transactional
@@ -166,7 +172,7 @@ class DbPopulatorReal(
     userAccount: UserAccount,
   ): Organization {
     return organizationService.find(name) ?: let {
-      organizationService.create(OrganizationDto(name, slug = slug), userAccount)
+      organizationService.createWithoutAuthorization(OrganizationDto(name, slug = slug), userAccount)
     }
   }
 

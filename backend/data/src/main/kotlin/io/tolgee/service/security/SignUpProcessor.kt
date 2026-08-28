@@ -78,7 +78,7 @@ class SignUpProcessor(
       return
     }
 
-    val organization = organizationService.createPreferred(user, organizationName)
+    val organization = organizationService.createPreferredWithoutAuthorization(user, organizationName)
     quickStartService.create(user, organization)
   }
 

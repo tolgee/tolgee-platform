@@ -2,27 +2,31 @@ import { FunctionComponent, ReactNode } from 'react';
 import { FormikProps } from 'formik';
 import { ObjectSchema } from 'yup';
 
-import { Link } from 'tg.constants/links';
 import { LoadableType, StandardForm } from '../common/form/StandardForm';
 import { BaseView, BaseViewProps } from './BaseView';
 
-interface BaseFormViewProps {
+type BaseFormViewProps = {
   initialValues: Record<string, unknown>;
   onSubmit: (v: any) => void;
   onCancel?: () => void;
   validationSchema: ObjectSchema<any>;
   saveActionLoadable?: LoadableType;
-  redirectAfter?: Link;
   customActions?: ReactNode;
   submitButtonInner?: ReactNode;
-  submitDisabledReason?: ReactNode;
-  disabled?: boolean;
   children?: ReactNode | ((formikProps: FormikProps<any>) => ReactNode);
-}
+} & (
+  | { submitDisabledReason?: ReactNode; disabled?: never }
+  | { submitDisabledReason?: never; disabled?: boolean }
+);
 
 export const BaseFormView: FunctionComponent<
   BaseFormViewProps & Omit<BaseViewProps, 'children'>
 > = (props) => {
+  const submitGate =
+    props.disabled === undefined
+      ? { submitDisabledReason: props.submitDisabledReason }
+      : { disabled: props.disabled };
+
   return (
     <BaseView {...props}>
       <StandardForm
@@ -33,8 +37,7 @@ export const BaseFormView: FunctionComponent<
         customActions={props.customActions}
         submitButtonInner={props.submitButtonInner}
         saveActionLoadable={props.saveActionLoadable}
-        submitDisabledReason={props.submitDisabledReason}
-        disabled={props.disabled}
+        {...submitGate}
       >
         {props.children}
       </StandardForm>

@@ -1,10 +1,13 @@
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect, useSyncExternalStore } from 'react';
 import * as Sentry from '@sentry/react';
 import { useGlobalLoading } from './GlobalLoading';
 import { useIdentify } from 'tg.hooks/useIdentify';
 import { useQueryClient } from 'react-query';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useIsSwitchingOrganization,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { usePosthogInit } from 'tg.hooks/usePosthog';
 import { usePlausible } from 'tg.hooks/plausible';
 import { CustomOptions } from 'tg.service/http/useQueryApi';
@@ -14,7 +17,7 @@ export const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
 
   const queryClient = useQueryClient();
-  const isFetching = useGlobalContext((c) => c.initialData.isFetching);
+  const isSwitchingOrganization = useIsSwitchingOrganization();
 
   const isGloballyFetching = useSyncExternalStore(
     (onChange) => queryClient.getQueryCache().subscribe(onChange),
@@ -37,7 +40,7 @@ export const MandatoryDataProvider = (props: any) => {
   );
 
   useGlobalLoading(
-    Boolean(isGloballyFetching || isGloballyMutating || isFetching)
+    Boolean(isGloballyFetching || isGloballyMutating || isSwitchingOrganization)
   );
 
   useIdentify(userData?.id);

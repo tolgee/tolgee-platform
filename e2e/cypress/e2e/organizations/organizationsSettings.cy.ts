@@ -9,6 +9,7 @@ import {
 } from '../../common/shared';
 import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
+import { organizationSettingsMenuItem } from '../../common/organizationSettingsMenu';
 
 describe('Organization Settings', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -70,16 +71,10 @@ describe('Organization Settings', () => {
       .click();
     cy.waitForDom();
     cy.gcy('global-form-save-button').should('be.disabled');
-    cy.gcy('organization-profile-delete-button').should('be.disabled');
-    cy.gcy('settings-menu-item')
-      .contains('Organization profile')
-      .should('be.visible');
-    cy.gcy('settings-menu-item')
-      .contains('Organization members')
-      .should('not.exist');
-    cy.gcy('settings-menu-item')
-      .contains('Member permissions')
-      .should('not.exist');
+    cy.gcy('organization-profile-delete-button').should('not.exist');
+    organizationSettingsMenuItem('profile').should('be.visible');
+    organizationSettingsMenuItem('members').should('not.exist');
+    organizationSettingsMenuItem('member-privileges').should('not.exist');
   });
 
   it('deletes organization', () => {

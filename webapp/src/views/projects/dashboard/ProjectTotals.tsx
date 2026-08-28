@@ -8,12 +8,12 @@ import { useHistory } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
+import { billingLinkFor } from 'tg.fixtures/billingLink';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useBillingOrganization, useConfig } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { StringsHint } from 'tg.component/common/StringsHint';
 
 const StyledTiles = styled(Box)`
@@ -131,14 +131,8 @@ export const ProjectTotals: React.FC<
   });
   const locale = useCurrentLanguage();
 
-  const billingEnabled = useGlobalContext(
-    (c) => c.initialData.serverConfiguration.billing.enabled
-  );
-  const isOrganizationOwner = useGlobalContext(
-    (c) => c.initialData.preferredOrganization?.currentUserRole === 'OWNER'
-  );
-  const { preferredOrganization } = usePreferredOrganization();
-  const canGoToBilling = billingEnabled && isOrganizationOwner;
+  const billingOrganization = useBillingOrganization();
+  const canGoToBilling = Boolean(billingOrganization);
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const anchorWidth = useRef();
@@ -176,11 +170,10 @@ export const ProjectTotals: React.FC<
   };
 
   const redirectToBilling = () => {
-    history.push(
-      LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.id || '',
-      })
-    );
+    if (!billingOrganization) {
+      return;
+    }
+    history.push(billingLinkFor({ slug: billingOrganization.slug }));
   };
 
   const { satisfiesPermission } = useProjectPermissions();

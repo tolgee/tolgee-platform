@@ -45,7 +45,6 @@ const CommunityProjects = () => {
         titleAdornment={
           <OrganizationSwitch
             plain
-            selectedSurface="community"
             onSelect={() => history.push(LINKS.ROOT.build())}
           />
         }

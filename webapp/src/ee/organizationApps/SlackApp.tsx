@@ -4,11 +4,16 @@ import { T } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { canManageOrganization } from 'tg.fixtures/organizationRole';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { OrganizationSlackSuccessHandler } from 'tg.views/organizations/apps/slack/OrganizationSlackSuccessHandler';
 import { DisconnectButton } from 'tg.views/organizations/apps/slack/DisconnectButton';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useConfig, useEnabledFeatures } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useEnabledFeatures,
+  useIsAdmin,
+} from 'tg.globalContext/helpers';
 import { NotConfiguredBanner } from 'tg.views/organizations/apps/slack/NotConfiguredBanner';
 import { NoNeedToConnectBanner } from 'tg.views/organizations/apps/slack/NoNeedToConnectBanner';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
@@ -62,6 +67,11 @@ const StyledTeamId = styled('div')`
 
 export const SlackApp = () => {
   const organization = useOrganization();
+  const isAdmin = useIsAdmin();
+  const canManageApps = canManageOrganization(
+    organization?.currentUserRole,
+    isAdmin
+  );
   const { isEnabled } = useEnabledFeatures();
   const featureNotEnabled = !isEnabled('SLACK_INTEGRATION');
   const config = useConfig();
@@ -121,7 +131,9 @@ export const SlackApp = () => {
               color="primary"
               variant="contained"
               loading={getUrlMutation.isLoading}
-              disabled={featureNotEnabled || !slackConfig.enabled}
+              disabled={
+                featureNotEnabled || !slackConfig.enabled || !canManageApps
+              }
             >
               <T keyName="organization_slack_connect_button" />
             </LoadingButton>
@@ -149,7 +161,7 @@ export const SlackApp = () => {
                 <div>{item.slackTeamName}</div>
                 <StyledTeamId>{item.slackTeamId}</StyledTeamId>
               </Box>
-              <DisconnectButton workspaceId={item.id} />
+              {canManageApps && <DisconnectButton workspaceId={item.id} />}
             </StyledItem>
           ))}
         </div>

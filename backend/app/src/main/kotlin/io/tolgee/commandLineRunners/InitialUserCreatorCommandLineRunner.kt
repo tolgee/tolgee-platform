@@ -72,10 +72,8 @@ class InitialUserCreatorCommandLineRunner(
     userAccountService.createUser(userAccount = user)
     userAccountService.transferLegacyNoAuthUser()
 
-    // If the user was already existing, it may already have assigned orgs.
-    // To avoid conflicts, we only create the org if the user doesn't have any.
     val organization =
-      organizationService.create(
+      organizationService.createWithoutAuthorization(
         OrganizationDto(
           properties.authentication.initialUsername,
         ),

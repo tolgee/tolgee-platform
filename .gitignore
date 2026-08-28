@@ -45,6 +45,7 @@ e2e/cypress/integration/examples/
 /webapp/.DS_Store
 /webapp/.env.local
 /webapp/.env.development.local
+/webapp/.env.e2e
 /webapp/.env.test.local
 /webapp/.env.production.local
 /webapp/src/eeSetup/eeModule.current.tsx

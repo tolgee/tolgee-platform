@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
@@ -28,6 +29,30 @@ class UserPreferencesSetPreferredOrganizationTest : AuthorizedControllerTest() {
     userAccount = testData.nonMember
     performAuthPut("/v2/user-preferences/set-preferred-organization/${testData.otherOrg.id}", null).andIsOk
     assertPreferredOrganization(testData.nonMember.id, testData.otherOrg.id)
+  }
+
+  @Test
+  fun `the write answers with the organization it stored, so no follow-up read is needed`() {
+    userAccount = testData.nonMember
+    performAuthPut("/v2/user-preferences/set-preferred-organization/${testData.otherOrg.id}", null)
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isEqualTo(testData.otherOrg.id)
+        node("name").isEqualTo("Vibrant translators")
+        node("currentUserRole").isEqualTo(null)
+        node("limitedView").isEqualTo(true)
+      }
+  }
+
+  @Test
+  fun `the write answers with the full model for a member`() {
+    userAccount = testData.otherOrgMember
+    performAuthPut("/v2/user-preferences/set-preferred-organization/${testData.otherOrg.id}", null)
+      .andIsOk
+      .andAssertThatJson {
+        node("currentUserRole").isEqualTo("MEMBER")
+        node("limitedView").isEqualTo(false)
+      }
   }
 
   @Test

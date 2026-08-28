@@ -7,6 +7,8 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { useOrganization } from '../useOrganization';
+import { canManageOrganization } from 'tg.fixtures/organizationRole';
+import { useIsAdmin, useIsAdminOrSupporter } from 'tg.globalContext/helpers';
 import { MemberItem } from './MemberItem';
 import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { InviteDialog } from './InviteDialog';
@@ -18,6 +20,8 @@ export const OrganizationMembersView: FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
   const organization = useOrganization();
+  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
   const { t } = useTranslate();
 
   const [search, setSearch] = useState('');
@@ -39,12 +43,25 @@ export const OrganizationMembersView: FunctionComponent<
     },
   });
 
+  // Reads are a GET, which the interceptor's read-only bypass admits a supporter to.
+  const canReadInvitations = canManageOrganization(
+    organization?.currentUserRole,
+    isAdminOrSupporter
+  );
+  // One OWNER floor, two surfaces: V2InvitationController's invite/revoke and
+  // OrganizationController's setUserRole/removeUser are all @RequiresOrganizationRole(OWNER).
+  const canManageMembers = canManageOrganization(
+    organization?.currentUserRole,
+    isAdmin
+  );
+
   const invitationsLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/invitations',
     method: 'get',
     path: { organizationId: organization!.id },
     options: {
       keepPreviousData: true,
+      enabled: canReadInvitations,
     },
   });
 
@@ -72,40 +89,53 @@ export const OrganizationMembersView: FunctionComponent<
         ],
       ]}
     >
-      <Box
-        mb={1}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Typography variant="h6">{t('invitations_title')}</Typography>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => setInviteOpen(true)}
-          data-cy="invite-generate-button"
-        >
-          {t('invitations_invite_button')}
-        </Button>
-      </Box>
+      {canReadInvitations && (
+        <>
+          <Box
+            mb={1}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6">{t('invitations_title')}</Typography>
+            {canManageMembers && (
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={() => setInviteOpen(true)}
+                data-cy="invite-generate-button"
+              >
+                {t('invitations_invite_button')}
+              </Button>
+            )}
+          </Box>
 
-      {!invitations && !invitationsLoadable.isLoading && (
-        <Box m={4} display="flex" justifyContent="center">
-          <Typography color="textSecondary">
-            {t('invite_user_nothing_found')}
-          </Typography>
-        </Box>
+          {!invitations && !invitationsLoadable.isLoading && (
+            <Box m={4} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                {t('invite_user_nothing_found')}
+              </Typography>
+            </Box>
+          )}
+
+          {invitations && invitations.length > 0 && (
+            <SimpleList
+              data={invitations}
+              renderItem={(i) => (
+                <InvitationItem invitation={i} canCancel={canManageMembers} />
+              )}
+            />
+          )}
+          {canManageMembers && (
+            <InviteDialog
+              onClose={() => setInviteOpen(false)}
+              open={inviteOpen}
+            />
+          )}
+
+          <Box mt={4} />
+        </>
       )}
-
-      {invitations?.length && (
-        <SimpleList
-          data={invitations}
-          renderItem={(i) => <InvitationItem invitation={i} />}
-        />
-      )}
-      <InviteDialog onClose={() => setInviteOpen(false)} open={inviteOpen} />
-
-      <Box mt={4} />
       <PaginatedHateoasList
         loadable={membersLoadable}
         title={<T keyName="organization_members_view_title" />}
@@ -119,7 +149,11 @@ export const OrganizationMembersView: FunctionComponent<
           </Box>
         }
         renderItem={(user) => (
-          <MemberItem user={user} organizationId={organization!.id} />
+          <MemberItem
+            user={user}
+            organizationId={organization!.id}
+            canManageMembers={canManageMembers}
+          />
         )}
       />
     </BaseOrganizationSettingsView>

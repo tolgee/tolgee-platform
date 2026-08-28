@@ -1,49 +1,24 @@
-import { FC } from 'react';
-import { Box } from '@mui/material';
-import {
-  useIsEmailVerified,
-  usePreferredOrganization,
-} from 'tg.globalContext/helpers';
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { CompactView } from 'tg.component/layout/CompactView';
-import { T, useTranslate } from '@tolgee/react';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { FC, ReactNode } from 'react';
+
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { usePreferredOrganizationResolution } from 'tg.globalContext/helpers';
+
+type Props = {
+  fallback: ReactNode;
+};
 
 export const RequirePreferredOrganization: FC<
-  React.PropsWithChildren<unknown>
+  React.PropsWithChildren<Props>
 > = (props) => {
-  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
+  const resolution = usePreferredOrganizationResolution();
 
-  const { t } = useTranslate();
-
-  const { preferredOrganization, isFetching } = usePreferredOrganization();
-
-  const isEmailVerified = useIsEmailVerified();
-  if (!isEmailVerified) {
+  if (resolution.status === 'resolved') {
     return <>{props.children}</>;
   }
-  const hasPrivateAccessWithoutOrganization =
-    allowPrivate && !preferredOrganization;
 
-  if (hasPrivateAccessWithoutOrganization) {
-    if (isFetching) {
-      return null;
-    }
-
-    return (
-      <DashboardPage>
-        <CompactView
-          primaryContent={
-            <Box data-cy="no-permissions-message">
-              <T keyName={'no-permissions-on-the-server'} />
-            </Box>
-          }
-          title={<T keyName={'no-permissions-title'} />}
-          windowTitle={t('no-permissions-title')}
-        />
-      </DashboardPage>
-    );
+  if (resolution.status === 'resolving') {
+    return <FullPageLoading />;
   }
 
-  return <>{props.children}</>;
+  return <>{props.fallback}</>;
 };

@@ -7,12 +7,138 @@ import {
   useUser,
 } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
+import { ContextOrganizationModel } from 'tg.globalContext/types';
+import { chatwootOrganizationPayload } from 'tg.fixtures/chatwootOrganizationPayload';
+import {
+  applyChatwootSession,
+  chatwootSessionAction,
+  openChatwootSession,
+} from 'tg.fixtures/chatwootSession';
 
 type User = components['schemas']['PrivateUserAccountModel'];
-type Organization = components['schemas']['PrivateOrganizationModel'];
 
 const BASE_URL = 'https://app.chatwoot.com';
 let chatwootLoadPromise: Promise<void> | null = null;
+let chatwootIdentifiedUserId: number | undefined;
+
+export function useChatwoot() {
+  const user = useUser();
+  const { preferredOrganization } = usePreferredOrganization();
+  const config = useConfig();
+  const token = config?.chatwootToken;
+
+  const hasSupportChat = useHasSupportChat();
+
+  const canOpenSupportChat = !!(token && user && hasSupportChat);
+
+  const sessionAction = () =>
+    chatwootSessionAction({
+      canOpenSupportChat,
+      identifiedUserId: chatwootIdentifiedUserId,
+      currentUserId: user?.id,
+    });
+
+  const theme = useTheme();
+  const darkMode = theme.palette.mode === 'dark';
+
+  useEffect(() => {
+    if (canOpenSupportChat) {
+      loadChatwootOnce(token, darkMode);
+    }
+  }, [canOpenSupportChat]);
+
+  useEffect(() => {
+    if (!chatwootLoadPromise) {
+      return;
+    }
+
+    let cancelled = false;
+    chatwootLoadPromise.then(() => {
+      if (cancelled) {
+        return;
+      }
+      chatwootIdentifiedUserId = applyChatwootSession(
+        sessionAction(),
+        preferredOrganization,
+        chatwootIdentifiedUserId,
+        chatwootSdk
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canOpenSupportChat, preferredOrganization, user?.id]);
+
+  const openChatwoot = async () => {
+    if (!canOpenSupportChat) {
+      return;
+    }
+
+    await loadChatwootOnce(token, darkMode);
+    chatwootIdentifiedUserId = openChatwootSession(
+      sessionAction(),
+      { user, userId: user.id, organization: preferredOrganization },
+      chatwootSdk
+    );
+  };
+
+  return {
+    chatwootAvailable: canOpenSupportChat,
+    openChatwoot,
+  };
+}
+
+const chatwootSdk = {
+  reset: resetChatwootSession,
+  setUser: setChatwootUser,
+  setAttributes: setChatwootAttributes,
+  toggle: toggleChatwoot,
+};
+
+function setChatwootUser(user: User) {
+  window['$chatwoot']?.setUser(user.id, {
+    email: user.username,
+    name: user.name,
+    url: window.location,
+  });
+}
+
+function setChatwootAttributes(organization: ContextOrganizationModel) {
+  window['$chatwoot']?.setCustomAttributes(
+    chatwootOrganizationPayload(organization)
+  );
+}
+
+function resetChatwootSession() {
+  window['$chatwoot']?.reset();
+}
+
+function toggleChatwoot() {
+  window['$chatwoot']?.toggle();
+}
+
+async function loadChatwootOnce(websiteToken: string, darkMode: boolean) {
+  if (!chatwootLoadPromise) {
+    chatwootLoadPromise = loadChatwoot(websiteToken, darkMode);
+  }
+
+  await chatwootLoadPromise;
+}
+
+async function loadChatwoot(websiteToken: string, darkMode: boolean) {
+  window['chatwootSettings'] = {
+    darkMode: darkMode ? 'auto' : 'light',
+    hideMessageBubble: true,
+  };
+
+  await loadScript(document, BASE_URL + '/packs/js/sdk.js');
+
+  window['chatwootSDK']?.run({
+    websiteToken,
+    baseUrl: BASE_URL,
+  });
+}
 
 function loadScript(doc: Document, url: string) {
   return new Promise<void>((resolve) => {
@@ -30,89 +156,4 @@ function loadScript(doc: Document, url: string) {
 
     existingElement?.parentNode?.insertBefore(element, existingElement);
   });
-}
-
-async function loadChatwoot(websiteToken: string, darkMode: boolean) {
-  window['chatwootSettings'] = {
-    darkMode: darkMode ? 'auto' : 'light',
-    hideMessageBubble: true,
-  };
-
-  await loadScript(document, BASE_URL + '/packs/js/sdk.js');
-
-  window['chatwootSDK']?.run({
-    websiteToken,
-    baseUrl: BASE_URL,
-  });
-}
-
-async function loadChatwootOnce(websiteToken: string, darkMode: boolean) {
-  if (!chatwootLoadPromise) {
-    chatwootLoadPromise = loadChatwoot(websiteToken, darkMode);
-  }
-
-  await chatwootLoadPromise;
-}
-
-function setChatwootUser(user: User) {
-  window['$chatwoot']?.setUser(user.id, {
-    email: user.username,
-    name: user.name,
-    url: window.location,
-  });
-}
-
-function setChatwootAttributes(organization: Organization) {
-  const subscription = organization.activeCloudSubscription;
-  window['$chatwoot']?.setCustomAttributes({
-    plan: subscription?.plan?.name || 'free',
-    subscriptionStatus: subscription?.status || 'inactive',
-    organizationId: organization.id,
-    organizationName: organization.name,
-    enabledFeatures: organization.enabledFeatures.join(', '),
-    currentUserRole: organization.currentUserRole,
-  });
-}
-
-function toggleChatwoot() {
-  window['$chatwoot']?.toggle();
-}
-
-export function useChatwoot() {
-  const user = useUser();
-  const { preferredOrganization } = usePreferredOrganization();
-  const config = useConfig();
-  const token = config?.chatwootToken;
-
-  const hasSupportChat = useHasSupportChat();
-
-  const available = !!(token && user && hasSupportChat);
-
-  const theme = useTheme();
-  const darkMode = theme.palette.mode === 'dark';
-
-  useEffect(() => {
-    if (available) {
-      loadChatwootOnce(token, darkMode);
-    }
-  }, [available]);
-
-  const openChatwoot = async () => {
-    if (!available) {
-      return;
-    }
-
-    await loadChatwootOnce(token, darkMode);
-    setChatwootUser(user);
-    if (preferredOrganization) {
-      setChatwootAttributes(preferredOrganization);
-    }
-
-    toggleChatwoot();
-  };
-
-  return {
-    chatwootAvailable: available,
-    openChatwoot,
-  };
 }

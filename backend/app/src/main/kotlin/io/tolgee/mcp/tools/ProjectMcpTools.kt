@@ -5,14 +5,13 @@ import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
+import io.tolgee.facade.ProjectCreationFacade
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
-import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
@@ -24,10 +23,9 @@ import tools.jackson.databind.ObjectMapper
 class ProjectMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val projectService: ProjectService,
-  private val projectCreationService: ProjectCreationService,
+  private val projectCreationFacade: ProjectCreationFacade,
   private val languageStatsService: LanguageStatsService,
   private val languageService: LanguageService,
-  private val organizationRoleService: OrganizationRoleService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
@@ -105,8 +103,7 @@ class ProjectMcpTools(
           )
 
         executeInNewTransaction(transactionManager) {
-          organizationRoleService.checkUserCanCreateProject(dto.organizationId)
-          val project = projectCreationService.createProject(dto)
+          val project = projectCreationFacade.createProjectAsCurrentUser(dto)
           val result =
             mapOf(
               "id" to project.id,

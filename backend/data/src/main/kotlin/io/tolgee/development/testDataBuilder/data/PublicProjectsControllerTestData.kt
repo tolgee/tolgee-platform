@@ -8,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.ThirdPartyAuthType
 
 class PublicProjectsControllerTestData : BaseTestData() {
   val privateProject: Project get() = project
@@ -30,6 +31,7 @@ class PublicProjectsControllerTestData : BaseTestData() {
   lateinit var storedGuest: UserAccount
   lateinit var otherOrgPrivateProject: Project
   lateinit var serverAdmin: UserAccount
+  lateinit var serverSupporter: UserAccount
 
   lateinit var guestWithPermission: UserAccount
   lateinit var granularPermissionUser: UserAccount
@@ -51,6 +53,9 @@ class PublicProjectsControllerTestData : BaseTestData() {
   lateinit var softDeletedOrgPublicProject: Project
   lateinit var softDeletedOrgMember: UserAccount
   lateinit var orgLessCommunityUser: UserAccount
+  lateinit var ssoOrgLessUser: UserAccount
+  lateinit var ssoServerAdmin: UserAccount
+  lateinit var ssoGlobalOrgLessUser: UserAccount
 
   init {
     root.apply {
@@ -66,6 +71,28 @@ class PublicProjectsControllerTestData : BaseTestData() {
         addUserAccountWithoutOrganization {
           username = "org_less_community_user"
           name = "Org Less Community User"
+        }.self
+
+      ssoOrgLessUser =
+        addUserAccountWithoutOrganization {
+          username = "sso_org_less_user"
+          name = "Sso Org Less User"
+          thirdPartyAuthType = ThirdPartyAuthType.SSO
+        }.self
+
+      ssoGlobalOrgLessUser =
+        addUserAccountWithoutOrganization {
+          username = "sso_global_org_less_user"
+          name = "Sso Global Org Less User"
+          thirdPartyAuthType = ThirdPartyAuthType.SSO_GLOBAL
+        }.self
+
+      ssoServerAdmin =
+        addUserAccountWithoutOrganization {
+          username = "sso_server_admin"
+          name = "Sso Server Admin"
+          thirdPartyAuthType = ThirdPartyAuthType.SSO
+          role = UserAccount.Role.ADMIN
         }.self
 
       directPermissionUser =
@@ -124,6 +151,13 @@ class PublicProjectsControllerTestData : BaseTestData() {
           username = "server_admin"
           name = "Server Admin"
           role = UserAccount.Role.ADMIN
+        }.self
+
+      serverSupporter =
+        addUserAccount {
+          username = "server_supporter"
+          name = "Server Supporter"
+          role = UserAccount.Role.SUPPORTER
         }.self
 
       otherOrg =

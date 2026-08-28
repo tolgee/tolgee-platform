@@ -1,7 +1,6 @@
-package io.tolgee.component
+package io.tolgee.facade
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
-class PreferredOrganizationFacade(
+class PrivateOrganizationModelFacade(
   private val authenticationFacade: AuthenticationFacade,
   private val userPreferencesService: UserPreferencesService,
   private val privateOrganizationModelAssembler: PrivateOrganizationModelAssembler,
@@ -23,20 +22,20 @@ class PreferredOrganizationFacade(
   fun getPreferred(): PrivateOrganizationModel? {
     val user = authenticationFacade.authenticatedUser
     val preferences = userPreferencesService.findOrCreate(user.id)
-    var preferred = preferences.preferredOrganization
-    if (preferred == null || !organizationRoleService.canUserViewOrPublic(user, preferred.id)) {
-      preferred = userPreferencesService.refreshPreferredOrganization(user.id) ?: return null
-    }
+    val preferred = preferences.preferredOrganization ?: return null
+    val accessible =
+      preferred.takeIf { organizationRoleService.canUserViewOrPublic(user, it.id) }
+        ?: userPreferencesService.refreshPreferredOrganization(user.id)
+        ?: return null
 
-    return getPrivateModel(preferred.id)
+    return getPrivateModelWithoutAuthorization(accessible.id)
   }
 
-  fun getPrivateModel(organizationId: Long): PrivateOrganizationModel? {
+  fun getPrivateModelWithoutAuthorization(organizationId: Long): PrivateOrganizationModel? {
     val user = authenticationFacade.authenticatedUser
     val view = organizationService.findPrivateView(organizationId, user.id) ?: return null
-    val isAtLeastMember = organizationRoleService.canUserViewAtLeastMember(user, organizationId)
-    val limitedView =
-      !user.isSupporterOrAdmin() && !organizationRoleService.canUserViewStrict(user.id, organizationId)
+    val isAtLeastMember = organizationRoleService.hasAnyOrganizationRole(user.id, organizationId)
+    val limitedView = !organizationRoleService.canUserView(user, organizationId)
     return privateOrganizationModelAssembler.toModel(
       view,
       enabledFeaturesProvider.get(view.organization.id),
