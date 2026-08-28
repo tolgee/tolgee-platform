@@ -48,7 +48,6 @@ dependencyResolutionManagement {
             library('jjwtApi', 'io.jsonwebtoken', 'jjwt-api').version(jjwtVersion)
             library('jjwtImpl', 'io.jsonwebtoken', 'jjwt-impl').version(jjwtVersion)
             library('jjwtJackson', 'io.jsonwebtoken', 'jjwt-jackson').version(jjwtVersion)
-            library('springSecurityOauth2AuthServer', 'org.springframework.security', 'spring-security-oauth2-authorization-server').withoutVersion()
             library('assertJCore', 'org.assertj:assertj-core:3.27.3')
             library('springmockk', 'com.ninja-squad:springmockk:3.0.1')
             library('mockito', 'org.mockito.kotlin:mockito-kotlin:5.4.0')

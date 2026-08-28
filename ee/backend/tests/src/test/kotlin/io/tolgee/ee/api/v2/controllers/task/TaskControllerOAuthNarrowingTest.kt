@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.task
 
+import io.tolgee.component.KeyGenerator
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.TaskTestData
@@ -9,14 +10,13 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.model.enums.Scope
+import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 /**
@@ -25,10 +25,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
  */
 class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var authorizationRepository: OAuth2AuthorizationRepository
 
   @Autowired
-  private lateinit var registeredClientRepository: RegisteredClientRepository
+  private lateinit var keyGenerator: KeyGenerator
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
@@ -41,7 +41,7 @@ class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
     testData = TaskTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.TASKS)
-    tokens = OAuth2TestTokens(authorizationService, registeredClientRepository)
+    tokens = OAuth2TestTokens(authorizationRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach

@@ -28,7 +28,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
-import io.tolgee.security.oauth2.OAuth2AuthorizationQueryService
+import io.tolgee.security.oauth2.OAuth2AuthorizationService
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -92,7 +92,7 @@ class UserAccountService(
 
   @Autowired
   @Lazy
-  private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
+  private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   private val emailValidator = EmailValidator()
 
@@ -227,6 +227,7 @@ class UserAccountService(
   }
 
   private fun deleteWithFetchedData(toDelete: UserAccount) {
+    oauth2AuthorizationService.revokeAllForUser(toDelete.id)
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
@@ -610,7 +611,7 @@ class UserAccountService(
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
     // The tokensValidNotBefore cutoff is read from the USER_ACCOUNTS cache, which lags per-node without Redis, so the
     // refresh grant could keep minting tokens on a stale replica; deleting the grants makes revocation topology-safe.
-    oauth2AuthorizationQueryService.revokeAllForUser(userAccount.id)
+    oauth2AuthorizationService.revokeAllForUser(userAccount.id)
   }
 
   private fun publishUserInfoUpdatedEvent(

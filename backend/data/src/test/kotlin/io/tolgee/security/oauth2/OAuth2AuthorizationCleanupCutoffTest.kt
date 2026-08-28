@@ -36,7 +36,7 @@ class OAuth2AuthorizationCleanupCutoffTest {
   @Test
   fun `deletes with a cutoff of exactly now minus the retention window`() {
     val now = Instant.parse("2026-08-07T00:00:00Z")
-    val queryService = mock<OAuth2AuthorizationQueryService>()
+    val queryService = mock<OAuth2AuthorizationService>()
     val dateProvider = mock<CurrentDateProvider> { on { date } doReturn Date.from(now) }
     val properties = OAuth2ServerProperties().apply { authorizationRetentionDays = 7 }
 

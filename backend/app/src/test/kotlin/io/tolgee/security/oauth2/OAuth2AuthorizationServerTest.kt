@@ -38,14 +38,12 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
 
   @Test
   fun `publishes no JWK set`() {
-    // Access tokens are opaque, so the server holds no signing key and Spring registers no JWK-set endpoint. If this
-    // ever starts returning a key set, a key lifecycle has been reintroduced without anything needing one.
-    assertThat(
-      mvc
-        .perform(get("/oauth2/jwks"))
-        .andReturn()
-        .response.status,
-    ).isNotEqualTo(200)
+    // Access tokens are opaque, so the server holds no signing key. If this ever starts answering with a key set, a
+    // key lifecycle has been reintroduced without anything needing one. (An unknown path is answered by the SPA
+    // catch-all, so the check is on the content, not the status.)
+    val response = mvc.perform(get("/oauth2/jwks")).andReturn().response
+    assertThat(response.contentType ?: "").doesNotContain("json")
+    assertThat(response.contentAsString).doesNotContain("\"keys\"")
   }
 
   @Test

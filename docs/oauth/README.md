@@ -60,11 +60,9 @@ flow above runs.
 
 **This hop is forced, not incidental — don't try to remove it.** A top-level navigation carries no
 `Authorization` header, and Tolgee deliberately has no auth cookie (which is what makes the API stateless
-and CSRF-free by construction). Something has to bridge the two, and the authorization endpoint needs a
-`Principal` before it will issue a code. The only ways around it are to hand-roll `/oauth2/authorize`
-ourselves — taking on redirect-URI matching, PKCE storage, and single-use/expiring codes, i.e. the most
-attack-exposed half of the protocol — or to replace Spring's
-`OAuth2AuthorizationCodeRequestAuthenticationProvider`. Both are worse than one short-lived session.
+and CSRF-free by construction). Something has to bridge the two, and `/oauth2/authorize` takes its principal
+**only** from that session (`OAuth2SessionBootstrapper`), never from a bearer header — otherwise a project API
+key or PAT could mint an OAuth token for itself.
 
 This bootstrap session is the *only* stateful part of the otherwise-stateless app. To keep it working on
 multi-replica deployments (Tolgee Cloud, self-hosted HA) without requiring load-balancer session affinity,
@@ -75,10 +73,10 @@ and no ingress stickiness are needed.
 
 #### The session is destroyed the moment a code is issued
 
-We invalidate the bootstrap session as soon as `/oauth2/authorize` issues an authorization code
-(`OAuth2SessionInvalidatingAuthorizationResponseHandler`, wired on the authorization endpoint). Its whole
-job is to carry the single authorize → consent → authorize round trip; the `/oauth2/token` and refresh
-exchanges are back-channel and sessionless, so nothing needs it afterwards.
+We invalidate the bootstrap session as soon as the consent form issues an authorization code
+(`OAuth2AuthorizationServerController.consent`). Its whole job is to carry the single authorize → consent →
+authorize round trip; the `/oauth2/token` and refresh exchanges are back-channel and sessionless, so nothing
+needs it afterwards.
 
 **Why we do this.** The session cookie lives in the browser's shared cookie jar, but the real web login is
 the JWT in local storage — logging out of the webapp drops that JWT and does **not** touch the cookie. Without
@@ -99,7 +97,7 @@ explicitly **revoking an app's access** (killing its refresh token + grant), not
 **This is not an OAuth-spec behavior.** The specs (RFC 6749 §3.1) deliberately leave the authorization
 server's own login session out of scope, and a *typical* AS does the opposite — it keeps a long-lived **SSO**
 session so repeat authorizations are silent. What we have here is not an SSO session but a **synthetic,
-single-use bridge** from the stateless JWT into the session SAS requires; destroying it when its one
+single-use bridge** from the stateless JWT into a session; destroying it when its one
 transaction completes is ordinary session hygiene (the same family as the session-id rotation the bootstrap
 already does for fixation defense), just applied to a session that in a normal AS wouldn't be single-use.
 
@@ -128,10 +126,10 @@ So even if someone steals the one-time code in transit, it's useless without the
 never left the app. PKCE is required for every Tolgee OAuth client.
 
 ### Opaque access tokens (why not a JWT)
-The access token is an **opaque** random string. It carries no readable content: the claims that describe
-it — `sub` (the user id), `scope`, and Tolgee's `tg.prj` (which projects it is bound to) — live on the
-`oauth2_authorization` row the token points at, and `OAuth2AccessTokenResolver` reads them on every
-request.
+The access token is an **opaque** random string. It carries no readable content: everything that describes
+it — the user, the granted scopes, and the project set it is bound to — lives on the `oauth2_authorization`
+row it belongs to, and `OAuth2AccessTokenResolver` reads that row on every request. Like project API keys
+and PATs, codes and tokens are stored **hashed**; the plaintext exists only in the response that delivered it.
 
 The alternative, a self-contained signed JWT, is the more common choice for an authorization server, and
 we deliberately did not take it:
@@ -152,15 +150,14 @@ supersedes the previous access token immediately rather than leaving it usable u
 
 ### issuer
 The base URL that identifies this authorization server; it's the `iss` parameter on the code redirect and
-the root of discovery (`{issuer}/.well-known/oauth-authorization-server`), and Spring builds every endpoint URL
+the root of discovery (`{issuer}/.well-known/oauth-authorization-server`), and every endpoint URL is built
 relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`,
 …) are actually reachable — i.e. the **backend / API URL** (`back-end-url`).
 
 `OAuth2IssuerResolver` owns it, and exposes two forms. `configuredBaseUrl` is `backEndUrl ?: frontEndUrl`,
-with a blank treated as unset and any trailing slash stripped; the startup `AuthorizationServerSettings`
-bean reads it, and leaves the issuer unset when nothing is configured. `issuerUrl` is the same value, or
-the request's own container-visible origin when nothing is configured, and it is what every in-request
-caller uses — the RFC 9728 document, the bootstrap `continue` URL and the `iss` on the code redirect.
+with a blank treated as unset and any trailing slash stripped. `issuerUrl` is the same value, or
+the request's own container-visible origin when nothing is configured, and it is what every
+caller uses — the discovery documents, the bootstrap `continue` URL and the `iss` on the code redirect.
 Note the request fallback reads what the container saw, *not* `X-Forwarded-*`, which the app does not
 trust: behind a reverse proxy you must set `back-end-url` or the issuer will be the internal URL. The
 `frontEndUrl`
@@ -172,8 +169,8 @@ two, treat `back-end-url` as required.)
 
 ### Consent is never remembered
 
-Every authorization shows the consent screen, and `AlwaysPromptConsentService` is what makes that true —
-SAS would otherwise skip the screen once a stored consent covers the requested scopes.
+Every authorization shows the consent screen; nothing stores a past consent, so there is nothing to skip it
+with.
 
 The reason is the project picker. A token is bound to a project, that choice is made on the screen, and it
 is per-authorization state with nowhere to be stored. Skipping the screen leaves the authorization with no
@@ -182,8 +179,9 @@ client's own choice) or "every project this user can reach" — neither of which
 remembering consent requires making the project selection durable first; until then, re-prompting is what
 lets a reconnect mint a token at all.
 
-`oauth2_authorization_consent` is therefore written and read by nothing. The table stays because it is part
-of the stock SAS schema; dropping it is a migration decision, not a code one.
+Should consent ever be remembered, the project selection has to become durable first, and the token endpoint's
+guard (a consent client's code is only redeemable once a project set was bound, see
+`OAuth2AuthorizationService.exchangeCode`) is what would catch a screen that was skipped without it.
 
 ### scope vs. project set
 - **scope** = a capability verb (`translations.suggest`, `translation-comments.add`) — *what* the token
@@ -194,8 +192,9 @@ of the stock SAS schema; dropping it is a migration decision, not a code one.
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
-**pre-registration**: the browser extension and CLI are seeded as fixed clients with a known `client_id`
-(`PreRegisteredClients.kt`). Simple and safe, but it only works for apps *we* control.
+**pre-registration**: the browser extension and CLI are built from configuration with a known `client_id`
+(`OAuth2ClientRegistry.kt`). Every client is public, must use PKCE (S256 only), and always goes through
+the consent screen; redirect URIs are matched exactly. Simple and safe, but it only works for apps *we* control.
 
 Onboarding third-party clients (the MCP round) needs one of two mechanisms, neither of which is built:
 
@@ -216,16 +215,22 @@ recover it with `git revert` of the commit that removed it rather than writing i
 
 ## Where it lives in the code
 
+The authorization server is Tolgee's own code, not a library: the authorization-code grant with PKCE for public
+clients is small enough (one service, one controller, one entity) that owning it costs less than bending a
+general-purpose server to a stateless app with opaque tokens and a per-authorization project picker.
+`OAuth2ProtocolConformanceTest` pins the protocol contract at the HTTP level; `OAuth2AuthorizationCodeFlowTest`
+covers what is Tolgee-specific on top of it.
+
 | Concern | Files |
 |---|---|
-| Token generation (opaque) | `backend/data/.../security/oauth2/OAuth2TokenGeneratorConfig.kt` |
-| Auth-server filter chain, issuer | `backend/app/.../configuration/OAuth2AuthorizationServerConfig.kt` |
-| Token claims (`sub`, `scope`, `tg.prj`) | `TolgeeOAuth2TokenCustomizer.kt` |
+| `/oauth2/authorize`, the consent form, `/oauth2/token`, RFC 8414 discovery | `backend/api/.../controllers/oauth2/OAuth2AuthorizationServerController.kt` |
+| Protocol decisions: request validation, code issuance and exchange, PKCE check, refresh rotation, revocation | `backend/data/.../security/oauth2/OAuth2AuthorizationService.kt` |
+| The grant itself (user, client, scopes, project set, hashed code/tokens, expiries) | `backend/data/.../model/oauth2/OAuth2Authorization.kt`, `db/changelog/oauth2/oauth2-server.xml` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
-| Browser session bootstrap + consent info | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
-| Bootstrap session killed on code issuance | `backend/data/.../security/oauth2/OAuth2SessionInvalidatingAuthorizationResponseHandler.kt` |
-| Grant/consent storage | `db/changelog/oauth2/oauth2-server.xml` (Spring Authorization Server JDBC schema) |
-| Client registry (from config, not stored) | `PreRegisteredClients.kt`, `TolgeeRegisteredClientRepository.kt` |
+| Browser session bootstrap + consent-screen data + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt`, `OAuth2SessionBootstrapper.kt` |
+| Client registry (from config, not stored) | `OAuth2ClientRegistry.kt` |
+| Issuer | `OAuth2IssuerResolver.kt` |
+| Nightly cleanup of spent/abandoned grants | `OAuth2AuthorizationCleanup.kt` |
 
 ## Round-1 limitations (tracked follow-ups)
 
@@ -238,15 +243,12 @@ These are known gaps, deferred to the client rounds that first exercise them:
   first would mean replacing it immediately. Recover the implementation with `git revert` of the commit that
   removed it rather than writing it again.
 
-- **Refresh is stock rotate-on-use.** Public clients *do* get rotating refresh tokens — SAS withholds
-  them by default (both on the code grant and by refusing to authenticate a public client on the
-  refresh grant), so we add `PublicClientRefreshTokenGenerator` plus `PublicClientRefreshAuthentication`
-  (a converter + provider that authenticate a bare `client_id`, gated strictly to
-  `grant_type=refresh_token`). But `reuseRefreshTokens(false)` is plain rotation with no grace window
-  and no reuse-detection family-revocation, so a client that refreshes proactively can hit
-  `invalid_grant` on a near-simultaneous second refresh. Follow-up: replace
-  `OAuth2RefreshTokenAuthenticationProvider` with one that accepts a just-superseded token within a
-  short grace window and revokes the whole authorization family on replay of an already-rotated token.
+- **Refresh is plain rotate-on-use.** Every refresh replaces both tokens on the grant, with no grace window
+  and no reuse detection: a superseded refresh token is simply unknown, so a client that refreshes
+  proactively can hit `invalid_grant` on a near-simultaneous second refresh, and a replayed old token is
+  refused but does not revoke the grant. Follow-up in `OAuth2AuthorizationService.refresh`: accept a
+  just-superseded token within a short grace window and revoke the whole grant on replay of an older one.
+  (A replayed authorization *code* already revokes everything it issued.)
 - **A grant resolves on every request.** Opaque tokens are looked up in `oauth2_authorization` per
   request, which is what makes revocation immediate — but it is also an uncached database read on the API
   hot path. Project API keys and PATs cache their lookup by token hash (`Caches.PROJECT_API_KEYS`); doing
@@ -316,7 +318,7 @@ Now the extension's API url is `https://localhost:3995` and the whole flow is HT
 Load the unpacked extension (`chrome://extensions` → Developer mode → Load unpacked → `dist-chrome`
 after `npm run build` in the chrome-plugin repo). In its **service worker** console run
 `chrome.identity.getRedirectURL()` and add that exact value (trailing slash included) to the local
-backend config, then restart the backend so `PreRegisteredClients` seeds the client:
+backend config, then restart the backend so `OAuth2ClientRegistry` picks the client up:
 
 ```yaml
 tolgee:

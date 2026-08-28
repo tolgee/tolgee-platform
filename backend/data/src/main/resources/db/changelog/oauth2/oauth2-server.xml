@@ -3,117 +3,71 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!--
-        Spring Authorization Server built-in JDBC schema (spring-security-oauth2-authorization-server).
-        Adapted for PostgreSQL per the notes in the shipped schema SQL: 'blob' -> 'text', 'timestamp' -> 'timestamptz'.
-        These tables are NOT JPA entities, so they are listed in gradle/liquibase.gradle excludeObjects to keep
-        diffChangeLog from emitting DROPs for them. There is no oauth2_registered_client table: clients are built from
-        configuration at startup (see TolgeeRegisteredClientRepository), not stored.
-    -->
-
-    <changeSet author="dbocharov" id="oauth2-authorization">
-        <sql dbms="postgresql" splitStatements="false">
-            CREATE TABLE oauth2_authorization (
-                id varchar(100) NOT NULL,
-                registered_client_id varchar(100) NOT NULL,
-                principal_name varchar(200) NOT NULL,
-                authorization_grant_type varchar(100) NOT NULL,
-                authorized_scopes varchar(1000) DEFAULT NULL,
-                attributes text DEFAULT NULL,
-                state varchar(500) DEFAULT NULL,
-                authorization_code_value text DEFAULT NULL,
-                authorization_code_issued_at timestamptz DEFAULT NULL,
-                authorization_code_expires_at timestamptz DEFAULT NULL,
-                authorization_code_metadata text DEFAULT NULL,
-                access_token_value text DEFAULT NULL,
-                access_token_issued_at timestamptz DEFAULT NULL,
-                access_token_expires_at timestamptz DEFAULT NULL,
-                access_token_metadata text DEFAULT NULL,
-                access_token_type varchar(100) DEFAULT NULL,
-                access_token_scopes varchar(1000) DEFAULT NULL,
-                oidc_id_token_value text DEFAULT NULL,
-                oidc_id_token_issued_at timestamptz DEFAULT NULL,
-                oidc_id_token_expires_at timestamptz DEFAULT NULL,
-                oidc_id_token_metadata text DEFAULT NULL,
-                refresh_token_value text DEFAULT NULL,
-                refresh_token_issued_at timestamptz DEFAULT NULL,
-                refresh_token_expires_at timestamptz DEFAULT NULL,
-                refresh_token_metadata text DEFAULT NULL,
-                user_code_value text DEFAULT NULL,
-                user_code_issued_at timestamptz DEFAULT NULL,
-                user_code_expires_at timestamptz DEFAULT NULL,
-                user_code_metadata text DEFAULT NULL,
-                device_code_value text DEFAULT NULL,
-                device_code_issued_at timestamptz DEFAULT NULL,
-                device_code_expires_at timestamptz DEFAULT NULL,
-                device_code_metadata text DEFAULT NULL,
-                PRIMARY KEY (id)
-            );
-        </sql>
-        <rollback>
-            <sql>DROP TABLE oauth2_authorization;</sql>
-        </rollback>
-    </changeSet>
-
-    <changeSet author="dbocharov" id="oauth2-authorization-consent">
+    <changeSet author="jancizmar" id="oauth2-authorization-drop-spring-authorization-server-tables">
         <comment>
-            Source: classpath resource org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql
-            (spring-security-oauth2-authorization-server jar). No PostgreSQL adaptation needed (varchar columns only).
+            Earlier builds of this feature persisted grants in the Spring Authorization Server schema. Nothing released
+            ever wrote it, so it is dropped rather than migrated.
         </comment>
-        <sql dbms="postgresql" splitStatements="false">
-            CREATE TABLE oauth2_authorization_consent (
-                registered_client_id varchar(100) NOT NULL,
-                principal_name varchar(200) NOT NULL,
-                authorities varchar(1000) NOT NULL,
-                PRIMARY KEY (registered_client_id, principal_name)
-            );
+        <sql dbms="postgresql" splitStatements="true">
+            DROP TABLE IF EXISTS oauth2_authorization_consent;
+            DROP TABLE IF EXISTS oauth2_authorization;
         </sql>
-        <rollback>
-            <sql>DROP TABLE oauth2_authorization_consent;</sql>
-        </rollback>
     </changeSet>
 
-    <changeSet author="dbocharov" id="oauth2-authorization-created-at">
-        <comment>
-            Not part of the SAS built-in schema. SAS persists a row at /authorize (before consent) whose token/code
-            expiry columns are all NULL; without a creation timestamp the nightly cleanup can never age those abandoned
-            pre-consent rows out. SAS ignores unknown columns, so this extra column does not affect its read/write.
-        </comment>
-        <sql dbms="postgresql" splitStatements="false">
-            ALTER TABLE oauth2_authorization ADD COLUMN created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP;
-        </sql>
-        <rollback>
-            <sql>ALTER TABLE oauth2_authorization DROP COLUMN created_at;</sql>
-        </rollback>
+    <changeSet author="jancizmar" id="oauth2-authorization">
+        <createTable tableName="oauth2_authorization">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="oauth2_authorizationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="redirect_uri" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_state" type="VARCHAR(2000)"/>
+            <column name="code_challenge" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_scopes" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="granted_scopes" type="VARCHAR(4000)"/>
+            <column name="project_hint" type="BIGINT"/>
+            <column name="project_selection" type="VARCHAR(255)"/>
+            <column name="consent_state" type="VARCHAR(255)"/>
+            <column name="code_hash" type="VARCHAR(255)"/>
+            <column name="code_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="code_used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_hash" type="VARCHAR(255)"/>
+            <column name="access_token_issued_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="refresh_token_hash" type="VARCHAR(255)"/>
+            <column name="refresh_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addUniqueConstraint columnNames="consent_state" constraintName="oauth2_authorization_consent_state_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="code_hash" constraintName="oauth2_authorization_code_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="access_token_hash" constraintName="oauth2_authorization_access_token_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="refresh_token_hash" constraintName="oauth2_authorization_refresh_token_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <createIndex indexName="oauth2_authorization_user_account_id_idx" tableName="oauth2_authorization">
+            <column name="user_account_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="oauth2_authorization"
+                                 constraintName="oauth2_authorization_user_account_fk" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
-
-    <changeSet author="dbocharov" id="oauth2-authorization-indexes">
-        <comment>
-            The SAS reference schema ships PK-only; production must add these. findByToken (every code exchange and
-            refresh) filters on the token/state columns, and our connected-apps queries filter on principal_name.
-            The token columns are mostly NULL, so partial indexes keep them small. The token-value columns use hash
-            indexes: findByToken only does equality lookups, and a self-contained access-token JWT can exceed the B-tree
-            entry size limit (~2704 bytes) with many scopes, which would make the row unindexable and break issuance.
-        </comment>
-        <sql dbms="postgresql" splitStatements="false">
-            CREATE INDEX ix_oauth2_authorization_principal_name ON oauth2_authorization (principal_name);
-            CREATE INDEX ix_oauth2_authorization_state ON oauth2_authorization (state) WHERE state IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_auth_code ON oauth2_authorization USING hash (authorization_code_value)
-                WHERE authorization_code_value IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_access_token ON oauth2_authorization USING hash (access_token_value)
-                WHERE access_token_value IS NOT NULL;
-            CREATE INDEX ix_oauth2_authorization_refresh_token ON oauth2_authorization USING hash (refresh_token_value)
-                WHERE refresh_token_value IS NOT NULL;
-        </sql>
-        <rollback>
-            <sql>
-                DROP INDEX ix_oauth2_authorization_principal_name;
-                DROP INDEX ix_oauth2_authorization_state;
-                DROP INDEX ix_oauth2_authorization_auth_code;
-                DROP INDEX ix_oauth2_authorization_access_token;
-                DROP INDEX ix_oauth2_authorization_refresh_token;
-            </sql>
-        </rollback>
-    </changeSet>
-
 </databaseChangeLog>

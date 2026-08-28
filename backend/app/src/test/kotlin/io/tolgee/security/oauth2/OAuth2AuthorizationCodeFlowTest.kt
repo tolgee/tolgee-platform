@@ -16,11 +16,13 @@
 
 package io.tolgee.security.oauth2
 
-import io.tolgee.configuration.OAuth2AuthorizationServerConfig
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
+import io.tolgee.model.oauth2.OAuth2Authorization
+import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
 import org.assertj.core.api.Assertions.assertThat
@@ -29,19 +31,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.mock.web.MockHttpSession
-import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
-import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.web.util.UriComponentsBuilder
@@ -51,33 +42,30 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.time.Instant
 import java.util.Base64
 import java.util.Date
 
 /**
- * Drives the whole browser flow through MockMvc against a test client registered below (consent disabled, so no page
- * is needed): session bootstrap -> /oauth2/authorize -> code -> /oauth2/token -> use the access token on the REST API.
- * This is the end-to-end proof that a real authorization-code token works — including that `sub` is the numeric user id.
+ * Drives the whole browser flow through MockMvc against the clients configured in the test `application.yaml`:
+ * session bootstrap → `/oauth2/authorize` → consent page → project selection → consent form → code → `/oauth2/token`,
+ * and what the issued tokens then do on the REST API. Protocol edge cases live in [OAuth2ProtocolConformanceTest];
+ * this file covers what is Tolgee's own: project binding, consent-screen data, and revocation.
  */
 class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Autowired
   private lateinit var jwtService: JwtService
 
   @Autowired
-  private lateinit var registeredClientRepository: TolgeeRegisteredClientRepository
-
-  @Autowired
-  private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
+  private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   @Autowired
   private lateinit var issuerResolver: OAuth2IssuerResolver
 
   @Autowired
-  private lateinit var jdbcTemplate: JdbcTemplate
+  private lateinit var repository: OAuth2AuthorizationRepository
 
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var keyGenerator: KeyGenerator
 
   private lateinit var testData: BaseTestData
   private lateinit var otherUser: UserAccount
@@ -113,60 +101,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     testDataService.saveTestData(testData.root)
     otherProjectId = otherProjectBuilder.self.id
     publicProjectId = publicProjectBuilder.self.id
-    // Self-contained clients, so the test does not depend on which clients the running configuration seeds.
-    registeredClientRepository.save(flowClient(TEST_CLIENT_ID, CLI_REDIRECT))
-    registeredClientRepository.save(flowClient(SECOND_CLIENT_ID, SECOND_REDIRECT))
-    registeredClientRepository.save(
-      flowClient(
-        CONSENT_CLIENT_ID,
-        CONSENT_REDIRECT,
-        requireConsent = true,
-        scopes = listOf("translations.view", "translations.edit"),
-        requiredScopes = listOf("translations.view"),
-      ),
-    )
   }
-
-  private fun flowClient(
-    clientId: String,
-    redirect: String,
-    requireConsent: Boolean = false,
-    scopes: Collection<String> = listOf("translations.view"),
-    requiredScopes: List<String> = emptyList(),
-  ): RegisteredClient =
-    RegisteredClient
-      .withId(clientId)
-      .clientId(clientId)
-      .clientName("Test Flow Client $clientId")
-      .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-      .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-      .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-      .redirectUri(redirect)
-      .scopes { it.addAll(scopes) }
-      .clientSettings(
-        ClientSettings
-          .builder()
-          .requireProofKey(true)
-          .requireAuthorizationConsent(requireConsent)
-          .apply {
-            if (requiredScopes.isNotEmpty()) {
-              setting(OAuth2Constants.REQUIRED_SCOPES_SETTING, requiredScopes.joinToString(" "))
-            }
-          }.build(),
-      ).tokenSettings(
-        TokenSettings
-          .builder()
-          .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
-          .reuseRefreshTokens(false)
-          .build(),
-      ).build()
 
   @AfterEach
   fun cleanup() {
-    jdbcTemplate.update("DELETE FROM oauth2_authorization")
-    // Clients live in the application context, not the database, so the per-test DB reset does not remove the ones
-    // registered above; without this they outlive the test and are visible to every later one.
-    registeredClientRepository.resetToConfigured()
+    oauth2AuthorizationService.revokeAllForUser(testData.user.id)
+    oauth2AuthorizationService.revokeAllForUser(otherUser.id)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -174,7 +114,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `authorization code + PKCE flow issues an access token that works on the REST API`() {
     val accessToken = runAuthorizationCodeFlow()
 
-    assertThat(storedClaims(accessToken).get("sub").asText()).isEqualTo(testData.user.id.toString())
+    assertThat(stored(accessToken).userAccount.id).isEqualTo(testData.user.id)
 
     mvc
       .perform(
@@ -194,7 +134,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val firstAccessToken = firstResponse.get("access_token").asString()
     // Read before refreshing: rotation replaces the authorization's single access token, so the superseded one no
     // longer resolves.
-    val initialClaims = storedClaims(firstAccessToken)
+    val initial = stored(firstAccessToken)
+    val initialScopes = initial.grantedScopeValues
+    val initialClientId = initial.clientId
 
     val refreshResponse =
       mvc
@@ -202,7 +144,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "refresh_token")
             .param("refresh_token", refreshToken!!)
-            .param("client_id", TEST_CLIENT_ID)
+            .param("client_id", FLOW_CLIENT_ID)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
         .response.contentAsString
@@ -212,11 +154,10 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(refreshedAccessToken).isNotNull()
     assertThat(refreshed.get("refresh_token")?.asString()).isNotNull().isNotEqualTo(refreshToken)
 
-    val refreshedClaims = storedClaims(refreshedAccessToken!!)
-    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
-    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
-    assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
-    assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
+    val refreshedStored = stored(refreshedAccessToken!!)
+    assertThat(refreshedStored.boundProjectIds()).containsExactly(testData.project.id)
+    assertThat(refreshedStored.clientId).isEqualTo(initialClientId)
+    assertThat(refreshedStored.grantedScopeValues).isEqualTo(initialScopes)
 
     mvc
       .perform(
@@ -230,7 +171,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "refresh_token")
             .param("refresh_token", refreshToken)
-            .param("client_id", TEST_CLIENT_ID)
+            .param("client_id", FLOW_CLIENT_ID)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
         .response.status
@@ -254,7 +195,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "refresh_token")
             .param("refresh_token", refreshToken)
-            .param("client_id", TEST_CLIENT_ID)
+            .param("client_id", FLOW_CLIENT_ID)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
         .response.status
@@ -282,10 +223,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       authorizationCodeTokenResponse(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
         .get("refresh_token")
         .asString()
+    val userId = testData.user.id
 
-    // Deleting the account does not revoke its grants, so the refresh grant must reject the now-missing user itself
-    // and revoke the dead grant, not mint a fresh access token for a user who no longer exists.
-    userAccountService.delete(testData.user.id)
+    userAccountService.delete(userId)
 
     val status =
       mvc
@@ -293,12 +233,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "refresh_token")
             .param("refresh_token", refreshToken)
-            .param("client_id", TEST_CLIENT_ID)
+            .param("client_id", FLOW_CLIENT_ID)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
         .response.status
     assertThat(status).isEqualTo(400)
-    assertThat(authorizationRowsForUser()).isZero()
+    assertThat(repository.countByUserAccountId(userId)).isZero()
   }
 
   @Test
@@ -308,7 +248,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsOk
 
-    oauth2AuthorizationQueryService.revokeAllForUser(testData.user.id)
+    oauth2AuthorizationService.revokeAllForUser(testData.user.id)
 
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
@@ -330,88 +270,27 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(authorizationRowsForUser()).isZero()
   }
 
-  private fun authorizationRowsForUser(): Int =
-    jdbcTemplate.queryForObject(
-      "SELECT COUNT(*) FROM oauth2_authorization WHERE principal_name = ?",
-      Int::class.java,
-      testData.user.id.toString(),
-    ) ?: 0
+  private fun authorizationRowsForUser(): Long = repository.countByUserAccountId(testData.user.id)
 
   @Test
   fun `a scope deselected at consent is absent from the issued token`() {
     val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-    mvc.perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
+    val pending = startPendingConsent(jwt, scope = "translations.view translations.edit")
+    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", CONSENT_CLIENT_ID)
-        .queryParam("redirect_uri", CONSENT_REDIRECT)
-        .queryParam("scope", "translations.view translations.edit")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "client-state")
-        .build()
-        .toUriString()
-    val consentLocation =
-      mvc
-        .perform(get(authorizeUrl).session(session))
-        .andReturn()
-        .response
-        .getHeader("Location")
-    val state = URLDecoder.decode(queryParam(consentLocation!!, "state")!!, StandardCharsets.UTF_8)
-    selectProject(jwt, state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    val accessToken = completeConsent(pending, approvedScopes = listOf("translations.view"))
 
-    val codeLocation =
-      mvc
-        .perform(
-          post("/oauth2/authorize")
-            .param("client_id", CONSENT_CLIENT_ID)
-            .param("state", state)
-            .param("scope", "translations.view")
-            .session(session),
-        ).andReturn()
-        .response
-        .getHeader("Location")
-    val code = queryParam(codeLocation!!, "code")
-
-    val tokenResponse =
-      mvc
-        .perform(
-          post("/oauth2/token")
-            .param("grant_type", "authorization_code")
-            .param("code", code!!)
-            .param("redirect_uri", CONSENT_REDIRECT)
-            .param("client_id", CONSENT_CLIENT_ID)
-            .param("code_verifier", verifier)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
-        ).andReturn()
-        .response.contentAsString
-    val accessToken = jacksonObjectMapper().readTree(tokenResponse).get("access_token").asString()
-
-    val scopeClaim = storedClaims(accessToken).get("scope").toString()
-    assertThat(scopeClaim).contains("translations.view").doesNotContain("translations.edit")
+    assertThat(stored(accessToken).grantedScopeValues)
+      .contains("translations.view")
+      .doesNotContain("translations.edit")
   }
 
   @Test
   fun `the code-delivery redirect echoes the client's own state and the RFC 9207 iss`() {
     val jwt = jwtService.emitToken(testData.user.id)
     val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
-    val codeLocation =
-      mvc
-        .perform(
-          post("/oauth2/authorize")
-            .param("client_id", CONSENT_CLIENT_ID)
-            .param("state", pending.state)
-            .param("scope", "translations.view")
-            .session(pending.session),
-        ).andReturn()
-        .response
-        .getHeader("Location")
-    // The client's original `state` must round-trip for CSRF defense — NOT SAS's internal pending-authorization state.
+    val codeLocation = submitConsent(pending, listOf("translations.view")).response.getHeader("Location")
+    // The client's original `state` must round-trip for CSRF defense — NOT the server's internal consent state.
     val echoedState = URLDecoder.decode(queryParam(codeLocation!!, "state")!!, StandardCharsets.UTF_8)
     assertThat(echoedState).isEqualTo("client-state").isNotEqualTo(pending.state)
     // iss is present and is the issuer this server advertises (RFC 9207 AS mix-up defense). Read live rather than
@@ -442,7 +321,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .getHeader("Location")
 
     // The consent page, not a code delivered straight to the client redirect.
-    assertThat(location).isNotNull().contains(OAuth2AuthorizationServerConfig.CONSENT_PAGE_URI)
+    assertThat(location).isNotNull().contains(OAuth2Constants.CONSENT_PAGE_PATH)
     assertThat(queryParam(location!!, "code")).isNull()
   }
 
@@ -456,10 +335,8 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
     val second = startPendingConsent(jwt)
     selectProject(jwt, second.state, publicProjectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
-    val claim = storedClaims(completeConsent(second)).get(OAuth2Constants.PROJECTS_CLAIM)
 
-    assertThat(claim.isArray).isTrue()
-    assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
+    assertThat(stored(completeConsent(second)).boundProjectIds()).containsExactly(publicProjectId)
   }
 
   @Test
@@ -470,14 +347,14 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
       .andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    // Deliberately omit code_challenge. Every public client sets requireProofKey, so SAS must refuse with an error
-    // redirect and never issue a code — pins PKCE against an accidental downgrade that would re-open code interception.
+    // Deliberately omit code_challenge. Every client is public, so the server must refuse with an error redirect and
+    // never issue a code — pins PKCE against an accidental downgrade that would re-open code interception.
     val authorizeUrl =
       UriComponentsBuilder
         .fromPath("/oauth2/authorize")
         .queryParam("response_type", "code")
-        .queryParam("client_id", TEST_CLIENT_ID)
-        .queryParam("redirect_uri", CLI_REDIRECT)
+        .queryParam("client_id", FLOW_CLIENT_ID)
+        .queryParam("redirect_uri", FLOW_REDIRECT)
         .queryParam("scope", "translations.view")
         .queryParam("state", "no-pkce")
         .build()
@@ -495,31 +372,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   @Test
   fun `rejects the code exchange when the PKCE verifier is wrong`() {
     val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-    mvc.perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
-
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", TEST_CLIENT_ID)
-        .queryParam("redirect_uri", CLI_REDIRECT)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "state-123")
-        .build()
-        .toUriString()
-    val code =
-      queryParam(
-        mvc
-          .perform(get(authorizeUrl).session(session))
-          .andReturn()
-          .response
-          .getHeader("Location")!!,
-        "code",
-      )
+    val pending = startPendingConsent(jwt)
+    selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    val code = queryParam(submitConsent(pending, listOf("translations.view")).response.getHeader("Location")!!, "code")
 
     val status =
       mvc
@@ -527,8 +382,8 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "authorization_code")
             .param("code", code!!)
-            .param("redirect_uri", CLI_REDIRECT)
-            .param("client_id", TEST_CLIENT_ID)
+            .param("redirect_uri", CONSENT_REDIRECT)
+            .param("client_id", CONSENT_CLIENT_ID)
             .param("code_verifier", "not-the-real-verifier")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
@@ -540,28 +395,21 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `binds the token to the project hinted on the authorize request`() {
     val accessToken = runAuthorizationCodeFlow(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
 
-    val projectClaim = storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
-    assertThat(projectClaim.isArray).isTrue()
-    assertThat(projectClaim.size()).isEqualTo(1)
-    assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
+    assertThat(stored(accessToken).boundProjectIds()).containsExactly(testData.project.id)
   }
 
   @Test
   fun `a single project chosen on the consent screen binds the token to it`() {
     val accessToken = consentFlowAccessToken(testData.project.id)
 
-    val projectClaim = storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
-    assertThat(projectClaim.isArray).isTrue()
-    assertThat(projectClaim.size()).isEqualTo(1)
-    assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
+    assertThat(stored(accessToken).boundProjectIds()).containsExactly(testData.project.id)
   }
 
   @Test
   fun `choosing all projects on the consent screen keeps the token unscoped`() {
     val accessToken = consentFlowAccessToken(projectId = null)
 
-    assertThat(storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM).asString())
-      .isEqualTo(OAuth2Constants.ALL_PROJECTS)
+    assertThat(stored(accessToken).boundProjectIds()).isNull()
   }
 
   @Test
@@ -571,9 +419,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     selectProject(jwt, pending.state, testData.project.id)
       .andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    val projectClaim = storedClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM)
-    assertThat(projectClaim.isArray).isTrue()
-    assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
+    assertThat(stored(completeConsent(pending)).boundProjectIds()).containsExactly(testData.project.id)
   }
 
   @Test
@@ -582,22 +428,22 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
     selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    assertThat(storedClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM).asString())
-      .isEqualTo(OAuth2Constants.ALL_PROJECTS)
+    assertThat(stored(completeConsent(pending)).boundProjectIds()).isNull()
   }
 
   @Test
   fun `a consent-selected token keeps its project binding after a refresh`() {
-    // The consent selection is stored as an OAuth2Authorization attribute (not the authorize-time hint), so this proves
-    // that attribute survives the refresh grant — a refresh must not silently widen tg.prj back to ALL_PROJECTS.
+    // A refresh must not silently widen the project set back to "all projects".
     val jwt = jwtService.emitToken(testData.user.id)
-    val pending = startPendingConsent(jwt) // no authorize hint — binding comes only from the consent attribute
+    val pending = startPendingConsent(jwt) // no authorize hint — binding comes only from the consent selection
     selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
     val first = completeConsentTokenResponse(pending)
     val refreshToken = first.get("refresh_token")?.asString()
     assertThat(refreshToken).isNotNull()
 
-    val initialClaims = storedClaims(first.get("access_token").asString())
+    val initial = stored(first.get("access_token").asString())
+    val initialScopes = initial.grantedScopeValues
+    val initialClientId = initial.clientId
 
     val refreshed =
       jacksonObjectMapper().readTree(
@@ -612,11 +458,10 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .response.contentAsString,
       )
 
-    val refreshedClaims = storedClaims(refreshed.get("access_token").asString())
-    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
-    assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
-    assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
-    assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
+    val refreshedStored = stored(refreshed.get("access_token").asString())
+    assertThat(refreshedStored.boundProjectIds()).containsExactly(testData.project.id)
+    assertThat(refreshedStored.clientId).isEqualTo(initialClientId)
+    assertThat(refreshedStored.grantedScopeValues).isEqualTo(initialScopes)
   }
 
   @Test
@@ -678,8 +523,8 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .perform(
           get("/oauth2/authorize")
             .queryParam("response_type", "code")
-            .queryParam("client_id", TEST_CLIENT_ID)
-            .queryParam("redirect_uri", CLI_REDIRECT)
+            .queryParam("client_id", FLOW_CLIENT_ID)
+            .queryParam("redirect_uri", FLOW_REDIRECT)
             .queryParam("scope", "translations.view")
             .queryParam("code_challenge", s256Challenge(randomVerifier()))
             .queryParam("code_challenge_method", "S256")
@@ -688,12 +533,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .response
         .getHeader("Location")
 
-    assertThat(location).isNotNull().startsWith(OAuth2AuthorizationServerConfig.BOOTSTRAP_PAGE_URI)
+    assertThat(location).isNotNull().startsWith(OAuth2Constants.BOOTSTRAP_PAGE_PATH)
     val continueUrl = URLDecoder.decode(queryParam(location!!, "continue")!!, StandardCharsets.UTF_8)
     // Not the host MockMvc served the request on, which is what a request-derived URL would give.
     assertThat(continueUrl).doesNotStartWith("http://localhost")
     assertThat(continueUrl).startsWith("${issuerResolver.issuerUrl}/oauth2/authorize?")
-    assertThat(continueUrl).contains("client_id=$TEST_CLIENT_ID")
+    assertThat(continueUrl).contains("client_id=$FLOW_CLIENT_ID")
   }
 
   @Test
@@ -762,22 +607,121 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     selectProject(jwt, pending.state, publicProjectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
     val token = completeConsent(pending)
-    val claim = storedClaims(token).get(OAuth2Constants.PROJECTS_CLAIM)
-    assertThat(claim.isArray).isTrue()
-    assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
+    assertThat(stored(token).boundProjectIds()).containsExactly(publicProjectId)
 
     mvc
       .perform(get("/v2/projects/$publicProjectId/translations").header("Authorization", "Bearer $token"))
       .andIsOk
   }
 
+  @Test
+  fun `invalidates the http session once the authorization code is issued`() {
+    // The session carries only the authorize round trip; killing it at code issuance stops a later connect from
+    // silently reusing a stale principal (e.g. after the webapp user switched accounts). A fresh bootstrap must run.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt)
+    selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    val location = submitConsent(pending, listOf("translations.view")).response.getHeader("Location")
+
+    assertThat(queryParam(location!!, "code")).isNotNull()
+    assertThat(pending.session.isInvalid).isTrue()
+  }
+
+  @Test
+  fun `session-bootstrap rotates the session id (fixation defense)`() {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val session = MockHttpSession()
+    val originalId = session.id
+
+    mvc
+      .perform(
+        post("/v2/oauth2/session-bootstrap")
+          .header("Authorization", "Bearer $jwt")
+          .session(session),
+      ).andExpect { assertThat(it.response.status).isEqualTo(204) }
+
+    assertThat(session.id).isNotEqualTo(originalId)
+  }
+
+  @Test
+  fun `an API token cannot authenticate the authorize endpoint without a bootstrapped session`() {
+    // A raw webapp/PAK/PAT bearer must not establish a principal at /oauth2/authorize (that would let a token mint
+    // another token). Unauthenticated -> bootstrap redirect.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val verifier = randomVerifier()
+    val authorizeUrl =
+      UriComponentsBuilder
+        .fromPath("/oauth2/authorize")
+        .queryParam("response_type", "code")
+        .queryParam("client_id", FLOW_CLIENT_ID)
+        .queryParam("redirect_uri", FLOW_REDIRECT)
+        .queryParam("scope", "translations.view")
+        .queryParam("code_challenge", s256Challenge(verifier))
+        .queryParam("code_challenge_method", "S256")
+        .queryParam("state", "state-123")
+        .build()
+        .toUriString()
+
+    val location =
+      mvc
+        .perform(get(authorizeUrl).header("Authorization", "Bearer $jwt").accept(MediaType.TEXT_HTML))
+        .andReturn()
+        .response
+        .getHeader("Location")
+
+    assertThat(location).contains(OAuth2Constants.BOOTSTRAP_PAGE_PATH)
+    assertThat(location).doesNotContain(FLOW_REDIRECT)
+    assertThat(queryParam(location!!, "code")).isNull()
+
+    val continueUrl = URLDecoder.decode(queryParam(location, "continue")!!, StandardCharsets.UTF_8)
+    assertThat(continueUrl).contains("/oauth2/authorize")
+    assertThat(continueUrl).contains("client_id=$FLOW_CLIENT_ID")
+    assertThat(continueUrl).contains("state=state-123")
+    assertThat(continueUrl).contains("code_challenge=")
+  }
+
+  // -----------------------------------------------------------------------------------------------------------------
+  // Helpers
+  // -----------------------------------------------------------------------------------------------------------------
+
   private data class PendingConsent(
     val session: MockHttpSession,
     val state: String,
     val verifier: String,
+    val clientId: String,
+    val redirect: String,
   )
 
-  /** Bootstraps a session and reaches the consent page for the consent-required client, leaving a pending authorization. */
+  private fun runAuthorizationCodeFlow(
+    extraAuthorizeParams: Map<String, String> = emptyMap(),
+    clientId: String = FLOW_CLIENT_ID,
+    redirect: String = FLOW_REDIRECT,
+  ): String = authorizationCodeTokenResponse(extraAuthorizeParams, clientId, redirect).get("access_token").asString()
+
+  /**
+   * The whole flow as the browser runs it: bootstrap, authorize, bind the hinted project (or all projects) on the
+   * consent screen, approve, exchange the code.
+   */
+  private fun authorizationCodeTokenResponse(
+    extraAuthorizeParams: Map<String, String> = emptyMap(),
+    clientId: String = FLOW_CLIENT_ID,
+    redirect: String = FLOW_REDIRECT,
+  ): JsonNode {
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending =
+      startPendingConsent(
+        jwt,
+        hintProjectId = extraAuthorizeParams[OAuth2Constants.PROJECT_PARAM]?.toLong(),
+        clientId = clientId,
+        redirect = redirect,
+        clientState = "state-123",
+      )
+    selectProject(jwt, pending.state, extraAuthorizeParams[OAuth2Constants.PROJECT_PARAM]?.toLong())
+      .andExpect { assertThat(it.response.status).isEqualTo(204) }
+    return completeConsentTokenResponse(pending)
+  }
+
   private fun authorizeUrl(state: String): String =
     UriComponentsBuilder
       .fromPath("/oauth2/authorize")
@@ -791,9 +735,14 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .build()
       .toUriString()
 
+  /** Bootstraps a session and reaches the consent page, leaving a pending authorization keyed by the returned state. */
   private fun startPendingConsent(
     jwt: String,
     hintProjectId: Long? = null,
+    scope: String = "translations.view",
+    clientId: String = CONSENT_CLIENT_ID,
+    redirect: String = CONSENT_REDIRECT,
+    clientState: String = "client-state",
   ): PendingConsent {
     val session = MockHttpSession()
     mvc
@@ -805,24 +754,26 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       UriComponentsBuilder
         .fromPath("/oauth2/authorize")
         .queryParam("response_type", "code")
-        .queryParam("client_id", CONSENT_CLIENT_ID)
-        .queryParam("redirect_uri", CONSENT_REDIRECT)
-        .queryParam("scope", "translations.view")
+        .queryParam("client_id", clientId)
+        .queryParam("redirect_uri", redirect)
+        .queryParam("scope", scope)
         .queryParam("code_challenge", s256Challenge(verifier))
         .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "client-state")
+        .queryParam("state", clientState)
     hintProjectId?.let { authorizeBuilder.queryParam(OAuth2Constants.PROJECT_PARAM, it.toString()) }
-    // The consent page carries SAS's own state (which keys the pending authorization); url-decoded, that is what the
-    // SPA and select-project use, not the client's original state.
+    // The consent page carries the server's own state (which keys the pending authorization); url-decoded, that is
+    // what the SPA and select-project use, not the client's original state.
     val consentPageLocation =
       mvc
-        .perform(
-          get(authorizeBuilder.build().toUriString()).session(session),
-        ).andReturn()
+        .perform(get(authorizeBuilder.build().toUriString()).session(session))
+        .andReturn()
         .response
         .getHeader("Location")
+    assertThat(consentPageLocation)
+      .withFailMessage("expected the consent page, got $consentPageLocation")
+      .contains(OAuth2Constants.CONSENT_PAGE_PATH)
     val state = URLDecoder.decode(queryParam(consentPageLocation!!, "state")!!, StandardCharsets.UTF_8)
-    return PendingConsent(session, state, verifier)
+    return PendingConsent(session, state, verifier, clientId, redirect)
   }
 
   private fun selectProject(
@@ -835,24 +786,32 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     return mvc.perform(request)
   }
 
-  private fun completeConsent(pending: PendingConsent): String =
-    completeConsentTokenResponse(pending).get("access_token").asString()
+  /** The consent form as the SPA posts it: client_id, the consent state and one `scope` field per approved scope. */
+  private fun submitConsent(
+    pending: PendingConsent,
+    approvedScopes: List<String>,
+  ) = mvc
+    .perform(
+      post("/oauth2/authorize")
+        .param("client_id", pending.clientId)
+        .param("state", pending.state)
+        .apply { approvedScopes.forEach { param("scope", it) } }
+        .session(pending.session),
+    ).andReturn()
 
-  /** Submits the SAS consent form for a pending authorization and exchanges the resulting code for the token response. */
-  private fun completeConsentTokenResponse(pending: PendingConsent): JsonNode {
-    val consentLocation =
-      mvc
-        .perform(
-          post("/oauth2/authorize")
-            .param("client_id", CONSENT_CLIENT_ID)
-            .param("state", pending.state)
-            .param("scope", "translations.view")
-            .session(pending.session),
-        ).andReturn()
-        .response
-        .getHeader("Location")
+  private fun completeConsent(
+    pending: PendingConsent,
+    approvedScopes: List<String> = listOf("translations.view"),
+  ): String = completeConsentTokenResponse(pending, approvedScopes).get("access_token").asString()
+
+  /** Submits the consent form for a pending authorization and exchanges the resulting code for the token response. */
+  private fun completeConsentTokenResponse(
+    pending: PendingConsent,
+    approvedScopes: List<String> = listOf("translations.view"),
+  ): JsonNode {
+    val consentLocation = submitConsent(pending, approvedScopes).response.getHeader("Location")
     val code = queryParam(consentLocation!!, "code")
-    assertThat(code).isNotNull()
+    assertThat(code).withFailMessage("consent did not deliver a code: $consentLocation").isNotNull()
 
     val tokenResponse =
       mvc
@@ -860,13 +819,15 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           post("/oauth2/token")
             .param("grant_type", "authorization_code")
             .param("code", code!!)
-            .param("redirect_uri", CONSENT_REDIRECT)
-            .param("client_id", CONSENT_CLIENT_ID)
+            .param("redirect_uri", pending.redirect)
+            .param("client_id", pending.clientId)
             .param("code_verifier", pending.verifier)
             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
         ).andReturn()
         .response.contentAsString
-    return jacksonObjectMapper().readTree(tokenResponse)
+    val tree = jacksonObjectMapper().readTree(tokenResponse)
+    assertThat(tree.get("access_token")?.asString()).withFailMessage(tokenResponse).isNotNull()
+    return tree
   }
 
   private fun consentFlowAccessToken(projectId: Long?): String {
@@ -895,166 +856,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     )
   }
 
-  @Test
-  fun `invalidates the http session once the authorization code is issued`() {
-    // The session carries only the authorize round trip; killing it at code issuance stops a later connect from
-    // silently reusing a stale principal (e.g. after the webapp user switched accounts). A fresh bootstrap must run.
-    val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-    mvc
-      .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
-      .andExpect { assertThat(it.response.status).isEqualTo(204) }
-
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", TEST_CLIENT_ID)
-        .queryParam("redirect_uri", CLI_REDIRECT)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "state-123")
-        .build()
-        .toUriString()
-    val location =
-      mvc
-        .perform(get(authorizeUrl).session(session))
-        .andReturn()
-        .response
-        .getHeader("Location")
-
-    assertThat(queryParam(location!!, "code")).isNotNull()
-    assertThat(session.isInvalid).isTrue()
-  }
-
-  @Test
-  fun `session-bootstrap rotates the session id (fixation defense)`() {
-    val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-    val originalId = session.id
-
-    mvc
-      .perform(
-        post("/v2/oauth2/session-bootstrap")
-          .header("Authorization", "Bearer $jwt")
-          .session(session),
-      ).andExpect { assertThat(it.response.status).isEqualTo(204) }
-
-    assertThat(session.id).isNotEqualTo(originalId)
-  }
-
-  @Test
-  fun `an API token cannot authenticate the authorize endpoint without a bootstrapped session`() {
-    // AuthenticationFilter is intentionally NOT on the SAS chain: a raw webapp/PAK/PAT bearer must not establish a
-    // principal at /oauth2/authorize (that would let a token mint another token). Unauthenticated -> bootstrap redirect.
-    val jwt = jwtService.emitToken(testData.user.id)
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", TEST_CLIENT_ID)
-        .queryParam("redirect_uri", CLI_REDIRECT)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "state-123")
-        .build()
-        .toUriString()
-
-    val location =
-      mvc
-        .perform(get(authorizeUrl).header("Authorization", "Bearer $jwt"))
-        .andReturn()
-        .response
-        .getHeader("Location")
-
-    assertThat(location).contains("/oauth2/bootstrap")
-    assertThat(location).doesNotContain(CLI_REDIRECT)
-    assertThat(queryParam(location!!, "code")).isNull()
-
-    val continueUrl = URLDecoder.decode(queryParam(location, "continue")!!, StandardCharsets.UTF_8)
-    assertThat(continueUrl).contains("/oauth2/authorize")
-    assertThat(continueUrl).contains("client_id=$TEST_CLIENT_ID")
-    assertThat(continueUrl).contains("state=state-123")
-    assertThat(continueUrl).contains("code_challenge=")
-  }
-
-  private fun runAuthorizationCodeFlow(
-    extraAuthorizeParams: Map<String, String> = emptyMap(),
-    clientId: String = TEST_CLIENT_ID,
-    redirect: String = CLI_REDIRECT,
-  ): String {
-    return authorizationCodeTokenResponse(extraAuthorizeParams, clientId, redirect).get("access_token").asString()
-  }
-
-  private fun authorizationCodeTokenResponse(
-    extraAuthorizeParams: Map<String, String> = emptyMap(),
-    clientId: String = TEST_CLIENT_ID,
-    redirect: String = CLI_REDIRECT,
-  ): JsonNode {
-    val jwt = jwtService.emitToken(testData.user.id)
-    val session = MockHttpSession()
-
-    mvc
-      .perform(
-        post("/v2/oauth2/session-bootstrap")
-          .header("Authorization", "Bearer $jwt")
-          .session(session),
-      ).andExpect { assertThat(it.response.status).isEqualTo(204) }
-
-    val verifier = randomVerifier()
-    val authorizeBuilder =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", clientId)
-        .queryParam("redirect_uri", redirect)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "state-123")
-    extraAuthorizeParams.forEach { (name, value) -> authorizeBuilder.queryParam(name, value) }
-
-    val authorizeLocation =
-      mvc
-        .perform(get(authorizeBuilder.build().toUriString()).session(session))
-        .andReturn()
-        .response
-        .getHeader("Location")
-
-    val code = queryParam(authorizeLocation!!, "code")
-    assertThat(code).isNotNull()
-
-    val tokenResponse =
-      mvc
-        .perform(
-          post("/oauth2/token")
-            .param("grant_type", "authorization_code")
-            .param("code", code!!)
-            .param("redirect_uri", redirect)
-            .param("client_id", clientId)
-            .param("code_verifier", verifier)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
-        ).andReturn()
-        .response.contentAsString
-
-    val tree = jacksonObjectMapper().readTree(tokenResponse)
-    assertThat(tree.get("access_token")?.asString()).isNotNull()
-    return tree
-  }
-
-  private fun storedClaims(token: String): JsonNode {
-    val authorization =
-      authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN)
-        ?: throw AssertionError("no authorization stored for the access token")
-    val claims = authorization.accessToken?.claims ?: throw AssertionError("access token carries no claims")
-    // Instants have no natural JSON mapping without the time module; the timestamps are not what any assertion reads.
-    val normalized = claims.mapValues { (_, value) -> if (value is Instant) value.epochSecond else value }
-    return jacksonObjectMapper().valueToTree(normalized)
-  }
+  private fun stored(accessToken: String): OAuth2Authorization =
+    repository.findByAccessTokenHash(keyGenerator.hash(accessToken))
+      ?: throw AssertionError("no authorization stored for the access token")
 
   private fun randomVerifier(): String {
     val bytes = ByteArray(32)
@@ -1078,12 +882,11 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .getFirst(name)
 
   companion object {
-    private const val CLI_REDIRECT = "http://127.0.0.1:9876/callback"
-    private const val TEST_CLIENT_ID = "test-flow-client"
-    private const val SECOND_REDIRECT = "http://127.0.0.1:9877/callback"
-    private const val SECOND_CLIENT_ID = "test-flow-client-2"
-    private const val CONSENT_REDIRECT = "http://127.0.0.1:9878/callback"
-    private const val CONSENT_CLIENT_ID = "test-flow-client-consent"
+    // Registered from tolgee.oauth2.* in the test application.yaml.
+    private const val FLOW_CLIENT_ID = OAuth2Constants.CLI_CLIENT_ID
+    private const val FLOW_REDIRECT = "http://127.0.0.1:9999/callback"
+    private const val CONSENT_CLIENT_ID = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID
+    private const val CONSENT_REDIRECT = "https://extension.test/callback"
     private const val INACCESSIBLE_PROJECT_ID = 9_999_999L
   }
 }

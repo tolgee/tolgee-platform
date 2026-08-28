@@ -26,7 +26,7 @@ import java.time.Duration
 
 @Component
 class OAuth2AuthorizationCleanup(
-  private val queryService: OAuth2AuthorizationQueryService,
+  private val queryService: OAuth2AuthorizationService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {

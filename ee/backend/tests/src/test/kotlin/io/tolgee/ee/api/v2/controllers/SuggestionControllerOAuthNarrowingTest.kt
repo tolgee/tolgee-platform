@@ -1,18 +1,18 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 
 /**
  * An OAuth token must not delete a suggestion through the own-author shortcut in
@@ -21,10 +21,10 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
  */
 class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var authorizationRepository: OAuth2AuthorizationRepository
 
   @Autowired
-  private lateinit var registeredClientRepository: RegisteredClientRepository
+  private lateinit var keyGenerator: KeyGenerator
 
   private lateinit var testData: SuggestionsTestData
   private lateinit var tokens: OAuth2TestTokens
@@ -33,7 +33,7 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   fun setup() {
     testData = SuggestionsTestData(SuggestionsMode.ENABLED)
     testDataService.saveTestData(testData.root)
-    tokens = OAuth2TestTokens(authorizationService, registeredClientRepository)
+    tokens = OAuth2TestTokens(authorizationRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach

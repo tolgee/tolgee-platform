@@ -1,26 +1,28 @@
 package io.tolgee.security.oauth2
 
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.AuthorityUtils
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
 
+/**
+ * The bridge from the stateless webapp JWT to the browser session `/oauth2/authorize` needs: a top-level navigation
+ * carries no `Authorization` header, so the bootstrap page turns the stored JWT into a short-lived server session
+ * first. The session holds nothing but the user id, and only the authorization endpoint reads it.
+ */
 @Component
 class OAuth2SessionBootstrapper {
   fun establishSession(
     request: HttpServletRequest,
     userId: Long,
   ) {
-    // Must be a built-in Spring Security auth type: SAS persists the principal via a whitelist Jackson mapper that
-    // rejects Tolgee's own auth classes. The name (= user id) becomes the token `sub` and stored `principal_name`.
-    val authentication = UsernamePasswordAuthenticationToken(userId.toString(), null, AuthorityUtils.NO_AUTHORITIES)
-    val context = SecurityContextHolder.createEmptyContext()
-    context.authentication = authentication
     request.getSession(true)
-    // Manual session-fixation defense: Spring's built-in one doesn't run for a manually-injected principal.
+    // Session-fixation defense: the id the browser held before it carried a principal must not survive.
     request.changeSessionId()
-    request.session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context)
+    request.session.setAttribute(USER_ID_ATTRIBUTE, userId)
+  }
+
+  fun userIdOf(request: HttpServletRequest): Long? = request.getSession(false)?.getAttribute(USER_ID_ATTRIBUTE) as? Long
+
+  companion object {
+    const val USER_ID_ATTRIBUTE = "tolgee.oauth2.userId"
   }
 }

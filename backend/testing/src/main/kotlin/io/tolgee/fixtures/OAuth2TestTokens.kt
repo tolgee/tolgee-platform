@@ -1,115 +1,67 @@
 package io.tolgee.fixtures
 
-import io.tolgee.model.enums.Scope
+import io.tolgee.component.KeyGenerator
+import io.tolgee.model.oauth2.OAuth2Authorization
+import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.security.oauth2.OAuth2Constants
-import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod
-import org.springframework.security.oauth2.core.OAuth2AccessToken
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
+import io.tolgee.service.security.UserAccountService
 import java.time.Duration
 import java.time.Instant
-import java.util.UUID
+import java.util.Date
 
 /**
- * Issues opaque OAuth2 access tokens straight into the authorization store, so a test can exercise the resolver without
- * driving the whole authorization-code dance.
- *
- * The token is only ever resolvable through `oauth2_authorization`, so the row — and a registered client for it to
- * point at — must exist. [deleteAll] cleans up what a test issued.
+ * Issues OAuth2 access tokens straight into the authorization store, so a test can exercise the resolver without
+ * driving the whole authorization-code dance. [deleteAll] cleans up what a test issued.
  */
 class OAuth2TestTokens(
-  private val authorizationService: OAuth2AuthorizationService,
-  private val registeredClientRepository: RegisteredClientRepository,
+  private val repository: OAuth2AuthorizationRepository,
+  private val userAccountService: UserAccountService,
+  private val keyGenerator: KeyGenerator,
 ) {
-  private val issuedAuthorizationIds = mutableListOf<String>()
-  private val clientIdsById = mutableMapOf<String, String>()
-
-  fun registerClient(clientId: String): RegisteredClient {
-    registeredClientRepository.findByClientId(clientId)?.let { return it }
-    val client =
-      RegisteredClient
-        .withId(clientId)
-        .clientId(clientId)
-        .clientName(clientId)
-        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-        .redirectUri("https://example.org/callback")
-        .apply { Scope.entries.forEach { scope(it.value) } }
-        .clientSettings(ClientSettings.builder().requireProofKey(true).build())
-        .build()
-    registeredClientRepository.save(client)
-    return client
-  }
+  private val issuedAuthorizationIds = mutableListOf<Long>()
 
   /**
    * @param projects project ids the token is bound to, or [OAuth2Constants.ALL_PROJECTS] for the not-narrowed sentinel.
-   *   Ids are stamped as strings, matching what the token customizer writes.
+   *   Any other value is stored as-is, so a test can plant an unparseable selection.
    */
   fun issue(
     subject: Long,
     scopes: List<String>,
     projects: Any = OAuth2Constants.ALL_PROJECTS,
-    clientId: String = DEFAULT_CLIENT_ID,
+    clientId: String = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
     issuedAt: Instant = Instant.now(),
     expiresAt: Instant = issuedAt.plus(Duration.ofMinutes(30)),
   ): String {
-    val client = registerClient(clientId)
-    val value = "test-" + UUID.randomUUID().toString().replace("-", "")
-    val accessToken = OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, value, issuedAt, expiresAt, scopes.toSet())
+    val token = keyGenerator.generate()
     val authorization =
-      OAuth2Authorization
-        .withRegisteredClient(client)
-        .id(UUID.randomUUID().toString())
-        .principalName(subject.toString())
-        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-        .authorizedScopes(scopes.toSet())
-        .token(accessToken) { metadata ->
-          metadata[OAuth2Authorization.Token.CLAIMS_METADATA_NAME] =
-            mapOf(
-              "sub" to subject.toString(),
-              "jti" to UUID.randomUUID().toString(),
-              OAuth2Constants.PROJECTS_CLAIM to normalizeProjects(projects),
-            )
-        }.build()
-    authorizationService.save(authorization)
+      OAuth2Authorization().apply {
+        userAccount = userAccountService.get(subject)
+        this.clientId = clientId
+        redirectUri = "https://example.org/callback"
+        codeChallenge = "test-challenge"
+        requestedScopeValues = scopes
+        grantedScopeValues = scopes
+        projectSelection = selectionOf(projects)
+        accessTokenHash = keyGenerator.hash(token)
+        accessTokenIssuedAt = Date.from(issuedAt)
+        accessTokenExpiresAt = Date.from(expiresAt)
+      }
+    repository.save(authorization)
     issuedAuthorizationIds.add(authorization.id)
-    clientIdsById[authorization.id] = clientId
-    return value
+    return token
   }
 
-  /**
-   * SAS's JDBC store deserializes stored claims through an allowlisting `PolymorphicTypeValidator` that rejects
-   * `java.lang.Long`, so a numeric project id round-trips only as a String — which is what the production token
-   * customizer writes. Callers may pass ids as numbers; they are stamped the same way here.
-   */
-  private fun normalizeProjects(projects: Any): Any {
-    if (projects is Collection<*>) return projects.map { it.toString() }
-    return projects
+  private fun selectionOf(projects: Any): String {
+    if (projects is Collection<*>) return projects.joinToString(",")
+    return projects.toString()
   }
 
   fun revoke(token: String) {
-    authorizationService
-      .findByToken(token, OAuth2TokenType.ACCESS_TOKEN)
-      ?.let { authorizationService.remove(it) }
+    repository.findByAccessTokenHash(keyGenerator.hash(token))?.let { repository.delete(it) }
   }
 
   fun deleteAll() {
-    issuedAuthorizationIds.forEach { id ->
-      // Re-registered first: reading a row whose client is gone throws, and a test may have de-registered it on purpose.
-      registerClient(clientIdsById.getValue(id))
-      authorizationService.findById(id)?.let { authorizationService.remove(it) }
-    }
+    repository.deleteAllById(issuedAuthorizationIds)
     issuedAuthorizationIds.clear()
-    clientIdsById.clear()
-  }
-
-  companion object {
-    const val DEFAULT_CLIENT_ID = "test-oauth-client"
   }
 }

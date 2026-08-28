@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.fixtures.OAuth2TestTokens
@@ -30,6 +31,7 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
+import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.testing.AbstractControllerTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -37,8 +39,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
 import org.springframework.test.web.servlet.MvcResult
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -54,10 +54,10 @@ import java.util.zip.ZipInputStream
  */
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var authorizationRepository: OAuth2AuthorizationRepository
 
   @Autowired
-  private lateinit var registeredClientRepository: RegisteredClientRepository
+  private lateinit var keyGenerator: KeyGenerator
 
   private lateinit var tokens: OAuth2TestTokens
 
@@ -146,7 +146,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
           totalItems = 1
         }.self
     testDataService.saveTestData(testData.root)
-    tokens = OAuth2TestTokens(authorizationService, registeredClientRepository)
+    tokens = OAuth2TestTokens(authorizationRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
@@ -263,12 +263,14 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `rejects a token whose client is no longer registered`() {
     // Clients come from configuration, and dropping one is the documented way to switch it off. Its grants outlive it
-    // in the store, and SAS throws when it cannot re-hydrate the client for a row — which must not become a 500 on
-    // every request carrying such a token.
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    performGet(translationsUrl(), bearer(token)).andIsOk
-
-    (registeredClientRepository as TolgeeRegisteredClientRepository).resetToConfigured()
+    // in the store and must stop authenticating — with a 401, not a 500.
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf("translations.view"),
+        projects = listOf(testData.project.id),
+        clientId = "no-longer-registered-client",
+      )
 
     performGet(translationsUrl(), bearer(token)).andIsUnauthorized
   }
@@ -393,10 +395,13 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   )
 
   @Test
-  fun `rejects a token whose subject user no longer exists`() {
-    // A deleted account keeps its authorization row (delete doesn't revoke grants), so liveness still passes; the
-    // resolver must reject once findDto returns null for the subject, or a soft-deleted user keeps a working token.
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), subject = 9_999_999L)
+  fun `a token stops working once its subject account is deleted`() {
+    val token =
+      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), subject = viewOnlyUser.id)
+    performGet(translationsUrl(), bearer(token)).andIsOk
+
+    userAccountService.delete(userAccountService.get(viewOnlyUser.id))
+
     performGet(translationsUrl(), bearer(token)).andIsUnauthorized
   }
 
