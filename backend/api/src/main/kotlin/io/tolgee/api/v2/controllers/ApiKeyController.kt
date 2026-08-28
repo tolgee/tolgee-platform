@@ -28,6 +28,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AllowOAuthAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -128,9 +129,7 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         apiKey.project.id,
         authenticationFacade.authenticatedUser.id,
-        // The caller is a project API key, which does not inherit the user's server-admin reach. Without this the
-        // reported languages would be the admin-bypassed set, contradicting what the key can actually translate.
-        bypassAdminRights = authenticationFacade.isScopedCredential,
+        asScopedCredential = authenticationFacade.isScopedCredential,
       )
 
     val translateLanguageIds =
@@ -199,6 +198,7 @@ class ApiKeyController(
     description = "Returns current PAK or PAT permissions for current user, api-key and project",
   )
   @AllowApiAccess()
+  @AllowOAuthAccess
   fun getCurrentPermissions(
     @RequestParam
     @Parameter(description = "Required when using with PAT")
@@ -224,7 +224,7 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         projectIdNotNull,
         authenticationFacade.authenticatedUser.id,
-        bypassAdminRights = authenticationFacade.isScopedCredential,
+        asScopedCredential = authenticationFacade.isScopedCredential,
       )
 
     val computed = permissionData.computedPermissions
@@ -242,7 +242,6 @@ class ApiKeyController(
     )
   }
 
-  // A scoped credential (PAK or OAuth token) has no single project "type"; its authority is the scope list.
   private fun resolveReportedPermissionType(computedType: ProjectPermissionType?): ProjectPermissionType? {
     if (authenticationFacade.isScopedCredential) return null
     return computedType

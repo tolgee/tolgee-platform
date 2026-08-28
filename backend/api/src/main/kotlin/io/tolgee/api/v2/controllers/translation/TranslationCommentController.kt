@@ -119,7 +119,7 @@ class TranslationCommentController(
     if (comment.author.id != authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(io.tolgee.constants.Message.CAN_EDIT_ONLY_OWN_COMMENT)
     }
-    if (!authenticationFacade.isAuthorSelfAccess(comment.author.id)) {
+    if (!authenticationFacade.canUseAuthorSelfAccess) {
       checkEditPermission()
     }
     translationCommentService.update(dto, comment)

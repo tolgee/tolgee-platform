@@ -12,15 +12,12 @@ import org.junit.jupiter.api.Test
 class TasksAssignedAccessScopeTest {
   @Test
   fun `is not a read-only scope`() {
-    // readOnlyScopes is ALL_VIEW's expansion, and it is what lets a server supporter read a project. This scope
-    // unlocks task-gated writes, so putting it under ALL_VIEW would hand supporters write access through the back door.
     assertThat(Scope.readOnlyScopes).doesNotContain(Scope.TASKS_ASSIGNED_ACCESS)
     assertThat(Scope.TASKS_ASSIGNED_ACCESS.isReadOnly()).isFalse()
   }
 
   @Test
   fun `expands to itself only`() {
-    // Standalone by design: granting the elevation must not silently confer any other capability.
     assertThat(Scope.TASKS_ASSIGNED_ACCESS.expand()).containsExactly(Scope.TASKS_ASSIGNED_ACCESS)
   }
 

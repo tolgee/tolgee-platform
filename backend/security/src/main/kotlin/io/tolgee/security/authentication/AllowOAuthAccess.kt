@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package io.tolgee.security.oauth2
+package io.tolgee.security.authentication
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
-import org.springframework.stereotype.Component
-
-@Component
-class OAuth2AudienceResolver(
-  private val tolgeeProperties: TolgeeProperties,
-) {
-  val serverBaseUrl: String?
-    get() = tolgeeProperties.backEndUrl ?: tolgeeProperties.frontEndUrl
-
-  val apiAudience: String
-    get() = serverBaseUrl ?: DEFAULT_API_AUDIENCE
-
-  companion object {
-    const val DEFAULT_API_AUDIENCE = "tolgee-api"
-  }
-}
+/**
+ * Opens an endpoint to OAuth2 access tokens that [io.tolgee.security.authorization.ProjectScopedEndpoints] would
+ * refuse.
+ *
+ * Put this on an endpoint only once it narrows the token itself: it must read
+ * `AuthenticationFacade.oauthTokenCredentials` and honour both the scope set and `coversProject`. Adding it to an
+ * endpoint that does neither hands every consented token the user's whole account.
+ */
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
+annotation class AllowOAuthAccess

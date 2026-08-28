@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tolgee.configuration
+package io.tolgee.security.oauth2
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets
 /** Unauthenticated `/oauth2/authorize` → the SPA bootstrap page (authorize URL in `continue`), which turns the stored JWT into a session and returns. */
 class OAuth2BootstrapAuthenticationEntryPoint(
   private val bootstrapPath: String,
+  private val issuerResolver: OAuth2IssuerResolver,
 ) : AuthenticationEntryPoint {
   override fun commence(
     request: HttpServletRequest,
@@ -33,8 +34,12 @@ class OAuth2BootstrapAuthenticationEntryPoint(
     authException: AuthenticationException,
   ) {
     val query = request.queryString?.let { "?$it" } ?: ""
-    val continueUrl = request.requestURL.toString() + query
-    val encoded = URLEncoder.encode(continueUrl, StandardCharsets.UTF_8)
+    val encoded = URLEncoder.encode(authorizeUrl(request) + query, StandardCharsets.UTF_8)
     response.sendRedirect("$bootstrapPath?continue=$encoded")
   }
+
+  // requestURI includes the context path and so does the issuer, so it has to come off one of them or a deployment
+  // with server.servlet.context-path set redirects to /<ctx>/<ctx>/oauth2/authorize.
+  private fun authorizeUrl(request: HttpServletRequest): String =
+    issuerResolver.issuerUrl + request.requestURI.removePrefix(request.contextPath)
 }

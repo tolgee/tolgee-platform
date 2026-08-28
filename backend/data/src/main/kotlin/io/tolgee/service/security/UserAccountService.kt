@@ -610,7 +610,7 @@ class UserAccountService(
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
     // The tokensValidNotBefore cutoff is read from the USER_ACCOUNTS cache, which lags per-node without Redis, so the
     // refresh grant could keep minting tokens on a stale replica; deleting the grants makes revocation topology-safe.
-    oauth2AuthorizationQueryService.revokeAllForPrincipal(userAccount.id.toString())
+    oauth2AuthorizationQueryService.revokeAllForUser(userAccount.id)
   }
 
   private fun publishUserInfoUpdatedEvent(

@@ -158,8 +158,10 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     expectedType: ProjectPermissionType,
   ) {
     assertThat(invitationService.getForProject(project)).hasSize(0)
-    assertThat(permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser)).isNotNull
-    val type = permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser)!!
+    assertThat(
+      permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser, asScopedCredential = false),
+    ).isNotNull
+    val type = permissionService.getProjectPermissionScopesNoApiKey(project.id, newUser, asScopedCredential = false)!!
     type.assert.equalsPermissionType(expectedType)
   }
 
@@ -177,7 +179,9 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
       }
 
     assertThat(invitationService.getForProject(base.project)).hasSize(1)
-    assertThat(permissionService.getProjectPermissionScopesNoApiKey(base.project.id, newUser)).isNullOrEmpty()
+    assertThat(
+      permissionService.getProjectPermissionScopesNoApiKey(base.project.id, newUser, asScopedCredential = false),
+    ).isNullOrEmpty()
   }
 
   @Test

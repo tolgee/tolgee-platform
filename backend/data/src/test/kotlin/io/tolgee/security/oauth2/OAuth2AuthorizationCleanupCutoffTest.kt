@@ -17,6 +17,7 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor

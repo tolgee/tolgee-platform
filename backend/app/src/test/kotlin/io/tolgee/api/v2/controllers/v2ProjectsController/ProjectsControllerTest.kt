@@ -263,7 +263,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
     permissionService
-      .getProjectPermissionScopesNoApiKey(repo.id, user)
+      .getProjectPermissionScopesNoApiKey(repo.id, user, asScopedCredential = false)
       .let { assertThat(it).isEmpty() }
   }
 

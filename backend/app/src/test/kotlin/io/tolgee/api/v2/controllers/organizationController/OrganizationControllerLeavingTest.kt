@@ -56,6 +56,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
       .getProjectPermissionData(
         testData.projectBuilder.self.id,
         me.id,
+        asScopedCredential = false,
       ).directPermissions.assert.isNotNull
 
     performAuthPut("/v2/organizations/${testData.organizationBuilder.self.id}/leave", null).andIsOk
@@ -64,6 +65,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
       .getProjectPermissionData(
         testData.projectBuilder.self.id,
         me.id,
+        asScopedCredential = false,
       ).directPermissions.assert
       .isNull()
   }

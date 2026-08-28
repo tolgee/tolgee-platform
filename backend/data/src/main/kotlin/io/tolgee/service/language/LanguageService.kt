@@ -149,6 +149,7 @@ class LanguageService(
         .getProjectPermissionData(
           projectId,
           userId,
+          asScopedCredential = askedAsScopedCredential(userId),
         ).computedPermissions.viewLanguageIds
 
     val permitted =
@@ -266,7 +267,9 @@ class LanguageService(
     userId: Long,
   ): Set<LanguageDto> {
     if (languages == null) {
-      return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
+      return permissionService
+        .getPermittedViewLanguages(projectId, userId, asScopedCredential = askedAsScopedCredential(userId))
+        .toSet()
     } else {
       securityService.checkLanguageViewPermissionByTag(projectId, languages)
       return findByTags(languages, projectId)
@@ -301,6 +304,7 @@ class LanguageService(
         .getProjectPermissionData(
           projectId,
           userId,
+          asScopedCredential = askedAsScopedCredential(userId),
         ).computedPermissions.viewLanguageIds
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
@@ -308,6 +312,11 @@ class LanguageService(
       findByTags(languages, projectId).filter { viewLanguageIds.contains(it.id) }.toSet()
     }
   }
+
+  // These enumerate languages where SecurityService checks them; without the same rule an admin's scoped credential
+  // would be listed every language it is refused.
+  private fun askedAsScopedCredential(userId: Long): Boolean =
+    authenticationFacade.isScopedCredential && authenticationFacade.authenticatedUserOrNull?.id == userId
 
   fun findByName(
     name: String?,

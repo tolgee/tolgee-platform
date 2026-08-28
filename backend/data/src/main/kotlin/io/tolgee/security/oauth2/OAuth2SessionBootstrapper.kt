@@ -1,4 +1,4 @@
-package io.tolgee.security.authentication
+package io.tolgee.security.oauth2
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

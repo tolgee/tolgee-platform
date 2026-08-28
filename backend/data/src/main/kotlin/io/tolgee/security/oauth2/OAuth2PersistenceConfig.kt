@@ -19,7 +19,6 @@ package io.tolgee.security.oauth2
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
@@ -37,10 +36,5 @@ class OAuth2PersistenceConfig {
   }
 
   @Bean
-  fun oAuth2AuthorizationConsentService(
-    jdbcTemplate: JdbcTemplate,
-    registeredClientRepository: RegisteredClientRepository,
-  ): OAuth2AuthorizationConsentService {
-    return JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository)
-  }
+  fun oAuth2AuthorizationConsentService(): OAuth2AuthorizationConsentService = AlwaysPromptConsentService()
 }

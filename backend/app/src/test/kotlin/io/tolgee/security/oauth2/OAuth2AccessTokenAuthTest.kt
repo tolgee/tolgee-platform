@@ -31,6 +31,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.testing.AbstractControllerTest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,14 +39,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
+import org.springframework.test.web.servlet.MvcResult
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.zip.ZipInputStream
 
 /**
- * Verifies the RS256-vs-HS512 discrimination in AuthenticationFilter and the token-scope/project-set intersection in
- * SecurityService. Tokens are minted directly with the server's JwtEncoder so the resolver path is exercised without
- * running the full authorization-code dance.
+ * Verifies that an OAuth bearer token is resolved as one, and that SecurityService intersects its scope set and its
+ * project set with the user's live permissions.
+ *
+ * Access tokens are opaque, so a token here is an authorization row written straight into the store rather than
+ * anything self-describing; the authorization-code dance is covered by OAuth2AuthorizationCodeFlowTest.
  */
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
@@ -61,6 +66,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   private lateinit var adminUser: UserAccount
   private lateinit var supporterUser: UserAccount
   private lateinit var langRestrictedAdmin: UserAccount
+  private lateinit var viewRestrictedAdmin: UserAccount
   private lateinit var ownComment: TranslationComment
   private lateinit var ownCommentTranslation: Translation
   private lateinit var ownBatchJob: BatchJob
@@ -68,10 +74,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @BeforeEach
   fun setup() {
     testData = BaseTestData()
-    // A second user with view-only project access, to prove a token can't grant more than the user actually has.
     viewOnlyUser = testData.root.addUserAccount { username = "oauth_view_only_user" }.self
-    // A server admin and supporter who are NOT members of testData.project, to prove an OAuth token can't ride their
-    // server-wide reach onto a project they never joined.
     adminUser =
       testData.root
         .addUserAccount {
@@ -84,8 +87,6 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
           username = "oauth_supporter_user"
           role = UserAccount.Role.SUPPORTER
         }.self
-    // A server admin who is ALSO a language-restricted member (TRANSLATE, German only), to prove an OAuth token honors
-    // the per-language restriction rather than riding the admin bypass.
     val german =
       testData.projectBuilder
         .addLanguage {
@@ -108,9 +109,24 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       user = viewOnlyUser
       type = ProjectPermissionType.VIEW
     }
+    viewRestrictedAdmin =
+      testData.root
+        .addUserAccount {
+          username = "oauth_view_lang_admin"
+          role = UserAccount.Role.ADMIN
+        }.self
+    testData.projectBuilder.addPermission {
+      user = viewRestrictedAdmin
+      type = ProjectPermissionType.VIEW
+      viewLanguages = mutableSetOf(german)
+    }
     testData.projectBuilder
       .addKey { name = "oauth-own-comment-key" }
       .build {
+        addTranslation {
+          language = german
+          text = "Wert"
+        }
         addTranslation {
           language = testData.projectBuilder.self.baseLanguage!!
           text = "value"
@@ -149,6 +165,21 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun `is forbidden on endpoints not opened to any API token`() {
     val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet("/v2/projects", bearer(token)).andIsForbidden
+  }
+
+  @Test
+  fun `is forbidden on API endpoints that never apply the token's scopes`() {
+    // Nothing outside a project-scoped handler applies scope ∩ project set, so a token there would carry the user's
+    // whole account: their email and server role, every notification, every task in every project they belong to.
+    // These are all @AllowApiAccess endpoints a PAT or PAK may use; an OAuth token must not.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+
+    performGet("/v2/user", bearer(token)).andIsForbidden
+    performGet("/v2/notification", bearer(token)).andIsForbidden
+    performGet("/v2/notification-settings", bearer(token)).andIsForbidden
+    // Declares @UseDefaultPermissions but sits outside the project paths, so the interceptor never runs for it and
+    // it would return every task the user has in every project. Annotations are not the question here; the path is.
+    performGet("/v2/user-tasks", bearer(token)).andIsForbidden
   }
 
   @Test
@@ -221,12 +252,23 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `a revoked token stops working at once`() {
-    // The point of opaque tokens: the grant is read on every request, so deleting it kills already-issued access
-    // tokens rather than leaving them valid until they expire.
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
     performGet(translationsUrl(), bearer(token)).andIsOk
 
     tokens.revoke(token)
+
+    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
+  }
+
+  @Test
+  fun `rejects a token whose client is no longer registered`() {
+    // Clients come from configuration, and dropping one is the documented way to switch it off. Its grants outlive it
+    // in the store, and SAS throws when it cannot re-hydrate the client for a row — which must not become a 500 on
+    // every request carrying such a token.
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performGet(translationsUrl(), bearer(token)).andIsOk
+
+    (registeredClientRepository as TolgeeRegisteredClientRepository).resetToConfigured()
 
     performGet(translationsUrl(), bearer(token)).andIsUnauthorized
   }
@@ -265,8 +307,6 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `an admin's OAuth token honors the user's per-language translate restriction`() {
-    // The admin is a TRANSLATE member limited to German; the per-language check must run for the OAuth token (the admin
-    // bypass is suppressed), so editing English is denied even though the token covers the project and the edit scope.
     val token =
       mint(
         scopes = listOf("translations.edit"),
@@ -275,6 +315,72 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       )
     setTranslation("en", token).andIsForbidden
     setTranslation("de", token).andIsOk
+  }
+
+  @Test
+  fun `an admin's OAuth token sees only the languages the admin may view`() {
+    // Enumeration, not checking: the translations list asks LanguageService which languages the caller may view. Left
+    // admin-bypassed it would answer "all of them" for the very token the check path restricts to German.
+    val token =
+      mint(
+        scopes = listOf("translations.view"),
+        projects = OAuth2Constants.ALL_PROJECTS,
+        subject = viewRestrictedAdmin.id,
+      )
+
+    performGet(translationsUrl(), bearer(token))
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations").isObject.containsKey("de")
+        node("_embedded.keys[0].translations").isObject.doesNotContainKey("en")
+      }
+  }
+
+  @Test
+  fun `an admin's OAuth token cannot name a language the admin may not view`() {
+    // The explicit ?languages= branch is findByTagsAndFilterPermitted, a different call site from the implicit one
+    // above. Asking for English by name must not get past the restriction that hides it from the list.
+    val token =
+      mint(
+        scopes = listOf("translations.view"),
+        projects = OAuth2Constants.ALL_PROJECTS,
+        subject = viewRestrictedAdmin.id,
+      )
+
+    performGet(translationsUrl() + "?languages=en", bearer(token))
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations").isObject.doesNotContainKey("en")
+      }
+  }
+
+  @Test
+  fun `an admin's OAuth token exports only the languages the admin may view`() {
+    // getLanguagesForExport is the third call site, and the one that returns translation content rather than a list.
+    // Asserted on the zip's entries: with the restriction applied there is one file, and it is the German one.
+    val token =
+      mint(
+        scopes = listOf("translations.view"),
+        projects = OAuth2Constants.ALL_PROJECTS,
+        subject = viewRestrictedAdmin.id,
+      )
+
+    val bytes =
+      performGet("/v2/projects/${testData.project.id}/export", bearer(token))
+        .andIsOk
+        .andDo { obj: MvcResult -> obj.asyncResult }
+        .andReturn()
+        .response.contentAsByteArray
+
+    val entries = mutableListOf<String>()
+    ZipInputStream(bytes.inputStream()).use { zip ->
+      var entry = zip.nextEntry
+      while (entry != null) {
+        entries.add(entry.name)
+        entry = zip.nextEntry
+      }
+    }
+    assertThat(entries).containsExactly("de.json")
   }
 
   private fun setTranslation(

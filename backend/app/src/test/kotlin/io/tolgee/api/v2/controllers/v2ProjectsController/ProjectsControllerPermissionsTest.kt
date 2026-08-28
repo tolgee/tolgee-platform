@@ -28,7 +28,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
       performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
       permissionService
-        .getProjectPermissionScopesNoApiKey(project.id, user)
+        .getProjectPermissionScopesNoApiKey(project.id, user, asScopedCredential = false)
         .let { Assertions.assertThat(it).equalsPermissionType(ProjectPermissionType.EDIT) }
     }
   }
@@ -78,9 +78,15 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
       .getProjectPermissionData(
         testData.projectBuilder.self.id,
         me.id,
+        asScopedCredential = false,
       ).directPermissions.assert.isNotNull
     performProjectAuthPut("users/${me.id}/set-by-organization").andIsOk
-    val permissionData = permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id)
+    val permissionData =
+      permissionService.getProjectPermissionData(
+        testData.projectBuilder.self.id,
+        me.id,
+        asScopedCredential = false,
+      )
     permissionData.directPermissions.assert.isNull()
     permissionData.organizationRole.assert.isNotNull
   }

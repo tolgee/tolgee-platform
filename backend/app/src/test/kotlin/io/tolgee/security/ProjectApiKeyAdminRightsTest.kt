@@ -31,7 +31,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
   @BeforeEach
   fun setup() {
     testData = BaseTestData()
-    // A server admin and a supporter who are NOT members of the project.
     outsideAdmin =
       testData.root
         .addUserAccount {
@@ -44,7 +43,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
           username = "pak_outside_supporter"
           role = UserAccount.Role.SUPPORTER
         }.self
-    // A server admin who IS a member, with only VIEW — to prove the key follows the real membership, not the role.
     memberAdmin =
       testData.root
         .addUserAccount {
@@ -55,8 +53,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
       user = memberAdmin
       type = ProjectPermissionType.VIEW
     }
-    // A server admin who is a member with a per-language restriction (TRANSLATE, German only), to prove the key
-    // reports that restriction rather than the admin's unrestricted reach.
     val german =
       testData.projectBuilder
         .addLanguage {
@@ -75,7 +71,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
       type = ProjectPermissionType.TRANSLATE
       translateLanguages = mutableSetOf(german)
     }
-    // An existing key, so the write test exercises the permission check rather than a missing-key 404.
     testData.projectBuilder
       .addKey { name = EXISTING_KEY }
       .build {
@@ -111,8 +106,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
 
   @Test
   fun `an admin's key cannot exceed the admin's real membership`() {
-    // memberAdmin is a VIEW member, so the key cannot write even though the key itself carries TRANSLATIONS_EDIT and
-    // the user is a server admin.
     performPut(
       "$translationsUrl?ak=${key(memberAdmin, Scope.TRANSLATIONS_EDIT)}",
       SetTranslationsWithKeyDto(key = EXISTING_KEY, translations = mapOf("en" to "Hello")),

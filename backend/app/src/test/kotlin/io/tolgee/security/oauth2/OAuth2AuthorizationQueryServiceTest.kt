@@ -25,7 +25,10 @@ import org.springframework.jdbc.core.JdbcTemplate
 
 /**
  * `principal_name` scoping is the only thing keeping a revoke from reaching another user's OAuth grants, so the
- * cross-user isolation of revokeAllForPrincipal (irreversible cross-tenant deletion) is asserted.
+ * cross-user isolation of revokeAllForUser (irreversible cross-tenant deletion) is asserted.
+ *
+ * The consent half covers the upgrade case only — nothing writes `oauth2_authorization_consent` while
+ * [io.tolgee.security.oauth2.AlwaysPromptConsentService] is the consent service.
  */
 class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
   @Autowired
@@ -34,8 +37,10 @@ class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
   @Autowired
   private lateinit var queryService: OAuth2AuthorizationQueryService
 
-  private val userA = "1001"
-  private val userB = "1002"
+  private val userAId = 1001L
+  private val userBId = 1002L
+  private val userA = userAId.toString()
+  private val userB = userBId.toString()
 
   @AfterEach
   fun cleanup() {
@@ -44,7 +49,7 @@ class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `revokeAllForPrincipal deletes only the requesting user's grants and consents`() {
+  fun `revokeAllForUser deletes only the requesting user's grants and consents`() {
     // logout-everywhere / password change deletes by principal_name with no client filter; a wrong or missing WHERE
     // clause here would wipe every user's grants on any single user's invalidation.
     insertGrant("a-1", "client-x", userA)
@@ -53,7 +58,7 @@ class OAuth2AuthorizationQueryServiceTest : AbstractSpringTest() {
     insertConsent("client-x", userA)
     insertConsent("client-x", userB)
 
-    queryService.revokeAllForPrincipal(userA)
+    queryService.revokeAllForUser(userAId)
 
     assertThat(authorizationExists("a-1")).isFalse()
     assertThat(authorizationExists("a-2")).isFalse()

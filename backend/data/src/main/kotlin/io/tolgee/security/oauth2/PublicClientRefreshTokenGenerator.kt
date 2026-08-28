@@ -1,5 +1,10 @@
 /**
+ * Copyright 2020-2026 the original author or authors.
  * Copyright (C) 2026 Tolgee s.r.o. and contributors
+ *
+ * Derived from `org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator` in
+ * spring-security-oauth2-authorization-server (Apache-2.0). Changed: translated to Kotlin, and the
+ * `isPublicClientForAuthorizationCodeGrant` skip removed so public clients receive refresh tokens.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

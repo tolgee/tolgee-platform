@@ -23,41 +23,39 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
+import org.springframework.dao.DataRetrievalFailureException
 import org.springframework.security.oauth2.core.OAuth2AccessToken
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.stereotype.Component
 
-/**
- * Resolves an opaque OAuth2 access token by looking the grant up in `oauth2_authorization`.
- *
- * Because the lookup happens on every request, deleting the row revokes the token immediately — that is the point of
- * issuing opaque tokens rather than self-contained ones.
- */
 @Component
 class OAuth2AccessTokenResolver(
   private val authorizationService: OAuth2AuthorizationService,
   private val userAccountService: UserAccountService,
-) {
+) : Logging {
   fun tryResolve(token: String): TolgeeAuthentication? {
     // Tolgee's own JWTs are the other kind of Bearer token on this path. They always carry the two dots of a JWS,
     // which an opaque token (base64url, no padding) never does — so this rules them out without a store lookup.
     if (token.contains('.')) return null
 
-    val authorization = authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN) ?: return null
+    val authorization = findAuthorization(token) ?: return null
     val accessToken = authorization.accessToken ?: return null
     if (!accessToken.isActive) {
-      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+      throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
-    val userId = authorization.principalName?.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    val userId =
+      authorization.principalName?.toLongOrNull() ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     val user =
       userAccountService.findDto(userId)
-        ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+        ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
 
     if (user.isTokenInvalidated(accessToken.token.issuedAt)) {
-      throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
+      throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
     return TolgeeAuthentication(
@@ -70,9 +68,23 @@ class OAuth2AccessTokenResolver(
     )
   }
 
+  /**
+   * Clients are registered from configuration, so one can be de-registered — which is how the docs say to switch a
+   * client off — while its grants are still in the store. SAS's JDBC service throws when it cannot re-hydrate the
+   * client for a row, which would answer every request carrying such a token with a 500 instead of a 401.
+   */
+  private fun findAuthorization(token: String): OAuth2Authorization? =
+    try {
+      authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN)
+    } catch (e: DataRetrievalFailureException) {
+      logger.debug("Ignoring an access token whose client is no longer registered", e)
+      null
+    }
+
+  // A stored token can name a scope that no longer exists, so unknown values are dropped rather than raised.
   private fun parseScopes(accessToken: OAuth2Authorization.Token<OAuth2AccessToken>): Set<Scope> =
     accessToken.token.scopes
-      .mapNotNull { runCatching { Scope.fromValue(it) }.getOrNull() }
+      .mapNotNull { SCOPES_BY_VALUE[it] }
       .toSet()
 
   private fun parseProjects(accessToken: OAuth2Authorization.Token<OAuth2AccessToken>): Set<Long>? {
@@ -87,5 +99,6 @@ class OAuth2AccessTokenResolver(
 
   companion object {
     private const val JTI_CLAIM = "jti"
+    private val SCOPES_BY_VALUE = Scope.entries.associateBy { it.value }
   }
 }

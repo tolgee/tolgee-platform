@@ -17,6 +17,7 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.scheduling.annotation.Scheduled

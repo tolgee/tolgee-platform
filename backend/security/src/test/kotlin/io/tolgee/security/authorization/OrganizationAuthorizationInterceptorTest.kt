@@ -120,6 +120,19 @@ class OrganizationAuthorizationInterceptorTest {
   }
 
   @Test
+  fun `it refuses an OAuth token even when the user's org role would allow it`() {
+    // An OAuth token's authority is scopes + projects; there is no organization-level consent, so the user's org role
+    // must not carry it. Refused before the role check, so granting the role cannot open it.
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
+    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER)).thenReturn(true)
+
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsForbidden
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
+  }
+
+  @Test
   fun `it hides the organization if the user cannot see it`() {
     Mockito
       .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))

@@ -27,8 +27,12 @@ class OAuth2ProtectedResourceMetadataTest : AuthorizedControllerTest() {
     performGet("/.well-known/oauth-protected-resource/mcp/developer")
       .andIsOk
       .andAssertThatJson {
-        node("resource").isString
-        node("authorization_servers").isArray
+        // RFC 9728: the identifier must be the resource the client asked about — the MCP endpoint, not the server root.
+        // A client that validates it against the URL it fetched rejects anything else.
+        node("resource").isString.endsWith("/mcp/developer")
+        // Clients append /.well-known/oauth-authorization-server to this, so it has to be a dereferenceable URL.
+        node("authorization_servers").isArray.hasSize(1)
+        node("authorization_servers[0]").isString.startsWith("http")
         node("scopes_supported").isArray.contains("translations.suggest")
       }
   }

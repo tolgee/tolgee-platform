@@ -27,6 +27,7 @@ import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
+import io.tolgee.security.authorization.ProjectScopedEndpoints
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
@@ -172,7 +173,7 @@ class WebSecurityConfig(
       )
     private val ADMIN_ENDPOINTS = arrayOf("/v2/administration/**", "/v2/ee-license/**")
     private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
-    private val PROJECT_ENDPOINTS = arrayOf("/v2/projects/**", "/api/project/**", "/api/repository/**")
+    private val PROJECT_ENDPOINTS = ProjectScopedEndpoints.PATTERNS
     private val ORGANIZATION_ENDPOINTS = arrayOf("/v2/organizations/**")
   }
 }

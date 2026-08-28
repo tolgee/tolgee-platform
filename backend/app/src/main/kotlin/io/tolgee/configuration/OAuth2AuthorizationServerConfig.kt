@@ -17,7 +17,9 @@
 package io.tolgee.configuration
 
 import io.tolgee.component.ExceptionHandlerFilter
-import io.tolgee.security.oauth2.OAuth2AudienceResolver
+import io.tolgee.security.oauth2.OAuth2BootstrapAuthenticationEntryPoint
+import io.tolgee.security.oauth2.OAuth2IssuerResolver
+import io.tolgee.security.oauth2.OAuth2SessionInvalidatingAuthorizationResponseHandler
 import io.tolgee.security.oauth2.PublicClientRefreshAuthenticationConverter
 import io.tolgee.security.oauth2.PublicClientRefreshAuthenticationProvider
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
@@ -41,7 +43,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
 // PAK/PAT/OAuth token can't authenticate /oauth2/authorize and self-escalate into a broader token.
 @Configuration
 class OAuth2AuthorizationServerConfig(
-  private val audienceResolver: OAuth2AudienceResolver,
+  private val issuerResolver: OAuth2IssuerResolver,
 ) {
   @Bean
   @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -64,7 +66,7 @@ class OAuth2AuthorizationServerConfig(
         }
         configurer.authorizationEndpoint {
           it.consentPage(CONSENT_PAGE_URI)
-          it.authorizationResponseHandler(OAuth2SessionInvalidatingAuthorizationResponseHandler(issuer))
+          it.authorizationResponseHandler(OAuth2SessionInvalidatingAuthorizationResponseHandler(issuerResolver))
         }
         configurer.authorizationServerMetadataEndpoint { metadata ->
           metadata.authorizationServerMetadataCustomizer { claims ->
@@ -77,9 +79,8 @@ class OAuth2AuthorizationServerConfig(
       .csrf { it.ignoringRequestMatchers(endpointsMatcher) }
       .cors(Customizer.withDefaults())
       .headers { headers ->
-        // This chain gets Spring's default headers, but not the ones the main chain adds — and Referrer-Policy is not
-        // a Spring default. It matters most here: /oauth2/authorize answers with redirects and error pages whose URLs
-        // carry `code` and `state`, which a full Referer would leak to whatever the client navigates to next.
+        // /oauth2/authorize answers with URLs carrying `code` and `state`; a full Referer leaks them onward. Spring
+        // sets no Referrer-Policy by default and this chain does not inherit the main chain's headers.
         headers.referrerPolicy { it.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN) }
         headers.frameOptions { it.deny() }
       }.addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
@@ -87,7 +88,7 @@ class OAuth2AuthorizationServerConfig(
       .addFilterBefore(globalIpRateLimitFilter, UsernamePasswordAuthenticationFilter::class.java)
       .exceptionHandling {
         it.defaultAuthenticationEntryPointFor(
-          OAuth2BootstrapAuthenticationEntryPoint(BOOTSTRAP_PAGE_URI),
+          OAuth2BootstrapAuthenticationEntryPoint(BOOTSTRAP_PAGE_URI, issuerResolver),
           MediaTypeRequestMatcher(MediaType.TEXT_HTML),
         )
       }
@@ -102,8 +103,10 @@ class OAuth2AuthorizationServerConfig(
     return builder.build()
   }
 
+  // Not issuerUrl: this bean is built at startup, where there is no request to derive an origin from. Left unset, SAS
+  // derives the issuer per request itself.
   private val issuer: String?
-    get() = audienceResolver.serverBaseUrl
+    get() = issuerResolver.configuredBaseUrl
 
   companion object {
     const val CONSENT_PAGE_URI = "/oauth2/consent"

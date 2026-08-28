@@ -27,6 +27,7 @@ class OAuth2TestTokens(
   private val registeredClientRepository: RegisteredClientRepository,
 ) {
   private val issuedAuthorizationIds = mutableListOf<String>()
+  private val clientIdsById = mutableMapOf<String, String>()
 
   fun registerClient(clientId: String): RegisteredClient {
     registeredClientRepository.findByClientId(clientId)?.let { return it }
@@ -78,6 +79,7 @@ class OAuth2TestTokens(
         }.build()
     authorizationService.save(authorization)
     issuedAuthorizationIds.add(authorization.id)
+    clientIdsById[authorization.id] = clientId
     return value
   }
 
@@ -99,9 +101,12 @@ class OAuth2TestTokens(
 
   fun deleteAll() {
     issuedAuthorizationIds.forEach { id ->
+      // Re-registered first: reading a row whose client is gone throws, and a test may have de-registered it on purpose.
+      registerClient(clientIdsById.getValue(id))
       authorizationService.findById(id)?.let { authorizationService.remove(it) }
     }
     issuedAuthorizationIds.clear()
+    clientIdsById.clear()
   }
 
   companion object {

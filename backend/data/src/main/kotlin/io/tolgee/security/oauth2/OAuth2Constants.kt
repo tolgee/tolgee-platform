@@ -29,9 +29,6 @@ object OAuth2Constants {
   const val BROWSER_EXTENSION_CLIENT_ID = "tolgee-browser-extension"
   const val CLI_CLIENT_ID = "tolgee-cli"
 
-  /**
-   * Client setting (space-delimited scope values) naming the scopes the consent screen locks as required. Stored as a
-   * plain String, not a List, so it round-trips through the JdbcRegisteredClientRepository's allowlisted Jackson mapper.
-   */
+  /** Client setting: space-delimited scope values the consent screen locks as required. */
   const val REQUIRED_SCOPES_SETTING = "tolgee.required-scopes"
 }

@@ -89,22 +89,23 @@ class PermissionService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
-  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
+    asScopedCredential: Boolean,
+  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id, asScopedCredential)
 
   @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ): Array<Scope>? {
-    return getProjectPermissionData(projectId, userAccountId, bypassAdminRights).computedPermissions.expandedScopes
+    return getProjectPermissionData(projectId, userAccountId, asScopedCredential).computedPermissions.expandedScopes
   }
 
   @Transactional(readOnly = true)
   fun getProjectPermissionData(
     project: ProjectDto,
     userAccountId: Long,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ): ProjectPermissionData {
     val projectPermission = find(projectId = project.id, userId = userAccountId)
 
@@ -123,7 +124,7 @@ class PermissionService(
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
         isProjectPublic = project.public,
-        bypassAdminRights = bypassAdminRights,
+        asScopedCredential = asScopedCredential,
       )
 
     return ProjectPermissionData(
@@ -181,10 +182,10 @@ class PermissionService(
   fun getProjectPermissionData(
     projectId: Long,
     userAccountId: Long,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ): ProjectPermissionData {
     val project = projectService.findDto(projectId) ?: throw NotFoundException()
-    return getProjectPermissionData(project, userAccountId, bypassAdminRights)
+    return getProjectPermissionData(project, userAccountId, asScopedCredential)
   }
 
   fun create(permission: Permission): Permission {
@@ -238,7 +239,7 @@ class PermissionService(
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
     isProjectPublic: Boolean = false,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ): ComputedPermissionDto {
     val computed =
       when {
@@ -253,10 +254,8 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    // The community floor still applies (public-project contributors keep view/suggest/comment), but an OAuth token
-    // must never inherit the user's server-admin/supporter reach — it stays bound to real membership.
     val withFloor = communityFloored(computed, userRole, isProjectPublic)
-    if (bypassAdminRights) return withFloor
+    if (asScopedCredential) return withFloor
     return withFloor.getAdminOrSupporterPermissions(userRole)
   }
 
@@ -336,7 +335,7 @@ class PermissionService(
     projectId: Long,
     userId: Long,
   ): Permission {
-    val data = this.getProjectPermissionData(projectId, userId)
+    val data = this.getProjectPermissionData(projectId, userId, asScopedCredential = false)
 
     checkUserIsInProject(data)
 
@@ -438,7 +437,7 @@ class PermissionService(
     userId: Long,
     projectId: Long,
   ) {
-    val data = this.getProjectPermissionData(projectId, userId)
+    val data = this.getProjectPermissionData(projectId, userId, asScopedCredential = false)
     if (data.organizationRole != null) {
       throw BadRequestException(Message.USER_IS_ORGANIZATION_MEMBER)
     }
@@ -464,7 +463,7 @@ class PermissionService(
     project: Project,
     userId: Long,
   ) {
-    val permissionData = this.getProjectPermissionData(project.id, userId)
+    val permissionData = this.getProjectPermissionData(project.id, userId, asScopedCredential = false)
     if (permissionData.organizationRole != null) {
       throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
     }
@@ -484,8 +483,9 @@ class PermissionService(
   fun getPermittedViewLanguages(
     projectId: Long,
     userId: Long,
+    asScopedCredential: Boolean,
   ): Collection<LanguageDto> {
-    val permissionData = this.getProjectPermissionData(projectId, userId)
+    val permissionData = this.getProjectPermissionData(projectId, userId, asScopedCredential)
 
     val allLanguages = languageService.findAll(projectId)
     val viewLanguageIds = permissionData.computedPermissions.viewLanguageIds
@@ -509,7 +509,8 @@ class PermissionService(
     projectId: Long,
     userId: Long,
   ) {
-    val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
+    val permission =
+      getProjectPermissionData(projectId, userId, asScopedCredential = false).directPermissions ?: return
     delete(permission.id)
   }
 

@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.configuration.OAuth2AuthorizationServerConfig
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
@@ -36,7 +37,6 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
@@ -65,13 +65,13 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   private lateinit var jwtService: JwtService
 
   @Autowired
-  private lateinit var registeredClientRepository: RegisteredClientRepository
+  private lateinit var registeredClientRepository: TolgeeRegisteredClientRepository
 
   @Autowired
   private lateinit var oauth2AuthorizationQueryService: OAuth2AuthorizationQueryService
 
   @Autowired
-  private lateinit var authorizationServerSettings: AuthorizationServerSettings
+  private lateinit var issuerResolver: OAuth2IssuerResolver
 
   @Autowired
   private lateinit var jdbcTemplate: JdbcTemplate
@@ -161,11 +161,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .build(),
       ).build()
 
+  @AfterEach
   fun cleanup() {
-    // Consent is remembered per client+user; without clearing it a later test whose user id repeats would have SAS skip
-    // the consent screen (making startPendingConsent capture the client state, not the pending-authorization state).
-    jdbcTemplate.update("DELETE FROM oauth2_authorization_consent")
     jdbcTemplate.update("DELETE FROM oauth2_authorization")
+    // Clients live in the application context, not the database, so the per-test DB reset does not remove the ones
+    // registered above; without this they outlive the test and are visible to every later one.
+    registeredClientRepository.resetToConfigured()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -173,7 +174,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `authorization code + PKCE flow issues an access token that works on the REST API`() {
     val accessToken = runAuthorizationCodeFlow()
 
-    assertThat(decodeClaims(accessToken).get("sub").asText()).isEqualTo(testData.user.id.toString())
+    assertThat(storedClaims(accessToken).get("sub").asText()).isEqualTo(testData.user.id.toString())
 
     mvc
       .perform(
@@ -193,7 +194,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val firstAccessToken = firstResponse.get("access_token").asString()
     // Read before refreshing: rotation replaces the authorization's single access token, so the superseded one no
     // longer resolves.
-    val initialClaims = decodeClaims(firstAccessToken)
+    val initialClaims = storedClaims(firstAccessToken)
 
     val refreshResponse =
       mvc
@@ -211,14 +212,12 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     assertThat(refreshedAccessToken).isNotNull()
     assertThat(refreshed.get("refresh_token")?.asString()).isNotNull().isNotEqualTo(refreshToken)
 
-    val refreshedClaims = decodeClaims(refreshedAccessToken!!)
+    val refreshedClaims = storedClaims(refreshedAccessToken!!)
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
     assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
     assertThat(refreshedClaims.get("scope")).isEqualTo(initialClaims.get("scope"))
 
-    // Rotation supersedes the previous access token as well as the refresh token: opaque tokens are read from the
-    // grant on every request, so the old value stops working at once instead of living out its TTL.
     mvc
       .perform(
         get("/v2/projects/${testData.project.id}/translations")
@@ -309,7 +308,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
       .andIsOk
 
-    oauth2AuthorizationQueryService.revokeAllForPrincipal(testData.user.id.toString())
+    oauth2AuthorizationQueryService.revokeAllForUser(testData.user.id)
 
     mvc
       .perform(get("/v2/projects/${testData.project.id}/translations").header("Authorization", "Bearer $accessToken"))
@@ -393,7 +392,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
         .response.contentAsString
     val accessToken = jacksonObjectMapper().readTree(tokenResponse).get("access_token").asString()
 
-    val scopeClaim = decodeClaims(accessToken).get("scope").toString()
+    val scopeClaim = storedClaims(accessToken).get("scope").toString()
     assertThat(scopeClaim).contains("translations.view").doesNotContain("translations.edit")
   }
 
@@ -415,61 +414,52 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     // The client's original `state` must round-trip for CSRF defense — NOT SAS's internal pending-authorization state.
     val echoedState = URLDecoder.decode(queryParam(codeLocation!!, "state")!!, StandardCharsets.UTF_8)
     assertThat(echoedState).isEqualTo("client-state").isNotEqualTo(pending.state)
-    // iss is present and equals the issuer SAS was configured with (RFC 9207 AS mix-up defense). Compared against the
-    // AuthorizationServerSettings bean, not audienceResolver.serverBaseUrl (a live property another test can mutate).
+    // iss is present and is the issuer this server advertises (RFC 9207 AS mix-up defense). Read live rather than
+    // hardcoded: another test in the same JVM can change the URL property it is derived from.
     assertThat(URLDecoder.decode(queryParam(codeLocation, "iss")!!, StandardCharsets.UTF_8))
-      .isEqualTo(authorizationServerSettings.issuer)
+      .isEqualTo(issuerResolver.issuerUrl)
   }
 
   @Test
-  fun `a remembered-consent reconnect without a project selection fails closed instead of widening to all projects`() {
+  fun `a reconnect after a completed consent shows the consent screen again`() {
+    // A token is bound to a project chosen on the consent screen, and that choice is per-authorization with nowhere to
+    // be remembered. So consent is deliberately not remembered either: skipping the screen would leave the
+    // authorization with no project selection and nothing able to mint a token for it.
     val jwt = jwtService.emitToken(testData.user.id)
-    // First flow: consent the client and bind it to a single project. This records a remembered consent for client+user.
-    val pending = startPendingConsent(jwt)
-    selectProject(jwt, pending.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
-    completeConsent(pending)
+    val first = startPendingConsent(jwt)
+    selectProject(jwt, first.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    completeConsent(first)
 
-    // Second authorize, same client+scope: SAS skips the consent screen (consent remembered) and issues a code directly,
-    // so select-project never runs. Without a project hint the token must not silently widen from the consented project.
     val session = MockHttpSession()
     mvc
       .perform(post("/v2/oauth2/session-bootstrap").header("Authorization", "Bearer $jwt").session(session))
       .andExpect { assertThat(it.response.status).isEqualTo(204) }
-    val verifier = randomVerifier()
-    val authorizeUrl =
-      UriComponentsBuilder
-        .fromPath("/oauth2/authorize")
-        .queryParam("response_type", "code")
-        .queryParam("client_id", CONSENT_CLIENT_ID)
-        .queryParam("redirect_uri", CONSENT_REDIRECT)
-        .queryParam("scope", "translations.view")
-        .queryParam("code_challenge", s256Challenge(verifier))
-        .queryParam("code_challenge_method", "S256")
-        .queryParam("state", "client-state-2")
-        .build()
-        .toUriString()
-    val codeLocation =
+    val location =
       mvc
-        .perform(get(authorizeUrl).session(session))
+        .perform(get(authorizeUrl(state = "client-state-2")).session(session))
         .andReturn()
         .response
         .getHeader("Location")
-    val code = queryParam(codeLocation!!, "code")
-    assertThat(code).isNotNull() // consent skipped -> code issued straight to the client redirect
 
-    val status =
-      mvc
-        .perform(
-          post("/oauth2/token")
-            .param("grant_type", "authorization_code")
-            .param("code", code!!)
-            .param("redirect_uri", CONSENT_REDIRECT)
-            .param("client_id", CONSENT_CLIENT_ID)
-            .param("code_verifier", verifier)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
-        ).andReturn()
-        .response.status
-    assertThat(status).isEqualTo(400)
+    // The consent page, not a code delivered straight to the client redirect.
+    assertThat(location).isNotNull().contains(OAuth2AuthorizationServerConfig.CONSENT_PAGE_URI)
+    assertThat(queryParam(location!!, "code")).isNull()
+  }
+
+  @Test
+  fun `a second consent can bind the token to a different project`() {
+    // The corollary of re-prompting: the project is chosen afresh each time rather than inherited from the last grant.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val first = startPendingConsent(jwt)
+    selectProject(jwt, first.state, testData.project.id).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    completeConsent(first)
+
+    val second = startPendingConsent(jwt)
+    selectProject(jwt, second.state, publicProjectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
+    val claim = storedClaims(completeConsent(second)).get(OAuth2Constants.PROJECTS_CLAIM)
+
+    assertThat(claim.isArray).isTrue()
+    assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
   }
 
   @Test
@@ -550,7 +540,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `binds the token to the project hinted on the authorize request`() {
     val accessToken = runAuthorizationCodeFlow(mapOf(OAuth2Constants.PROJECT_PARAM to testData.project.id.toString()))
 
-    val projectClaim = decodeClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
+    val projectClaim = storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
     assertThat(projectClaim.isArray).isTrue()
     assertThat(projectClaim.size()).isEqualTo(1)
     assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
@@ -560,7 +550,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `a single project chosen on the consent screen binds the token to it`() {
     val accessToken = consentFlowAccessToken(testData.project.id)
 
-    val projectClaim = decodeClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
+    val projectClaim = storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM)
     assertThat(projectClaim.isArray).isTrue()
     assertThat(projectClaim.size()).isEqualTo(1)
     assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
@@ -570,7 +560,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   fun `choosing all projects on the consent screen keeps the token unscoped`() {
     val accessToken = consentFlowAccessToken(projectId = null)
 
-    assertThat(decodeClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM).asString())
+    assertThat(storedClaims(accessToken).get(OAuth2Constants.PROJECTS_CLAIM).asString())
       .isEqualTo(OAuth2Constants.ALL_PROJECTS)
   }
 
@@ -581,7 +571,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     selectProject(jwt, pending.state, testData.project.id)
       .andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    val projectClaim = decodeClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM)
+    val projectClaim = storedClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM)
     assertThat(projectClaim.isArray).isTrue()
     assertThat(projectClaim[0].asLong()).isEqualTo(testData.project.id)
   }
@@ -592,7 +582,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val pending = startPendingConsent(jwt, hintProjectId = testData.project.id)
     selectProject(jwt, pending.state, null).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
-    assertThat(decodeClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM).asString())
+    assertThat(storedClaims(completeConsent(pending)).get(OAuth2Constants.PROJECTS_CLAIM).asString())
       .isEqualTo(OAuth2Constants.ALL_PROJECTS)
   }
 
@@ -607,8 +597,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     val refreshToken = first.get("refresh_token")?.asString()
     assertThat(refreshToken).isNotNull()
 
-    // Read before refreshing: rotation supersedes the previous access token, which then no longer resolves.
-    val initialClaims = decodeClaims(first.get("access_token").asString())
+    val initialClaims = storedClaims(first.get("access_token").asString())
 
     val refreshed =
       jacksonObjectMapper().readTree(
@@ -623,7 +612,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
           .response.contentAsString,
       )
 
-    val refreshedClaims = decodeClaims(refreshed.get("access_token").asString())
+    val refreshedClaims = storedClaims(refreshed.get("access_token").asString())
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM).isArray).isTrue()
     assertThat(refreshedClaims.get(OAuth2Constants.PROJECTS_CLAIM)[0].asLong()).isEqualTo(testData.project.id)
     assertThat(refreshedClaims.get("aud")).isEqualTo(initialClaims.get("aud"))
@@ -681,6 +670,61 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `an unauthenticated authorize request bootstraps through the configured origin`() {
+    // The browser has to be able to reach the continue URL, so it must be the externally configured origin and not the
+    // one the container saw — behind a reverse proxy those differ, and X-Forwarded-* is not trusted.
+    val location =
+      mvc
+        .perform(
+          get("/oauth2/authorize")
+            .queryParam("response_type", "code")
+            .queryParam("client_id", TEST_CLIENT_ID)
+            .queryParam("redirect_uri", CLI_REDIRECT)
+            .queryParam("scope", "translations.view")
+            .queryParam("code_challenge", s256Challenge(randomVerifier()))
+            .queryParam("code_challenge_method", "S256")
+            .accept(MediaType.TEXT_HTML),
+        ).andReturn()
+        .response
+        .getHeader("Location")
+
+    assertThat(location).isNotNull().startsWith(OAuth2AuthorizationServerConfig.BOOTSTRAP_PAGE_URI)
+    val continueUrl = URLDecoder.decode(queryParam(location!!, "continue")!!, StandardCharsets.UTF_8)
+    // Not the host MockMvc served the request on, which is what a request-derived URL would give.
+    assertThat(continueUrl).doesNotStartWith("http://localhost")
+    assertThat(continueUrl).startsWith("${issuerResolver.issuerUrl}/oauth2/authorize?")
+    assertThat(continueUrl).contains("client_id=$TEST_CLIENT_ID")
+  }
+
+  @Test
+  fun `consent-info describes the pending authorization, not an inflated scope parameter`() {
+    // `scope` is a query parameter of the consent screen's own request; a screen that echoed it would ask the user to
+    // approve scopes the pending authorization never requested, and the token would then be minted from that
+    // authorization instead. The screen must describe what is actually being consented to.
+    val jwt = jwtService.emitToken(testData.user.id)
+    val pending = startPendingConsent(jwt)
+
+    val info =
+      jacksonObjectMapper().readTree(
+        mvc
+          .perform(
+            get("/v2/oauth2/consent-info")
+              .header("Authorization", "Bearer $jwt")
+              .param("clientId", CONSENT_CLIENT_ID)
+              .param("state", pending.state)
+              .param("scope", "translations.view translations.edit admin"),
+          ).andIsOk
+          .andReturn()
+          .response.contentAsString,
+      )
+
+    assertThat(info.get("scopes").toString())
+      .contains("translations.view")
+      .doesNotContain("translations.edit")
+      .doesNotContain("admin")
+  }
+
+  @Test
   fun `select-project rejects binding another user's pending authorization`() {
     val pending = startPendingConsent(jwtService.emitToken(testData.user.id))
     selectProject(jwtService.emitToken(otherUser.id), pending.state, testData.project.id)
@@ -718,7 +762,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     selectProject(jwt, pending.state, publicProjectId).andExpect { assertThat(it.response.status).isEqualTo(204) }
 
     val token = completeConsent(pending)
-    val claim = decodeClaims(token).get(OAuth2Constants.PROJECTS_CLAIM)
+    val claim = storedClaims(token).get(OAuth2Constants.PROJECTS_CLAIM)
     assertThat(claim.isArray).isTrue()
     assertThat(claim[0].asLong()).isEqualTo(publicProjectId)
 
@@ -734,6 +778,19 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   )
 
   /** Bootstraps a session and reaches the consent page for the consent-required client, leaving a pending authorization. */
+  private fun authorizeUrl(state: String): String =
+    UriComponentsBuilder
+      .fromPath("/oauth2/authorize")
+      .queryParam("response_type", "code")
+      .queryParam("client_id", CONSENT_CLIENT_ID)
+      .queryParam("redirect_uri", CONSENT_REDIRECT)
+      .queryParam("scope", "translations.view")
+      .queryParam("code_challenge", s256Challenge(randomVerifier()))
+      .queryParam("code_challenge_method", "S256")
+      .queryParam("state", state)
+      .build()
+      .toUriString()
+
   private fun startPendingConsent(
     jwt: String,
     hintProjectId: Long? = null,
@@ -989,10 +1046,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     return tree
   }
 
-  // Access tokens are opaque, so the claims live on the stored authorization rather than inside the token value.
-  // Rotation replaces the row's single access token, so a superseded token no longer resolves — read claims before
-  // refreshing.
-  private fun decodeClaims(token: String): JsonNode {
+  private fun storedClaims(token: String): JsonNode {
     val authorization =
       authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN)
         ?: throw AssertionError("no authorization stored for the access token")

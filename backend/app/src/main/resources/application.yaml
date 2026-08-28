@@ -9,14 +9,10 @@ spring:
       repositories:
         enabled: false
   session:
-    # JDBC-backed HTTP sessions (shared across replicas) for the OAuth2 consent flow, which is the only stateful
-    # request path in the app — the main security chain is SessionCreationPolicy.STATELESS and creates none. The store
-    # type is necessarily global (Spring Session has no per-path store), so the bound on it is the timeout below.
-    # The schema is created by Liquibase (db/changelog/spring-session), not by Spring Session.
+    # Only the OAuth2 consent flow uses a session; JDBC so it survives across replicas without ingress affinity.
+    # Schema comes from Liquibase (db/changelog/spring-session), not Spring Session.
     store-type: jdbc
-    # A consent session exists only between the bootstrap redirect and the user pressing Allow, and is invalidated the
-    # moment a code is issued. Ten minutes is generous for that and keeps an abandoned flow from lingering for the
-    # 30-minute servlet default.
+    # A consent session lives from the bootstrap redirect until Allow, and is invalidated when a code is issued.
     timeout: 10m
     jdbc:
       initialize-schema: never
@@ -55,8 +51,9 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
 server:
-  # Honor X-Forwarded-* so the OAuth2 issuer and .well-known URLs are correct behind the reverse proxy.
-  forward-headers-strategy: framework
+  # Do not set forward-headers-strategy: Spring would rebuild each request's origin from X-Forwarded-* with no trust
+  # check, letting anyone who can inject X-Forwarded-Host make discovery advertise a token endpoint on their own host.
+  # Behind a reverse proxy set tolgee.back-end-url instead.
   compression:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"

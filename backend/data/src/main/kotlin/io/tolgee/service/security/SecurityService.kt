@@ -87,10 +87,10 @@ class SecurityService(
 
   fun checkAnyProjectPermission(projectId: Long) {
     val isScoped = authenticationFacade.isScopedCredential
-    if (
-      getProjectPermissionScopesNoApiKey(projectId, bypassAdminRights = isScoped).isNullOrEmpty() &&
-      (isScoped || !activeUser.isSupporterOrAdmin())
-    ) {
+    val hasNoProjectPermission =
+      getProjectPermissionScopesNoApiKey(projectId, asScopedCredential = isScoped).isNullOrEmpty()
+    val mayFallBackOnAdminReach = !isScoped && activeUser.isSupporterOrAdmin()
+    if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
     authenticationFacade.oauthTokenCredentials?.let { requireOAuthCoversProject(it, projectId) }
@@ -137,7 +137,7 @@ class SecurityService(
           getProjectPermissionScopesNoApiKey(
             projectId,
             authenticationFacade.authenticatedUser.id,
-            bypassAdminRights = authenticationFacade.isScopedCredential,
+            asScopedCredential = authenticationFacade.isScopedCredential,
           ),
         ).toSet()
 
@@ -170,7 +170,7 @@ class SecurityService(
       projectId,
       requiredPermission,
       user,
-      bypassAdminRights = authenticationFacade.isScopedCredential,
+      asScopedCredential = authenticationFacade.isScopedCredential,
     )
 
     authenticationFacade.oauthTokenCredentials?.let { checkOAuthTokenPermission(projectId, requiredPermission, it) }
@@ -195,17 +195,6 @@ class SecurityService(
       throw PermissionException(missingScopes = listOf(requiredPermission))
     }
   }
-
-  /**
-   * Whether the credential may use the task-assignee elevation at all.
-   *
-   * Must go through [getCurrentPermittedScopes], not a raw permission lookup: that is what intersects the PAK's scope
-   * list and the OAuth token's scope ∩ project set with the user's live permissions, so this one gate binds every
-   * credential kind. A direct permission lookup here would let a scoped credential ride the elevation past its own
-   * authority.
-   */
-  private fun hasTaskAssignedAccess(projectId: Long): Boolean =
-    getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
 
   fun checkTaskEditScopeOrAssigned(
     projectId: Long,
@@ -235,6 +224,11 @@ class SecurityService(
     }
   }
 
+  // Via getCurrentPermittedScopes, not a raw permission lookup: that is what intersects a PAK's scope list and an
+  // OAuth token's scope ∩ project set, so one gate binds every credential kind.
+  private fun hasTaskAssignedAccess(projectId: Long): Boolean =
+    getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
+
   private fun translationInTask(
     keyId: Long,
     languageId: Long,
@@ -254,19 +248,19 @@ class SecurityService(
     projectId: Long,
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ) {
-    if (!bypassAdminRights && userAccountDto.isAdmin()) {
+    if (!asScopedCredential && userAccountDto.isAdmin()) {
       return
     }
 
     val isReadonlyAccess = requiredScope.isReadOnly()
-    if (!bypassAdminRights && isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
+    if (!asScopedCredential && isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
       return
     }
 
     val allowedScopes =
-      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id, bypassAdminRights = bypassAdminRights)
+      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id, asScopedCredential = asScopedCredential)
         ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     checkPermission(requiredScope, allowedScopes)
@@ -289,7 +283,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -302,7 +296,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -325,7 +319,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
@@ -337,7 +331,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestManagePermitted(*languageIds.toLongArray()) }
@@ -349,7 +343,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
@@ -377,7 +371,7 @@ class SecurityService(
     passIfAnyPermissionCheckSucceeds(
       {
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-        runIfUserNotServerAdmin {
+        runUnlessElevatedAsServerAdmin {
           checkLanguagePermission(
             projectId,
           ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
@@ -414,7 +408,7 @@ class SecurityService(
   ) {
     try {
       checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-      runIfUserNotServerAdmin {
+      runUnlessElevatedAsServerAdmin {
         checkLanguagePermission(
           projectId,
         ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
@@ -465,7 +459,7 @@ class SecurityService(
       permissionService.getProjectPermissionData(
         projectId,
         authenticationFacade.authenticatedUser.id,
-        bypassAdminRights = authenticationFacade.isScopedCredential,
+        asScopedCredential = authenticationFacade.isScopedCredential,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -481,7 +475,7 @@ class SecurityService(
         permissionService.getProjectPermissionData(
           projectId,
           authenticationFacade.authenticatedUser.id,
-          bypassAdminRights = authenticationFacade.isScopedCredential,
+          asScopedCredential = authenticationFacade.isScopedCredential,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -594,9 +588,9 @@ class SecurityService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userId: Long = activeUser.id,
-    bypassAdminRights: Boolean = false,
+    asScopedCredential: Boolean,
   ): Array<Scope>? {
-    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId, bypassAdminRights)
+    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId, asScopedCredential)
   }
 
   fun checkKeyIdsExistAndIsFromProject(
@@ -726,15 +720,15 @@ class SecurityService(
     }
   }
 
-  // A scoped credential never inherits the admin/supporter bypass: the per-language check must run for it even when the
-  // underlying user is a server admin/supporter, so it stays bound to that user's real language restrictions.
-  private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
+  // "Elevated" is about the caller, not the user: a scoped credential held by a server admin is not elevated, so the
+  // per-language check still runs for it.
+  private fun runUnlessElevatedAsServerAdmin(runnable: () -> Unit) {
     if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
-  private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
+  private fun runUnlessElevatedAsSupporterOrAdmin(runnable: () -> Unit) {
     if (authenticationFacade.isScopedCredential || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }

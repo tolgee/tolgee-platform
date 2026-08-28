@@ -12,10 +12,6 @@
     -->
 
     <changeSet author="dbocharov" id="oauth2-authorization">
-        <comment>
-            Source: classpath resource org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql
-            (spring-security-oauth2-authorization-server jar). PostgreSQL adaptation: 'blob' -> 'text', 'timestamp' -> 'timestamptz'.
-        </comment>
         <sql dbms="postgresql" splitStatements="false">
             CREATE TABLE oauth2_authorization (
                 id varchar(100) NOT NULL,

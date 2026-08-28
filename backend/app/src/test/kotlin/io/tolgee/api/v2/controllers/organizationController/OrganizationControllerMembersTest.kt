@@ -131,11 +131,12 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
       .getProjectPermissionData(
         testData.projectBuilder.self.id,
         me.id,
+        asScopedCredential = false,
       ).directPermissions.assert.isNotNull
     performAuthDelete("/v2/organizations/${testData.organizationBuilder.self.id}/users/${me.id}", null)
       .andIsOk
     permissionService
-      .getProjectPermissionData(testData.projectBuilder.self.id, me.id)
+      .getProjectPermissionData(testData.projectBuilder.self.id, me.id, asScopedCredential = false)
       .directPermissions.assert
       .isNull()
   }

@@ -22,26 +22,38 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Holds the OAuth2 clients built from configuration ([PreRegisteredClients]).
+ * The OAuth clients this server accepts, built from configuration at startup.
  *
- * Clients are derived entirely from properties, so there is nothing to persist: a restart rebuilds the same set, and
- * emptying a client's redirect config simply stops it from existing rather than needing a stored row deleted.
+ * Configuration is the only source: nothing registers a client at runtime, and [save] holds one for this replica's
+ * lifetime only — Tolgee exposes no dynamic client registration, so SAS never calls it outside tests.
  *
- * Spring's own `InMemoryRegisteredClientRepository` cannot be used because its constructor rejects an empty list, and
- * no clients configured is the default state.
+ * Not Spring's `InMemoryRegisteredClientRepository`: its constructor rejects an empty list, and no clients configured
+ * is the default state.
  */
 @Component
 class TolgeeRegisteredClientRepository(
-  preRegisteredClients: PreRegisteredClients,
+  private val preRegisteredClients: PreRegisteredClients,
 ) : RegisteredClientRepository {
   private val byId = ConcurrentHashMap<String, RegisteredClient>()
   private val byClientId = ConcurrentHashMap<String, RegisteredClient>()
 
   init {
-    preRegisteredClients.clients().forEach(::put)
+    resetToConfigured()
   }
 
   override fun save(registeredClient: RegisteredClient) = put(registeredClient)
+
+  /**
+   * Restores exactly the configured set, dropping everything [save] added.
+   *
+   * Clients live here rather than in the database, so a test that registers its own is not undone by the per-test
+   * database reset; without this they would stay visible to every later test sharing the application context.
+   */
+  fun resetToConfigured() {
+    byId.clear()
+    byClientId.clear()
+    preRegisteredClients.clients().forEach(::put)
+  }
 
   override fun findById(id: String): RegisteredClient? = byId[id]
 

@@ -25,12 +25,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator
 
-/**
- * Tokens are opaque ([org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat.REFERENCE]),
- * so there is no signing key, no JWKS and no JWT encoder anywhere in the authorization server. Spring only registers
- * the JWK-set endpoint when a `JWKSource` bean exists, and only builds a `JwtGenerator` when a `JwtEncoder` exists —
- * publishing either would put a key lifecycle back into the server for no consumer.
- */
+// Publishing a JWKSource or JwtEncoder bean would make Spring register the JWK-set endpoint and mint signed tokens
+// again, putting a key lifecycle back into the server for no consumer.
 @Configuration
 class OAuth2TokenGeneratorConfig {
   @Bean

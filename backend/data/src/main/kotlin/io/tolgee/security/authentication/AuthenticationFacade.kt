@@ -123,8 +123,12 @@ class AuthenticationFacade(
   val isScopedCredential: Boolean
     get() = isProjectApiKeyAuth || isOAuthTokenAuth
 
-  // The author-self elevation ("you may act on what you created") is a user-authority path: a scoped credential must
-  // carry the real scope instead, or the elevation would let it act past the scope list it was issued with.
+  /**
+   * Whether "you may act on what you created" is available to this caller.
+   *
+   * It is an elevation granted to the user, so a scoped credential has to carry the real scope instead — otherwise the
+   * elevation would let it act past the scope list it was issued with.
+   */
   val canUseAuthorSelfAccess: Boolean
     get() = !isScopedCredential
 
@@ -133,8 +137,6 @@ class AuthenticationFacade(
     return authorId != null && authorId == authenticatedUser.id
   }
 
-  // The single project a credential is unambiguously bound to — a PAK's embedded project, or an OAuth token narrowed to
-  // exactly one. Null for a user JWT/PAT or an all-projects OAuth token, which carry no implicit project.
   val implicitProjectId: Long?
     get() {
       if (isProjectApiKeyAuth) return projectApiKey.projectId

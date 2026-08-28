@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.tolgee.configuration
+package io.tolgee.security.oauth2
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -36,7 +36,7 @@ import java.nio.charset.StandardCharsets
  * a private method reference that can't be wrapped (RFC 6749 §4.1.2 success response: code + optional state).
  */
 class OAuth2SessionInvalidatingAuthorizationResponseHandler(
-  private val issuer: String?,
+  private val issuerResolver: OAuth2IssuerResolver,
   private val redirectStrategy: RedirectStrategy = DefaultRedirectStrategy(),
 ) : AuthenticationSuccessHandler {
   override fun onAuthenticationSuccess(
@@ -52,8 +52,9 @@ class OAuth2SessionInvalidatingAuthorizationResponseHandler(
       UriComponentsBuilder
         .fromUriString(redirectUri)
         .queryParam(OAuth2ParameterNames.CODE, code.tokenValue)
-    // RFC 9207 iss (AS mix-up defense); SAS's default response includes it when an issuer is configured, so preserve it.
-    issuer?.let { uriBuilder.queryParam("iss", UriUtils.encode(it, StandardCharsets.UTF_8)) }
+    // RFC 9207 iss (AS mix-up defense). SAS 7.1 does not emit it — its response carries only code and state — so a
+    // client that requires iss breaks if this handler stops adding it.
+    uriBuilder.queryParam("iss", UriUtils.encode(issuerResolver.issuerUrl, StandardCharsets.UTF_8))
     val state = token.state
     if (!state.isNullOrBlank()) {
       uriBuilder.queryParam(OAuth2ParameterNames.STATE, UriUtils.encode(state, StandardCharsets.UTF_8))

@@ -71,11 +71,17 @@ class McpRequestContext(
     }
   }
 
-  /** Mirrors [AuthenticationInterceptor.preHandle] */
+  /**
+   * The MCP endpoint is a RouterFunction, so [AuthenticationInterceptor] never runs for it and its path-keyed OAuth
+   * rule cannot apply. This is the same guarantee, restated for tool specs: a global route skips
+   * [ProjectContextService.setup], so nothing there would narrow the token.
+   */
   private fun checkTokenType(spec: ToolEndpointSpec) {
     if (!authenticationFacade.isApiAuthentication) return
 
-    if (authenticationFacade.isOAuthTokenAuth && spec.allowedTokenType != AuthTokenType.ANY) {
+    if (authenticationFacade.isOAuthTokenAuth &&
+      (spec.allowedTokenType != AuthTokenType.ANY || spec.isGlobalRoute)
+    ) {
       throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
     }
 
@@ -115,8 +121,6 @@ class McpRequestContext(
   /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.isUserOfRole] */
   private fun checkOrgRole(spec: ToolEndpointSpec) {
     val requiredRole = spec.requiredOrgRole ?: return
-    // An OAuth token is a constrained capability; it must not inherit an org-role-gated operation from the org role of
-    // the user it authenticates. Reject it here rather than letting the user's membership widen the token's authority.
     if (authenticationFacade.isOAuthTokenAuth) {
       throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
     }

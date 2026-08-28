@@ -67,6 +67,44 @@ class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
   }
 
   @Test
+  fun `OAuth auth on a project-scoped tool with ANY passes`() {
+    // The only shape an OAuth token is allowed through: ProjectContextService then intersects its scope set and its
+    // project set, which is what keeps it below the user's own authority.
+    oauthAuthenticated()
+
+    sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = false), projectId = 99L) {}
+  }
+
+  @Test
+  fun `OAuth auth on a global tool throws OAUTH_ACCESS_NOT_ALLOWED`() {
+    oauthAuthenticated()
+
+    assertThatThrownBy {
+      sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = true)) {}
+    }.isInstanceOf(PermissionException::class.java)
+      .satisfies({ ex ->
+        assertThat((ex as PermissionException).tolgeeMessage).isEqualTo(Message.OAUTH_ACCESS_NOT_ALLOWED)
+      })
+  }
+
+  @Test
+  fun `OAuth auth on a tool restricted to one API token kind throws OAUTH_ACCESS_NOT_ALLOWED`() {
+    oauthAuthenticated()
+
+    assertThatThrownBy {
+      sut.executeAs(spec(allowedTokenType = AuthTokenType.ONLY_PAT, isGlobalRoute = false), projectId = 99L) {}
+    }.isInstanceOf(PermissionException::class.java)
+      .satisfies({ ex ->
+        assertThat((ex as PermissionException).tolgeeMessage).isEqualTo(Message.OAUTH_ACCESS_NOT_ALLOWED)
+      })
+  }
+
+  private fun oauthAuthenticated() {
+    whenever(authenticationFacade.isApiAuthentication).thenReturn(true)
+    whenever(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+  }
+
+  @Test
   fun `PAT auth with ONLY_PAT passes`() {
     whenever(authenticationFacade.isApiAuthentication).thenReturn(true)
     whenever(authenticationFacade.isPersonalAccessTokenAuth).thenReturn(true)

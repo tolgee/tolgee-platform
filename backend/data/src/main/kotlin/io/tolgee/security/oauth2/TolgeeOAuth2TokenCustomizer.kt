@@ -36,7 +36,8 @@ class TolgeeOAuth2TokenCustomizer(
     if (context.tokenType != OAuth2TokenType.ACCESS_TOKEN) return
 
     rejectRefreshOfInvalidatedTokens(context)
-    context.claims.claim(OAuth2Constants.PROJECTS_CLAIM, projectSet(context))
+    rejectConsentedClientWithNothingSelected(context)
+    context.claims.claim(OAuth2Constants.PROJECTS_CLAIM, projectClaim(context))
   }
 
   // A refresh-minted access token carries a fresh iat, so it slips the resolver's tokensValidNotBefore check; gate the
@@ -56,23 +57,36 @@ class TolgeeOAuth2TokenCustomizer(
     authorizationQueryService.revokeByIdInNewTransaction(authorization.id)
   }
 
-  private fun projectSet(context: OAuth2TokenClaimsContext): Any {
-    // Stamp ids as strings: SAS's JDBC polymorphic-type validator rejects java.lang.Long when it deserializes the
-    // stored claims on the refresh grant, which would otherwise make a project-bound token unrefreshable.
-    consentSelection(context)?.let { return projectSetFor(it) }
-    context.getAuthorization()?.projectHint()?.let { return listOf(it.toString()) }
-    // A consent-required client reaching here ran no select-project and sent no project hint — SAS skipped the consent
-    // screen because consent is remembered. Fail closed rather than silently widening from the consented project to
-    // ALL_PROJECTS; the client must re-prompt for consent (or send a project hint) to re-establish the binding.
-    if (context.registeredClient.clientSettings.isRequireAuthorizationConsent) {
-      throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST)
-    }
+  /**
+   * Defence in depth: with consent never remembered ([AlwaysPromptConsentService]) a consent-requiring client always
+   * reaches here with a selection. Were one ever skipped, `project` is a request parameter the client chose, so
+   * honouring it would bind the token to a project nobody was shown.
+   */
+  private fun rejectConsentedClientWithNothingSelected(context: OAuth2TokenClaimsContext) {
+    if (consentSelection(context) != null) return
+    if (!context.registeredClient.clientSettings.isRequireAuthorizationConsent) return
+    throw OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST)
+  }
+
+  /**
+   * Either the [OAuth2Constants.ALL_PROJECTS] sentinel or a list of project ids.
+   *
+   * For a client that asks for no consent there is no approved project set, so the token is as wide as the user —
+   * which is what [OAuth2Constants.ALL_PROJECTS] means here. The `project` request parameter is then honoured because
+   * it can only narrow that: it is intersected with live permissions like any other binding, so a client can restrict
+   * its own token but never reach past the user it authenticates.
+   */
+  private fun projectClaim(context: OAuth2TokenClaimsContext): Any {
+    consentSelection(context)?.let { return claimFor(it) }
+    context.getAuthorization()?.projectHint()?.let { return claimFor(it.toString()) }
     return OAuth2Constants.ALL_PROJECTS
   }
 
-  private fun projectSetFor(selection: String): Any {
-    if (selection == OAuth2Constants.ALL_PROJECTS) return OAuth2Constants.ALL_PROJECTS
-    return listOf(selection)
+  private fun claimFor(projectId: String): Any {
+    if (projectId == OAuth2Constants.ALL_PROJECTS) return OAuth2Constants.ALL_PROJECTS
+    // Ids are stamped as strings: SAS's JDBC polymorphic-type validator rejects java.lang.Long when it deserializes
+    // the stored claims on the refresh grant, which would make a project-bound token unrefreshable.
+    return listOf(projectId)
   }
 
   private fun consentSelection(context: OAuth2TokenClaimsContext): String? =

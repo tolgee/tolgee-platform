@@ -21,13 +21,20 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
-// SAS stores the user id as `principal_name`, so callers pass `user.id.toString()`.
 @Service
 class OAuth2AuthorizationQueryService(
   private val repository: OAuth2AuthorizationJdbcRepository,
 ) {
-  /** Deletes ALL of the user's authorizations and consents (logout-everywhere); returns the authorization-row count. */
-  fun revokeAllForPrincipal(principalName: String): Int {
+  /**
+   * Deletes ALL of the user's authorizations (logout-everywhere); returns the row count.
+   *
+   * The consent sweep is insurance only: [AlwaysPromptConsentService] means nothing writes that table today, but a
+   * deployment upgraded from a version that did would otherwise keep rows this can never reach again.
+   */
+  fun revokeAllForUser(userId: Long): Int {
+    // SAS's principal_name column, which Tolgee populates with the user id. Taking a Long keeps a caller from reaching
+    // for the obvious human principal — a username would match nothing and delete nothing, silently.
+    val principalName = userId.toString()
     repository.deleteConsentByPrincipal(principalName)
     return repository.deleteByPrincipal(principalName)
   }

@@ -33,8 +33,7 @@ class OAuth2AuthorizationJdbcRepository(
 
   fun deleteById(id: String): Int = jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE id = ?", id)
 
-  // Deletes rows whose newest credential expiry (refresh > access > code) passed — so a still-valid refresh token is
-  // never deleted — plus abandoned pre-consent rows (all expiries NULL) before [cutoff], which the expiry test misses.
+  // COALESCE takes the newest expiry, so a row with a still-valid refresh token survives a long-expired access token.
   fun deleteExpiredBefore(cutoff: Instant): Int {
     val ts = Timestamp.from(cutoff)
     return jdbcTemplate.update(

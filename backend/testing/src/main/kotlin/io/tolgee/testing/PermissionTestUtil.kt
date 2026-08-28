@@ -77,7 +77,10 @@ class PermissionTestUtil(
           null,
         ).andIsOk
 
-      checkFn(permissionService.getProjectPermissionData(project.id, user.id), langByTag)
+      checkFn(
+        permissionService.getProjectPermissionData(project.id, user.id, asScopedCredential = false),
+        langByTag,
+      )
     }
   }
 

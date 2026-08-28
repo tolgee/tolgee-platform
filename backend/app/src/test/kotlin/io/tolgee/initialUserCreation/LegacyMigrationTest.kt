@@ -91,6 +91,7 @@ class LegacyMigrationTest : AbstractSpringTest() {
         testData.randomProject.id,
         Scope.SCREENSHOTS_UPLOAD,
         UserAccountDto.fromEntity(initialUser),
+        asScopedCredential = false,
       )
     }
   }

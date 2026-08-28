@@ -69,6 +69,7 @@ class ExportController(
         permissionService.getPermittedViewLanguages(
           projectHolder.project.id,
           authenticationFacade.authenticatedUser.id,
+          asScopedCredential = authenticationFacade.isScopedCredential,
         )
 
       headersBuilder.header(

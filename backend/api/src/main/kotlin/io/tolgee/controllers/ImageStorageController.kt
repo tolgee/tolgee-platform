@@ -104,6 +104,7 @@ class ImageStorageController(
             authProjectId,
             Scope.SCREENSHOTS_VIEW,
             auth.userAccount,
+            asScopedCredential = false,
           )
         } catch (e: PermissionException) {
           // Security consideration: pretend it doesn't exist if we don't have permission to see it.

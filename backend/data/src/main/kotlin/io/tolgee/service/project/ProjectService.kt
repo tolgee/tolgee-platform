@@ -158,7 +158,12 @@ class ProjectService(
 
   @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
-    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
+    val perms =
+      permissionService.getProjectPermissionData(
+        id,
+        authenticationFacade.authenticatedUser.id,
+        asScopedCredential = authenticationFacade.isScopedCredential,
+      )
     val withoutPermittedLanguages =
       projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
         ?: throw ProjectNotFoundException(id)
@@ -313,6 +318,7 @@ class ProjectService(
               permission,
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
+              asScopedCredential = false,
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()

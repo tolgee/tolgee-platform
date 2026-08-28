@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
@@ -37,20 +38,21 @@ class PreRegisteredClients(
 
   private fun browserExtensionClient(): RegisteredClient? {
     if (properties.browserExtensionRedirectUris.isEmpty()) return null
-    return publicClientBuilder(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID, "Tolgee Browser Extension")
-      .apply { properties.browserExtensionRedirectUris.forEach { redirectUri(it) } }
-      .clientSettings(
-        clientSettings(
-          requireConsent = true,
-          requiredScopes = listOf(Scope.KEYS_VIEW, Scope.TRANSLATIONS_VIEW),
-        ),
-      ).build()
+    return publicClientBuilder(
+      OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
+      "Tolgee Browser Extension",
+      properties.browserExtensionRedirectUris,
+    ).clientSettings(
+      clientSettings(
+        requireConsent = true,
+        requiredScopes = listOf(Scope.KEYS_VIEW, Scope.TRANSLATIONS_VIEW),
+      ),
+    ).build()
   }
 
   private fun cliClient(): RegisteredClient? {
     if (properties.cliRedirectUris.isEmpty()) return null
-    return publicClientBuilder(OAuth2Constants.CLI_CLIENT_ID, "Tolgee CLI")
-      .apply { properties.cliRedirectUris.forEach { redirectUri(it) } }
+    return publicClientBuilder(OAuth2Constants.CLI_CLIENT_ID, "Tolgee CLI", properties.cliRedirectUris)
       // A loopback redirect can't be bound to one local app, so any local process that knows this fixed client_id could
       // otherwise obtain a full-scope token silently. Require consent (OAuth 2.1 / RFC 8252 for public native clients).
       .clientSettings(clientSettings(requireConsent = true))
@@ -60,6 +62,7 @@ class PreRegisteredClients(
   private fun publicClientBuilder(
     clientId: String,
     clientName: String,
+    redirectUris: List<String>,
   ): RegisteredClient.Builder {
     return RegisteredClient
       .withId(clientId)
@@ -68,6 +71,7 @@ class PreRegisteredClients(
       .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
       .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
       .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+      .apply { redirectUris.forEach { redirectUri(it) } }
       .apply { Scope.entries.forEach { scope(it.value) } }
       .tokenSettings(properties.tokenSettings())
   }

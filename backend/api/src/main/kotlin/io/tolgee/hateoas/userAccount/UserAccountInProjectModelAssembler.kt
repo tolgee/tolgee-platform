@@ -31,6 +31,7 @@ class UserAccountInProjectModelAssembler(
         view.organizationBasePermission,
         view.directPermission,
         UserAccount.Role.USER,
+        asScopedCredential = false,
       )
     val avatar = avatarService.getAvatarLinks(view.avatarHash)
     return UserAccountInProjectModel(

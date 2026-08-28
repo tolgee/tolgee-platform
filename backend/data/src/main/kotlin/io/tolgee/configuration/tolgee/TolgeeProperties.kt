@@ -61,35 +61,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
         ),
       ],
     ),
-    DocProperty(
-      name = "oauth2",
-      prefix = "tolgee.oauth2",
-      displayName = "OAuth2 authorization server",
-      description = "Settings for Tolgee acting as an OAuth 2.1 authorization server (browser-extension login, MCP).",
-      children = [
-        DocProperty(
-          name = "browser-extension-redirect-uris",
-          description =
-            "Exact redirect URIs of the Tolgee browser extension, e.g. " +
-              "`https://<extension-id>.chromiumapp.org/`. The extension OAuth client is only registered when this " +
-              "is set.",
-          defaultValue = "",
-        ),
-        DocProperty(
-          name = "cli-redirect-uris",
-          description =
-            "Loopback redirect URIs of the Tolgee CLI (RFC 8252), e.g. `http://127.0.0.1:9876/callback`. The CLI " +
-              "OAuth client is only registered when this is set.\n" +
-              "\n" +
-              ":::info\n" +
-              "A loopback redirect cannot be tied to one local application, so any process on the machine that knows " +
-              "the client id can start an authorization for it. The user still has to approve the consent screen, " +
-              "but leave this unset unless the CLI is actually in use.\n" +
-              ":::\n\n",
-          defaultValue = "",
-        ),
-      ],
-    ),
   ],
   global = true,
 )
@@ -99,6 +70,7 @@ class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  var oauth2: OAuth2ServerProperties = OAuth2ServerProperties(),
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,
   @DocProperty(hidden = true)

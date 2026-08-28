@@ -8,11 +8,13 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.oauth2.ConsentInfoModel
 import io.tolgee.hateoas.oauth2.OAuth2ProjectModel
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
 import io.tolgee.security.authentication.BypassForcedSsoAuthentication
-import io.tolgee.security.authentication.OAuth2SessionBootstrapper
 import io.tolgee.security.oauth2.OAuth2Constants
+import io.tolgee.security.oauth2.OAuth2SessionBootstrapper
+import io.tolgee.security.oauth2.authorizationRequestScopes
 import io.tolgee.security.oauth2.projectHint
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
@@ -35,6 +37,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/v2/oauth2")
+// Drives the consent screen only: authenticated by the webapp JWT or the consent session, and keyed by a `state`
+// only the SPA holds. Not part of the public API.
+@OpenApiHideFromPublicDocs
 @Tag(name = "OAuth2 flow")
 class OAuth2FlowController(
   private val authenticationFacade: AuthenticationFacade,
@@ -64,9 +69,10 @@ class OAuth2FlowController(
     @RequestParam(required = false) state: String?,
   ): ConsentInfoModel {
     val client = registeredClientRepository.findByClientId(clientId) ?: throw NotFoundException()
-    val scopes = scope?.let { splitScopeString(it) } ?: emptyList()
+    val authorization = state?.let { ownAuthorization(it) }
+    val scopes = requestedScopes(authorization, scope)
     val requiredScopes = clientRequiredScopes(client).filter { it in scopes }
-    val requestedProjectId = state?.let { ownAuthorization(it)?.projectHint() }
+    val requestedProjectId = authorization?.projectHint()
     return ConsentInfoModel(
       appName = client.clientName,
       scopes = scopes,
@@ -86,10 +92,20 @@ class OAuth2FlowController(
     @RequestParam(required = false) projectId: Long?,
   ) {
     val authorization = ownAuthorization(state) ?: throw NotFoundException()
-    val selection = projectSelectionValue(projectId)
+    val selection = requireAccessibleSelection(projectId)
     oAuth2AuthorizationService.save(
       OAuth2Authorization.from(authorization).attribute(OAuth2Constants.PROJECT_ATTRIBUTE, selection).build(),
     )
+  }
+
+  // From the stored request, not the `scope` parameter: the screen has to describe the authorization it is consenting
+  // to. The parameter is only a fallback for a state that no longer resolves.
+  private fun requestedScopes(
+    authorization: OAuth2Authorization?,
+    scopeParam: String?,
+  ): List<String> {
+    authorization?.authorizationRequestScopes()?.takeIf { it.isNotEmpty() }?.let { return it.toList() }
+    return scopeParam?.let { splitScopeString(it) } ?: emptyList()
   }
 
   private fun clientRequiredScopes(client: RegisteredClient): List<String> {
@@ -99,16 +115,10 @@ class OAuth2FlowController(
 
   private fun splitScopeString(raw: String): List<String> = raw.split(" ").filter { it.isNotBlank() }
 
-  /** Resolves the hinted project's name only when the user has access, so an unrelated hint can't leak a name. */
   private fun hintedProject(projectId: Long): OAuth2ProjectModel? =
-    accessibleProject(projectId)?.let { projectModel(it.id, it.name) }
+    accessibleProject(projectId)?.let { OAuth2ProjectModel(id = it.id, name = it.name) }
 
-  private fun projectModel(
-    id: Long,
-    name: String?,
-  ) = OAuth2ProjectModel(id = id, name = name ?: "#$id")
-
-  /** The pending authorization for [state], only when it belongs to the caller (guards against state replay). */
+  // Only the caller's own pending authorization: `state` is guessable enough that another user's must not resolve.
   private fun ownAuthorization(state: String): OAuth2Authorization? {
     val authorization =
       oAuth2AuthorizationService.findByToken(state, OAuth2TokenType(OAuth2ParameterNames.STATE)) ?: return null
@@ -116,7 +126,7 @@ class OAuth2FlowController(
     return authorization
   }
 
-  private fun projectSelectionValue(projectId: Long?): String {
+  private fun requireAccessibleSelection(projectId: Long?): String {
     if (projectId == null) return OAuth2Constants.ALL_PROJECTS
     if (accessibleProject(projectId) == null) throw PermissionException()
     return projectId.toString()

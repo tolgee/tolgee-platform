@@ -50,23 +50,34 @@ class SecurityServiceOAuthNarrowingTest {
       permissionService = this@SecurityServiceOAuthNarrowingTest.permissionService
     }
 
+  /**
+   * In production `isScopedCredential` is `isProjectApiKeyAuth || isOAuthTokenAuth`, so with an OAuth token present it
+   * is necessarily true. Stubbing the credentials without it lets the mock report a state that cannot occur, and the
+   * permission lookups would then be matched for the wrong `asScopedCredential` value — the tests would pass without
+   * exercising the narrowing they are named for.
+   */
+  private fun authenticatedWithOAuth(credentials: OAuth2TokenCredentials?) {
+    whenever(authenticationFacade.oauthTokenCredentials).thenReturn(credentials)
+    whenever(authenticationFacade.isScopedCredential).thenReturn(credentials != null)
+  }
+
   private fun userHasAccessTo(projectId: Long) {
-    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L))
-      .thenReturn(arrayOf(Scope.TRANSLATIONS_VIEW))
+    userHasScopeOn(projectId, Scope.TRANSLATIONS_VIEW)
   }
 
   private fun userHasScopeOn(
     projectId: Long,
     scope: Scope,
   ) {
-    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L)).thenReturn(arrayOf(scope))
+    // Stubbed for both values: an OAuth-authenticated call passes asScopedCredential = true, a plain one false.
+    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L, false)).thenReturn(arrayOf(scope))
+    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L, true)).thenReturn(arrayOf(scope))
   }
 
   @Test
   fun `denies an OAuth token not covering the project even when the user has access`() {
     userHasAccessTo(2L)
-    whenever(authenticationFacade.oauthTokenCredentials)
-      .thenReturn(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), setOf(1L)))
+    authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), setOf(1L)))
 
     assertThatThrownBy { service().checkAnyProjectPermission(2L) }.isInstanceOf(PermissionException::class.java)
   }
@@ -74,8 +85,7 @@ class SecurityServiceOAuthNarrowingTest {
   @Test
   fun `allows an OAuth token covering the project`() {
     userHasAccessTo(2L)
-    whenever(authenticationFacade.oauthTokenCredentials)
-      .thenReturn(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), setOf(2L)))
+    authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), setOf(2L)))
 
     assertThatCode { service().checkAnyProjectPermission(2L) }.doesNotThrowAnyException()
   }
@@ -83,7 +93,7 @@ class SecurityServiceOAuthNarrowingTest {
   @Test
   fun `allows a non-OAuth caller with project access`() {
     userHasAccessTo(2L)
-    whenever(authenticationFacade.oauthTokenCredentials).thenReturn(null)
+    authenticatedWithOAuth(null)
 
     assertThatCode { service().checkAnyProjectPermission(2L) }.doesNotThrowAnyException()
   }
@@ -93,8 +103,7 @@ class SecurityServiceOAuthNarrowingTest {
     // The user has keys.edit live, but the token was only granted translations.edit — the nested KEYS_EDIT check
     // (past the endpoint interceptor) must be denied so a narrow token can't create/delete keys.
     userHasScopeOn(2L, Scope.KEYS_EDIT)
-    whenever(authenticationFacade.oauthTokenCredentials)
-      .thenReturn(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_EDIT), setOf(2L)))
+    authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_EDIT), setOf(2L)))
 
     assertThatThrownBy { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }
       .isInstanceOf(PermissionException::class.java)
@@ -105,8 +114,7 @@ class SecurityServiceOAuthNarrowingTest {
   @Test
   fun `checkProjectPermission denies a token bound to a different project even when scope and live access cover it`() {
     userHasScopeOn(2L, Scope.KEYS_EDIT)
-    whenever(authenticationFacade.oauthTokenCredentials)
-      .thenReturn(OAuth2TokenCredentials(setOf(Scope.KEYS_EDIT), setOf(1L)))
+    authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.KEYS_EDIT), setOf(1L)))
 
     assertThatThrownBy { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }
       .isInstanceOf(PermissionException::class.java)
@@ -117,8 +125,7 @@ class SecurityServiceOAuthNarrowingTest {
   @Test
   fun `checkProjectPermission allows a token covering both the scope and the project`() {
     userHasScopeOn(2L, Scope.KEYS_EDIT)
-    whenever(authenticationFacade.oauthTokenCredentials)
-      .thenReturn(OAuth2TokenCredentials(setOf(Scope.KEYS_EDIT), setOf(2L)))
+    authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.KEYS_EDIT), setOf(2L)))
 
     assertThatCode { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }.doesNotThrowAnyException()
   }
