@@ -32,11 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * What an organization does with the apps it **registered**, as opposed to ones it merely installed:
- * publish a new app (register) and read its apps. Every endpoint resolves the app within the
- * organization, so an organization that installed somebody else's app reaches none of this.
- */
 @RestController
 @CrossOrigin(origins = ["*"])
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")

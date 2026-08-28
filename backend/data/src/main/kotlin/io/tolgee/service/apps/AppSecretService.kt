@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 
-/** Owns the app-level client secrets. An expired secret is treated as dead wherever it is read. */
 @Service
 class AppSecretService(
   private val appSecretRepository: AppSecretRepository,
@@ -32,7 +31,6 @@ class AppSecretService(
     val previousExpiresAt: Date?,
   )
 
-  /** Mints and persists a secret in the caller's transaction, with no cap check (used at registration). */
   fun mintSecret(app: App): IssueResult {
     val plaintext = AppService.APP_CLIENT_SECRET_PREFIX + keyGenerator.generate(256)
     val secret =
@@ -63,9 +61,7 @@ class AppSecretService(
     return RotationResult(issued, previousExpiresAt)
   }
 
-  /** Puts every active secret but [keepSecretId] on a [graceSeconds] deadline, keeping any earlier one. */
-  @Transactional
-  fun expireOthers(
+  private fun expireOthers(
     appId: Long,
     keepSecretId: Long,
     graceSeconds: Long,
@@ -85,10 +81,6 @@ class AppSecretService(
     return others.mapNotNull { it.expiresAt }.maxOrNull()
   }
 
-  /**
-   * @param force stamps [App.tokensInvalidBefore] (the kill switch for a leaked credential) and lets
-   *   the app's only active secret be revoked.
-   */
   @Transactional
   fun revoke(
     appId: Long,
@@ -130,11 +122,6 @@ class AppSecretService(
   ): AppSecret? {
     val providedHash = keyGenerator.hash(plaintextSecret)
     return activeSecrets(appId).firstOrNull { constantTimeEquals(providedHash, it.secretHash) }
-  }
-
-  @Transactional
-  fun recordFirstUse(secretId: Long) {
-    appSecretRepository.updateLastUsedById(secretId, currentDateProvider.date)
   }
 
   @Async

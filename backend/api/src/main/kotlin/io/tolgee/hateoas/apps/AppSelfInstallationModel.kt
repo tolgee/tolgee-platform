@@ -5,10 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-/**
- * What an app's own backend is told about one of its installs: the identity of the install and the
- * projects it may currently act on.
- */
 @Relation(collectionRelation = "installations", itemRelation = "installation")
 open class AppSelfInstallationModel(
   @Schema(description = "Id of the install the calling token belongs to")
@@ -16,13 +12,6 @@ open class AppSelfInstallationModel(
   val appId: String,
   val name: String,
   val version: String,
-  @Schema(
-    description =
-      "Whether this is a native (server-level) install rather than an organization's own. Always " +
-        "false for now — native installs arrive in a later release; the field is present so app " +
-        "backends can rely on its shape without a schema change when they do.",
-  )
-  val native: Boolean,
   @Schema(description = "Permission scopes granted to the install at consent time")
   val scopes: List<String>,
   @ArraySchema(

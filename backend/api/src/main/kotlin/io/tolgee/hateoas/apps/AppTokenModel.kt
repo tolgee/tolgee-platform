@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.project.apps
+package io.tolgee.hateoas.apps
 
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation

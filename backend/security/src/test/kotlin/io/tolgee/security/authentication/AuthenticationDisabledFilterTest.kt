@@ -57,7 +57,6 @@ class AuthenticationDisabledFilterTest {
       mock(),
       mock(),
       mock(),
-      mock(),
       userAccountService,
       mock(),
       mock(),

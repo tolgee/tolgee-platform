@@ -31,11 +31,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import tools.jackson.databind.JsonNode
 
-/**
- * An install acts as an account of its own, so writing a row that references a user works whatever
- * became of the person who registered the app — and that account is not a person: it takes no seat,
- * appears in no listing, cannot be signed in as, and goes when the install goes.
- */
 class AppInstallPrincipalTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appInstallService: AppInstallService
@@ -114,7 +109,6 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
     commentAsApp().andIsCreated
   }
 
-  /** The principal is what the install acts as, so it must be obvious in any UI that shows it. */
   @Test
   fun `names the principal after the app`() {
     userAccountService
@@ -176,10 +170,6 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
     userAccountService.findActive(principalId).assert.isNull()
   }
 
-  /**
-   * Acting as a person is the one path where a person's state still gates the request — the
-   * install's own principal must not paper over it.
-   */
   @Test
   fun `refuses to act as a disabled user`() {
     userAccountService.disable(testData.member.id)
@@ -189,7 +179,6 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
   }
 
-  /** Acting-as caps the install at the acted-as user: the app is granted comment-add, the member is not. */
   @Test
   fun `narrows the install to the acted-as user's project scopes`() {
     actingAs(get("/v2/projects/${testData.project.id}/translations"), testData.member.id).andIsOk
@@ -199,10 +188,6 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
   }
 
-  /**
-   * Acting-as only narrows what the install may do; the write is still authored by the install
-   * principal, not the acted-as person. (Person-level attribution is the activity slice's concern.)
-   */
   @Test
   fun `authors a write as the install principal even while acting as a person`() {
     actingAs(commentRequest(), testData.user.id).andIsCreated.andAssertThatJson {

@@ -77,9 +77,7 @@ class AuthenticationFilterTest {
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
-  private val appTokenService = Mockito.mock(AppTokenService::class.java)
-
-  private val appInstallService = Mockito.mock(AppInstallService::class.java)
+  private val appTokenAuthenticator = Mockito.mock(AppTokenAuthenticator::class.java)
 
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
@@ -103,8 +101,7 @@ class AuthenticationFilterTest {
       currentDateProvider,
       rateLimitService,
       jwtService,
-      appTokenService,
-      appInstallService,
+      appTokenAuthenticator,
       userAccountService,
       pakService,
       patService,
@@ -130,10 +127,9 @@ class AuthenticationFilterTest {
     Mockito.`when`(appsProperties.enabled).thenReturn(true)
     Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
 
-    // A real JWT is not an app token: the app path rejects it and falls through to JWT validation.
     Mockito
-      .`when`(appTokenService.validateToken(any()))
-      .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
+      .`when`(appTokenAuthenticator.authenticate(any(), any()))
+      .thenReturn(null)
 
     Mockito
       .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))

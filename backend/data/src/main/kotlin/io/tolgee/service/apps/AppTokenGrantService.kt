@@ -6,10 +6,6 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.authentication.AppTokenService
 import org.springframework.stereotype.Service
 
-/**
- * The client-credentials grant behind the app token endpoint: validates the grant, authenticates the
- * app credentials, and mints either an app-level token (no install) or an install-context token.
- */
 @Service
 class AppTokenGrantService(
   private val appCredentialAuthenticator: AppCredentialAuthenticator,

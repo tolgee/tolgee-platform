@@ -10,11 +10,7 @@ import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
-/**
- * Denies app tokens everywhere except the project-scoped routes that cap them to the install's
- * granted scopes (via [io.tolgee.security.ProjectContextService], which sets [AppAuthentication.boundProjectId]).
- * Exceptions: [AllowAppOwnInstallAccess] and [AppAccessNeutral]. Must run after `ProjectAuthorizationInterceptor`.
- */
+/** Must run after `ProjectAuthorizationInterceptor`, which sets [AppAuthentication.boundProjectId]. */
 @Component
 class AppAccessInterceptor(
   private val authenticationFacade: AuthenticationFacade,
@@ -24,10 +20,8 @@ class AppAccessInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    // The error dispatch re-enters here with nothing bound; leave the original error response intact.
     if (request.dispatcherType == DispatcherType.ERROR) return true
     if (!authenticationFacade.isAppAuth) {
-      // The app-only endpoints exist for app tokens; a non-app caller (session/PAK/PAT) is refused here.
       if (isAppOnly(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
       return true
     }
@@ -40,8 +34,6 @@ class AppAccessInterceptor(
       return true
     }
     if (allowsMethod(handler, AllowAppOwnInstallAccess::class.java)) {
-      // The annotation's contract is "derive the install from the token's own claims", which only an
-      // install-context token honours; a user- or app-level token here would read installs it never owns.
       if (!authenticationFacade.appAuthentication.isInstallContext) {
         throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
       }

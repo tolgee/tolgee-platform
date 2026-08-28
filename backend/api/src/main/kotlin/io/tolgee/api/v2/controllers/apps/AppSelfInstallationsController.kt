@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * Lets an app's backend discover all of its installations so it can do background work without a
- * user or an iframe. Authenticated by an app-level token (client credentials without an install id),
- * so the raw client secret only ever travels to the token endpoint.
- */
 @RestController
 @CrossOrigin(origins = ["*"])
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")
@@ -47,7 +42,6 @@ class AppSelfInstallationsController(
       appInstallService.findAllByRegisteredApp(appId).map { install ->
         appSelfInstallationModelAssembler.toModel(
           install = install,
-          native = false,
           enabledProjects = appEnablementService.listEnabledProjectsForInstall(install.id),
         )
       }

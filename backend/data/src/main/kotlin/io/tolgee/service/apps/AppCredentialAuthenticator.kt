@@ -6,7 +6,6 @@ import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppSecret
 import org.springframework.stereotype.Service
 
-/** Verifies app-level client credentials carried in a request body, and stamps the secret's use. */
 @Service
 class AppCredentialAuthenticator(
   private val appService: AppService,
@@ -27,12 +26,7 @@ class AppCredentialAuthenticator(
     return app
   }
 
-  // Split out of the service so its @Async proxy on updateLastUsedAsync survives self-invocation.
   private fun stampUse(secret: AppSecret) {
-    if (secret.lastUsedAt == null) {
-      appSecretService.recordFirstUse(secret.id)
-      return
-    }
     appSecretService.updateLastUsedAsync(secret.id, secret.lastUsedAt)
   }
 }

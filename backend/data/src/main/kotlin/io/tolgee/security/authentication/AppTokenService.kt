@@ -16,10 +16,6 @@ import org.springframework.stereotype.Service
 import java.security.Key
 import java.util.Date
 
-/**
- * Mints and validates the app JWTs. A token carries identity claims only — permissions are resolved
- * per request, so revocation is immediate. Signed with a dedicated, domain-separated key.
- */
 @Service
 class AppTokenService(
   @Qualifier("apps_jwt_signing_key")
@@ -57,7 +53,6 @@ class AppTokenService(
       .compact()
   }
 
-  /** App-level token: identifies the app itself, for app-level operations (installation discovery). */
   fun mintAppLevelToken(appId: Long): String {
     return Jwts
       .builder()
@@ -79,11 +74,6 @@ class AppTokenService(
       .setExpiration(Date(currentDateProvider.date.time + appsProperties.tokenExpiration))
       .claim(JWT_APP_TOKEN_INSTALL_ID_CLAIM, installId)
 
-  /**
-   * Parses and verifies the token. Checks signature, audience, and expiry only — the
-   * existence / non-revocation of the install, user, project and per-project enablement
-   * is validated by the authentication filter against current DB state on every request.
-   */
   fun validateToken(token: String): AppTokenClaims {
     val jws =
       try {

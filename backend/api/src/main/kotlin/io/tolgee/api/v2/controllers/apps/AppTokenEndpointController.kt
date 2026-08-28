@@ -16,12 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * Client-credentials token endpoint. Modelled on the OAuth 2.0 client-credentials grant (RFC 6749
- * §4.4) but JSON-encoded with a Tolgee error envelope, so use Tolgee's app SDK, not a stock OAuth
- * library. An app's backend exchanges its `client_id` + `client_secret` for a short-lived
- * install-context token, so subsequent API calls carry the token rather than the raw secret.
- */
 @RestController
 @CrossOrigin(origins = ["*"])
 @AppAccessNeutral
@@ -33,8 +27,6 @@ class AppTokenEndpointController(
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @PostMapping("/token")
-  // Every process of a scaled app mints its own token and re-mints hourly, so a deploy that
-  // restarts every replica at once arrives here as a burst.
   @RateLimited(120, isAuthentication = true)
   @Operation(
     summary = "Exchange app client credentials for an install-scoped access token",

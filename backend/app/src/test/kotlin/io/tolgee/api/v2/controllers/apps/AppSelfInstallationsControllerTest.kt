@@ -72,7 +72,6 @@ class AppSelfInstallationsControllerTest : AuthorizedControllerTest() {
       node("_embedded.installations[0].appId").isEqualTo("test-app")
       node("_embedded.installations[0].name").isEqualTo("Test App")
       node("_embedded.installations[0].version").isEqualTo("0.1.0")
-      node("_embedded.installations[0].native").isEqualTo(false)
       node("_embedded.installations[0].scopes").isArray.containsExactly("activity.view")
       node("_embedded.installations[0].enabledProjects").isArray.hasSize(1)
       node("_embedded.installations[0].enabledProjects[0].id").isEqualTo(testData.project.id)

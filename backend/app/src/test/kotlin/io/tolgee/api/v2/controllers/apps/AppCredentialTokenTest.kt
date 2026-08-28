@@ -21,10 +21,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Duration
 
-/**
- * Minting install-scoped tokens with the app's own credentials, and the cutoff that makes revoking
- * one of those credentials take effect on tokens it already minted.
- */
 class AppCredentialTokenTest : AuthorizedControllerTest() {
   @MockitoBean
   @Autowired
@@ -49,7 +45,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     appClientId = json.get("clientId").asText()
     appClientSecret = json.get("clientSecret").asText()
 
-    // The install must be enabled somewhere for a minted token to reach any data.
     performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
   }
 
@@ -137,7 +132,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     revokeSecret(firstSecretId())
 
     translationsWith(token).andExpect(status().isUnauthorized)
-    // The replacement still mints, so the app recovers on its own.
     translationsWith(mintToken(secret = second)).andIsOk
   }
 
@@ -158,11 +152,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     translationsWith(mintToken(secret = second)).andIsOk
   }
 
-  /**
-   * The "I revoked it normally, then learned it had leaked" case: a plain revoke does not stamp the
-   * cutoff, so tokens the secret already minted stay live. Force-revoking the now-already-revoked
-   * secret must still fire the kill switch.
-   */
   @Test
   fun `force-revoking an already-revoked secret still invalidates its tokens`() {
     issueSecret()
@@ -177,8 +166,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     translationsWith(token).andExpect(status().isUnauthorized)
   }
 
-  /** The SDK often keeps its current app token in a default Authorization header; the body-authenticated
-   *  token endpoint must ignore it rather than 403 the very call that renews the token. */
   @Test
   fun `the token endpoint ignores a valid app token in the Authorization header`() {
     val token = mintToken()
@@ -200,7 +187,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     ).andIsOk
   }
 
-  /** The cutoff is truncated to whole seconds, so a recovery token minted in the same second survives it. */
   @Test
   fun `a recovery token minted in the same second as a force-revoke survives the cutoff`() {
     currentDateProvider.forcedDate = currentDateProvider.date
@@ -272,10 +258,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
     return objectMapper.readTree(response).get("access_token").asText()
   }
 
-  /**
-   * Puts a second active secret alongside the current one (owner rotation, long grace so the old one
-   * stays live) and returns the new plaintext.
-   */
   private fun issueSecret(): String {
     loginAsUser()
     val response =
@@ -348,8 +330,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
   }
 
   companion object {
-    // Same host as the first app's manifest — a subdomain that resolves nowhere is rejected as an
-    // invalid URL before registration is even attempted.
     private const val OTHER_MANIFEST_URL = "https://example.com/other/manifest.json"
 
     private val MANIFEST_WITH_SCOPES: String =

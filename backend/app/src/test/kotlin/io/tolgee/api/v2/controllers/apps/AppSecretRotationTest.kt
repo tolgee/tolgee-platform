@@ -28,12 +28,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import tools.jackson.databind.JsonNode
 import java.time.Duration
 
-/**
- * Rolling an app's client secret: one action mints a replacement and retires the old one after a
- * grace window, so an app configured by hand can be switched over first. Rotation leaves everything
- * below the credential — installs, availability, enablements — untouched. Lifecycle delivery of the
- * new secret is a later slice; nothing here asserts it.
- */
 class AppSecretRotationTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appAvailabilityService: AppAvailabilityService
@@ -74,10 +68,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     testDataService.cleanTestData(testData.root)
   }
 
-  /**
-   * A rotation never cuts the old secret off on its own — Tolgee cannot know the app adopted the
-   * new one.
-   */
   @Test
   fun `a rotation keeps the old secret alive through the grace window`() {
     val rolled = roll(graceSeconds = ONE_DAY)
@@ -98,7 +88,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     activeSecretIds().assert.hasSize(2)
   }
 
-  /** A secret already scheduled to die sooner must keep that deadline, not be pushed out by a later roll. */
   @Test
   fun `a later long-grace rotation does not extend a secret already expiring sooner`() {
     roll(graceSeconds = 60)
@@ -120,7 +109,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     activeSecretIds().assert.hasSize(1)
   }
 
-  /** There is no immediate-cutover path — old secrets end by expiry or by an explicit revoke. */
   @Test
   fun `rolling with zero grace is refused`() {
     userAccount = testData.user
@@ -144,7 +132,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
       mapOf("graceSeconds" to ONE_DAY),
     ).andIsBadRequest.andHasErrorMessage(Message.APP_TOO_MANY_LIVE_SECRETS)
 
-    // Revoking one of the expiring secrets frees the slot again.
     val expiringId = activeSecretIds().first { it != newestId }
     performAuthDelete("${ownedAppsUrl()}/$appEntityId/secrets/$expiringId").andIsOk
     roll(graceSeconds = ONE_DAY)
@@ -259,7 +246,6 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
   private fun ownedAppsUrl() = "/v2/organizations/${testData.organization.id}/owned-apps"
 
-  /** Probes whether a secret still authenticates by exchanging it for a token. */
   private fun secretAuthenticates(clientSecret: String): ResultActions = tokenRequest(appClientId, clientSecret)
 
   private fun tokenRequest(

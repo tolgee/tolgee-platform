@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.hateoas.project.apps.AppTokenModel
 import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
 import io.tolgee.model.enums.Scope
@@ -40,9 +39,7 @@ import org.springframework.web.bind.annotation.RestController
 @DenyAppAccess
 class ProjectAppsController(
   private val projectHolder: ProjectHolder,
-  private val authenticationFacade: AuthenticationFacade,
   private val appEnablementService: AppEnablementService,
-  private val appTokenService: AppTokenService,
   private val projectAppModelAssembler: ProjectAppModelAssembler,
   private val pagedProjectAppsAssembler: PagedResourcesAssembler<ProjectAppView>,
 ) {
@@ -109,34 +106,5 @@ class ProjectAppsController(
     @PathVariable installId: Long,
   ) {
     appEnablementService.disable(projectHolder.project.id, installId)
-  }
-
-  @PostMapping("/{installId}/token")
-  @UseDefaultPermissions
-  // Minting is a POST but does not mutate anything; a read-only (e.g. supporter) session must be able
-  // to mint, and the token it gets carries that read-only flag.
-  @ReadOnlyOperation
-  @Operation(
-    summary = "Mint a user-context app token",
-    description =
-      "Issues a short-lived JWT bound to (install, current user) that the dashboard iframe uses to " +
-        "call Tolgee's REST API on behalf of the user. The token is organization-wide: it works on " +
-        "every project the install is enabled for, always capped by the user's own permissions " +
-        "there. Returns 404 if the install is not enabled for this project.",
-  )
-  fun mintToken(
-    @PathVariable installId: Long,
-  ): AppTokenModel {
-    val projectId = projectHolder.project.id
-    if (!appEnablementService.isEnabledForProject(projectId, installId)) {
-      throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    }
-    val token =
-      appTokenService.mintUserContextToken(
-        installId = installId,
-        userId = authenticationFacade.authenticatedUser.id,
-        isReadOnly = authenticationFacade.isReadOnly,
-      )
-    return AppTokenModel(token = token)
   }
 }

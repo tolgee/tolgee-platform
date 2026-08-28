@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component
 class AppSelfInstallationModelAssembler {
   fun toModel(
     install: AppInstall,
-    native: Boolean,
     enabledProjects: List<AppEnabledProjectDto>,
   ): AppSelfInstallationModel {
     return AppSelfInstallationModel(
@@ -16,7 +15,6 @@ class AppSelfInstallationModelAssembler {
       appId = install.app.appId,
       name = install.app.name,
       version = install.app.version,
-      native = native,
       scopes = install.grantedScopes.map { it.value },
       enabledProjects = enabledProjects.map { toProjectModel(it) },
     )

@@ -9,14 +9,10 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.authentication.AppAuthentication
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
-import io.tolgee.service.security.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -29,9 +25,7 @@ class ProjectContextService(
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
-  private val appEnablementService: AppEnablementService,
-  private val permissionService: PermissionService,
-  private val userAccountService: UserAccountService,
+  private val appProjectContextBinder: AppProjectContextBinder,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -61,7 +55,7 @@ class ProjectContextService(
     useDefaultPermissions: Boolean,
     isWriteOperation: Boolean,
   ) {
-    bindAppToProject(project)
+    appProjectContextBinder.bind(project)
 
     val userId = authenticationFacade.authenticatedUser.id
     var bypassed = false
@@ -78,22 +72,13 @@ class ProjectContextService(
           )
 
           if (authenticationFacade.isAppAuth) {
-            // The user reached this project through an enabled app in a project they belong to; the
-            // empty scope set means the app's grantedScopes don't intersect the user's project
-            // scopes. Surface a 403 with the required scopes — hiding project existence is the wrong
-            // threat model here.
-            throw PermissionException(
-              Message.OPERATION_NOT_PERMITTED,
-              requiredScopes?.map { it.value } ?: emptyList(),
-            )
+            throwAppScopePermissionDenied(requiredScopes)
           }
 
           if (!canBypassForReadOnly()) {
-            // Security consideration: if the user cannot see the project, pretend it does not exist.
             throw ProjectNotFoundException(project.id)
           }
 
-          // Admin access for read-only operations is allowed, but it's not enough for the current operation.
           throw PermissionException()
         }
 
@@ -134,62 +119,11 @@ class ProjectContextService(
     populateHolders(project)
   }
 
-  /**
-   * Binds an app authentication to the request's project after checking enablement. Until this runs
-   * the app has no bound project, so permission resolution returns nothing — a route that never
-   * reaches here denies rather than skipping the check.
-   */
-  private fun bindAppToProject(project: ProjectDto) {
-    if (!authenticationFacade.isAppAuth) return
-    val appAuth = authenticationFacade.appAuthentication
-    // An app-level token has no install and no project scopes; it binds nothing and resolves to no
-    // access, and the AppAccessInterceptor refuses it on any project route.
-    if (appAuth.isAppLevel) return
-
-    if (!appEnablementService.isEnabledForProject(project.id, appAuth.appInstall.id)) {
-      // A user-context caller may get an accurate "not enabled" for a project its own user can see;
-      // every other case must be indistinguishable from a nonexistent id (which fails as
-      // APP_ACCESS_FORBIDDEN), else the differing codes let an app enumerate project ids across
-      // tenants.
-      if (userKnowsProject(appAuth, project)) throw PermissionException(Message.APP_NOT_ENABLED_FOR_PROJECT)
-      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
-    }
-
-    checkActingAsUserIsProjectMember(appAuth, project.id)
-
-    appAuth.boundProjectId = project.id
-  }
-
-  private fun userKnowsProject(
-    appAuth: AppAuthentication,
-    project: ProjectDto,
-  ): Boolean {
-    if (appAuth.isInstallContext) return false
-    // The accurate "not enabled" error may only reveal a project of the install's own organization —
-    // the token is organization-wide within that org. A project of any other organization stays
-    // indistinguishable from a nonexistent id, so an app cannot enumerate the acting user's
-    // memberships in organizations it was never installed in.
-    if (project.organizationOwnerId != appAuth.appInstall.organization.id) return false
-    return !permissionService.getProjectPermissionScopesNoApiKey(project.id, appAuth.principal.id).isNullOrEmpty()
-  }
-
-  /**
-   * Resolves the acted-as user (only now that the project is known — see [AppAuthentication.actsForUserId])
-   * and confirms it is an active member of this project: an install may narrow itself to a member, never
-   * widen itself to a stranger. A missing/disabled user and a non-member get the same error, so nothing
-   * about which user ids exist leaks.
-   */
-  private fun checkActingAsUserIsProjectMember(
-    appAuth: AppAuthentication,
-    projectId: Long,
-  ) {
-    val actsForUserId = appAuth.actsForUserId ?: return
-    userAccountService.findDto(actsForUserId)
-      ?: throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
-    val scopes = permissionService.getProjectPermissionScopesNoApiKey(projectId, actsForUserId)
-    if (scopes.isNullOrEmpty()) {
-      throw PermissionException(Message.APP_ACTING_AS_USER_NOT_PROJECT_MEMBER)
-    }
+  private fun throwAppScopePermissionDenied(requiredScopes: Array<Scope>?): Nothing {
+    throw PermissionException(
+      Message.OPERATION_NOT_PERMITTED,
+      requiredScopes?.map { it.value } ?: emptyList(),
+    )
   }
 
   private fun populateHolders(project: ProjectDto) {

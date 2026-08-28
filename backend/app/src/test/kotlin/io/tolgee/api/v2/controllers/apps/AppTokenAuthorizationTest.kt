@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
@@ -31,11 +32,6 @@ import tools.jackson.databind.JsonNode
 import java.time.Duration
 import java.util.Date
 
-/**
- * Covers what an app token may and may not reach. The install below is granted only
- * `translations.edit`, while the person who registered it is the organization owner — so anything
- * the token reaches beyond that grant is that person's privileges leaking through.
- */
 class AppTokenAuthorizationTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appTokenService: AppTokenService
@@ -83,22 +79,12 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asApp(get("/v2/user")).andIsForbidden.andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
-  /**
-   * Minting is the one app-management route with no scope gate in front of it, so nothing but the
-   * app-access rule stops an app from minting a token for an install other than its own.
-   */
   @Test
   fun `is rejected when minting a token for an install`() {
-    asApp(post("/v2/projects/${testData.project.id}/apps/$installId/token"))
-      .andIsForbidden
-      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+    asApp(post("/v2/organizations/${testData.organization.id}/apps/$installId/token"))
+      .andIsNotFound
   }
 
-  /**
-   * An install whose manifest asks for apps.manage clears the scope check that guards the
-   * app-management endpoints, so only the app-access rule keeps it from managing apps for the
-   * project.
-   */
   @Test
   fun `cannot manage apps even when its grant covers apps manage`() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, APPS_MANAGE_MANIFEST)
@@ -125,10 +111,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
-  /**
-   * A super-auth endpoint is reserved for a freshly-authenticated human; an app token, whose
-   * synthetic principal never needs a super JWT, must be denied rather than passing the gate vacuously.
-   */
   @Test
   fun `cannot reach a super-authentication endpoint even when its grant covers the scope`() {
     AppsTestFixtures.mockManifest(appManifestHttpClient, PROJECT_EDIT_MANIFEST)
@@ -149,8 +131,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
 
   @Test
   fun `is rejected on a legacy api project route for a project it is not enabled for`() {
-    // An existing-but-not-enabled project is indistinguishable from a nonexistent one, so an app
-    // cannot enumerate project ids across tenants.
     asApp(get("/api/project/${testData.siblingProject.id}/export/jsonZip"))
       .andIsForbidden
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
@@ -172,7 +152,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
   }
 
-  /** The install belongs to the organization; the person who registered it may have left. */
   @Test
   fun `keeps working once its author has been disabled`() {
     userAccountService.disable(testData.user.id)
@@ -192,10 +171,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
   }
 
-  /**
-   * The author's server role must not reach the install, whatever it is — neither to reach a project
-   * the app was never enabled for, nor to bypass a scope check inside one it was.
-   */
   @Test
   fun `does not gain the author's server-admin privileges`() {
     val author = userAccountService.get(testData.user.id)
@@ -223,7 +198,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
   }
 
-  /** The token is organization-wide: one mint reaches every project the install is enabled for. */
   @Test
   fun `a user-context token works on every enabled project of the organization`() {
     userAccount = testData.user
@@ -240,7 +214,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
     asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations")).andIsOk
   }
 
-  /** Where the app is not enabled, a project the token's own user can see gets the accurate error. */
   @Test
   fun `reports the specific not-enabled error for a project the iframe user is a member of`() {
     val token =
@@ -255,11 +228,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
-  /**
-   * A project in a different organization stays indistinguishable from a nonexistent id — even when
-   * the iframe user is a member of it (they are a member of `otherProject`), so an app cannot
-   * enumerate the user's memberships in organizations it was never installed in.
-   */
   @Test
   fun `stays opaque on a foreign organization's project`() {
     val token =
@@ -277,7 +245,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
   }
 
-  /** Disabling the app cuts off an already-minted token, with the accurate error for a member. */
   @Test
   fun `reports the specific not-enabled error once the project's enablement is revoked`() {
     val token =
@@ -296,10 +263,6 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
       .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
   }
 
-  /**
-   * The install grants translations.edit, but a user-context token minted for a VIEW-only member is
-   * capped at the intersection — read passes, write does not.
-   */
   @Test
   fun `narrows a user-context token to the iframe user's own project scopes`() {
     val memberToken =
@@ -358,7 +321,7 @@ class AppTokenAuthorizationTest : AuthorizedControllerTest() {
   @Test
   fun `mints a read-write user-context token for a read-write session`() {
     val response =
-      performAuthPost("/v2/projects/${testData.project.id}/apps/$installId/token", null)
+      performAuthPost("/v2/organizations/${testData.organization.id}/apps/$installId/token", null)
         .andIsOk
         .andReturn()
         .response.contentAsString
