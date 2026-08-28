@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupConsentScopes } from './consentScopeGroups';
+import { groupConsentScopes } from 'tg.component/security/oauth2/consentScopeGroups';
 import { HierarchyType } from 'tg.component/PermissionsSettings/types';
 
 const structure: HierarchyType = {

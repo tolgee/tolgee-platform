@@ -247,3 +247,25 @@ export const updateByDependenciesSoftly = (
   });
   return newState;
 };
+
+/**
+ * Whether a node's checkbox is disabled, and why it can be for two independent reasons.
+ *
+ * `lockedScopes` is the OAuth consent screen's "the application requires this" set. It must not replace the
+ * dependency rule: `handleToggle`'s uncheck path removes only the toggled scopes and does no dependent cleanup, so
+ * `blockingScopes` is the only thing that stops a user unchecking a scope another checked scope still needs.
+ */
+export const isNodeDisabled = ({
+  myScopes,
+  lockedScopes,
+  blockingScopes,
+}: {
+  myScopes: PermissionModelScope[];
+  lockedScopes: PermissionModelScope[] | undefined;
+  blockingScopes: PermissionModelScope[];
+}): boolean => {
+  const lockedRequired =
+    myScopes.length > 0 &&
+    myScopes.every((scope) => lockedScopes?.includes(scope) ?? false);
+  return lockedRequired || blockingScopes.length > 0;
+};

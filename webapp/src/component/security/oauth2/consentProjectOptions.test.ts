@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveConsentProjects } from './consentProjectOptions';
+import { deriveConsentProjects } from 'tg.component/security/oauth2/consentProjectOptions';
 
 describe('deriveConsentProjects', () => {
   it('no hint: not inaccessible, no per-project option', () => {

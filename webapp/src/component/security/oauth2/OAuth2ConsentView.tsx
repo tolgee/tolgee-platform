@@ -17,7 +17,6 @@ import { CompactView } from 'tg.component/layout/CompactView';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
-import { apiV2HttpService } from 'tg.service/http/ApiV2HttpService';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { useScopeTranslations } from 'tg.component/PermissionsSettings/useScopeTranslations';
@@ -33,12 +32,14 @@ import {
 import { deriveConsentProjects } from 'tg.component/security/oauth2/consentProjectOptions';
 import { groupConsentScopes } from 'tg.component/security/oauth2/consentScopeGroups';
 import { clampApprovedScopes } from 'tg.component/security/oauth2/consentScopeSelection';
-import { submitConsentForm } from 'tg.component/security/oauth2/oauth2ConsentSubmit';
+import {
+  ALL_PROJECTS,
+  selectConsentProject,
+  submitConsentForm,
+} from 'tg.component/security/oauth2/oauth2ConsentSubmit';
 
 const asString = (value: string | string[] | undefined): string =>
   Array.isArray(value) ? value[0] ?? '' : value ?? '';
-
-const ALL_PROJECTS = 'all' as const;
 
 const StyledPermissionsHeader = styled(Box)`
   display: flex;
@@ -62,9 +63,6 @@ const StyledGroup = styled('div')`
 const StyledGroupLabel = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
   margin-right: ${({ theme }) => theme.spacing(0.5)};
-  &::after {
-    content: ':';
-  }
 `;
 
 const StyledButtons = styled(Box)`
@@ -124,20 +122,10 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
 
   const submitConsent = async (approvedScopes: string[]) => {
     setSubmitting(true);
-    // select-project must run before the SAS consent form POST, so the chosen project is on the authorization when
-    // the code is issued. Denials (no scopes) skip it.
+    // A denial approves no scopes, so there is no project to bind and nothing to select.
     if (approvedScopes.length > 0) {
-      const projectQuery =
-        selectedProject === ALL_PROJECTS ? '' : `&projectId=${selectedProject}`;
       try {
-        // useApiMutation can't type this call: select-project has no request body, and RequestParamsType intersects
-        // parameters & requestBody, so the mutation's variables collapse to `never` (a query-only POST doesn't fit).
-        await apiV2HttpService.post(
-          `oauth2/select-project?state=${encodeURIComponent(
-            state
-          )}${projectQuery}`,
-          {}
-        );
+        await selectConsentProject({ state, selectedProject });
       } catch {
         setSubmitting(false);
         setSubmitFailed(true);
@@ -146,6 +134,10 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     }
     submitConsentForm({ clientId, state, approvedScopes });
   };
+
+  // Approving nothing is how the authorization endpoint is told the user refused: it answers the client with
+  // `access_denied`. There is no separate deny parameter in the OAuth consent form.
+  const denyConsent = () => submitConsent([]);
 
   if (failed) {
     return (
@@ -267,7 +259,13 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
               grantedGroups.map((group, i) => (
                 <StyledGroup key={group.label ?? `_${i}`}>
                   {group.label && (
-                    <StyledGroupLabel>{group.label}</StyledGroupLabel>
+                    <StyledGroupLabel>
+                      <T
+                        keyName="oauth2_consent_scope_group_label"
+                        defaultValue="{group}:"
+                        params={{ group: group.label }}
+                      />
+                    </StyledGroupLabel>
                   )}
                   {group.scopes.map((s) => (
                     <Chip
@@ -297,7 +295,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                         scopes: selectedScopes as PermissionModelScope[],
                       }}
                       onChange={handleScopesChange}
-                      disabledScopes={
+                      lockedScopes={
                         info.requiredScopes as PermissionModelScope[]
                       }
                     />
@@ -311,7 +309,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 color="secondary"
                 data-cy="oauth2-consent-deny"
                 loading={submitting}
-                onClick={() => submitConsent([])}
+                onClick={denyConsent}
               >
                 <T keyName="oauth2_consent_deny" defaultValue="Deny" />
               </LoadingButton>

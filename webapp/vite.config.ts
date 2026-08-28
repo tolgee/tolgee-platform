@@ -106,8 +106,9 @@ export default defineConfig(({ mode }) => {
             target:
               process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',
             changeOrigin: false,
-            // Forward X-Forwarded-* so the backend emits https redirect URLs the https-only dev server can load.
-            xfwd: true,
+            // The backend does not read X-Forwarded-* (see the `server:` comment in application.yaml); set
+            // tolgee.back-end-url to the dev server's https origin so it emits URLs the browser can load.
+            xfwd: false,
           },
         ])
       ),

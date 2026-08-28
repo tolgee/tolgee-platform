@@ -9,8 +9,7 @@ export const groupConsentScopes = (
   scopes: string[],
   structure: HierarchyType
 ): ScopeGroup[] => {
-  const labelMap = new Map<string, string | undefined>();
-  buildLabelMap(structure, undefined, labelMap);
+  const labelMap = scopeLabels(structure);
 
   const groups: ScopeGroup[] = [];
   const byLabel = new Map<string | undefined, ScopeGroup>();
@@ -27,14 +26,17 @@ export const groupConsentScopes = (
   return groups;
 };
 
-const buildLabelMap = (
-  node: HierarchyType,
-  ancestorLabel: string | undefined,
-  map: Map<string, string | undefined>
-) => {
-  if (node.value !== undefined) {
-    map.set(node.value, ancestorLabel);
-  }
-  const childAncestor = node.label ?? ancestorLabel;
-  node.children?.forEach((child) => buildLabelMap(child, childAncestor, map));
+const scopeLabels = (
+  structure: HierarchyType
+): Map<string, string | undefined> => {
+  const labels = new Map<string, string | undefined>();
+  const collect = (node: HierarchyType, ancestorLabel: string | undefined) => {
+    if (node.value !== undefined) {
+      labels.set(node.value, ancestorLabel);
+    }
+    const childAncestor = node.label ?? ancestorLabel;
+    node.children?.forEach((child) => collect(child, childAncestor));
+  };
+  collect(structure, undefined);
+  return labels;
 };

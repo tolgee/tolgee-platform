@@ -4,14 +4,8 @@ import { API_URL, HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { gcyAdvanced } from '../../common/shared';
 
-// The consent screen is the only step of the OAuth flow a human drives, so it is the step worth covering in a real
-// browser. The rest of the flow (code exchange, token use) is covered by OAuth2AuthorizationCodeFlowTest.
-//
-// Denial is deliberately NOT covered here. It works — the server answers a scope-less consent submission with
-// error=access_denied, which OAuth2AuthorizationCodeFlowTest asserts — but adding it as a third case in this file made
-// whichever test ran last fail intermittently, with the browser left on a 400 from /oauth2/authorize. The cause is
-// state shared between cases in one spec, not a defect in the flow, and it was not worth blocking the rest of the
-// coverage on. Adding a case here means re-checking the file for that flakiness.
+// A third case in this file made whichever test ran last fail intermittently, on state shared between cases rather
+// than on the flow — re-check for that before adding one. Denial is covered by OAuth2AuthorizationCodeFlowTest.
 const CLIENT_ID = 'tolgee-browser-extension';
 const REDIRECT_URI = `${API_URL}/internal/e2e-data/oauth2-consent/callback`;
 // A fixed PKCE pair: challenge = base64url(sha256(verifier)). The code is never exchanged here, so the verifier is

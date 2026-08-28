@@ -1,4 +1,4 @@
-import { isSafeContinue } from './oauth2Continue';
+import { isSafeContinue } from 'tg.component/security/oauth2/oauth2Continue';
 
 const API_URL = 'https://app.example.com';
 
