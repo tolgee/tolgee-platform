@@ -11,6 +11,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -19,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.ceil
 
 @Component
@@ -37,11 +39,19 @@ class BatchJobConcurrentLauncher(
   }
 
   /**
-   * execution id -> Pair(BatchJobDto, Job)
+   * launch id -> Pair(BatchJobDto, Job)
    *
-   * Job is the result of a launch method executing the execution in a separate coroutine
+   * Job is the result of a launch method executing the execution in a separate coroutine.
+   *
+   * The key must stay unique per launch, never the chunk execution id: the queue can hand out
+   * the same execution again while its previous coroutine is still running (the Redis queue
+   * re-delivers items), and a shared key drops that coroutine from the map. A dropped coroutine
+   * can no longer be cancelled, so it keeps its pessimistic row lock forever and job
+   * cancellation times out.
    */
   val runningJobs: ConcurrentHashMap<Long, Pair<BatchJobDto, Job>> = ConcurrentHashMap()
+
+  private val launchIdProvider = AtomicLong()
 
   /**
    * O(1) counter for running jobs by character - avoids O(n) iteration on every chunk
@@ -230,17 +240,20 @@ class BatchJobConcurrentLauncher(
 
     // Launch with OTEL context propagation to ensure tracing context
     // survives coroutine suspension/resumption
+    val launchId = launchIdProvider.incrementAndGet()
     val job =
-      launch(tracingContext.asCoroutineContext()) {
+      launch(tracingContext.asCoroutineContext(), start = CoroutineStart.LAZY) {
         batchJobActionService.handleItem(executionItem, batchJobDto)
       }
 
-    runningJobs[executionItem.chunkExecutionId] = batchJobDto to job
+    runningJobs[launchId] = batchJobDto to job
     incrementRunningCharacterCount(batchJobDto.jobCharacter)
 
     job.invokeOnCompletion {
-      onJobCompleted(executionItem, batchJobDto.jobCharacter)
+      onJobCompleted(launchId, executionItem, batchJobDto.jobCharacter)
     }
+    // Starting only after the registration above keeps a concurrent cancel from missing it.
+    job.start()
     logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: ${runningJobs.size}")
     return true
   }
@@ -251,10 +264,11 @@ class BatchJobConcurrentLauncher(
   }
 
   private fun onJobCompleted(
+    launchId: Long,
     executionItem: ExecutionQueueItem,
     jobCharacter: JobCharacter,
   ) {
-    runningJobs.remove(executionItem.chunkExecutionId)
+    runningJobs.remove(launchId)
     decrementRunningCharacterCount(jobCharacter)
     // Decrement running count when coroutine actually finishes to align with runningJobs
     progressManager.onExecutionCoroutineComplete(executionItem.jobId)
