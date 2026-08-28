@@ -10,7 +10,7 @@ class RedisRunner {
 
   private val runner =
     DockerContainerRunner(
-      image = "redis:6",
+      image = "redis:8.10",
       expose = mapOf(port to "6379"),
       waitForLog = "Ready to accept connections",
       rm = true,
