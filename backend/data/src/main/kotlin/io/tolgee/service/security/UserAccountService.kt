@@ -23,6 +23,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.enums.UserDisabledBy
+import io.tolgee.model.isSupporterOrAdmin
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -656,10 +657,12 @@ class UserAccountService(
     disabledBy: UserDisabledBy,
   ) {
     val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (disabledBy == UserDisabledBy.ORGANIZATION && user.isSupporterOrAdmin()) {
+      throw ValidationException(Message.CANNOT_DISABLE_PLATFORM_ADMIN)
+    }
     if (user.disabledAt != null) {
-      // an admin disable takes over an organization one, so an organization owner cannot enable their way out of it
-      if (disabledBy == UserDisabledBy.ADMIN && user.disabledBy != UserDisabledBy.ADMIN) {
-        user.disabledBy = UserDisabledBy.ADMIN
+      if (user.disabledBy != disabledBy && canOverrideDisable(user.disabledBy, disabledBy)) {
+        user.disabledBy = disabledBy
         this.save(user)
       }
       return
@@ -672,13 +675,27 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
-  fun enable(userId: Long) {
+  fun enable(
+    userId: Long,
+    requestedBy: UserDisabledBy,
+  ) {
     val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
     if (user.disabledAt == null) return
+    if (!canOverrideDisable(user.disabledBy, requestedBy)) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
+    }
     user.disabledAt = null
     user.disabledBy = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
+  }
+
+  private fun canOverrideDisable(
+    storedDisabledBy: UserDisabledBy?,
+    requestedBy: UserDisabledBy,
+  ): Boolean {
+    if (requestedBy == UserDisabledBy.ADMIN) return true
+    return storedDisabledBy == UserDisabledBy.ORGANIZATION
   }
 
   fun transferLegacyNoAuthUser() {

@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -79,5 +80,32 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
       .andAssertError
       .isCustomValidation
       .hasMessage("organization_has_no_other_owner")
+  }
+
+  @Test
+  fun `cannot leave when the only other owner is disabled`() {
+    val organization = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+    val secondOwner = dbPopulator.createUserIfNotExists("disabledSecondOwner")
+    organizationRoleService.grantOwnerRoleToUser(secondOwner, organization)
+    userAccountService.disable(secondOwner.id, UserDisabledBy.ADMIN)
+
+    performAuthPut("/v2/organizations/${organization.id}/leave", null)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage("organization_has_no_other_owner")
+  }
+
+  @Test
+  fun `a member can leave when the only owner is disabled`() {
+    val owner = dbPopulator.createUserIfNotExists("disabledSoleOwner")
+    val organization = executeInNewTransaction { this.organizationService.create(dummyDto, owner) }
+    executeInNewTransaction {
+      organizationRoleService.grantMemberRoleToUser(userAccountService.get(userAccount!!.id), organization)
+    }
+    userAccountService.disable(owner.id, UserDisabledBy.ADMIN)
+
+    performAuthPut("/v2/organizations/${organization.id}/leave", null).andIsOk
+    getPermittedOrgs().find { organization.id == it.id }.assert.isNull()
   }
 }

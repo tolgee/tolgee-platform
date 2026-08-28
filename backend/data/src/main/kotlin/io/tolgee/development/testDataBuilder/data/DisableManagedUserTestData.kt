@@ -17,6 +17,9 @@ class DisableManagedUserTestData : BaseTestData() {
   lateinit var disabledNonManagedMember: UserAccount
   lateinit var adminDisabledManagedMember: UserAccount
   lateinit var orgDisabledManagedMember: UserAccount
+  lateinit var nullOriginDisabledManagedMember: UserAccount
+  lateinit var managedPlatformAdmin: UserAccount
+  lateinit var outsidePlatformAdmin: UserAccount
   lateinit var projectOnlyMember: UserAccount
   lateinit var multiProjectMember: UserAccount
 
@@ -58,6 +61,24 @@ class DisableManagedUserTestData : BaseTestData() {
         orgDisabledManagedMember = this
       }
       addUserAccountWithoutOrganization {
+        username = "byunknown@acting.org"
+        name = "Unknown Origin Disabled Managed Member"
+        disabledAt = Date(1700000000000)
+        nullOriginDisabledManagedMember = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "platformadmin@acting.org"
+        name = "Platform Admin Managed Member"
+        role = UserAccount.Role.ADMIN
+        managedPlatformAdmin = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "outsideadmin@tolgee.io"
+        name = "Outside Platform Admin"
+        role = UserAccount.Role.ADMIN
+        outsidePlatformAdmin = this
+      }
+      addUserAccountWithoutOrganization {
         username = "projectonly@acting.org"
         name = "Project Only Member"
         projectOnlyMember = this
@@ -93,8 +114,18 @@ class DisableManagedUserTestData : BaseTestData() {
           managed = true
         }
         addRole {
+          user = nullOriginDisabledManagedMember
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
           user = multiProjectMember
           type = OrganizationRoleType.MEMBER
+        }
+        addRole {
+          user = managedPlatformAdmin
+          type = OrganizationRoleType.MEMBER
+          managed = true
         }
       }
 
@@ -117,8 +148,6 @@ class DisableManagedUserTestData : BaseTestData() {
         }
       }
 
-      // multiProjectMember must hold permissions on >=2 org projects, otherwise the GROUP BY
-      // cardinality test cannot detect a join fan-out (a single project never duplicates rows).
       secondProject =
         addProject {
           name = "second_project"

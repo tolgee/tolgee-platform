@@ -20,6 +20,7 @@ import { DisableUserButton } from './DisableUserButton';
 import { EnableUserButton } from './EnableUserButton';
 import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
+import { useOrganization } from '../useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { MfaBadge } from '@tginternal/library/components/MfaBadge';
@@ -51,8 +52,8 @@ const StyledMfaBadgeWrapper = styled('div')`
 
 const StyledDisabledLabel = styled('span')`
   padding: ${({ theme }) => theme.spacing(0, 1)};
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+  font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
   background: ${({ theme }) => theme.palette.divider1};
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
@@ -86,6 +87,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const { t } = useTranslate();
   const currentUser = useUser();
+  const organization = useOrganization();
   const leaveOrganization = useLeaveOrganization();
 
   const [projectsOpen, setProjectsOpen] = useState(false);
@@ -108,6 +110,9 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
       );
     }
     if (user.managed) {
+      if (organization?.currentUserRole !== 'OWNER') {
+        return null;
+      }
       return user.disabled ? (
         <EnableUserButton userId={user.id} userName={user.username} />
       ) : (
@@ -118,11 +123,8 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
   };
 
   return (
-    <StyledListItem
-      data-cy="organization-member-item"
-      sx={{ opacity: user.disabled ? 0.6 : 1 }}
-    >
-      <StyledItemUser>
+    <StyledListItem data-cy="organization-member-item">
+      <StyledItemUser sx={{ opacity: user.disabled ? 0.6 : 1 }}>
         <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
         <StyledItemText>
           {user.name} ({user.username})
@@ -130,7 +132,10 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
             <>
               {' '}
               <StyledDisabledLabel data-cy="organization-member-disabled-label">
-                <T keyName="organization_member_disabled_label" />
+                <T
+                  keyName="organization_member_disabled_label"
+                  defaultValue="Disabled"
+                />
               </StyledDisabledLabel>
             </>
           )}

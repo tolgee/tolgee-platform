@@ -304,12 +304,7 @@ class OrganizationRoleService(
       throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
     }
 
-    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-    if (user.disabledAt != null && user.disabledBy != UserDisabledBy.ORGANIZATION) {
-      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
-    }
-
-    userAccountService.enable(userId)
+    userAccountService.enable(userId, UserDisabledBy.ORGANIZATION)
   }
 
   private fun isManagedBy(
@@ -366,7 +361,7 @@ class OrganizationRoleService(
     userId: Long,
     dto: SetOrganizationRoleDto,
   ) {
-    val user = userAccountService.findActive(userId) ?: throw NotFoundException()
+    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException()
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)
@@ -400,9 +395,8 @@ class OrganizationRoleService(
 
   fun isAnotherOwnerInOrganization(id: Long): Boolean {
     return this.organizationRoleRepository
-      .countAllByOrganizationIdAndTypeAndUserIdNot(
+      .countEnabledOwnersExcludingUser(
         id,
-        OrganizationRoleType.OWNER,
         authenticationFacade.authenticatedUser.id,
       ) > 0
   }

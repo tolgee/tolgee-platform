@@ -5883,17 +5883,28 @@
     </changeSet>
     <changeSet author="jirikuchynka" id="1785252020000-2">
         <sql>
-            UPDATE user_account
-            SET disabled_by = 'ADMIN'
-            WHERE disabled_at IS NOT NULL AND is_demo = false;
-
-            UPDATE user_account
-            SET disabled_by = 'ORGANIZATION'
-            WHERE disabled_at IS NOT NULL AND is_demo = false
-              AND id IN (SELECT user_id FROM organization_role WHERE managed = true);
+            -- Nothing records who disabled an account before this column existed. Managed members are
+            -- attributed to their organization: the members-page remove button disabled them (3.133.2
+            -- onwards) and that was the only organization-reachable disable path, so it is by far the
+            -- likeliest origin. An admin disable of a managed member is therefore misfiled here and
+            -- becomes organization-revocable — accepted deliberately, because the alternative leaves
+            -- every account an organization removed this way invisible and re-enableable only by
+            -- Tolgee staff. Non-managed accounts can only have come from the administration endpoint.
+            -- Accounts retired by user-account-normalize-username-casing-and-dedup are skipped: no human
+            -- disabled them, and that changeSet is the only writer of the id-prefixed "disabled-" username
+            -- form matched below. Leaving them NULL keeps them hidden from the members list and
+            -- org-unenableable while still letting an admin re-enable them, which is the contract that
+            -- changeSet documents.
+            UPDATE user_account ua
+            SET disabled_by = CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM organization_role r WHERE r.user_id = ua.id AND r.managed = true
+                ) THEN 'ORGANIZATION'
+                ELSE 'ADMIN'
+            END
+            WHERE ua.disabled_at IS NOT NULL AND ua.is_demo = false AND ua.disabled_by IS NULL
+              AND ua.username NOT LIKE 'disabled-' || ua.id || '-%';
         </sql>
-        <rollback>
-            UPDATE user_account SET disabled_by = NULL;
-        </rollback>
+        <rollback/>
     </changeSet>
 </databaseChangeLog>

@@ -25,6 +25,7 @@ export const DisableUserButton = (props: {
       message: (
         <T
           keyName="really_disable_user_confirmation"
+          defaultValue="Do you really want to disable user {userName}? They will lose access to the organization until you re-enable them."
           params={{ userName: props.userName }}
         />
       ),
@@ -39,7 +40,10 @@ export const DisableUserButton = (props: {
           {
             onSuccess: () => {
               messageService.success(
-                <T keyName="organization_user_disabled_message" />
+                <T
+                  keyName="organization_user_disabled_message"
+                  defaultValue="User disabled"
+                />
               );
             },
           }
@@ -48,7 +52,7 @@ export const DisableUserButton = (props: {
   };
 
   return (
-    <Tooltip title={t('organization_users_disable_user')}>
+    <Tooltip title={t('organization_users_disable_user', 'Disable')}>
       <IconButton
         data-cy="organization-members-disable-user-button"
         onClick={disableUser}

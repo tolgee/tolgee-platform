@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.DisableManagedUserTestData
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -11,6 +12,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -40,44 +42,75 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `disables a managed user`() {
     disable(testData.managedMember.id).andIsOk
-    assertMemberFlags("managed@acting.org", managed = true, disabled = true)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = true)
   }
 
   @Test
   fun `re-enables a disabled managed user`() {
     disable(testData.managedMember.id).andIsOk
     enable(testData.managedMember.id).andIsOk
-    assertMemberFlags("managed@acting.org", managed = true, disabled = false)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = false)
   }
 
   @Test
   fun `disabled managed user stays in the member listing alongside active members`() {
-    assertTotalElements(SEEDED_MEMBER_COUNT)
+    assertTotalElements(VISIBLE_MEMBER_COUNT)
     disable(testData.managedMember.id).andIsOk
-    assertTotalElements(SEEDED_MEMBER_COUNT)
-    assertMemberFlags("managed@acting.org", managed = true, disabled = true)
+    assertTotalElements(VISIBLE_MEMBER_COUNT)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = true)
   }
 
   @Test
   fun `non-managed disabled member is hidden from the org listing`() {
-    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=disabled@acting.org")
-      .andIsOk
-      .andAssertThatJson {
-        node("page.totalElements").isEqualTo(0)
-      }
+    assertSearchTotal(testData.disabledNonManagedMember.username!!, 0)
+  }
+
+  @Test
+  fun `managed member whose disable origin is unknown is hidden from the org listing`() {
+    assertSearchTotal(testData.nullOriginDisabledManagedMember.username!!, 0)
   }
 
   @Test
   fun `project-only member surfaces managed=false and disabled=false`() {
-    assertMemberFlags("projectonly@acting.org", managed = false, disabled = false)
+    assertMemberFlags(testData.projectOnlyMember.username!!, managed = false, disabled = false)
   }
 
   @Test
   fun `listing collapses fan-out for a member with multiple project permissions`() {
-    assertSearchSize("multiproject@acting.org", 1)
+    assertSearchSize(testData.multiProjectMember.username!!, 1)
     disable(testData.managedMember.id).andIsOk
-    assertSearchSize("multiproject@acting.org", 1)
-    assertTotalElements(SEEDED_MEMBER_COUNT)
+    assertSearchSize(testData.multiProjectMember.username!!, 1)
+    assertTotalElements(VISIBLE_MEMBER_COUNT)
+  }
+
+  @Test
+  fun `a platform admin acts for the organization through the org endpoints`() {
+    userAccount = testData.outsidePlatformAdmin
+    disable(testData.managedMember.id).andIsOk
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+    enable(testData.managedMember.id).andIsOk
+    assertDisabledBy(testData.managedMember.id, null)
+  }
+
+  @Test
+  fun `the role of a disabled managed member can still be changed`() {
+    disable(testData.managedMember.id).andIsOk
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/users/${testData.managedMember.id}/set-role",
+      SetOrganizationRoleDto(OrganizationRoleType.OWNER),
+    ).andIsOk
+    assertThat(organizationRoleService.findType(testData.managedMember.id, testData.organization.id))
+      .isEqualTo(OrganizationRoleType.OWNER)
+  }
+
+  @Test
+  fun `cannot disable a platform admin managed by the organization`() {
+    disable(testData.managedPlatformAdmin.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.CANNOT_DISABLE_PLATFORM_ADMIN.code)
+    assertMemberFlags(testData.managedPlatformAdmin.username!!, managed = true, disabled = false)
   }
 
   @Test
@@ -115,7 +148,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
-  fun `self-enable is rejected by the scope guard`() {
+  fun `an owner cannot enable themselves, they are not a managed member`() {
     enable(testData.owner.id)
       .andIsBadRequest
       .andAssertError
@@ -127,7 +160,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   fun `disabling an already-disabled managed user is an idempotent no-op`() {
     disable(testData.managedMember.id).andIsOk
     disable(testData.managedMember.id).andIsOk
-    assertMemberFlags("managed@acting.org", managed = true, disabled = true)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = true)
   }
 
   @Test
@@ -135,7 +168,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     disable(testData.managedMember.id).andIsOk
     enable(testData.managedMember.id).andIsOk
     enable(testData.managedMember.id).andIsOk
-    assertMemberFlags("managed@acting.org", managed = true, disabled = false)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = false)
   }
 
   @Test
@@ -230,8 +263,8 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `a platform admin can enable a user the organization disabled`() {
     disable(testData.managedMember.id).andIsOk
-    userAccountService.enable(testData.managedMember.id)
-    assertMemberFlags("managed@acting.org", managed = true, disabled = false)
+    userAccountService.enable(testData.managedMember.id, UserDisabledBy.ADMIN)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = false)
     assertDisabledBy(testData.managedMember.id, null)
   }
 
@@ -278,7 +311,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(0)
       }
-    assertMemberFlags("managed@acting.org", managed = true, disabled = true)
+    assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = true)
   }
 
   private fun disable(userId: Long) =
@@ -341,6 +374,6 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   companion object {
-    private const val SEEDED_MEMBER_COUNT = 6
+    private const val VISIBLE_MEMBER_COUNT = 7
   }
 }
