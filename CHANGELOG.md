@@ -1,3 +1,10 @@
+## [3.219.3](https://github.com/tolgee/tolgee-platform/compare/v3.219.2...v3.219.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* bump vulnerable dependencies flagged by Snyk ([#3877](https://github.com/tolgee/tolgee-platform/issues/3877)) ([a502bd5](https://github.com/tolgee/tolgee-platform/commit/a502bd568634b962f95cfd01b7ee319734cda53c))
+
 ## [3.219.2](https://github.com/tolgee/tolgee-platform/compare/v3.219.1...v3.219.2) (2026-08-27)
 
 
