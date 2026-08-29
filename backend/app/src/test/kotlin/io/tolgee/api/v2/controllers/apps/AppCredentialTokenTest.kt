@@ -167,27 +167,6 @@ class AppCredentialTokenTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the token endpoint ignores a valid app token in the Authorization header`() {
-    val token = mintToken()
-    logout()
-    perform(
-      post("/v2/public/apps/token")
-        .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(
-          objectMapper.writeValueAsString(
-            mapOf(
-              "grant_type" to "client_credentials",
-              "client_id" to appClientId,
-              "client_secret" to appClientSecret,
-              "install_id" to installId,
-            ),
-          ),
-        ),
-    ).andIsOk
-  }
-
-  @Test
   fun `a recovery token minted in the same second as a force-revoke survives the cutoff`() {
     currentDateProvider.forcedDate = currentDateProvider.date
     val second = issueSecret()

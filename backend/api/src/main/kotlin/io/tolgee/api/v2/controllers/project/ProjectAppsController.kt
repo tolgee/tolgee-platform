@@ -2,17 +2,12 @@ package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.ProjectAppView
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authentication.AppTokenService
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.DenyAppAccess
-import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.apps.AppEnablementService
@@ -26,7 +21,6 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

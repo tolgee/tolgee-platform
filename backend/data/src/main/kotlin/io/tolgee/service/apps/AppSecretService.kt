@@ -91,21 +91,17 @@ class AppSecretService(
       appSecretRepository.findByIdAndAppId(secretId, appId)
         ?: throw NotFoundException(Message.APP_SECRET_NOT_FOUND)
 
-    val now = currentDateProvider.date
     if (force) {
-      // Truncated to whole seconds to match a JWT's `iat`, else the recovery token the app mints in
-      // this same second is rejected. Stamped before the idempotency return so force still fires on
-      // an already-revoked secret.
-      secret.app.tokensInvalidBefore = Date(now.time / 1000L * 1000L)
+      secret.app.tokensInvalidBefore = currentDateProvider.date
     }
 
     if (secret.revokedAt != null) return appSecretRepository.save(secret)
 
-    if (!force && isActive(secret, now) && activeSecrets(appId).size <= 1) {
+    if (!force && isActive(secret = secret) && activeSecrets(appId).size <= 1) {
       throw BadRequestException(Message.APP_CANNOT_REVOKE_LAST_SECRET)
     }
 
-    secret.revokedAt = now
+    secret.revokedAt = currentDateProvider.date
     return appSecretRepository.save(secret)
   }
 
@@ -139,13 +135,10 @@ class AppSecretService(
     }
   }
 
-  private fun isActive(
-    secret: AppSecret,
-    now: Date,
-  ): Boolean {
+  private fun isActive(secret: AppSecret): Boolean {
     if (secret.revokedAt != null) return false
     val expiresAt = secret.expiresAt ?: return true
-    return expiresAt.after(now)
+    return expiresAt.after(currentDateProvider.date)
   }
 
   private fun activeSecrets(appId: Long): List<AppSecret> {

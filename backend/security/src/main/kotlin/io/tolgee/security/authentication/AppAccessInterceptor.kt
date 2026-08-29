@@ -25,7 +25,6 @@ class AppAccessInterceptor(
       if (isAppOnly(handler)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
       return true
     }
-    if (hasAnnotation(handler, AppAccessNeutral::class.java)) return true
     if (hasAnnotation(handler, DenyAppAccess::class.java)) throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     if (allowsMethod(handler, AllowAppLevelAccess::class.java)) {
       if (!authenticationFacade.appAuthentication.isAppLevel) {

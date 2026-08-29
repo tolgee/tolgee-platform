@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.apps.AppClientCredentialsRequest
 import io.tolgee.hateoas.apps.AppAccessTokenModel
-import io.tolgee.security.authentication.AppAccessNeutral
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.apps.AppTokenGrantService
 import jakarta.validation.Valid
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@AppAccessNeutral
 @ConditionalOnProperty(name = ["tolgee.apps.enabled"], havingValue = "true")
 @RequestMapping(value = ["/v2/public/apps"])
 @Tag(name = "App Authentication")

@@ -44,26 +44,31 @@ class AppTokenService(
       builder.claim(JWT_APP_TOKEN_READ_ONLY_CLAIM, true)
     }
 
-    return builder.compact()
+    return TOKEN_PREFIX + builder.compact()
   }
 
   fun mintInstallContextToken(installId: Long): String {
-    return baseBuilder(installId)
-      .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_INSTALL)
-      .compact()
+    return TOKEN_PREFIX +
+      baseBuilder(installId)
+        .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_INSTALL)
+        .compact()
   }
 
   fun mintAppLevelToken(appId: Long): String {
-    return Jwts
-      .builder()
-      .signWith(signingKey)
-      .setIssuedAt(currentDateProvider.date)
-      .setAudience(JWT_APP_TOKEN_AUDIENCE)
-      .setExpiration(Date(currentDateProvider.date.time + appsProperties.tokenExpiration))
-      .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_APP)
-      .claim(JWT_APP_TOKEN_APP_ID_CLAIM, appId)
-      .compact()
+    return TOKEN_PREFIX +
+      Jwts
+        .builder()
+        .signWith(signingKey)
+        .setIssuedAt(currentDateProvider.date)
+        .setAudience(JWT_APP_TOKEN_AUDIENCE)
+        .setExpiration(Date(currentDateProvider.date.time + appsProperties.tokenExpiration))
+        .claim(JWT_APP_TOKEN_CONTEXT_CLAIM, CONTEXT_APP)
+        .claim(JWT_APP_TOKEN_APP_ID_CLAIM, appId)
+        .compact()
   }
+
+  /** Whether the token is an app token at all — a [TOKEN_PREFIX]ed one, distinct from a user JWT. */
+  fun isAppToken(token: String): Boolean = token.startsWith(TOKEN_PREFIX)
 
   private fun baseBuilder(installId: Long) =
     Jwts
@@ -75,9 +80,12 @@ class AppTokenService(
       .claim(JWT_APP_TOKEN_INSTALL_ID_CLAIM, installId)
 
   fun validateToken(token: String): AppTokenClaims {
+    if (!isAppToken(token)) {
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
     val jws =
       try {
-        jwtParser.parseClaimsJws(token)
+        jwtParser.parseClaimsJws(token.substring(TOKEN_PREFIX.length))
       } catch (ex: Exception) {
         when (ex) {
           is SignatureException,
@@ -139,6 +147,7 @@ class AppTokenService(
   }
 
   companion object {
+    const val TOKEN_PREFIX = "tgapp_"
     const val JWT_APP_TOKEN_AUDIENCE = "tg.app"
     const val JWT_APP_TOKEN_INSTALL_ID_CLAIM = "tg.app.inst"
     const val JWT_APP_TOKEN_APP_ID_CLAIM = "tg.app.app"

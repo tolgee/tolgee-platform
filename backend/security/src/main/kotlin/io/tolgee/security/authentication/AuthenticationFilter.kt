@@ -96,19 +96,10 @@ class AuthenticationFilter(
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
 
-        val appAuth = appTokenAuthenticator.authenticate(request, token)
-        if (appAuth != null) {
-          if (!appAuth.isInstallContext && !appAuth.isAppLevel) {
-            checkIfSsoUserStillValid(appAuth.principal)
-          }
-          SecurityContextHolder.getContext().authentication = appAuth
-          return
-        }
+        val handledAppAuth = handleAppAuthentication(request, token)
+        if (handledAppAuth) return
 
-        val auth = jwtService.validateToken(token)
-        checkIfSsoUserStillValid(auth.principal)
-
-        SecurityContextHolder.getContext().authentication = auth
+        handleJwtAuth(token)
         return
       }
 
@@ -145,6 +136,29 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  private fun handleJwtAuth(token: String) {
+    val auth = jwtService.validateToken(token)
+    checkIfSsoUserStillValid(auth.principal)
+
+    SecurityContextHolder.getContext().authentication = auth
+  }
+
+  private fun handleAppAuthentication(
+    request: HttpServletRequest,
+    token: String,
+  ): Boolean {
+    val appAuth = appTokenAuthenticator.authenticate(request, token)
+    if (appAuth != null) {
+      if (!appAuth.isInstallContext && !appAuth.isAppLevel) {
+        checkIfSsoUserStillValid(appAuth.principal)
+      }
+      SecurityContextHolder.getContext().authentication = appAuth
+      return true
+    }
+
+    return false
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

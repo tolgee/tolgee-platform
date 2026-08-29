@@ -57,6 +57,22 @@ class AppTokenServiceTest {
   }
 
   @Test
+  fun `a minted token carries the app prefix`() {
+    appTokenService.isAppToken(appTokenService.mintInstallContextToken(INSTALL_ID)).assert.isTrue()
+    appTokenService.isAppToken(appTokenService.mintAppLevelToken(APP_ID)).assert.isTrue()
+    appTokenService.isAppToken("eyJ.not-an-app-token").assert.isFalse()
+  }
+
+  @Test
+  fun `rejects a token without the app prefix`() {
+    val jwt = appTokenService.mintInstallContextToken(INSTALL_ID).removePrefix(AppTokenService.TOKEN_PREFIX)
+
+    assertThrows<AuthenticationException> { appTokenService.validateToken(jwt) }
+      .code.assert
+      .isEqualTo(Message.INVALID_JWT_TOKEN.code)
+  }
+
+  @Test
   fun `reports an expired token as expired`() {
     val token = mintUserToken(isReadOnly = false)
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(NOW + TOKEN_LIFETIME + 10_000))
@@ -126,13 +142,14 @@ class AppTokenServiceTest {
   }
 
   private fun rawToken(configure: JwtBuilder.() -> Unit): String =
-    Jwts
-      .builder()
-      .signWith(signingKey)
-      .setIssuedAt(Date(NOW))
-      .setExpiration(Date(NOW + TOKEN_LIFETIME))
-      .apply(configure)
-      .compact()
+    AppTokenService.TOKEN_PREFIX +
+      Jwts
+        .builder()
+        .signWith(signingKey)
+        .setIssuedAt(Date(NOW))
+        .setExpiration(Date(NOW + TOKEN_LIFETIME))
+        .apply(configure)
+        .compact()
 
   private fun mintUserToken(isReadOnly: Boolean): String {
     return appTokenService.mintUserContextToken(
@@ -146,6 +163,7 @@ class AppTokenServiceTest {
     private const val NOW = 1_700_000_000_000L
     private const val TOKEN_LIFETIME = 60 * 1000L
     private const val INSTALL_ID = 42L
+    private const val APP_ID = 99L
     private const val USER_ID = 1337L
   }
 }

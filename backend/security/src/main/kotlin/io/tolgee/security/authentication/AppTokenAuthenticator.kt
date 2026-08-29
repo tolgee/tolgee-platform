@@ -21,7 +21,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.apps.App
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.UserAccountService
 import jakarta.servlet.http.HttpServletRequest
@@ -43,15 +43,11 @@ class AppTokenAuthenticator(
     token: String,
   ): AppAuthentication? {
     if (!tolgeeProperties.apps.enabled) return null
+    // The prefix marks the token as an app token, so a malformed one fails here rather than falling
+    // through to JWT auth as if it were a user token.
+    if (!appTokenService.isAppToken(token)) return null
 
-    val claims =
-      try {
-        appTokenService.validateToken(token)
-      } catch (e: AuthExpiredException) {
-        throw e
-      } catch (_: AuthenticationException) {
-        return null
-      }
+    val claims = appTokenService.validateToken(token)
 
     if (claims.isAppContext) {
       return appLevelAuth(token, claims)
@@ -70,11 +66,7 @@ class AppTokenAuthenticator(
       appInstallService.findAppForAppAuth(claims.appId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    app.tokensInvalidBefore?.let { cutoff ->
-      if (claims.issuedAt.before(cutoff)) {
-        throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
-      }
-    }
+    checkAppTokenCutoff(app, claims)
 
     return AppAuthentication.appLevel(
       credentials = token,
@@ -96,7 +88,7 @@ class AppTokenAuthenticator(
       appInstallService.findForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    assertNotRevokedByAppCutoff(install, claims)
+    checkAppTokenCutoff(install.app, claims)
 
     val user = resolveAppTokenUser(claims.userId!!, claims)
 
@@ -119,7 +111,7 @@ class AppTokenAuthenticator(
       appInstallService.resolveForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    assertNotRevokedByAppCutoff(resolution.install, claims)
+    checkAppTokenCutoff(resolution.install.app, claims)
 
     return AppAuthentication(
       credentials = token,
@@ -132,12 +124,14 @@ class AppTokenAuthenticator(
     )
   }
 
-  private fun assertNotRevokedByAppCutoff(
-    install: AppInstall,
+  private fun checkAppTokenCutoff(
+    app: App,
     claims: AppTokenClaims,
   ) {
-    val cutoff = install.app.tokensInvalidBefore ?: return
-    if (claims.issuedAt.before(cutoff)) {
+    val cutoff = app.tokensInvalidBefore ?: return
+    // A JWT `iat` is second-precision, so compare at whole seconds — otherwise a token minted in the
+    // same second as the cutoff reads as older than it and is wrongly rejected.
+    if (claims.issuedAt.time / 1000L < cutoff.time / 1000L) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
   }
