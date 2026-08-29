@@ -17,6 +17,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.AppsProperties
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -31,6 +32,7 @@ import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.security.thirdParty.SsoDelegate
+import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -70,11 +72,15 @@ class AuthenticationFilterTest {
 
   private val internalProperties = Mockito.mock(InternalProperties::class.java)
 
+  private val appsProperties = Mockito.mock(AppsProperties::class.java)
+
   private val rateLimitService = Mockito.mock(RateLimitService::class.java)
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
   private val oauth2AccessTokenResolver = Mockito.mock(OAuth2AccessTokenResolver::class.java)
+
+  private val appTokenAuthenticator = Mockito.mock(AppTokenAuthenticator::class.java)
 
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
@@ -99,6 +105,7 @@ class AuthenticationFilterTest {
       rateLimitService,
       jwtService,
       oauth2AccessTokenResolver,
+      appTokenAuthenticator,
       userAccountService,
       pakService,
       patService,
@@ -119,8 +126,14 @@ class AuthenticationFilterTest {
 
     Mockito.`when`(tolgeeProperties.authentication).thenReturn(authProperties)
     Mockito.`when`(tolgeeProperties.internal).thenReturn(internalProperties)
+    Mockito.`when`(tolgeeProperties.apps).thenReturn(appsProperties)
     Mockito.`when`(authProperties.enabled).thenReturn(true)
+    Mockito.`when`(appsProperties.enabled).thenReturn(true)
     Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
+
+    Mockito
+      .`when`(appTokenAuthenticator.authenticate(any(), any()))
+      .thenReturn(null)
 
     Mockito
       .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))

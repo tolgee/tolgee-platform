@@ -42,12 +42,6 @@ class AppEnablementService(
     return install
   }
 
-  /**
-   * The install this organization may enable for its project: one it holds whose app is still
-   * available to it. Availability is re-read here, not taken from install time, so an app whose
-   * availability was withdrawn cannot be freshly enabled. An install the organization does not hold
-   * stays indistinguishable from a missing one (404), never confirming another tenant's install.
-   */
   private fun resolveEnableableInstall(
     organizationId: Long,
     installId: Long,
@@ -85,19 +79,25 @@ class AppEnablementService(
     return appEnabledForProjectRepository.findEnabledInstallsByProjectId(projectId)
   }
 
-  /** How many of this organization's projects the install is enabled for. */
   @Transactional(readOnly = true)
   fun countEnabledProjectsForInstall(appInstallId: Long): Long {
     return countEnabledProjectsByInstall(listOf(appInstallId))[appInstallId] ?: 0
   }
 
-  /** The same count for many installs at once, so a list of installs stays one query. */
   @Transactional(readOnly = true)
   fun countEnabledProjectsByInstall(appInstallIds: Collection<Long>): Map<Long, Long> {
     if (appInstallIds.isEmpty()) return emptyMap()
     return appEnabledForProjectRepository
       .countEnabledProjectsByInstallIds(appInstallIds)
       .associate { (it[0] as Long) to (it[1] as Long) }
+  }
+
+  @Transactional(readOnly = true)
+  fun getEnabledProjectsForInstall(
+    appInstallId: Long,
+    pageable: Pageable,
+  ): Page<Project> {
+    return appEnabledForProjectRepository.findEnabledProjectsByAppInstallId(appInstallId, pageable)
   }
 
   @Transactional(readOnly = true)
@@ -113,11 +113,6 @@ class AppEnablementService(
     appEnabledForProjectRepository.deleteByAppInstallId(appInstallId)
   }
 
-  /**
-   * Enablement is consent given by one organization. Once the project belongs to another
-   * organization the old consent no longer applies, and the installs may not even be visible to the
-   * new owner - so the project starts with no app enabled.
-   */
   @Transactional
   fun removeAllForProject(projectId: Long) {
     appEnabledForProjectRepository.deleteByProjectId(projectId)

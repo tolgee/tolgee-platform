@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 
-class TolgeeAuthentication(
+open class TolgeeAuthentication(
   private val credentials: Any?,
   /**
    * Device id - unique for each token. For activity logging.

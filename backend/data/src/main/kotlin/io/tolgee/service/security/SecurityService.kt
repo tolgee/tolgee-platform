@@ -3,6 +3,7 @@ package io.tolgee.service.security
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
+import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
@@ -84,6 +85,13 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
+    if (authenticationFacade.isAppAuth) {
+      if (getCurrentPermittedScopes(projectId).isEmpty()) {
+        throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
+      }
+      return
+    }
+
     val hasNoProjectPermission = getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty()
     val mayFallBackOnAdminReach = !authenticationFacade.isScopedCredential && activeUser.isSupporterOrAdmin()
     if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
@@ -126,22 +134,51 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val scopes =
-      Scope
-        .expand(
-          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
-        ).toSet()
+    if (authenticationFacade.isAppAuth) {
+      return getAppPermittedScopes(projectId)
+    }
 
-    val credential = authenticationFacade.scopedCredential ?: return scopes
-    if (!credential.coversProject(projectId)) return emptySet()
-    return scopes.intersect(Scope.expand(credential.scopes).toSet())
+    val projectScopes = expandedScopesOf(projectId, authenticationFacade.authenticatedUser.id)
+
+    val credential = authenticationFacade.scopedCredential
+    if (credential != null) {
+      if (!credential.coversProject(projectId)) return emptySet()
+      return projectScopes.intersect(Scope.expand(credential.scopes).toSet())
+    }
+
+    val apiKey = activeApiKey ?: return projectScopes
+    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes)
+  }
+
+  private fun getAppPermittedScopes(projectId: Long): Set<Scope> {
+    val appAuth = authenticationFacade.appAuthentication
+    // An unbound project is one the install was never enabled for.
+    if (appAuth.boundProjectId != projectId) return emptySet()
+
+    val installScopes = Scope.expand(appAuth.appInstall.grantedScopes).toSet()
+
+    val actingAsUserId = appAuth.actsForUserId
+    if (actingAsUserId != null) {
+      return installScopes.intersect(expandedScopesOf(projectId, actingAsUserId))
+    }
+
+    if (appAuth.isInstallContext) return installScopes
+
+    // User-context: cap by the iframe user's own project scopes.
+    return installScopes.intersect(expandedScopesOf(projectId, appAuth.principal.id))
+  }
+
+  private fun expandedScopesOf(
+    projectId: Long,
+    userId: Long,
+  ): Set<Scope> {
+    return Scope.expand(getProjectPermissionScopesNoApiKey(projectId, userId)).toSet()
   }
 
   /**
-   * Checks the user's own permission on the project, then narrows it by the scoped credential.
-   *
-   * [credential] defaults to the one in the security context; pass it explicitly off the request thread, where
-   * there is none (see `WebSocketConfig`).
+   * Checks if the user has required permission for the project. If no user or API key is provided,
+   * uses the currently authenticated user and active API key.
+   * Always checks permissions for the current user even when using the API key for security reasons.
    */
   fun checkProjectPermission(
     projectId: Long,
@@ -149,6 +186,11 @@ class SecurityService(
     user: UserAccountDto? = null,
     credential: ScopedCredential? = null,
   ) {
+    if (authenticationFacade.isAppAuth) {
+      checkAppPermission(projectId, requiredPermission)
+      return
+    }
+
     val user = user ?: activeUser
     // Always check for the current user even when a scoped credential is presented: the credential can only narrow
     // what the user already has, never widen it.
@@ -159,6 +201,14 @@ class SecurityService(
     if (!Scope.expand(credential.scopes).contains(requiredPermission)) {
       throw PermissionException(missingScopes = listOf(requiredPermission))
     }
+  }
+
+  private fun checkAppPermission(
+    projectId: Long,
+    requiredScope: Scope,
+  ) {
+    if (getCurrentPermittedScopes(projectId).contains(requiredScope)) return
+    throw PermissionException(listOf(requiredScope))
   }
 
   fun checkTaskEditScopeOrAssigned(
@@ -179,6 +229,7 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
+      if (authenticationFacade.isAppAuth) throw err
       if (!hasTaskAssignedAccess(projectId)) {
         throw err
       }
@@ -192,11 +243,13 @@ class SecurityService(
   private fun hasTaskAssignedAccess(projectId: Long): Boolean =
     getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
 
+  /** A task assignment belongs to a person, so it never widens an install's scopes. */
   private fun translationInTask(
     keyId: Long,
     languageId: Long,
     taskType: TaskType? = null,
   ): Boolean {
+    if (authenticationFacade.isAppAuth) return false
     val assignees =
       taskService.findAssigneeByKey(
         keyId,
@@ -418,10 +471,11 @@ class SecurityService(
     projectId: Long,
     permissionCheckFn: (data: ComputedPermissionDto) -> Unit,
   ) {
+    val userId = languageRestrictedUserId ?: return
     val usersPermission =
       permissionService.getProjectPermissionData(
         projectId,
-        authenticationFacade.authenticatedUser.id,
+        userId,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -431,12 +485,13 @@ class SecurityService(
     languageTags: Collection<String>,
     fn: (data: ComputedPermissionDto, languageIds: Collection<Long>) -> Unit,
   ) {
+    val userId = languageRestrictedUserId ?: return
     val languageIds = languageService.getLanguageIdsByTags(projectId, languageTags)
     try {
       val usersPermission =
         permissionService.getProjectPermissionData(
           projectId,
-          authenticationFacade.authenticatedUser.id,
+          userId,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -490,11 +545,15 @@ class SecurityService(
     this.checkLanguageStateChangePermission(projectId, languageIds, keyId)
   }
 
+  /** An API key carries a person's scopes; an install has none to draw from, so app auth is refused. */
   fun checkApiKeyScopes(
     scopes: Set<Scope>,
     project: Project?,
     user: UserAccount? = null,
   ) {
+    if (authenticationFacade.isAppAuth) {
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    }
     Scope.assertProjectAssignable(scopes)
     try {
       val availableScopes = apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!)
@@ -650,20 +709,34 @@ class SecurityService(
     }
   }
 
+  /** Server-role bypasses are for people; an install has none, so the guarded body always runs for it. */
   private fun runUnlessElevatedAsServerAdmin(runnable: () -> Unit) {
-    if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
+    if (authenticationFacade.isScopedCredential || authenticationFacade.isAppAuth || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
   private fun runUnlessElevatedAsSupporterOrAdmin(runnable: () -> Unit) {
-    if (authenticationFacade.isScopedCredential || !activeUser.isSupporterOrAdmin()) {
+    if (authenticationFacade.isScopedCredential || authenticationFacade.isAppAuth || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }
 
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
+
+  /**
+   * The person whose per-language restrictions apply. Null means an install acting as itself (the one
+   * skip); a non-app caller with no context throws rather than silently skipping the gate.
+   */
+  private val languageRestrictedUserId: Long?
+    get() {
+      if (authenticationFacade.isAppAuth) return authenticationFacade.actingPersonUserId
+      return authenticationFacade.authenticatedUser.id
+    }
+
+  private val activeApiKey: ApiKeyDto?
+    get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 
   companion object {
     private const val KEY_ID_LOOKUP_CHUNK_SIZE = 10_000

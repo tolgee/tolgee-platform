@@ -4,6 +4,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.apps.AppEnabledForProject
 import io.tolgee.model.apps.AppInstall
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -37,16 +39,15 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
     """
     select p from AppEnabledForProject e
     join e.project p
-    join fetch p.organizationOwner o
     where e.appInstall.id = :appInstallId
       and p.deletedAt is null
-      and o.deletedAt is null
-    order by p.name, p.id
+      and p.organizationOwner.deletedAt is null
     """,
   )
   fun findEnabledProjectsByAppInstallId(
     @Param("appInstallId") appInstallId: Long,
-  ): List<Project>
+    pageable: Pageable,
+  ): Page<Project>
 
   fun deleteByAppInstallId(appInstallId: Long)
 
