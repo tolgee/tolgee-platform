@@ -310,7 +310,7 @@ class UserAccountService(
     userAccount: UserAccount,
     password: String?,
   ): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+    revokeAllCredentials(userAccount)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -344,7 +344,7 @@ class UserAccountService(
         ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
     userAccount.totpLastUsedTimeStep = matchedStep
-    resetTokensValidNotBefore(userAccount)
+    revokeAllCredentials(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_ENABLED)
     return savedUser
@@ -357,7 +357,7 @@ class UserAccountService(
     userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    resetTokensValidNotBefore(userAccount)
+    revokeAllCredentials(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_DISABLED)
     return savedUser
@@ -569,7 +569,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    resetTokensValidNotBefore(userAccount)
+    revokeAllCredentials(userAccount)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
@@ -603,11 +603,12 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+    revokeAllCredentials(userAccount)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun resetTokensValidNotBefore(userAccount: UserAccount) {
+  /** Cuts off every JWT the account has issued, and deletes its OAuth grants outright. */
+  private fun revokeAllCredentials(userAccount: UserAccount) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
     // The tokensValidNotBefore cutoff is read from the USER_ACCOUNTS cache, which lags per-node without Redis, so the
     // refresh grant could keep minting tokens on a stale replica; deleting the grants makes revocation topology-safe.

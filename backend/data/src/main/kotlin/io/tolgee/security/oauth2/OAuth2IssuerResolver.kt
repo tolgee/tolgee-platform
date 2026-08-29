@@ -19,6 +19,7 @@ package io.tolgee.security.oauth2
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.net.URI
 
 /**
  * The URL that identifies this authorization server.
@@ -51,5 +52,30 @@ class OAuth2IssuerResolver(
    * while another consumer advertises `https://host` — a client following one and validating against the other sees
    * two different servers.
    */
-  private fun String?.normalized(): String? = this?.takeIf { it.isNotBlank() }?.trimEnd('/')
+  private fun String?.normalized(): String? {
+    val trimmed = this?.takeIf { it.isNotBlank() }?.trimEnd('/') ?: return null
+    requireOrigin(trimmed)
+    return trimmed
+  }
+
+  /**
+   * RFC 8414 §3 puts the metadata document at `https://host/.well-known/oauth-authorization-server<issuer path>`,
+   * which Tolgee does not serve; a path-prefixed issuer would also make every endpoint URL it publishes unreachable.
+   * Failing here names the misconfigured property instead of leaving the flow to dead-end in the browser.
+   */
+  private fun requireOrigin(url: String) {
+    // A value that does not parse must not slip through: getOrNull() would make `path` null, which reads as "no path"
+    // and would pass the check below, leaving the unparseable URL to 500 later wherever it is concatenated.
+    val parsed =
+      runCatching { URI(url) }.getOrNull()
+        ?: throw IllegalStateException(
+          "tolgee.back-end-url (or tolgee.front-end-url) is not a valid URL: $url",
+        )
+    val path = parsed.path
+    if (!path.isNullOrEmpty()) {
+      throw IllegalStateException(
+        "tolgee.back-end-url (or tolgee.front-end-url) must be a bare origin with no path for OAuth2 to work, got: $url",
+      )
+    }
+  }
 }

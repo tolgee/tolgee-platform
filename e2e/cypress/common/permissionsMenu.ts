@@ -1,5 +1,10 @@
 import { Scopes } from '../../../webapp/src/fixtures/permissions';
-import { assertMessage, confirmHardMode, dismissMenu } from './shared';
+import {
+  assertMessage,
+  confirmHardMode,
+  dismissMenu,
+  gcyAdvanced,
+} from './shared';
 
 type Options = {
   confirm?: boolean;
@@ -41,7 +46,7 @@ export const permissionsMenuSelectAdvanced = (
 
   // check scopes
   scopes.forEach((scope) => {
-    cy.get('[permissions-scope="' + scope + '"]')
+    gcyAdvanced({ value: 'permissions-advanced-item', scope })
       .find('input')
       .focus()
       .check();

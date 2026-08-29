@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.hateoas.oauth2.ProtectedResourceMetadataModel
-import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
+import io.tolgee.security.oauth2.OAuth2Scopes
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -13,11 +15,12 @@ import org.springframework.web.bind.annotation.RestController
 /** RFC 9728 Protected Resource Metadata. Advertises `resource` = the audience tokens carry. */
 @RestController
 @CrossOrigin(origins = ["*"])
-@Tag(name = "OAuth2 flow")
+@OpenApiHideFromPublicDocs
+@Tag(name = "OAuth2 authorization server")
 class ProtectedResourceMetadataController(
   private val issuerResolver: OAuth2IssuerResolver,
 ) : IController {
-  @GetMapping("/.well-known/oauth-protected-resource$MCP_RESOURCE_PATH")
+  @GetMapping(OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH)
   @Operation(summary = "RFC 9728 protected-resource metadata for the MCP developer resource")
   fun mcpDeveloperMetadata(): ProtectedResourceMetadataModel {
     // RFC 9728: the path after the well-known prefix is the resource identifier's path, so a client that fetched this
@@ -25,14 +28,10 @@ class ProtectedResourceMetadataController(
     // also collide with the authorization server's own identifier.
     val issuer = issuerResolver.issuerUrl
     return ProtectedResourceMetadataModel(
-      resource = issuer + MCP_RESOURCE_PATH,
+      resource = issuer + OAuth2Constants.MCP_RESOURCE_PATH,
       authorizationServers = listOf(issuer),
-      scopesSupported = Scope.entries.map { it.value },
+      scopesSupported = OAuth2Scopes.SUPPORTED,
       bearerMethodsSupported = listOf("header"),
     )
-  }
-
-  companion object {
-    private const val MCP_RESOURCE_PATH = "/mcp/developer"
   }
 }

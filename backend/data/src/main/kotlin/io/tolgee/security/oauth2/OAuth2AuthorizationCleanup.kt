@@ -26,14 +26,17 @@ import java.time.Duration
 
 @Component
 class OAuth2AuthorizationCleanup(
-  private val queryService: OAuth2AuthorizationService,
+  private val authorizationService: OAuth2AuthorizationService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  @Scheduled(cron = "\${tolgee.oauth2.authorization-cleanup-cron:0 0 3 * * *}")
+  @Scheduled(
+    cron =
+      "\${tolgee.oauth2.authorization-cleanup-cron:" + OAuth2ServerProperties.DEFAULT_AUTHORIZATION_CLEANUP_CRON + "}",
+  )
   fun cleanUpExpiredAuthorizations() {
     val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.authorizationRetentionDays))
-    val deleted = queryService.deleteExpiredBefore(cutoff)
+    val deleted = authorizationService.deleteExpiredBefore(cutoff) + authorizationService.deleteExpiredPendingConsents()
     if (deleted > 0) {
       logger.info("OAuth2 authorization cleanup removed {} expired authorization(s)", deleted)
     }

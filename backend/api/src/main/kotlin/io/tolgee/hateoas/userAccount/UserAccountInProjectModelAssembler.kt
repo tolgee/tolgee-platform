@@ -31,6 +31,7 @@ class UserAccountInProjectModelAssembler(
         view.organizationBasePermission,
         view.directPermission,
         UserAccount.Role.USER,
+        // Tied to the hardcoded USER role above — passing the view's real role means revisiting this flag too.
         asScopedCredential = false,
       )
     val avatar = avatarService.getAvatarLinks(view.avatarHash)

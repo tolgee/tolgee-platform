@@ -4,16 +4,16 @@ import { API_URL, HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { gcyAdvanced } from '../../common/shared';
 
-// A third case in this file made whichever test ran last fail intermittently, on state shared between cases rather
-// than on the flow — re-check for that before adding one. Denial is covered by OAuth2AuthorizationCodeFlowTest.
 const CLIENT_ID = 'tolgee-browser-extension';
+// Must match the project OAuth2ConsentE2eData creates.
+const PROJECT_NAME = 'OAuth2 Consent Project';
 const REDIRECT_URI = `${API_URL}/internal/e2e-data/oauth2-consent/callback`;
 // A fixed PKCE pair: challenge = base64url(sha256(verifier)). The code is never exchanged here, so the verifier is
 // never needed — the challenge only has to be well-formed for /oauth2/authorize to accept the request.
 const CODE_CHALLENGE = '9fa4Kxg-kvmCollzytmpG-4BeAy0obZey5rQMBKBXVc';
-// Reaching the consent screen is three full page loads (authorize -> bootstrap -> authorize -> consent) and leaving it
-// is another redirect chain. On a backend that has just started, that comfortably exceeds the default command timeout,
-// so these steps get their own budget rather than relying on retries — PR runs have none.
+// Reaching the consent screen is a redirect plus the screen's own API calls, and leaving it is another navigation. On
+// a backend that has just started that comfortably exceeds the default command timeout, so these steps get their own
+// budget rather than relying on retries — PR runs have none.
 const NAVIGATION_TIMEOUT = 60000;
 
 const authorizeUrl = (scope: string) =>
@@ -33,8 +33,8 @@ describe('OAuth2 consent', () => {
       .then((r) => r.body)
       .then(({ users }) => {
         login(users[0].username);
-        // The bootstrap page turns the stored webapp JWT into the session /oauth2/authorize needs, so the app has to
-        // be loaded once for that JWT to be in local storage.
+        // The consent screen authenticates with the stored webapp JWT, so the app has to be loaded once for that JWT
+        // to be in local storage.
         cy.visit(HOST);
         waitForGlobalLoading();
       });
@@ -50,12 +50,53 @@ describe('OAuth2 consent', () => {
     cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
       'be.visible'
     );
-    cy.gcy('oauth2-consent-scope').should('have.length.at.least', 1);
+    ['keys.view', 'translations.view', 'translations.edit'].forEach((scope) =>
+      gcyAdvanced({ value: 'oauth2-consent-scope', scope }).should('exist')
+    );
 
+    // Nothing is pre-selected: the widest grant has to be asked for.
+    cy.gcy('oauth2-consent-allow').should('be.disabled');
+    cy.gcy('oauth2-consent-project-all').click();
     cy.gcy('oauth2-consent-allow').click();
 
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
     cy.url().should('include', 'state=e2e-state');
+  });
+
+  it('redirects with access_denied when the user denies', () => {
+    cy.visit(authorizeUrl('keys.view translations.view'));
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-deny').click();
+
+    cy.url({ timeout: NAVIGATION_TIMEOUT }).should(
+      'include',
+      'error=access_denied'
+    );
+    cy.url().should('include', 'state=e2e-state');
+    cy.url().should('not.include', 'code=');
+  });
+
+  // What the grant is bound to is asserted in OAuth2AuthorizationCodeFlowTest; this pins the browser-observable half.
+  it('will not approve a single-project grant until a project is picked', () => {
+    cy.visit(authorizeUrl('keys.view translations.view'));
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-project-one').click();
+    cy.gcy('oauth2-consent-allow').should('be.disabled');
+
+    cy.gcy('project-select').click();
+    gcyAdvanced({
+      value: 'user-switch-item',
+      'project-name': PROJECT_NAME,
+    }).click();
+
+    cy.gcy('oauth2-consent-allow').should('not.be.disabled').click();
+    cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
   });
 
   it('lets the user narrow the requested scopes before approving', () => {
@@ -74,9 +115,10 @@ describe('OAuth2 consent', () => {
 
     // translations.edit is optional for this client — only keys.view and translations.view are locked as required — so
     // deselecting it must stick and the flow must still complete.
-    cy.gcy('permissions-advanced-item')
-      .filter('[permissions-scope="translations.edit"]')
-      .click();
+    gcyAdvanced({
+      value: 'permissions-advanced-item',
+      scope: 'translations.edit',
+    }).click();
     cy.gcy('oauth2-consent-modify').click();
 
     gcyAdvanced({
@@ -88,6 +130,7 @@ describe('OAuth2 consent', () => {
       scope: 'translations.view',
     }).should('exist');
 
+    cy.gcy('oauth2-consent-project-all').click();
     cy.gcy('oauth2-consent-allow').click();
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
   });

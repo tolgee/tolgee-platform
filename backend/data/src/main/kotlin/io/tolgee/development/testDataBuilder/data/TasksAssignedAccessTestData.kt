@@ -8,8 +8,7 @@ import io.tolgee.model.enums.TaskType
  * [Scope.TASKS_ASSIGNED_ACCESS].
  *
  * Kept apart from [TaskTestData] on purpose: several tests there assert exact task and assignee counts, so adding a
- * task or an assignee to it breaks them. The pair only means anything together — the role presets all grant the scope
- * and nothing backfills existing granular rows, so this is the one population whose behaviour changes on upgrade.
+ * task or an assignee to it breaks them.
  */
 class TasksAssignedAccessTestData : BaseTestData("tasksAssignedAccessOwner", "Tasks assigned-access project") {
   val withScope =

@@ -73,8 +73,7 @@ class McpRequestContext(
 
   /**
    * The MCP endpoint is a RouterFunction, so [AuthenticationInterceptor] never runs for it and its path-keyed OAuth
-   * rule cannot apply. This is the same guarantee, restated for tool specs: a global route skips
-   * [ProjectContextService.setup], so nothing there would narrow the token.
+   * rule cannot apply — this check is what stands in for it.
    */
   private fun checkTokenType(spec: ToolEndpointSpec) {
     if (!authenticationFacade.isApiAuthentication) return

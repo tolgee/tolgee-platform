@@ -51,7 +51,6 @@ class RefreshPreferredOrganizationTest : AbstractSpringTest() {
           .getProjectPermissionData(
             testData.otherOrgPublicProject.id,
             testData.directPermissionUser.id,
-            asScopedCredential = false,
           ).directPermissions
       permissionService.delete(permission!!.id)
     }

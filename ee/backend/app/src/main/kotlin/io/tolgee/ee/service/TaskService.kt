@@ -523,8 +523,7 @@ class TaskService(
   ): MutableSet<UserAccount> {
     return assignees
       .map {
-        // The assignee's own access, not the caller's — a scoped credential must not shrink who may be assigned.
-        val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it, asScopedCredential = false)
+        val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
         if (permission.isNullOrEmpty()) {
           throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
         }

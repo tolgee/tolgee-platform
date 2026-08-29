@@ -34,7 +34,11 @@ class OAuth2ServerProperties {
   @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
   var accessTokenValidityMinutes: Long = 30
 
-  @DocProperty(description = "How long an issued OAuth refresh token stays valid, in days.")
+  @DocProperty(
+    description =
+      "How long an issued OAuth refresh token stays valid, in days. Each refresh issues a new one and restarts " +
+        "this window, so it bounds how long a grant may sit unused — not how long it may live.",
+  )
   var refreshTokenValidityDays: Long = 30
 
   @DocProperty(
@@ -44,8 +48,27 @@ class OAuth2ServerProperties {
 
   @DocProperty(
     description =
-      "How long a spent or abandoned OAuth authorization is kept before it is deleted, in days. " +
-        "Only rows whose tokens have all expired are removed.",
+      "How long the user has to complete the consent screen before the pending authorization goes stale, in seconds.",
+  )
+  var consentValiditySeconds: Long = 900
+
+  @DocProperty(
+    description =
+      "How long a spent OAuth authorization is kept after its last credential expired, in days. It holds a used " +
+        "code's row so a replayed code is still recognised. A consent the user never completed is not kept for " +
+        "this window — it is deleted once its own short deadline passes.",
   )
   var authorizationRetentionDays: Long = 7
+
+  @DocProperty(
+    description =
+      "Cron expression for the job that removes spent authorizations past their retention window and consents the " +
+        "user never completed. Spring's six-field format (second, minute, hour, day, month, weekday).",
+  )
+  var authorizationCleanupCron: String = DEFAULT_AUTHORIZATION_CLEANUP_CRON
+
+  companion object {
+    /** Also spelled into the `@Scheduled` placeholder default in `OAuth2AuthorizationCleanup`, which is what the scheduler actually reads. */
+    const val DEFAULT_AUTHORIZATION_CLEANUP_CRON = "0 0 3 * * *"
+  }
 }

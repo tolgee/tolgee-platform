@@ -26,6 +26,7 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.isCredentialScopedFor
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -158,12 +159,7 @@ class ProjectService(
 
   @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
-    val perms =
-      permissionService.getProjectPermissionData(
-        id,
-        authenticationFacade.authenticatedUser.id,
-        asScopedCredential = authenticationFacade.isScopedCredential,
-      )
+    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
     val withoutPermittedLanguages =
       projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
         ?: throw ProjectNotFoundException(id)
@@ -318,7 +314,7 @@ class ProjectService(
               permission,
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
-              asScopedCredential = false,
+              asScopedCredential = isCredentialScopedFor(userAccount.id),
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()

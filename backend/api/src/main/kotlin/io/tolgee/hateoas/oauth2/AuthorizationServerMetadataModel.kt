@@ -20,4 +20,7 @@ data class AuthorizationServerMetadataModel(
   val tokenEndpointAuthMethodsSupported: List<String>,
   @get:JsonProperty("scopes_supported")
   val scopesSupported: List<String>,
+  /** RFC 9207 §3: tells a client the `iss` parameter will be on every authorization response. */
+  @get:JsonProperty("authorization_response_iss_parameter_supported")
+  val authorizationResponseIssParameterSupported: Boolean,
 )

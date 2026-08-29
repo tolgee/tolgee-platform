@@ -33,6 +33,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -156,6 +157,26 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `a scope refusal answers a bearer caller with insufficient_scope`() {
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
+    assertThat(performGet(translationsUrl(), bearer(token)).andReturn().response.status).isEqualTo(200)
+
+    val forbidden =
+      performPut(
+        translationsUrl(),
+        mapOf("key" to "oauth-own-comment-key", "translations" to mapOf("en" to "x")),
+        bearer(token),
+      ).andReturn().response
+
+    forbidden.status.assert.isEqualTo(403)
+    forbidden
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("insufficient_scope")
+  }
+
+  @Test
   fun `accepts a valid scoped token`() {
     val token = mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS)
     performGet(translationsUrl(), bearer(token)).andIsOk
@@ -171,8 +192,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun `is forbidden on API endpoints that never apply the token's scopes`() {
     // Nothing outside a project-scoped handler applies scope ∩ project set, so a token there would carry the user's
     // whole account: their email and server role, every notification, every task in every project they belong to.
-    // These are all @AllowApiAccess endpoints a PAT or PAK may use; an OAuth token must not.
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
 
     performGet("/v2/user", bearer(token)).andIsForbidden
     performGet("/v2/notification", bearer(token)).andIsForbidden
@@ -190,20 +210,20 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `fails closed on an unrecognized project claim shape`() {
+  fun `fails closed on an unparseable stored project selection`() {
     val token = mint(scopes = listOf("translations.view"), projects = "nonsense")
     performGet(translationsUrl(), bearer(token)).andIsNotFound
   }
 
   @Test
   fun `grants access to a project inside the token project set`() {
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
     performGet(translationsUrl(), bearer(token)).andIsOk
   }
 
   @Test
   fun `hides a project outside the token project set`() {
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id + 999))
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id + 999))
     performGet(translationsUrl(), bearer(token)).andIsNotFound
   }
 
@@ -226,10 +246,9 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `denies current-permissions for a project outside the token project set`() {
-    // The token is narrowed to a different project. Even though the underlying user can access testData.project, the
-    // endpoint must not disclose its name, the user's role or permitted languages — it has no project path variable, so
-    // the interceptor never narrows it; the controller must reject outright, not just return empty scopes.
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id + 999))
+    // Rejected outright rather than answered with empty scopes, or it discloses the project name, the user's role
+    // and their permitted languages.
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id + 999))
     performGet("/v2/api-keys/current-permissions?projectId=${testData.project.id}", bearer(token))
       .andIsForbidden
   }
@@ -252,7 +271,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `a revoked token stops working at once`() {
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
     performGet(translationsUrl(), bearer(token)).andIsOk
 
     tokens.revoke(token)
@@ -262,13 +281,11 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `rejects a token whose client is no longer registered`() {
-    // Clients come from configuration, and dropping one is the documented way to switch it off. Its grants outlive it
-    // in the store and must stop authenticating — with a 401, not a 500.
     val token =
       tokens.issue(
         subject = testData.user.id,
         scopes = listOf("translations.view"),
-        projects = listOf(testData.project.id),
+        projectSelection = tokens.projectsOf(testData.project.id),
         clientId = "no-longer-registered-client",
       )
 
@@ -285,7 +302,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     val token =
       mint(
         scopes = listOf("translations.view"),
-        projects = listOf(testData.project.id),
+        projects = tokens.projectsOf(testData.project.id),
         issuedAt = Instant.now().minus(2, ChronoUnit.HOURS),
         expiresAt = Instant.now().minus(1, ChronoUnit.HOURS),
       )
@@ -294,7 +311,6 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
 
   @Test
   fun `an admin's OAuth token is bound to real membership, not the admin's server-wide reach`() {
-    // Non-member access is masked as 404, same as any stranger.
     val token =
       mint(scopes = listOf("translations.view"), projects = OAuth2Constants.ALL_PROJECTS, subject = adminUser.id)
     performGet(translationsUrl(), bearer(token)).andIsNotFound
@@ -320,9 +336,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `an admin's OAuth token sees only the languages the admin may view`() {
-    // Enumeration, not checking: the translations list asks LanguageService which languages the caller may view. Left
-    // admin-bypassed it would answer "all of them" for the very token the check path restricts to German.
+  fun `an admin's OAuth token sees only its permitted languages when the list enumerates them`() {
     val token =
       mint(
         scopes = listOf("translations.view"),
@@ -339,9 +353,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `an admin's OAuth token cannot name a language the admin may not view`() {
-    // The explicit ?languages= branch is findByTagsAndFilterPermitted, a different call site from the implicit one
-    // above. Asking for English by name must not get past the restriction that hides it from the list.
+  fun `an admin's OAuth token cannot name a hidden language through the explicit languages filter`() {
     val token =
       mint(
         scopes = listOf("translations.view"),
@@ -357,9 +369,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `an admin's OAuth token exports only the languages the admin may view`() {
-    // getLanguagesForExport is the third call site, and the one that returns translation content rather than a list.
-    // Asserted on the zip's entries: with the restriction applied there is one file, and it is the German one.
+  fun `an admin's OAuth token exports only its permitted languages`() {
     val token =
       mint(
         scopes = listOf("translations.view"),
@@ -382,7 +392,61 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
         entry = zip.nextEntry
       }
     }
-    assertThat(entries).containsExactly("de.json")
+    entries.assert.containsExactly("de.json")
+  }
+
+  @Test
+  fun `a token stops working once its subject account is deleted`() {
+    val token =
+      mint(
+        scopes = listOf("translations.view"),
+        projects = tokens.projectsOf(testData.project.id),
+        subject = viewOnlyUser.id,
+      )
+    performGet(translationsUrl(), bearer(token)).andIsOk
+
+    userAccountService.delete(userAccountService.get(viewOnlyUser.id))
+
+    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
+  }
+
+  @Test
+  fun `the own-jobs fallback cannot widen a token that lacks batch-jobs-view`() {
+    val currentJobs = "/v2/projects/${testData.project.id}/current-batch-jobs"
+    val viewOnly = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
+    performGet(currentJobs, bearer(viewOnly)).andIsForbidden
+    val withBatch =
+      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = tokens.projectsOf(testData.project.id))
+    performGet(currentJobs, bearer(withBatch)).andIsOk
+  }
+
+  @Test
+  fun `the own-comment fallback cannot widen a token that lacks comments-edit`() {
+    val commentUrl =
+      "/v2/projects/${testData.project.id}/translations/${ownCommentTranslation.id}/comments/${ownComment.id}"
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
+    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(token)).andIsForbidden
+    performDelete(commentUrl, null, bearer(token)).andIsForbidden
+
+    val editToken =
+      mint(
+        scopes = listOf("translations.view", "translation-comments.edit"),
+        projects = tokens.projectsOf(testData.project.id),
+      )
+    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(editToken)).andIsOk
+    performDelete(commentUrl, null, bearer(editToken)).andIsOk
+  }
+
+  @Test
+  fun `the own-batch-job fallback cannot widen a token that lacks batch-jobs scopes`() {
+    val jobUrl = "/v2/projects/${testData.project.id}/batch-jobs/${ownBatchJob.id}"
+    val token = mint(scopes = listOf("translations.view"), projects = tokens.projectsOf(testData.project.id))
+    performGet(jobUrl, bearer(token)).andIsForbidden
+    performPut("$jobUrl/cancel", null, bearer(token)).andIsForbidden
+
+    val viewToken =
+      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = tokens.projectsOf(testData.project.id))
+    performGet(jobUrl, bearer(viewToken)).andIsOk
   }
 
   private fun setTranslation(
@@ -394,60 +458,13 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     bearer(token),
   )
 
-  @Test
-  fun `a token stops working once its subject account is deleted`() {
-    val token =
-      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id), subject = viewOnlyUser.id)
-    performGet(translationsUrl(), bearer(token)).andIsOk
-
-    userAccountService.delete(userAccountService.get(viewOnlyUser.id))
-
-    performGet(translationsUrl(), bearer(token)).andIsUnauthorized
-  }
-
-  @Test
-  fun `the own-jobs fallback cannot widen a token that lacks batch-jobs-view`() {
-    val currentJobs = "/v2/projects/${testData.project.id}/current-batch-jobs"
-    val viewOnly = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    performGet(currentJobs, bearer(viewOnly)).andIsForbidden
-    val withBatch =
-      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = listOf(testData.project.id))
-    performGet(currentJobs, bearer(withBatch)).andIsOk
-  }
-
-  @Test
-  fun `the own-comment fallback cannot widen a token that lacks comments-edit`() {
-    val commentUrl =
-      "/v2/projects/${testData.project.id}/translations/${ownCommentTranslation.id}/comments/${ownComment.id}"
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(token)).andIsForbidden
-    performDelete(commentUrl, null, bearer(token)).andIsForbidden
-
-    val editToken =
-      mint(scopes = listOf("translations.view", "translation-comments.edit"), projects = listOf(testData.project.id))
-    performPut(commentUrl, TranslationCommentDto(text = "edited"), bearer(editToken)).andIsOk
-    performDelete(commentUrl, null, bearer(editToken)).andIsOk
-  }
-
-  @Test
-  fun `the own-batch-job fallback cannot widen a token that lacks batch-jobs scopes`() {
-    val jobUrl = "/v2/projects/${testData.project.id}/batch-jobs/${ownBatchJob.id}"
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    performGet(jobUrl, bearer(token)).andIsForbidden
-    performPut("$jobUrl/cancel", null, bearer(token)).andIsForbidden
-
-    val viewToken =
-      mint(scopes = listOf("translations.view", "batch-jobs.view"), projects = listOf(testData.project.id))
-    performGet(jobUrl, bearer(viewToken)).andIsOk
-  }
-
   private fun translationsUrl() = "/v2/projects/${testData.project.id}/translations"
 
   private fun bearer(token: String) = HttpHeaders().apply { add(HttpHeaders.AUTHORIZATION, "Bearer $token") }
 
   private fun mint(
     scopes: List<String>,
-    projects: Any,
+    projects: String,
     subject: Long = testData.user.id,
     issuedAt: Instant = Instant.now(),
     expiresAt: Instant = issuedAt.plus(30, ChronoUnit.MINUTES),
@@ -455,7 +472,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     tokens.issue(
       subject = subject,
       scopes = scopes,
-      projects = projects,
+      projectSelection = projects,
       issuedAt = issuedAt,
       expiresAt = expiresAt,
     )

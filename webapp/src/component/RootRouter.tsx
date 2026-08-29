@@ -47,9 +47,6 @@ const SsoMigrationView = React.lazy(
 const AcceptAuthProviderChangeView = React.lazy(
   () => import('./security/AcceptAuthProviderChangeView')
 );
-const OAuth2BootstrapView = React.lazy(
-  () => import('tg.component/security/oauth2/OAuth2BootstrapView')
-);
 const OAuth2ConsentView = React.lazy(
   () => import('tg.component/security/oauth2/OAuth2ConsentView')
 );
@@ -86,9 +83,6 @@ export const RootRouter = () => {
         </Route>
         <PrivateRoute path={LINKS.SSO_MIGRATION.template}>
           <SsoMigrationView />
-        </PrivateRoute>
-        <PrivateRoute exact path={LINKS.OAUTH2_BOOTSTRAP.template}>
-          <OAuth2BootstrapView />
         </PrivateRoute>
         <PrivateRoute exact path={LINKS.OAUTH2_CONSENT.template}>
           <OAuth2ConsentView />

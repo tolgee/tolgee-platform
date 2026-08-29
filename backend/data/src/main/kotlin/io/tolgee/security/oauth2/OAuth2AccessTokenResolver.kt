@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.oauth2.OAuth2Authorization
 import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.UserAccountService
 import org.springframework.stereotype.Component
@@ -38,19 +39,22 @@ class OAuth2AccessTokenResolver(
   private val currentDateProvider: CurrentDateProvider,
 ) {
   fun tryResolve(token: String): TolgeeAuthentication? {
-    // Tolgee's own JWTs are the other kind of Bearer token on this path. They always carry the two dots of a JWS,
-    // which an opaque token never does — so this rules them out without a store lookup.
-    if (token.contains('.')) return null
+    // Tolgee's own JWTs are the other kind of Bearer token on this path; the prefix is what tells the two apart
+    // without a store lookup.
+    if (!token.startsWith(OAUTH_ACCESS_TOKEN_PREFIX)) return null
 
-    val authorization = repository.findByAccessTokenHash(keyGenerator.hash(token)) ?: return null
+    val hash = keyGenerator.hash(token.removePrefix(OAUTH_ACCESS_TOKEN_PREFIX))
+    val authorization =
+      repository.findByAccessTokenHash(hash) ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     val expiresAt = authorization.accessTokenExpiresAt ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     if (!expiresAt.after(currentDateProvider.date)) {
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
-    // Clients are registered from configuration, and dropping one is how an operator switches it off; its grants
-    // outlive it in the store and must stop authenticating.
-    clientRegistry.find(authorization.clientId) ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    // A grant outlives the client it was issued to, so this is checked per request rather than at issue time.
+    if (!clientRegistry.isStillAuthorized(authorization.clientId)) {
+      throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    }
 
     val user =
       userAccountService.findDto(authorization.userAccount.id)
@@ -60,20 +64,12 @@ class OAuth2AccessTokenResolver(
     }
 
     return TolgeeAuthentication(
-      credentials = OAuth2TokenCredentials(grantedScopes(authorization), authorization.boundProjectIds()),
-      deviceId = authorization.id.toString(),
+      credentials = OAuth2TokenCredentials(authorization.activeScopeSet(), authorization.boundProjectIds()),
+      deviceId = null,
       userAccount = user,
       actingAsUserAccount = null,
       isReadOnly = false,
       isSuperToken = false,
     )
-  }
-
-  // A stored scope value can name a scope that no longer exists, so unknown values are dropped rather than raised.
-  private fun grantedScopes(authorization: OAuth2Authorization): Set<Scope> =
-    authorization.grantedScopeValues.mapNotNull { SCOPES_BY_VALUE[it] }.toSet()
-
-  companion object {
-    private val SCOPES_BY_VALUE = Scope.entries.associateBy { it.value }
   }
 }

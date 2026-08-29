@@ -112,7 +112,6 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
     Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(false)
-    // Derived from the two above, so a test that flips either gets the right answer without stubbing it again.
     Mockito.`when`(authenticationFacade.isScopedCredential).thenCallRealMethod()
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)

@@ -166,7 +166,6 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
       permissionService.getProjectPermissionData(
         testData.project.id,
         userAccount.id,
-        asScopedCredential = false,
       )
     checkFn(data)
   }

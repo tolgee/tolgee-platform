@@ -19,21 +19,32 @@ package io.tolgee.security.oauth2
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AbstractControllerTest
-import org.assertj.core.api.Assertions.assertThat
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
 
-/**
- * Boots the full application context to verify the OAuth2 authorization-server filter chain coexists with the main
- * stateless chain, and that the discovery endpoint is served.
- */
+/** Boots the full application context to verify the OAuth2 endpoints are served under the main security chain. */
 class OAuth2AuthorizationServerTest : AbstractControllerTest() {
+  private fun corsHeader(path: String): String? =
+    mvc
+      .perform(options(path).header("Origin", "https://ext.example").header("Access-Control-Request-Method", "GET"))
+      .andReturn()
+      .response
+      .getHeader("Access-Control-Allow-Origin")
+
   @Test
   fun `sets a referrer policy on the authorization endpoint`() {
-    // /oauth2/authorize answers with redirects and error pages whose URLs carry `code` and `state`. Spring sets no
-    // Referrer-Policy by default, and this chain does not inherit the main chain's headers, so it must set its own.
+    // /oauth2/authorize redirects to URLs carrying `code` and `state`, so the referrer must not leak them.
     val response = mvc.perform(get("/oauth2/authorize")).andReturn().response
-    assertThat(response.getHeader("Referrer-Policy")).isEqualTo("strict-origin-when-cross-origin")
+    response.getHeader("Referrer-Policy").assert.isEqualTo("strict-origin-when-cross-origin")
+  }
+
+  @Test
+  fun `CORS is offered on the token and discovery endpoints but not on authorize`() {
+    corsHeader("/oauth2/authorize").assert.isNull()
+    corsHeader("/oauth2/token").assert.isEqualTo("*")
+    corsHeader("/.well-known/oauth-authorization-server").assert.isEqualTo("*")
   }
 
   @Test
@@ -42,8 +53,8 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
     // key lifecycle has been reintroduced without anything needing one. (An unknown path is answered by the SPA
     // catch-all, so the check is on the content, not the status.)
     val response = mvc.perform(get("/oauth2/jwks")).andReturn().response
-    assertThat(response.contentType ?: "").doesNotContain("json")
-    assertThat(response.contentAsString).doesNotContain("\"keys\"")
+    (response.contentType ?: "").assert.doesNotContain("json")
+    response.contentAsString.assert.doesNotContain("\"keys\"")
   }
 
   @Test

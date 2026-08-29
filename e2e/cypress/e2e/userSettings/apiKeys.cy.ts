@@ -3,6 +3,7 @@ import {
   clickAdd,
   confirmStandard,
   gcy,
+  gcyAdvanced,
   getPopover,
   selectInSelect,
 } from '../../common/shared';
@@ -96,9 +97,7 @@ const visit = () => {
 };
 
 const getCheckbox = (scope: Scope) => {
-  return cy
-    .gcy('permissions-advanced-item')
-    .filter(`[permissions-scope="${scope}"]`);
+  return gcyAdvanced({ value: 'permissions-advanced-item', scope });
 };
 
 const unselectAll = () => {

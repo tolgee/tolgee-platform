@@ -90,7 +90,6 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
 
   @Test
   fun `an admin's key cannot read a project the admin never joined`() {
-    // Non-member access is masked as 404, same as any stranger.
     performGet("$translationsUrl?ak=${key(outsideAdmin, Scope.TRANSLATIONS_VIEW)}").andIsNotFound
   }
 

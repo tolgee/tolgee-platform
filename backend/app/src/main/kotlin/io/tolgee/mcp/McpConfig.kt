@@ -4,6 +4,7 @@ import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.util.VersionProvider
 import org.redisson.api.RedissonClient
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -19,7 +20,7 @@ class McpConfig {
   fun mcpTransportProvider(): WebMvcStreamableServerTransportProvider {
     return WebMvcStreamableServerTransportProvider
       .builder()
-      .mcpEndpoint("/mcp/developer")
+      .mcpEndpoint(OAuth2Constants.MCP_RESOURCE_PATH)
       .build()
   }
 

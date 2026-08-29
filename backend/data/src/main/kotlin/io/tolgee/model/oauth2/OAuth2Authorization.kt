@@ -2,18 +2,18 @@ package io.tolgee.model.oauth2
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.oauth2.OAuth2Constants
+import io.tolgee.security.oauth2.OAuth2Scopes
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import jakarta.persistence.UniqueConstraint
-import jakarta.validation.constraints.NotNull
 import java.util.Date
 
 /**
@@ -34,37 +34,39 @@ import java.util.Date
   ],
   indexes = [
     Index(columnList = "user_account_id"),
+    Index(columnList = "previous_refresh_token_hash"),
   ],
 )
 class OAuth2Authorization : StandardAuditModel() {
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(nullable = false)
-  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var userAccount: UserAccount
 
   @Column(nullable = false)
-  @NotNull
   var clientId: String = ""
 
-  @Column(nullable = false, length = 2000)
-  @NotNull
+  @Column(length = 2000, nullable = false)
   var redirectUri: String = ""
 
   @Column(length = 2000)
   var clientState: String? = null
 
   @Column(nullable = false)
-  @NotNull
   var codeChallenge: String = ""
 
-  /** Space-delimited scope values the client asked for on `/oauth2/authorize`. */
-  @Column(nullable = false, length = 4000)
-  @NotNull
+  /** What the client asked for on `/oauth2/authorize`. */
+  @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
 
-  /** Space-delimited scope values the user approved; null until consent. */
+  /** The ceiling a refresh can never exceed; null until consent. */
   @Column(length = 4000)
   var grantedScopes: String? = null
+
+  /**
+   * What the *currently issued* token carries — [grantedScopes], or a subset of it when a refresh asked for less.
+   * Kept apart from [grantedScopes] so a narrowing refresh does not shrink the grant itself.
+   */
+  @Column(length = 4000)
+  var activeScopes: String? = null
 
   /** The client's `project` hint on the authorize request, whatever the user later chose. */
   var projectHint: Long? = null
@@ -73,10 +75,17 @@ class OAuth2Authorization : StandardAuditModel() {
    * What the consent screen bound the token to: [OAuth2Constants.ALL_PROJECTS], or comma-separated project ids.
    * Null until the screen made the choice.
    */
+  @Column(length = 2000)
   var projectSelection: String? = null
 
-  /** Keys the pending authorization for the consent screen; distinct from the client's own [clientState]. */
+  /**
+   * Keys the pending authorization for the consent screen; distinct from the client's own [clientState]. Cleared when
+   * consent resolves the authorization, so a spent grant can no longer be addressed by it.
+   */
   var consentState: String? = null
+
+  @Temporal(TemporalType.TIMESTAMP)
+  var consentExpiresAt: Date? = null
 
   var codeHash: String? = null
 
@@ -96,20 +105,44 @@ class OAuth2Authorization : StandardAuditModel() {
 
   var refreshTokenHash: String? = null
 
+  /** The refresh token this grant's current one replaced, so a replay can be told from a guess. */
+  var previousRefreshTokenHash: String? = null
+
   @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
 
+  /**
+   * The three scope properties are stored as [Scope] *names* and exposed as wire values. A name that no longer
+   * resolves is dropped on read, which narrows the grant rather than failing it or honouring a scope the codebase
+   * no longer defines.
+   */
   var requestedScopeValues: List<String>
-    get() = splitScopes(requestedScopes)
+    get() = wireValuesOf(requestedScopes)
     set(value) {
-      requestedScopes = value.joinToString(" ")
+      requestedScopes = storedNamesOf(value)
     }
 
   var grantedScopeValues: List<String>
-    get() = splitScopes(grantedScopes ?: "")
+    get() = wireValuesOf(grantedScopes)
     set(value) {
-      grantedScopes = value.joinToString(" ")
+      grantedScopes = storedNamesOf(value)
     }
+
+  var activeScopeValues: List<String>
+    get() = wireValuesOf(activeScopes)
+    set(value) {
+      activeScopes = storedNamesOf(value)
+    }
+
+  /** The active scopes as [Scope], without the detour through their wire spelling. */
+  fun activeScopeSet(): Set<Scope> =
+    OAuth2Constants.splitScopeString(activeScopes).mapNotNull { OAuth2Scopes.findByName(it) }.toSet()
+
+  private fun wireValuesOf(stored: String?): List<String> =
+    OAuth2Constants.splitScopeString(stored).mapNotNull { OAuth2Scopes.findByName(it)?.value }
+
+  private fun storedNamesOf(wireValues: List<String>): String =
+    wireValues.mapNotNull { OAuth2Scopes.find(it)?.name }.joinToString(" ")
 
   /**
    * Project ids the authorization is bound to, or null for [OAuth2Constants.ALL_PROJECTS].
@@ -126,6 +159,4 @@ class OAuth2Authorization : StandardAuditModel() {
   fun bindProjects(projectIds: Collection<Long>?) {
     projectSelection = projectIds?.joinToString(",") ?: OAuth2Constants.ALL_PROJECTS
   }
-
-  private fun splitScopes(raw: String): List<String> = raw.split(" ").filter { it.isNotBlank() }
 }

@@ -46,11 +46,9 @@ data class UserAccountDto(
   }
 }
 
-// The account-wide token-invalidation gate: a token issued before [tokensValidNotBefore] (password change / forced
-// sign-out) is no longer valid. One owner for every bearer-token path (JWT, OAuth access + refresh).
+// A token issued before [UserAccountDto.tokensValidNotBefore] (password change / forced sign-out) is no longer valid.
 fun UserAccountDto.isTokenInvalidated(issuedAt: Instant?): Boolean {
   val validNotBefore = tokensValidNotBefore ?: return false
-  // Fail closed: a cutoff is set but the token carries no comparable issue time, so it can't be proven post-cutoff.
   if (issuedAt == null) return true
   // JWT `iat` has whole-second precision; truncate the cutoff to seconds too, otherwise a token minted in the same
   // second as the invalidation reads as "before" the millisecond-precise cutoff and is wrongly rejected.

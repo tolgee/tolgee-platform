@@ -5876,6 +5876,87 @@
             END $$;
         </sql>
     </changeSet>
-    <include file="db/changelog/oauth2/oauth2-server.xml"/>
-    <include file="db/changelog/spring-session/spring-session.xml"/>
+    <changeSet author="anty" id="oauth2-authorization">
+        <createTable tableName="oauth2_authorization">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="oauth2_authorizationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="redirect_uri" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_state" type="VARCHAR(2000)"/>
+            <column name="code_challenge" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_scopes" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="granted_scopes" type="VARCHAR(4000)"/>
+            <column name="active_scopes" type="VARCHAR(4000)"/>
+            <column name="project_hint" type="BIGINT"/>
+            <column name="project_selection" type="VARCHAR(2000)"/>
+            <column name="consent_state" type="VARCHAR(255)"/>
+            <column name="consent_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="code_hash" type="VARCHAR(255)"/>
+            <column name="code_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="code_used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_hash" type="VARCHAR(255)"/>
+            <column name="access_token_issued_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="refresh_token_hash" type="VARCHAR(255)"/>
+            <column name="previous_refresh_token_hash" type="VARCHAR(255)"/>
+            <column name="refresh_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addUniqueConstraint columnNames="consent_state" constraintName="oauth2_authorization_consent_state_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="code_hash" constraintName="oauth2_authorization_code_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="access_token_hash" constraintName="oauth2_authorization_access_token_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <addUniqueConstraint columnNames="refresh_token_hash" constraintName="oauth2_authorization_refresh_token_hash_unique"
+                             tableName="oauth2_authorization"/>
+        <createIndex indexName="oauth2_authorization_user_account_id_idx" tableName="oauth2_authorization">
+            <column name="user_account_id"/>
+        </createIndex>
+        <createIndex indexName="oauth2_authorization_previous_refresh_token_hash_idx" tableName="oauth2_authorization">
+            <column name="previous_refresh_token_hash"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="oauth2_authorization"
+                                 constraintName="oauth2_authorization_user_account_fk" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="anty" id="tasks-assigned-access-backfill">
+        <comment>
+            Before tasks.assigned-access existed, being a task's assignee was enough to view and edit it, whatever
+            the permission said. The scope now gates that fallback, and role-based permissions pick it up because
+            ProjectPermissionType expands at runtime — but granular permissions and API keys store their scope list
+            literally, so without this backfill every existing one silently loses the elevation on upgrade.
+        </comment>
+        <sql>
+            update permission
+            set scopes = array_append(scopes, 'TASKS_ASSIGNED_ACCESS')
+            where scopes is not null
+              and not ('TASKS_ASSIGNED_ACCESS' = any (scopes));
+
+            insert into api_key_scopes_enum (api_key_id, scopes_enum)
+            select id, 'TASKS_ASSIGNED_ACCESS'
+            from api_key
+            where id not in (select api_key_id
+                             from api_key_scopes_enum
+                             where scopes_enum = 'TASKS_ASSIGNED_ACCESS');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

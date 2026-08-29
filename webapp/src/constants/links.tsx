@@ -111,7 +111,6 @@ export class LINKS {
   );
 
   static OAUTH2 = Link.ofRoot('oauth2');
-  static OAUTH2_BOOTSTRAP = Link.ofParent(LINKS.OAUTH2, 'bootstrap');
   static OAUTH2_CONSENT = Link.ofParent(LINKS.OAUTH2, 'consent');
 
   static GO_TO_CLOUD_BILLING = Link.ofRoot('billing');

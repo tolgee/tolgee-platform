@@ -24,6 +24,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
+import io.tolgee.security.authentication.isCredentialScopedFor
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -89,23 +90,20 @@ class PermissionService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccount: UserAccount,
-    asScopedCredential: Boolean,
-  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id, asScopedCredential)
+  ) = getProjectPermissionScopesNoApiKey(projectId, userAccount.id)
 
   @Transactional(readOnly = true)
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userAccountId: Long,
-    asScopedCredential: Boolean,
   ): Array<Scope>? {
-    return getProjectPermissionData(projectId, userAccountId, asScopedCredential).computedPermissions.expandedScopes
+    return getProjectPermissionData(projectId, userAccountId).computedPermissions.expandedScopes
   }
 
   @Transactional(readOnly = true)
   fun getProjectPermissionData(
     project: ProjectDto,
     userAccountId: Long,
-    asScopedCredential: Boolean,
   ): ProjectPermissionData {
     val projectPermission = find(projectId = project.id, userId = userAccountId)
 
@@ -124,7 +122,7 @@ class PermissionService(
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
         isProjectPublic = project.public,
-        asScopedCredential = asScopedCredential,
+        asScopedCredential = isCredentialScopedFor(userAccountId),
       )
 
     return ProjectPermissionData(
@@ -182,10 +180,9 @@ class PermissionService(
   fun getProjectPermissionData(
     projectId: Long,
     userAccountId: Long,
-    asScopedCredential: Boolean,
   ): ProjectPermissionData {
     val project = projectService.findDto(projectId) ?: throw NotFoundException()
-    return getProjectPermissionData(project, userAccountId, asScopedCredential)
+    return getProjectPermissionData(project, userAccountId)
   }
 
   fun create(permission: Permission): Permission {
@@ -335,7 +332,7 @@ class PermissionService(
     projectId: Long,
     userId: Long,
   ): Permission {
-    val data = this.getProjectPermissionData(projectId, userId, asScopedCredential = false)
+    val data = this.getProjectPermissionData(projectId, userId)
 
     checkUserIsInProject(data)
 
@@ -437,7 +434,7 @@ class PermissionService(
     userId: Long,
     projectId: Long,
   ) {
-    val data = this.getProjectPermissionData(projectId, userId, asScopedCredential = false)
+    val data = this.getProjectPermissionData(projectId, userId)
     if (data.organizationRole != null) {
       throw BadRequestException(Message.USER_IS_ORGANIZATION_MEMBER)
     }
@@ -463,7 +460,7 @@ class PermissionService(
     project: Project,
     userId: Long,
   ) {
-    val permissionData = this.getProjectPermissionData(project.id, userId, asScopedCredential = false)
+    val permissionData = this.getProjectPermissionData(project.id, userId)
     if (permissionData.organizationRole != null) {
       throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
     }
@@ -483,9 +480,8 @@ class PermissionService(
   fun getPermittedViewLanguages(
     projectId: Long,
     userId: Long,
-    asScopedCredential: Boolean,
   ): Collection<LanguageDto> {
-    val permissionData = this.getProjectPermissionData(projectId, userId, asScopedCredential)
+    val permissionData = this.getProjectPermissionData(projectId, userId)
 
     val allLanguages = languageService.findAll(projectId)
     val viewLanguageIds = permissionData.computedPermissions.viewLanguageIds
@@ -509,8 +505,7 @@ class PermissionService(
     projectId: Long,
     userId: Long,
   ) {
-    val permission =
-      getProjectPermissionData(projectId, userId, asScopedCredential = false).directPermissions ?: return
+    val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }
 

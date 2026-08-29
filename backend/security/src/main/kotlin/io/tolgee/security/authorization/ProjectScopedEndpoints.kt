@@ -20,15 +20,8 @@ import org.springframework.util.AntPathMatcher
 
 /**
  * The paths [ProjectAuthorizationInterceptor] is registered for, and therefore the only ones where a credential's
- * project permissions can be applied.
- *
- * A matching path is necessary but not sufficient, so this is one half of "will this request be narrowed?", not the
- * whole answer: [IsGlobalRoute] makes the interceptor return before it narrows anything, whatever the path.
- *
- * Declaring `@RequiresProjectPermissions` or `@UseDefaultPermissions` is a different question again: a handler outside
- * these paths can carry one and never be narrowed, because the interceptor is registered by path and simply never runs
- * for it. `/v2/user-tasks` is exactly that — annotated, unnarrowed, and returning every task the user has in every
- * project.
+ * project permissions can be applied — a handler outside them is never narrowed, whatever it is annotated with.
+ * Matching a path is necessary but not sufficient; [ProjectAuthorizationInterceptor] owns the rest of the answer.
  */
 object ProjectScopedEndpoints {
   val PATTERNS = arrayOf("/v2/projects/**", "/api/project/**", "/api/repository/**")

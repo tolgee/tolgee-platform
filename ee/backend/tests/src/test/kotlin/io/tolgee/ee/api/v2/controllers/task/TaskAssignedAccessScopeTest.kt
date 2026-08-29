@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
- * The task-assignee elevation is gated on `Scope.TASKS_ASSIGNED_ACCESS`. Every role preset grants it and nothing
- * backfills existing granular permission rows, so a user holding hand-picked scopes is the one population whose
- * behaviour changes on upgrade — and the only one these tests are about.
+ * The task-assignee elevation is gated on `Scope.TASKS_ASSIGNED_ACCESS`. These tests are about the granular-permission
+ * population: role presets grant the scope by expansion, hand-picked scope sets only carry it if it was granted or
+ * backfilled.
  */
 class TaskAssignedAccessScopeTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TasksAssignedAccessTestData

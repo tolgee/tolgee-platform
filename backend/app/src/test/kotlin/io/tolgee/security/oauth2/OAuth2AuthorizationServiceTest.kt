@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2026 Tolgee s.r.o. and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.tolgee.security.oauth2
 
 import io.tolgee.AbstractSpringTest
@@ -16,7 +32,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
   private lateinit var repository: OAuth2AuthorizationRepository
 
   @Autowired
-  private lateinit var queryService: OAuth2AuthorizationService
+  private lateinit var authorizationService: OAuth2AuthorizationService
 
   private lateinit var testData: BaseTestData
   private lateinit var userA: UserAccount
@@ -32,8 +48,8 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
-    queryService.revokeAllForUser(userA.id)
-    queryService.revokeAllForUser(userB.id)
+    authorizationService.revokeAllForUser(userA.id)
+    authorizationService.revokeAllForUser(userB.id)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -45,7 +61,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     val a2 = insertGrant("client-y", userA)
     val b1 = insertGrant("client-x", userB)
 
-    val deleted = queryService.revokeAllForUser(userA.id)
+    val deleted = authorizationService.revokeAllForUser(userA.id)
 
     deleted.assert.isEqualTo(2)
     repository.existsById(a1).assert.isFalse()

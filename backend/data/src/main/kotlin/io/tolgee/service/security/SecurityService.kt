@@ -22,13 +22,13 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.isCredentialScopedFor
 import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectFeatureGuard
-import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -86,10 +86,8 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
-    val isScoped = authenticationFacade.isScopedCredential
-    val hasNoProjectPermission =
-      getProjectPermissionScopesNoApiKey(projectId, asScopedCredential = isScoped).isNullOrEmpty()
-    val mayFallBackOnAdminReach = !isScoped && activeUser.isSupporterOrAdmin()
+    val hasNoProjectPermission = getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty()
+    val mayFallBackOnAdminReach = !authenticationFacade.isScopedCredential && activeUser.isSupporterOrAdmin()
     if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
@@ -134,11 +132,7 @@ class SecurityService(
     var scopes =
       Scope
         .expand(
-          getProjectPermissionScopesNoApiKey(
-            projectId,
-            authenticationFacade.authenticatedUser.id,
-            asScopedCredential = authenticationFacade.isScopedCredential,
-          ),
+          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
 
     activeApiKey?.let { scopes = scopes.intersect(Scope.expand(it.scopes).toSet()) }
@@ -166,12 +160,7 @@ class SecurityService(
     val user = user ?: activeUser
     // Always check for the current user even if we're using an API key for security reasons.
     // This prevents improper preservation of permissions.
-    checkProjectPermissionNoApiKey(
-      projectId,
-      requiredPermission,
-      user,
-      asScopedCredential = authenticationFacade.isScopedCredential,
-    )
+    checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
     authenticationFacade.oauthTokenCredentials?.let { checkOAuthTokenPermission(projectId, requiredPermission, it) }
 
@@ -224,8 +213,6 @@ class SecurityService(
     }
   }
 
-  // Via getCurrentPermittedScopes, not a raw permission lookup: that is what intersects a PAK's scope list and an
-  // OAuth token's scope ∩ project set, so one gate binds every credential kind.
   private fun hasTaskAssignedAccess(projectId: Long): Boolean =
     getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
 
@@ -248,8 +235,8 @@ class SecurityService(
     projectId: Long,
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
-    asScopedCredential: Boolean,
   ) {
+    val asScopedCredential = isCredentialScopedFor(userAccountDto.id)
     if (!asScopedCredential && userAccountDto.isAdmin()) {
       return
     }
@@ -260,7 +247,7 @@ class SecurityService(
     }
 
     val allowedScopes =
-      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id, asScopedCredential = asScopedCredential)
+      getProjectPermissionScopesNoApiKey(projectId, userAccountDto.id)
         ?: throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     checkPermission(requiredScope, allowedScopes)
@@ -459,7 +446,6 @@ class SecurityService(
       permissionService.getProjectPermissionData(
         projectId,
         authenticationFacade.authenticatedUser.id,
-        asScopedCredential = authenticationFacade.isScopedCredential,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -475,7 +461,6 @@ class SecurityService(
         permissionService.getProjectPermissionData(
           projectId,
           authenticationFacade.authenticatedUser.id,
-          asScopedCredential = authenticationFacade.isScopedCredential,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -588,9 +573,8 @@ class SecurityService(
   fun getProjectPermissionScopesNoApiKey(
     projectId: Long,
     userId: Long = activeUser.id,
-    asScopedCredential: Boolean,
   ): Array<Scope>? {
-    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId, asScopedCredential)
+    return permissionService.getProjectPermissionScopesNoApiKey(projectId, userId)
   }
 
   fun checkKeyIdsExistAndIsFromProject(
@@ -720,8 +704,6 @@ class SecurityService(
     }
   }
 
-  // "Elevated" is about the caller, not the user: a scoped credential held by a server admin is not elevated, so the
-  // per-language check still runs for it.
   private fun runUnlessElevatedAsServerAdmin(runnable: () -> Unit) {
     if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
       runnable()

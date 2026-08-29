@@ -8,14 +8,6 @@ spring:
     redis:
       repositories:
         enabled: false
-  session:
-    # Only the OAuth2 consent flow uses a session; JDBC so it survives across replicas without ingress affinity.
-    # Schema comes from Liquibase (db/changelog/spring-session), not Spring Session.
-    store-type: jdbc
-    # A consent session lives from the bootstrap redirect until Allow, and is invalidated when a code is issued.
-    timeout: 10m
-    jdbc:
-      initialize-schema: never
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

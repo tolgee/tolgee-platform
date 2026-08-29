@@ -97,38 +97,26 @@ class AuthenticationFacade(
     get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth || isOAuthTokenAuth
 
   val isProjectApiKeyAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
+    get() = isProjectApiKeyCredential()
 
   val isPersonalAccessTokenAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is PatDto else false
+    get() = isPersonalAccessTokenCredential()
 
   val isOAuthTokenAuth: Boolean
     get() = oauthTokenCredentials != null
 
   val oauthTokenCredentials: OAuth2TokenCredentials?
-    get() {
-      if (!isAuthenticated) return null
-      return authentication.credentials as? OAuth2TokenCredentials
-    }
+    get() = currentOAuthTokenCredentials()
 
   /**
-   * Whether the request is made with a credential whose authority is narrower than the user's own.
-   *
-   * A project API key and an OAuth token are capabilities: bounded by the scope list they were issued with, and by the
-   * user's real project membership. A webapp JWT and a PAT are the user acting directly and carry the user's full
-   * authority, server-admin reach included.
-   *
-   * Every "the credential may do less than the user" rule reads this, so a new one cannot pick a different answer.
+   * Derived from this facade's own state, not from [io.tolgee.security.authentication.isScopedCredential], so that a
+   * caller holding a facade (a test's mock included) cannot see it disagree with [isProjectApiKeyAuth] and
+   * [isOAuthTokenAuth]. The static form exists for the permission layer, which has no facade to hand.
    */
   val isScopedCredential: Boolean
     get() = isProjectApiKeyAuth || isOAuthTokenAuth
 
-  /**
-   * Whether "you may act on what you created" is available to this caller.
-   *
-   * It is an elevation granted to the user, so a scoped credential has to carry the real scope instead — otherwise the
-   * elevation would let it act past the scope list it was issued with.
-   */
+  /** An elevation granted to the user, so a scoped credential must carry the real scope instead. */
   val canUseAuthorSelfAccess: Boolean
     get() = !isScopedCredential
 

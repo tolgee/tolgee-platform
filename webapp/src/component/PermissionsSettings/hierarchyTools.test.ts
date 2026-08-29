@@ -1,7 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
-import { isNodeDisabled } from './hierarchyTools';
-import { PermissionModelScope } from './types';
+import { isNodeDisabled } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { PermissionModelScope } from 'tg.component/PermissionsSettings/types';
 
 const scopes = (...values: string[]) => values as PermissionModelScope[];
 
@@ -27,8 +25,6 @@ describe('isNodeDisabled', () => {
   });
 
   it('still blocks a scope another checked scope depends on when a locked set is supplied', () => {
-    // The regression this guards: an empty lockedScopes array is truthy, and forking on it switched dependency
-    // blocking off for the whole tree — letting the consent screen uncheck keys.view while keys.edit stayed checked.
     expect(
       isNodeDisabled({
         myScopes: scopes('keys.view'),

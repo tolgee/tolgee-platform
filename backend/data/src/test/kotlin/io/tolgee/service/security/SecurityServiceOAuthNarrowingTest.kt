@@ -50,12 +50,6 @@ class SecurityServiceOAuthNarrowingTest {
       permissionService = this@SecurityServiceOAuthNarrowingTest.permissionService
     }
 
-  /**
-   * In production `isScopedCredential` is `isProjectApiKeyAuth || isOAuthTokenAuth`, so with an OAuth token present it
-   * is necessarily true. Stubbing the credentials without it lets the mock report a state that cannot occur, and the
-   * permission lookups would then be matched for the wrong `asScopedCredential` value — the tests would pass without
-   * exercising the narrowing they are named for.
-   */
   private fun authenticatedWithOAuth(credentials: OAuth2TokenCredentials?) {
     whenever(authenticationFacade.oauthTokenCredentials).thenReturn(credentials)
     whenever(authenticationFacade.isScopedCredential).thenReturn(credentials != null)
@@ -69,9 +63,7 @@ class SecurityServiceOAuthNarrowingTest {
     projectId: Long,
     scope: Scope,
   ) {
-    // Stubbed for both values: an OAuth-authenticated call passes asScopedCredential = true, a plain one false.
-    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L, false)).thenReturn(arrayOf(scope))
-    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L, true)).thenReturn(arrayOf(scope))
+    whenever(permissionService.getProjectPermissionScopesNoApiKey(projectId, 1L)).thenReturn(arrayOf(scope))
   }
 
   @Test
@@ -100,14 +92,11 @@ class SecurityServiceOAuthNarrowingTest {
 
   @Test
   fun `checkProjectPermission denies a scope the token doesn't cover even when the user holds it live`() {
-    // The user has keys.edit live, but the token was only granted translations.edit — the nested KEYS_EDIT check
-    // (past the endpoint interceptor) must be denied so a narrow token can't create/delete keys.
     userHasScopeOn(2L, Scope.KEYS_EDIT)
     authenticatedWithOAuth(OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_EDIT), setOf(2L)))
 
     assertThatThrownBy { service().checkProjectPermission(2L, Scope.KEYS_EDIT, user) }
       .isInstanceOf(PermissionException::class.java)
-      // A covered project but a missing scope is a scope error, not a project-access error.
       .hasFieldOrPropertyWithValue("code", Message.OPERATION_NOT_PERMITTED.code)
   }
 

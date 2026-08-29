@@ -265,7 +265,7 @@ class SlackSlashCommandController(
     try {
       if (
         permissionService
-          .getProjectPermissionScopesNoApiKey(projectId, userAccountId, asScopedCredential = false)
+          .getProjectPermissionScopesNoApiKey(projectId, userAccountId)
           ?.contains(Scope.ACTIVITY_VIEW) != true
       ) {
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())

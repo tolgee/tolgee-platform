@@ -493,15 +493,15 @@ declare namespace DataCy {
         "notifications-list-item": true;
         "notifications-settings-icon": true;
         "notistack-snackbar": true;
-        "oauth2-bootstrap-error": true;
         "oauth2-consent": true;
         "oauth2-consent-allow": true;
         "oauth2-consent-deny": true;
         "oauth2-consent-error": true;
         "oauth2-consent-modify": true;
+        "oauth2-consent-project": true;
+        "oauth2-consent-project-all": true;
         "oauth2-consent-project-inaccessible": true;
-        "oauth2-consent-project-option": true;
-        "oauth2-consent-project-select": true;
+        "oauth2-consent-project-one": true;
         "oauth2-consent-scope": true;
         "oauth2-consent-scopes": true;
         "order-translation-confirmation": true;

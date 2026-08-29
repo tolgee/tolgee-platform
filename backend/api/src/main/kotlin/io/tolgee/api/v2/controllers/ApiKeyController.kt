@@ -129,7 +129,6 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         apiKey.project.id,
         authenticationFacade.authenticatedUser.id,
-        asScopedCredential = authenticationFacade.isScopedCredential,
       )
 
     val translateLanguageIds =
@@ -224,7 +223,6 @@ class ApiKeyController(
       permissionService.getProjectPermissionData(
         projectIdNotNull,
         authenticationFacade.authenticatedUser.id,
-        asScopedCredential = authenticationFacade.isScopedCredential,
       )
 
     val computed = permissionData.computedPermissions

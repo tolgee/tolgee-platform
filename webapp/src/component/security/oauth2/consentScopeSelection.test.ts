@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { clampApprovedScopes } from 'tg.component/security/oauth2/consentScopeSelection';
 
 const REQUESTED = ['keys.view', 'translations.view', 'translations.edit'];

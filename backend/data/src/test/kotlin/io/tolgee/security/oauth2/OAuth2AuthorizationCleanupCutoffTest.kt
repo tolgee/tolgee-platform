@@ -18,7 +18,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
-import org.assertj.core.api.Assertions.assertThat
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
@@ -36,14 +36,14 @@ class OAuth2AuthorizationCleanupCutoffTest {
   @Test
   fun `deletes with a cutoff of exactly now minus the retention window`() {
     val now = Instant.parse("2026-08-07T00:00:00Z")
-    val queryService = mock<OAuth2AuthorizationService>()
+    val authorizationService = mock<OAuth2AuthorizationService>()
     val dateProvider = mock<CurrentDateProvider> { on { date } doReturn Date.from(now) }
     val properties = OAuth2ServerProperties().apply { authorizationRetentionDays = 7 }
 
-    OAuth2AuthorizationCleanup(queryService, properties, dateProvider).cleanUpExpiredAuthorizations()
+    OAuth2AuthorizationCleanup(authorizationService, properties, dateProvider).cleanUpExpiredAuthorizations()
 
     val captor = argumentCaptor<Instant>()
-    verify(queryService).deleteExpiredBefore(captor.capture())
-    assertThat(captor.firstValue).isEqualTo(now.minus(Duration.ofDays(7)))
+    verify(authorizationService).deleteExpiredBefore(captor.capture())
+    captor.firstValue.assert.isEqualTo(now.minus(Duration.ofDays(7)))
   }
 }
