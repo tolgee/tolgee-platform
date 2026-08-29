@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.dtos.request.apps.RotateAppSecretRequest
@@ -173,6 +174,12 @@ class OrganizationOwnedAppsController(
     @PathVariable organizationId: Long,
     @PathVariable appId: Long,
     @PathVariable secretId: Long,
+    @Parameter(
+      description =
+        "Revoke even when this is the app's last active secret, and invalidate every access token " +
+          "already minted from the app's secrets. Use to retire a leaked credential; without it, " +
+          "revoking the only active secret is refused so the app can't be cut off by mistake.",
+    )
     @RequestParam(required = false, defaultValue = "false") force: Boolean,
   ): AppSecretModel {
     val app = appService.getOwned(organizationId, appId)
