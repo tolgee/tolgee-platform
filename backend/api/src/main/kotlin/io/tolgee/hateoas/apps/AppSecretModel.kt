@@ -31,10 +31,4 @@ open class AppSecretModel(
         "endpoint exchanges it for the short-lived tokens that reach translation data.",
   )
   val secret: String? = null,
-  @Schema(
-    description =
-      "Whether the freshly issued secret reached the app over the lifecycle channel. Present only " +
-        "in the response to rotating the secret.",
-  )
-  val delivery: AppDeliveryOutcomeModel? = null,
 ) : RepresentationModel<AppSecretModel>()

@@ -1,8 +1,10 @@
 package io.tolgee.api.v2.controllers.apps
 
 import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.repository.apps.AppRepository
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppSecretRotationService
@@ -12,6 +14,7 @@ import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,6 +27,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.ResultActions
 import tools.jackson.databind.JsonNode
 
 /**
@@ -67,65 +71,39 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
 
   @Test
   fun `registering an app delivers app_registered with the disclosed credentials`() {
-    val registered = register()
+    val registered =
+      objectMapper.readTree(
+        registerResult()
+          .andAssertThatJson {
+            node("delivery.attempted").isEqualTo(true)
+            node("delivery.delivered").isEqualTo(true)
+          }.andReturn()
+          .response.contentAsString,
+      )
 
-    registered
-      .at("/delivery/attempted")
-      .asBoolean()
-      .assert
-      .isTrue()
-    registered.at("/delivery/delivered").assert.isNotNull
-    registered
-      .get("delivery")
-      .get("delivered")
-      .asBoolean()
-      .assert
-      .isTrue()
-
-    val payload = deliveredPayloads().single { it.get("eventType").asText() == "app.registered" }
-    payload
-      .at("/app/clientId")
-      .asText()
-      .assert
-      .isEqualTo(registered.get("clientId").asText())
-    payload
-      .at("/app/clientSecret")
-      .asText()
-      .assert
-      .isEqualTo(registered.get("clientSecret").asText())
-    payload
-      .at("/app/webhookSecret")
-      .asText()
-      .assert
-      .isEqualTo(registered.get("webhookSecret").asText())
-    payload
-      .at("/organization/id")
-      .asLong()
-      .assert
-      .isEqualTo(testData.organization.id)
+    val delivered = capturedDeliveries().single { it.eventType == "app.registered" }
+    assertThatJson(delivered.payload).apply {
+      node("app.clientId").isEqualTo(registered.get("clientId").asText())
+      node("app.clientSecret").isEqualTo(registered.get("clientSecret").asText())
+      node("app.webhookSecret").isEqualTo(registered.get("webhookSecret").asText())
+      node("organization.id").isEqualTo(testData.organization.id)
+    }
   }
 
   @Test
   fun `a failed registration delivery is reported, not thrown, and the app still registers`() {
     failDelivery()
 
-    val registered = register()
-
-    registered
-      .at("/delivery/attempted")
-      .asBoolean()
-      .assert
-      .isTrue()
-    registered
-      .at("/delivery/delivered")
-      .asBoolean()
-      .assert
-      .isFalse()
-    registered
-      .at("/delivery/error")
-      .asText()
-      .assert
-      .isNotEmpty()
+    val registered =
+      objectMapper.readTree(
+        registerResult()
+          .andAssertThatJson {
+            node("delivery.attempted").isEqualTo(true)
+            node("delivery.delivered").isEqualTo(false)
+            node("delivery.error").isString.isNotEmpty()
+          }.andReturn()
+          .response.contentAsString,
+      )
 
     val appEntityId = registered.get("id").asLong()
     executeInNewTransaction(platformTransactionManager) {
@@ -141,17 +119,9 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
     val appEntityId = register().get("id").asLong()
     val stored = webhookSecretOf(appEntityId)
 
-    val revealed =
-      objectMapper
-        .readTree(
-          performAuthGet("${ownedUrl()}/$appEntityId/webhook-secret")
-            .andIsOk
-            .andReturn()
-            .response.contentAsString,
-        ).get("secret")
-        .asText()
-
-    revealed.assert.isEqualTo(stored)
+    performAuthGet("${ownedUrl()}/$appEntityId/webhook-secret").andIsOk.andAssertThatJson {
+      node("secret").isEqualTo(stored)
+    }
   }
 
   @Test
@@ -165,37 +135,28 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
       objectMapper.readTree(
         performAuthPost("${ownedUrl()}/$appEntityId/webhook-secret/rotate", null)
           .andIsOk
-          .andReturn()
+          .andAssertThatJson {
+            node("secret").isString.isNotEqualTo(oldSecret)
+            node("delivery.delivered").isEqualTo(true)
+          }.andReturn()
           .response.contentAsString,
       )
 
     val newSecret = rotated.get("secret").asText()
-    newSecret.assert.isNotEqualTo(oldSecret)
-    rotated
-      .at("/delivery/delivered")
-      .asBoolean()
-      .assert
-      .isTrue()
     webhookSecretOf(appEntityId).assert.isEqualTo(newSecret)
 
-    val call = capturedDeliveries().single { it.payload.get("eventType").asText() == "app.secret_rotated" }
-    call.payload
-      .at("/app/webhookSecret")
-      .asText()
-      .assert
-      .isEqualTo(newSecret)
-    call.payload
-      .at("/app/clientSecret")
-      .isMissingNode.assert
-      .isTrue()
-    // The rotation delivery is signed with the previous secret so a running app can verify it.
+    val call = capturedDeliveries().single { it.eventType == "app.secret_rotated" }
+    assertThatJson(call.payload).apply {
+      node("app.webhookSecret").isEqualTo(newSecret)
+      node("app.clientSecret").isAbsent()
+    }
+    // Signed with the previous secret so a running app can verify the delivery that carries the new one.
     call.signingSecret.assert.isEqualTo(oldSecret)
   }
 
   @Test
   fun `rolling the client secret delivers app_secret_rotated with the new client secret`() {
-    val registered = register()
-    val appEntityId = registered.get("id").asLong()
+    val appEntityId = register().get("id").asLong()
     reset(appLifecycleHttpClient)
 
     executeInNewTransaction(platformTransactionManager) {
@@ -203,16 +164,11 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
       appSecretRotationService.rotate(app, ONE_DAY)
     }
 
-    val call = capturedDeliveries().single { it.payload.get("eventType").asText() == "app.secret_rotated" }
-    call.payload
-      .at("/app/clientSecret")
-      .asText()
-      .assert
-      .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
-    call.payload
-      .at("/app/webhookSecret")
-      .isMissingNode.assert
-      .isTrue()
+    val call = capturedDeliveries().single { it.eventType == "app.secret_rotated" }
+    assertThatJson(call.payload).apply {
+      node("app.clientSecret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+      node("app.webhookSecret").isAbsent()
+    }
   }
 
   @Test
@@ -225,19 +181,17 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
     performAuthPost("$otherOwned/$appEntityId/webhook-secret/rotate", null).andIsNotFound
   }
 
-  private fun register(): JsonNode {
+  private fun registerResult(): ResultActions {
     userAccount = testData.user
-    return objectMapper.readTree(
-      performAuthPost(ownedUrl(), mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL))
-        .andIsOk
-        .andReturn()
-        .response.contentAsString,
-    )
+    return performAuthPost(ownedUrl(), mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL)).andIsOk
   }
+
+  private fun register(): JsonNode = objectMapper.readTree(registerResult().andReturn().response.contentAsString)
 
   private data class Delivery(
     val url: String,
-    val payload: JsonNode,
+    val eventType: String,
+    val payload: String,
     val signingSecret: String,
   )
 
@@ -250,15 +204,15 @@ class AppLifecycleDeliveryTest : AuthorizedControllerTest() {
       atLeastOnce(),
     ).post(urlCaptor.capture(), payloadCaptor.capture(), secretCaptor.capture())
     return urlCaptor.allValues.indices.map {
+      val payload = payloadCaptor.allValues[it]
       Delivery(
         url = urlCaptor.allValues[it],
-        payload = objectMapper.readTree(payloadCaptor.allValues[it]),
+        eventType = objectMapper.readTree(payload).get("eventType").asText(),
+        payload = payload,
         signingSecret = secretCaptor.allValues[it],
       )
     }
   }
-
-  private fun deliveredPayloads(): List<JsonNode> = capturedDeliveries().map { it.payload }
 
   private fun failDelivery() {
     doThrow(AppLifecycleHttpClient.DeliveryFailedException("app unreachable"))

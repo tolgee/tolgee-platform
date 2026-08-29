@@ -158,13 +158,9 @@ class OrganizationOwnedAppsController(
     val request = body ?: RotateAppSecretRequest()
     val rotation = appSecretRotationService.rotate(app, request.graceSeconds)
     return AppSecretRotationModel(
-      secret =
-        appSecretModelAssembler.toModelWithSecret(
-          rotation.issued.secret,
-          rotation.issued.plaintextSecret,
-          rotation.delivery,
-        ),
+      secret = appSecretModelAssembler.toModelWithSecret(rotation.issued.secret, rotation.issued.plaintextSecret),
       previousExpiresAt = rotation.previousExpiresAt?.time,
+      delivery = AppDeliveryOutcomeModel.of(rotation.delivery),
     )
   }
 

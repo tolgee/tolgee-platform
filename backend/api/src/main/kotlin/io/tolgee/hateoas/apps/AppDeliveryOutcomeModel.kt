@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.apps
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 
 /**
  * Whether Tolgee managed to hand the just-disclosed credentials to the app. Present only in the
@@ -14,4 +15,9 @@ data class AppDeliveryOutcomeModel(
   val delivered: Boolean,
   @Schema(description = "Short reason when the delivery was attempted and failed; null otherwise")
   val error: String?,
-)
+) {
+  companion object {
+    fun of(outcome: AppLifecycleDeliveryOutcome?): AppDeliveryOutcomeModel? =
+      outcome?.let { AppDeliveryOutcomeModel(attempted = it.attempted, delivered = it.delivered, error = it.error) }
+  }
+}
