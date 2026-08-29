@@ -5,8 +5,9 @@ import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
 import java.util.Date
 
 /**
@@ -21,6 +22,7 @@ import java.util.Date
 class AppSecretRotationService(
   private val appSecretService: AppSecretService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
+  private val transactionManager: PlatformTransactionManager,
 ) {
   data class RotationResult(
     val issued: AppSecretService.IssueResult,
@@ -29,13 +31,18 @@ class AppSecretRotationService(
     val previousExpiresAt: Date?,
   )
 
-  @Transactional
   fun rotate(
     app: App,
     graceSeconds: Long,
   ): RotationResult {
-    val issued = appSecretService.issue(app)
-    val previousExpiresAt = appSecretService.expireOthers(app.id, issued.secret.id, graceSeconds)
+    // Persist and commit before delivering: an app may test the new secret the moment it receives it,
+    // and authentication reads only committed secret hashes, so a delivery inside the transaction
+    // could hand the app a secret its next request would then reject.
+    val (issued, previousExpiresAt) =
+      executeInNewTransaction(transactionManager) {
+        val result = appSecretService.issue(app)
+        result to appSecretService.expireOthers(app.id, result.secret.id, graceSeconds)
+      }
     val delivery =
       appLifecycleDeliveryService.deliverNow(
         appEntityId = app.id,

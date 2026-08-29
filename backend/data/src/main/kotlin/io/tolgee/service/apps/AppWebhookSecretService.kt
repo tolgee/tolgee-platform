@@ -8,8 +8,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppRepository
 import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
 
 /**
  * Rotates the secret Tolgee signs an app's lifecycle deliveries with. The new secret is delivered to
@@ -26,42 +27,58 @@ class AppWebhookSecretService(
   private val appRepository: AppRepository,
   private val keyGenerator: KeyGenerator,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
+  private val transactionManager: PlatformTransactionManager,
 ) {
   data class RotationResult(
     val newSecret: String,
     val delivery: AppLifecycleDeliveryOutcome?,
   )
 
-  @Transactional
+  private data class NewWebhookSecret(
+    val target: AppLifecycleDeliveryService.AppTarget,
+    val clientId: String,
+    val newSecret: String,
+  )
+
   fun rotate(appEntityId: Long): RotationResult {
-    val app =
-      appRepository.findById(appEntityId).orElse(null)
-        ?: throw NotFoundException(Message.APP_NOT_FOUND)
+    // Persist and commit the new secret before delivering it, so Tolgee never signs a later delivery
+    // with a secret the app already switched to but this transaction hadn't yet committed.
+    val rotated =
+      executeInNewTransaction(transactionManager) {
+        val app =
+          appRepository.findById(appEntityId).orElse(null)
+            ?: throw NotFoundException(Message.APP_NOT_FOUND)
 
-    val previous = app.webhookSecret
-    val newSecret = keyGenerator.generate(256)
-    app.webhookSecret = newSecret
-    appRepository.save(app)
+        val previous = app.webhookSecret
+        val newSecret = keyGenerator.generate(256)
+        app.webhookSecret = newSecret
+        appRepository.save(app)
 
-    val target =
-      AppLifecycleDeliveryService.AppTarget(
-        appEntityId = app.id,
-        appIdentifier = app.appId,
-        baseUrl = app.baseUrl,
-        // Signed with the old secret so a running app can verify the delivery that carries the new one.
-        signingSecret = previous,
-      )
+        NewWebhookSecret(
+          target =
+            AppLifecycleDeliveryService.AppTarget(
+              appEntityId = app.id,
+              appIdentifier = app.appId,
+              baseUrl = app.baseUrl,
+              // Signed with the old secret so a running app can verify the delivery that carries the new one.
+              signingSecret = previous,
+            ),
+          clientId = app.clientId,
+          newSecret = newSecret,
+        )
+      }
+
     val delivery =
       appLifecycleDeliveryService.deliverNow(
-        target = target,
+        target = rotated.target,
         eventType = AppLifecycleEventType.APP_SECRET_ROTATED,
         appCredentials =
           AppLifecycleAppCredentials(
-            clientId = app.clientId,
+            clientId = rotated.clientId,
             clientSecret = null,
-            webhookSecret = newSecret,
+            webhookSecret = rotated.newSecret,
           ),
       )
-    return RotationResult(newSecret, delivery)
+    return RotationResult(rotated.newSecret, delivery)
   }
 }
