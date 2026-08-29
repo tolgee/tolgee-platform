@@ -37,9 +37,17 @@ class ProjectContextService(
   ) {
     val project =
       projectService.findDto(projectId)
-        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+        ?: throw missingProjectException()
 
     setup(project, requiredScopes, useDefaultPermissions, isWriteOperation)
+  }
+
+  private fun missingProjectException(): RuntimeException {
+    // An app token must not tell a missing project apart from one it simply can't reach — otherwise it
+    // could enumerate project ids. AppProjectContextBinder already returns APP_ACCESS_FORBIDDEN for an
+    // existing project the app isn't bound to; a missing one has to answer the same way.
+    if (authenticationFacade.isAppAuth) return PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    return NotFoundException(Message.PROJECT_NOT_FOUND)
   }
 
   /**

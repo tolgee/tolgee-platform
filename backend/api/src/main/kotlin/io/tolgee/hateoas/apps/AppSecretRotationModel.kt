@@ -11,7 +11,10 @@ open class AppSecretRotationModel(
   val secret: AppSecretModel,
   @Schema(
     description =
-      "When the previous secret lapses, or null when there was no previous secret to retire.",
+      "The grace deadline of the secret this rotation just superseded, or null when there was no " +
+        "previous secret to retire. This is the latest of the outgoing secrets' expiries: a still " +
+        "older secret already inside a shorter grace window from an earlier rotation keeps its own " +
+        "earlier deadline and can lapse before this value.",
   )
   val previousExpiresAt: Long?,
 ) : RepresentationModel<AppSecretRotationModel>()

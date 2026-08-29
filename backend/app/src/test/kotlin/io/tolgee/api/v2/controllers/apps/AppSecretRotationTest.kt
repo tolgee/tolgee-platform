@@ -70,18 +70,14 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
 
   @Test
   fun `a rotation keeps the old secret alive through the grace window`() {
-    val rolled = roll(graceSeconds = ONE_DAY)
-
-    rolled
-      .at("/secret/secret")
-      .asText()
-      .assert
-      .startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
-    rolled
-      .at("/previousExpiresAt")
-      .asLong()
-      .assert
-      .isGreaterThan(0)
+    val response =
+      rollResult(graceSeconds = ONE_DAY)
+        .andAssertThatJson {
+          node("secret.secret").isString.startsWith(AppService.APP_CLIENT_SECRET_PREFIX)
+          node("previousExpiresAt").isNumber.isPositive
+        }.andReturn()
+        .response.contentAsString
+    val rolled = objectMapper.readTree(response)
 
     secretAuthenticates(appClientSecret).andIsOk
     secretAuthenticates(newSecretOf(rolled)).andIsOk
@@ -220,14 +216,16 @@ class AppSecretRotationTest : AuthorizedControllerTest() {
     )
   }
 
-  private fun roll(graceSeconds: Long): JsonNode {
+  private fun rollResult(graceSeconds: Long): ResultActions {
     userAccount = testData.user
-    return objectMapper.readTree(
-      performAuthPost(
-        "${ownedAppsUrl()}/$appEntityId/secrets/rotate",
-        mapOf("graceSeconds" to graceSeconds),
-      ).andIsOk.andReturn().response.contentAsString,
-    )
+    return performAuthPost(
+      "${ownedAppsUrl()}/$appEntityId/secrets/rotate",
+      mapOf("graceSeconds" to graceSeconds),
+    ).andIsOk
+  }
+
+  private fun roll(graceSeconds: Long): JsonNode {
+    return objectMapper.readTree(rollResult(graceSeconds).andReturn().response.contentAsString)
   }
 
   private fun newSecretOf(rolled: JsonNode): String = rolled.at("/secret/secret").asText()
