@@ -15,6 +15,10 @@ class AppRegisteredModelAssembler {
       clientSecret = credentials?.clientSecret,
       webhookSecret = credentials?.webhookSecret,
       installId = result.install?.id,
+      delivery =
+        result.delivery?.let {
+          AppDeliveryOutcomeModel(attempted = it.attempted, delivered = it.delivered, error = it.error)
+        },
     )
   }
 }

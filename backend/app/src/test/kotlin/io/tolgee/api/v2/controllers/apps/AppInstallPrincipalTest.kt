@@ -15,6 +15,7 @@ import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
+import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -38,6 +39,10 @@ class AppInstallPrincipalTest : AuthorizedControllerTest() {
   @MockitoBean
   @Autowired
   lateinit var appManifestHttpClient: AppManifestHttpClient
+
+  @MockitoBean
+  @Autowired
+  lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
 
   lateinit var testData: AppsTestData
   var installId: Long = 0

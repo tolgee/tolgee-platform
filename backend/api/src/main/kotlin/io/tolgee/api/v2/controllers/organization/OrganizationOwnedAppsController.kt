@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.dtos.request.apps.RotateAppSecretRequest
+import io.tolgee.hateoas.apps.AppDeliveryOutcomeModel
 import io.tolgee.hateoas.apps.AppRegisteredModel
 import io.tolgee.hateoas.apps.AppRegisteredModelAssembler
 import io.tolgee.hateoas.apps.AppSecretModel
 import io.tolgee.hateoas.apps.AppSecretModelAssembler
 import io.tolgee.hateoas.apps.AppSecretRotationModel
+import io.tolgee.hateoas.apps.AppWebhookSecretModel
 import io.tolgee.hateoas.organization.apps.OwnedAppModel
 import io.tolgee.hateoas.organization.apps.OwnedAppModelAssembler
 import io.tolgee.model.enums.Scope
@@ -18,8 +20,10 @@ import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppOwnerRemovalService
+import io.tolgee.service.apps.AppSecretRotationService
 import io.tolgee.service.apps.AppSecretService
 import io.tolgee.service.apps.AppService
+import io.tolgee.service.apps.AppWebhookSecretService
 import jakarta.validation.Valid
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.hateoas.CollectionModel
@@ -46,6 +50,8 @@ class OrganizationOwnedAppsController(
   private val appRegisteredModelAssembler: AppRegisteredModelAssembler,
   private val appOwnerRemovalService: AppOwnerRemovalService,
   private val appSecretService: AppSecretService,
+  private val appSecretRotationService: AppSecretRotationService,
+  private val appWebhookSecretService: AppWebhookSecretService,
   private val appSecretModelAssembler: AppSecretModelAssembler,
 ) {
   @PostMapping
@@ -150,10 +156,57 @@ class OrganizationOwnedAppsController(
   ): AppSecretRotationModel {
     val app = appService.getOwned(organizationId, appId)
     val request = body ?: RotateAppSecretRequest()
-    val rotation = appSecretService.rotate(app, request.graceSeconds)
+    val rotation = appSecretRotationService.rotate(app, request.graceSeconds)
     return AppSecretRotationModel(
-      secret = appSecretModelAssembler.toModelWithSecret(rotation.issued.secret, rotation.issued.plaintextSecret),
+      secret =
+        appSecretModelAssembler.toModelWithSecret(
+          rotation.issued.secret,
+          rotation.issued.plaintextSecret,
+          rotation.delivery,
+        ),
       previousExpiresAt = rotation.previousExpiresAt?.time,
+    )
+  }
+
+  @GetMapping("/{appId}/webhook-secret")
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @Operation(
+    summary = "Reveal the app's current webhook signing secret",
+    description =
+      "Unlike a client secret, the webhook signing secret is stored in the clear — Tolgee needs it " +
+        "to sign every delivery — so the owner can read it back here to configure the app by hand. " +
+        "It signs outbound lifecycle deliveries and authenticates nothing towards Tolgee.",
+  )
+  fun getWebhookSecret(
+    @PathVariable organizationId: Long,
+    @PathVariable appId: Long,
+  ): AppWebhookSecretModel {
+    val app = appService.getOwned(organizationId, appId)
+    return AppWebhookSecretModel(secret = app.webhookSecret)
+  }
+
+  @PostMapping("/{appId}/webhook-secret/rotate")
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @Operation(
+    summary = "Rotate the app's webhook signing secret",
+    description =
+      "Mints a new webhook signing secret. The new secret is both returned here — the only place it " +
+        "is disclosed — and delivered to the app, signed with the old secret so a running app adopts " +
+        "it automatically; the `delivery` field says whether it landed. A running app keeps accepting " +
+        "the old secret during the overlap and drops it on its own next rotation.",
+  )
+  fun rotateWebhookSecret(
+    @PathVariable organizationId: Long,
+    @PathVariable appId: Long,
+  ): AppWebhookSecretModel {
+    val app = appService.getOwned(organizationId, appId)
+    val rotation = appWebhookSecretService.rotate(app.id)
+    return AppWebhookSecretModel(
+      secret = rotation.newSecret,
+      delivery =
+        rotation.delivery?.let {
+          AppDeliveryOutcomeModel(attempted = it.attempted, delivered = it.delivered, error = it.error)
+        },
     )
   }
 
