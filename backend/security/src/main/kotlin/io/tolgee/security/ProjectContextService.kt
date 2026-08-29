@@ -25,6 +25,7 @@ class ProjectContextService(
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
+  private val appProjectContextBinder: AppProjectContextBinder,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -36,9 +37,17 @@ class ProjectContextService(
   ) {
     val project =
       projectService.findDto(projectId)
-        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+        ?: throw missingProjectException()
 
     setup(project, requiredScopes, useDefaultPermissions, isWriteOperation)
+  }
+
+  private fun missingProjectException(): RuntimeException {
+    // An app token must not tell a missing project apart from one it simply can't reach — otherwise it
+    // could enumerate project ids. AppProjectContextBinder already returns APP_ACCESS_FORBIDDEN for an
+    // existing project the app isn't bound to; a missing one has to answer the same way.
+    if (authenticationFacade.isAppAuth) return PermissionException(Message.APP_ACCESS_FORBIDDEN)
+    return NotFoundException(Message.PROJECT_NOT_FOUND)
   }
 
   /**
@@ -54,6 +63,8 @@ class ProjectContextService(
     useDefaultPermissions: Boolean,
     isWriteOperation: Boolean,
   ) {
+    appProjectContextBinder.bind(project)
+
     val userId = authenticationFacade.authenticatedUser.id
     var bypassed = false
 
@@ -68,12 +79,14 @@ class ProjectContextService(
             userId,
           )
 
+          if (authenticationFacade.isAppAuth) {
+            throwAppScopePermissionDenied(requiredScopes)
+          }
+
           if (!canBypassForReadOnly()) {
-            // Security consideration: if the user cannot see the project, pretend it does not exist.
             throw ProjectNotFoundException(project.id)
           }
 
-          // Admin access for read-only operations is allowed, but it's not enough for the current operation.
           throw PermissionException()
         }
 
@@ -114,6 +127,13 @@ class ProjectContextService(
     populateHolders(project)
   }
 
+  private fun throwAppScopePermissionDenied(requiredScopes: Array<Scope>?): Nothing {
+    throw PermissionException(
+      Message.OPERATION_NOT_PERMITTED,
+      requiredScopes?.map { it.value } ?: emptyList(),
+    )
+  }
+
   private fun populateHolders(project: ProjectDto) {
     projectHolder.project = project
     activityHolder.activityRevision.projectId = project.id
@@ -131,7 +151,7 @@ class ProjectContextService(
   }
 
   private val canUseAdminPermissions
-    get() = !authenticationFacade.isProjectApiKeyAuth
+    get() = !authenticationFacade.isProjectApiKeyAuth && !authenticationFacade.isAppAuth
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
     if (!canUseAdminPermissions) return false

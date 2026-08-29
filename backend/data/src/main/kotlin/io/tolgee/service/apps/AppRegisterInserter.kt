@@ -50,7 +50,7 @@ class AppRegisterInserter(
       }
     AppService.markManifestHealthy(app, currentDateProvider.date)
     val saved = appRepository.saveAndFlush(app)
-    val issued = appSecretService.issueInitial(saved)
+    val issued = appSecretService.mintSecret(saved)
     return Inserted(
       app = saved,
       credentials =

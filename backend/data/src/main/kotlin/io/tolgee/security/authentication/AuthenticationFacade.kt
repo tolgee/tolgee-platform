@@ -101,6 +101,27 @@ class AuthenticationFacade(
   val isPersonalAccessTokenAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is PatDto else false
 
+  val isAppAuth: Boolean
+    get() = SecurityContextHolder.getContext().authentication is AppAuthentication
+
+  val appAuthentication: AppAuthentication
+    get() =
+      SecurityContextHolder.getContext().authentication as? AppAuthentication
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+
+  /**
+   * The person this request is on behalf of, or null when an install acts as itself. For anything
+   * about a person — attribution, per-language grants — prefer this over the principal, which on the
+   * install-context path is only a synthetic identity.
+   */
+  val actingPersonUserId: Long?
+    get() {
+      if (!isAppAuth) return authenticatedUserOrNull?.id
+      appAuthentication.actsForUserId?.let { return it }
+      if (appAuthentication.isInstallContext) return null
+      return authenticatedUserOrNull?.id
+    }
+
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 

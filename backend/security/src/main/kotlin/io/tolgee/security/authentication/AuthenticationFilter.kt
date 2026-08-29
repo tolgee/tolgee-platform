@@ -48,6 +48,8 @@ class AuthenticationFilter(
   @Lazy
   private val jwtService: JwtService,
   @Lazy
+  private val appTokenAuthenticator: AppTokenAuthenticator,
+  @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
   private val apiKeyService: ApiKeyService,
@@ -56,6 +58,10 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  companion object {
+    const val ACTING_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
+  }
+
   private val authenticationProperties
     get() = tolgeeProperties.authentication
   private val internalProperties
@@ -88,10 +94,12 @@ class AuthenticationFilter(
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
-        val auth = jwtService.validateToken(authorization.substring(7))
-        checkIfSsoUserStillValid(auth.principal)
+        val token = authorization.substring(7)
 
-        SecurityContextHolder.getContext().authentication = auth
+        val handledAppAuth = handleAppAuthentication(request, token)
+        if (handledAppAuth) return
+
+        handleJwtAuth(token)
         return
       }
 
@@ -128,6 +136,29 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  private fun handleJwtAuth(token: String) {
+    val auth = jwtService.validateToken(token)
+    checkIfSsoUserStillValid(auth.principal)
+
+    SecurityContextHolder.getContext().authentication = auth
+  }
+
+  private fun handleAppAuthentication(
+    request: HttpServletRequest,
+    token: String,
+  ): Boolean {
+    val appAuth = appTokenAuthenticator.authenticate(request, token)
+    if (appAuth != null) {
+      if (!appAuth.isInstallContext && !appAuth.isAppLevel) {
+        checkIfSsoUserStillValid(appAuth.principal)
+      }
+      SecurityContextHolder.getContext().authentication = appAuth
+      return true
+    }
+
+    return false
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

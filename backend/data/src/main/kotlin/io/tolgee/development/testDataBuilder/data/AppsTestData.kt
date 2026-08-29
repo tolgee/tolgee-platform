@@ -50,11 +50,17 @@ open class AppsTestData : BaseTestData("apps-test-owner@test.com", "test_project
       otherOrganizationBuilder = otherOwnerBuilder.defaultOrganizationBuilder
       otherOrganization = otherOrganizationBuilder.self
 
-      otherProject =
+      val otherProjectBuilder =
         addProject {
           name = "other_project"
           organizationOwner = otherOwnerBuilder.defaultOrganizationBuilder.self
-        }.self
+        }
+      otherProject = otherProjectBuilder.self
+      otherProjectBuilder.addPermission {
+        this.project = otherProjectBuilder.self
+        this.user = this@AppsTestData.user
+        this.type = ProjectPermissionType.VIEW
+      }
     }
   }
 }
