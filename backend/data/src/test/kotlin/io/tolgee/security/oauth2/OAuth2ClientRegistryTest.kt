@@ -100,6 +100,15 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
+  fun `plain http is accepted on a loopback host, including localhost`() {
+    // e2e and every local client are configured with http://localhost; refusing it would reject a legitimate
+    // deployment rather than an unsafe one.
+    registry(extensionUris = listOf("http://localhost:8201/callback"), cliUris = listOf()).clients.assert.isNotEmpty
+    registry(extensionUris = listOf(), cliUris = listOf("http://127.0.0.1:9876/cb")).clients.assert.isNotEmpty
+    registry(extensionUris = listOf(), cliUris = listOf("http://[::1]:9876/cb")).clients.assert.isNotEmpty
+  }
+
+  @Test
   fun `a configured redirect URI carrying a fragment or plain http is refused at startup`() {
     assertThrows<IllegalStateException> {
       registry(extensionUris = listOf("https://ext.example/cb#x"), cliUris = listOf()).clients

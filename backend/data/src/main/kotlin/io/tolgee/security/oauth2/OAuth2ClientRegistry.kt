@@ -114,7 +114,7 @@ class OAuth2ClientRegistry(
       if (parsed.fragment != null) {
         throw IllegalStateException("tolgee.oauth2 redirect URI must not carry a fragment, got: $uri")
       }
-      if (parsed.scheme != "https" && parsed.host !in OAuth2Client.LOOPBACK_HOSTS) {
+      if (parsed.scheme != "https" && !isLoopbackHost(parsed.host)) {
         throw IllegalStateException(
           "tolgee.oauth2 redirect URI must use https unless it is a loopback address, got: $uri",
         )
@@ -122,4 +122,11 @@ class OAuth2ClientRegistry(
     }
     return uris
   }
+
+  /**
+   * `localhost` counts here but not in [OAuth2Client.matchesLoopback], which follows RFC 8252 §8.3 in matching the IP
+   * literals only. This is the scheme exemption, and plain http on localhost is what local clients are configured
+   * with — refusing it would reject a legitimate deployment rather than an unsafe one.
+   */
+  private fun isLoopbackHost(host: String?): Boolean = host == "localhost" || host in OAuth2Client.LOOPBACK_HOSTS
 }
