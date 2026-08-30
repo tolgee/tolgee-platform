@@ -143,6 +143,7 @@ class AppActivityTest : AuthorizedControllerTest() {
       captor.allValues.firstOrNull { it.eventName == ActivityType.APP_UPDATE.name }
     event.assert.isNotNull
     event!!.data!!["appName"].assert.isEqualTo("Renamed App")
+    event.data!!["appIdentifier"].assert.isEqualTo("test-app")
     (event.data!!["appId"] as String).toLong().assert.isEqualTo(appEntityId("test-app"))
   }
 

@@ -39,6 +39,7 @@ class AppSecret : StandardAuditModel() {
   lateinit var secretHash: String
 
   /** How the secret is identified everywhere it is shown: its start and end, e.g. `tgpubs_ab…yz`. */
+  @ActivityLoggedProp
   @Column(length = 32, nullable = false)
   lateinit var name: String
 

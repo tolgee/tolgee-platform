@@ -25,6 +25,7 @@ class AppActivityRecorder(
   ) {
     activityType?.let { activityHolder.activity = it }
     activityHolder.businessEventData["appId"] = app.id.toString()
+    activityHolder.businessEventData["appIdentifier"] = app.appId
     activityHolder.businessEventData["appName"] = app.name
     organizationId?.let { activityHolder.activityRevision.organizationId = it }
     projectId?.let { activityHolder.activityRevision.projectId = it }
