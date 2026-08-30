@@ -23,6 +23,9 @@ interface Caches {
     const val LANGUAGE_TOOL_RESULTS = "languageToolResults"
     const val APP_ENABLEMENTS = "appEnablements"
 
+    const val APPS = "apps"
+    const val APP_INSTALLS = "appInstalls"
+
     const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
   }
 }

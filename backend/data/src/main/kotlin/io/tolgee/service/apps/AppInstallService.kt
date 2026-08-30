@@ -1,19 +1,24 @@
 package io.tolgee.service.apps
 
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.AppLifecycleAppCredentials
 import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
+import io.tolgee.dtos.cacheable.AppDto
+import io.tolgee.dtos.cacheable.AppInstallDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
-import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
+import io.tolgee.service.security.UserAccountService
 import org.apache.commons.codec.digest.DigestUtils
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,6 +36,9 @@ class AppInstallService(
   private val appService: AppService,
   private val appAvailabilityService: AppAvailabilityService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
+  private val userAccountService: UserAccountService,
+  @Lazy
+  private val self: AppInstallService,
 ) {
   data class RegisterResult(
     val install: AppInstall,
@@ -214,19 +222,20 @@ class AppInstallService(
     return appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
   }
 
+  @Cacheable(cacheNames = [Caches.APP_INSTALLS], key = "#installId")
   @Transactional(readOnly = true)
-  fun findForAppAuth(installId: Long): AppInstall? {
-    return appInstallRepository.findWithAppById(installId)
+  fun findForAppAuth(installId: Long): AppInstallDto? {
+    return appInstallRepository.findWithAppById(installId)?.let { AppInstallDto.fromEntity(it) }
   }
 
-  @Transactional(readOnly = true)
   fun resolveForAppAuth(installId: Long): AppAuthResolution? {
-    val install = appInstallRepository.findWithAppById(installId) ?: return null
-    return AppAuthResolution(install, UserAccountDto.fromEntity(install.principal))
+    val install = self.findForAppAuth(installId) ?: return null
+    val principal = userAccountService.findDto(install.principalUserId) ?: return null
+    return AppAuthResolution(install, principal)
   }
 
   data class AppAuthResolution(
-    val install: AppInstall,
+    val install: AppInstallDto,
     val principal: UserAccountDto,
   )
 
@@ -245,8 +254,9 @@ class AppInstallService(
     return install
   }
 
+  @Cacheable(cacheNames = [Caches.APPS], key = "#appEntityId")
   @Transactional(readOnly = true)
-  fun findAppForAppAuth(appEntityId: Long): App? {
-    return appService.findForAppAuth(appEntityId)
+  fun findAppForAppAuth(appEntityId: Long): AppDto? {
+    return appService.findForAppAuth(appEntityId)?.let { AppDto.fromEntity(it) }
   }
 }

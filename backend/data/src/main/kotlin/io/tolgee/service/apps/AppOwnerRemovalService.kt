@@ -1,10 +1,12 @@
 package io.tolgee.service.apps
 
+import io.tolgee.constants.Caches
 import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.repository.apps.AppRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
+import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 
@@ -24,6 +26,7 @@ class AppOwnerRemovalService(
   private val appAvailabilityService: AppAvailabilityService,
   private val appInstallPrincipalService: AppInstallPrincipalService,
   private val transactionManager: PlatformTransactionManager,
+  private val cacheManager: CacheManager,
 ) : Logging {
   fun removeEverywhere(appEntityId: Long) {
     val count = executeInNewTransaction(transactionManager) { purge(appEntityId) }
@@ -47,6 +50,10 @@ class AppOwnerRemovalService(
     appRepository.deleteById(appEntityId)
     appRepository.flush()
     principals.forEach { appInstallPrincipalService.retire(it) }
+
+    val appInstallsCache = cacheManager.getCache(Caches.APP_INSTALLS)
+    installs.forEach { appInstallsCache?.evict(it.id) }
+    cacheManager.getCache(Caches.APPS)?.evict(appEntityId)
 
     return installs.size
   }

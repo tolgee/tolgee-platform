@@ -1,13 +1,13 @@
 package io.tolgee.security.authentication
 
+import io.tolgee.dtos.cacheable.AppInstallDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.UserAccount
-import io.tolgee.model.apps.AppInstall
 
 class AppAuthentication(
   credentials: Any?,
   userAccount: UserAccountDto,
-  private val appInstallOrNull: AppInstall?,
+  private val appInstallOrNull: AppInstallDto?,
   val appId: Long,
   val isInstallContext: Boolean,
   isReadOnly: Boolean,
@@ -25,7 +25,7 @@ class AppAuthentication(
   val isAppLevel: Boolean
     get() = appInstallOrNull == null
 
-  val appInstall: AppInstall
+  val appInstall: AppInstallDto
     get() = appInstallOrNull ?: throw IllegalStateException("An app-level token is not bound to an install")
 
   companion object {
