@@ -3,6 +3,8 @@ package io.tolgee.api.v2.controllers.organization
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.dtos.request.apps.RotateAppSecretRequest
 import io.tolgee.hateoas.apps.AppDeliveryOutcomeModel
@@ -56,6 +58,7 @@ class OrganizationOwnedAppsController(
 ) {
   @PostMapping
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_REGISTER)
   @Operation(
     summary = "Register a Tolgee app",
     description =
@@ -104,6 +107,7 @@ class OrganizationOwnedAppsController(
 
   @DeleteMapping("/{appId}")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_UNINSTALL)
   @Operation(
     summary = "Delete an owned app",
     description =
@@ -139,6 +143,7 @@ class OrganizationOwnedAppsController(
   @PostMapping("/{appId}/secrets/rotate")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_SECRET_UPDATE)
   @Operation(
     summary = "Rotate the app's client secret",
     description =
@@ -183,6 +188,7 @@ class OrganizationOwnedAppsController(
 
   @PostMapping("/{appId}/webhook-secret/rotate")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_SECRET_UPDATE)
   @Operation(
     summary = "Rotate the app's webhook signing secret",
     description =
@@ -209,6 +215,7 @@ class OrganizationOwnedAppsController(
   @DeleteMapping("/{appId}/secrets/{secretId}")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_SECRET_UPDATE)
   @Operation(
     summary = "Revoke an app-level client secret",
     description =

@@ -1,5 +1,6 @@
 package io.tolgee.service.apps
 
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
@@ -26,6 +27,8 @@ class AppInstallPersister(
   private val appRegisterInserter: AppRegisterInserter,
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
+  private val appActivityRecorder: AppActivityRecorder,
+  private val metrics: Metrics,
 ) : Logging {
   /**
    * Registers the app - making [organizationId] its owner - and, when [install] is true, installs it
@@ -47,6 +50,8 @@ class AppInstallPersister(
     appsLimitGuard.checkAppsLimit(organizationId, registersNewApp = true)
     val inserted = appRegisterInserter.insert(organizationId, manifestUrl, fetched)
     val app = inserted.app
+    appActivityRecorder.record(app)
+    metrics.recordAppRegistered()
     if (!install) {
       return AppInstallService.RegisterAppResult(
         app = appService.summarize(app),
@@ -56,6 +61,7 @@ class AppInstallPersister(
       )
     }
     val installEntity = persist(app, organizationId, fetched)
+    metrics.recordAppInstalled()
     return AppInstallService.RegisterAppResult(
       app = appService.summarize(app),
       appEntityId = app.id,
@@ -74,6 +80,8 @@ class AppInstallPersister(
     appsLimitGuard.checkAppsLimit(organizationId, registersNewApp = false)
     val app = entityManager.getReference(App::class.java, appEntityId)
     val install = persist(app, organizationId, fetched)
+    appActivityRecorder.record(install.app)
+    metrics.recordAppInstalled()
     return AppInstallService.RegisterResult(
       install = install,
       app = appService.summarize(app),
@@ -125,7 +133,7 @@ class AppInstallPersister(
     val install =
       appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    return applySnapshot(install, fetched, allowScopeWidening)
+    return applySnapshot(install, fetched, allowScopeWidening, organizationIdSeed = null)
   }
 
   /** The app refreshing one of its own installs. Never widens the granted scopes. */
@@ -138,13 +146,19 @@ class AppInstallPersister(
     val install =
       appInstallRepository.findByAppIdAndId(appEntityId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    return applySnapshot(install, fetched, allowScopeWidening = false)
+    return applySnapshot(
+      install,
+      fetched,
+      allowScopeWidening = false,
+      organizationIdSeed = install.organization.id,
+    )
   }
 
   private fun applySnapshot(
     install: AppInstall,
     fetched: AppManifestFetcher.FetchResult,
     allowScopeWidening: Boolean,
+    organizationIdSeed: Long?,
   ): AppInstall {
     val app = install.app
     if (fetched.manifest.id != app.appId) {
@@ -158,6 +172,7 @@ class AppInstallPersister(
     app.manifestScopes = AppService.joinScopes(fetched.scopes)
     AppService.markManifestHealthy(app, currentDateProvider.date)
     install.grantedScopes = resolveGrantedScopes(install.grantedScopes.toSet(), fetched.scopes, allowScopeWidening)
+    appActivityRecorder.record(app, organizationId = organizationIdSeed)
     return appInstallRepository.save(install)
   }
 
@@ -178,6 +193,7 @@ class AppInstallPersister(
     val install =
       appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    appActivityRecorder.record(install.app)
     val principal = install.principal
     appEnablementService.removeAllForAppInstall(installId)
     appInstallRepository.delete(install)

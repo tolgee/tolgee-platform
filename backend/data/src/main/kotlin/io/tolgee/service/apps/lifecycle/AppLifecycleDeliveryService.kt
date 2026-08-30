@@ -1,5 +1,8 @@
 package io.tolgee.service.apps.lifecycle
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
+import io.tolgee.Metrics
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.apps.AppLifecycleAppCredentials
 import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
@@ -38,6 +41,7 @@ class AppLifecycleDeliveryService(
   private val tolgeeProperties: TolgeeProperties,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
+  private val metrics: Metrics,
 ) : Logging {
   /**
    * Everything a delivery needs about the app, taken while the app still exists. Read before a
@@ -78,12 +82,18 @@ class AppLifecycleDeliveryService(
     return deliverNow(target, eventType, appCredentials, organizationId)
   }
 
+  @WithSpan
   fun deliverNow(
     target: AppTarget,
     eventType: AppLifecycleEventType,
     appCredentials: AppLifecycleAppCredentials? = null,
     organizationId: Long? = null,
   ): AppLifecycleDeliveryOutcome {
+    val span = Span.current()
+    span.setAttribute("app.id", target.appEntityId)
+    span.setAttribute("app.identifier", target.appIdentifier)
+    span.setAttribute("app.event", eventType.wireName)
+
     val organization = organizationId?.let { organizationRepository.findById(it).orElse(null) }
     val payload =
       AppLifecyclePayload(
@@ -95,13 +105,16 @@ class AppLifecycleDeliveryService(
       )
 
     val url = deliveryUrl(target.baseUrl)
-    return try {
-      httpClient.post(url, objectMapper.writeValueAsString(payload), target.signingSecret)
-      AppLifecycleDeliveryOutcome.DELIVERED
-    } catch (e: AppLifecycleHttpClient.DeliveryFailedException) {
-      logger.info("App lifecycle {} delivery to {} failed: {}", eventType.wireName, url, e.message)
-      AppLifecycleDeliveryOutcome.failed(e.message ?: "delivery failed")
-    }
+    val outcome =
+      try {
+        httpClient.post(url, objectMapper.writeValueAsString(payload), target.signingSecret)
+        AppLifecycleDeliveryOutcome.DELIVERED
+      } catch (e: AppLifecycleHttpClient.DeliveryFailedException) {
+        logger.info("App lifecycle {} delivery to {} failed: {}", eventType.wireName, url, e.message)
+        AppLifecycleDeliveryOutcome.failed(e.message ?: "delivery failed")
+      }
+    metrics.recordAppLifecycleDelivery(eventType.wireName, if (outcome.delivered) "delivered" else "failed")
+    return outcome
   }
 
   companion object {

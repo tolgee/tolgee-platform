@@ -23,6 +23,7 @@ class AppSecretRotationService(
   private val appSecretService: AppSecretService,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
   private val transactionManager: PlatformTransactionManager,
+  private val appActivityRecorder: AppActivityRecorder,
 ) {
   data class RotationResult(
     val issued: AppSecretService.IssueResult,
@@ -59,6 +60,7 @@ class AppSecretRotationService(
     graceSeconds: Long,
   ): Pair<AppSecretService.IssueResult, Date?> =
     executeInNewTransaction(transactionManager) {
+      appActivityRecorder.record(app)
       val issued = appSecretService.issue(app)
       issued to appSecretService.expireOthers(app.id, issued.secret.id, graceSeconds)
     }

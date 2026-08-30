@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.RegisterAppRequest
 import io.tolgee.hateoas.organization.apps.AppInstallModel
 import io.tolgee.hateoas.organization.apps.AppInstallModelAssembler
@@ -54,6 +56,7 @@ class OrganizationAppsController(
 
   @PostMapping
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_INSTALL)
   @Operation(
     summary = "Install a Tolgee app",
     description =
@@ -91,6 +94,7 @@ class OrganizationAppsController(
   @PostMapping("/{installId}/refresh")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_UPDATE)
   @Operation(
     summary = "Refresh an installed app's manifest and approve its current scopes",
     description =
@@ -108,6 +112,7 @@ class OrganizationAppsController(
 
   @DeleteMapping("/{installId}")
   @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_UNINSTALL)
   @Operation(
     summary = "Remove app",
     description = "Uninstalls the app from the organization.",

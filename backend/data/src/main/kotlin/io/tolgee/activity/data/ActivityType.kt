@@ -125,4 +125,12 @@ enum class ActivityType(
   BRANCH_MERGE(onlyCountsInList = true, paramsProvider = BranchMergeActivityParamsProvider::class),
   QA_ISSUE_IGNORE,
   QA_ISSUE_UNIGNORE,
+  APP_REGISTER,
+  APP_INSTALL,
+  APP_UNINSTALL,
+  APP_UPDATE(saveWithoutModification = true),
+  APP_ENABLE_FOR_PROJECT(saveWithoutModification = true),
+  APP_DISABLE_FOR_PROJECT(saveWithoutModification = true),
+  APP_SECRET_UPDATE(saveWithoutModification = true),
+  APP_AVAILABILITY_UPDATE(saveWithoutModification = true),
 }

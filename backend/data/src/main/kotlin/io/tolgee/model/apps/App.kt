@@ -1,6 +1,9 @@
 package io.tolgee.model.apps
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
+import io.tolgee.activity.annotation.ActivityIgnoredProp
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Organization
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -23,6 +26,7 @@ import java.util.Date
  * every organization that installed it.
  */
 @Entity
+@ActivityLoggedEntity
 @Table(
   name = "app",
   uniqueConstraints = [
@@ -44,13 +48,16 @@ class App : StandardAuditModel() {
   @Column(nullable = false)
   lateinit var manifestUrl: String
 
+  @ActivityLoggedProp
   @Column(nullable = false)
   lateinit var name: String
 
+  @ActivityLoggedProp
   @Column(nullable = false)
   @ColumnDefault("''")
   var version: String = ""
 
+  @ActivityLoggedProp
   @Column(nullable = false)
   lateinit var baseUrl: String
 
@@ -59,6 +66,7 @@ class App : StandardAuditModel() {
   var icon: String? = null
 
   /** The manifest as last read. */
+  @ActivityIgnoredProp
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb", nullable = false)
   lateinit var manifestJson: String
@@ -67,6 +75,7 @@ class App : StandardAuditModel() {
    * The scopes the manifest currently requests, comma-joined. Diffed against each install's
    * granted scopes to surface pending permission requests.
    */
+  @ActivityLoggedProp
   @Column(columnDefinition = "TEXT", nullable = false)
   var manifestScopes: String = ""
 
@@ -88,24 +97,32 @@ class App : StandardAuditModel() {
    * Access tokens issued before this moment no longer validate - set when a secret is revoked, so
    * revocation takes effect immediately instead of when the minted tokens expire.
    */
+  @ActivityIgnoredProp
   var tokensInvalidBefore: Date? = null
 
+  @ActivityIgnoredProp
   var manifestLastCheckedAt: Date? = null
 
+  @ActivityIgnoredProp
   @Column(nullable = false)
   @ColumnDefault("0")
   var manifestFailureCount: Int = 0
 
+  @ActivityIgnoredProp
   var manifestFirstFailedAt: Date? = null
 
+  @ActivityIgnoredProp
   @Column(length = 500)
   var manifestLastError: String? = null
 
+  @ActivityIgnoredProp
   @Enumerated(EnumType.STRING)
   @Column(length = 32)
   var manifestLastFailureKind: AppManifestFailureKind? = null
 
+  @ActivityIgnoredProp
   var unhealthySince: Date? = null
 
+  @ActivityIgnoredProp
   var unhealthyNotifiedAt: Date? = null
 }

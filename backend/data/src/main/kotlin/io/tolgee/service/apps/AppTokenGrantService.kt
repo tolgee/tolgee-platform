@@ -1,5 +1,6 @@
 package io.tolgee.service.apps
 
+import io.tolgee.Metrics
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -11,6 +12,7 @@ class AppTokenGrantService(
   private val appCredentialAuthenticator: AppCredentialAuthenticator,
   private val appInstallService: AppInstallService,
   private val appTokenService: AppTokenService,
+  private val metrics: Metrics,
 ) {
   fun issueFromClientCredentials(
     grantType: String,
@@ -24,12 +26,18 @@ class AppTokenGrantService(
 
     val app = appCredentialAuthenticator.authenticate(clientId, clientSecret)
 
-    if (installId == null) return appTokenService.mintAppLevelToken(app.id)
+    if (installId == null) {
+      val token = appTokenService.mintAppLevelToken(app.id)
+      metrics.recordAppTokenMinted()
+      return token
+    }
 
     val install =
       appInstallService.findOwnInstall(app.id, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
-    return appTokenService.mintInstallContextToken(install.id)
+    val token = appTokenService.mintInstallContextToken(install.id)
+    metrics.recordAppTokenMinted()
+    return token
   }
 
   companion object {

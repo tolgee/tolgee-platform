@@ -2,12 +2,15 @@ package io.tolgee.api.v2.controllers.administration
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.model.Organization
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.service.apps.AppActivityRecorder
 import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.apps.AppService
@@ -45,16 +48,19 @@ class AdministrationAppsController(
   private val appAvailabilityService: AppAvailabilityService,
   private val appInstallService: AppInstallService,
   private val organizationService: OrganizationService,
+  private val appActivityRecorder: AppActivityRecorder,
   private val simpleOrganizationModelAssembler: SimpleOrganizationModelAssembler,
   private val pagedOrganizationsAssembler: PagedResourcesAssembler<Organization>,
 ) : IController {
   @PutMapping("/{appId}/available-to-all")
   @Operation(summary = "Make the app available to all organizations")
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_AVAILABILITY_UPDATE)
   fun setAvailableToAll(
     @PathVariable appId: Long,
   ) {
-    appService.getRegistered(appId)
+    val app = appService.getRegistered(appId)
+    appActivityRecorder.record(app, organizationId = app.organization.id)
     appAvailabilityService.setAvailableToAll(appId)
   }
 
@@ -65,10 +71,12 @@ class AdministrationAppsController(
       "Disables the app in every non-owner project that could only reach it through availability to all organizations.",
   )
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_AVAILABILITY_UPDATE)
   fun clearAvailableToAll(
     @PathVariable appId: Long,
   ) {
-    appService.getRegistered(appId)
+    val app = appService.getRegistered(appId)
+    appActivityRecorder.record(app, organizationId = app.organization.id)
     appAvailabilityService.clearAvailableToAll(appId)
   }
 
@@ -91,12 +99,14 @@ class AdministrationAppsController(
   @PutMapping("/{appId}/available-organizations/{organizationId}")
   @Operation(summary = "Make the app available to one organization")
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_AVAILABILITY_UPDATE)
   fun addAvailableOrganization(
     @PathVariable appId: Long,
     @PathVariable organizationId: Long,
   ) {
-    appService.getRegistered(appId)
+    val app = appService.getRegistered(appId)
     organizationService.get(organizationId)
+    appActivityRecorder.record(app, organizationId = app.organization.id)
     appAvailabilityService.addAvailableOrganization(appId, organizationId)
   }
 
@@ -107,11 +117,13 @@ class AdministrationAppsController(
       "Disables the app in that organization's projects unless it stays reachable through availability to all organizations.",
   )
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.APP_AVAILABILITY_UPDATE)
   fun removeAvailableOrganization(
     @PathVariable appId: Long,
     @PathVariable organizationId: Long,
   ) {
-    appService.getRegistered(appId)
+    val app = appService.getRegistered(appId)
+    appActivityRecorder.record(app, organizationId = app.organization.id)
     appAvailabilityService.removeAvailableOrganization(appId, organizationId)
   }
 
