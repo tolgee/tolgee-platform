@@ -1,13 +1,17 @@
 package io.tolgee.service.apps
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.apps.AppLifecycleAppCredentials
+import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
+import io.tolgee.model.apps.AppLifecycleEventType
 import io.tolgee.repository.apps.AppInstallRepository
+import io.tolgee.service.apps.lifecycle.AppLifecycleDeliveryService
 import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
@@ -25,6 +29,7 @@ class AppInstallService(
   private val appInstallPersister: AppInstallPersister,
   private val appService: AppService,
   private val appAvailabilityService: AppAvailabilityService,
+  private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
 ) {
   data class RegisterResult(
     val install: AppInstall,
@@ -37,6 +42,11 @@ class AppInstallService(
     val appEntityId: Long,
     val appCredentials: AppService.AppCredentials?,
     val install: AppInstall?,
+    /**
+     * Whether the just-disclosed credentials reached the app over the lifecycle channel. Null when
+     * nothing was disclosed (there is no such flow yet — registration always discloses).
+     */
+    val delivery: AppLifecycleDeliveryOutcome? = null,
   )
 
   fun register(
@@ -47,11 +57,37 @@ class AppInstallService(
   ): RegisterAppResult {
     val fetched = appManifestFetcher.fetch(manifestUrl)
     verifyManifestUnchanged(manifestHash, fetched)
-    return try {
-      appInstallPersister.registerAndMaybeInstall(organization.id, manifestUrl, fetched, install)
-    } catch (_: DataIntegrityViolationException) {
-      throw BadRequestException(Message.APP_ALREADY_REGISTERED)
-    }
+    val result =
+      try {
+        appInstallPersister.registerAndMaybeInstall(organization.id, manifestUrl, fetched, install)
+      } catch (_: DataIntegrityViolationException) {
+        throw BadRequestException(Message.APP_ALREADY_REGISTERED)
+      }
+    return result.copy(delivery = deliverRegistered(organization, result))
+  }
+
+  /**
+   * Hands the app its just-issued credentials, synchronously, so the registration dialog can say
+   * whether the app got them or the operator still has to copy them. A failure is reported, never
+   * thrown: the credentials were returned in the response too, so a dead app host does not undo the
+   * registration. Runs after [registerAndMaybeInstall]'s transaction commits.
+   */
+  private fun deliverRegistered(
+    organization: Organization,
+    result: RegisterAppResult,
+  ): AppLifecycleDeliveryOutcome? {
+    val credentials = result.appCredentials ?: return null
+    return appLifecycleDeliveryService.deliverNow(
+      appEntityId = result.appEntityId,
+      eventType = AppLifecycleEventType.APP_REGISTERED,
+      organizationId = organization.id,
+      appCredentials =
+        AppLifecycleAppCredentials(
+          clientId = credentials.clientId,
+          clientSecret = credentials.clientSecret,
+          webhookSecret = credentials.webhookSecret,
+        ),
+    )
   }
 
   fun install(

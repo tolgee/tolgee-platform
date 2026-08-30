@@ -26,11 +26,6 @@ class AppSecretService(
     val plaintextSecret: String,
   )
 
-  data class RotationResult(
-    val issued: IssueResult,
-    val previousExpiresAt: Date?,
-  )
-
   fun mintSecret(app: App): IssueResult {
     val plaintext = AppService.APP_CLIENT_SECRET_PREFIX + keyGenerator.generate(256)
     val secret =
@@ -50,18 +45,12 @@ class AppSecretService(
     return mintSecret(app)
   }
 
-  /** issue + expireOthers in one transaction, so a failure cannot leave a deadline-less extra secret. */
-  @Transactional
-  fun rotate(
-    app: App,
-    graceSeconds: Long,
-  ): RotationResult {
-    val issued = issue(app)
-    val previousExpiresAt = expireOthers(app.id, issued.secret.id, graceSeconds)
-    return RotationResult(issued, previousExpiresAt)
-  }
-
-  private fun expireOthers(
+  /**
+   * Puts every active secret except [keepSecretId] on a [graceSeconds] deadline, never extending one
+   * already expiring sooner, and returns the latest of those deadlines. Call inside the same
+   * transaction as [issue] so a failure cannot leave a deadline-less extra secret.
+   */
+  fun expireOthers(
     appId: Long,
     keepSecretId: Long,
     graceSeconds: Long,
