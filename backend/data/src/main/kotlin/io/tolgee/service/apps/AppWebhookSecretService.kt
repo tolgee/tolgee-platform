@@ -28,6 +28,7 @@ class AppWebhookSecretService(
   private val keyGenerator: KeyGenerator,
   private val appLifecycleDeliveryService: AppLifecycleDeliveryService,
   private val transactionManager: PlatformTransactionManager,
+  private val appActivityRecorder: AppActivityRecorder,
 ) {
   data class RotationResult(
     val newSecret: String,
@@ -49,6 +50,7 @@ class AppWebhookSecretService(
           appRepository.findById(appEntityId).orElse(null)
             ?: throw NotFoundException(Message.APP_NOT_FOUND)
 
+        appActivityRecorder.record(app)
         val previous = app.webhookSecret
         val newSecret = keyGenerator.generate(256)
         app.webhookSecret = newSecret

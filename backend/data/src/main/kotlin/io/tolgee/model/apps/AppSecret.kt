@@ -1,5 +1,7 @@
 package io.tolgee.model.apps
 
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -16,6 +18,7 @@ import java.util.Date
  * to issuing it; only the hash is stored.
  */
 @Entity
+@ActivityLoggedEntity
 @Table(
   name = "app_secret",
   uniqueConstraints = [
@@ -36,6 +39,7 @@ class AppSecret : StandardAuditModel() {
   lateinit var secretHash: String
 
   /** How the secret is identified everywhere it is shown: its start and end, e.g. `tgpubs_ab…yz`. */
+  @ActivityLoggedProp
   @Column(length = 32, nullable = false)
   lateinit var name: String
 
@@ -46,7 +50,9 @@ class AppSecret : StandardAuditModel() {
    * it on the outgoing secret to keep it working through a grace window; past the time the secret
    * is treated as dead wherever it is read — no job touches the row.
    */
+  @ActivityLoggedProp
   var expiresAt: Date? = null
 
+  @ActivityLoggedProp
   var revokedAt: Date? = null
 }

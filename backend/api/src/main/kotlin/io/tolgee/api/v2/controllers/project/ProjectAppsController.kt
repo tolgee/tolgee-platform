@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.hateoas.project.apps.ProjectAppModel
 import io.tolgee.hateoas.project.apps.ProjectAppModelAssembler
@@ -73,6 +75,7 @@ class ProjectAppsController(
 
   @PutMapping("/{installId}")
   @RequiresProjectPermissions([Scope.APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_ENABLE_FOR_PROJECT)
   @Operation(
     summary = "Enable app for project",
     description = "Enables the given app install for this project. Idempotent.",
@@ -91,6 +94,7 @@ class ProjectAppsController(
 
   @DeleteMapping("/{installId}")
   @RequiresProjectPermissions([Scope.APPS_MANAGE])
+  @RequestActivity(ActivityType.APP_DISABLE_FOR_PROJECT)
   @Operation(
     summary = "Disable app for project",
     description = "Disables the given app for this project. Idempotent - no-op if it wasn't enabled.",

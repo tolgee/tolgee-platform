@@ -20,6 +20,7 @@ class AppSecretService(
   private val appSecretRepository: AppSecretRepository,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
+  private val appActivityRecorder: AppActivityRecorder,
 ) {
   data class IssueResult(
     val secret: AppSecret,
@@ -79,6 +80,7 @@ class AppSecretService(
     val secret =
       appSecretRepository.findByIdAndAppId(secretId, appId)
         ?: throw NotFoundException(Message.APP_SECRET_NOT_FOUND)
+    appActivityRecorder.record(secret.app)
 
     if (force) {
       secret.app.tokensInvalidBefore = currentDateProvider.date

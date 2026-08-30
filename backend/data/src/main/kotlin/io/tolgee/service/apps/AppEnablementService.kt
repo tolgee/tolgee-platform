@@ -1,5 +1,7 @@
 package io.tolgee.service.apps
 
+import io.tolgee.Metrics
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.apps.ProjectAppView
 import io.tolgee.exceptions.NotFoundException
@@ -19,6 +21,8 @@ class AppEnablementService(
   private val appInstallRepository: AppInstallRepository,
   private val appEnablementInserter: AppEnablementInserter,
   private val appAvailabilityService: AppAvailabilityService,
+  private val appActivityRecorder: AppActivityRecorder,
+  private val metrics: Metrics,
 ) {
   @Transactional
   fun enable(
@@ -27,6 +31,8 @@ class AppEnablementService(
   ): AppInstall {
     val orgId = project.organizationOwner.id
     val install = resolveEnableableInstall(orgId, installId)
+    appActivityRecorder.record(install.app, ActivityType.APP_ENABLE_FOR_PROJECT, projectId = project.id)
+    metrics.recordAppEnabledForProject()
 
     if (appEnabledForProjectRepository.findByProjectIdAndAppInstallId(project.id, install.id) == null) {
       try {
@@ -63,6 +69,7 @@ class AppEnablementService(
   ) {
     val existing =
       appEnabledForProjectRepository.findByProjectIdAndAppInstallId(projectId, appInstallId) ?: return
+    appActivityRecorder.record(existing.appInstall.app, ActivityType.APP_DISABLE_FOR_PROJECT, projectId = projectId)
     appEnabledForProjectRepository.delete(existing)
   }
 
