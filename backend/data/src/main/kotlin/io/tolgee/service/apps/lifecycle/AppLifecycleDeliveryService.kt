@@ -109,8 +109,6 @@ class AppLifecycleDeliveryService(
     const val LIFECYCLE_PATH = "/tolgee/lifecycle"
 
     fun deliveryUrl(baseUrl: String): String {
-      // Append to the URL's path component, not the raw string: a base URL carrying a query or
-      // fragment would otherwise splice the path into the wrong place.
       val base = URI(baseUrl)
       val path = (base.path ?: "").trimEnd('/') + LIFECYCLE_PATH
       return URI(base.scheme, base.authority, path, null, null).toString()

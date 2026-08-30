@@ -35,14 +35,8 @@ class AppSecretRotationService(
     app: App,
     graceSeconds: Long,
   ): RotationResult {
-    // Persist and commit before delivering: an app may test the new secret the moment it receives it,
-    // and authentication reads only committed secret hashes, so a delivery inside the transaction
-    // could hand the app a secret its next request would then reject.
-    val (issued, previousExpiresAt) =
-      executeInNewTransaction(transactionManager) {
-        val result = appSecretService.issue(app)
-        result to appSecretService.expireOthers(app.id, result.secret.id, graceSeconds)
-      }
+    // Committed before delivery so an app that tests the new secret immediately isn't rejected.
+    val (issued, previousExpiresAt) = issueAndExpireOthersInNewTransaction(app, graceSeconds)
     val delivery =
       appLifecycleDeliveryService.deliverNow(
         appEntityId = app.id,
@@ -59,4 +53,13 @@ class AppSecretRotationService(
       previousExpiresAt = previousExpiresAt,
     )
   }
+
+  private fun issueAndExpireOthersInNewTransaction(
+    app: App,
+    graceSeconds: Long,
+  ): Pair<AppSecretService.IssueResult, Date?> =
+    executeInNewTransaction(transactionManager) {
+      val issued = appSecretService.issue(app)
+      issued to appSecretService.expireOthers(app.id, issued.secret.id, graceSeconds)
+    }
 }
