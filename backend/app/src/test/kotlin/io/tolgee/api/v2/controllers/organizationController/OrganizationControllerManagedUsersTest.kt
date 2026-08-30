@@ -3,23 +3,26 @@ package io.tolgee.api.v2.controllers.organizationController
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.DisableManagedUserTestData
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
-import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.node
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.UserDisabledBy
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import net.javacrumbs.jsonunit.core.internal.Node.JsonMap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
 
 @SpringBootTest
@@ -54,20 +57,25 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
 
   @Test
   fun `disabled managed user stays in the member listing alongside active members`() {
-    assertTotalElements(VISIBLE_MEMBER_COUNT)
+    assertListingShowsExactly(visibleMembers)
     disable(testData.managedMember.id).andIsOk
-    assertTotalElements(VISIBLE_MEMBER_COUNT)
+    assertListingShowsExactly(visibleMembers)
     assertMemberFlags(testData.managedMember.username!!, managed = true, disabled = true)
   }
 
   @Test
   fun `non-managed disabled member is hidden from the org listing`() {
-    assertSearchTotal(testData.disabledNonManagedMember.username!!, 0)
+    assertNotListed(testData.disabledNonManagedMember.username!!)
   }
 
   @Test
   fun `managed member whose disable origin is unknown is hidden from the org listing`() {
-    assertSearchTotal(testData.nullOriginDisabledManagedMember.username!!, 0)
+    assertNotListed(testData.nullOriginDisabledManagedMember.username!!)
+  }
+
+  @Test
+  fun `a member disabled by the organization that manages them elsewhere stays hidden here`() {
+    assertNotListed(testData.disabledByOtherOrgPlainMember.username!!)
   }
 
   @Test
@@ -77,10 +85,10 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
 
   @Test
   fun `listing collapses fan-out for a member with multiple project permissions`() {
-    assertSearchSize(testData.multiProjectMember.username!!, 1)
+    assertListedExactlyOnce(testData.multiProjectMember.username!!)
     disable(testData.managedMember.id).andIsOk
-    assertSearchSize(testData.multiProjectMember.username!!, 1)
-    assertTotalElements(VISIBLE_MEMBER_COUNT)
+    assertListedExactlyOnce(testData.multiProjectMember.username!!)
+    assertListingShowsExactly(visibleMembers)
   }
 
   @Test
@@ -104,13 +112,59 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
+  fun `the role of a member an admin disabled cannot be changed`() {
+    setRole(testData.adminDisabledManagedMember.id).andIsNotFound
+  }
+
+  @Test
+  fun `the role of a member whose disable origin is unknown cannot be changed`() {
+    setRole(testData.nullOriginDisabledManagedMember.id).andIsNotFound
+  }
+
+  @Test
+  fun `the role of a member another organization disabled cannot be changed`() {
+    setRole(testData.disabledByOtherOrgPlainMember.id).andIsNotFound
+  }
+
+  @Test
   fun `cannot disable a platform admin managed by the organization`() {
     disable(testData.managedPlatformAdmin.id)
       .andIsBadRequest
       .andAssertError
       .isCustomValidation
-      .hasMessage(Message.CANNOT_DISABLE_PLATFORM_ADMIN.code)
+      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
     assertMemberFlags(testData.managedPlatformAdmin.username!!, managed = true, disabled = false)
+  }
+
+  @Test
+  fun `cannot disable a platform supporter managed by the organization`() {
+    disable(testData.managedPlatformSupporter.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
+    assertMemberFlags(testData.managedPlatformSupporter.username!!, managed = true, disabled = false)
+  }
+
+  @Test
+  fun `a disabled staff account attributed to the organization is not listed`() {
+    assertNotListed(testData.orgDisabledManagedPlatformAdmin.username!!)
+  }
+
+  @Test
+  fun `cannot enable a platform admin whose disable was attributed to the organization`() {
+    enable(testData.orgDisabledManagedPlatformAdmin.id)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
+    assertThat(userAccountService.findActiveOrDisabled(testData.orgDisabledManagedPlatformAdmin.id)!!.disabledAt)
+      .isNotNull()
+  }
+
+  @Test
+  fun `enabling an already-enabled platform admin managed by the organization stays a no-op`() {
+    enable(testData.managedPlatformAdmin.id).andIsOk
   }
 
   @Test
@@ -174,7 +228,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `org-disable rejects the managed user's pre-existing JWT and PAT`() {
     val jwt = jwtService.emitToken(testData.managedMember.id)
-    val pat = patService.create(CreatePatDto("kill-switch"), testData.managedMember)
+    val pat = testData.managedMemberPat
 
     disable(testData.managedMember.id).andIsOk
 
@@ -224,15 +278,14 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
-  fun `an org disable does not take over an admin disable`() {
+  fun `an org disable is rejected, not silently dropped, on an admin-disabled account`() {
     userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
-    disable(testData.managedMember.id).andIsOk
-    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
-    enable(testData.managedMember.id)
+    disable(testData.managedMember.id)
       .andIsBadRequest
       .andAssertError
       .isCustomValidation
       .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+    assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
   }
 
   @Test
@@ -270,18 +323,25 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
 
   @Test
   fun `admin-disabled managed user is hidden from the org listing`() {
-    assertSearchTotal("byadmin@acting.org", 0)
+    assertNotListed(testData.adminDisabledManagedMember.username!!)
   }
 
   @Test
   fun `org-disabled managed user stays visible in the org listing`() {
-    assertMemberFlags("byorg@acting.org", managed = true, disabled = true)
+    assertMemberFlags(testData.orgDisabledManagedMember.username!!, managed = true, disabled = true)
   }
 
   @Test
   fun `a non-owner cannot disable a managed user`() {
     userAccount = testData.nonManagedMember
     disable(testData.managedMember.id).andIsForbidden
+  }
+
+  @Test
+  fun `a non-owner cannot enable a managed user`() {
+    disable(testData.managedMember.id).andIsOk
+    userAccount = testData.nonManagedMember
+    enable(testData.managedMember.id).andIsForbidden
   }
 
   @Test
@@ -295,7 +355,23 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
-  fun `removing a managed user is still rejected (the DELETE revert)`() {
+  fun `a member managed by another organization can still be removed from this one`() {
+    performAuthDelete(
+      "/v2/organizations/${testData.organization.id}/users/${testData.managedByOtherOrg.id}",
+      null,
+    ).andIsOk
+  }
+
+  @Test
+  fun `a member an admin disabled cannot be removed`() {
+    performAuthDelete(
+      "/v2/organizations/${testData.organization.id}/users/${testData.disabledNonManagedMember.id}",
+      null,
+    ).andIsNotFound
+  }
+
+  @Test
+  fun `removing a managed user is rejected`() {
     performAuthDelete("/v2/organizations/${testData.organization.id}/users/${testData.managedMember.id}", null)
       .andIsBadRequest
       .andAssertError
@@ -306,7 +382,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `disabled managed user is hidden from project listing but shown in org listing`() {
     disable(testData.managedMember.id).andIsOk
-    performAuthGet("/v2/projects/${testData.project.id}/users?search=managed@acting.org")
+    performAuthGet("/v2/projects/${testData.project.id}/users?search=${testData.managedMember.username}")
       .andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(0)
@@ -320,43 +396,47 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   private fun enable(userId: Long) =
     performAuthPut("/v2/organizations/${testData.organization.id}/users/$userId/enable", null)
 
-  private fun assertTotalElements(expected: Int) {
+  private fun assertListingShowsExactly(expected: List<UserAccount>) {
+    val expectedUsernames = expected.map { it.username }.toSet()
     performAuthGet("/v2/organizations/${testData.organization.id}/users?size=100")
       .andIsOk
       .andAssertThatJson {
-        node("page.totalElements").isEqualTo(expected)
+        node("_embedded.usersInOrganization") {
+          isArray.hasSize(expectedUsernames.size)
+          expectedUsernames.forEach { username ->
+            isArray.anySatisfy { (it as JsonMap)["username"].assert.isEqualTo(username) }
+          }
+        }
       }
   }
 
-  private fun assertSearchSize(
-    search: String,
-    expected: Int,
-  ) {
-    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=$search")
-      .andIsOk
-      .andAssertThatJson {
-        node("_embedded.usersInOrganization").isArray.hasSize(expected)
-      }
+  private fun setRole(userId: Long) =
+    performAuthPut(
+      "/v2/organizations/${testData.organization.id}/users/$userId/set-role",
+      SetOrganizationRoleDto(OrganizationRoleType.OWNER),
+    )
+
+  private fun search(username: String) =
+    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=$username").andIsOk
+
+  private fun assertListedExactlyOnce(username: String) {
+    search(username).andAssertThatJson {
+      node("_embedded.usersInOrganization").isArray.hasSize(1)
+    }
   }
 
-  private fun assertSearchTotal(
-    search: String,
-    expected: Int,
-  ) {
-    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=$search")
-      .andIsOk
-      .andAssertThatJson {
-        node("page.totalElements").isEqualTo(expected)
-      }
+  private fun assertNotListed(username: String) {
+    search(username).andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
   }
 
   private fun assertMemberFlags(
-    search: String,
+    username: String,
     managed: Boolean,
     disabled: Boolean,
   ) {
-    performAuthGet("/v2/organizations/${testData.organization.id}/users?search=$search")
-      .andIsOk
+    search(username)
       .andAssertThatJson {
         node("_embedded.usersInOrganization") {
           isArray.hasSize(1)
@@ -373,7 +453,17 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     assertThat(userAccountService.findActiveOrDisabled(userId)!!.disabledBy).isEqualTo(expected)
   }
 
-  companion object {
-    private const val VISIBLE_MEMBER_COUNT = 7
-  }
+  private val visibleMembers
+    get() =
+      listOf(
+        testData.owner,
+        testData.managedMember,
+        testData.nonManagedMember,
+        testData.orgDisabledManagedMember,
+        testData.managedPlatformAdmin,
+        testData.managedPlatformSupporter,
+        testData.managedByOtherOrg,
+        testData.projectOnlyMember,
+        testData.multiProjectMember,
+      )
 }
