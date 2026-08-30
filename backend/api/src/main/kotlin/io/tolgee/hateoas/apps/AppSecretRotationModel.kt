@@ -17,4 +17,10 @@ open class AppSecretRotationModel(
         "earlier deadline and can lapse before this value.",
   )
   val previousExpiresAt: Long?,
+  @Schema(
+    description =
+      "Whether the freshly issued secret reached the app over the lifecycle channel, or null when " +
+        "there was nothing to deliver to.",
+  )
+  val delivery: AppDeliveryOutcomeModel? = null,
 ) : RepresentationModel<AppSecretRotationModel>()

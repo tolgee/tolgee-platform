@@ -35,4 +35,10 @@ open class AppRegisteredModel(
   val webhookSecret: String? = null,
   @Schema(description = "Id of the install created for this organization, or null when install was skipped")
   val installId: Long? = null,
+  @Schema(
+    description =
+      "Whether the app-level credentials reached the app over the lifecycle channel. Present only " +
+        "when this call registered the app; null when nothing was disclosed to deliver.",
+  )
+  val delivery: AppDeliveryOutcomeModel? = null,
 ) : RepresentationModel<AppRegisteredModel>()

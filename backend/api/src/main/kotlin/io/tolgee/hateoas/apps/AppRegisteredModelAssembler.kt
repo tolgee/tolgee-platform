@@ -15,6 +15,7 @@ class AppRegisteredModelAssembler {
       clientSecret = credentials?.clientSecret,
       webhookSecret = credentials?.webhookSecret,
       installId = result.install?.id,
+      delivery = AppDeliveryOutcomeModel.of(result.delivery),
     )
   }
 }

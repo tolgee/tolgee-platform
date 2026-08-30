@@ -3,6 +3,7 @@ package io.tolgee.service.apps
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.repository.PermissionRepository
+import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.AfterEach
@@ -26,6 +27,10 @@ class AppPrincipalSeatTest : AbstractSpringTest() {
   @MockitoBean
   @Autowired
   private lateinit var appManifestHttpClient: AppManifestHttpClient
+
+  @MockitoBean
+  @Autowired
+  private lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
 
   private lateinit var testData: AppsTestData
 
