@@ -1,25 +1,29 @@
 package io.tolgee.api.v2.controllers.apps
 
 import io.tolgee.constants.Caches
-import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.development.testDataBuilder.data.AppsWithInstallsTestData
 import io.tolgee.dtos.cacheable.AppDto
 import io.tolgee.dtos.cacheable.AppInstallDto
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.apps.AppEnabledForProjectRepository
+import io.tolgee.service.apps.AppAvailabilityService
+import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.apps.AppManifestHttpClient
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -27,18 +31,25 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Duration
 
 /**
+ * Every app-request cache method, run against a real cache backend so a missed eviction is a red
+ * test. The concrete subclasses pick the backend: [AppCacheWithoutRedisTest] uses in-heap Caffeine,
+ * [AppCacheWithRedisTest] uses Redis, so the cached DTOs also have to round-trip through the
+ * Redisson Kryo codec - a serialization defect Caffeine could never surface.
+ *
  * The app-auth caches must never outlive the security decision they cache: a force-revoke, an
  * uninstall, or a scope reduction has to take effect on the very next request, not two hours later.
- * These run with the cache on so a missed eviction is a red test.
  */
-@ContextRecreatingTest
-@SpringBootTest(
-  properties = [
-    "tolgee.cache.enabled=true",
-  ],
-)
-@AutoConfigureMockMvc
-class AppAuthCacheTest : AuthorizedControllerTest() {
+abstract class AbstractAppCacheTest : AuthorizedControllerTest() {
+  @MockitoSpyBean
+  @Autowired
+  private lateinit var appEnabledForProjectRepository: AppEnabledForProjectRepository
+
+  @Autowired
+  private lateinit var appEnablementService: AppEnablementService
+
+  @Autowired
+  private lateinit var appAvailabilityService: AppAvailabilityService
+
   @MockitoBean
   @Autowired
   lateinit var appManifestHttpClient: AppManifestHttpClient
@@ -47,7 +58,7 @@ class AppAuthCacheTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
 
-  lateinit var testData: AppsTestData
+  lateinit var testData: AppsWithInstallsTestData
   lateinit var appClientId: String
   lateinit var appClientSecret: String
   var appEntityId: Long = 0
@@ -55,7 +66,7 @@ class AppAuthCacheTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
-    testData = AppsTestData()
+    testData = AppsWithInstallsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     AppsTestFixtures.mockManifest(appManifestHttpClient, manifest(""""translations.view""""))
@@ -69,12 +80,68 @@ class AppAuthCacheTest : AuthorizedControllerTest() {
     performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
 
     clearCaches()
+    Mockito.reset(appEnabledForProjectRepository)
   }
 
   @AfterEach
   fun cleanup() {
     currentDateProvider.forcedDate = null
     testDataService.cleanTestData(testData.root)
+  }
+
+  @Test
+  fun `serves the enablement check from cache on the second call`() {
+    val projectId = testData.projectBuilder.self.id
+    val installId = testData.enabledInstall.id
+
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
+
+    verify(appEnabledForProjectRepository, times(1)).findEnabledProjectIdsByInstallId(installId)
+  }
+
+  @Test
+  fun `disable evicts so the check does not read stale as enabled`() {
+    val projectId = testData.projectBuilder.self.id
+    val installId = testData.enabledInstall.id
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
+
+    appEnablementService.disable(projectId, installId)
+
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(false)
+  }
+
+  @Test
+  fun `uninstall evicts so the check does not read stale as enabled`() {
+    val projectId = testData.projectBuilder.self.id
+    val installId = testData.enabledInstall.id
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
+
+    appEnablementService.removeAllForAppInstall(installId)
+
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(false)
+  }
+
+  @Test
+  fun `enable evicts the negative entry so the check reads enabled immediately`() {
+    val siblingProject = testData.siblingProject
+    val installId = testData.enabledInstall.id
+    appEnablementService.isEnabledForProject(siblingProject.id, installId).assert.isEqualTo(false)
+
+    appEnablementService.enable(siblingProject, installId)
+
+    appEnablementService.isEnabledForProject(siblingProject.id, installId).assert.isEqualTo(true)
+  }
+
+  @Test
+  fun `withdrawing an app's availability evicts the enablement cache`() {
+    val projectId = testData.orgScopedProject.id
+    val installId = testData.orgScopedInstall.id
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
+
+    appAvailabilityService.removeAvailableOrganization(testData.orgScopedApp.id, testData.otherOrganization.id)
+
+    appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(false)
   }
 
   @Test
@@ -213,8 +280,8 @@ class AppAuthCacheTest : AuthorizedControllerTest() {
   private fun manifest(scopes: String): String =
     """
     {
-      "id": "test-app",
-      "name": "Test App",
+      "id": "auth-cache-test-app",
+      "name": "Auth Cache Test App",
       "version": "0.1.0",
       "baseUrl": "https://app.example.com",
       "scopes": [$scopes],

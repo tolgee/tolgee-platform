@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.AppBuilder
+import io.tolgee.model.Project
 import io.tolgee.model.apps.App
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.enums.Scope
@@ -18,6 +19,16 @@ class AppsWithInstallsTestData : NativeAppsTestData() {
 
   lateinit var availableApp: App
   lateinit var enabledInstall: AppInstall
+
+  /**
+   * A second app the owner made available to [otherOrganization] only (no all-organizations
+   * sentinel), installed by that organization and enabled for a project it owns. Withdrawing the
+   * single availability grant makes the app unreachable for that org, so its enablement rows are
+   * deleted - the scenario the availability-withdrawal eviction test drives.
+   */
+  lateinit var orgScopedApp: App
+  lateinit var orgScopedInstall: AppInstall
+  lateinit var orgScopedProject: Project
 
   init {
     root.apply {
@@ -62,6 +73,28 @@ class AppsWithInstallsTestData : NativeAppsTestData() {
             app = this@AppsWithInstallsTestData.availableApp
           }.self
       projectBuilder.addEnabledApp { appInstall = this@AppsWithInstallsTestData.enabledInstall }
+
+      val orgScopedAppBuilder =
+        ownerOrgBuilder.addApp {
+          appId = "org-scoped-app"
+          name = "Org Scoped App"
+          manifestJson = AppBuilder.manifestJsonFor("org-scoped-app", "Org Scoped App")
+        }
+      orgScopedApp = orgScopedAppBuilder.self
+      orgScopedAppBuilder.addAvailability { organization = this@AppsWithInstallsTestData.otherOrganization }
+
+      orgScopedInstall =
+        otherOrganizationBuilder
+          .addAppInstall {
+            app = this@AppsWithInstallsTestData.orgScopedApp
+          }.self
+
+      val orgScopedProjectBuilder =
+        addProject(organizationOwner = this@AppsWithInstallsTestData.otherOrganization) {
+          name = "org_scoped_project"
+        }
+      orgScopedProject = orgScopedProjectBuilder.self
+      orgScopedProjectBuilder.addEnabledApp { appInstall = this@AppsWithInstallsTestData.orgScopedInstall }
     }
   }
 }
