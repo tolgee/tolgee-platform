@@ -9,6 +9,7 @@ import io.tolgee.hateoas.organization.apps.AppManifestPreviewModel
 import io.tolgee.hateoas.organization.apps.AppManifestPreviewModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.service.apps.AppInstallService
 import jakarta.validation.Valid
@@ -85,6 +86,24 @@ class OrganizationAppsController(
     @PathVariable organizationId: Long,
   ): CollectionModel<AppInstallModel> {
     return appInstallModelAssembler.toCollectionModel(appInstallService.findAll(organizationId))
+  }
+
+  @PostMapping("/{installId}/refresh")
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_APPS_MANAGE])
+  @RequiresSuperAuthentication
+  @Operation(
+    summary = "Refresh an installed app's manifest and approve its current scopes",
+    description =
+      "Re-fetches the app's manifest and updates the stored snapshot. As the organization's consent " +
+        "authority, this also approves the scopes the manifest now requests: the install adopts that " +
+        "scope set, clearing any pending permission requests. This is the only path that may widen an " +
+        "install's granted scopes.",
+  )
+  fun refresh(
+    @PathVariable organizationId: Long,
+    @PathVariable installId: Long,
+  ): AppInstallModel {
+    return appInstallModelAssembler.toModel(appInstallService.refresh(organizationId, installId))
   }
 
   @DeleteMapping("/{installId}")

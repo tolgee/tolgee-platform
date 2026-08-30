@@ -230,6 +230,7 @@ class OrganizationAppsControllerTest : AuthorizedControllerTest() {
     performAuthPost(registerUrl(), registerBody()).andIsForbidden
     performAuthGet(ownedUrl()).andIsForbidden
     performAuthPost("${appsUrl()}/preview", registerBody()).andIsForbidden
+    performAuthPost("${appsUrl()}/$installId/refresh", null).andIsForbidden
     performAuthDelete("${appsUrl()}/$installId").andIsForbidden
   }
 
