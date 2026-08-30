@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers.apps
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.ISimpleProject
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
@@ -60,6 +62,7 @@ class AppSelfInstallationsController(
   @PostMapping("/installations/{installId}/refresh")
   @AllowAppLevelAccess
   @RateLimited(10, isAuthentication = true)
+  @RequestActivity(ActivityType.APP_UPDATE)
   @Operation(
     summary = "Re-fetch the manifest for one of the app's installations",
     description =

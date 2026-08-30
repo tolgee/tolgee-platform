@@ -1,6 +1,9 @@
 package io.tolgee.model.apps
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.propChangesProvider.ScopeArrayPropChangesProvider
 import io.tolgee.model.Organization
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
@@ -21,6 +24,7 @@ import org.hibernate.annotations.Type
  * lives on the app; the install carries only what is specific to this organization — its consent.
  */
 @Entity
+@ActivityLoggedEntity
 @Table(
   name = "app_install",
   uniqueConstraints = [
@@ -53,6 +57,7 @@ class AppInstall : StandardAuditModel() {
   lateinit var principal: UserAccount
 
   /** What the organization consented to. Requests beyond this show as pending until approved. */
+  @ActivityLoggedProp(modificationProvider = ScopeArrayPropChangesProvider::class)
   @Type(
     EnumArrayType::class,
     parameters = [
