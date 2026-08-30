@@ -16,6 +16,9 @@ fun Date.addSeconds(seconds: Int): Date = addToCalendar(Calendar.SECOND, seconds
 
 fun Date.addMilliseconds(milliseconds: Int): Date = addToCalendar(Calendar.MILLISECOND, milliseconds)
 
+/** Epoch seconds, dropping sub-second millis — for comparing against a JWT `iat`, which is second-precision. */
+fun Date.toWholeSeconds(): Long = time / 1000L
+
 private fun Date.addToCalendar(
   field: Int,
   amount: Int,

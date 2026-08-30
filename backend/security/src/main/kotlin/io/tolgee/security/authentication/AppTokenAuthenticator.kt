@@ -24,6 +24,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.apps.App
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.toWholeSeconds
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -129,9 +130,9 @@ class AppTokenAuthenticator(
     claims: AppTokenClaims,
   ) {
     val cutoff = app.tokensInvalidBefore ?: return
-    // A JWT `iat` is second-precision, so compare at whole seconds — otherwise a token minted in the
-    // same second as the cutoff reads as older than it and is wrongly rejected.
-    if (claims.issuedAt.time / 1000L < cutoff.time / 1000L) {
+    // Compare at whole seconds: a JWT `iat` is second-precision, so a token minted in the same second
+    // as the cutoff would otherwise read as older than it and be wrongly rejected.
+    if (claims.issuedAt.toWholeSeconds() < cutoff.toWholeSeconds()) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
   }
