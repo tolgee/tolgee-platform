@@ -173,6 +173,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy)
       .isEqualTo(UserDisabledBy.ADMIN)
+  }
+
+  @Test
+  fun `admin enable clears the disable origin`() {
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
 
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
     assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy).isNull()

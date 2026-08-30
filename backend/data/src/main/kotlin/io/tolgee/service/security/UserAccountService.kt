@@ -657,14 +657,9 @@ class UserAccountService(
     disabledBy: UserDisabledBy,
   ) {
     val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-    if (disabledBy == UserDisabledBy.ORGANIZATION && user.isSupporterOrAdmin()) {
-      throw ValidationException(Message.CANNOT_DISABLE_PLATFORM_ADMIN)
-    }
+    checkOrganizationMayActOnAccount(user, disabledBy)
     if (user.disabledAt != null) {
-      if (user.disabledBy != disabledBy && canOverrideDisable(user.disabledBy, disabledBy)) {
-        user.disabledBy = disabledBy
-        this.save(user)
-      }
+      takeOverDisable(user, disabledBy)
       return
     }
     user.disabledAt = currentDateProvider.date
@@ -673,14 +668,16 @@ class UserAccountService(
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
+  /** @return whether the account actually changed from disabled to enabled. */
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(
     userId: Long,
     requestedBy: UserDisabledBy,
-  ) {
+  ): Boolean {
     val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-    if (user.disabledAt == null) return
+    if (user.disabledAt == null) return false
+    checkOrganizationMayActOnAccount(user, requestedBy)
     if (!canOverrideDisable(user.disabledBy, requestedBy)) {
       throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
     }
@@ -688,6 +685,29 @@ class UserAccountService(
     user.disabledBy = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
+    return true
+  }
+
+  /** changeSet 1785252020000-2 can leave a managed staff account carrying an ORGANIZATION origin. */
+  private fun checkOrganizationMayActOnAccount(
+    user: UserAccount,
+    actingAs: UserDisabledBy,
+  ) {
+    if (actingAs == UserDisabledBy.ORGANIZATION && user.isSupporterOrAdmin()) {
+      throw ValidationException(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT)
+    }
+  }
+
+  private fun takeOverDisable(
+    user: UserAccount,
+    disabledBy: UserDisabledBy,
+  ) {
+    if (user.disabledBy == disabledBy) return
+    if (!canOverrideDisable(user.disabledBy, disabledBy)) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
+    }
+    user.disabledBy = disabledBy
+    this.save(user)
   }
 
   private fun canOverrideDisable(
@@ -695,6 +715,8 @@ class UserAccountService(
     requestedBy: UserDisabledBy,
   ): Boolean {
     if (requestedBy == UserDisabledBy.ADMIN) return true
+    // An unrecorded origin stays with the platform: it is either a disable predating the column or a
+    // demo account, and neither is the organization's to release.
     return storedDisabledBy == UserDisabledBy.ORGANIZATION
   }
 

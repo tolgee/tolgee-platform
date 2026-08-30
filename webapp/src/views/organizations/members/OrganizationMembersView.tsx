@@ -118,9 +118,7 @@ export const OrganizationMembersView: FunctionComponent<
             </Typography>
           </Box>
         }
-        renderItem={(user) => (
-          <MemberItem user={user} organizationId={organization!.id} />
-        )}
+        renderItem={(user) => <MemberItem user={user} />}
       />
     </BaseOrganizationSettingsView>
   );

@@ -17,7 +17,6 @@ import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
@@ -230,13 +229,11 @@ class OrganizationController(
   fun leaveOrganization(
     @PathVariable("id") id: Long,
   ) {
-    organizationService.find(id)?.let {
-      val isOwner = organizationRoleService.findType(id) == OrganizationRoleType.OWNER
-      if (isOwner && !organizationService.isThereAnotherOwner(id)) {
-        throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
-      }
-      organizationRoleService.leave(id)
-    } ?: throw NotFoundException()
+    val organization = organizationService.get(id)
+    if (organizationRoleService.isLastEnabledOwner(organization.id, authenticationFacade.authenticatedUser.id)) {
+      throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+    }
+    organizationRoleService.leave(organization.id)
   }
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
@@ -281,9 +278,6 @@ class OrganizationController(
     @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    if (authenticationFacade.authenticatedUser.id == userId) {
-      throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
-    }
     organizationRoleService.disableUser(userId, organizationHolder.organization.id)
   }
 

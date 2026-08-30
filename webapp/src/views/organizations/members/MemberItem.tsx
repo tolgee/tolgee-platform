@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import {
+  Chip,
   IconButton,
   styled,
   Tooltip,
@@ -11,19 +12,23 @@ import {
   Link as MuiLink,
 } from '@mui/material';
 import { XClose, InfoCircle } from '@untitled-ui/icons-react';
-import { useUser } from 'tg.globalContext/helpers';
+import { useIsAdmin, useUser } from 'tg.globalContext/helpers';
 import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { RemoveUserButton } from './RemoveUserButton';
-import { DisableUserButton } from './DisableUserButton';
-import { EnableUserButton } from './EnableUserButton';
-import { UpdateRoleButton } from './UpdateRoleButton';
-import { useLeaveOrganization } from '../useLeaveOrganization';
-import { useOrganization } from '../useOrganization';
+import { RemoveUserButton } from 'tg.views/organizations/members/RemoveUserButton';
+import {
+  DisableUserButton,
+  EnableUserButton,
+} from 'tg.views/organizations/members/DisableEnableUserButton';
+import { UpdateRoleButton } from 'tg.views/organizations/members/UpdateRoleButton';
+import { useLeaveOrganization } from 'tg.views/organizations/useLeaveOrganization';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { MfaBadge } from '@tginternal/library/components/MfaBadge';
+
+const DISABLED_ROW_OPACITY = 0.6;
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -50,14 +55,6 @@ const StyledMfaBadgeWrapper = styled('div')`
   padding: ${({ theme }) => theme.spacing(1)};
 `;
 
-const StyledDisabledLabel = styled('span')`
-  padding: ${({ theme }) => theme.spacing(0, 1)};
-  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
-  background: ${({ theme }) => theme.palette.divider1};
-  color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
 const StyledItemActions = styled('div')`
   display: flex;
   gap: ${({ theme }) => theme.spacing(1)};
@@ -78,19 +75,22 @@ const StyledItemUser = styled('div')`
 
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
-  organizationId: number;
 };
 
 export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
   user,
-  organizationId,
 }) => {
   const { t } = useTranslate();
   const currentUser = useUser();
+  const isAdmin = useIsAdmin();
   const organization = useOrganization();
   const leaveOrganization = useLeaveOrganization();
 
   const [projectsOpen, setProjectsOpen] = useState(false);
+
+  // A SUPPORTER's bypass is read-only (OrganizationAuthorizationInterceptor.canBypass), so these
+  // PUTs would 403 for them.
+  const canManageMembers = organization?.currentUserRole === 'OWNER' || isAdmin;
 
   const renderMemberAction = () => {
     if (currentUser?.id === user.id) {
@@ -101,7 +101,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
         <Tooltip title={t('organization_users_leave')}>
           <IconButton
             size="small"
-            onClick={() => leaveOrganization(organizationId)}
+            onClick={() => leaveOrganization(organization!.id)}
             data-cy="organization-member-leave-button"
           >
             <XClose />
@@ -109,10 +109,10 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
         </Tooltip>
       );
     }
+    if (!canManageMembers) {
+      return null;
+    }
     if (user.managed) {
-      if (organization?.currentUserRole !== 'OWNER') {
-        return null;
-      }
       return user.disabled ? (
         <EnableUserButton userId={user.id} userName={user.username} />
       ) : (
@@ -123,20 +123,29 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
   };
 
   return (
-    <StyledListItem data-cy="organization-member-item">
-      <StyledItemUser sx={{ opacity: user.disabled ? 0.6 : 1 }}>
+    <StyledListItem
+      data-cy="organization-member-item"
+      data-cy-username={user.username}
+    >
+      <StyledItemUser
+        sx={{ opacity: user.disabled ? DISABLED_ROW_OPACITY : 1 }}
+      >
         <AvatarImg owner={{ ...user, type: 'USER' }} size={24} />
         <StyledItemText>
           {user.name} ({user.username})
           {user.disabled && (
             <>
               {' '}
-              <StyledDisabledLabel data-cy="organization-member-disabled-label">
-                <T
-                  keyName="organization_member_disabled_label"
-                  defaultValue="Disabled"
-                />
-              </StyledDisabledLabel>
+              <Chip
+                size="small"
+                data-cy="organization-member-disabled-label"
+                label={
+                  <T
+                    keyName="organization_member_disabled_label"
+                    defaultValue="Disabled"
+                  />
+                }
+              />
             </>
           )}
         </StyledItemText>

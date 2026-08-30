@@ -8,9 +8,14 @@ import {
 } from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { E2OrganizationMembersView } from '../../compounds/organizationMembers/E2OrganizationMembersView';
+
+const MANAGED_MEMBER = 'LonelyDev@tolgee.io';
+const NON_MANAGED_MEMBER = 'evan@netsuite.com';
 
 describe('Organization Members', () => {
   let organizationData: Record<string, { slug: string }>;
+  const membersView = new E2OrganizationMembersView();
 
   beforeEach(() => {
     setBypassSeatCountCheck(true);
@@ -74,59 +79,43 @@ describe('Organization Members', () => {
   });
 
   it('Can disable and re-enable a user managed by the organization', () => {
-    gcy('global-paginated-list').within(() => {
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-remove-user-button')
-        .should('not.exist');
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-disable-user-button')
-        .click();
-    });
-    confirmStandard();
+    membersView
+      .getMember(MANAGED_MEMBER)
+      .findDcy('organization-members-remove-user-button')
+      .should('not.exist');
+    membersView.disableMember(MANAGED_MEMBER);
     assertMessage('User disabled');
 
-    gcy('global-paginated-list').within(() => {
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-member-disabled-label')
-        .should('exist');
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-enable-user-button')
-        .click();
-    });
-    confirmStandard();
+    membersView
+      .getMember(MANAGED_MEMBER)
+      .findDcy('organization-member-disabled-label')
+      .should('exist');
+    membersView.enableMember(MANAGED_MEMBER);
     assertMessage('User re-enabled');
 
-    gcy('global-paginated-list').within(() => {
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-member-disabled-label')
-        .should('not.exist');
-      cy.contains('Lonely Developer')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-disable-user-button')
-        .should('exist');
-    });
+    membersView
+      .getMember(MANAGED_MEMBER)
+      .findDcy('organization-member-disabled-label')
+      .should('not.exist');
+    membersView
+      .getMember(MANAGED_MEMBER)
+      .findDcy('organization-members-disable-user-button')
+      .should('exist');
   });
 
   it('Shows the remove button (not disable/enable) for non-managed members', () => {
-    gcy('global-paginated-list').within(() => {
-      cy.contains('Goldberg')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-remove-user-button')
-        .should('exist');
-      cy.contains('Goldberg')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-disable-user-button')
-        .should('not.exist');
-      cy.contains('Goldberg')
-        .closestDcy('organization-member-item')
-        .findDcy('organization-members-enable-user-button')
-        .should('not.exist');
-    });
+    membersView
+      .getMember(NON_MANAGED_MEMBER)
+      .findDcy('organization-members-remove-user-button')
+      .should('exist');
+    membersView
+      .getMember(NON_MANAGED_MEMBER)
+      .findDcy('organization-members-disable-user-button')
+      .should('not.exist');
+    membersView
+      .getMember(NON_MANAGED_MEMBER)
+      .findDcy('organization-members-enable-user-button')
+      .should('not.exist');
   });
 
   it('Can leave', () => {

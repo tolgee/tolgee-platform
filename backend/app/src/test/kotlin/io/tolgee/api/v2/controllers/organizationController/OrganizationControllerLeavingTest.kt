@@ -9,6 +9,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -17,6 +18,15 @@ import org.springframework.data.domain.PageRequest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
+  // A leftover disabled row is invisible to createUserIfNotExists (findActive) but still holds the
+  // username unique index, so the next run would fail on the insert.
+  @AfterEach
+  fun deleteDisabledFixtureUsers() {
+    listOf(DISABLED_SECOND_OWNER, DISABLED_SOLE_OWNER).forEach { username ->
+      userAccountService.findActiveOrDisabled(username)?.let { userAccountService.delete(it) }
+    }
+  }
+
   @Test
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
@@ -85,7 +95,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   @Test
   fun `cannot leave when the only other owner is disabled`() {
     val organization = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
-    val secondOwner = dbPopulator.createUserIfNotExists("disabledSecondOwner")
+    val secondOwner = dbPopulator.createUserIfNotExists(DISABLED_SECOND_OWNER)
     organizationRoleService.grantOwnerRoleToUser(secondOwner, organization)
     userAccountService.disable(secondOwner.id, UserDisabledBy.ADMIN)
 
@@ -98,7 +108,7 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
   @Test
   fun `a member can leave when the only owner is disabled`() {
-    val owner = dbPopulator.createUserIfNotExists("disabledSoleOwner")
+    val owner = dbPopulator.createUserIfNotExists(DISABLED_SOLE_OWNER)
     val organization = executeInNewTransaction { this.organizationService.create(dummyDto, owner) }
     executeInNewTransaction {
       organizationRoleService.grantMemberRoleToUser(userAccountService.get(userAccount!!.id), organization)
@@ -107,5 +117,10 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
 
     performAuthPut("/v2/organizations/${organization.id}/leave", null).andIsOk
     getPermittedOrgs().find { organization.id == it.id }.assert.isNull()
+  }
+
+  companion object {
+    private const val DISABLED_SECOND_OWNER = "disabledSecondOwner"
+    private const val DISABLED_SOLE_OWNER = "disabledSoleOwner"
   }
 }
