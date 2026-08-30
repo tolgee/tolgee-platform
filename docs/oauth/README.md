@@ -207,6 +207,17 @@ covers what is Tolgee-specific on top of it.
 
 These are known gaps, deferred to the client rounds that first exercise them:
 
+- **An all-projects token cannot enumerate the projects it reaches.** `*` means "every project this user can
+  currently see", a set that changes with their membership, so a client cannot cache it — and nothing lets it ask:
+  both project-listing routes are `@IsGlobalRoute` (which `AuthenticationInterceptor.isOAuthAllowed` denies) and
+  `ONLY_PAT` besides, and MCP's `listProjectsSpec` is refused for the same reason. Not a boundary problem — every
+  request is still narrowed by `coversProject()` and the user's live permissions, so the failure is "cannot
+  discover", never "reaches further than intended". The browser extension is handed its project by the page it
+  edits; MCP is the round that needs discovery, and the follow-up is one non-global OAuth-reachable route returning
+  the token's projects. `AuthenticationFacade.implicitProjectId` reuses the project-API-key conflation
+  (`oauthTokenCredentials?.singleProjectId()`), so `*` currently reads as "no project" — the opposite of what it
+  means — and wants fixing in the same change.
+
 - **`refresh-token-validity-days` is a sliding inactivity window, not a grant lifetime.** Every refresh issues a new
   refresh token and pushes its expiry out again, so a grant that keeps being used never expires on its own: the 30
   days measure idleness, not age. What ends an actively-used grant today is revocation — a password change, signing
