@@ -24,4 +24,10 @@ open class AppInstallModel(
   val enabledProjectCount: Long = 0,
   val modules: AppManifestModulesDto,
   val scopes: List<String>,
+  @Schema(
+    description =
+      "Scopes the current manifest requests that the install has not consented to yet. Non-empty " +
+        "after the app widens its manifest; an owner refresh approves them and clears this list.",
+  )
+  val pendingScopes: List<String> = emptyList(),
 ) : RepresentationModel<AppInstallModel>()

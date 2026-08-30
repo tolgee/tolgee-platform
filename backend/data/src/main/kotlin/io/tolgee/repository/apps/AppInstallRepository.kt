@@ -24,6 +24,12 @@ interface AppInstallRepository : JpaRepository<AppInstall, Long> {
     id: Long,
   ): AppInstall?
 
+  @Query("select i from AppInstall i join fetch i.app where i.app.id = :appEntityId and i.id = :id")
+  fun findByAppIdAndId(
+    @Param("appEntityId") appEntityId: Long,
+    @Param("id") id: Long,
+  ): AppInstall?
+
   @Query(
     """
     select i from AppInstall i

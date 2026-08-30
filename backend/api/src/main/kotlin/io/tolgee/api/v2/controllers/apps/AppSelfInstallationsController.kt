@@ -24,6 +24,7 @@ import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -54,6 +55,23 @@ class AppSelfInstallationsController(
     val appId = authenticationFacade.appAuthentication.appId
     val models = appInstallService.findAllByRegisteredApp(appId).map { appSelfInstallationModelAssembler.toModel(it) }
     return CollectionModel.of(models)
+  }
+
+  @PostMapping("/installations/{installId}/refresh")
+  @AllowAppLevelAccess
+  @RateLimited(10, isAuthentication = true)
+  @Operation(
+    summary = "Re-fetch the manifest for one of the app's installations",
+    description =
+      "Re-reads the app's manifest and updates the stored snapshot. Never widens the install's " +
+        "granted scopes: a manifest that requests more surfaces those as `pendingScopes` until the " +
+        "organization's owner approves them; scopes the manifest no longer requests are dropped.",
+  )
+  fun refreshInstallation(
+    @PathVariable installId: Long,
+  ): AppSelfInstallationModel {
+    val appId = authenticationFacade.appAuthentication.appId
+    return appSelfInstallationModelAssembler.toModel(appInstallService.refreshForApp(appId, installId))
   }
 
   @GetMapping("/installations/{installId}/projects")
