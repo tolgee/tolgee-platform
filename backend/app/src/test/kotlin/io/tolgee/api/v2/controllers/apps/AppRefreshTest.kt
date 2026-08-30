@@ -1,7 +1,10 @@
 package io.tolgee.api.v2.controllers.apps
 
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.AppsTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
@@ -134,6 +137,46 @@ class AppRefreshTest : AuthorizedControllerTest() {
     grantedScopeValues().assert.containsExactlyInAnyOrder("translations.view", "keys.edit")
   }
 
+  @Test
+  fun `refresh refuses a manifest whose app id no longer matches`() {
+    mockManifest(manifest(id = "a-different-app", scopes = """"translations.view""""))
+
+    performAuthPost("${appsUrl()}/$installId/refresh", null)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.APP_MANIFEST_INVALID)
+
+    grantedScopeValues().assert.containsExactlyInAnyOrder("translations.view", "keys.edit")
+  }
+
+  @Test
+  fun `an app cannot refresh an install that is not its own`() {
+    mockManifest(
+      manifest(
+        id = "other-app",
+        name = "Other App",
+        baseUrl = "https://other-app.example.com",
+        scopes = """"translations.view"""",
+      ),
+    )
+    userAccount = testData.otherOwner
+    val other =
+      objectMapper.readTree(
+        performAuthPost(
+          "/v2/organizations/${testData.otherOrganization.id}/owned-apps",
+          mapOf("manifestUrl" to OTHER_MANIFEST_URL),
+        ).andIsOk.andReturn().response.contentAsString,
+      )
+    userAccount = testData.user
+    val otherToken = appLevelToken(other.get("clientId").asText(), other.get("clientSecret").asText())
+
+    logout()
+    perform(post("${selfInstallations()}/$installId/refresh").header(HttpHeaders.AUTHORIZATION, "Bearer $otherToken"))
+      .andIsNotFound
+    userAccount = testData.user
+
+    grantedScopeValues().assert.containsExactlyInAnyOrder("translations.view", "keys.edit")
+  }
+
   private fun grantedScopeValues(): List<String> =
     appInstallService.find(testData.organization.id, installId)!!.grantedScopes.map { it.value }
 
@@ -145,6 +188,10 @@ class AppRefreshTest : AuthorizedControllerTest() {
 
   private fun mockManifest(json: String) = AppsTestFixtures.mockManifest(appManifestHttpClient, json)
 
+  private companion object {
+    const val OTHER_MANIFEST_URL = "https://example.com/other/manifest.json"
+  }
+
   private fun asAppToken(builder: MockHttpServletRequestBuilder): ResultActions {
     val token = appLevelToken()
     logout()
@@ -153,13 +200,16 @@ class AppRefreshTest : AuthorizedControllerTest() {
     return result
   }
 
-  private fun appLevelToken(): String {
+  private fun appLevelToken(
+    clientId: String = appClientId,
+    clientSecret: String = appClientSecret,
+  ): String {
     logout()
     val body =
       mapOf(
         "grant_type" to "client_credentials",
-        "client_id" to appClientId,
-        "client_secret" to appClientSecret,
+        "client_id" to clientId,
+        "client_secret" to clientSecret,
       )
     val response =
       perform(
@@ -172,16 +222,18 @@ class AppRefreshTest : AuthorizedControllerTest() {
   }
 
   private fun manifest(
+    id: String = "test-app",
     name: String = "Test App",
     version: String = "0.1.0",
+    baseUrl: String = "https://app.example.com",
     scopes: String,
   ): String =
     """
     {
-      "id": "test-app",
+      "id": "$id",
       "name": "$name",
       "version": "$version",
-      "baseUrl": "https://app.example.com",
+      "baseUrl": "$baseUrl",
       "scopes": [$scopes],
       "modules": {
         "project-dashboard-page": [

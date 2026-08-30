@@ -136,7 +136,7 @@ class AppInstallPersister(
     fetched: AppManifestFetcher.FetchResult,
   ): AppInstall {
     val install =
-      appInstallRepository.findWithAppById(installId)?.takeIf { it.app.id == appEntityId }
+      appInstallRepository.findByAppIdAndId(appEntityId, installId)
         ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
     return applySnapshot(install, fetched, allowScopeWidening = false)
   }
