@@ -18,10 +18,10 @@ package io.tolgee.security.authentication
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.AppDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.apps.App
 import io.tolgee.service.apps.AppInstallService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.toWholeSeconds
@@ -89,14 +89,14 @@ class AppTokenAuthenticator(
       appInstallService.findForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    checkAppTokenCutoff(install.app, claims)
+    checkAppTokenCutoff(requireApp(install.appEntityId), claims)
 
     val user = resolveAppTokenUser(claims.userId!!, claims)
 
     return AppAuthentication(
       credentials = token,
       appInstallOrNull = install,
-      appId = install.app.id,
+      appId = install.appEntityId,
       userAccount = user,
       isInstallContext = false,
       isReadOnly = claims.isReadOnly,
@@ -112,12 +112,12 @@ class AppTokenAuthenticator(
       appInstallService.resolveForAppAuth(claims.installId!!)
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    checkAppTokenCutoff(resolution.install.app, claims)
+    checkAppTokenCutoff(requireApp(resolution.install.appEntityId), claims)
 
     return AppAuthentication(
       credentials = token,
       appInstallOrNull = resolution.install,
-      appId = resolution.install.app.id,
+      appId = resolution.install.appEntityId,
       userAccount = resolution.principal,
       isInstallContext = true,
       isReadOnly = claims.isReadOnly,
@@ -125,14 +125,19 @@ class AppTokenAuthenticator(
     )
   }
 
+  private fun requireApp(appEntityId: Long): AppDto {
+    return appInstallService.findAppForAppAuth(appEntityId)
+      ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+  }
+
   private fun checkAppTokenCutoff(
-    app: App,
+    app: AppDto,
     claims: AppTokenClaims,
   ) {
     val cutoff = app.tokensInvalidBefore ?: return
     // Compare at whole seconds: a JWT `iat` is second-precision, so a token minted in the same second
     // as the cutoff would otherwise read as older than it and be wrongly rejected.
-    if (claims.issuedAt.toWholeSeconds() < cutoff.toWholeSeconds()) {
+    if (claims.issuedAt.toWholeSeconds() < cutoff / 1000L) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
   }

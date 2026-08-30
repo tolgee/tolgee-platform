@@ -22,6 +22,9 @@ interface Caches {
     const val LLM_PROVIDERS = "llmProviders"
     const val LANGUAGE_TOOL_RESULTS = "languageToolResults"
 
+    const val APPS = "apps"
+    const val APP_INSTALLS = "appInstalls"
+
     const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
   }
 }
