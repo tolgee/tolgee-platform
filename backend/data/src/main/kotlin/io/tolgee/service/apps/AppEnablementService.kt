@@ -22,6 +22,7 @@ class AppEnablementService(
   private val appEnablementInserter: AppEnablementInserter,
   private val appAvailabilityService: AppAvailabilityService,
   private val appActivityRecorder: AppActivityRecorder,
+  private val appEnablementCache: AppEnablementCache,
   private val metrics: Metrics,
 ) {
   @Transactional
@@ -45,6 +46,7 @@ class AppEnablementService(
       }
     }
 
+    appEnablementCache.evict(install.id)
     return install
   }
 
@@ -71,6 +73,7 @@ class AppEnablementService(
       appEnabledForProjectRepository.findByProjectIdAndAppInstallId(projectId, appInstallId) ?: return
     appActivityRecorder.record(existing.appInstall.app, ActivityType.APP_DISABLE_FOR_PROJECT, projectId = projectId)
     appEnabledForProjectRepository.delete(existing)
+    appEnablementCache.evict(appInstallId)
   }
 
   @Transactional(readOnly = true)
@@ -107,21 +110,24 @@ class AppEnablementService(
     return appEnabledForProjectRepository.findEnabledProjectsByAppInstallId(appInstallId, pageable)
   }
 
-  @Transactional(readOnly = true)
   fun isEnabledForProject(
     projectId: Long,
     appInstallId: Long,
   ): Boolean {
-    return appEnabledForProjectRepository.findByProjectIdAndAppInstallId(projectId, appInstallId) != null
+    return projectId in appEnablementCache.getEnabledProjectIds(appInstallId)
   }
 
   @Transactional
   fun removeAllForAppInstall(appInstallId: Long) {
     appEnabledForProjectRepository.deleteByAppInstallId(appInstallId)
+    appEnablementCache.evict(appInstallId)
   }
 
   @Transactional
   fun removeAllForProject(projectId: Long) {
     appEnabledForProjectRepository.deleteByProjectId(projectId)
+    // A project delete touches many installs' enabled-project sets; per-install eviction would need an
+    // extra query and project deletion is rare, so evict every entry.
+    appEnablementCache.evictAll()
   }
 }
