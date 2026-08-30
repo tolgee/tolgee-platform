@@ -254,7 +254,11 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         and ua.deletedAt is null
         and (
           ua.disabledAt is null
-          or (mr.managed = true and ua.disabledBy = io.tolgee.model.enums.UserDisabledBy.ORGANIZATION)
+          or (
+            mr.managed = true
+            and ua.disabledBy = io.tolgee.model.enums.UserDisabledBy.ORGANIZATION
+            and ua.role = io.tolgee.model.UserAccount${'$'}Role.USER
+          )
         )
         group by ua.id, mr.type, mr.managed
       """,

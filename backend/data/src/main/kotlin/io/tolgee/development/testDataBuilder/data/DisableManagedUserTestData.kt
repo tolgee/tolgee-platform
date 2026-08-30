@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Organization
-import io.tolgee.model.Project
+import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -9,24 +9,29 @@ import io.tolgee.model.enums.UserDisabledBy
 import java.util.Date
 
 class DisableManagedUserTestData : BaseTestData() {
+  companion object {
+    private val DISABLED_AT: Date = Date(1700000000000)
+  }
+
   val organization: Organization get() = userAccountBuilder.defaultOrganizationBuilder.self
   val owner: UserAccount get() = user
 
   lateinit var managedMember: UserAccount
+  lateinit var managedMemberPat: Pat
   lateinit var nonManagedMember: UserAccount
   lateinit var disabledNonManagedMember: UserAccount
   lateinit var adminDisabledManagedMember: UserAccount
   lateinit var orgDisabledManagedMember: UserAccount
   lateinit var nullOriginDisabledManagedMember: UserAccount
   lateinit var managedPlatformAdmin: UserAccount
+  lateinit var managedPlatformSupporter: UserAccount
+  lateinit var orgDisabledManagedPlatformAdmin: UserAccount
   lateinit var outsidePlatformAdmin: UserAccount
   lateinit var projectOnlyMember: UserAccount
   lateinit var multiProjectMember: UserAccount
 
-  lateinit var otherOrg: Organization
   lateinit var managedByOtherOrg: UserAccount
-
-  lateinit var secondProject: Project
+  lateinit var disabledByOtherOrgPlainMember: UserAccount
 
   init {
     root.apply {
@@ -34,6 +39,11 @@ class DisableManagedUserTestData : BaseTestData() {
         username = "managed@acting.org"
         name = "Managed Member"
         managedMember = this
+      }.build {
+        addPat {
+          description = "kill-switch"
+          managedMemberPat = this
+        }
       }
       addUserAccountWithoutOrganization {
         username = "member@acting.org"
@@ -43,27 +53,27 @@ class DisableManagedUserTestData : BaseTestData() {
       addUserAccountWithoutOrganization {
         username = "disabled@acting.org"
         name = "Disabled Member"
-        disabledAt = Date(1700000000000)
+        disabledAt = DISABLED_AT
         disabledNonManagedMember = this
       }
       addUserAccountWithoutOrganization {
         username = "byadmin@acting.org"
         name = "Admin Disabled Managed Member"
-        disabledAt = Date(1700000000000)
+        disabledAt = DISABLED_AT
         disabledBy = UserDisabledBy.ADMIN
         adminDisabledManagedMember = this
       }
       addUserAccountWithoutOrganization {
         username = "byorg@acting.org"
         name = "Org Disabled Managed Member"
-        disabledAt = Date(1700000000000)
+        disabledAt = DISABLED_AT
         disabledBy = UserDisabledBy.ORGANIZATION
         orgDisabledManagedMember = this
       }
       addUserAccountWithoutOrganization {
         username = "byunknown@acting.org"
         name = "Unknown Origin Disabled Managed Member"
-        disabledAt = Date(1700000000000)
+        disabledAt = DISABLED_AT
         nullOriginDisabledManagedMember = this
       }
       addUserAccountWithoutOrganization {
@@ -73,10 +83,36 @@ class DisableManagedUserTestData : BaseTestData() {
         managedPlatformAdmin = this
       }
       addUserAccountWithoutOrganization {
+        username = "platformsupporter@acting.org"
+        name = "Platform Supporter Managed Member"
+        role = UserAccount.Role.SUPPORTER
+        managedPlatformSupporter = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "legacyadmin@acting.org"
+        name = "Legacy Org Disabled Platform Admin"
+        role = UserAccount.Role.ADMIN
+        disabledAt = DISABLED_AT
+        disabledBy = UserDisabledBy.ORGANIZATION
+        orgDisabledManagedPlatformAdmin = this
+      }
+      addUserAccountWithoutOrganization {
         username = "outsideadmin@tolgee.io"
         name = "Outside Platform Admin"
         role = UserAccount.Role.ADMIN
         outsidePlatformAdmin = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "managed@other.org"
+        name = "Managed By Other Org"
+        managedByOtherOrg = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "disabledbyother@other.org"
+        name = "Disabled By Other Org"
+        disabledAt = DISABLED_AT
+        disabledBy = UserDisabledBy.ORGANIZATION
+        disabledByOtherOrgPlainMember = this
       }
       addUserAccountWithoutOrganization {
         username = "projectonly@acting.org"
@@ -127,6 +163,24 @@ class DisableManagedUserTestData : BaseTestData() {
           type = OrganizationRoleType.MEMBER
           managed = true
         }
+        addRole {
+          user = managedPlatformSupporter
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
+          user = orgDisabledManagedPlatformAdmin
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
+          user = disabledByOtherOrgPlainMember
+          type = OrganizationRoleType.MEMBER
+        }
+        addRole {
+          user = managedByOtherOrg
+          type = OrganizationRoleType.MEMBER
+        }
       }
 
       projectBuilder.build {
@@ -148,32 +202,30 @@ class DisableManagedUserTestData : BaseTestData() {
         }
       }
 
-      secondProject =
-        addProject {
-          name = "second_project"
-          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
-        }.build {
-          addPermission {
-            user = multiProjectMember
-            type = ProjectPermissionType.VIEW
-          }
-        }.self
-
-      addUserAccountWithoutOrganization {
-        username = "managed@other.org"
-        name = "Managed By Other Org"
-        managedByOtherOrg = this
+      addProject {
+        name = "second_project"
+        organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
+      }.build {
+        addPermission {
+          user = multiProjectMember
+          type = ProjectPermissionType.VIEW
+        }
       }
-      otherOrg =
-        addOrganization {
-          name = "Other Org"
-        }.build {
-          addRole {
-            user = managedByOtherOrg
-            type = OrganizationRoleType.MEMBER
-            managed = true
-          }
-        }.self
+
+      addOrganization {
+        name = "Other Org"
+      }.build {
+        addRole {
+          user = managedByOtherOrg
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
+          user = disabledByOtherOrgPlainMember
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+      }
     }
   }
 }

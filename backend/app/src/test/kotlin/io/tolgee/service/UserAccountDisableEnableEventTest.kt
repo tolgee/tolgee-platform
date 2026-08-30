@@ -25,97 +25,99 @@ class UserAccountDisableEnableEventTest : AbstractSpringTest() {
 
   @Test
   fun `disable publishes one decrease event on a real transition`() {
-    val testData = saveTestData()
+    val data = saveTestData()
     val events =
-      captureUserCountEvents { userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION) }
+      captureUserCountEvents { userAccountService.disable(data.managedMember.id, UserDisabledBy.ORGANIZATION) }
     assertThat(events).hasSize(1)
     assertThat(events[0].decrease).isTrue()
   }
 
   @Test
   fun `enable publishes one increase event on a real transition`() {
-    val testData = saveTestData()
-    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+    val data = saveTestData()
+    userAccountService.disable(data.managedMember.id, UserDisabledBy.ORGANIZATION)
     val events =
-      captureUserCountEvents { userAccountService.enable(testData.managedMember.id, UserDisabledBy.ORGANIZATION) }
+      captureUserCountEvents { userAccountService.enable(data.managedMember.id, UserDisabledBy.ORGANIZATION) }
     assertThat(events).hasSize(1)
     assertThat(events[0].decrease).isFalse()
   }
 
   @Test
   fun `an organization cannot enable a user an admin disabled`() {
-    val testData = saveTestData()
-    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
+    val data = saveTestData()
+    userAccountService.disable(data.managedMember.id, UserDisabledBy.ADMIN)
     assertThrows<ValidationException> {
-      userAccountService.enable(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+      userAccountService.enable(data.managedMember.id, UserDisabledBy.ORGANIZATION)
     }
-    assertThat(userAccountService.findActiveOrDisabled(testData.managedMember.id)!!.disabledAt).isNotNull()
+    assertThat(userAccountService.findActiveOrDisabled(data.managedMember.id)!!.disabledAt).isNotNull()
   }
 
   @Test
   fun `disabling an already-disabled user publishes no event`() {
-    val testData = saveTestData()
+    val data = saveTestData()
     val events =
       captureUserCountEvents {
-        userAccountService.disable(testData.disabledNonManagedMember.id, UserDisabledBy.ORGANIZATION)
+        userAccountService.disable(data.orgDisabledManagedMember.id, UserDisabledBy.ORGANIZATION)
       }
     assertThat(events).isEmpty()
   }
 
   @Test
   fun `enabling an already-enabled user publishes no event`() {
-    val testData = saveTestData()
-    val events = captureUserCountEvents { userAccountService.enable(testData.managedMember.id, UserDisabledBy.ADMIN) }
+    val data = saveTestData()
+    val events = captureUserCountEvents { userAccountService.enable(data.managedMember.id, UserDisabledBy.ADMIN) }
     assertThat(events).isEmpty()
   }
 
   @Test
   fun `an admin takeover of an org disable publishes no event`() {
-    val testData = saveTestData()
-    userAccountService.disable(testData.managedMember.id, UserDisabledBy.ORGANIZATION)
+    val data = saveTestData()
+    userAccountService.disable(data.managedMember.id, UserDisabledBy.ORGANIZATION)
     val events =
-      captureUserCountEvents { userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN) }
+      captureUserCountEvents { userAccountService.disable(data.managedMember.id, UserDisabledBy.ADMIN) }
     assertThat(events).isEmpty()
   }
 
   @Test
   fun `an admin can still disable a platform admin an organization may not touch`() {
-    val testData = saveTestData()
+    val data = saveTestData()
     assertThrows<ValidationException> {
-      userAccountService.disable(testData.managedPlatformAdmin.id, UserDisabledBy.ORGANIZATION)
+      userAccountService.disable(data.managedPlatformAdmin.id, UserDisabledBy.ORGANIZATION)
     }
-    userAccountService.disable(testData.managedPlatformAdmin.id, UserDisabledBy.ADMIN)
-    assertThat(userAccountService.findActiveOrDisabled(testData.managedPlatformAdmin.id)!!.disabledAt).isNotNull()
+    userAccountService.disable(data.managedPlatformAdmin.id, UserDisabledBy.ADMIN)
+    assertThat(userAccountService.findActiveOrDisabled(data.managedPlatformAdmin.id)!!.disabledAt).isNotNull()
   }
 
   @Test
   fun `an organization cannot enable an account whose disable origin is unknown`() {
-    val testData = saveTestData()
+    val data = saveTestData()
     assertThrows<ValidationException> {
-      userAccountService.enable(testData.nullOriginDisabledManagedMember.id, UserDisabledBy.ORGANIZATION)
+      userAccountService.enable(data.nullOriginDisabledManagedMember.id, UserDisabledBy.ORGANIZATION)
     }
-    val user = userAccountService.findActiveOrDisabled(testData.nullOriginDisabledManagedMember.id)!!
+    val user = userAccountService.findActiveOrDisabled(data.nullOriginDisabledManagedMember.id)!!
     assertThat(user.disabledAt).isNotNull()
     assertThat(user.disabledBy).isNull()
   }
 
   @Test
-  fun `an organization disable does not claim an account whose disable origin is unknown`() {
-    val testData = saveTestData()
+  fun `an organization disable is rejected on an account whose disable origin is unknown`() {
+    val data = saveTestData()
     val events =
       captureUserCountEvents {
-        userAccountService.disable(testData.nullOriginDisabledManagedMember.id, UserDisabledBy.ORGANIZATION)
+        assertThrows<ValidationException> {
+          userAccountService.disable(data.nullOriginDisabledManagedMember.id, UserDisabledBy.ORGANIZATION)
+        }
       }
     assertThat(events).isEmpty()
-    assertThat(userAccountService.findActiveOrDisabled(testData.nullOriginDisabledManagedMember.id)!!.disabledBy)
+    assertThat(userAccountService.findActiveOrDisabled(data.nullOriginDisabledManagedMember.id)!!.disabledBy)
       .isNull()
   }
 
   @Test
   fun `an admin can enable an account whose disable origin is unknown`() {
-    val testData = saveTestData()
-    userAccountService.enable(testData.nullOriginDisabledManagedMember.id, UserDisabledBy.ADMIN)
-    assertThat(userAccountService.findActiveOrDisabled(testData.nullOriginDisabledManagedMember.id)!!.disabledAt)
+    val data = saveTestData()
+    userAccountService.enable(data.nullOriginDisabledManagedMember.id, UserDisabledBy.ADMIN)
+    assertThat(userAccountService.findActiveOrDisabled(data.nullOriginDisabledManagedMember.id)!!.disabledAt)
       .isNull()
   }
 
