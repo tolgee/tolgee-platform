@@ -3,6 +3,7 @@ package io.tolgee.hateoas.organization.apps
 import io.tolgee.dtos.apps.AppManifestDto
 import io.tolgee.model.apps.AppInstall
 import io.tolgee.service.apps.AppEnablementService
+import io.tolgee.service.apps.AppService
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
@@ -31,6 +32,8 @@ class AppInstallModelAssembler(
   ): AppInstallModel {
     val registeredApp = entity.app
     val manifest = objectMapper.readValue<AppManifestDto>(registeredApp.manifestJson)
+    val grantedScopes = entity.grantedScopes.map { it.value }
+    val pendingScopes = (AppService.splitScopes(registeredApp.manifestScopes) - grantedScopes.toSet()).sorted()
     return AppInstallModel(
       id = entity.id,
       manifestUrl = registeredApp.manifestUrl,
@@ -41,7 +44,8 @@ class AppInstallModelAssembler(
       icon = registeredApp.icon,
       enabledProjectCount = enabledProjectCount,
       modules = manifest.modules,
-      scopes = entity.grantedScopes.map { it.value },
+      scopes = grantedScopes,
+      pendingScopes = pendingScopes,
     )
   }
 }

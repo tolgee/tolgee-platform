@@ -5,6 +5,7 @@ import io.tolgee.dtos.apps.AppLifecycleAppCredentials
 import io.tolgee.dtos.apps.AppLifecycleDeliveryOutcome
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Organization
 import io.tolgee.model.apps.App
@@ -121,6 +122,53 @@ class AppInstallService(
 
   fun previewManifest(manifestUrl: String): AppManifestFetcher.FetchResult {
     return appManifestFetcher.fetch(manifestUrl)
+  }
+
+  /**
+   * Re-fetches the manifest for an organization's install and reconciles the snapshot. The caller is
+   * the organization's app manager and the consent authority, so [allowScopeWidening] is true: the
+   * install adopts the scope set the manifest currently requests, which is how a widened permission
+   * request is approved. The fetch runs outside a transaction — see the class doc.
+   */
+  fun refresh(
+    organizationId: Long,
+    installId: Long,
+  ): AppInstall {
+    val manifestUrl = requireOrgInstallManifestUrl(organizationId, installId)
+    val fetched = appManifestFetcher.fetch(manifestUrl)
+    return appInstallPersister.applySnapshotForOrgInstall(
+      organizationId = organizationId,
+      installId = installId,
+      fetched = fetched,
+      allowScopeWidening = true,
+    )
+  }
+
+  /**
+   * Re-fetches the manifest for an install on the calling app's own behalf. Never widens the granted
+   * scopes: a manifest that requests more surfaces those as pending until the organization's owner
+   * approves them through [refresh]. Refuses when the install is not the app's own.
+   */
+  fun refreshForApp(
+    appEntityId: Long,
+    installId: Long,
+  ): AppInstall {
+    val manifestUrl =
+      findOwnInstall(appEntityId, installId)?.app?.manifestUrl
+        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    val fetched = appManifestFetcher.fetch(manifestUrl)
+    return appInstallPersister.applySnapshotForApp(appEntityId, installId, fetched)
+  }
+
+  @Transactional(readOnly = true)
+  fun requireOrgInstallManifestUrl(
+    organizationId: Long,
+    installId: Long,
+  ): String {
+    return (
+      appInstallRepository.findByOrganizationIdAndId(organizationId, installId)
+        ?: throw NotFoundException(Message.APP_INSTALL_NOT_FOUND)
+    ).app.manifestUrl
   }
 
   fun manifestHash(fetched: AppManifestFetcher.FetchResult): String {
