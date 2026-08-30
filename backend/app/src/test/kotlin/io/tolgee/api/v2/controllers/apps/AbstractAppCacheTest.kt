@@ -9,6 +9,7 @@ import io.tolgee.repository.apps.AppEnabledForProjectRepository
 import io.tolgee.service.apps.AppAvailabilityService
 import io.tolgee.service.apps.AppEnablementService
 import io.tolgee.service.apps.AppManifestHttpClient
+import io.tolgee.service.apps.AppsLimitProvider
 import io.tolgee.service.apps.AppsTestFixtures
 import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
 import io.tolgee.testing.AuthorizedControllerTest
@@ -17,8 +18,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -58,6 +61,12 @@ abstract class AbstractAppCacheTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
 
+  // The combined fixture already registers three apps; raise the community apps limit so the auth
+  // flow can register its own without tripping ServerAppsLimitGuard.
+  @MockitoBean
+  @Autowired
+  lateinit var appsLimitProvider: AppsLimitProvider
+
   lateinit var testData: AppsWithInstallsTestData
   lateinit var appClientId: String
   lateinit var appClientSecret: String
@@ -69,6 +78,7 @@ abstract class AbstractAppCacheTest : AuthorizedControllerTest() {
     testData = AppsWithInstallsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+    whenever(appsLimitProvider.getAppsLimit(any())).thenReturn(1000)
     AppsTestFixtures.mockManifest(appManifestHttpClient, manifest(""""translations.view""""))
 
     val json = objectMapper.readTree(register())
@@ -139,7 +149,7 @@ abstract class AbstractAppCacheTest : AuthorizedControllerTest() {
     val installId = testData.orgScopedInstall.id
     appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(true)
 
-    appAvailabilityService.removeAvailableOrganization(testData.orgScopedApp.id, testData.otherOrganization.id)
+    appAvailabilityService.removeAvailableOrganization(testData.orgScopedApp.id, testData.organization.id)
 
     appEnablementService.isEnabledForProject(projectId, installId).assert.isEqualTo(false)
   }

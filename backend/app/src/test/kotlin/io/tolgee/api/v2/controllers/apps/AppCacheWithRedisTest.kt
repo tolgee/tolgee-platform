@@ -28,7 +28,7 @@ class AppCacheWithRedisTest : AbstractAppCacheTest() {
 
     @AfterAll
     @JvmStatic
-    fun cleanup() {
+    fun stopRedis() {
       redisRunner.stop()
     }
 
