@@ -282,8 +282,27 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `requires an explicit project for current-permissions with an OAuth token`() {
+  fun `requires an explicit project for current-permissions with an all-projects token`() {
     val token = mint(scopes = listOf("translations.view"), projects = null)
+    performGet("/v2/api-keys/current-permissions", bearerHeaders(token)).andIsBadRequest
+  }
+
+  @Test
+  fun `serves current-permissions without a projectId when the token is bound to one project`() {
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+
+    performGet("/v2/api-keys/current-permissions", bearerHeaders(token))
+      .andIsOk
+      .andAssertThatJson {
+        node("projectId").isEqualTo(testData.project.id)
+        node("scopes").isArray.contains("translations.view")
+      }
+  }
+
+  @Test
+  fun `requires an explicit project for current-permissions with a multi-project token`() {
+    val token =
+      mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id, foreignProject.id))
     performGet("/v2/api-keys/current-permissions", bearerHeaders(token)).andIsBadRequest
   }
 

@@ -201,7 +201,9 @@ class ApiKeyController(
   @AllowOAuthAccess
   fun getCurrentPermissions(
     @RequestParam
-    @Parameter(description = "Required when using with a PAT or an OAuth token")
+    @Parameter(
+      description = "Required with a PAT, and with an OAuth token not bound to exactly one project",
+    )
     projectId: Long?,
   ): ApiKeyPermissionsModel {
     val projectIdNotNull =
@@ -209,8 +211,12 @@ class ApiKeyController(
         authenticationFacade.isProjectApiKeyAuth ->
           authenticationFacade.projectApiKey.projectId
 
+        // This endpoint is outside ProjectScopedEndpoints, so RequestContextService never resolves the implicit
+        // project for it. A PAT has none; an OAuth token bound to exactly one project does.
         authenticationFacade.isPersonalAccessTokenAuth || authenticationFacade.isOAuthTokenAuth ->
-          projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
+          projectId
+            ?: authenticationFacade.implicitProjectId
+            ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
         else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
       }
