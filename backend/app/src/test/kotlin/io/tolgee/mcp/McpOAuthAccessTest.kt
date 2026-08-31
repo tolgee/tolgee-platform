@@ -93,6 +93,12 @@ class McpOAuthAccessTest : AbstractMcpTest() {
     val response = mcpInitializeWith(token)
 
     response.statusCode().assert.isEqualTo(401)
+    response
+      .headers()
+      .firstValue("WWW-Authenticate")
+      .orElse("")
+      .assert
+      .contains("invalid_token")
   }
 
   @Test

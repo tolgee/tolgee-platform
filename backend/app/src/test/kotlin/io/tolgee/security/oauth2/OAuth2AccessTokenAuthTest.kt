@@ -62,6 +62,29 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `a scope refusal answers a bearer caller with insufficient_scope`() {
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    performGet(translationsUrl(), bearerHeaders(token))
+      .andReturn()
+      .response.status.assert
+      .isEqualTo(200)
+
+    val forbidden =
+      performPut(
+        translationsUrl(),
+        mapOf("key" to "oauth-own-comment-key", "translations" to mapOf("en" to "x")),
+        bearerHeaders(token),
+      ).andReturn().response
+
+    forbidden.status.assert.isEqualTo(403)
+    forbidden
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("insufficient_scope")
+  }
+
+  @Test
   fun `accepts a valid scoped token`() {
     val token = mintForAllProjects(scopes = listOf("translations.view"))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
