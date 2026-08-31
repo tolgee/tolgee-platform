@@ -289,6 +289,8 @@ export function useErrorTranslation() {
         return t('pat_access_not_allowed');
       case 'pak_access_not_allowed':
         return t('pak_access_not_allowed');
+      case 'oauth_access_not_allowed':
+        return t('oauth_access_not_allowed');
 
       // User & account
       case 'user_not_found':

@@ -12,6 +12,7 @@ import {
   ALL_LANGUAGES_SCOPES,
   checkChildren,
   getBlockingScopes,
+  isNodeDisabled,
   getChildScopes,
   getLanguagesUnion,
   getScopeLanguagePermission,
@@ -44,6 +45,7 @@ type Props = {
   state: PermissionAdvancedState;
   onChange: (value: PermissionAdvancedState) => void;
   allLangs?: LanguageModel[];
+  lockedScopes?: PermissionModelScope[];
 };
 
 export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
@@ -52,6 +54,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
   state,
   onChange,
   allLangs,
+  lockedScopes,
 }) => {
   const { t } = useTranslate();
   const allLangIds = allLangs?.map((l) => l.id) || [];
@@ -77,7 +80,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
 
   const blockedLanguages = getLanguagesUnion(blockingScopes, state, allLangIds);
 
-  const disabled = Boolean(blockingScopes.length);
+  const disabled = isNodeDisabled({ myScopes, lockedScopes, blockingScopes });
 
   const fullyChecked =
     scopeIncluded || (!structure.value && childrenCheckedAll);
@@ -157,7 +160,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
           enterDelay={1000}
           enterNextDelay={1000}
           title={
-            (disabled && structure.value
+            (blockingScopes.length && structure.value
               ? t('permissions_advanced_item_blocked', {
                   scopes: blockingScopes.join(', '),
                 })
@@ -210,6 +213,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
               state={state}
               onChange={onChange}
               allLangs={allLangs}
+              lockedScopes={lockedScopes}
             />
           );
         })}

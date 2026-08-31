@@ -494,6 +494,17 @@ declare namespace DataCy {
         "notifications-list-item": true;
         "notifications-settings-icon": true;
         "notistack-snackbar": true;
+        "oauth2-consent": true;
+        "oauth2-consent-allow": true;
+        "oauth2-consent-deny": true;
+        "oauth2-consent-error": true;
+        "oauth2-consent-modify": true;
+        "oauth2-consent-project": true;
+        "oauth2-consent-project-all": true;
+        "oauth2-consent-project-inaccessible": true;
+        "oauth2-consent-project-one": true;
+        "oauth2-consent-scope": true;
+        "oauth2-consent-scopes": true;
         "order-translation-confirmation": true;
         "order-translation-confirmation-ok": true;
         "order-translation-invitation-checkbox": true;
@@ -616,6 +627,7 @@ declare namespace DataCy {
         "project-menu-items": true;
         "project-mt-dialog-settings-inherited": true;
         "project-name-field": true;
+        "project-search-select-item": true;
         "project-select": true;
         "project-settings": true;
         "project-settings-branch-item": true;
