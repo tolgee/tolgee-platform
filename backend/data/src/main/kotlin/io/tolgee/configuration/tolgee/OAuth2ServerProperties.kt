@@ -53,4 +53,23 @@ class OAuth2ServerProperties {
       "How long the user has to complete the consent screen before the pending authorization goes stale, in seconds.",
   )
   var consentValiditySeconds: Long = 900
+
+  @DocProperty(
+    description =
+      "How long a spent OAuth grant is kept after its last credential expired, in days. It holds a used " +
+        "code's row so a replayed code is still recognised. A consent the user never completed is not kept for " +
+        "this window — it is deleted once its own short deadline passes.",
+  )
+  var grantRetentionDays: Long = 7
+
+  @DocProperty(
+    description =
+      "Cron expression for the job that removes spent grants past their retention window and consents the " +
+        "user never completed. Spring's six-field format (second, minute, hour, day, month, weekday).",
+  )
+  var grantCleanupCron: String = DEFAULT_GRANT_CLEANUP_CRON
+
+  companion object {
+    const val DEFAULT_GRANT_CLEANUP_CRON = "0 0 3 * * *"
+  }
 }
