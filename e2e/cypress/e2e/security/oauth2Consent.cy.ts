@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { oauth2ConsentTestData } from '../../common/apiCalls/testData/testData';
 import { API_URL, HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
+import { scopeCheckbox } from '../../common/permissionsMenu';
 import { gcyAdvanced } from '../../common/shared';
 
 const CLIENT_ID = 'tolgee-browser-extension';
@@ -91,7 +92,7 @@ describe('OAuth2 consent', () => {
 
     cy.gcy('project-select').click();
     gcyAdvanced({
-      value: 'user-switch-item',
+      value: 'project-search-select-item',
       'project-name': PROJECT_NAME,
     }).click();
 
@@ -113,12 +114,11 @@ describe('OAuth2 consent', () => {
     cy.gcy('oauth2-consent-modify').click();
     cy.gcy('oauth2-consent-scopes').should('be.visible');
 
-    // translations.edit is optional for this client — only keys.view and translations.view are locked as required — so
-    // deselecting it must stick and the flow must still complete.
-    gcyAdvanced({
-      value: 'permissions-advanced-item',
-      scope: 'translations.edit',
-    }).click();
+    scopeCheckbox('keys.view').find('input').should('be.disabled');
+
+    // Only keys.view and translations.view are locked as required for this client
+    // (OAuth2ClientRegistry.browserExtension).
+    scopeCheckbox('translations.edit').click();
     cy.gcy('oauth2-consent-modify').click();
 
     gcyAdvanced({

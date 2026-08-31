@@ -10,13 +10,13 @@ describe('authorizeRequestFromSearch', () => {
         '&scope=keys.view%20translations.view&state=s1&code_challenge=c&code_challenge_method=S256&project=7'
     );
     expect(request).toEqual({
-      client_id: 'ext',
-      redirect_uri: 'https://a.test/cb',
-      response_type: 'code',
+      clientId: 'ext',
+      redirectUri: 'https://a.test/cb',
+      responseType: 'code',
       scope: 'keys.view translations.view',
       state: 's1',
-      code_challenge: 'c',
-      code_challenge_method: 'S256',
+      codeChallenge: 'c',
+      codeChallengeMethod: 'S256',
       project: '7',
     });
   });

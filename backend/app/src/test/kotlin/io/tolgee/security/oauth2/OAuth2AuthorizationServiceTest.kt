@@ -19,8 +19,8 @@ package io.tolgee.security.oauth2
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.UserAccount
-import io.tolgee.model.oauth2.OAuth2Authorization
-import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
   @Autowired
-  private lateinit var repository: OAuth2AuthorizationRepository
+  private lateinit var repository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var authorizationService: OAuth2AuthorizationService
@@ -48,8 +48,6 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
-    authorizationService.revokeAllForUser(userA.id)
-    authorizationService.revokeAllForUser(userB.id)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -73,15 +71,15 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     clientId: String,
     user: UserAccount,
   ): Long {
-    val authorization =
-      OAuth2Authorization().apply {
+    val grant =
+      OAuth2Grant().apply {
         userAccount = user
         this.clientId = clientId
         redirectUri = "https://example.org/callback"
         codeChallenge = "challenge"
         requestedScopes = "translations.view"
       }
-    repository.save(authorization)
-    return authorization.id
+    repository.save(grant)
+    return grant.id
   }
 }

@@ -67,8 +67,8 @@ class OAuth2FlowDriver(
     redirect: String,
     params: Map<String, String?>,
   ): ResultActions {
-    val body = mutableMapOf<String, Any>("client_id" to clientId, "redirect_uri" to redirect)
-    params.forEach { (name, value) -> value?.let { body[name] = it } }
+    val body = mutableMapOf<String, Any>("clientId" to clientId, "redirectUri" to redirect)
+    params.forEach { (name, value) -> value?.let { body[BODY_FIELDS[name] ?: name] = it } }
     return mvc.perform(
       post("/v2/oauth2/authorize")
         .header("Authorization", "Bearer $jwt")
@@ -185,6 +185,18 @@ class OAuth2FlowDriver(
     return mvc.perform(request)
   }
 
+  fun revoke(
+    token: String?,
+    clientId: String?,
+  ): ResultActions {
+    val request =
+      post(OAuth2Constants.REVOKE_PATH)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    token?.let { request.param("token", it) }
+    clientId?.let { request.param("client_id", it) }
+    return mvc.perform(request)
+  }
+
   fun completeFlow(
     jwt: String,
     clientId: String,
@@ -230,6 +242,14 @@ class OAuth2FlowDriver(
       .getFirst(name)
 
   companion object {
+    /** Tests speak the client's snake_case wire vocabulary; POST /v2/oauth2/authorize is Tolgee's own API. */
+    private val BODY_FIELDS =
+      mapOf(
+        "response_type" to "responseType",
+        "code_challenge" to "codeChallenge",
+        "code_challenge_method" to "codeChallengeMethod",
+      )
+
     private val mapper = jacksonObjectMapper()
 
     fun randomVerifier(): String {

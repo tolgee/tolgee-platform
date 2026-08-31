@@ -10,8 +10,7 @@ import java.util.Date
 class UserAccountDtoTest {
   @Test
   fun `isTokenInvalidated does not reject a token minted in the same second as the cutoff`() {
-    // Cutoff at .500 of a second; a token whose whole-second iat lands on that same second must survive — otherwise a
-    // token legitimately minted right after the invalidation reads as "before" the millisecond-precise cutoff.
+    // The rule this pins is on UserAccountDto.isTokenInvalidated.
     val dto = dto(tokensValidNotBefore = Date(1_700_000_000_500))
     assertThat(dto.isTokenInvalidated(Instant.ofEpochSecond(1_700_000_000))).isFalse()
   }

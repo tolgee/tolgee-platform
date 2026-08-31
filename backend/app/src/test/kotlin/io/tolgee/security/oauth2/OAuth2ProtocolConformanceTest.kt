@@ -19,6 +19,8 @@ package io.tolgee.security.oauth2
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.bearerHeaders
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
@@ -67,8 +69,6 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
   @AfterEach
   fun cleanup() {
     currentDateProvider.forcedDate = null
-    oauth2AuthorizationService.revokeAllForUser(testData.user.id)
-    oauth2AuthorizationService.revokeAllForUser(otherUser.id)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -143,15 +143,17 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
             "state" to "client-state",
             "code_challenge" to OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier()),
             "code_challenge_method" to "S256",
+            "project" to "7",
           ),
         ).andReturn()
         .response
     response.status.assert.isEqualTo(302)
     val location = response.getHeader("Location")!!
     location.assert.contains(OAuth2Constants.CONSENT_PAGE_PATH)
-    // The client's own parameters have to survive the hand-off, or the screen cannot open the authorization.
     location.assert.contains("state=client-state")
     location.assert.contains("scope=translations.view")
+    // The only hop that carries the client's project hint to the screen; the SPA reads it back off this URL.
+    location.assert.contains("project=7")
   }
 
   @Test
@@ -184,8 +186,6 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
 
   @Test
   fun `omitting response_type is invalid_request, not unsupported_response_type`() {
-    // OAuth 2.1 reserves unsupported_response_type for a value the server was given and cannot honour; a missing
-    // required parameter is invalid_request, and a client needs to tell those apart.
     errorRedirect(mapOf("response_type" to null)).assert.contains("error=invalid_request")
   }
 
@@ -648,13 +648,186 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `a refresh token cannot be used by a client other than the one it was issued to`() {
+  fun `a refresh token presented by the wrong client is refused, and the grant dies with it`() {
     val issued = json(tokenResult())
-    json(driver.refresh(issued.get("refresh_token").asString(), OTHER_CLIENT_ID).andReturn())
+    val refreshToken = issued.get("refresh_token").asString()
+
+    json(driver.refresh(refreshToken, OTHER_CLIENT_ID).andReturn())
       .get("error")
       .asString()
       .assert
       .isEqualTo("invalid_grant")
+
+    json(driver.refresh(refreshToken, CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+  }
+
+  @Test
+  fun `a client can revoke its own refresh token, and the access token dies with the grant`() {
+    val issued = json(tokenResult())
+    val accessToken = issued.get("access_token").asString()
+
+    driver.revoke(issued.get("refresh_token").asString(), CLIENT_ID).andIsOk
+
+    json(driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+    performGet("/v2/projects/${testData.project.id}/translations", bearerHeaders(accessToken)).andIsUnauthorized
+  }
+
+  @Test
+  fun `a client can revoke by presenting its access token, not only the refresh token`() {
+    val issued = json(tokenResult())
+    val accessToken = issued.get("access_token").asString()
+
+    driver.revoke(accessToken, CLIENT_ID).andIsOk
+
+    performGet("/v2/projects/${testData.project.id}/translations", bearerHeaders(accessToken)).andIsUnauthorized
+    json(driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+  }
+
+  @Test
+  fun `a token sent in the query string is refused, and the grant stays live`() {
+    val issued = json(tokenResult())
+    val refreshToken = issued.get("refresh_token").asString()
+
+    val refused =
+      mvc
+        .perform(
+          post("${OAuth2Constants.REVOKE_PATH}?token=$refreshToken&client_id=$CLIENT_ID")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn()
+    refused.response.status.assert
+      .isEqualTo(400)
+    json(refused)
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_request")
+
+    json(driver.refresh(refreshToken, CLIENT_ID).andReturn())
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+  }
+
+  @Test
+  fun `a client cannot revoke another client's grant`() {
+    val issued = json(tokenResult())
+    val refreshToken = issued.get("refresh_token").asString()
+
+    assertOAuthError(driver.revoke(refreshToken, OTHER_CLIENT_ID).andReturn(), "invalid_grant")
+
+    json(driver.refresh(refreshToken, CLIENT_ID).andReturn())
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+  }
+
+  @Test
+  fun `revoking an unknown token answers 200 all the same`() {
+    driver.revoke("tgoat_never-issued", CLIENT_ID).andIsOk
+  }
+
+  @Test
+  fun `the token endpoint refuses a parameter sent more than once`() {
+    assertOAuthError(
+      mvc
+        .perform(
+          post(OAuth2Constants.TOKEN_PATH)
+            .param("grant_type", "authorization_code")
+            .param("grant_type", "refresh_token")
+            .param("client_id", CLIENT_ID)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn(),
+      "invalid_request",
+    )
+  }
+
+  @Test
+  fun `the revocation endpoint refuses a parameter sent more than once`() {
+    assertOAuthError(
+      mvc
+        .perform(
+          post(OAuth2Constants.REVOKE_PATH)
+            .param("token", "tgoat_one")
+            .param("token", "tgoat_two")
+            .param("client_id", CLIENT_ID)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+        ).andReturn(),
+      "invalid_request",
+    )
+  }
+
+  @Test
+  fun `a revocation carrying no token is refused rather than silently doing nothing`() {
+    val issued = json(tokenResult())
+
+    listOf(null, "").forEach { token ->
+      val refused = driver.revoke(token, CLIENT_ID).andReturn()
+      refused.response.status.assert
+        .isEqualTo(400)
+      json(refused)
+        .get("error")
+        .asString()
+        .assert
+        .isEqualTo("invalid_request")
+    }
+
+    json(driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID).andReturn())
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+  }
+
+  @Test
+  fun `revoking the refresh token the current one replaced still ends the grant`() {
+    val issued = json(tokenResult())
+    val superseded = issued.get("refresh_token").asString()
+    val current = json(driver.refresh(superseded, CLIENT_ID).andReturn()).get("refresh_token").asString()
+
+    driver.revoke(superseded, CLIENT_ID).andIsOk
+
+    json(driver.refresh(current, CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+  }
+
+  @Test
+  fun `a revocation naming no registered client is refused rather than silently doing nothing`() {
+    val issued = json(tokenResult())
+    val refreshToken = issued.get("refresh_token").asString()
+
+    listOf(null, "not-a-registered-client").forEach { clientId ->
+      val refused = driver.revoke(refreshToken, clientId).andReturn()
+      refused.response.status.assert
+        .isEqualTo(400)
+      json(refused)
+        .get("error")
+        .asString()
+        .assert
+        .isEqualTo("invalid_client")
+    }
+
+    json(driver.refresh(refreshToken, CLIENT_ID).andReturn())
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
   }
 
   @Test
@@ -739,8 +912,6 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
       }
   }
 
-  private fun jwt(): String = jwtService.emitToken(testData.user.id)
-
   @Test
   fun `a state carrying reserved characters survives to the consent redirect`() {
     // RFC 6749 section 4.1.1 allows any printable ASCII in state, so a client that does not percent-encode its own
@@ -764,29 +935,6 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
     // Why the way out must not use a bare `+` is on OAuth2Redirects.encodeQueryValue.
     assertEncodedBothLegs(received = "abc+def", encoded = "abc%2Bdef")
     assertEncodedBothLegs(received = "abc def", encoded = "abc%20def")
-  }
-
-  /**
-   * [received] is the value the handler gets after the request layer has decoded the query, which is where the two
-   * legs meet: MockMvc percent-decodes and a servlet container form-decodes, so what a client put on the wire is not
-   * reproducible here. What is asserted is the half Tolgee owns — how that value is written back out.
-   */
-  private fun assertEncodedBothLegs(
-    received: String,
-    encoded: String,
-  ) {
-    val consentRedirect =
-      driver
-        .authorize(CLIENT_ID, REDIRECT, validParams() + ("state" to received))
-        .andReturn()
-        .response
-        .getHeader("Location")!!
-    driver.queryParam(consentRedirect, "state").assert.isEqualTo(encoded)
-
-    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, clientState = received)
-    val codeRedirect = driver.consentRedirect(pending, projectId = null)
-    driver.queryParam(codeRedirect, "state").assert.isEqualTo(encoded)
-    URLDecoder.decode(driver.queryParam(codeRedirect, "state")!!, StandardCharsets.UTF_8).assert.isEqualTo(received)
   }
 
   @Test
@@ -829,7 +977,19 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `a parameter sent more than once is refused`() {
+  fun `a state of exactly the stored width survives the whole flow`() {
+    // Pins MAX_STATE_LENGTH against the client_state column: if either moves alone this fails here instead of as a
+    // runtime insert error on /oauth2/authorize.
+    val state = "x".repeat(OAuth2AuthorizationService.MAX_STATE_LENGTH)
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, clientState = state)
+    val location = driver.consentRedirect(pending)
+
+    location.assert.contains("code=")
+    location.assert.contains("state=$state")
+  }
+
+  @Test
+  fun `a repeated scope parameter is refused`() {
     val location =
       mvc
         .perform(
@@ -837,6 +997,7 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
             "/oauth2/authorize?response_type=code&client_id=$CLIENT_ID" +
               "&redirect_uri=$REDIRECT" +
               "&scope=translations.view&scope=admin" +
+              "&state=s1" +
               "&code_challenge=${OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier())}" +
               "&code_challenge_method=S256",
           ),
@@ -846,9 +1007,35 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
 
     location.assert.startsWith(REDIRECT)
     location.assert.contains("error=invalid_request")
+    location.assert.contains("state=s1")
   }
 
   private val oauth2 get() = tolgeeProperties.oauth2
+
+  private fun jwt(): String = jwtService.emitToken(testData.user.id)
+
+  /**
+   * [received] is the value the handler gets after the request layer has decoded the query, which is where the two
+   * legs meet: MockMvc percent-decodes and a servlet container form-decodes, so what a client put on the wire is not
+   * reproducible here. What is asserted is the half Tolgee owns — how that value is written back out.
+   */
+  private fun assertEncodedBothLegs(
+    received: String,
+    encoded: String,
+  ) {
+    val consentRedirect =
+      driver
+        .authorize(CLIENT_ID, REDIRECT, validParams() + ("state" to received))
+        .andReturn()
+        .response
+        .getHeader("Location")!!
+    driver.queryParam(consentRedirect, "state").assert.isEqualTo(encoded)
+
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, clientState = received)
+    val codeRedirect = driver.consentRedirect(pending, projectId = null)
+    driver.queryParam(codeRedirect, "state").assert.isEqualTo(encoded)
+    URLDecoder.decode(driver.queryParam(codeRedirect, "state")!!, StandardCharsets.UTF_8).assert.isEqualTo(received)
+  }
 
   private fun validParams(): Map<String, String?> =
     mapOf(
@@ -883,6 +1070,19 @@ class OAuth2ProtocolConformanceTest : AbstractControllerTest() {
     val url = jacksonObjectMapper().readTree(body).get("redirectUrl")?.asString()
     url.assert.withFailMessage("expected an error redirect, got $body").isNotNull()
     return url!!
+  }
+
+  private fun assertOAuthError(
+    result: MvcResult,
+    error: String,
+  ) {
+    result.response.status.assert
+      .isEqualTo(400)
+    json(result)
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo(error)
   }
 
   private fun json(result: MvcResult): JsonNode = jacksonObjectMapper().readTree(result.response.contentAsString)

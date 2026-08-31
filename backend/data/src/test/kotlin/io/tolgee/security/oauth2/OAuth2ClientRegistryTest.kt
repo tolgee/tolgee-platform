@@ -25,7 +25,6 @@ import org.junit.jupiter.api.assertThrows
 class OAuth2ClientRegistryTest {
   @Test
   fun `configures no clients when no redirect URIs are set`() {
-    // Emptying the config is how an operator disables a client, and nothing is persisted, so it simply stops existing.
     val registry = registry(extensionUris = listOf(), cliUris = listOf())
 
     registry.clients.assert.isEmpty()
@@ -62,6 +61,54 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
+  fun `the published scope vocabulary is a protocol contract, not whatever the Scope enum happens to hold`() {
+    // scopes_supported is published in RFC 8414 and RFC 9728 discovery and hard-coded by clients into authorize
+    // requests, while Scope.value is a `var`. Spelling the list out is the point: adding, removing or renaming a
+    // value is a breaking wire change, so it has to be a deliberate edit here rather than a side effect of the enum.
+    OAuth2Scopes.SUPPORTED.assert.containsExactlyInAnyOrder(
+      "translations.view",
+      "translations.edit",
+      "translations.suggest",
+      "translation-suggestions.manage",
+      "keys.edit",
+      "screenshots.upload",
+      "screenshots.delete",
+      "screenshots.view",
+      "activity.view",
+      "languages.edit",
+      "admin",
+      "project.edit",
+      "members.view",
+      "members.edit",
+      "translation-comments.add",
+      "translation-comments.edit",
+      "translation-comments.set-state",
+      "translations.state-edit",
+      "keys.view",
+      "keys.delete",
+      "keys.create",
+      "batch-jobs.view",
+      "batch-jobs.cancel",
+      "translations.batch-by-tm",
+      "translations.batch-machine",
+      "content-delivery.manage",
+      "content-delivery.publish",
+      "webhooks.manage",
+      "tasks.view",
+      "tasks.edit",
+      "tasks.assigned-access",
+      "prompts.view",
+      "prompts.edit",
+      "translation-labels.manage",
+      "translation-labels.assign",
+      "all.view",
+      "branch.management",
+      "branch.protected-modify",
+      "organization-quotas.view",
+    )
+  }
+
+  @Test
   fun `a scope is supported only when it is one of Tolgee's own`() {
     OAuth2Scopes.isSupported("translations.view").assert.isTrue()
     OAuth2Scopes.isSupported("translations.edit").assert.isTrue()
@@ -84,6 +131,17 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
+  fun `a localhost redirect is matched on any port, like the IP literals`() {
+    // The rule this pins is on OAuth2Client.isLoopbackHost.
+    val client = registry(extensionUris = listOf(), cliUris = listOf("http://localhost:9876/callback")).clients.single()
+
+    client.allowsRedirectUri("http://localhost:9876/callback").assert.isTrue()
+    client.allowsRedirectUri("http://localhost:54321/callback").assert.isTrue()
+    client.allowsRedirectUri("http://localhost:9876/other").assert.isFalse()
+    client.allowsRedirectUri("http://127.0.0.1:9876/callback").assert.isFalse()
+  }
+
+  @Test
   fun `an IPv6 loopback redirect is accepted on any port`() {
     val client = registry(extensionUris = listOf(), cliUris = listOf("http://[::1]:9876/callback")).clients.single()
 
@@ -95,14 +153,11 @@ class OAuth2ClientRegistryTest {
 
   @Test
   fun `a configured redirect URI that is not absolute is refused at startup`() {
-    // A relative entry parses and would match, and the code redirect would then resolve against Tolgee's own origin.
     assertThrows<IllegalStateException> { registry(extensionUris = listOf("/callback"), cliUris = listOf()).clients }
   }
 
   @Test
   fun `plain http is accepted on a loopback host, including localhost`() {
-    // e2e and every local client are configured with http://localhost; refusing it would reject a legitimate
-    // deployment rather than an unsafe one.
     registry(extensionUris = listOf("http://localhost:8201/callback"), cliUris = listOf()).clients.assert.isNotEmpty
     registry(extensionUris = listOf(), cliUris = listOf("http://127.0.0.1:9876/cb")).clients.assert.isNotEmpty
     registry(extensionUris = listOf(), cliUris = listOf("http://[::1]:9876/cb")).clients.assert.isNotEmpty

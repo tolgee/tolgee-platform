@@ -40,6 +40,8 @@ tolgee:
     port: ${TOLGEE_TEST_PG_EE_PORT:55434}
     stop: false
   data-path: ./build/test_data_ee
+  # Required when tolgee.oauth2 client is configured.
+  front-end-url: https://dummy-url.com
   oauth2:
     browser-extension-redirect-uris:
       - https://extension.test/callback

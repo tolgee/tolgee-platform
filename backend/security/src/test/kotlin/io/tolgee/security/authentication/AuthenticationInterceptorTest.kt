@@ -79,6 +79,15 @@ class AuthenticationInterceptorTest {
   }
 
   @Test
+  fun `an endpoint opened to OAuth that no OAuth token could reach still refuses the token`() {
+    // The mis-annotation itself is caught at build time by AllowOAuthAccessAnnotationTest; at request time refusing
+    // is the right answer either way, so this must not become a 500.
+    oauthAuthenticated()
+
+    mockMvc.perform(get("/v2/projects/1/only-pak-opened-to-oauth")).andIsForbidden
+  }
+
+  @Test
   fun `it allows an OAuth token outside the project-scoped paths when the handler opts in`() {
     oauthAuthenticated()
 
@@ -141,6 +150,11 @@ class AuthenticationInterceptorTest {
     @AllowApiAccess
     @AllowOAuthAccess
     fun explicitlyOpenedToOAuth(): String = "hello!"
+
+    @GetMapping("/v2/projects/1/only-pak-opened-to-oauth")
+    @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAK)
+    @AllowOAuthAccess
+    fun onlyPakOpenedToOAuth(): String = "hello!"
 
     @GetMapping("/requires-super-auth")
     @RequiresSuperAuthentication

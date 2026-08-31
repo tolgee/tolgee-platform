@@ -112,6 +112,22 @@ class ProjectApiKeyAdminRightsTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `an admin's key is held to the admin's own per-language restriction on the write path`() {
+    // The reporting endpoint below says the key is restricted to German; this is the half that enforces it.
+    val restrictedKey = key(languageRestrictedAdmin, Scope.TRANSLATIONS_EDIT)
+
+    performPut(
+      "$translationsUrl?ak=$restrictedKey",
+      SetTranslationsWithKeyDto(key = EXISTING_KEY, translations = mapOf("en" to "Hello")),
+    ).andIsForbidden
+
+    performPut(
+      "$translationsUrl?ak=$restrictedKey",
+      SetTranslationsWithKeyDto(key = EXISTING_KEY, translations = mapOf("de" to "Hallo")),
+    ).andIsOk
+  }
+
+  @Test
   fun `current-key permissions report the real language restriction, not the admin's reach`() {
     // /v2/api-keys/current answers for the calling key, so it must describe what that key can actually do. Reporting
     // the admin-bypassed set here would contradict what the write path now enforces.

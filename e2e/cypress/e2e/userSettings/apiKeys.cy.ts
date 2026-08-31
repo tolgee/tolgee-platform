@@ -1,9 +1,9 @@
+import { scopeCheckbox } from '../../common/permissionsMenu';
 import {
   assertMessage,
   clickAdd,
   confirmStandard,
   gcy,
-  gcyAdvanced,
   getPopover,
   selectInSelect,
 } from '../../common/shared';
@@ -48,7 +48,7 @@ describe('API keys', () => {
 
     cy.gcy('permissions-advanced-item').contains('Admin').click();
 
-    getPermissionItem('keys.edit').click();
+    scopeCheckbox('keys.edit').click();
     const newDescription = 'Brand new description';
     cy.gcy('generate-api-key-dialog-description-input')
       .clear()
@@ -96,28 +96,20 @@ const visit = () => {
   cy.visit(HOST + '/account/apiKeys');
 };
 
-const getCheckbox = (scope: Scope) => {
-  return gcyAdvanced({ value: 'permissions-advanced-item', scope });
-};
-
 const unselectAll = () => {
-  getCheckbox('screenshots.delete').click();
-  getCheckbox('screenshots.upload').click();
-  getCheckbox('screenshots.view').click();
-  getCheckbox('translations.state-edit').click();
-  getCheckbox('translations.edit').click();
-  getCheckbox('translations.view').click();
-  getCheckbox('keys.edit').click();
-  getCheckbox('keys.create').click();
-  getCheckbox('keys.view').click();
+  scopeCheckbox('screenshots.delete').click();
+  scopeCheckbox('screenshots.upload').click();
+  scopeCheckbox('screenshots.view').click();
+  scopeCheckbox('translations.state-edit').click();
+  scopeCheckbox('translations.edit').click();
+  scopeCheckbox('translations.view').click();
+  scopeCheckbox('keys.edit').click();
+  scopeCheckbox('keys.create').click();
+  scopeCheckbox('keys.view').click();
 
   cy.gcy('permissions-advanced-item')
     .find('input[type="checkbox"]')
     .should('not.be.checked');
-};
-
-const getPermissionItem = (scope: Scope) => {
-  return cy.get(`[aria-label="${scope}"]`);
 };
 
 const create = (project: string, scopes: Scope[], description) => {
@@ -128,7 +120,7 @@ const create = (project: string, scopes: Scope[], description) => {
   getPopover().contains(project).click();
   unselectAll();
   scopes.forEach((s) => {
-    getPermissionItem(s).click();
+    scopeCheckbox(s).click();
   });
 
   cy.xpath(getAnyContainingText('Save', 'button')).click();

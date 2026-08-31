@@ -626,6 +626,7 @@ declare namespace DataCy {
         "project-menu-items": true;
         "project-mt-dialog-settings-inherited": true;
         "project-name-field": true;
+        "project-search-select-item": true;
         "project-select": true;
         "project-settings": true;
         "project-settings-branch-item": true;

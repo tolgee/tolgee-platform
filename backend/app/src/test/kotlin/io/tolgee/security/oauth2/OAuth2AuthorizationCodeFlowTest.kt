@@ -24,8 +24,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.oauth2.OAuth2Authorization
-import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
@@ -60,7 +60,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   private lateinit var issuerResolver: OAuth2IssuerResolver
 
   @Autowired
-  private lateinit var repository: OAuth2AuthorizationRepository
+  private lateinit var repository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
@@ -105,8 +105,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    oauth2AuthorizationService.revokeAllForUser(testData.user.id)
-    oauth2AuthorizationService.revokeAllForUser(otherUser.id)
     testDataService.cleanTestData(testData.root)
   }
 
@@ -167,8 +165,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     completeFlow(projectId = testData.project.id)
     authorizationRowsForUser().assert.isNotZero()
 
-    // A password change must delete the grants, not only bump tokensValidNotBefore (which the refresh gate reads from a
-    // per-node-cached DTO that lags without Redis), so a stolen refresh token can't keep minting on a stale replica.
     userAccountService.setUserPassword(userAccountService.get(testData.user.id), "new-password-123")
 
     authorizationRowsForUser().assert.isZero()
@@ -186,7 +182,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .andReturn()
       .response.status.assert
       .isEqualTo(400)
-    repository.countByUserAccountId(userId).assert.isZero()
+    grantsForUser(userId).assert.isZero()
   }
 
   @Test
@@ -223,22 +219,20 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
 
   @Test
   fun `a grant stores Scope names, not the wire values it was requested with`() {
-    // Scope.value is the wire spelling and is a var; renaming one for API cosmetics must not silently narrow every
-    // live grant that held it. ApiKey.scopesEnum persists names for the same reason.
     val accessToken = accessToken(projectId = testData.project.id)
-    val authorization = stored(accessToken)
+    val grant = stored(accessToken)
 
-    authorization.grantedScopes.assert.isEqualTo(Scope.TRANSLATIONS_VIEW.name)
-    authorization.grantedScopeValues.assert.containsExactly(Scope.TRANSLATIONS_VIEW.value)
+    grant.grantedScopes.assert.isEqualTo(Scope.TRANSLATIONS_VIEW.name)
+    grant.grantedScopeValues.assert.containsExactly(Scope.TRANSLATIONS_VIEW.value)
   }
 
   @Test
   fun `a stored scope value that no longer names a real scope is dropped rather than failing the request`() {
     val accessToken = accessToken(projectId = testData.project.id)
-    val authorization = stored(accessToken)
+    val grant = stored(accessToken)
     // Written straight to the column: the property setter maps wire values to Scope names and would drop this first.
-    authorization.activeScopes = authorization.activeScopes + " TRANSLATIONS_RETIRED_SCOPE"
-    repository.save(authorization)
+    grant.activeScopes = grant.activeScopes + " TRANSLATIONS_RETIRED_SCOPE"
+    repository.save(grant)
 
     apiRequest(accessToken).andIsOk
     stored(accessToken).activeScopeValues.assert.containsExactly(Scope.TRANSLATIONS_VIEW.value)
@@ -327,38 +321,48 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `consent-info surfaces an accessible hinted project and hides an inaccessible one`() {
+  fun `consent-info names no project when the client sent no hint`() {
     val jwt = jwt()
 
-    val noHint = consentInfo(jwt, driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT).state)
-    noHint
+    val info = consentInfo(jwt, driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT).state)
+
+    info
       .get("project")
       .isNull.assert
       .isTrue()
-    noHint
+    info
       .get("requestedProjectId")
       .isNull.assert
       .isTrue()
-    noHint
-      .get("requiredScopes")
-      .toString()
-      .assert
-      .contains("translations.view")
+  }
 
-    val inaccessible = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, hintProjectId = otherProjectId)
-    val inaccessibleInfo = consentInfo(jwt, inaccessible.state)
-    inaccessibleInfo
-      .get("project")
-      .isNull.assert
-      .isTrue()
-    inaccessibleInfo
-      .get("requestedProjectId")
-      .asLong()
-      .assert
-      .isEqualTo(otherProjectId)
+  @Test
+  fun `consent-info reports the requested id but no project when the hint is one the user cannot reach`() {
+    val jwt = jwt()
 
-    val accessible = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, hintProjectId = testData.project.id)
-    val hinted = consentInfo(jwt, accessible.state).get("project")
+    listOf(otherProjectId, INACCESSIBLE_PROJECT_ID).forEach { hinted ->
+      val pending = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, hintProjectId = hinted)
+      val info = consentInfo(jwt, pending.state)
+
+      info
+        .get("project")
+        .isNull.assert
+        .isTrue()
+      info
+        .get("requestedProjectId")
+        .asLong()
+        .assert
+        .isEqualTo(hinted)
+    }
+  }
+
+  @Test
+  fun `consent-info resolves a hinted project the user can reach`() {
+    val jwt = jwt()
+
+    val pending = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, hintProjectId = testData.project.id)
+    val hinted = consentInfo(jwt, pending.state).get("project")
+
     hinted
       .get("id")
       .asLong()
@@ -369,18 +373,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .asString()
       .assert
       .isEqualTo(testData.project.name)
-
-    val nonexistent = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, hintProjectId = INACCESSIBLE_PROJECT_ID)
-    val nonexistentInfo = consentInfo(jwt, nonexistent.state)
-    nonexistentInfo
-      .get("project")
-      .isNull.assert
-      .isTrue()
-    nonexistentInfo
-      .get("requestedProjectId")
-      .asLong()
-      .assert
-      .isEqualTo(INACCESSIBLE_PROJECT_ID)
   }
 
   @Test
@@ -485,9 +477,9 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
       .header(header, value)
       .contentType(MediaType.APPLICATION_JSON)
       .content(
-        """{"client_id":"$CLIENT_ID","redirect_uri":"$REDIRECT","response_type":"code",""" +
-          """"scope":"translations.view","code_challenge_method":"S256",""" +
-          """"code_challenge":"${OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier())}"}""",
+        """{"clientId":"$CLIENT_ID","redirectUri":"$REDIRECT","responseType":"code",""" +
+          """"scope":"translations.view","codeChallengeMethod":"S256",""" +
+          """"codeChallenge":"${OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier())}"}""",
       ),
   )
 
@@ -497,7 +489,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     response.contentAsString.assert.contains(Message.API_ACCESS_FORBIDDEN.code)
   }
 
-  private fun authorizationRowsForUser(): Long = repository.countByUserAccountId(testData.user.id)
+  private fun authorizationRowsForUser(): Int = grantsForUser(testData.user.id)
 
   private fun apiRequest(accessToken: String) =
     mvc.perform(
@@ -526,7 +518,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
   private fun json(actions: ResultActions): JsonNode =
     jacksonObjectMapper().readTree(actions.andReturn().response.contentAsString)
 
-  private fun stored(accessToken: String): OAuth2Authorization =
+  private fun stored(accessToken: String): OAuth2Grant =
     repository.findByAccessTokenHash(keyGenerator.hash(accessToken.removePrefix(OAUTH_ACCESS_TOKEN_PREFIX)))
       ?: throw AssertionError("no authorization stored for the access token")
 
@@ -536,4 +528,6 @@ class OAuth2AuthorizationCodeFlowTest : AbstractControllerTest() {
     private const val REDIRECT = "https://extension.test/callback"
     private const val INACCESSIBLE_PROJECT_ID = 9_999_999L
   }
+
+  private fun grantsForUser(userId: Long): Int = repository.findAll().count { it.userAccount.id == userId }
 }

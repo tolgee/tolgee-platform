@@ -9,8 +9,9 @@ import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.bearerHeaders
 import io.tolgee.model.enums.Scope
-import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
  */
 class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var authorizationRepository: OAuth2AuthorizationRepository
+  private lateinit var grantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
@@ -41,11 +42,12 @@ class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
     testData = TaskTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.TASKS)
-    tokens = OAuth2TestTokens(authorizationRepository, userAccountService, keyGenerator)
+    tokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
   fun cleanup() {
+    enabledFeaturesProvider.forceEnabled = null
     tokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
@@ -70,14 +72,13 @@ class TaskControllerOAuthNarrowingTest : AbstractControllerTest() {
       .andHasErrorMessage(Message.TASK_NOT_FINISHED)
   }
 
-  private fun issue(scopes: List<String>) = tokens.issue(subject = testData.projectUser.self.id, scopes = scopes)
+  private fun issue(scopes: List<String>) =
+    tokens.issue(subject = testData.projectUser.self.id, scopes = scopes, projectIds = null)
 
   private fun finishTranslateTask(token: String) =
     mvc.perform(
       MockMvcRequestBuilders
         .put("/v2/projects/${testData.projectBuilder.self.id}/tasks/${testData.translateTask.self.number}/finish")
-        .headers(bearer(token)),
+        .headers(bearerHeaders(token)),
     )
-
-  private fun bearer(token: String) = HttpHeaders().apply { add(HttpHeaders.AUTHORIZATION, "Bearer $token") }
 }

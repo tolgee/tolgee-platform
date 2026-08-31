@@ -80,11 +80,7 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
         me.id,
       ).directPermissions.assert.isNotNull
     performProjectAuthPut("users/${me.id}/set-by-organization").andIsOk
-    val permissionData =
-      permissionService.getProjectPermissionData(
-        testData.projectBuilder.self.id,
-        me.id,
-      )
+    val permissionData = permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id)
     permissionData.directPermissions.assert.isNull()
     permissionData.organizationRole.assert.isNotNull
   }

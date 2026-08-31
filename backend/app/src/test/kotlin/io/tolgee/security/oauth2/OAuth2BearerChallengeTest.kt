@@ -71,7 +71,7 @@ class OAuth2BearerChallengeTest : AbstractControllerTest() {
 
   @Test
   fun `a challenge outside the MCP resource advertises no resource_metadata`() {
-    // RFC 9728 §5.1 names the document for the resource that was requested, and Tolgee publishes one only for MCP.
+    // The rule this pins is on OAuth2BearerChallengeProvider.resourceMetadataUrl.
     val challenge = apiRequestChallenge("${OAUTH_ACCESS_TOKEN_PREFIX}nope")
 
     challenge.assert.isNotNull().contains("invalid_token")
@@ -99,8 +99,7 @@ class OAuth2BearerChallengeTest : AbstractControllerTest() {
 
   @Test
   fun `a 401 for a caller that presented no bearer token carries no error code`() {
-    // RFC 6750 §3.1: "If the request lacks any authentication information ... the resource server SHOULD NOT include
-    // an error code" — an X-API-Key caller presented no bearer token, so there is none to call invalid.
+    // The §3.1 rule this pins is on OAuth2BearerChallengeProvider.challengeFor.
     val challenge =
       mvc
         .perform(get("/v2/projects/${testData.project.id}/translations").header("X-API-Key", "tgpak_not-a-real-key"))

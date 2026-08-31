@@ -74,7 +74,7 @@ class AuthenticationFilterTest {
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
-  private val oAuth2AccessTokenResolver = Mockito.mock(OAuth2AccessTokenResolver::class.java)
+  private val oauth2AccessTokenResolver = Mockito.mock(OAuth2AccessTokenResolver::class.java)
 
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
@@ -98,7 +98,7 @@ class AuthenticationFilterTest {
       currentDateProvider,
       rateLimitService,
       jwtService,
-      oAuth2AccessTokenResolver,
+      oauth2AccessTokenResolver,
       userAccountService,
       pakService,
       patService,
@@ -335,6 +335,45 @@ class AuthenticationFilterTest {
     req.removeHeader("X-API-Key")
     req.addHeader("X-API-Key", TEST_VALID_PAT)
     assertThrows<RateLimitedException> { authenticationFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `the authorization server's endpoints still consume the auth rate limit`() {
+    // Skipping the whole filter for them would take the credential-guessing throttle off the token endpoint.
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
+      .thenThrow(RateLimitedException(1000L, true))
+
+    val req = MockHttpServletRequest("POST", "/oauth2/token")
+
+    assertThrows<RateLimitedException> {
+      authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+    }
+  }
+
+  @Test
+  fun `it skips credential resolution on the authorization server's own endpoints`() {
+    // The rule this pins is on AuthenticationFilter.doAuthenticate.
+    listOf("/oauth2/token", "/oauth2/revoke", "/.well-known/oauth-authorization-server").forEach { path ->
+      SecurityContextHolder.clearContext()
+      val req = MockHttpServletRequest("POST", path)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+      assertThat(SecurityContextHolder.getContext().authentication).isNull()
+    }
+  }
+
+  @Test
+  fun `the exemption is by exact path, so a neighbour under the same prefix is still authenticated`() {
+    listOf("/.well-known/security.txt", "/.well-known/oauth-authorization-server/extra", "/oauth2/consent").forEach {
+      val req = MockHttpServletRequest("GET", it)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertThrows<AuthenticationException> {
+        authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+      }
+    }
   }
 
   @Test

@@ -18,25 +18,17 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
 
 class OAuth2IssuerResolverTest {
   @Test
-  fun `has no issuer when no base url is configured`() {
-    // Callers derive one from the request instead; there is no sensible literal, and a non-URL here would be published
-    // in discovery documents where clients dereference it.
-    resolverFor(backEnd = null, frontEnd = null).configuredBaseUrl.assert.isNull()
-  }
-
-  @Test
-  fun `treats a blank url as unconfigured`() {
-    resolverFor(backEnd = "", frontEnd = "   ").configuredBaseUrl.assert.isNull()
+  fun `a blank url counts as unset, so reading the issuer fails`() {
+    assertThatThrownBy { resolverFor(backEnd = "", frontEnd = "   ").issuerUrl }
+      .isInstanceOf(IllegalStateException::class.java)
   }
 
   @Test
@@ -44,38 +36,34 @@ class OAuth2IssuerResolverTest {
     resolverFor(
       backEnd = "https://back.example.com",
       frontEnd = "https://front.example.com",
-    ).configuredBaseUrl.assert.isEqualTo("https://back.example.com")
+    ).issuerUrl.assert.isEqualTo("https://back.example.com")
   }
 
   @Test
   fun `falls back to the front-end url for single-origin deployments`() {
     resolverFor(backEnd = null, frontEnd = "https://front.example.com")
-      .configuredBaseUrl.assert
+      .issuerUrl.assert
       .isEqualTo("https://front.example.com")
   }
 
   @Test
   fun `strips a trailing slash so every consumer advertises the same issuer`() {
     resolverFor(backEnd = "https://back.example.com/", frontEnd = null)
-      .configuredBaseUrl.assert
+      .issuerUrl.assert
       .isEqualTo("https://back.example.com")
   }
 
   @Test
-  fun `issuerUrl derives the origin from the request when nothing is configured`() {
-    withRequest {
-      resolverFor(backEnd = null, frontEnd = null).issuerUrl.assert.isEqualTo("https://tolgee.example.com")
-    }
+  fun `issuerUrl refuses to invent an issuer when nothing is configured`() {
+    assertThatThrownBy { resolverFor(backEnd = null, frontEnd = null).issuerUrl }
+      .isInstanceOf(IllegalStateException::class.java)
   }
 
   @Test
-  fun `issuerUrl prefers configuration over the request`() {
-    // Behind a reverse proxy the request's own origin is the internal one, so a configured URL has to win.
-    withRequest {
-      resolverFor(backEnd = "https://public.example.com", frontEnd = null)
-        .issuerUrl.assert
-        .isEqualTo("https://public.example.com")
-    }
+  fun `issuerUrl is the configured value`() {
+    resolverFor(backEnd = "https://public.example.com", frontEnd = null)
+      .issuerUrl.assert
+      .isEqualTo("https://public.example.com")
   }
 
   @Test
@@ -91,33 +79,53 @@ class OAuth2IssuerResolverTest {
   }
 
   @Test
+  fun `refuses an issuer carrying a query or a fragment`() {
+    // RFC 8414 §2: the issuer identifier has no query or fragment components.
+    assertThatThrownBy { resolverFor("https://tolgee.example.com?tenant=a", null).issuerUrl }
+      .isInstanceOf(IllegalStateException::class.java)
+    assertThatThrownBy { resolverFor("https://tolgee.example.com#f", null).issuerUrl }
+      .isInstanceOf(IllegalStateException::class.java)
+  }
+
+  @Test
   fun `accepts a bare origin, with or without a trailing slash`() {
     resolverFor("https://tolgee.example.com/", null).issuerUrl.assert.isEqualTo("https://tolgee.example.com")
     resolverFor("https://tolgee.example.com", null).issuerUrl.assert.isEqualTo("https://tolgee.example.com")
   }
 
-  private fun withRequest(body: () -> Unit) {
-    val request =
-      MockHttpServletRequest("GET", "/oauth2/authorize").apply {
-        scheme = "https"
-        serverName = "tolgee.example.com"
-        serverPort = 443
-      }
-    RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
-    try {
-      body()
-    } finally {
-      RequestContextHolder.resetRequestAttributes()
-    }
-  }
-
   private fun resolverFor(
     backEnd: String?,
     frontEnd: String?,
+    clients: List<OAuth2Client> = listOf(),
   ) = OAuth2IssuerResolver(
     mock<TolgeeProperties> {
       on { backEndUrl } doReturn backEnd
       on { frontEndUrl } doReturn frontEnd
     },
+    mock<OAuth2ClientRegistry> { on { isEnabled } doReturn clients.isNotEmpty() },
   )
+
+  private fun anyClient() =
+    listOf(OAuth2Client(clientId = "c", name = "c", redirectUris = listOf("https://ext.example/cb")))
+
+  @Test
+  fun `an unusable issuer fails startup once a client is configured`() {
+    assertThatThrownBy {
+      resolverFor("https://tolgee.example.com/tolgee", null, anyClient()).requireConfiguredIssuer()
+    }.isInstanceOf(IllegalStateException::class.java)
+  }
+
+  @Test
+  fun `an unset issuer fails startup once a client is configured`() {
+    assertThatThrownBy {
+      resolverFor(null, null, anyClient()).requireConfiguredIssuer()
+    }.isInstanceOf(IllegalStateException::class.java)
+  }
+
+  @Test
+  fun `an unusable issuer does not fail startup for a deployment that issues no tokens`() {
+    assertThatCode {
+      resolverFor("https://tolgee.example.com/tolgee", null).requireConfiguredIssuer()
+    }.doesNotThrowAnyException()
+  }
 }

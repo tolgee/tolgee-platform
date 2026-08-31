@@ -26,6 +26,7 @@ import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -50,9 +51,18 @@ class SecurityServiceOAuthNarrowingTest {
       permissionService = this@SecurityServiceOAuthNarrowingTest.permissionService
     }
 
-  private fun authenticatedWithOAuth(credentials: OAuth2TokenCredentials?) {
+  private fun authenticatedWithOAuth(credentials: OAuth2TokenCredentials) {
+    stubCredentials(credentials)
+  }
+
+  private fun authenticatedWithoutOAuth() {
+    stubCredentials(null)
+  }
+
+  private fun stubCredentials(credentials: OAuth2TokenCredentials?) {
     whenever(authenticationFacade.oauthTokenCredentials).thenReturn(credentials)
     whenever(authenticationFacade.isScopedCredential).thenReturn(credentials != null)
+    whenever(authenticationFacade.isScopedCredentialFor(any())).thenReturn(credentials != null)
   }
 
   private fun userHasAccessTo(projectId: Long) {
@@ -85,7 +95,7 @@ class SecurityServiceOAuthNarrowingTest {
   @Test
   fun `allows a non-OAuth caller with project access`() {
     userHasAccessTo(2L)
-    authenticatedWithOAuth(null)
+    authenticatedWithoutOAuth()
 
     assertThatCode { service().checkAnyProjectPermission(2L) }.doesNotThrowAnyException()
   }

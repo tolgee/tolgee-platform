@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TasksAssignedAccessTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -33,6 +34,7 @@ class TaskAssignedAccessScopeTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @AfterEach
   fun cleanup() {
+    enabledFeaturesProvider.forceEnabled = null
     testDataService.cleanTestData(testData.root)
   }
 
@@ -53,5 +55,46 @@ class TaskAssignedAccessScopeTest : ProjectAuthControllerTest("/v2/projects/") {
     finishTask().andIsOk
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `the assignee elevation on a translation in the task needs the scope too`() {
+    // SecurityService.translationsInTask: neither user carries translations.edit, so the task is the only way in.
+    userAccount = testData.withoutScope
+    setTranslation().andIsForbidden
+
+    userAccount = testData.withScope
+    setTranslation().andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `commenting on a translation in the task needs the scope too`() {
+    // SecurityService.checkScopeOrAssignedToTask: neither user carries translation-comments.add.
+    userAccount = testData.withoutScope
+    addComment().andIsForbidden
+
+    userAccount = testData.withScope
+    addComment().andIsCreated
+  }
+
   private fun finishTask() = performProjectAuthPut("tasks/${TasksAssignedAccessTestData.TASK_NUMBER}/finish")
+
+  private fun setTranslation() =
+    performProjectAuthPut(
+      "translations",
+      mapOf(
+        "key" to TasksAssignedAccessTestData.TASK_KEY_NAME,
+        "translations" to mapOf("en" to "edited by the assignee"),
+      ),
+    )
+
+  private fun addComment() =
+    performProjectAuthPost(
+      "translations/create-comment",
+      mapOf(
+        "keyId" to testData.taskKey.id,
+        "languageId" to testData.englishLanguage.id,
+        "text" to "comment by the assignee",
+      ),
+    )
 }

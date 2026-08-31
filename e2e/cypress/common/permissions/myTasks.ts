@@ -4,13 +4,9 @@ import { pageAcessibleWithoutErrors, ProjectInfo } from './shared';
 
 export function testMyTasks(projectInfo: ProjectInfo) {
   const scopes = projectInfo.project.computedPermission.scopes;
-  // Opening an assigned task needs tasks.view, or tasks.assigned-access for the assignee elevation. Role presets
-  // grant the latter, a granular permission only when it was picked explicitly — without either there is no
-  // reachable task to open.
-  if (
-    !scopes.includes('tasks.view') &&
-    !scopes.includes('tasks.assigned-access')
-  ) {
+  const canReachAnAssignedTask =
+    scopes.includes('tasks.view') || scopes.includes('tasks.assigned-access');
+  if (!canReachAnAssignedTask) {
     return;
   }
 

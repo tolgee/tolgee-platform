@@ -5,8 +5,9 @@ import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.bearerHeaders
 import io.tolgee.model.enums.SuggestionsMode
-import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.AbstractControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -21,7 +22,7 @@ import org.springframework.http.HttpHeaders
  */
 class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var authorizationRepository: OAuth2AuthorizationRepository
+  private lateinit var grantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
@@ -33,7 +34,7 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   fun setup() {
     testData = SuggestionsTestData(SuggestionsMode.ENABLED)
     testDataService.saveTestData(testData.root)
-    tokens = OAuth2TestTokens(authorizationRepository, userAccountService, keyGenerator)
+    tokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
@@ -46,22 +47,28 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   fun `the own-suggestion fallback cannot widen a token that lacks suggestions-manage`() {
     // projectTranslator authored czechSuggestions[0] and could delete it via the own-author shortcut. A token scoped
     // only to translations.view must not ride that shortcut — it needs translation-suggestions.manage like anyone else.
-    val token = tokens.issue(subject = testData.projectTranslator.self.id, scopes = listOf("translations.view"))
-    performDelete(suggestionUrl(testData.czechSuggestions[0].self.id), null, bearer(token)).andIsForbidden
+    val token =
+      tokens.issue(
+        subject = testData.projectTranslator.self.id,
+        scopes = listOf("translations.view"),
+        projectIds = null,
+      )
+    performDelete(suggestionUrl(testData.czechSuggestions[0].self.id), null, bearerHeaders(token)).andIsForbidden
+  }
 
-    // Positive control: a token carrying the manage scope for a holder who has it can delete — proving the endpoint is
-    // reachable and the guard above is what blocks, not an unreachable route.
+  @Test
+  fun `a token carrying translation-suggestions manage can delete another author's suggestion`() {
     val moderatorToken =
       tokens.issue(
         subject = testData.suggestionModerator.self.id,
         scopes = listOf("translations.view", "translation-suggestions.manage"),
+        projectIds = null,
       )
-    performDelete(suggestionUrl(testData.czechSuggestions[1].self.id), null, bearer(moderatorToken)).andIsOk
+
+    performDelete(suggestionUrl(testData.czechSuggestions[1].self.id), null, bearerHeaders(moderatorToken)).andIsOk
   }
 
   private fun suggestionUrl(suggestionId: Long) =
     "/v2/projects/${testData.project.id}/languages/${testData.czechLanguage.id}/" +
       "key/${testData.keys[0].self.id}/suggestion/$suggestionId"
-
-  private fun bearer(token: String) = HttpHeaders().apply { add(HttpHeaders.AUTHORIZATION, "Bearer $token") }
 }

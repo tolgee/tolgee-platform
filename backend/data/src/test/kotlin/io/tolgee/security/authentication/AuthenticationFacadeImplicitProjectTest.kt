@@ -28,56 +28,65 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.springframework.security.core.context.SecurityContextHolder
 
-class CredentialScopeTest {
+class AuthenticationFacadeImplicitProjectTest {
+  private val facade = AuthenticationFacade(mock(), mock(), mock())
+
   @AfterEach
   fun clear() {
     SecurityContextHolder.clearContext()
   }
 
   @Test
-  fun `a thread with no security context - batch, @Async - is not scoped`() {
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
+  fun `a project API key names its own project`() {
+    authenticate(mock<ApiKeyDto> { on { projectId } doReturn PROJECT_ID })
+
+    facade.implicitProjectId.assert.isEqualTo(PROJECT_ID)
   }
 
   @Test
-  fun `a webapp JWT is the user acting directly`() {
+  fun `an OAuth token bound to one project names it`() {
+    authenticate(oauthBoundTo(setOf(PROJECT_ID)))
+
+    facade.implicitProjectId.assert.isEqualTo(PROJECT_ID)
+  }
+
+  @Test
+  fun `an OAuth token bound to several projects names none of them`() {
+    authenticate(oauthBoundTo(setOf(PROJECT_ID, PROJECT_ID + 1)))
+
+    facade.implicitProjectId.assert.isNull()
+  }
+
+  @Test
+  fun `an all-projects OAuth token names no project`() {
+    authenticate(oauthBoundTo(null))
+
+    facade.implicitProjectId.assert.isNull()
+  }
+
+  @Test
+  fun `a PAT names no project`() {
+    authenticate(mock<PatDto>())
+
+    facade.implicitProjectId.assert.isNull()
+  }
+
+  @Test
+  fun `a webapp JWT names no project`() {
     authenticate(credentials = null)
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
+
+    facade.implicitProjectId.assert.isNull()
   }
 
-  @Test
-  fun `a PAT carries the user's full authority`() {
-    authenticate(credentials = mock<PatDto>())
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
-  }
-
-  @Test
-  fun `a project API key is scoped`() {
-    authenticate(credentials = mock<ApiKeyDto>())
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
-  }
-
-  @Test
-  fun `an OAuth token is scoped`() {
-    authenticate(credentials = OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), null))
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
-  }
-
-  @Test
-  fun `a scoped credential narrows only its own holder`() {
-    authenticate(credentials = mock<ApiKeyDto>())
-
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
-    isScopedCredentialInContextFor(USER_ID + 1).assert.isFalse()
-  }
+  private fun oauthBoundTo(projectIds: Set<Long>?) =
+    OAuth2TokenCredentials(scopes = setOf(Scope.TRANSLATIONS_VIEW), projectIds = projectIds)
 
   private fun authenticate(credentials: Any?) {
-    val user = mock<UserAccountDto> { on { id } doReturn USER_ID }
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
         credentials = credentials,
         deviceId = null,
-        userAccount = user,
+        userAccount = mock<UserAccountDto> { on { id } doReturn USER_ID },
         actingAsUserAccount = null,
         isReadOnly = false,
         isSuperToken = false,
@@ -86,5 +95,6 @@ class CredentialScopeTest {
 
   companion object {
     private const val USER_ID = 42L
+    private const val PROJECT_ID = 7L
   }
 }

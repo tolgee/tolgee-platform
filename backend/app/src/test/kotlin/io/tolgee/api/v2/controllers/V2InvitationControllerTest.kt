@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto

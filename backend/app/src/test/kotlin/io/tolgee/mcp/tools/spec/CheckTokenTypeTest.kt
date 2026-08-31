@@ -68,8 +68,6 @@ class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
 
   @Test
   fun `OAuth auth on a project-scoped tool with ANY passes`() {
-    // The only shape an OAuth token is allowed through: ProjectContextService then intersects its scope set and its
-    // project set, which is what keeps it below the user's own authority.
     oauthAuthenticated()
 
     sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = false), projectId = 99L) {}

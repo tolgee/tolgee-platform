@@ -46,10 +46,7 @@ export const permissionsMenuSelectAdvanced = (
 
   // check scopes
   scopes.forEach((scope) => {
-    gcyAdvanced({ value: 'permissions-advanced-item', scope })
-      .find('input')
-      .focus()
-      .check();
+    scopeCheckbox(scope).find('input').focus().check();
   });
 
   cy.gcy('permissions-menu-save').click();
@@ -58,3 +55,6 @@ export const permissionsMenuSelectAdvanced = (
   }
   assertMessage('Permissions set');
 };
+
+export const scopeCheckbox = (scope: Scopes[number]) =>
+  gcyAdvanced({ value: 'permissions-advanced-item', scope });

@@ -19,6 +19,19 @@ describe('Permissions task', () => {
     );
   });
 
+  it('tasks.assigned-access', () => {
+    visitProjectWithPermissions({ scopes: ['tasks.assigned-access'] }).then(
+      (projectInfo) => {
+        checkPermissions(projectInfo, {
+          'project-menu-item-dashboard': RUN,
+          'project-menu-item-translations': RUN,
+          'project-menu-item-export': RUN,
+          'project-menu-item-integrate': RUN,
+        });
+      }
+    );
+  });
+
   it('tasks.edit', () => {
     visitProjectWithPermissions({ scopes: ['tasks.edit'] }).then(
       (projectInfo) => {

@@ -32,15 +32,15 @@ import java.util.Date
  * The cutoff computation is the only logic in the scheduled cleanup: a sign error would push it into the future and
  * delete authorizations whose refresh tokens are still live, logging active users out.
  */
-class OAuth2AuthorizationCleanupCutoffTest {
+class OAuth2GrantCleanupCutoffTest {
   @Test
   fun `deletes with a cutoff of exactly now minus the retention window`() {
     val now = Instant.parse("2026-08-07T00:00:00Z")
     val authorizationService = mock<OAuth2AuthorizationService>()
     val dateProvider = mock<CurrentDateProvider> { on { date } doReturn Date.from(now) }
-    val properties = OAuth2ServerProperties().apply { authorizationRetentionDays = 7 }
+    val properties = OAuth2ServerProperties().apply { grantRetentionDays = 7 }
 
-    OAuth2AuthorizationCleanup(authorizationService, properties, dateProvider).cleanUpExpiredAuthorizations()
+    OAuth2GrantCleanup(authorizationService, properties, dateProvider).cleanUpExpiredGrants()
 
     val captor = argumentCaptor<Instant>()
     verify(authorizationService).deleteExpiredBefore(captor.capture())
