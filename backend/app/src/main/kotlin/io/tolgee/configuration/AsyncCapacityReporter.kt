@@ -31,10 +31,11 @@ class AsyncCapacityReporter(
 
     if (connectionPoolSize == null) {
       logger.info(
-        "Async capacity: $streaming streaming threads, $background background threads. The DataSource " +
-          "does not report a pool size, so these were derived from an assumed " +
-          "${AsyncExecutorFactory.FALLBACK_CONNECTION_POOL_SIZE} connections — set " +
-          "tolgee.async.streaming.max-threads and tolgee.async.background.max-threads explicitly.",
+        "Async capacity: $streaming streaming threads, $background background threads. " +
+          "${asyncExecutorFactory.connectionPoolSizeProperty} is not set, so these were derived from " +
+          "HikariCP's default of ${AsyncExecutorFactory.FALLBACK_CONNECTION_POOL_SIZE} connections — " +
+          "set it, or set tolgee.async.streaming.max-threads and tolgee.async.background.max-threads " +
+          "explicitly.",
       )
       return
     }
@@ -52,17 +53,12 @@ class AsyncCapacityReporter(
         "$background background + $batch batch = $reserved against only $connectionPoolSize " +
         "connections. Every streaming response holds one connection for its whole duration, so " +
         "1/$SYNC_RESERVE_DIVISOR of the pool should stay free for ordinary requests. Raise " +
-        "${connectionPoolSizeProperty()}, or lower tolgee.async.streaming.max-threads, " +
+        "${asyncExecutorFactory.connectionPoolSizeProperty}, or lower tolgee.async.streaming.max-threads, " +
         "tolgee.async.background.max-threads and tolgee.batch.concurrency.",
     )
   }
 
   private fun minimumSyncReserve(connectionPoolSize: Int) = connectionPoolSize / SYNC_RESERVE_DIVISOR
-
-  private fun connectionPoolSizeProperty(): String {
-    if (tolgeeProperties.postgresAutostart.enabled) return "spring.datasource.maximum-pool-size"
-    return "spring.datasource.hikari.maximum-pool-size"
-  }
 
   companion object {
     const val SYNC_RESERVE_DIVISOR = 4

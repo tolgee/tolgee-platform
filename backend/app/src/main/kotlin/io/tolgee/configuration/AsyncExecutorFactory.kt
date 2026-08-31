@@ -1,23 +1,37 @@
 package io.tolgee.configuration
 
-import com.zaxxer.hikari.HikariDataSource
 import io.sentry.spring7.SentryTaskDecorator
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import org.springframework.beans.factory.ObjectProvider
+import org.springframework.boot.context.properties.bind.Binder
+import org.springframework.core.env.Environment
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Component
 import java.util.concurrent.RejectedExecutionHandler
 import java.util.concurrent.ThreadPoolExecutor
-import javax.sql.DataSource
 
 @Component
 class AsyncExecutorFactory(
   private val tolgeeProperties: TolgeeProperties,
-  private val dataSourceProvider: ObjectProvider<DataSource>,
+  private val environment: Environment,
 ) {
-  /** Read off the live bean, not `spring.datasource.*` — see PostgresAutoStartConfiguration. */
+  /**
+   * PostgresAutoStartConfiguration binds the DataSource from `spring.datasource` and Boot's own
+   * autoconfiguration binds it from `spring.datasource.hikari`; each ignores the other's key.
+   */
+  val connectionPoolSizeProperty: String
+    get() {
+      if (tolgeeProperties.postgresAutostart.enabled) return AUTOSTART_POOL_SIZE_PROPERTY
+      return HIKARI_POOL_SIZE_PROPERTY
+    }
+
+  /**
+   * Bound from configuration rather than read off the DataSource bean. The pools are sized while the
+   * async infrastructure is still being assembled, and resolving that bean here would create the
+   * DataSource at that point — starting Postgres under postgres-autostart — instead of when the
+   * persistence layer asks for it.
+   */
   val connectionPoolSize: Int? by lazy {
-    (dataSourceProvider.ifAvailable as? HikariDataSource)?.maximumPoolSize
+    Binder.get(environment).bind(connectionPoolSizeProperty, Int::class.javaObjectType).orElse(null)
   }
 
   val streamingMaxThreads: Int
@@ -79,7 +93,12 @@ class AsyncExecutorFactory(
     const val MIN_POOL_SIZE = 2
     const val STREAMING_POOL_DIVISOR = 3
     const val BACKGROUND_POOL_DIVISOR = 6
+
+    /** HikariCP's own default, which is what an instance that configures nothing ends up with. */
     const val FALLBACK_CONNECTION_POOL_SIZE = 10
+
+    const val AUTOSTART_POOL_SIZE_PROPERTY = "spring.datasource.maximum-pool-size"
+    const val HIKARI_POOL_SIZE_PROPERTY = "spring.datasource.hikari.maximum-pool-size"
 
     /** A burst is a burst regardless of how many threads drain it; 3 threads still deserve a buffer. */
     const val MIN_QUEUE_CAPACITY = 50

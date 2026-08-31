@@ -4,11 +4,11 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import org.springframework.mock.env.MockEnvironment
 
 class AsyncCapacityReporterTest {
   @Test
@@ -45,7 +45,7 @@ class AsyncCapacityReporterTest {
   }
 
   @Test
-  fun `reports without a warning when the DataSource cannot report a pool size`() {
+  fun `reports without a warning when the connection pool size is not configured`() {
     val events = report(connectionPoolSize = null, batchConcurrency = 40)
 
     events.warnings.assert.isEmpty()
@@ -72,11 +72,9 @@ class AsyncCapacityReporterTest {
     properties.batch.concurrency = batchConcurrency
     properties.postgresAutostart.enabled = postgresAutostart
 
-    val dataSource =
-      connectionPoolSize?.let {
-        HikariDataSource().apply { maximumPoolSize = it }
-      }
-    val reporter = AsyncCapacityReporter(AsyncExecutorFactory(properties, providerOf(dataSource)), properties)
+    val environment = MockEnvironment()
+    connectionPoolSize?.let { environment.setProperty(poolSizeProperty(postgresAutostart), it.toString()) }
+    val reporter = AsyncCapacityReporter(AsyncExecutorFactory(properties, environment), properties)
 
     val logger = LoggerFactory.getLogger(AsyncCapacityReporter::class.java) as Logger
     val appender = ListAppender<ILoggingEvent>().apply { start() }
@@ -87,6 +85,11 @@ class AsyncCapacityReporterTest {
       logger.detachAppender(appender)
     }
     return CapturedLog(appender.list)
+  }
+
+  private fun poolSizeProperty(postgresAutostart: Boolean): String {
+    if (postgresAutostart) return AsyncExecutorFactory.AUTOSTART_POOL_SIZE_PROPERTY
+    return AsyncExecutorFactory.HIKARI_POOL_SIZE_PROPERTY
   }
 
   private class CapturedLog(

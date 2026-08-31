@@ -1,10 +1,9 @@
 package io.tolgee.configuration
 
-import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
-import javax.sql.DataSource
+import org.springframework.mock.env.MockEnvironment
 
 class AsyncPoolSizeDerivationTest {
   @Test
@@ -55,9 +54,8 @@ class AsyncPoolSizeDerivationTest {
   }
 
   @Test
-  fun `falls back to a fixed size when the DataSource cannot report a pool`() {
-    val factory =
-      AsyncExecutorFactory(TolgeeProperties(), providerOf<DataSource>(null))
+  fun `falls back to a fixed size when the connection pool size is not configured`() {
+    val factory = AsyncExecutorFactory(TolgeeProperties(), MockEnvironment())
 
     factory.connectionPoolSize.assert.isNull()
     // Fallback pool of 10 / streaming divisor of 3.
@@ -89,8 +87,11 @@ class AsyncPoolSizeDerivationTest {
     connectionPoolSize: Int,
     properties: TolgeeProperties = TolgeeProperties(),
   ): AsyncExecutorFactory {
-    val dataSource = HikariDataSource()
-    dataSource.maximumPoolSize = connectionPoolSize
-    return AsyncExecutorFactory(properties, providerOf(dataSource))
+    val environment =
+      MockEnvironment().withProperty(
+        AsyncExecutorFactory.AUTOSTART_POOL_SIZE_PROPERTY,
+        connectionPoolSize.toString(),
+      )
+    return AsyncExecutorFactory(properties, environment)
   }
 }

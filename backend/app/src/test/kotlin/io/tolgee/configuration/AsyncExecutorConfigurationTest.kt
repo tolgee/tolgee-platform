@@ -55,6 +55,8 @@ class AsyncExecutorConfigurationTest {
       .describedAs("test connection pool size the expectations below are pinned to")
       .isEqualTo(100)
 
+    // The size is bound from configuration rather than read off the bean, so this pins that the
+    // property AsyncExecutorFactory picks is the one the DataSource was actually built from.
     asyncExecutorFactory.connectionPoolSize.assert.isEqualTo(100)
     asyncExecutorFactory.streamingMaxThreads.assert.isEqualTo(33)
     asyncExecutorFactory.streamingQueueCapacity.assert.isEqualTo(AsyncExecutorFactory.MIN_QUEUE_CAPACITY)
