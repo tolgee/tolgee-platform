@@ -1,3 +1,10 @@
+## [3.219.4](https://github.com/tolgee/tolgee-platform/compare/v3.219.3...v3.219.4) (2026-08-31)
+
+
+### Bug Fixes
+
+* keep re-launched batch chunks cancellable ([#3881](https://github.com/tolgee/tolgee-platform/issues/3881)) ([5c48854](https://github.com/tolgee/tolgee-platform/commit/5c48854b6d31a6ffab7db4576c858a70519d89dc))
+
 ## [3.219.3](https://github.com/tolgee/tolgee-platform/compare/v3.219.2...v3.219.3) (2026-08-28)
 
 
