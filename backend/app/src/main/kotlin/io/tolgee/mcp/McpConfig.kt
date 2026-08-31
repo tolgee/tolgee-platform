@@ -19,7 +19,7 @@ class McpConfig {
   fun mcpTransportProvider(): WebMvcStreamableServerTransportProvider {
     return WebMvcStreamableServerTransportProvider
       .builder()
-      .mcpEndpoint("/mcp/developer")
+      .mcpEndpoint(McpConstants.DEVELOPER_ENDPOINT_PATH)
       .build()
   }
 
