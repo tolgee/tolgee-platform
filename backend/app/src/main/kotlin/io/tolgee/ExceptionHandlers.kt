@@ -301,7 +301,7 @@ class ExceptionHandlers(
   }
 
   private fun isStreamingUnavailable(ex: Throwable): Boolean =
-    generateSequence(ex) { it.cause }.any { it is StreamingUnavailableException }
+    ExceptionUtils.getThrowableList(ex).any { it is StreamingUnavailableException }
 
   private fun serverBusy(response: HttpServletResponse): ResponseEntity<ErrorResponseBody> {
     dropStagedStreamingHeaders(response)
