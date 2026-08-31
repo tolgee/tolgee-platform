@@ -595,6 +595,7 @@ class UserAccountService(
     userAccount.username = newEmail
   }
 
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
     resetTokensValidNotBefore(userAccount)
     return userAccountRepository.save(userAccount)
