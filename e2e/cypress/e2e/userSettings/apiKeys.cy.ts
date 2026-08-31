@@ -1,3 +1,4 @@
+import { scopeCheckbox } from '../../common/permissionsMenu';
 import {
   assertMessage,
   clickAdd,
@@ -47,7 +48,7 @@ describe('API keys', () => {
 
     cy.gcy('permissions-advanced-item').contains('Admin').click();
 
-    getPermissionItem('keys.edit').click();
+    scopeCheckbox('keys.edit').click();
     const newDescription = 'Brand new description';
     cy.gcy('generate-api-key-dialog-description-input')
       .clear()
@@ -95,30 +96,25 @@ const visit = () => {
   cy.visit(HOST + '/account/apiKeys');
 };
 
-const getCheckbox = (scope: Scope) => {
-  return cy
-    .gcy('permissions-advanced-item')
-    .filter(`[permissions-scope="${scope}"]`);
-};
+// Order matters: unchecking a scope also unchecks the ones that depend on it, so the dependants go first.
+const SCOPES_TO_UNSELECT: Scope[] = [
+  'screenshots.delete',
+  'screenshots.upload',
+  'screenshots.view',
+  'translations.state-edit',
+  'translations.edit',
+  'translations.view',
+  'keys.edit',
+  'keys.create',
+  'keys.view',
+];
 
 const unselectAll = () => {
-  getCheckbox('screenshots.delete').click();
-  getCheckbox('screenshots.upload').click();
-  getCheckbox('screenshots.view').click();
-  getCheckbox('translations.state-edit').click();
-  getCheckbox('translations.edit').click();
-  getCheckbox('translations.view').click();
-  getCheckbox('keys.edit').click();
-  getCheckbox('keys.create').click();
-  getCheckbox('keys.view').click();
+  SCOPES_TO_UNSELECT.forEach((scope) => scopeCheckbox(scope).click());
 
   cy.gcy('permissions-advanced-item')
     .find('input[type="checkbox"]')
     .should('not.be.checked');
-};
-
-const getPermissionItem = (scope: Scope) => {
-  return cy.get(`[aria-label="${scope}"]`);
 };
 
 const create = (project: string, scopes: Scope[], description) => {
@@ -129,7 +125,7 @@ const create = (project: string, scopes: Scope[], description) => {
   getPopover().contains(project).click();
   unselectAll();
   scopes.forEach((s) => {
-    getPermissionItem(s).click();
+    scopeCheckbox(s).click();
   });
 
   cy.xpath(getAnyContainingText('Save', 'button')).click();

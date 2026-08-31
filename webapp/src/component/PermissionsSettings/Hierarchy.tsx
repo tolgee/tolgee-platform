@@ -167,7 +167,7 @@ export const Hierarchy: React.FC<React.PropsWithChildren<Props>> = ({
           disableInteractive
         >
           <FormControlLabel
-            permissions-scope={structure.value}
+            data-cy-scope={structure.value}
             data-cy="permissions-advanced-item"
             control={
               <Checkbox
