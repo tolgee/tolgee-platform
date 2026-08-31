@@ -49,7 +49,7 @@ class SsoAuthController(
     val url =
       "${tenant.authorizationUri}?" +
         "client_id=${tenant.clientId}&" +
-        "redirect_uri=${frontendUrlProvider.url + "/login/auth_callback/sso"}&" +
+        "redirect_uri=${frontendUrlProvider.requestDerivedUrl + "/login/auth_callback/sso"}&" +
         "response_type=code&" +
         "scope=${getScope(tenant)}&" +
         "state=$state"
