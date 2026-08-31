@@ -32,4 +32,25 @@ class OAuth2ServerProperties {
     defaultValue = "",
   )
   var cliRedirectUris: List<String> = listOf()
+
+  @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
+  var accessTokenValidityMinutes: Long = 30
+
+  @DocProperty(
+    description =
+      "How long an issued OAuth refresh token stays valid, in days. Each refresh issues a new one and restarts " +
+        "this window, so it bounds how long a grant may sit unused — not how long it may live.",
+  )
+  var refreshTokenValidityDays: Long = 30
+
+  @DocProperty(
+    description = "How long an authorization code can be exchanged for tokens after it was issued, in seconds.",
+  )
+  var authorizationCodeValiditySeconds: Long = 300
+
+  @DocProperty(
+    description =
+      "How long the user has to complete the consent screen before the pending authorization goes stale, in seconds.",
+  )
+  var consentValiditySeconds: Long = 900
 }

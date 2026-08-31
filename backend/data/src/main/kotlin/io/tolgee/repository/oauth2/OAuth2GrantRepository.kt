@@ -11,6 +11,10 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.Date
 
+/**
+ * The `findAndLock*` finders take a row lock: two concurrent redemptions of the same code, consent or refresh token
+ * must not both observe it unspent and each walk away believing they hold the grant's only token pair.
+ */
 @Repository
 @Lazy
 interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
@@ -25,12 +29,17 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   fun findByAccessTokenHash(accessTokenHash: String): OAuth2Grant?
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT g FROM OAuth2Grant g WHERE g.accessTokenHash = :accessTokenHash")
+  fun findAndLockByAccessTokenHash(
+    @Param("accessTokenHash") accessTokenHash: String,
+  ): OAuth2Grant?
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT g FROM OAuth2Grant g WHERE g.codeHash = :codeHash")
   fun findAndLockByCodeHash(
     @Param("codeHash") codeHash: String,
   ): OAuth2Grant?
 
-  /** Serializes rotation, so two concurrent refreshes cannot each believe they hold the grant's only token pair. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT g FROM OAuth2Grant g WHERE g.refreshTokenHash = :hash")
   fun findAndLockByRefreshTokenHash(
