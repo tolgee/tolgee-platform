@@ -110,6 +110,15 @@ class OAuth2AuthorizationService(
     return repository.save(grant)
   }
 
+  /**
+   * A plain read for the consent screen. The decision itself re-reads under a lock in [approveConsent] and
+   * [denyConsent].
+   */
+  fun findOwnPendingByConsentState(
+    consentState: String,
+    userId: Long,
+  ): OAuth2Grant = requireOwnPending(repository.findByConsentState(consentState), userId)
+
   sealed class ResolvedConsent {
     abstract val redirectUri: String
     abstract val clientState: String?
@@ -262,12 +271,21 @@ class OAuth2AuthorizationService(
   private fun lockOwnPendingGrant(
     consentState: String,
     userId: Long,
+  ): OAuth2Grant = requireOwnPending(repository.findAndLockByConsentState(consentState), userId)
+
+  /**
+   * Every refusal is the same NotFoundException: a state that is not yours must be indistinguishable from one
+   * that never existed.
+   */
+  private fun requireOwnPending(
+    grant: OAuth2Grant?,
+    userId: Long,
   ): OAuth2Grant {
-    val grant =
-      repository.findAndLockByConsentState(consentState)?.takeIf { !isExpiredOrUnset(it.consentExpiresAt) }
+    val pending =
+      grant?.takeIf { !isExpiredOrUnset(it.consentExpiresAt) }
         ?: throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
-    if (grant.userAccount.id != userId) throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
-    return grant
+    if (pending.userAccount.id != userId) throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
+    return pending
   }
 
   private fun bindConsentAndMintCode(
