@@ -16,6 +16,8 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.component.BackendUrlProvider
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThatCode
@@ -98,12 +100,18 @@ class OAuth2IssuerResolverTest {
     frontEnd: String?,
     clients: List<OAuth2Client> = listOf(),
   ) = OAuth2IssuerResolver(
-    mock<TolgeeProperties> {
-      on { backEndUrl } doReturn backEnd
-      on { frontEndUrl } doReturn frontEnd
-    },
+    BackendUrlProvider(propertiesWith(backEnd, frontEnd)),
+    FrontendUrlProvider(propertiesWith(backEnd, frontEnd)),
     mock<OAuth2ClientRegistry> { on { isEnabled } doReturn clients.isNotEmpty() },
   )
+
+  private fun propertiesWith(
+    backEnd: String?,
+    frontEnd: String?,
+  ) = mock<TolgeeProperties> {
+    on { backEndUrl } doReturn backEnd
+    on { frontEndUrl } doReturn frontEnd
+  }
 
   private fun anyClient() =
     listOf(OAuth2Client(clientId = "c", name = "c", redirectUris = listOf("https://ext.example/cb")))

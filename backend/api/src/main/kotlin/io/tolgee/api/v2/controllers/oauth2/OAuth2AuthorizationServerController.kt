@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.oauth2
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
-import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.oauth2.AuthorizationServerMetadataModel
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -43,7 +43,7 @@ class OAuth2AuthorizationServerController(
   private val authorizationService: OAuth2AuthorizationService,
   private val clientRegistry: OAuth2ClientRegistry,
   private val issuerResolver: OAuth2IssuerResolver,
-  private val tolgeeProperties: TolgeeProperties,
+  private val frontendUrlProvider: FrontendUrlProvider,
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
@@ -254,10 +254,7 @@ class OAuth2AuthorizationServerController(
   // Relative unless `front-end-url` says otherwise: behind a TLS-terminating proxy the container's view of the
   // request is the internal URL, and redirecting there would strand the user.
   private fun consentPageUrl(params: Map<String, String?>): String {
-    val base =
-      tolgeeProperties.frontEndUrl.nullIfBlank
-        ?.trimEnd('/')
-        .orEmpty()
+    val base = frontendUrlProvider.stableUrl?.trimEnd('/').orEmpty()
     return OAuth2Redirects.appendQuery(base + OAuth2Constants.CONSENT_PAGE_PATH, params.toList())
   }
 

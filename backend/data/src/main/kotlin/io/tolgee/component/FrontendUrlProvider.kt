@@ -1,6 +1,7 @@
 package io.tolgee.component
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.util.nullIfBlank
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
@@ -8,15 +9,19 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class FrontendUrlProvider(
   private val tolgeeProperties: TolgeeProperties,
 ) {
+  /**
+   * The configured URL, falling back to the current request's origin. Callers that publish or persist the value
+   * want [stableUrl] instead: this one changes with the request that happens to be in flight.
+   */
   val url: String
-    get() {
-      val frontEndUrlFromProperties = tolgeeProperties.frontEndUrl
-      if (!frontEndUrlFromProperties.isNullOrBlank()) {
-        return frontEndUrlFromProperties
-      }
+    get() = stableUrl ?: getFromServerRequest()
 
-      return getFromServerRequest()
-    }
+  /**
+   * The configured URL, or null when `tolgee.front-end-url` is unset. Never derived from the request, so it is
+   * stable across calls and cannot be steered by a caller's `Host` header.
+   */
+  val stableUrl: String?
+    get() = tolgeeProperties.frontEndUrl.nullIfBlank
 
   private fun getFromServerRequest(): String {
     try {

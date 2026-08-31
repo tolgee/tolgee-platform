@@ -16,7 +16,8 @@
 
 package io.tolgee.security.oauth2
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.component.BackendUrlProvider
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.util.nullIfBlank
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
@@ -25,13 +26,18 @@ import java.net.URI
 /**
  * The URL that identifies this authorization server.
  *
- * Deliberately not [io.tolgee.component.FrontendUrlProvider]: every OAuth endpoint hangs off the issuer, so this must
- * be where the *API* is reachable. `front-end-url` is only a fallback for single-origin deployments, where the backend
- * also serves the SPA and operators commonly leave `back-end-url` unset.
+ * Built from the providers' *stable* values only, never [io.tolgee.component.FrontendUrlProvider.url]: the issuer is
+ * published in discovery and as `iss` on every authorization response, so a request-derived value would let a caller
+ * choose what this server says about itself.
+ *
+ * The back-end URL comes first because every OAuth endpoint hangs off the issuer, so it must be where the *API* is
+ * reachable. `front-end-url` is only a fallback for single-origin deployments, where the backend also serves the SPA
+ * and operators commonly leave `back-end-url` unset.
  */
 @Component
 class OAuth2IssuerResolver(
-  private val tolgeeProperties: TolgeeProperties,
+  private val backendUrlProvider: BackendUrlProvider,
+  private val frontendUrlProvider: FrontendUrlProvider,
   private val clientRegistry: OAuth2ClientRegistry,
 ) {
   @PostConstruct
@@ -48,7 +54,7 @@ class OAuth2IssuerResolver(
       }
 
   private val configuredBaseUrl: String?
-    get() = tolgeeProperties.backEndUrl.normalized() ?: tolgeeProperties.frontEndUrl.normalized()
+    get() = backendUrlProvider.stableUrl.normalized() ?: frontendUrlProvider.stableUrl.normalized()
 
   /**
    * The issuer is concatenated with endpoint paths, so `https://host/` would publish `https://host//oauth2/token`
