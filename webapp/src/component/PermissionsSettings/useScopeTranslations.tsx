@@ -4,7 +4,9 @@ import { PermissionModelScope } from './types';
 export const useScopeTranslations = () => {
   const { t } = useTranslate();
 
-  const labels: Record<PermissionModelScope, string> = {
+  // Partial: the scope union also carries organization-level scopes that have no project-permission
+  // label; getScopeTranslation falls back to the raw scope for anything not listed here.
+  const labels: Partial<Record<PermissionModelScope, string>> = {
     admin: t('permissions_item_admin'),
     'translations.view': t('permissions_item_translations_view'),
     'translations.edit': t('permissions_item_translations_edit'),
