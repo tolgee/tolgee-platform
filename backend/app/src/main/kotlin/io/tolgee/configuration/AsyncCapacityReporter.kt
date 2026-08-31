@@ -50,7 +50,8 @@ class AsyncCapacityReporter(
 
     logger.warn(
       "Async thread pools may starve the database connection pool: $streaming streaming + " +
-        "$background background + $batch batch = $reserved against only $connectionPoolSize " +
+        "$background background + $batch batch + $SERIAL_POOLS serial = $reserved against only " +
+        "$connectionPoolSize " +
         "connections. Every streaming response holds one connection for its whole duration, so " +
         "1/$SYNC_RESERVE_DIVISOR of the pool should stay free for ordinary requests. Raise " +
         "${asyncExecutorFactory.connectionPoolSizeProperty}, or lower tolgee.async.streaming.max-threads, " +

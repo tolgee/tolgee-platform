@@ -50,7 +50,10 @@ class AsyncMethodConfiguration(
   /**
    * Also single-threaded. BatchJobService.tryDebounceJob is a find-then-insert with no lock, and the
    * automation triggers share a debouncing key on purpose, so running two revisions at once lets
-   * both see no PENDING job and enqueue a publish the debounce exists to collapse into one.
+   * both see no PENDING job and enqueue a publish the debounce exists to collapse into one. This
+   * only holds within one JVM: two pods still race, and findBatchJobByDebouncingKey then throws on
+   * the duplicate rather than merely publishing twice. Serializing here keeps today's behaviour; it
+   * does not make the debounce safe.
    */
   @Bean(AUTOMATION_EXECUTOR_BEAN_NAME)
   fun automationAsyncExecutor(): ThreadPoolTaskExecutor =

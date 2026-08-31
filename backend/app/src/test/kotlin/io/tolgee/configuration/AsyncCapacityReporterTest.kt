@@ -44,6 +44,22 @@ class AsyncCapacityReporterTest {
     report(connectionPoolSize = 60, batchConcurrency = 14).warnings.assert.isNotEmpty()
   }
 
+  /** The warning spells the sum out term by term; one dropped term silently misleads the operator. */
+  @Test
+  fun `the warned equation adds up to the total it prints`() {
+    val warning = report(connectionPoolSize = 100, batchConcurrency = 40).warnings.single()
+
+    val terms =
+      Regex("""(\d+) (?:streaming|background|batch|serial) """)
+        .findAll(warning)
+        .map { it.groupValues[1].toInt() }
+        .toList()
+    val total = Regex("""= (\d+) against""").find(warning)!!.groupValues[1].toInt()
+
+    terms.assert.hasSize(4)
+    terms.sum().assert.isEqualTo(total)
+  }
+
   @Test
   fun `reports without a warning when the connection pool size is not configured`() {
     val events = report(connectionPoolSize = null, batchConcurrency = 40)

@@ -59,8 +59,8 @@ class StreamingResponseBodyProvider(
           }
         }
       } finally {
-        session.close()
         sample.stop(metrics.streamDurationTimer(streamType))
+        session.close()
       }
     }
   }
