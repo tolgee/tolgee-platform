@@ -503,6 +503,11 @@ export function useErrorTranslation() {
           'organization_currency_already_set',
           'This organization already has a billing currency and it cannot be changed.'
         );
+      case 'plan_not_priced_in_organization_currency':
+        return t(
+          'plan_not_priced_in_organization_currency',
+          'This organization is billed in a currency this plan has no prices for. Add prices in that currency to the plan.'
+        );
       case 'keys_spending_limit_exceeded':
         return t('keys_spending_limit_exceeded');
 
