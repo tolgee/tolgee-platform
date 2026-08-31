@@ -24,6 +24,7 @@ import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
@@ -49,6 +50,8 @@ class AuthenticationFilter(
   private val rateLimitService: RateLimitService,
   @Lazy
   private val jwtService: JwtService,
+  @Lazy
+  private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
@@ -97,7 +100,8 @@ class AuthenticationFilter(
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
-        val auth = jwtService.validateToken(authorization.substring(7))
+        val token = authorization.substring(7)
+        val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth

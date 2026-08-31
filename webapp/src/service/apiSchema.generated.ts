@@ -108,7 +108,7 @@ export interface paths {
     get: operations["getCurrent_1"];
   };
   "/v2/api-keys/current-permissions": {
-    /** Returns current PAK or PAT permissions for current user, api-key and project */
+    /** Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project */
     get: operations["getCurrentPermissions"];
   };
   "/v2/api-keys/{apiKeyId}": {
@@ -9374,11 +9374,11 @@ export interface operations {
       };
     };
   };
-  /** Returns current PAK or PAT permissions for current user, api-key and project */
+  /** Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project */
   getCurrentPermissions: {
     parameters: {
       query: {
-        /** Required when using with PAT */
+        /** Required with a PAT, and with an OAuth token not bound to exactly one project */
         projectId?: number;
       };
     };

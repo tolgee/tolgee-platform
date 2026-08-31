@@ -79,7 +79,7 @@ class ProjectAuthorizationInterceptorTest {
 
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
-  private val apiKey = Mockito.mock(ApiKeyDto::class.java)
+  private val apiKey = apiKeyFor(projectId = 1337L, scopes = setOf(Scope.KEYS_CREATE))
 
   private val projectContextService =
     ProjectContextService(
@@ -111,10 +111,10 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
+    Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(false)
     Mockito.`when`(authenticationFacade.isScopedCredential).thenReturn(false)
     Mockito.`when`(authenticationFacade.scopedCredential).thenReturn(null)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
-    Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
     Mockito.`when`(authenticationFacade.isReadOnly).thenCallRealMethod()
 
     Mockito.`when`(authentication.isReadOnly).thenReturn(false)
@@ -129,9 +129,11 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(projectDto.organizationOwnerId).thenReturn(1L)
     Mockito.`when`(project.id).thenReturn(1337L)
 
-    Mockito.`when`(apiKey.projectId).thenReturn(1337L)
-    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
     Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(mutableSetOf(Scope.KEYS_CREATE))
+    // The user can see project 1337 in their own right; only the credential's project binding varies per test.
+    Mockito
+      .`when`(securityService.getProjectPermissionScopesNoApiKey(1337L, 1337L))
+      .thenReturn(arrayOf(Scope.KEYS_CREATE))
   }
 
   @AfterEach
@@ -145,7 +147,6 @@ class ProjectAuthorizationInterceptorTest {
       project,
       projectDto,
       userAccount,
-      apiKey,
     )
   }
 
@@ -245,9 +246,9 @@ class ProjectAuthorizationInterceptorTest {
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
 
-    val fakeProject = Mockito.mock(Project::class.java)
-    Mockito.`when`(fakeProject.id).thenReturn(7331L)
-    Mockito.`when`(apiKey.projectId).thenReturn(7331L)
+    Mockito
+      .`when`(authenticationFacade.scopedCredential)
+      .thenReturn(apiKeyFor(projectId = 7331L, scopes = setOf(Scope.KEYS_CREATE)))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
   }
@@ -265,7 +266,9 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it does not let scopes on the key work if the authenticated user does not have them`() {
-    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
+    Mockito
+      .`when`(authenticationFacade.scopedCredential)
+      .thenReturn(apiKeyFor(projectId = 1337L, scopes = setOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT)))
     Mockito
       .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE))
@@ -283,7 +286,9 @@ class ProjectAuthorizationInterceptorTest {
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk
 
-    Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
+    Mockito
+      .`when`(authenticationFacade.scopedCredential)
+      .thenReturn(apiKeyFor(projectId = 1337L, scopes = setOf(Scope.KEYS_VIEW)))
     Mockito
       .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_VIEW))
@@ -429,4 +434,16 @@ class ProjectAuthorizationInterceptorTest {
     @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun implicitProject() = "hello from implicit project!"
   }
+
+  private fun apiKeyFor(
+    projectId: Long,
+    scopes: Set<Scope>,
+  ) = ApiKeyDto(
+    id = 1L,
+    hash = "hash",
+    expiresAt = null,
+    projectId = projectId,
+    userAccountId = 1337L,
+    scopes = scopes,
+  )
 }

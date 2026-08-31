@@ -57,6 +57,10 @@ class ProjectContextService(
     val userId = authenticationFacade.authenticatedUser.id
     var bypassed = false
 
+    // Before the scope gate: a credential pointed at a project it does not cover is told so, rather than being told
+    // the project does not exist because its permitted-scope set came back empty.
+    validateScopedCredential(project, userId)
+
     if (useDefaultPermissions || requiredScopes != null) {
       val scopes = securityService.getCurrentPermittedScopes(project.id)
 
@@ -101,8 +105,6 @@ class ProjectContextService(
       }
     }
 
-    validatePak(project)
-
     if (bypassed) {
       logger.info(
         "Use of admin privileges: user#{} failed local security checks for proj#{}",
@@ -122,12 +124,19 @@ class ProjectContextService(
         ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
-  private fun validatePak(project: ProjectDto) {
-    if (!authenticationFacade.isProjectApiKeyAuth) return
-    val pak = authenticationFacade.projectApiKey
-    if (project.id != pak.projectId) {
-      throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
+  private fun validateScopedCredential(
+    project: ProjectDto,
+    userId: Long,
+  ) {
+    val credential = authenticationFacade.scopedCredential ?: return
+    if (credential.coversProject(project.id)) return
+
+    // The user's own access answers first: telling a credential "wrong project" for a project its user cannot see
+    // would turn any scoped credential into an instance-wide project-existence oracle.
+    if (securityService.getProjectPermissionScopesNoApiKey(project.id, userId).isNullOrEmpty()) {
+      throw ProjectNotFoundException(project.id)
     }
+    throw PermissionException(credential.projectMismatchMessage)
   }
 
   private val canUseAdminPermissions

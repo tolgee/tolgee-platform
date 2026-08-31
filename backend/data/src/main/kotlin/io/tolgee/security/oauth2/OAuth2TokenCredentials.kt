@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package io.tolgee.security.authentication
+package io.tolgee.security.oauth2
 
 import io.tolgee.constants.Message
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.ScopedCredential
 
-/** A credential that narrows its user down to its own scopes. */
-interface ScopedCredential {
-  val scopes: Set<Scope>
+data class OAuth2TokenCredentials(
+  override val scopes: Set<Scope>,
+  /** Null means every project the user can reach, not none. */
+  val projectIds: Set<Long>?,
+) : ScopedCredential {
+  override val singleProjectId: Long?
+    get() = projectIds?.singleOrNull()
 
-  /** Null when the credential is not narrowed to exactly one project — all of them, none, or several. */
-  val singleProjectId: Long?
+  override val projectMismatchMessage: Message
+    get() = Message.USER_HAS_NO_PROJECT_ACCESS
 
-  val projectMismatchMessage: Message
-
-  fun coversProject(projectId: Long): Boolean
+  override fun coversProject(projectId: Long): Boolean {
+    return projectIds == null || projectId in projectIds
+  }
 }

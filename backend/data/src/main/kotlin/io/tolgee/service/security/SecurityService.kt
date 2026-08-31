@@ -3,7 +3,6 @@ package io.tolgee.service.security
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
-import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
@@ -22,12 +21,12 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ScopedCredential
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectFeatureGuard
-import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -90,6 +89,15 @@ class SecurityService(
     if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
+    authenticationFacade.scopedCredential?.let { requireCoversProject(it, projectId) }
+  }
+
+  private fun requireCoversProject(
+    credential: ScopedCredential,
+    projectId: Long,
+  ) {
+    if (credential.coversProject(projectId)) return
+    throw PermissionException(credential.projectMismatchMessage)
   }
 
   fun currentPermittedScopesContain(scope: Scope): Boolean {
@@ -118,41 +126,39 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val projectScopes =
+    val scopes =
       Scope
         .expand(
           getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
-    val apiKey = activeApiKey ?: return projectScopes
 
-    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
+    val credential = authenticationFacade.scopedCredential ?: return scopes
+    if (!credential.coversProject(projectId)) return emptySet()
+    return scopes.intersect(Scope.expand(credential.scopes).toSet())
   }
 
   /**
-   * Checks if the user has required permission for the project. If no user or API key is provided,
-   * uses the currently authenticated user and active API key.
-   * Always checks permissions for the current user even when using the API key for security reasons.
+   * Checks the user's own permission on the project, then narrows it by the scoped credential.
    *
+   * [credential] defaults to the one in the security context; pass it explicitly off the request thread, where
+   * there is none (see `WebSocketConfig`).
    */
   fun checkProjectPermission(
     projectId: Long,
     requiredPermission: Scope,
     user: UserAccountDto? = null,
-    apiKey: ApiKeyDto? = null,
+    credential: ScopedCredential? = null,
   ) {
     val user = user ?: activeUser
-    // Always check for the current user even if we're using an API key for security reasons.
-    // This prevents improper preservation of permissions.
+    // Always check for the current user even when a scoped credential is presented: the credential can only narrow
+    // what the user already has, never widen it.
     checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
-    val apiKey = apiKey ?: activeApiKey
-    apiKey ?: return
-
-    if (apiKey.projectId != projectId) {
-      throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
+    val credential = credential ?: authenticationFacade.scopedCredential ?: return
+    requireCoversProject(credential, projectId)
+    if (!Scope.expand(credential.scopes).contains(requiredPermission)) {
+      throw PermissionException(missingScopes = listOf(requiredPermission))
     }
-
-    this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
   }
 
   fun checkTaskEditScopeOrAssigned(
@@ -505,34 +511,6 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
   }
 
-  /**
-   * Checks if API key has required scopes.
-   *
-   * It does not check whether the user has the permission to use all the scope. This needs to be done separately.
-   *
-   * If you need to check both, use [checkProjectPermission] function.
-   */
-  fun checkApiKeyScopes(
-    scopes: Collection<Scope>,
-    apiKey: ApiKeyDto,
-  ) {
-    checkApiKeyScopes(apiKey) { expandedScopes ->
-      val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
-      if (!hasRequiredPermission) {
-        val missingScopes = scopes.filter { !expandedScopes.contains(it) }
-        throw PermissionException(missingScopes = missingScopes)
-      }
-    }
-  }
-
-  private fun checkApiKeyScopes(
-    apiKey: ApiKeyDto,
-    checkFn: (expandedScopes: Array<Scope>) -> Unit,
-  ) {
-    val expandedScopes = Scope.expand(apiKey.scopes)
-    checkFn(expandedScopes)
-  }
-
   fun checkScreenshotsUploadPermission(projectId: Long) {
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
   }
@@ -685,9 +663,6 @@ class SecurityService(
 
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
-
-  private val activeApiKey: ApiKeyDto?
-    get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 
   companion object {
     private const val KEY_ID_LOOKUP_CHUNK_SIZE = 10_000

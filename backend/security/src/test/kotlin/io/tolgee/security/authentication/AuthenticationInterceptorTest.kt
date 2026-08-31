@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.security.authorization.IsGlobalRoute
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,6 +56,41 @@ class AuthenticationInterceptorTest {
   }
 
   @Test
+  fun `it allows an OAuth token on a project-scoped path`() {
+    oauthAuthenticated()
+
+    mockMvc.perform(get("/v2/projects/1/allow-api-access")).andIsOk
+  }
+
+  @Test
+  fun `it allows an OAuth token outside the project-scoped paths`() {
+    // An OAuth token reaches whatever any other API credential reaches; the project narrowing is applied where the
+    // request actually resolves a project, not by the shape of the URL.
+    oauthAuthenticated()
+
+    mockMvc.perform(get("/allow-api-access")).andIsOk
+  }
+
+  @Test
+  fun `it refuses an OAuth token on an endpoint written for one API token kind`() {
+    oauthAuthenticated()
+
+    mockMvc.perform(get("/v2/projects/1/only-pak")).andIsForbidden
+  }
+
+  @Test
+  fun `it allows an OAuth token on a global route`() {
+    oauthAuthenticated()
+
+    mockMvc.perform(get("/v2/projects/1/global-route")).andIsOk
+  }
+
+  private fun oauthAuthenticated() {
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+  }
+
+  @Test
   fun `it enforces the super JWT requirement`() {
     mockMvc.perform(get("/requires-super-auth")).andIsForbidden
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(true)
@@ -80,6 +116,19 @@ class AuthenticationInterceptorTest {
     @GetMapping("/allow-api-access")
     @AllowApiAccess
     fun allowApiAccess(): String = "hello!"
+
+    @GetMapping("/v2/projects/1/allow-api-access")
+    @AllowApiAccess
+    fun projectScoped(): String = "hello!"
+
+    @GetMapping("/v2/projects/1/global-route")
+    @AllowApiAccess
+    @IsGlobalRoute
+    fun projectScopedGlobalRoute(): String = "hello!"
+
+    @GetMapping("/v2/projects/1/only-pak")
+    @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAK)
+    fun projectScopedOnlyPak(): String = "hello!"
 
     @GetMapping("/requires-super-auth")
     @RequiresSuperAuthentication
