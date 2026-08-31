@@ -21,7 +21,7 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 
 ![example workflow](https://github.com/tolgee/tolgee-platform/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/tolgee-platform)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://hub.docker.com/repository/docker/tolgee/tolgee)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://hub.docker.com/r/tolgee/tolgee)
 [![github release](https://img.shields.io/github/v/release/tolgee/tolgee-platform?label=GitHub%20Release)](https://github.com/tolgee/tolgee-platform/releases/latest)
 ![licence](https://img.shields.io/badge/license-Apache%202%20%2F%20Tolgee%20EL-blue)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
@@ -35,13 +35,13 @@ An open-source alternative to Crowdin, Phrase, or Lokalise
 [![X](https://img.shields.io/badge/X-%23000000.svg?logo=X&logoColor=white)](https://x.com/Tolgee_i18n)
 </div>
 
-![Tolgee](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/tolgee.gif)
+![Tolgee](tolgee.gif)
 
 ## Why use Tolgee?
 
 It saves you valuable time that would otherwise be spent on localization tasks while ensuring your software is flawlessly translated.
 
-![Frame 47](https://github.com/techwithprerit/tolgee-platform/blob/a8b0ab45640e1fef729e7f1237817ba9b03dfaf4/Tolgee-specs.gif)
+![Frame 47](Tolgee-specs.gif)
 
 ### In context translating & One click screenshots
 
@@ -49,7 +49,7 @@ Easily add translations to your code and edit them directly within your app usin
 
 Just one click—that’s all it takes to capture a screenshot of your application with highlighted phrases for translation. Simply hold ALT + click on a string, then hit the camera button. Boom! Your screenshot is instantly generated.
 
-![Sep-06-2022 16-38-49](https://github.com/techwithprerit/tolgee-platform/blob/b56dd663cacd1c167ac5855a33c5b9fa4aa4276e/tolgee-app.gif)
+![Tolgee in-context editing](tolgee-app.gif)
 
 ### Translating on production
 
@@ -61,7 +61,15 @@ Tolgee isn't just another localization platform that simply syncs your local dat
 
 ### Machine translation
 
-We support **DeepL, Google Translate, and AWS Translate**—simply choose your preferred services in the settings. With machine translation, the localization process becomes significantly faster, allowing translators to leverage AI-powered suggestions for more efficient and accurate translations.
+We support **DeepL, Google Translate, AWS Translate, and Azure Translator**—simply choose your preferred services in the settings. With machine translation, the localization process becomes significantly faster, allowing translators to leverage AI-powered suggestions for more efficient and accurate translations.
+
+### AI translator
+
+Conventional machine translation sees one string at a time. The AI translator sees the situation around it: screenshots of the phrase in your app, the key and project descriptions, your language notes, matches from the translation memory, and Tolgee Context, which the SDK gathers from how keys are actually laid out in your application.
+
+The result is that ambiguous strings stop being a coin flip. A bare "Open" can be a button, a status or a menu item, and the AI translator picks based on where it appears—then tells you which reading it went with, so a reviewer can disagree at a glance.
+
+You can shape it further by describing your project and languages, or by editing the translation prompt directly. [Read more](https://docs.tolgee.io/platform/translation_process/ai_translator).
 
 ### Translation memory
 
