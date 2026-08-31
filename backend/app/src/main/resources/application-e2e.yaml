@@ -13,6 +13,10 @@ tolgee:
   billing:
     enabled: false
   frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
+  oauth2:
+    # The callback is served by OAuth2ConsentE2eDataController.
+    browser-extension-redirect-uris:
+      - http://localhost:${TOLGEE_E2E_PORT:8201}/internal/e2e-data/oauth2-consent/callback
   authentication:
     enabled: true
     needs-email-verification: true
