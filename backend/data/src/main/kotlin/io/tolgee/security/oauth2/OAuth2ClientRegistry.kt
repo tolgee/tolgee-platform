@@ -22,51 +22,6 @@ import org.springframework.stereotype.Component
 import java.net.URI
 
 /**
- * A client Tolgee issues tokens to. Every client is public (no secret), must use PKCE, and always goes through the
- * consent screen; the only per-client facts are its redirect URIs and which scopes the screen locks as required.
- */
-data class OAuth2Client(
-  val clientId: String,
-  val name: String,
-  val redirectUris: List<String>,
-  val requiredScopes: List<Scope> = emptyList(),
-) {
-  fun allowsRedirectUri(redirectUri: String): Boolean {
-    // Parsed, not merely compared: a redirect that matches only as a string is still built into a Location header
-    // with URI.create, so a misconfigured entry would 500 the flow instead of simply never matching.
-    if (parse(redirectUri) == null) return false
-    if (redirectUri in redirectUris) return true
-    return redirectUris.any { matchesLoopback(it, redirectUri) }
-  }
-
-  /**
-   * RFC 8252 §7.3: a loopback redirect must be accepted on whatever port the client got from the OS at request time,
-   * so the registered port is not part of the comparison. Everything else — scheme, host, path, and any non-loopback
-   * URI — still has to match exactly.
-   */
-  private fun matchesLoopback(
-    registered: String,
-    presented: String,
-  ): Boolean {
-    val registeredUri = parse(registered) ?: return false
-    if (registeredUri.host !in LOOPBACK_HOSTS) return false
-    val presentedUri = parse(presented) ?: return false
-    return presentedUri.scheme == registeredUri.scheme &&
-      presentedUri.host == registeredUri.host &&
-      presentedUri.path.orEmpty() == registeredUri.path.orEmpty() &&
-      presentedUri.query == null &&
-      presentedUri.fragment == null
-  }
-
-  private fun parse(uri: String): URI? = runCatching { URI(uri) }.getOrNull()
-
-  companion object {
-    // URI.getHost() renders an IPv6 literal with its brackets.
-    internal val LOOPBACK_HOSTS = setOf("127.0.0.1", "[::1]")
-  }
-}
-
-/**
  * The clients Tolgee ships, built from configuration. A client with no redirect URIs configured is absent, which is
  * how an operator switches it off; nothing is persisted, so no stale registration can outlive that intent.
  */
@@ -74,12 +29,17 @@ data class OAuth2Client(
 class OAuth2ClientRegistry(
   private val properties: OAuth2ServerProperties,
 ) {
-  val clients: List<OAuth2Client>
-    get() = listOfNotNull(browserExtension(), cli())
+  val clients: List<OAuth2Client> = listOfNotNull(browserExtension(), cli())
+
+  /**
+   * Whether this deployment can issue tokens at all. With no client configured there is nothing to describe and no
+   * issuer to publish.
+   */
+  val isEnabled: Boolean
+    get() = clients.isNotEmpty()
 
   fun find(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
 
-  /** Whether a grant issued to [clientId] may still authenticate. */
   fun isStillAuthorized(clientId: String): Boolean = find(clientId) != null
 
   private fun browserExtension(): OAuth2Client? {
@@ -114,7 +74,7 @@ class OAuth2ClientRegistry(
       if (parsed.fragment != null) {
         throw IllegalStateException("tolgee.oauth2 redirect URI must not carry a fragment, got: $uri")
       }
-      if (parsed.scheme != "https" && !isLoopbackHost(parsed.host)) {
+      if (parsed.scheme != "https" && !OAuth2Client.isLoopbackHost(parsed.host)) {
         throw IllegalStateException(
           "tolgee.oauth2 redirect URI must use https unless it is a loopback address, got: $uri",
         )
@@ -122,11 +82,50 @@ class OAuth2ClientRegistry(
     }
     return uris
   }
+}
+
+/**
+ * A client Tolgee issues tokens to. Every client is public (no secret), must use PKCE, and always goes through the
+ * consent screen; the only per-client facts are its redirect URIs and which scopes the screen locks as required.
+ */
+data class OAuth2Client(
+  val clientId: String,
+  val name: String,
+  val redirectUris: List<String>,
+  val requiredScopes: List<Scope> = emptyList(),
+) {
+  fun allowsRedirectUri(redirectUri: String): Boolean {
+    if (parse(redirectUri) == null) return false
+    if (redirectUri in redirectUris) return true
+    return redirectUris.any { matchesLoopback(it, redirectUri) }
+  }
 
   /**
-   * `localhost` counts here but not in [OAuth2Client.matchesLoopback], which follows RFC 8252 §8.3 in matching the IP
-   * literals only. This is the scheme exemption, and plain http on localhost is what local clients are configured
-   * with — refusing it would reject a legitimate deployment rather than an unsafe one.
+   * RFC 8252 §7.3: a loopback redirect must be accepted on whatever port the client got from the OS at request time,
+   * so the registered port is not part of the comparison. Everything else — scheme, host, path, and any non-loopback
+   * URI — still has to match exactly.
    */
-  private fun isLoopbackHost(host: String?): Boolean = host == "localhost" || host in OAuth2Client.LOOPBACK_HOSTS
+  private fun matchesLoopback(
+    registered: String,
+    presented: String,
+  ): Boolean {
+    val registeredUri = parse(registered) ?: return false
+    if (!isLoopbackHost(registeredUri.host)) return false
+    val presentedUri = parse(presented) ?: return false
+    return presentedUri.scheme == registeredUri.scheme &&
+      presentedUri.host == registeredUri.host &&
+      presentedUri.path.orEmpty() == registeredUri.path.orEmpty() &&
+      presentedUri.userInfo == registeredUri.userInfo &&
+      presentedUri.query == null &&
+      presentedUri.fragment == null
+  }
+
+  private fun parse(uri: String): URI? = runCatching { URI(uri) }.getOrNull()
+
+  companion object {
+    // URI.getHost() renders an IPv6 literal with its brackets.
+    private val LOOPBACK_HOSTS = setOf("127.0.0.1", "[::1]", "localhost")
+
+    internal fun isLoopbackHost(host: String?): Boolean = host in LOOPBACK_HOSTS
+  }
 }

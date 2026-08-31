@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
+import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
 import io.tolgee.service.security.ApiKeyService
@@ -49,7 +50,7 @@ class AuthenticationFilter(
   @Lazy
   private val jwtService: JwtService,
   @Lazy
-  private val oAuth2AccessTokenResolver: OAuth2AccessTokenResolver,
+  private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
@@ -88,11 +89,17 @@ class AuthenticationFilter(
   }
 
   private fun doAuthenticate(request: HttpServletRequest) {
+    // The authorization server authenticates nobody: /oauth2/token and /oauth2/revoke identify their caller by the
+    // grant they present, and discovery is public. Resolving a credential here would let a stale Authorization header
+    // 401 the very requests a client makes to recover — including the RFC 9728 document a 401 pointed it at. Only the
+    // credential resolution is skipped: the filter itself still runs, so these paths keep the per-IP auth rate limit.
+    if (request.requestURI.removePrefix(request.contextPath) in AUTHORIZATION_SERVER_PATHS) return
+
     val authorization = request.getHeader("Authorization")
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
-        val auth = oAuth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
+        val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -219,5 +226,16 @@ class AuthenticationFilter(
       userAccountService.findInitialUser()
         ?: throw IllegalStateException("Initial user does not exists")
     UserAccountDto.fromEntity(account)
+  }
+
+  companion object {
+    private val AUTHORIZATION_SERVER_PATHS =
+      setOf(
+        OAuth2Constants.AUTHORIZE_PATH,
+        OAuth2Constants.TOKEN_PATH,
+        OAuth2Constants.REVOKE_PATH,
+        OAuth2Constants.AUTHORIZATION_SERVER_METADATA_PATH,
+        OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH,
+      )
   }
 }

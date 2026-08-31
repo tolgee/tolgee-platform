@@ -607,7 +607,6 @@ class UserAccountService(
     return userAccountRepository.save(userAccount)
   }
 
-  /** Cuts off every JWT the account has issued, and deletes its OAuth grants outright. */
   private fun revokeAllCredentials(userAccount: UserAccount) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
     // The tokensValidNotBefore cutoff is read from the USER_ACCOUNTS cache, which lags per-node without Redis, so the

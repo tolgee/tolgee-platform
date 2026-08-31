@@ -46,7 +46,6 @@ data class UserAccountDto(
   }
 }
 
-// A token issued before [UserAccountDto.tokensValidNotBefore] (password change / forced sign-out) is no longer valid.
 fun UserAccountDto.isTokenInvalidated(issuedAt: Instant?): Boolean {
   val validNotBefore = tokensValidNotBefore ?: return false
   if (issuedAt == null) return true

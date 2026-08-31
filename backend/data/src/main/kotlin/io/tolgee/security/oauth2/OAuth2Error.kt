@@ -16,11 +16,9 @@
 
 package io.tolgee.security.oauth2
 
-/** An RFC 6749 error: [error] is the wire value (`invalid_grant`, ...), [statusCode] the HTTP status the token endpoint answers with. */
 class OAuth2Error(
   val error: String,
   val description: String? = null,
-  val statusCode: Int = 400,
 ) : RuntimeException(description?.let { "$error: $it" } ?: error) {
   companion object {
     const val INVALID_REQUEST = "invalid_request"

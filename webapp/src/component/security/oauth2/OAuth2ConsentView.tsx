@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Alert, Box, styled } from '@mui/material';
 
@@ -15,6 +15,7 @@ import {
 import {
   NO_CHOICE,
   ProjectChoice,
+  initialProjectChoice,
   isChoiceComplete,
 } from 'tg.component/security/oauth2/consentProjectChoice';
 import { ConsentProjectPicker } from 'tg.component/security/oauth2/ConsentProjectPicker';
@@ -32,6 +33,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [state, setState] = useState<string>();
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [projectChoice, setProjectChoice] = useState<ProjectChoice>(NO_CHOICE);
+  const openedRef = useRef(false);
   const [failed, setFailed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,6 +47,12 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   });
 
   useEffect(() => {
+    // StrictMode double-invokes the effect on the same fiber; without this the second call opens a grant nobody
+    // ever sees. A genuine remount gets a fresh ref and deliberately starts a new authorization.
+    if (openedRef.current) {
+      return;
+    }
+    openedRef.current = true;
     authorize.mutate(
       {
         content: {
@@ -83,14 +91,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
       return;
     }
     setSelectedScopes(info.scopes);
-    setProjectChoice(
-      info.project
-        ? {
-            kind: 'one',
-            project: { id: info.project.id, name: info.project.name },
-          }
-        : NO_CHOICE
-    );
+    setProjectChoice(initialProjectChoice(info));
   }, [info]);
 
   const submitDecision = (approvedScopes: string[]) => {

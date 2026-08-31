@@ -24,20 +24,22 @@ import java.util.Date
  * delivered it.
  */
 @Entity
+// Not `oauth2_authorization`: that is Spring Authorization Server's default table name, and Tolgee may share a schema
+// with an application that owns those rows.
 @Table(
-  name = "oauth2_authorization",
+  name = "oauth2_grant",
   uniqueConstraints = [
-    UniqueConstraint(columnNames = ["consent_state"], name = "oauth2_authorization_consent_state_unique"),
-    UniqueConstraint(columnNames = ["code_hash"], name = "oauth2_authorization_code_hash_unique"),
-    UniqueConstraint(columnNames = ["access_token_hash"], name = "oauth2_authorization_access_token_hash_unique"),
-    UniqueConstraint(columnNames = ["refresh_token_hash"], name = "oauth2_authorization_refresh_token_hash_unique"),
+    UniqueConstraint(columnNames = ["consent_state"], name = "oauth2_grant_consent_state_unique"),
+    UniqueConstraint(columnNames = ["code_hash"], name = "oauth2_grant_code_hash_unique"),
+    UniqueConstraint(columnNames = ["access_token_hash"], name = "oauth2_grant_access_token_hash_unique"),
+    UniqueConstraint(columnNames = ["refresh_token_hash"], name = "oauth2_grant_refresh_token_hash_unique"),
   ],
   indexes = [
     Index(columnList = "user_account_id"),
     Index(columnList = "previous_refresh_token_hash"),
   ],
 )
-class OAuth2Authorization : StandardAuditModel() {
+class OAuth2Grant : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   lateinit var userAccount: UserAccount
 
@@ -53,7 +55,6 @@ class OAuth2Authorization : StandardAuditModel() {
   @Column(nullable = false)
   var codeChallenge: String = ""
 
-  /** What the client asked for on `/oauth2/authorize`. */
   @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
 
@@ -68,7 +69,6 @@ class OAuth2Authorization : StandardAuditModel() {
   @Column(length = 4000)
   var activeScopes: String? = null
 
-  /** The client's `project` hint on the authorize request, whatever the user later chose. */
   var projectHint: Long? = null
 
   /**
@@ -111,11 +111,6 @@ class OAuth2Authorization : StandardAuditModel() {
   @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
 
-  /**
-   * The three scope properties are stored as [Scope] *names* and exposed as wire values. A name that no longer
-   * resolves is dropped on read, which narrows the grant rather than failing it or honouring a scope the codebase
-   * no longer defines.
-   */
   var requestedScopeValues: List<String>
     get() = wireValuesOf(requestedScopes)
     set(value) {
@@ -134,15 +129,7 @@ class OAuth2Authorization : StandardAuditModel() {
       activeScopes = storedNamesOf(value)
     }
 
-  /** The active scopes as [Scope], without the detour through their wire spelling. */
-  fun activeScopeSet(): Set<Scope> =
-    OAuth2Constants.splitScopeString(activeScopes).mapNotNull { OAuth2Scopes.findByName(it) }.toSet()
-
-  private fun wireValuesOf(stored: String?): List<String> =
-    OAuth2Constants.splitScopeString(stored).mapNotNull { OAuth2Scopes.findByName(it)?.value }
-
-  private fun storedNamesOf(wireValues: List<String>): String =
-    wireValues.mapNotNull { OAuth2Scopes.find(it)?.name }.joinToString(" ")
+  fun activeScopeSet(): Set<Scope> = storedScopesOf(activeScopes).toSet()
 
   /**
    * Project ids the authorization is bound to, or null for [OAuth2Constants.ALL_PROJECTS].
@@ -159,4 +146,16 @@ class OAuth2Authorization : StandardAuditModel() {
   fun bindProjects(projectIds: Collection<Long>?) {
     projectSelection = projectIds?.joinToString(",") ?: OAuth2Constants.ALL_PROJECTS
   }
+
+  /**
+   * Scopes are stored as [Scope] *names* and exposed as wire values. A name that no longer resolves is dropped here,
+   * which narrows the grant rather than failing it or honouring a scope the codebase no longer defines.
+   */
+  private fun storedScopesOf(stored: String?): List<Scope> =
+    OAuth2Scopes.splitScopeString(stored).mapNotNull { OAuth2Scopes.findByName(it) }
+
+  private fun wireValuesOf(stored: String?): List<String> = storedScopesOf(stored).map { it.value }
+
+  private fun storedNamesOf(wireValues: List<String>): String =
+    wireValues.mapNotNull { OAuth2Scopes.find(it)?.name }.joinToString(" ")
 }

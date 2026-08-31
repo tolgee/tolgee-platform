@@ -26,7 +26,6 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authentication.isCredentialScopedFor
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -314,7 +313,7 @@ class ProjectService(
               permission,
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
-              asScopedCredential = isCredentialScopedFor(userAccount.id),
+              asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccount.id),
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()

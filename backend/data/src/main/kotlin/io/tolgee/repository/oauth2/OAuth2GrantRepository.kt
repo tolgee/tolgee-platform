@@ -1,6 +1,6 @@
 package io.tolgee.repository.oauth2
 
-import io.tolgee.model.oauth2.OAuth2Authorization
+import io.tolgee.model.oauth2.OAuth2Grant
 import jakarta.persistence.LockModeType
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
@@ -13,49 +13,47 @@ import java.util.Date
 
 @Repository
 @Lazy
-interface OAuth2AuthorizationRepository : JpaRepository<OAuth2Authorization, Long> {
-  fun findByConsentState(consentState: String): OAuth2Authorization?
+interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
+  fun findByConsentState(consentState: String): OAuth2Grant?
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT a FROM OAuth2Authorization a WHERE a.consentState = :consentState")
+  @Query("SELECT g FROM OAuth2Grant g WHERE g.consentState = :consentState")
   fun findAndLockByConsentState(
     @Param("consentState") consentState: String,
-  ): OAuth2Authorization?
+  ): OAuth2Grant?
 
-  fun findByAccessTokenHash(accessTokenHash: String): OAuth2Authorization?
-
-  fun countByUserAccountId(userAccountId: Long): Long
+  fun findByAccessTokenHash(accessTokenHash: String): OAuth2Grant?
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT a FROM OAuth2Authorization a WHERE a.codeHash = :codeHash")
+  @Query("SELECT g FROM OAuth2Grant g WHERE g.codeHash = :codeHash")
   fun findAndLockByCodeHash(
     @Param("codeHash") codeHash: String,
-  ): OAuth2Authorization?
+  ): OAuth2Grant?
 
   /** Serializes rotation, so two concurrent refreshes cannot each believe they hold the grant's only token pair. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT a FROM OAuth2Authorization a WHERE a.refreshTokenHash = :hash")
+  @Query("SELECT g FROM OAuth2Grant g WHERE g.refreshTokenHash = :hash")
   fun findAndLockByRefreshTokenHash(
     @Param("hash") hash: String,
-  ): OAuth2Authorization?
+  ): OAuth2Grant?
 
   /** Reaches the grant a just-superseded token belonged to, which is what makes RFC 9700 §4.14.2 replay detectable. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT a FROM OAuth2Authorization a WHERE a.previousRefreshTokenHash = :hash")
+  @Query("SELECT g FROM OAuth2Grant g WHERE g.previousRefreshTokenHash = :hash")
   fun findAndLockByPreviousRefreshTokenHash(
     @Param("hash") hash: String,
-  ): OAuth2Authorization?
+  ): OAuth2Grant?
 
   @Modifying
-  @Query("DELETE FROM OAuth2Authorization a WHERE a.userAccount.id = :userAccountId")
+  @Query("DELETE FROM OAuth2Grant g WHERE g.userAccount.id = :userAccountId")
   fun deleteAllByUserAccountId(userAccountId: Long): Int
 
   /** Removes grants no credential can revive: the newest expiry (refresh, then access, then code) is past the cutoff. */
   @Modifying
   @Query(
     """
-    DELETE FROM OAuth2Authorization a
-    WHERE COALESCE(a.refreshTokenExpiresAt, a.accessTokenExpiresAt, a.codeExpiresAt) < :cutoff
+    DELETE FROM OAuth2Grant g
+    WHERE COALESCE(g.refreshTokenExpiresAt, g.accessTokenExpiresAt, g.codeExpiresAt) < :cutoff
     """,
   )
   fun deleteExpiredBefore(cutoff: Date): Int
@@ -67,9 +65,9 @@ interface OAuth2AuthorizationRepository : JpaRepository<OAuth2Authorization, Lon
   @Modifying
   @Query(
     """
-    DELETE FROM OAuth2Authorization a
-    WHERE a.consentExpiresAt < :now
-      AND a.codeHash IS NULL AND a.accessTokenHash IS NULL AND a.refreshTokenHash IS NULL
+    DELETE FROM OAuth2Grant g
+    WHERE g.consentExpiresAt < :now
+      AND g.codeHash IS NULL AND g.accessTokenHash IS NULL AND g.refreshTokenHash IS NULL
     """,
   )
   fun deleteExpiredPendingConsents(now: Date): Int

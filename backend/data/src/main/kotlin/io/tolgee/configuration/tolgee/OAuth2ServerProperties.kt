@@ -54,21 +54,20 @@ class OAuth2ServerProperties {
 
   @DocProperty(
     description =
-      "How long a spent OAuth authorization is kept after its last credential expired, in days. It holds a used " +
+      "How long a spent OAuth grant is kept after its last credential expired, in days. It holds a used " +
         "code's row so a replayed code is still recognised. A consent the user never completed is not kept for " +
         "this window — it is deleted once its own short deadline passes.",
   )
-  var authorizationRetentionDays: Long = 7
+  var grantRetentionDays: Long = 7
 
   @DocProperty(
     description =
-      "Cron expression for the job that removes spent authorizations past their retention window and consents the " +
+      "Cron expression for the job that removes spent grants past their retention window and consents the " +
         "user never completed. Spring's six-field format (second, minute, hour, day, month, weekday).",
   )
-  var authorizationCleanupCron: String = DEFAULT_AUTHORIZATION_CLEANUP_CRON
+  var grantCleanupCron: String = DEFAULT_GRANT_CLEANUP_CRON
 
   companion object {
-    /** Also spelled into the `@Scheduled` placeholder default in `OAuth2AuthorizationCleanup`, which is what the scheduler actually reads. */
-    const val DEFAULT_AUTHORIZATION_CLEANUP_CRON = "0 0 3 * * *"
+    const val DEFAULT_GRANT_CLEANUP_CRON = "0 0 3 * * *"
   }
 }

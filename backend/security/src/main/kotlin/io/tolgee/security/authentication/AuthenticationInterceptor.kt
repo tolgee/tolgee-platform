@@ -106,14 +106,12 @@ class AuthenticationInterceptor(
     if (annotation.tokenType != AuthTokenType.ANY) return false
     if (isExplicitlyOpenedToOAuth(handler)) return true
     if (isGlobalRoute(handler)) return false
-    return ProjectScopedEndpoints.matches(requestPath(request))
+    return ProjectScopedEndpoints.matches(request)
   }
 
-  private fun isGlobalRoute(handler: HandlerMethod): Boolean =
-    AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java) != null
-
-  // Not servletPath: it is empty when the servlet is mapped at "/", which is how MockMvc and the app both run.
-  private fun requestPath(request: HttpServletRequest): String = request.requestURI.removePrefix(request.contextPath)
+  private fun isGlobalRoute(handler: HandlerMethod): Boolean {
+    return AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java) != null
+  }
 
   private fun isExplicitlyOpenedToOAuth(handler: HandlerMethod): Boolean {
     return AnnotationUtils.getAnnotation(handler.method, AllowOAuthAccess::class.java) != null

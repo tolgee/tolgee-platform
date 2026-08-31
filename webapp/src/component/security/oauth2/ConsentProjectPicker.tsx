@@ -40,16 +40,6 @@ export const ConsentProjectPicker: React.FC<Props> = ({ value, onChange }) => {
         }
       >
         <FormControlLabel
-          value="all"
-          control={<Radio data-cy="oauth2-consent-project-all" />}
-          label={
-            <T
-              keyName="oauth2_consent_all_projects_option"
-              defaultValue="All projects"
-            />
-          }
-        />
-        <FormControlLabel
           value="one"
           control={<Radio data-cy="oauth2-consent-project-one" />}
           label={
@@ -59,15 +49,25 @@ export const ConsentProjectPicker: React.FC<Props> = ({ value, onChange }) => {
             />
           }
         />
-      </RadioGroup>
-      {value.kind === 'one' && (
-        <StyledSelect
-          single
-          label={t('oauth2_consent_project_label', 'Project')}
-          value={value.project ? [value.project] : []}
-          onChange={handleProjectChange}
+        {value.kind === 'one' && (
+          <StyledSelect
+            single
+            label={t('oauth2_consent_project_label', 'Project')}
+            value={value.project ? [value.project] : []}
+            onChange={handleProjectChange}
+          />
+        )}
+        <FormControlLabel
+          value="all"
+          control={<Radio data-cy="oauth2-consent-project-all" />}
+          label={
+            <T
+              keyName="oauth2_consent_all_projects_option"
+              defaultValue="All projects"
+            />
+          }
         />
-      )}
+      </RadioGroup>
     </Box>
   );
 };

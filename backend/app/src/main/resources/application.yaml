@@ -43,9 +43,8 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
 server:
-  # Do not set forward-headers-strategy: Spring would rebuild each request's origin from X-Forwarded-* with no trust
-  # check, letting anyone who can inject X-Forwarded-Host make discovery advertise a token endpoint on their own host.
-  # Behind a reverse proxy set tolgee.back-end-url instead.
+  # Do not set forward-headers-strategy: X-Forwarded-* is untrusted here. Behind a reverse proxy set
+  # tolgee.back-end-url instead.
   compression:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"

@@ -14,18 +14,18 @@ import io.tolgee.hateoas.oauth2.ConsentInfoModel
 import io.tolgee.hateoas.oauth2.OAuth2AuthorizeResultModel
 import io.tolgee.hateoas.oauth2.OAuth2ProjectModel
 import io.tolgee.hateoas.oauth2.OAuth2RedirectModel
-import io.tolgee.model.oauth2.OAuth2Authorization
+import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
-import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
+import io.tolgee.security.oauth2.OAuth2Scopes
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
-import io.tolgee.util.orNullIfBlank
+import io.tolgee.util.nullIfBlank
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -57,7 +57,7 @@ class OAuth2FlowController(
   private val issuerResolver: OAuth2IssuerResolver,
 ) : IController {
   @PostMapping("/authorize")
-  @Operation(summary = "Record the pending authorization the consent screen will act on")
+  @Operation(summary = "Record the pending grant the consent screen will act on")
   fun authorize(
     @RequestBody @Valid request: OAuth2AuthorizeRequest,
   ): OAuth2AuthorizeResultModel {
@@ -69,28 +69,28 @@ class OAuth2FlowController(
 
     val params =
       OAuth2AuthorizationService.AuthorizeParams(
-        responseType = request.responseType.orNullIfBlank(),
-        scope = request.scope.orNullIfBlank(),
-        state = request.state.orNullIfBlank(),
-        codeChallenge = request.codeChallenge.orNullIfBlank(),
-        codeChallengeMethod = request.codeChallengeMethod.orNullIfBlank(),
+        responseType = request.responseType.nullIfBlank,
+        scope = request.scope.nullIfBlank,
+        state = request.state.nullIfBlank,
+        codeChallenge = request.codeChallenge.nullIfBlank,
+        codeChallengeMethod = request.codeChallengeMethod.nullIfBlank,
       )
-    val authorization =
+    val grant =
       try {
         authorizationService.startAuthorization(
           userId,
           client,
           request.redirectUri,
           params,
-          request.project.orNullIfBlank(),
+          request.project.nullIfBlank,
         )
       } catch (e: OAuth2Error) {
         return OAuth2AuthorizeResultModel(
           consentState = null,
-          redirectUrl = OAuth2Redirects.error(request.redirectUri, e, issuerResolver.issuerUrl, request.state),
+          redirectUrl = OAuth2Redirects.error(request.redirectUri, e, issuerResolver.issuerUrl, params.state),
         )
       }
-    return OAuth2AuthorizeResultModel(consentState = authorization.consentState, redirectUrl = null)
+    return OAuth2AuthorizeResultModel(consentState = grant.consentState, redirectUrl = null)
   }
 
   @GetMapping("/consent-info")
@@ -98,10 +98,10 @@ class OAuth2FlowController(
   fun consentInfo(
     @RequestParam state: String,
   ): ConsentInfoModel {
-    val authorization = ownPendingAuthorization(state)
-    val client = clientRegistry.find(authorization.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
-    val scopes = authorization.requestedScopeValues
-    val requestedProjectId = authorization.projectHint
+    val grant = ownPendingGrant(state)
+    val client = clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val scopes = grant.requestedScopeValues
+    val requestedProjectId = grant.projectHint
     return ConsentInfoModel(
       appName = client.name,
       scopes = scopes,
@@ -116,21 +116,13 @@ class OAuth2FlowController(
    * project the token is bound to land together, so a grant can never exist with one and not the other.
    */
   @PostMapping("/consent")
-  @Operation(summary = "Approve (or, with no scopes, deny) the pending authorization")
+  @Operation(summary = "Approve (or, with no scopes, deny) the pending grant")
   fun consent(
     @RequestBody @Valid request: OAuth2ConsentRequest,
   ): OAuth2RedirectModel {
-    val approved = request.scopes.orEmpty().flatMap { OAuth2Constants.splitScopeString(it) }
-    // Resolved before the service call, because it needs the caller's live project permissions and not the lock.
-    val projectIds = if (approved.isEmpty()) null else requireAccessibleSelection(requireProjectSelection(request))
-
-    val resolved =
-      authorizationService.resolveConsent(
-        request.state,
-        authenticationFacade.authenticatedUser.id,
-        approved,
-        projectIds,
-      )
+    val approved = request.scopes.orEmpty().flatMap { OAuth2Scopes.splitScopeString(it) }
+    val userId = authenticationFacade.authenticatedUser.id
+    val resolved = resolveDecision(request, userId, approved)
     val target =
       when (resolved) {
         is OAuth2AuthorizationService.ResolvedConsent.Granted ->
@@ -141,21 +133,29 @@ class OAuth2FlowController(
     return OAuth2RedirectModel(target)
   }
 
-  // Only the caller's own pending authorization: `state` travels in a URL, so another user's must never resolve, and
-  // a consented one must not resolve at all.
-  private fun ownPendingAuthorization(state: String): OAuth2Authorization {
-    val authorization =
+  private fun ownPendingGrant(state: String): OAuth2Grant {
+    val grant =
       authorizationService.findPendingByConsentState(state) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
-    if (authorization.userAccount.id != authenticationFacade.authenticatedUser.id) {
+    if (grant.userAccount.id != authenticationFacade.authenticatedUser.id) {
       throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
     }
-    return authorization
+    return grant
   }
 
   private fun hintedProject(projectId: Long): OAuth2ProjectModel? =
     accessibleProject(projectId)?.let { OAuth2ProjectModel(id = it.id, name = it.name) }
 
-  /** The project the consent binds to, or null for all of them. A request that names no project scope is refused. */
+  private fun resolveDecision(
+    request: OAuth2ConsentRequest,
+    userId: Long,
+    approved: List<String>,
+  ): OAuth2AuthorizationService.ResolvedConsent {
+    if (approved.isEmpty()) return authorizationService.denyConsent(request.state, userId)
+    // Resolved before the service call, because it needs the caller's live project permissions and not the lock.
+    val projectIds = requireAccessibleSelection(requireProjectSelection(request))
+    return authorizationService.approveConsent(request.state, userId, approved, projectIds)
+  }
+
   private fun requireProjectSelection(request: OAuth2ConsentRequest): Long? {
     if (request.projectScope == null) throw BadRequestException(Message.OAUTH_PROJECT_SCOPE_REQUIRED)
     if (request.projectScope == OAuth2ConsentRequest.ProjectScope.ALL_PROJECTS) return null

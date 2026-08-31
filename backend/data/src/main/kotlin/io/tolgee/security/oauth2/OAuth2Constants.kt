@@ -25,13 +25,12 @@ object OAuth2Constants {
 
   const val AUTHORIZE_PATH = "/oauth2/authorize"
   const val TOKEN_PATH = "/oauth2/token"
+  const val REVOKE_PATH = "/oauth2/revoke"
 
-  /** SPA route the authorization endpoint hands the browser to. */
   const val CONSENT_PAGE_PATH = "/oauth2/consent"
+
+  const val AUTHORIZATION_SERVER_METADATA_PATH = "/.well-known/oauth-authorization-server"
 
   const val MCP_RESOURCE_PATH = "/mcp/developer"
   const val PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource$MCP_RESOURCE_PATH"
-
-  /** RFC 6749 §3.3: scope is a space-delimited, order-independent list. */
-  fun splitScopeString(raw: String?): List<String> = raw.orEmpty().split(" ").filter { it.isNotBlank() }
 }

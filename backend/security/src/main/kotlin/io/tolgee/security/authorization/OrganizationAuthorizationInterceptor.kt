@@ -56,18 +56,18 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    if (authenticationFacade.isOAuthTokenAuth) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
+
     val userId = authenticationFacade.authenticatedUser.id
+
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
         // In both cases, there is no authorization to perform, and we simply continue.
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
-
-    // A token scoped to project capabilities must not act at the organization level via the user's org role.
-    if (authenticationFacade.isOAuthTokenAuth) {
-      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
-    }
 
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)

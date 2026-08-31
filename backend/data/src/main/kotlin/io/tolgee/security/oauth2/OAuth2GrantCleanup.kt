@@ -25,20 +25,20 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class OAuth2AuthorizationCleanup(
+class OAuth2GrantCleanup(
   private val authorizationService: OAuth2AuthorizationService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @Scheduled(
     cron =
-      "\${tolgee.oauth2.authorization-cleanup-cron:" + OAuth2ServerProperties.DEFAULT_AUTHORIZATION_CLEANUP_CRON + "}",
+      "\${tolgee.oauth2.grant-cleanup-cron:${OAuth2ServerProperties.DEFAULT_GRANT_CLEANUP_CRON}}",
   )
-  fun cleanUpExpiredAuthorizations() {
-    val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.authorizationRetentionDays))
+  fun cleanUpExpiredGrants() {
+    val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.grantRetentionDays))
     val deleted = authorizationService.deleteExpiredBefore(cutoff) + authorizationService.deleteExpiredPendingConsents()
     if (deleted > 0) {
-      logger.info("OAuth2 authorization cleanup removed {} expired authorization(s)", deleted)
+      logger.info("OAuth2 grant cleanup removed {} expired grant(s)", deleted)
     }
   }
 }

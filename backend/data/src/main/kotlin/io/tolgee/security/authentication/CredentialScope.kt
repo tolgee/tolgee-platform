@@ -21,11 +21,11 @@ import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import org.springframework.security.core.context.SecurityContextHolder
 
-/** A scoped credential constrains only its own holder, so a question about anyone else is answered in full. */
-fun isCredentialScopedFor(userAccountId: Long): Boolean =
-  isScopedCredential() && currentAuthentication()?.principal?.id == userAccountId
+fun isScopedCredentialInContextFor(userAccountId: Long): Boolean =
+  isScopedCredentialInContext() && currentAuthentication()?.principal?.id == userAccountId
 
-internal fun isScopedCredential(): Boolean = isProjectApiKeyCredential() || currentOAuthTokenCredentials() != null
+internal fun isScopedCredentialInContext(): Boolean =
+  isProjectApiKeyCredential() || currentOAuthTokenCredentials() != null
 
 internal fun isProjectApiKeyCredential(): Boolean = currentAuthentication()?.credentials is ApiKeyDto
 

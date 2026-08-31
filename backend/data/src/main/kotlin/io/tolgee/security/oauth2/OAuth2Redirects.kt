@@ -19,7 +19,6 @@ package io.tolgee.security.oauth2
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-/** The redirect URLs the authorization endpoint answers a client with. */
 object OAuth2Redirects {
   /** RFC 6749 §4.1.2.1 error response. Carries the RFC 9207 `iss` too — §2 covers error responses. */
   fun error(
@@ -49,16 +48,6 @@ object OAuth2Redirects {
     return appendQuery(redirectUri, listOf("code" to code, "iss" to issuer, "state" to state))
   }
 
-  /**
-   * RFC 3986 percent-encoding: a space becomes `%20`, never a bare `+`.
-   *
-   * `+` reads as a space to a form decoder and as a literal plus to a strict percent decoder, and RFC 6749 does not
-   * say which a client uses. A `state` that comes back byte-different is one the client must treat as an attack
-   * (§10.12), so the encoding has to be unambiguous to both.
-   */
-  fun encodeQueryValue(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20")
-
-  /** Appends [params] to [url], skipping the null ones, encoding each value with [encodeQueryValue]. */
   fun appendQuery(
     url: String,
     params: List<Pair<String, String?>>,
@@ -68,4 +57,13 @@ object OAuth2Redirects {
     val separator = if ("?" in url) "&" else "?"
     return url + separator + query.joinToString("&")
   }
+
+  /**
+   * RFC 3986 percent-encoding: a space becomes `%20`, never a bare `+`.
+   *
+   * `+` reads as a space to a form decoder and as a literal plus to a strict percent decoder, and RFC 6749 does not
+   * say which a client uses. A `state` that comes back byte-different is one the client must treat as an attack
+   * (§10.12), so the encoding has to be unambiguous to both.
+   */
+  fun encodeQueryValue(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20")
 }

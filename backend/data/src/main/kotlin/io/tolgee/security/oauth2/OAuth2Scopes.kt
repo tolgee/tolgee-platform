@@ -28,14 +28,14 @@ object OAuth2Scopes {
   private val BY_VALUE = Scope.entries.associateBy { it.value }
   private val BY_NAME = Scope.entries.associateBy { it.name }
 
+  /** RFC 6749 §3.3: scope is a space-delimited, order-independent list. */
+  fun splitScopeString(raw: String?): List<String> = raw.orEmpty().split(" ").filter { it.isNotBlank() }
+
   fun isSupported(scope: String): Boolean = scope in BY_VALUE
 
-  /** Null for a wire value that names no scope. */
   fun find(scope: String): Scope? = BY_VALUE[scope]
 
   /**
-   * Null for a stored name that no longer names a real scope.
-   *
    * Grants persist [Scope.name], not [Scope.value], for the same reason `ApiKey.scopesEnum` does: `value` is the wire
    * spelling and is a `var`, so renaming it for API cosmetics would silently narrow every live grant that held it.
    */

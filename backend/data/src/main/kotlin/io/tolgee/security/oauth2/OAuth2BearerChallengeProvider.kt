@@ -22,14 +22,11 @@ import org.springframework.stereotype.Component
 
 /**
  * The RFC 6750 §3 `WWW-Authenticate` challenge a protected resource owes a caller it refused.
- *
- * It is also how an RFC 9728 client discovers this deployment's authorization server: the `resource_metadata`
- * parameter points at the protected-resource document, which is the only machine-readable route from a 401 to
- * `/oauth2/authorize`.
  */
 @Component
 class OAuth2BearerChallengeProvider(
   private val issuerResolver: OAuth2IssuerResolver,
+  private val clientRegistry: OAuth2ClientRegistry,
 ) {
   fun challengeFor(
     request: HttpServletRequest,
@@ -66,6 +63,11 @@ class OAuth2BearerChallengeProvider(
   private fun resourceMetadataUrl(request: HttpServletRequest): String? {
     val path = request.requestURI.removePrefix(request.contextPath)
     if (!path.startsWith(OAuth2Constants.MCP_RESOURCE_PATH)) return null
-    return issuerResolver.issuerUrl + OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH
+    // Pointing a discovering client at a document this deployment does not publish is worse than no pointer at all.
+    if (!clientRegistry.isEnabled) return null
+    // This runs from inside the exception handler. A misconfigured issuer throws, and letting that escape would
+    // replace every handled error on the MCP path with a 500 raised while rendering it.
+    val issuer = runCatching { issuerResolver.issuerUrl }.getOrNull() ?: return null
+    return issuer + OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH
   }
 }

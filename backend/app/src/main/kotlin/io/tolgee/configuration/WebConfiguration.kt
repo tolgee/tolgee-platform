@@ -60,8 +60,7 @@ class WebConfiguration(
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
-    // OAuth 2.1 §3.1: "CORS MUST NOT be supported at the Authorization Endpoint" — the client never calls it, it
-    // redirects the user agent there. Registered first so it wins over the catch-all below.
+    // OAuth 2.1 §3.1 forbids CORS here; see OAuth2AuthorizationServerController.
     registry.addMapping(OAuth2Constants.AUTHORIZE_PATH).allowedOrigins()
     registry
       .addMapping("/**")

@@ -4580,13 +4580,13 @@ export interface components {
     };
     OAuth2AuthorizeRequest: {
       /** @description Registered client id from the client's authorize request */
-      client_id: string;
-      code_challenge?: string;
-      code_challenge_method?: string;
+      clientId: string;
+      codeChallenge?: string;
+      codeChallengeMethod?: string;
       project?: string;
       /** @description Redirect URI from the client's authorize request; must be registered for the client */
-      redirect_uri: string;
-      response_type?: string;
+      redirectUri: string;
+      responseType?: string;
       scope?: string;
       state?: string;
     };

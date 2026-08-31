@@ -8,13 +8,13 @@ export const authorizeRequestFromSearch = (search: string) => {
   const params = new URLSearchParams(search);
   const value = (name: string) => params.get(name) ?? undefined;
   return {
-    client_id: params.get('client_id') ?? '',
-    redirect_uri: params.get('redirect_uri') ?? '',
-    response_type: value('response_type'),
+    clientId: params.get('client_id') ?? '',
+    redirectUri: params.get('redirect_uri') ?? '',
+    responseType: value('response_type'),
     scope: value('scope'),
     state: value('state'),
-    code_challenge: value('code_challenge'),
-    code_challenge_method: value('code_challenge_method'),
+    codeChallenge: value('code_challenge'),
+    codeChallengeMethod: value('code_challenge_method'),
     project: value('project'),
   };
 };

@@ -17,8 +17,9 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.util.nullIfBlank
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.net.URI
 
 /**
@@ -31,20 +32,22 @@ import java.net.URI
 @Component
 class OAuth2IssuerResolver(
   private val tolgeeProperties: TolgeeProperties,
+  private val clientRegistry: OAuth2ClientRegistry,
 ) {
-  /**
-   * The issuer as advertised inside a request, falling back to the origin the container saw — not `X-Forwarded-*`,
-   * which is untrusted, so behind a reverse proxy `tolgee.back-end-url` has to be set.
-   */
+  @PostConstruct
+  fun requireConfiguredIssuer() {
+    if (clientRegistry.isEnabled) issuerUrl
+  }
+
   val issuerUrl: String
     get() =
-      configuredBaseUrl ?: ServletUriComponentsBuilder
-        .fromCurrentContextPath()
-        .build()
-        .toUriString()
-        .trimEnd('/')
+      checkNotNull(configuredBaseUrl) {
+        "tolgee.back-end-url (or tolgee.front-end-url) must be set when a tolgee.oauth2 client is configured: the " +
+          "issuer is published in every discovery document and on every authorization response, and it is never " +
+          "derived from the request"
+      }
 
-  val configuredBaseUrl: String?
+  private val configuredBaseUrl: String?
     get() = tolgeeProperties.backEndUrl.normalized() ?: tolgeeProperties.frontEndUrl.normalized()
 
   /**
@@ -53,28 +56,26 @@ class OAuth2IssuerResolver(
    * two different servers.
    */
   private fun String?.normalized(): String? {
-    val trimmed = this?.takeIf { it.isNotBlank() }?.trimEnd('/') ?: return null
+    val trimmed = this.nullIfBlank?.trimEnd('/') ?: return null
     requireOrigin(trimmed)
     return trimmed
   }
 
   /**
-   * RFC 8414 §3 puts the metadata document at `https://host/.well-known/oauth-authorization-server<issuer path>`,
-   * which Tolgee does not serve; a path-prefixed issuer would also make every endpoint URL it publishes unreachable.
-   * Failing here names the misconfigured property instead of leaving the flow to dead-end in the browser.
+   * RFC 8414 §2 defines the issuer as a URL with no query or fragment, and §3 puts the metadata document at
+   * `https://host/.well-known/oauth-authorization-server<issuer path>`, which Tolgee does not serve; any of the three
+   * would also make every endpoint URL the issuer is concatenated into unreachable.
    */
   private fun requireOrigin(url: String) {
-    // A value that does not parse must not slip through: getOrNull() would make `path` null, which reads as "no path"
-    // and would pass the check below, leaving the unparseable URL to 500 later wherever it is concatenated.
     val parsed =
       runCatching { URI(url) }.getOrNull()
         ?: throw IllegalStateException(
           "tolgee.back-end-url (or tolgee.front-end-url) is not a valid URL: $url",
         )
-    val path = parsed.path
-    if (!path.isNullOrEmpty()) {
+    if (!parsed.path.isNullOrEmpty() || parsed.query != null || parsed.fragment != null) {
       throw IllegalStateException(
-        "tolgee.back-end-url (or tolgee.front-end-url) must be a bare origin with no path for OAuth2 to work, got: $url",
+        "tolgee.back-end-url (or tolgee.front-end-url) must be a bare origin with no path, query or fragment " +
+          "for OAuth2 to work, got: $url",
       )
     }
   }

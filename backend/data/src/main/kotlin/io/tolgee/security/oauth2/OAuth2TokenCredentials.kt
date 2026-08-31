@@ -20,7 +20,6 @@ import io.tolgee.model.enums.Scope
 
 data class OAuth2TokenCredentials(
   val scopes: Set<Scope>,
-  /** Project ids the token is bound to, or null for the "all projects" sentinel (not narrowed to any subset). */
   val projectIds: Set<Long>?,
 ) {
   fun coversProject(projectId: Long): Boolean {

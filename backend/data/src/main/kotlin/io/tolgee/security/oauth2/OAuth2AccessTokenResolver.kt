@@ -22,9 +22,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.enums.Scope
-import io.tolgee.model.oauth2.OAuth2Authorization
-import io.tolgee.repository.oauth2.OAuth2AuthorizationRepository
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.UserAccountService
@@ -32,7 +30,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class OAuth2AccessTokenResolver(
-  private val repository: OAuth2AuthorizationRepository,
+  private val repository: OAuth2GrantRepository,
   private val clientRegistry: OAuth2ClientRegistry,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
@@ -44,27 +42,27 @@ class OAuth2AccessTokenResolver(
     if (!token.startsWith(OAUTH_ACCESS_TOKEN_PREFIX)) return null
 
     val hash = keyGenerator.hash(token.removePrefix(OAUTH_ACCESS_TOKEN_PREFIX))
-    val authorization =
+    val grant =
       repository.findByAccessTokenHash(hash) ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
-    val expiresAt = authorization.accessTokenExpiresAt ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    val expiresAt = grant.accessTokenExpiresAt ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     if (!expiresAt.after(currentDateProvider.date)) {
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
     // A grant outlives the client it was issued to, so this is checked per request rather than at issue time.
-    if (!clientRegistry.isStillAuthorized(authorization.clientId)) {
+    if (!clientRegistry.isStillAuthorized(grant.clientId)) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 
     val user =
-      userAccountService.findDto(authorization.userAccount.id)
+      userAccountService.findDto(grant.userAccount.id)
         ?: throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
-    if (user.isTokenInvalidated(authorization.accessTokenIssuedAt?.toInstant())) {
+    if (user.isTokenInvalidated(grant.accessTokenIssuedAt?.toInstant())) {
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
     return TolgeeAuthentication(
-      credentials = OAuth2TokenCredentials(authorization.activeScopeSet(), authorization.boundProjectIds()),
+      credentials = OAuth2TokenCredentials(grant.activeScopeSet(), grant.boundProjectIds()),
       deviceId = null,
       userAccount = user,
       actingAsUserAccount = null,

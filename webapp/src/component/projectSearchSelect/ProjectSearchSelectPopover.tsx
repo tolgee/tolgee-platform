@@ -196,7 +196,7 @@ export const ProjectSearchSelectPopover: React.FC<
                     {...props}
                     selected={selected}
                     data-cy-project-name={option.name}
-                    data-cy="user-switch-item"
+                    data-cy="project-search-select-item"
                   >
                     {!single && (
                       <Checkbox
@@ -224,7 +224,6 @@ export const ProjectSearchSelectPopover: React.FC<
               );
             }}
             onChange={(_, newValue) => {
-              // In single mode the Autocomplete hands back one option (or null); otherwise the whole array.
               const value = single
                 ? ([newValue].filter(Boolean) as Project[])
                 : (newValue as Project[]);

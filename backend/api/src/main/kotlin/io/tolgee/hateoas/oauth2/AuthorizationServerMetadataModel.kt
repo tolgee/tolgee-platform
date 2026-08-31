@@ -23,4 +23,9 @@ data class AuthorizationServerMetadataModel(
   /** RFC 9207 §3: tells a client the `iss` parameter will be on every authorization response. */
   @get:JsonProperty("authorization_response_iss_parameter_supported")
   val authorizationResponseIssParameterSupported: Boolean,
+  @get:JsonProperty("revocation_endpoint")
+  val revocationEndpoint: String,
+  /** RFC 8414 §2: omitting this would default the endpoint to `client_secret_basic`, and every client here is public. */
+  @get:JsonProperty("revocation_endpoint_auth_methods_supported")
+  val revocationEndpointAuthMethodsSupported: List<String>,
 )

@@ -16,7 +16,9 @@
 
 package io.tolgee.security.authorization
 
-import org.springframework.util.AntPathMatcher
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.handler.MappedInterceptor
 
 /**
  * The paths [ProjectAuthorizationInterceptor] is registered for, and therefore the only ones where a credential's
@@ -26,7 +28,8 @@ import org.springframework.util.AntPathMatcher
 object ProjectScopedEndpoints {
   val PATTERNS = arrayOf("/v2/projects/**", "/api/project/**", "/api/repository/**")
 
-  private val matcher = AntPathMatcher()
+  // Must stay the same matcher WebSecurityConfig registers these patterns with.
+  private val mappedPatterns = MappedInterceptor(PATTERNS, null, object : HandlerInterceptor {})
 
-  fun matches(path: String): Boolean = PATTERNS.any { matcher.match(it, path) }
+  fun matches(request: HttpServletRequest): Boolean = mappedPatterns.matches(request)
 }

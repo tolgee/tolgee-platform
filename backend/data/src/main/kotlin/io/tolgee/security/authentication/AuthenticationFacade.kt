@@ -108,13 +108,12 @@ class AuthenticationFacade(
   val oauthTokenCredentials: OAuth2TokenCredentials?
     get() = currentOAuthTokenCredentials()
 
-  /**
-   * Derived from this facade's own state, not from [io.tolgee.security.authentication.isScopedCredential], so that a
-   * caller holding a facade (a test's mock included) cannot see it disagree with [isProjectApiKeyAuth] and
-   * [isOAuthTokenAuth]. The static form exists for the permission layer, which has no facade to hand.
-   */
   val isScopedCredential: Boolean
     get() = isProjectApiKeyAuth || isOAuthTokenAuth
+
+  /** [isScopedCredentialInContextFor] is the same predicate for callers that cannot take this bean - see
+   * PermissionService, which this class's own dependencies would make cyclic. */
+  fun isScopedCredentialFor(userAccountId: Long): Boolean = isScopedCredentialInContextFor(userAccountId)
 
   /** An elevation granted to the user, so a scoped credential must carry the real scope instead. */
   val canUseAuthorSelfAccess: Boolean

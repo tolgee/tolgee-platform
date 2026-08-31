@@ -22,7 +22,6 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authentication.isCredentialScopedFor
 import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
@@ -137,12 +136,9 @@ class SecurityService(
 
     activeApiKey?.let { scopes = scopes.intersect(Scope.expand(it.scopes).toSet()) }
 
-    authenticationFacade.oauthTokenCredentials?.let { credentials ->
-      if (!credentials.coversProject(projectId)) return emptySet()
-      scopes = scopes.intersect(Scope.expand(credentials.scopes).toSet())
-    }
-
-    return scopes
+    val credentials = authenticationFacade.oauthTokenCredentials ?: return scopes
+    if (!credentials.coversProject(projectId)) return emptySet()
+    return scopes.intersect(Scope.expand(credentials.scopes).toSet())
   }
 
   /**
@@ -236,7 +232,7 @@ class SecurityService(
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
   ) {
-    val asScopedCredential = isCredentialScopedFor(userAccountDto.id)
+    val asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountDto.id)
     if (!asScopedCredential && userAccountDto.isAdmin()) {
       return
     }
