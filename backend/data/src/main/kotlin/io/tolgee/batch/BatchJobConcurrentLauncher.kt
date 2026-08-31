@@ -41,13 +41,7 @@ class BatchJobConcurrentLauncher(
   /**
    * launch id -> Pair(BatchJobDto, Job)
    *
-   * Job is the result of a launch method executing the execution in a separate coroutine.
-   *
-   * The key must stay unique per launch, never the chunk execution id: the queue can hand out
-   * the same execution again while its previous coroutine is still running (the Redis queue
-   * re-delivers items), and a shared key drops that coroutine from the map. A dropped coroutine
-   * can no longer be cancelled, so it keeps its pessimistic row lock forever and job
-   * cancellation times out.
+   * Job is the result of a launch method executing the execution in a separate coroutine
    */
   val runningJobs: ConcurrentHashMap<Long, Pair<BatchJobDto, Job>> = ConcurrentHashMap()
 
@@ -252,7 +246,8 @@ class BatchJobConcurrentLauncher(
     job.invokeOnCompletion {
       onJobCompleted(launchId, executionItem, batchJobDto.jobCharacter)
     }
-    // Starting only after the registration above keeps a concurrent cancel from missing it.
+    // The coroutine must not run before it is in runningJobs: a cancel or pause scanning the map
+    // while it runs unregistered cannot stop it, and it then blocks holding its execution row lock.
     job.start()
     logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: ${runningJobs.size}")
     return true
