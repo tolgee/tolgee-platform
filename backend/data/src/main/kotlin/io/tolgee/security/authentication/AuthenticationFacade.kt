@@ -111,9 +111,8 @@ class AuthenticationFacade(
   val isScopedCredential: Boolean
     get() = isProjectApiKeyAuth || isOAuthTokenAuth
 
-  /** [isScopedCredentialInContextFor] is the same predicate for callers that cannot take this bean - see
-   * PermissionService, which this class's own dependencies would make cyclic. */
-  fun isScopedCredentialFor(userAccountId: Long): Boolean = isScopedCredentialInContextFor(userAccountId)
+  fun isScopedCredentialFor(userAccountId: Long): Boolean =
+    isScopedCredential && authenticatedUserOrNull?.id == userAccountId
 
   /** An elevation granted to the user, so a scoped credential must carry the real scope instead. */
   val canUseAuthorSelfAccess: Boolean

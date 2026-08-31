@@ -24,7 +24,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
-import io.tolgee.security.authentication.isScopedCredentialInContextFor
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -49,6 +49,8 @@ class PermissionService(
   private val userPreferencesService: UserPreferencesService,
   @Lazy
   private val applicationContext: ApplicationContext,
+  @Lazy
+  private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
 ) {
   @set:Autowired
@@ -122,7 +124,7 @@ class PermissionService(
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
         isProjectPublic = project.public,
-        asScopedCredential = isScopedCredentialInContextFor(userAccountId),
+        asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountId),
       )
 
     return ProjectPermissionData(

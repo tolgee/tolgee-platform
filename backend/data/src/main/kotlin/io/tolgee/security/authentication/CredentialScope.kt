@@ -21,12 +21,6 @@ import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import org.springframework.security.core.context.SecurityContextHolder
 
-fun isScopedCredentialInContextFor(userAccountId: Long): Boolean =
-  isScopedCredentialInContext() && currentAuthentication()?.principal?.id == userAccountId
-
-internal fun isScopedCredentialInContext(): Boolean =
-  isProjectApiKeyCredential() || currentOAuthTokenCredentials() != null
-
 internal fun isProjectApiKeyCredential(): Boolean = currentAuthentication()?.credentials is ApiKeyDto
 
 internal fun isPersonalAccessTokenCredential(): Boolean = currentAuthentication()?.credentials is PatDto

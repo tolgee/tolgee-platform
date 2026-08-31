@@ -29,6 +29,8 @@ import org.mockito.kotlin.mock
 import org.springframework.security.core.context.SecurityContextHolder
 
 class CredentialScopeTest {
+  private val facade = AuthenticationFacade(mock(), mock(), mock())
+
   @AfterEach
   fun clear() {
     SecurityContextHolder.clearContext()
@@ -36,39 +38,39 @@ class CredentialScopeTest {
 
   @Test
   fun `a thread with no security context - batch, @Async - is not scoped`() {
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
+    facade.isScopedCredentialFor(USER_ID).assert.isFalse()
   }
 
   @Test
   fun `a webapp JWT is the user acting directly`() {
     authenticate(credentials = null)
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
+    facade.isScopedCredentialFor(USER_ID).assert.isFalse()
   }
 
   @Test
   fun `a PAT carries the user's full authority`() {
     authenticate(credentials = mock<PatDto>())
-    isScopedCredentialInContextFor(USER_ID).assert.isFalse()
+    facade.isScopedCredentialFor(USER_ID).assert.isFalse()
   }
 
   @Test
   fun `a project API key is scoped`() {
     authenticate(credentials = mock<ApiKeyDto>())
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
+    facade.isScopedCredentialFor(USER_ID).assert.isTrue()
   }
 
   @Test
   fun `an OAuth token is scoped`() {
     authenticate(credentials = OAuth2TokenCredentials(setOf(Scope.TRANSLATIONS_VIEW), null))
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
+    facade.isScopedCredentialFor(USER_ID).assert.isTrue()
   }
 
   @Test
   fun `a scoped credential narrows only its own holder`() {
     authenticate(credentials = mock<ApiKeyDto>())
 
-    isScopedCredentialInContextFor(USER_ID).assert.isTrue()
-    isScopedCredentialInContextFor(USER_ID + 1).assert.isFalse()
+    facade.isScopedCredentialFor(USER_ID).assert.isTrue()
+    facade.isScopedCredentialFor(USER_ID + 1).assert.isFalse()
   }
 
   private fun authenticate(credentials: Any?) {
