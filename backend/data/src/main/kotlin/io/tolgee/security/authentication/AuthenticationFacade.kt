@@ -96,10 +96,28 @@ class AuthenticationFacade(
     get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth
 
   val isProjectApiKeyAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
+    get() = credentialsOrNull is ApiKeyDto
 
   val isPersonalAccessTokenAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is PatDto else false
+    get() = credentialsOrNull is PatDto
+
+  val scopedCredential: ScopedCredential?
+    get() = credentialsOrNull as? ScopedCredential
+
+  val isScopedCredential: Boolean
+    get() = scopedCredential != null
+
+  fun isScopedCredentialFor(userAccountId: Long): Boolean =
+    isScopedCredential && authenticatedUserOrNull?.id == userAccountId
+
+  /** An elevation granted to the user, so a scoped credential must carry the real scope instead. */
+  val canUseAuthorSelfAccess: Boolean
+    get() = !isScopedCredential
+
+  fun isAuthorSelfAccess(authorId: Long?): Boolean {
+    if (!canUseAuthorSelfAccess) return false
+    return authorId != null && authorId == authenticatedUser.id
+  }
 
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
@@ -125,5 +143,11 @@ class AuthenticationFacade(
 
       // null safety: `.get` returns non-null or throws. non-null assert is safe here.
       return authentication.personalAccessTokenEntity!!
+    }
+
+  private val credentialsOrNull: Any?
+    get() {
+      if (!isAuthenticated) return null
+      return authentication.credentials
     }
 }

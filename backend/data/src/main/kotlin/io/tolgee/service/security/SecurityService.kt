@@ -85,10 +85,9 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
-    if (
-      getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !activeUser.isSupporterOrAdmin()
-    ) {
+    val hasNoProjectPermission = getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty()
+    val mayFallBackOnAdminReach = !authenticationFacade.isScopedCredential && activeUser.isSupporterOrAdmin()
+    if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
   }
@@ -201,12 +200,13 @@ class SecurityService(
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
   ) {
-    if (userAccountDto.isAdmin()) {
+    val asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountDto.id)
+    if (!asScopedCredential && userAccountDto.isAdmin()) {
       return
     }
 
     val isReadonlyAccess = requiredScope.isReadOnly()
-    if (isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
+    if (!asScopedCredential && isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
       return
     }
 
@@ -234,7 +234,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -247,7 +247,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -270,7 +270,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
@@ -282,7 +282,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestManagePermitted(*languageIds.toLongArray()) }
@@ -294,7 +294,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
@@ -329,7 +329,7 @@ class SecurityService(
     passIfAnyPermissionCheckSucceeds(
       {
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-        runIfUserNotServerAdmin {
+        runUnlessElevatedAsServerAdmin {
           checkLanguagePermission(
             projectId,
           ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
@@ -366,7 +366,7 @@ class SecurityService(
   ) {
     try {
       checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-      runIfUserNotServerAdmin {
+      runUnlessElevatedAsServerAdmin {
         checkLanguagePermission(
           projectId,
         ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
@@ -532,9 +532,6 @@ class SecurityService(
   }
 
   fun checkScreenshotsUploadPermission(projectId: Long) {
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.projectApiKey)
-    }
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
   }
 
@@ -672,14 +669,14 @@ class SecurityService(
     }
   }
 
-  private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
-    if (!activeUser.isAdmin()) {
+  private fun runUnlessElevatedAsServerAdmin(runnable: () -> Unit) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
-  private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
-    if (!activeUser.isSupporterOrAdmin()) {
+  private fun runUnlessElevatedAsSupporterOrAdmin(runnable: () -> Unit) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }

@@ -111,6 +111,8 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
+    Mockito.`when`(authenticationFacade.isScopedCredential).thenReturn(false)
+    Mockito.`when`(authenticationFacade.scopedCredential).thenReturn(null)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
     Mockito.`when`(authenticationFacade.isReadOnly).thenCallRealMethod()
@@ -206,6 +208,8 @@ class ProjectAuthorizationInterceptorTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
 
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isScopedCredential).thenReturn(true)
+    Mockito.`when`(authenticationFacade.scopedCredential).thenReturn(apiKey)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
@@ -236,6 +240,8 @@ class ProjectAuthorizationInterceptorTest {
   fun `ensures API key works only for the project it is bound to`() {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isScopedCredential).thenReturn(true)
+    Mockito.`when`(authenticationFacade.scopedCredential).thenReturn(apiKey)
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
 
@@ -271,6 +277,8 @@ class ProjectAuthorizationInterceptorTest {
   fun `permissions work as intended when using implicit project id`() {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isScopedCredential).thenReturn(true)
+    Mockito.`when`(authenticationFacade.scopedCredential).thenReturn(apiKey)
     Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk

@@ -18,6 +18,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.ScopedCredential
 import java.io.Serializable
 import java.util.Date
 
@@ -27,8 +28,9 @@ data class ApiKeyDto(
   val expiresAt: Date?,
   val projectId: Long,
   val userAccountId: Long,
-  val scopes: Set<Scope>,
-) : Serializable {
+  override val scopes: Set<Scope>,
+) : Serializable,
+  ScopedCredential {
   companion object {
     fun fromEntity(apiKey: ApiKey): ApiKeyDto {
       return ApiKeyDto(

@@ -23,6 +23,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = null,
         userRole = UserAccount.Role.USER,
         isProjectPublic = true,
+        asScopedCredential = false,
       )
     assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.COMMUNITY)
     assertThat(computed.expandedScopes)
@@ -38,6 +39,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = null,
         userRole = UserAccount.Role.USER,
         isProjectPublic = false,
+        asScopedCredential = false,
       )
     assertThat(computed.expandedScopes)
       .doesNotContain(Scope.TRANSLATIONS_SUGGEST, Scope.TRANSLATIONS_COMMENTS_ADD)
@@ -52,6 +54,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = null,
         userRole = UserAccount.Role.SUPPORTER,
         isProjectPublic = true,
+        asScopedCredential = false,
       )
     assertThat(computed.expandedScopes).contains(
       Scope.TRANSLATIONS_SUGGEST,
@@ -70,6 +73,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = null,
         userRole = UserAccount.Role.ADMIN,
         isProjectPublic = true,
+        asScopedCredential = false,
       )
     assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.SERVER_ADMIN)
     assertThat(computed.expandedScopes).contains(Scope.ADMIN)
@@ -105,10 +109,27 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = restrictedToOneLanguage,
         userRole = UserAccount.Role.USER,
         isProjectPublic = true,
+        asScopedCredential = false,
       )
     assertThat(computed.viewLanguageIds).isNull()
     assertThat(computed.suggestLanguageIds).isNull()
     assertThat(computed.translateLanguageIds).containsExactly(1L)
+  }
+
+  @Test
+  fun `a scoped credential on a public project keeps the community floor and loses the admin elevation`() {
+    val computed =
+      permissionService.computeProjectPermission(
+        organizationRole = null,
+        organizationBasePermission = ComputedPermissionDto.NONE,
+        directPermission = null,
+        userRole = UserAccount.Role.ADMIN,
+        isProjectPublic = true,
+        asScopedCredential = true,
+      )
+    assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.COMMUNITY)
+    assertThat(computed.expandedScopes).isNotEmpty()
+    assertThat(computed.expandedScopes).doesNotContain(Scope.ADMIN)
   }
 
   @Test
@@ -120,6 +141,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         directPermission = null,
         userRole = null,
         isProjectPublic = true,
+        asScopedCredential = false,
       )
     assertThat(computed.expandedScopes).isEmpty()
     assertThat(computed.origin).isNotEqualTo(ComputedPermissionOrigin.COMMUNITY)
