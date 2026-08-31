@@ -1,8 +1,8 @@
 # OAuth 2.1 authorization server
 
-Tolgee can now let apps (browser extension, CLI, MCP clients) sign a user in **through the browser**
+Tolgee lets apps (browser extension, CLI, MCP clients) sign a user in **through the browser**
 and receive a short-lived token, instead of the user pasting a long-lived API key. This is what
-"Sign in with Google/GitHub" does — Tolgee is now the thing you sign in *with*.
+"Sign in with Google/GitHub" does — Tolgee is the thing you sign in *with*.
 
 This page explains, in plain words, how it works and what the jargon means.
 
@@ -56,7 +56,8 @@ Tolgee's web login is stateless — a JWT in the browser's local storage, not a 
 browser navigation, which cannot send that JWT. So `/oauth2/authorize` authenticates nobody. It checks only what has
 to be right before a redirect is safe (that the `client_id` is a registered client and the `redirect_uri` is one of
 its registered URIs, and that the rest of the request is well formed) and then redirects the browser to the SPA's
-`/oauth2/consent` route, carrying the client's authorize parameters through untouched. The redirect is relative
+`/oauth2/consent` route, carrying the authorize parameters as this endpoint normalized them — a parameter sent
+without a value is forwarded as absent, per OAuth 2.1 §3.1. The redirect is relative
 unless `front-end-url` is set — relative resolves against whatever origin the browser actually reached, which is what
 a reverse proxy in front of a single origin needs; `front-end-url` makes it absolute for a split-origin deployment.
 
@@ -93,7 +94,7 @@ never left the app. PKCE is required for every Tolgee OAuth client.
 ### Opaque access tokens (why not a JWT)
 The access token is an **opaque** random string. It carries no readable content: everything that describes
 it — the user, the scopes this token carries (`active_scopes`, which a narrowing refresh may set below the granted
-ceiling), and the project set it is bound to — lives on the `oauth2_authorization` row it belongs to, and
+ceiling), and the project set it is bound to — lives on the `oauth2_grant` row it belongs to, and
 `OAuth2AccessTokenResolver` reads that row on every request. Like project API keys
 and PATs, codes and tokens are stored **hashed**; the plaintext exists only in the response that delivered it.
 
@@ -122,19 +123,18 @@ the root of discovery (`{issuer}/.well-known/oauth-authorization-server`), and e
 relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`,
 …) are actually reachable — i.e. the **backend / API URL** (`back-end-url`).
 
-`OAuth2IssuerResolver` owns it, and exposes two forms. `configuredBaseUrl` is `backEndUrl ?: frontEndUrl`,
-with a blank treated as unset and any trailing slash stripped. `issuerUrl` is the same value, or
-the request's own container-visible origin when nothing is configured, and it is what every
-caller uses — the discovery documents and the `iss` on authorization responses. It must be a bare origin: a
-`back-end-url` carrying a path is rejected the first time the issuer is read, because RFC 8414 §3 would put the
-metadata document at a location Tolgee does not serve.
-Note the request fallback reads what the container saw, *not* `X-Forwarded-*`, which the app does not
-trust: behind a reverse proxy you must set `back-end-url` or the issuer will be the internal URL. The
-`frontEndUrl` fallback is **not** "use the web app as the issuer": it only exists for deployments that serve the API
-and the web app from **one origin** (the backend also serves the built SPA), where `back-end-url` is
-often left unset and `front-end-url` *is* that single origin. If your backend runs on a separate URL you
-**must set `back-end-url`**, and then the fallback never fires. (If your topology always separates the
-two, treat `back-end-url` as required.)
+`OAuth2IssuerResolver` owns it. `issuerUrl` is `backEndUrl ?: frontEndUrl`, with a blank treated as unset and
+any trailing slash stripped, and it is what every caller uses — the discovery documents and the `iss` on
+authorization responses. It is never derived from the request, so a caller cannot choose the issuer this server
+publishes about itself; it must be a bare origin. Once any OAuth client is configured, startup fails unless one
+of the two is set and names a bare origin — a path-carrying value is rejected too, because RFC 8414 §3 would put
+the metadata document at a location Tolgee does not serve. A deployment with no client configured is left alone
+— it issues no tokens, so nothing reads the issuer. The `frontEndUrl` fallback is **not** "use the web app as
+the issuer": it only exists for deployments that serve the API and the web app from **one origin** (the backend
+also serves the built SPA), where `back-end-url` is often left unset and `front-end-url` *is* that single
+origin. Whenever the API has its own origin, `back-end-url` is the one you must set: nothing checks that the
+configured value really names the API, so a `front-end-url` pointing at a separate web app will satisfy startup
+and then publish an issuer the OAuth endpoints are not reachable at.
 
 ### Consent is never remembered
 
@@ -151,6 +151,12 @@ lets a reconnect mint a token at all.
 Were that ever built, the token endpoint's guard — a code is only redeemable once a project set was bound, see
 `OAuth2AuthorizationService.exchangeCode` — is what would catch a screen that got skipped without one.
 
+The shape that follow-up would most likely take: let the `project` request parameter *bind* rather than hint —
+`startAuthorization` binds `projectSelection` from it after the same accessibility check the consent path runs,
+the screen shows it as a pre-made but editable choice, and consent is then remembered per
+(user, client, scopes, project selection) with no new durable state. It changes what an existing wire parameter
+means, which is why it is a deliberate decision rather than an additive one.
+
 ### scope vs. project set
 - **scope** = a capability verb (`translations.suggest`, `translation-comments.add`) — *what* the token
   may do. The OAuth `scope` request parameter.
@@ -162,9 +168,11 @@ Before Tolgee will issue tokens to an app, it must know that app's `client_id` a
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
 **pre-registration**: the browser extension and CLI are built from configuration with a known `client_id`
 (`OAuth2ClientRegistry.kt`). Every client is public, must use PKCE (S256 only), and always goes through
-the consent screen. Redirect URIs are matched exactly, except that a loopback URI (`127.0.0.1` / `[::1]`) is accepted
-on any port, because RFC 8252 §7.3 requires it — a CLI takes whatever port the OS gives it at request time. Simple and
-safe, but it only works for apps *we* control.
+the consent screen. Redirect URIs are matched exactly, except that a loopback URI is accepted on any port — a CLI
+takes whatever port the OS gives it at request time. RFC 8252 §7.3 requires that for the IP literals (`127.0.0.1`,
+`[::1]`); §8.3 steers clients towards those rather than `localhost`, which depends on the host's name resolution,
+but Tolgee matches a `localhost` registration the same way because refusing it would accept a configuration at
+startup and then reject the callback it produces. Simple and safe, but it only works for apps *we* control.
 
 Onboarding third-party clients (the MCP round) needs one of two mechanisms, neither of which is built:
 
@@ -181,36 +189,44 @@ Onboarding third-party clients (the MCP round) needs one of two mechanisms, neit
 
 An implementation of CIMD was written and then removed from this round, because nothing consumes it until
 the MCP client work lands and it is not the kind of code to carry unused. It is preserved in history —
-recover it with `git revert` of the commit that removed it rather than writing it again.
+recover it with `git revert f65e6e995` (`chore: remove CIMD client resolution`) rather than writing it again. A
+squash merge kills that hash; `git log --all --diff-filter=D -- '*Cimd*'` still finds the removal.
 
 ## Where it lives in the code
 
 The authorization server is Tolgee's own code, not a library: the authorization-code grant with PKCE for public
-clients is small enough (one service, two controllers, one entity) that owning it costs less than bending a
+clients is small enough (one service, three controllers, one entity) that owning it costs less than bending a
 general-purpose server to a stateless app with opaque tokens and a per-authorization project picker.
 `OAuth2ProtocolConformanceTest` pins the protocol contract at the HTTP level; `OAuth2AuthorizationCodeFlowTest`
 covers what is Tolgee-specific on top of it.
 
 | Concern | Files |
 |---|---|
-| `/oauth2/authorize`, `/oauth2/token`, RFC 8414 discovery | `backend/api/.../controllers/oauth2/OAuth2AuthorizationServerController.kt` |
+| `/oauth2/authorize`, `/oauth2/token`, `/oauth2/revoke`, RFC 8414 discovery | `backend/api/.../controllers/oauth2/OAuth2AuthorizationServerController.kt` |
 | Protocol decisions: request validation, code issuance and exchange, PKCE check, refresh rotation, revocation | `backend/data/.../security/oauth2/OAuth2AuthorizationService.kt` |
-| The grant itself (user, client, scopes, project set, hashed code/tokens, expiries) | `backend/data/.../model/oauth2/OAuth2Authorization.kt`, `db/changelog/schema.xml` |
+| The grant itself (user, client, scopes, project set, hashed code/tokens, expiries) | `backend/data/.../model/oauth2/OAuth2Grant.kt`, `db/changelog/schema.xml` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Client registry (from config, not stored) | `OAuth2ClientRegistry.kt` |
 | Issuer | `OAuth2IssuerResolver.kt` |
 | RFC 9728 protected-resource metadata + the RFC 6750 `WWW-Authenticate` challenge that points at it | `ProtectedResourceMetadataController.kt`, `OAuth2BearerChallengeProvider.kt` |
-| Nightly cleanup of spent/abandoned grants | `OAuth2AuthorizationCleanup.kt` |
+| Nightly cleanup of spent/abandoned grants | `OAuth2GrantCleanup.kt` |
 
 ## Round-1 limitations (tracked follow-ups)
 
 These are known gaps, deferred to the client rounds that first exercise them:
 
+- **A client's `requiredScopes` are a consent-screen affordance, not a server-side rule.** The screen locks them
+  on, but `approveConsent` only checks that what was approved was requested, so a direct `POST /v2/oauth2/consent`
+  can grant less than the client declared it needs. That is deliberate — RFC 6749 §3.3 lets a server issue
+  narrower than requested, and it is the user's own account — and the cost is that the client discovers the
+  missing scope at its first API call rather than at consent.
+
 - **An all-projects token cannot enumerate the projects it reaches.** `*` means "every project this user can
   currently see", a set that changes with their membership, so a client cannot cache it — and nothing lets it ask:
-  both project-listing routes are `@IsGlobalRoute` (which `AuthenticationInterceptor.isOAuthAllowed` denies) and
-  `ONLY_PAT` besides, and MCP's `listProjectsSpec` is refused for the same reason. Not a boundary problem — every
+  both project-listing routes are `@IsGlobalRoute` (which `AuthenticationInterceptor.isOAuthAllowed` denies) —
+  `getAll` is `ONLY_PAT` besides, and `getAllWithStatistics` carries no `@AllowApiAccess` at all, so it admits no
+  API credential — and MCP's `listProjectsSpec` is refused for the same reason. Not a boundary problem — every
   request is still narrowed by `coversProject()` and the user's live permissions, so the failure is "cannot
   discover", never "reaches further than intended". The browser extension is handed its project by the page it
   edits; MCP is the round that needs discovery, and the follow-up is one non-global OAuth-reachable route returning
@@ -220,18 +236,24 @@ These are known gaps, deferred to the client rounds that first exercise them:
 
 - **`refresh-token-validity-days` is a sliding inactivity window, not a grant lifetime.** Every refresh issues a new
   refresh token and pushes its expiry out again, so a grant that keeps being used never expires on its own: the 30
-  days measure idleness, not age. What ends an actively-used grant today is revocation — a password change, signing
-  out everywhere, deleting the account, or unregistering the client — all of which take effect on the next request
-  because the token is opaque and resolved per request. An absolute cap is deferred with the per-app revocation
-  surface below: forcing a re-consent on a cadence is only humane once a user can see which apps they have
-  authorized and why one stopped working.
+  days measure idleness, not age. What ends an actively-used grant is revocation — the client's own RFC 7009 call on
+  logout, a password change, signing out everywhere, deleting the account, or unregistering the client — all of
+  which take effect on the next request because the token is opaque and resolved per request. An absolute cap is
+  deferred with the per-app revocation surface below: forcing a re-consent on a cadence is only humane once a
+  user can see which apps they have authorized and why one stopped working.
 
-- **There is no way for a user to see or revoke an authorized app.** Grants are killed only wholesale, by
-  changing the password or signing out everywhere (`revokeAllForUser`). A per-app list-and-revoke API
-  and screen were written and then removed from this round, because the planned Session management feature
-  will own that surface for OAuth apps and sessions together, and shipping a separate Connected apps page
-  first would mean replacing it immediately. Recover the implementation with `git revert` of the commit that
-  removed it rather than writing it again.
+- **There is no way for a *user* to see or revoke an authorized app.** A client can end its own grant
+  (`POST /oauth2/revoke`, RFC 7009, advertised as `revocation_endpoint` in discovery), but from the user's side
+  grants are killed only wholesale, by changing the password or signing out everywhere (`revokeAllForUser`). A
+  per-app list-and-revoke API and screen were written and then removed from this round, because the planned
+  Session management feature will own that surface for OAuth apps and sessions together, and shipping a separate
+  Connected apps page first would mean replacing it immediately. Recover it rather than writing it again: the
+  removal is `chore: remove the connected-apps API` (`48987fc85` on the release-polish branch), and if the stack
+  was squash merged and that hash is gone, the deleted files are still findable by path —
+  `git log --all --diff-filter=D -- '*ConnectedApps*' '*connectedApps*'` reaches
+  `ConnectedAppsController.kt`, `ConnectedAppModel.kt`, `OAuth2AuthorizationQueryService.kt`,
+  `OAuth2AuthorizationJdbcRepository.kt`, `ConnectedAppsView.tsx`, `ConnectedAppListItem.tsx` and
+  `OAuth2ConnectedAppsAndDiscoveryTest.kt`.
 
 - **Refresh replay detection reaches one generation back.** Every refresh replaces both tokens on the grant, and
   presenting the token the current one replaced revokes the whole grant (RFC 9700 §4.14.2). The refresh token is one
@@ -250,40 +272,69 @@ These are known gaps, deferred to the client rounds that first exercise them:
   Follow-up in `OAuth2AuthorizationService.refresh`: return the current pair for a just-superseded token inside a
   short window, and revoke only outside it.
 
-- **A grant resolves on every request.** Opaque tokens are looked up in `oauth2_authorization` per
+- **A scoped credential's lack of elevation is enforced per consumer, not at the principal.** An OAuth token's
+  principal still carries the user's real ADMIN/SUPPORTER role, so every `isAdmin()` / `isSupporterOrAdmin()`
+  reachable from an OAuth request grants full reach unless the consumer asks `isScopedCredential` /
+  `isScopedCredentialInContextFor` first — which `SecurityService`, `ProjectContextService`, `PermissionService` and
+  `ApiKeyController` all now do. Nothing makes that structural: the next elevation check added on a project route
+  is elevated for OAuth tokens until someone notices. It holds today because the path gate keeps OAuth tokens off
+  org and global routes entirely, so the un-narrowed `OrganizationRoleService` checks are unreachable for them. The
+  structural fix is to downgrade the principal's role to `USER` when the credential is scoped, at the point
+  `TolgeeAuthentication` is built, leaving only the genuinely per-user questions
+  (`PermissionService.getProjectPermissionData`, authorship self-access) explicit — a change to how every request
+  is authenticated, and so its own PR rather than part of this one.
+
+- **The "may an OAuth token reach this endpoint" rule has two implementations.** `AuthenticationInterceptor`
+  answers it for servlet dispatch (annotations plus `ProjectScopedEndpoints`), and `McpRequestContext` answers it
+  again for the MCP RouterFunction, which no interceptor sees. The same is true of the org-role refusal, which
+  `OrganizationAuthorizationInterceptor` and `McpRequestContext.checkOrgRole` each state. They are deliberately
+  parallel rather than shared today — the MCP copy has no `@AllowOAuthAccess` equivalent because no MCP tool needs
+  one — but a fourth condition has to be added in both places, and the natural refactor is one pure predicate next
+  to `ProjectScopedEndpoints` that both call.
+
+- **Project API keys lose the author self-access bypass** (released behaviour, changed by
+  `fix: keep self-authored access out of scoped credentials`). Several endpoints let you act on something because you
+  created it — viewing and cancelling your own batch job, deleting your own suggestion, editing and deleting your own
+  comment. That bypass applied to project API keys too, so a key could act on those resources while carrying none of
+  `batch-jobs.view`, `batch-jobs.cancel`, `translation-suggestions.manage` or `translation-comments.edit`. A key is a
+  scoped capability, so it now has to carry the real scope; a webapp JWT and a PAT still carry the user's full
+  authority and are unaffected. Existing keys are not backfilled — unlike `tasks.assigned-access`, the scopes here
+  already exist and adding them to every key would grant more than the bypass did. A key that relied on it needs the
+  scope added, and `GET /v2/projects/{id}/batch-jobs/{jobId}` is the likeliest one to notice:
+  `translations.batch-machine` does not expand to `batch-jobs.view`.
+
+- **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
+  through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client
+  that rotated and logs out with the refresh token it replaced is still honoured. There is no equivalent for access
+  tokens: `issueTokens` overwrites `accessTokenHash` in place and no previous-hash column exists for it, so an
+  access token from before the last refresh resolves to nothing and the call answers 200 having revoked nothing.
+  A client in that position still holds its current refresh token, which does revoke the grant.
+
+- **A consent submitted after its deadline is a dead end for the client.** `consent-validity-seconds` defaults to
+  900, so a user who opens the consent screen, leaves it for fifteen minutes and then clicks Allow hits
+  `lockOwnPendingGrant`, whose `takeIf { !isExpired(it.consentExpiresAt) }` yields
+  `NotFoundException(OAUTH_UNKNOWN_STATE)`. `OAuth2ConsentView.submitDecision`'s `onError` renders "Could not load
+  the authorization request." and stops, so the browser stays on Tolgee and the client is left waiting on a
+  `redirect_uri` that never fires. Nothing is issued and no grant survives, so this is a usability gap rather than a
+  protocol or security one. The fix is for the failure handler to obtain a redirect it can safely leave on — re-POST
+  `/v2/oauth2/authorize` with the parameters still in the URL, which re-validates the client and redirect URI, and
+  follow the `redirectUrl` it returns carrying `error=access_denied` (RFC 6749 §4.1.2.1). That is new control flow in
+  the consent screen, including what to do when the second authorize call fails too, so it waits for the round that
+  owns the screen's own design.
+
+- **A tokenless MCP client does not get the RFC 9728 challenge.** `/mcp/**` is deliberately unauthenticated at
+  the filter chain so `initialize` and `tools/list` answer a health check without credentials, so a client that has
+  no token yet gets a successful `initialize` and is only refused once it calls a tool — from inside the handler,
+  not as a 401 carrying `WWW-Authenticate`. The challenge does fire for a client that presents a bad or revoked
+  token (`OAuth2BearerChallengeTest`), which is the path a client that already authenticated once takes. Making
+  discovery work from a cold start means emitting the challenge from a filter on `/mcp/**` while keeping the
+  unauthenticated `tools/list` health check intact — a follow-up for the MCP round.
+
+- **A grant resolves on every request.** Opaque tokens are looked up in `oauth2_grant` per
   request, which is what makes revocation immediate — but it is also an uncached database read on the API
   hot path. Project API keys and PATs cache their lookup by token hash (`Caches.PROJECT_API_KEYS`); doing
   the same here is the obvious follow-up if it ever shows up in profiling, and it must come with the same
   evict-on-revoke discipline or it reintroduces exactly the revocation lag the opaque token removed.
-
-## Working on this branch: recreate your database
-
-Nothing here migrates a database that already holds an earlier revision of this feature's tables, on purpose:
-`oauth2_authorization` and `oauth2_authorization_consent` are Spring Authorization Server's default table names,
-owned by no Tolgee release, so a changeset that dropped them would destroy a neighbouring Spring application's live
-grants on any schema Tolgee shares. Startup fails loudly instead, and the fix is to recreate your own database.
-
-The `oauth2-authorization` changeset is also edited in place while the feature is unreleased, so a database created
-by an earlier revision of this branch fails Liquibase validation on startup:
-
-```
-liquibase.exception.ValidationFailedException: Validation Failed:
-     1 changesets check sum
-          db/changelog/schema.xml::oauth2-authorization::anty was: ... but is now: ...
-```
-
-`bootRun` swallows that into a bean-creation failure and still prints `BUILD SUCCESSFUL`, so it is easy to miss.
-Drop the container and let it be recreated:
-
-```bash
-docker rm -fv <your dev postgres container>      # and the test containers, if they were created earlier
-```
-
-A database that still holds an earlier revision's `oauth2_authorization` fails the same way, with a
-`relation "oauth2_authorization" already exists` from the `createTable` — same fix.
-
-No released database has either table, so nothing needs migrating; this only affects developer and CI-local
-databases created from an earlier state of the branch.
 
 ## Testing the browser extension locally (development)
 
@@ -298,20 +349,7 @@ to reproduce the flow against a local dev checkout, where the webapp (vite, `:30
 ### 1. Single-origin dev server (vite proxy)
 
 `webapp/vite.config.ts` proxies the backend-owned paths (`/v2`, `/api`, `/oauth2/authorize`,
-`/oauth2/token`, `/.well-known`) to the backend, leaving `/oauth2/consent` as an SPA route:
-
-```ts
-// webapp/vite.config.ts — inside defineConfig(...).server
-proxy: Object.fromEntries(
-  ['/v2', '/api', '/oauth2/authorize', '/oauth2/token', '/.well-known'].map((path) => [
-    path,
-    {
-      target: process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080',
-      changeOrigin: false,
-    },
-  ])
-),
-```
+`/oauth2/token`, `/oauth2/revoke`, `/.well-known`) to the backend, leaving `/oauth2/consent` as an SPA route.
 
 Point the app at the same origin and set the proxy target in `webapp/.env.development.local`:
 
@@ -350,10 +388,10 @@ backend config, then restart the backend so `OAuth2ClientRegistry` picks the cli
 
 ```yaml
 tolgee:
-  # The dev topology is split (vite in front of the backend on another port) and X-Forwarded-* is
-  # deliberately not trusted, so the issuer has to be stated explicitly. Without this the `iss` on the
-  # code redirect and the RFC 9728 document both come out as
-  # `http://localhost:3000` — wrong scheme — and the flow in §4 redirects somewhere vite will not answer.
+  # In dev the browser reaches the backend through vite, and the issuer is never derived from the request
+  # (X-Forwarded-* is deliberately untrusted), so this has to name the origin the browser uses (the vite port),
+  # not the backend's own — otherwise the `iss` on the code redirect and the RFC 9728 document point somewhere
+  # vite will not answer.
   back-end-url: https://localhost:3000
   oauth2:
     browser-extension-redirect-uris:
@@ -373,7 +411,8 @@ needs it), open the extension popup on the **Login** tab, set the **Server** fie
 refresh token stays in the service worker.
 
 The consent screen re-appears on every connect (see "Consent is never remembered"), so there is nothing to
-clear between attempts. There is no revocation API in this round — see below.
+clear between attempts. The extension can end its own grant with `POST /oauth2/revoke`; there is no user-facing
+list-and-revoke screen in this round (see "Round-1 limitations" above).
 
 ### 5. Edit in-context against a local build of the editor
 
