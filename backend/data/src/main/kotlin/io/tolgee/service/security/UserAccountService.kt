@@ -28,6 +28,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.security.oauth2.OAuth2AuthorizationService
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.EmailVerificationService
@@ -88,6 +89,10 @@ class UserAccountService(
 
   @Autowired
   private lateinit var notificationService: NotificationService
+
+  @Autowired
+  @Lazy
+  private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   private val emailValidator = EmailValidator()
 
@@ -222,6 +227,7 @@ class UserAccountService(
   }
 
   private fun deleteWithFetchedData(toDelete: UserAccount) {
+    oauth2AuthorizationService.revokeAllForUser(toDelete.id)
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
@@ -304,7 +310,7 @@ class UserAccountService(
     userAccount: UserAccount,
     password: String?,
   ): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -338,7 +344,7 @@ class UserAccountService(
         ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
     userAccount.totpLastUsedTimeStep = matchedStep
-    resetTokensValidNotBefore(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_ENABLED)
     return savedUser
@@ -351,7 +357,7 @@ class UserAccountService(
     userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    resetTokensValidNotBefore(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_DISABLED)
     return savedUser
@@ -563,7 +569,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    resetTokensValidNotBefore(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
@@ -597,12 +603,13 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
   fun invalidateTokens(userAccount: UserAccount): UserAccount {
-    resetTokensValidNotBefore(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun resetTokensValidNotBefore(userAccount: UserAccount) {
+  private fun revokeSessionsAndOAuthGrants(userAccount: UserAccount) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
+    oauth2AuthorizationService.revokeAllForUser(userAccount.id)
   }
 
   private fun publishUserInfoUpdatedEvent(
