@@ -284,13 +284,21 @@ These are known gaps, deferred to the client rounds that first exercise them:
   (`PermissionService.getProjectPermissionData`, authorship self-access) explicit — a change to how every request
   is authenticated, and so its own PR rather than part of this one.
 
-- **The "may an OAuth token reach this endpoint" rule has two implementations.** `AuthenticationInterceptor`
-  answers it for servlet dispatch (annotations plus `ProjectScopedEndpoints`), and `McpRequestContext` answers it
-  again for the MCP RouterFunction, which no interceptor sees. The same is true of the org-role refusal, which
-  `OrganizationAuthorizationInterceptor` and `McpRequestContext.checkOrgRole` each state. They are deliberately
-  parallel rather than shared today — the MCP copy has no `@AllowOAuthAccess` equivalent because no MCP tool needs
-  one — but a fourth condition has to be added in both places, and the natural refactor is one pure predicate next
-  to `ProjectScopedEndpoints` that both call.
+- **Account-level endpoints apply no scope narrowing to any API credential.** An OAuth token is gated by
+  `@AllowApiAccess.tokenType` exactly as a project API key is, so it reaches `/v2/user`, `/v2/notification`,
+  `/v2/notification-settings`, `/v2/notifications-mark-seen`, `/v2/user-tasks` and `/v2/image-upload`. None of
+  these resolves a project, so `SecurityService.getCurrentPermittedScopes` never runs and neither the token's
+  scopes nor its project set is consulted — a project API key reads them today for the same reason. `/v2/user`
+  is the one worth weighing: it returns the account's email and server role to any API credential. Making these
+  `ONLY_PAT` is the likely answer, but it is a question about every API credential rather than about OAuth, so it
+  belongs in its own PR.
+
+- **The "may an OAuth token reach this endpoint" rule still has two implementations.**
+  `AuthenticationInterceptor` answers it for servlet dispatch and `McpRequestContext` answers it again for the MCP
+  RouterFunction, which no interceptor sees. Both now reduce to the same single condition
+  (`tokenType == ANY`), so the copies are trivially comparable, but a second condition would still have to be
+  added in both places. The same is true of the org-role refusal, which `OrganizationAuthorizationInterceptor`
+  and `McpRequestContext.checkOrgRole` each state.
 
 - **Project API keys lose the author self-access bypass** (released behaviour, changed by
   `fix: keep self-authored access out of scoped credentials`). Several endpoints let you act on something because you

@@ -19,8 +19,6 @@ package io.tolgee.security.authentication
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.security.authorization.IsGlobalRoute
-import io.tolgee.security.authorization.ProjectScopedEndpoints
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -69,7 +67,7 @@ class AuthenticationInterceptor(
         throw PermissionException(Message.PAK_ACCESS_NOT_ALLOWED)
       }
 
-      if (authenticationFacade.isOAuthTokenAuth && !isOAuthAllowed(allowApiAccess, request, handler)) {
+      if (authenticationFacade.isOAuthTokenAuth && !isOAuthAllowed(allowApiAccess)) {
         throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
       }
     }
@@ -98,24 +96,12 @@ class AuthenticationInterceptor(
     return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
   }
 
-  private fun isOAuthAllowed(
-    annotation: AllowApiAccess,
-    request: HttpServletRequest,
-    handler: HandlerMethod,
-  ): Boolean {
-    if (annotation.tokenType != AuthTokenType.ANY) return false
-    if (isExplicitlyOpenedToOAuth(handler)) return true
-    if (isGlobalRoute(handler)) return false
-    return ProjectScopedEndpoints.matches(request)
-  }
-
-  private fun isGlobalRoute(handler: HandlerMethod): Boolean {
-    return AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java) != null
-  }
-
-  private fun isExplicitlyOpenedToOAuth(handler: HandlerMethod): Boolean {
-    return AnnotationUtils.getAnnotation(handler.method, AllowOAuthAccess::class.java) != null
-  }
+  /**
+   * An OAuth token is an API credential like any other: what it may reach is decided by the endpoint's
+   * [AllowApiAccess.tokenType], and what it may do there by the token's scopes intersected with the user's live
+   * permissions. ONLY_PAK and ONLY_PAT name a specific credential this is not.
+   */
+  private fun isOAuthAllowed(annotation: AllowApiAccess): Boolean = annotation.tokenType == AuthTokenType.ANY
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE

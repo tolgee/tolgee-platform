@@ -2,7 +2,6 @@ package io.tolgee.mcp.tools
 
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AllowOAuthAccess
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -20,11 +19,6 @@ class BuildSpecErrorTest {
     @AllowApiAccess
     @RequiresSuperAuthentication
     fun superAuth(): String = "nope"
-
-    @GetMapping("/oauth-opened")
-    @AllowApiAccess
-    @AllowOAuthAccess
-    fun oauthOpened(): String = "nope"
   }
 
   @Test
@@ -41,13 +35,5 @@ class BuildSpecErrorTest {
       buildSpec(TestController::class.java, "superAuth", "bad_tool")
     }.isInstanceOf(IllegalArgumentException::class.java)
       .hasMessageContaining("requires super authentication")
-  }
-
-  @Test
-  fun `method with AllowOAuthAccess throws IllegalArgumentException`() {
-    assertThatThrownBy {
-      buildSpec(TestController::class.java, "oauthOpened", "bad_tool")
-    }.isInstanceOf(IllegalArgumentException::class.java)
-      .hasMessageContaining("opened to OAuth by annotation")
   }
 }

@@ -203,17 +203,16 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `is forbidden on API endpoints that never apply the token's scopes`() {
-    // Nothing outside a project-scoped handler applies scope ∩ project set, so a token there would carry the user's
-    // whole account: their email and server role, every notification, every task in every project they belong to.
+  fun `reaches the non-project endpoints every other API credential reaches`() {
+    // An OAuth token is gated by @AllowApiAccess.tokenType alone, exactly as a project API key is. These endpoints
+    // are account-level and apply no scope narrowing to any credential - a project API key reads them today for the
+    // same reason. Whether they should be ONLY_PAT is a question about all API credentials, not about OAuth.
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
 
-    performGet("/v2/user", bearerHeaders(token)).andIsForbidden
-    performGet("/v2/notification", bearerHeaders(token)).andIsForbidden
-    performGet("/v2/notification-settings", bearerHeaders(token)).andIsForbidden
-    // Declares @UseDefaultPermissions but sits outside the project paths, so the interceptor never runs for it and
-    // it would return every task the user has in every project. Annotations are not the question here; the path is.
-    performGet("/v2/user-tasks", bearerHeaders(token)).andIsForbidden
+    performGet("/v2/user", bearerHeaders(token)).andIsOk
+    performGet("/v2/notification", bearerHeaders(token)).andIsOk
+    performGet("/v2/notification-settings", bearerHeaders(token)).andIsOk
+    performGet("/v2/user-tasks", bearerHeaders(token)).andIsOk
   }
 
   @Test

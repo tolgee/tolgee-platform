@@ -29,7 +29,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AllowOAuthAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -198,7 +197,6 @@ class ApiKeyController(
     description = "Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project",
   )
   @AllowApiAccess()
-  @AllowOAuthAccess
   fun getCurrentPermissions(
     @RequestParam
     @Parameter(

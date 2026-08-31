@@ -74,15 +74,10 @@ class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
   }
 
   @Test
-  fun `OAuth auth on a global tool throws OAUTH_ACCESS_NOT_ALLOWED`() {
+  fun `OAuth auth on a global tool is allowed, as it is for every other API credential`() {
     oauthAuthenticated()
 
-    assertThatThrownBy {
-      sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = true)) {}
-    }.isInstanceOf(PermissionException::class.java)
-      .satisfies({ ex ->
-        assertThat((ex as PermissionException).tolgeeMessage).isEqualTo(Message.OAUTH_ACCESS_NOT_ALLOWED)
-      })
+    sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = true)) {}
   }
 
   @Test

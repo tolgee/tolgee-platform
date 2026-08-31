@@ -63,42 +63,27 @@ class AuthenticationInterceptorTest {
   }
 
   @Test
-  fun `it refuses an OAuth token outside the project-scoped paths`() {
+  fun `it allows an OAuth token outside the project-scoped paths`() {
+    // An OAuth token reaches whatever any other API credential reaches; the project narrowing is applied where the
+    // request actually resolves a project, not by the shape of the URL.
     oauthAuthenticated()
 
-    mockMvc.perform(get("/allow-api-access")).andIsForbidden
+    mockMvc.perform(get("/allow-api-access")).andIsOk
   }
 
   @Test
-  fun `it refuses an OAuth token on a project-scoped path restricted to one API token kind`() {
-    // ONLY_PAK/ONLY_PAT say the endpoint was written for that one credential; an OAuth token is not it, whatever the
-    // path would otherwise permit.
+  fun `it refuses an OAuth token on an endpoint written for one API token kind`() {
+    // ONLY_PAK/ONLY_PAT name a specific credential, and an OAuth token is neither.
     oauthAuthenticated()
 
     mockMvc.perform(get("/v2/projects/1/only-pak")).andIsForbidden
   }
 
   @Test
-  fun `an endpoint opened to OAuth that no OAuth token could reach still refuses the token`() {
-    // The mis-annotation itself is caught at build time by AllowOAuthAccessAnnotationTest; at request time refusing
-    // is the right answer either way, so this must not become a 500.
+  fun `it allows an OAuth token on a global route`() {
     oauthAuthenticated()
 
-    mockMvc.perform(get("/v2/projects/1/only-pak-opened-to-oauth")).andIsForbidden
-  }
-
-  @Test
-  fun `it allows an OAuth token outside the project-scoped paths when the handler opts in`() {
-    oauthAuthenticated()
-
-    mockMvc.perform(get("/explicitly-opened-to-oauth")).andIsOk
-  }
-
-  @Test
-  fun `it refuses an OAuth token on a global route even under a project-scoped path`() {
-    oauthAuthenticated()
-
-    mockMvc.perform(get("/v2/projects/1/global-route")).andIsForbidden
+    mockMvc.perform(get("/v2/projects/1/global-route")).andIsOk
   }
 
   private fun oauthAuthenticated() {
@@ -145,16 +130,6 @@ class AuthenticationInterceptorTest {
     @GetMapping("/v2/projects/1/only-pak")
     @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAK)
     fun projectScopedOnlyPak(): String = "hello!"
-
-    @GetMapping("/explicitly-opened-to-oauth")
-    @AllowApiAccess
-    @AllowOAuthAccess
-    fun explicitlyOpenedToOAuth(): String = "hello!"
-
-    @GetMapping("/v2/projects/1/only-pak-opened-to-oauth")
-    @AllowApiAccess(tokenType = AuthTokenType.ONLY_PAK)
-    @AllowOAuthAccess
-    fun onlyPakOpenedToOAuth(): String = "hello!"
 
     @GetMapping("/requires-super-auth")
     @RequiresSuperAuthentication

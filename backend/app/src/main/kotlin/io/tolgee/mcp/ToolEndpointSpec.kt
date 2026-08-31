@@ -6,7 +6,6 @@ import io.tolgee.constants.Feature
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AllowOAuthAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -76,12 +75,6 @@ private fun buildSpecFromMethod(
 
   require(AnnotationUtils.getAnnotation(method, RequiresSuperAuthentication::class.java) == null) {
     "MCP tool $mcpOperation references ${method.name} which requires super authentication (not supported in MCP)"
-  }
-
-  // The annotation overrides AuthenticationInterceptor's path-keyed OAuth rule, and MCP has no such rule to override:
-  // checkTokenType would silently ignore it, so a tool that needs it has to fail here instead.
-  require(AnnotationUtils.getAnnotation(method, AllowOAuthAccess::class.java) == null) {
-    "MCP tool $mcpOperation references ${method.name} which is opened to OAuth by annotation (not supported in MCP)"
   }
 
   val rateLimited = AnnotationUtils.getAnnotation(method, RateLimited::class.java)
