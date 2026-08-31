@@ -173,12 +173,18 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
+      if (!hasTaskAssignedAccess(projectId)) {
+        throw err
+      }
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
       }
     }
   }
+
+  private fun hasTaskAssignedAccess(projectId: Long): Boolean =
+    getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
 
   private fun translationInTask(
     keyId: Long,
@@ -301,26 +307,6 @@ class SecurityService(
     }
   }
 
-  private fun translationsInTask(
-    projectId: Long,
-    taskType: TaskType,
-    languageIds: Collection<Long>,
-    keyId: Long? = null,
-  ): Boolean {
-    checkLanguageViewPermission(projectId, languageIds)
-
-    if (keyId != null && languageIds.isNotEmpty()) {
-      languageIds.forEach {
-        if (!translationInTask(keyId, it, taskType)) {
-          return false
-        }
-      }
-    } else {
-      return false
-    }
-    return true
-  }
-
   fun checkLanguageTranslatePermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -336,7 +322,8 @@ class SecurityService(
         }
       },
       {
-        if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+        checkLanguageViewPermission(projectId, languageIds)
+        if (!mayActAsTaskAssignee(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
           throw PermissionException(Message.OPERATION_NOT_PERMITTED)
         }
       },
@@ -372,10 +359,22 @@ class SecurityService(
         ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
       }
     } catch (e: PermissionException) {
-      if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
+      checkLanguageViewPermission(projectId, languageIds)
+      if (!mayActAsTaskAssignee(projectId, TaskType.REVIEW, languageIds, keyId)) {
         throw e
       }
     }
+  }
+
+  private fun mayActAsTaskAssignee(
+    projectId: Long,
+    taskType: TaskType,
+    languageIds: Collection<Long>,
+    keyId: Long?,
+  ): Boolean {
+    if (!hasTaskAssignedAccess(projectId)) return false
+    if (keyId == null || languageIds.isEmpty()) return false
+    return languageIds.all { translationInTask(keyId, it, taskType) }
   }
 
   fun checkScopeOrAssignedToTask(
@@ -388,6 +387,9 @@ class SecurityService(
       checkProjectPermission(projectHolder.project.id, scope)
     } catch (e: PermissionException) {
       checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
+      if (!hasTaskAssignedAccess(projectHolder.project.id)) {
+        throw e
+      }
       if (!translationInTask(keyId, languageId, taskType)) {
         throw e
       }

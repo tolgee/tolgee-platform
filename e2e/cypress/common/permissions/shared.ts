@@ -2,6 +2,8 @@ import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import { v2apiFetchPromise } from '../apiCalls/common';
 import { waitForGlobalLoading } from '../loading';
 
+const ERROR_SNACKBAR = '.SnackbarItem-variantError';
+
 export type ProjectModel = components['schemas']['ProjectModel'];
 export type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -12,7 +14,7 @@ export type ProjectInfo = {
 
 export const pageAcessibleWithoutErrors = () => {
   waitForGlobalLoading();
-  cy.get('.SnackbarItem-variantError', { timeout: 0 }).should('not.exist');
+  cy.get(ERROR_SNACKBAR, { timeout: 0 }).should('not.exist');
 };
 
 export function getProjectInfo(projectId: number) {

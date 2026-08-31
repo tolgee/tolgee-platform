@@ -39,6 +39,7 @@ enum class Scope(
   WEBHOOKS_MANAGE("webhooks.manage"),
   TASKS_VIEW("tasks.view"),
   TASKS_EDIT("tasks.edit"),
+  TASKS_ASSIGNED_ACCESS("tasks.assigned-access"),
   PROMPTS_VIEW("prompts.view"),
   PROMPTS_EDIT("prompts.edit"),
   TRANSLATION_LABEL_MANAGE("translation-labels.manage"),
@@ -100,6 +101,7 @@ enum class Scope(
             ),
           ),
           HierarchyItem(TASKS_EDIT, listOf(tasksView)),
+          HierarchyItem(TASKS_ASSIGNED_ACCESS),
           HierarchyItem(
             PROMPTS_EDIT,
             listOf(
