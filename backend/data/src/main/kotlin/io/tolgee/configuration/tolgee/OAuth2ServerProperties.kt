@@ -1,0 +1,35 @@
+package io.tolgee.configuration.tolgee
+
+import io.tolgee.configuration.annotations.DocProperty
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+@ConfigurationProperties(prefix = "tolgee.oauth2")
+@DocProperty(
+  description = "Settings for Tolgee acting as an OAuth 2.1 authorization server (browser-extension login, MCP).",
+  displayName = "OAuth2 authorization server",
+)
+class OAuth2ServerProperties {
+  @DocProperty(
+    description =
+      "Exact redirect URIs of the Tolgee browser extension, e.g. `https://<extension-id>.chromiumapp.org/`. " +
+        "The extension OAuth client is only registered when this is set.",
+    defaultValue = "",
+  )
+  var browserExtensionRedirectUris: List<String> = listOf()
+
+  @DocProperty(
+    description =
+      "Loopback redirect URIs of the Tolgee CLI (RFC 8252), e.g. `http://127.0.0.1:9876/callback`. Prefer the " +
+        "loopback IP literal over `localhost`, which RFC 8252 section 7.3 marks NOT RECOMMENDED: a client " +
+        "resolving `localhost` may end up listening on interfaces other than the loopback one. The CLI " +
+        "OAuth client is only registered when this is set.\n" +
+        "\n" +
+        ":::info\n" +
+        "A loopback redirect cannot be tied to one local application, so any process on the machine that knows " +
+        "the client id can start an authorization for it. The user still has to approve the consent screen, " +
+        "but leave this unset unless the CLI is actually in use.\n" +
+        ":::\n\n",
+    defaultValue = "",
+  )
+  var cliRedirectUris: List<String> = listOf()
+}

@@ -70,6 +70,7 @@ class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  var oauth2: OAuth2ServerProperties = OAuth2ServerProperties(),
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,
   @DocProperty(hidden = true)
