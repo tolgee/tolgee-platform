@@ -37,7 +37,7 @@ class AppProjectContextBinder(
     project: ProjectDto,
   ): Boolean {
     if (appAuth.isInstallContext) return false
-    if (project.organizationOwnerId != appAuth.appInstall.organization.id) return false
+    if (project.organizationOwnerId != appAuth.appInstall.organizationId) return false
     return !permissionService.getProjectPermissionScopesNoApiKey(project.id, appAuth.principal.id).isNullOrEmpty()
   }
 

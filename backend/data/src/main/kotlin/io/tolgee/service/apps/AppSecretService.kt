@@ -2,6 +2,7 @@ package io.tolgee.service.apps
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -10,6 +11,7 @@ import io.tolgee.model.apps.AppSecret
 import io.tolgee.repository.apps.AppSecretRepository
 import io.tolgee.util.constantTimeEquals
 import io.tolgee.util.runSentryCatching
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -72,6 +74,7 @@ class AppSecretService(
   }
 
   @Transactional
+  @CacheEvict(cacheNames = [Caches.APPS], key = "#appId", condition = "#force")
   fun revoke(
     appId: Long,
     secretId: Long,

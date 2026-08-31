@@ -49,6 +49,11 @@ interface AppEnabledForProjectRepository : JpaRepository<AppEnabledForProject, L
     pageable: Pageable,
   ): Page<Project>
 
+  @Query("select e.project.id from AppEnabledForProject e where e.appInstall.id = :appInstallId")
+  fun findEnabledProjectIdsByInstallId(
+    @Param("appInstallId") appInstallId: Long,
+  ): List<Long>
+
   fun deleteByAppInstallId(appInstallId: Long)
 
   fun deleteByProjectId(projectId: Long)

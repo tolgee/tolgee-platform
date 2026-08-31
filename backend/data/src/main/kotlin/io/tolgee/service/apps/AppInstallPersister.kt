@@ -2,6 +2,7 @@ package io.tolgee.service.apps
 
 import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -13,6 +14,7 @@ import io.tolgee.repository.apps.AppInstallRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -124,6 +126,7 @@ class AppInstallPersister(
    * install to the acting organization.
    */
   @Transactional
+  @CacheEvict(cacheNames = [Caches.APP_INSTALLS], key = "#installId")
   fun applySnapshotForOrgInstall(
     organizationId: Long,
     installId: Long,
@@ -138,6 +141,7 @@ class AppInstallPersister(
 
   /** The app refreshing one of its own installs. Never widens the granted scopes. */
   @Transactional
+  @CacheEvict(cacheNames = [Caches.APP_INSTALLS], key = "#installId")
   fun applySnapshotForApp(
     appEntityId: Long,
     installId: Long,
@@ -186,6 +190,7 @@ class AppInstallPersister(
   }
 
   @Transactional
+  @CacheEvict(cacheNames = [Caches.APP_INSTALLS], key = "#installId")
   fun remove(
     organizationId: Long,
     installId: Long,

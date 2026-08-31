@@ -46,6 +46,24 @@ export interface paths {
     /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
+  "/v2/administration/apps/{appId}/available-organizations": {
+    /** The organizations granted the app besides the owner, searchable and paged. */
+    get: operations["availableOrganizations"];
+  };
+  "/v2/administration/apps/{appId}/available-organizations/{organizationId}": {
+    put: operations["addAvailableOrganization"];
+    /** Disables the app in that organization's projects unless it stays reachable through availability to all organizations. */
+    delete: operations["removeAvailableOrganization"];
+  };
+  "/v2/administration/apps/{appId}/available-to-all": {
+    put: operations["setAvailableToAll"];
+    /** Disables the app in every non-owner project that could only reach it through availability to all organizations. */
+    delete: operations["clearAvailableToAll"];
+  };
+  "/v2/administration/apps/{appId}/installations": {
+    /** Backs the installations view: which organizations hold the app, searchable and paged. */
+    get: operations["installations"];
+  };
   "/v2/administration/batch-job-queue": {
     /** Returns all chunk execution items currently in the batch job queue */
     get: operations["getBatchJobQueue"];
@@ -120,7 +138,19 @@ export interface paths {
   };
   "/v2/api-keys/{keyId}": {
     /** Returns specific API key info */
-    get: operations["get_26"];
+    get: operations["get_27"];
+  };
+  "/v2/apps/self/installations": {
+    /** Returns every installation of the app on this server. The install ids are what the token endpoint exchanges for install-scoped tokens; the projects each install may act on are listed by the installation's `/projects` endpoint. */
+    get: operations["listInstallations"];
+  };
+  "/v2/apps/self/installations/{installId}/projects": {
+    /** Paginated list of the projects the given installation of the calling app may currently act on. The list changes whenever a project owner enables or disables the app. */
+    get: operations["listEnabledProjects"];
+  };
+  "/v2/apps/self/installations/{installId}/refresh": {
+    /** Re-reads the app's manifest and updates the stored snapshot. Never widens the install's granted scopes: a manifest that requests more surfaces those as `pendingScopes` until the organization's owner approves them; scopes the manifest no longer requests are dropped. */
+    post: operations["refreshInstallation"];
   };
   "/v2/auth-provider": {
     get: operations["getCurrentAuthProvider"];
@@ -156,7 +186,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_19"];
+    delete: operations["delete_20"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -208,6 +238,28 @@ export interface paths {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
   };
+  "/v2/organizations/{organizationId}/apps": {
+    /** Returns every app this organization has installed. */
+    get: operations["list_5"];
+    /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server and available to the organization: when it is not registered, the call fails with the `app_not_registered` code, and the caller may register it - becoming its owner - through the owned-apps endpoint. No credentials are disclosed here. */
+    post: operations["install"];
+  };
+  "/v2/organizations/{organizationId}/apps/preview": {
+    /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes and a `manifestHash`) without persisting anything. Used to show a consent prompt before registering or installing; pass the hash back so the write can reject a manifest that changed. */
+    post: operations["preview"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}": {
+    /** Uninstalls the app from the organization. */
+    delete: operations["remove"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/refresh": {
+    /** Re-fetches the app's manifest and updates the stored snapshot. As the organization's consent authority, this also approves the scopes the manifest now requests: the install adopts that scope set, clearing any pending permission requests. This is the only path that may widen an install's granted scopes. */
+    post: operations["refresh"];
+  };
+  "/v2/organizations/{organizationId}/apps/{installId}/token": {
+    /** Issues a short-lived JWT bound to (install, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. The token is organization-wide: it works on every project the install is enabled for, always capped by the user's own permissions there. */
+    post: operations["mintToken"];
+  };
   "/v2/organizations/{organizationId}/base-languages": {
     /** Returns all base languages in use by projects owned by specified organization */
     get: operations["getAllBaseLanguagesInUse"];
@@ -250,7 +302,7 @@ export interface paths {
     post: operations["update_14"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations/{languageTag}": {
-    get: operations["get_25"];
+    get: operations["get_26"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/termsIds": {
     get: operations["getAllIds"];
@@ -283,6 +335,37 @@ export interface paths {
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     /** Returns machine translation credit balance for organization */
     get: operations["getOrganizationCredits"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps": {
+    /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+    get: operations["list_4"];
+    /** Registers the app described by the manifest and, unless `install` is false, installs it for the organization. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered the call fails with `app_already_registered`; installing an existing app is the install endpoint. */
+    post: operations["register"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}": {
+    get: operations["get_25"];
+    /** Takes the app down across the whole server: every organization's install is removed and the app's credentials are revoked. Use this to retire an app or to kill a compromised one in a single step, rather than uninstalling it per organization. */
+    delete: operations["delete_17"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets": {
+    /** Returns every secret of the app, revoked and expired ones included, without disclosing any of them. At rest an app has a single active secret; older ones, each with an `expiresAt`, linger only while a rotation's grace window is open. */
+    get: operations["listSecrets"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/rotate": {
+    /** Mints a replacement secret and puts every other active one on a deadline. The new secret is returned here — the only place it is disclosed. The old secrets keep working until `previousExpiresAt` — the `graceSeconds` window — and can be revoked earlier by hand; there is no immediate cutover, because Tolgee cannot know the app has adopted the new secret. Refused while the app already has the maximum number of active secrets. Installs, availability and per-project enablements are untouched. */
+    post: operations["rotateSecret"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/secrets/{secretId}": {
+    /** Ends this one secret at once — how a rotation's grace window is cut short, and how a leaked credential is retired. Revoking the app's only active secret is refused unless `force=true`, so an ordinary revoke cannot cut the app off by mistake; `force` also invalidates every access token already minted from the app's secrets. It does not touch the app's OTHER live secrets, so to fully contain a compromise revoke each secret (a holder of a live secret can mint more) or delete the app, which retires every credential in one step. Idempotent. */
+    delete: operations["revokeSecret"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/webhook-secret": {
+    /** Unlike a client secret, the webhook signing secret is stored in the clear — Tolgee needs it to sign every delivery — so the owner can read it back here to configure the app by hand. It signs outbound lifecycle deliveries and authenticates nothing towards Tolgee. */
+    get: operations["getWebhookSecret"];
+  };
+  "/v2/organizations/{organizationId}/owned-apps/{appId}/webhook-secret/rotate": {
+    /** Mints a new webhook signing secret. The new secret is both returned here — the only place it is disclosed — and delivered to the app, signed with the old secret so a running app adopts it automatically; the `delivery` field says whether it landed. A running app keeps accepting the old secret during the overlap and drops it on its own next rotation. */
+    post: operations["rotateWebhookSecret"];
   };
   "/v2/organizations/{organizationId}/projects-with-stats": {
     /** Returns all projects (including statistics) where current user has any permission (except none) */
@@ -463,6 +546,20 @@ export interface paths {
     /** Returns all API keys for specified project */
     get: operations["allByProject"];
   };
+  "/v2/projects/{projectId}/apps": {
+    /** Returns every app the project's organization has installed, each annotated with whether it is enabled for this project. Requires apps.manage: it discloses the organization's whole app inventory, including apps not enabled for this project. The default project view uses the `/enabled` listing instead. */
+    get: operations["list_12"];
+  };
+  "/v2/projects/{projectId}/apps/enabled": {
+    /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+    get: operations["listEnabled"];
+  };
+  "/v2/projects/{projectId}/apps/{installId}": {
+    /** Enables the given app install for this project. Idempotent. */
+    put: operations["enable"];
+    /** Disables the given app for this project. Idempotent - no-op if it wasn't enabled. */
+    delete: operations["disable"];
+  };
   "/v2/projects/{projectId}/auto-translation-settings": {
     /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
     get: operations["getAutoTranslationSettings"];
@@ -474,7 +571,7 @@ export interface paths {
     delete: operations["removeAvatar_1"];
   };
   "/v2/projects/{projectId}/batch-jobs": {
-    get: operations["list_4"];
+    get: operations["list_6"];
   };
   "/v2/projects/{projectId}/batch-jobs/{id}": {
     get: operations["get_22"];
@@ -734,7 +831,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/trash": {
-    get: operations["list_8"];
+    get: operations["list_10"];
   };
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
@@ -749,7 +846,7 @@ export interface paths {
     put: operations["restore"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete_17"];
+    delete: operations["delete_18"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     get: operations["get_8"];
@@ -1058,7 +1155,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translation-memories": {
     /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-    get: operations["list_6"];
+    get: operations["list_8"];
   };
   "/v2/projects/{projectId}/translation-memories/project-tm-settings": {
     /** Sets TM-level flags on the project's own PROJECT-type TM. The shared-TM update endpoint rejects PROJECT TMs; this narrow endpoint exists so project admins can toggle the `writeOnlyReviewed` flag without org-level privileges. */
@@ -1171,6 +1268,10 @@ export interface paths {
   "/v2/projects/{projectId}/webhook-configs/{id}/test": {
     /** Sends a test request to the webhook */
     post: operations["test"];
+  };
+  "/v2/public/apps/token": {
+    /** OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an installation via `install_id`, and returns a short-lived access token the app's backend uses to call Tolgee's REST API as that install. Omit `install_id` to get an app-level token for app-level operations (installation discovery); the install ids come from there. */
+    post: operations["token"];
   };
   "/v2/public/business-events/identify": {
     post: operations["identify"];
@@ -1452,6 +1553,23 @@ export interface components {
         | "branch.management"
         | "branch.protected-modify"
         | "organization-quotas.view"
+        | "apps.manage"
+        | "organization-members.view"
+        | "organization-members.manage"
+        | "organization-usage.view"
+        | "organization-projects.create"
+        | "organization-settings.manage"
+        | "organization.delete"
+        | "organization-apps.manage"
+        | "organization-slack.manage"
+        | "organization-ai.manage"
+        | "organization-glossaries.manage"
+        | "organization-glossary-terms.manage"
+        | "organization-translation-memory.view"
+        | "organization-translation-memory.manage"
+        | "organization-translation-memory-entries.manage"
+        | "organization-billing.view"
+        | "organization-billing.manage"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1520,6 +1638,137 @@ export interface components {
       scopes: string[];
       userFullName?: string;
       username?: string;
+    };
+    AppAccessTokenModel: {
+      access_token: string;
+      /** Format: int64 */
+      expires_in: number;
+      token_type: string;
+    };
+    AppClientCredentialsRequest: {
+      client_id: string;
+      client_secret: string;
+      grant_type: string;
+      /** Format: int64 */
+      install_id?: number;
+    };
+    /** @description Outcome of pushing the disclosed credentials to the app's base URL */
+    AppDeliveryOutcomeModel: {
+      /** @description False when there was nothing to deliver to */
+      attempted: boolean;
+      delivered: boolean;
+      /** @description Short reason when the delivery was attempted and failed; null otherwise */
+      error?: string;
+    };
+    AppInstallModel: {
+      appId: string;
+      baseUrl: string;
+      /**
+       * Format: int64
+       * @description How many of this organization's projects the app is currently enabled for
+       */
+      enabledProjectCount: number;
+      /** @description The app's logo: an emoji, a native Tolgee icon name, or an absolute image URL served by the app's own host. Null when the manifest declares none. */
+      icon?: string;
+      /** Format: int64 */
+      id: number;
+      manifestUrl: string;
+      modules: components["schemas"]["AppManifestModulesDto"];
+      name: string;
+      /** @description Scopes the current manifest requests that the install has not consented to yet. Non-empty after the app widens its manifest; an owner refresh approves them and clears this list. */
+      pendingScopes: string[];
+      scopes: string[];
+      version: string;
+    };
+    AppManifestModulesDto: {
+      "project-dashboard-page"?: components["schemas"]["ProjectDashboardPageModuleDto"][];
+    };
+    AppManifestPreviewModel: {
+      appId: string;
+      baseUrl: string;
+      icon?: string;
+      /** @description SHA-256 hex of the manifest as fetched. Pass it back on register/install so the server can reject a manifest whose bytes changed since this consent preview. */
+      manifestHash: string;
+      modules: components["schemas"]["AppManifestModulesDto"];
+      name: string;
+      requestedScopes: string[];
+      version: string;
+    };
+    AppRegisteredModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      /** @description App-level OAuth client id. Present only when this call registered the app. */
+      clientId?: string;
+      /** @description App-level OAuth client secret in plaintext - the app's only long-lived credential; the token endpoint exchanges it for install-scoped access tokens. Present only when this call registered the app; Tolgee stores only a hash and cannot show it again. */
+      clientSecret?: string;
+      delivery?: components["schemas"]["AppDeliveryOutcomeModel"];
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description Id of the install created for this organization, or null when install was skipped
+       */
+      installId?: number;
+      name: string;
+      /** @description The secret Tolgee signs this app's lifecycle deliveries with. Present only when this call registered the app. */
+      webhookSecret?: string;
+    };
+    /** @description The freshly issued secret, disclosed once here. */
+    AppSecretModel: {
+      /** Format: int64 */
+      createdAt: number;
+      /**
+       * Format: int64
+       * @description When this secret stops authenticating, or null while it has no scheduled end. Set on the outgoing secret during a rotation's grace window.
+       */
+      expiresAt?: number;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description When this secret last authenticated a request — token minting, install discovery or self-administration — or null if it never has.
+       */
+      lastUsedAt?: number;
+      /** @description How the secret is identified wherever it is shown: its start and end, e.g. `tgpubs_ab…yz` */
+      name: string;
+      /**
+       * Format: int64
+       * @description When the secret was revoked, or null while it still authenticates
+       */
+      revokedAt?: number;
+      /** @description The secret in plaintext. Present only in the response to issuing it — Tolgee stores only a hash and cannot show it again. Everything the app does starts from it — the token endpoint exchanges it for the short-lived tokens that reach translation data. */
+      secret?: string;
+    };
+    AppSecretRotationModel: {
+      delivery?: components["schemas"]["AppDeliveryOutcomeModel"];
+      /**
+       * Format: int64
+       * @description The grace deadline of the secret this rotation just superseded, or null when there was no previous secret to retire. This is the latest of the outgoing secrets' expiries: a still older secret already inside a shorter grace window from an earlier rotation keeps its own earlier deadline and can lapse before this value.
+       */
+      previousExpiresAt?: number;
+      secret: components["schemas"]["AppSecretModel"];
+    };
+    AppSelfInstallationModel: {
+      appId: string;
+      /**
+       * Format: int64
+       * @description Id of the install the calling token belongs to
+       */
+      id: number;
+      name: string;
+      /** @description Scopes the current manifest requests that are not granted yet. Non-empty after the app widens its manifest, until the organization's owner approves them. */
+      pendingScopes: string[];
+      /** @description Permission scopes granted to the install at consent time */
+      scopes: string[];
+      version: string;
+    };
+    AppTokenModel: {
+      token: string;
+    };
+    AppWebhookSecretModel: {
+      delivery?: components["schemas"]["AppDeliveryOutcomeModel"];
+      /** @description The webhook signing secret in plaintext. Tolgee signs lifecycle deliveries with it; the app verifies against it. On rotation this is the new secret — store it like a password. */
+      secret: string;
     };
     ApplyBranchMergeRequest: {
       deleteBranch: boolean;
@@ -1879,6 +2128,21 @@ export interface components {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
       };
     };
+    CollectionModelAppInstallModel: {
+      _embedded?: {
+        appInstalls?: components["schemas"]["AppInstallModel"][];
+      };
+    };
+    CollectionModelAppSecretModel: {
+      _embedded?: {
+        appSecrets?: components["schemas"]["AppSecretModel"][];
+      };
+    };
+    CollectionModelAppSelfInstallationModel: {
+      _embedded?: {
+        installations?: components["schemas"]["AppSelfInstallationModel"][];
+      };
+    };
     CollectionModelAutoTranslationConfigModel: {
       _embedded?: {
         configs?: components["schemas"]["AutoTranslationConfigModel"][];
@@ -1967,6 +2231,16 @@ export interface components {
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+    };
+    CollectionModelOwnedAppModel: {
+      _embedded?: {
+        ownedApps?: components["schemas"]["OwnedAppModel"][];
+      };
+    };
+    CollectionModelProjectAppModel: {
+      _embedded?: {
+        projectApps?: components["schemas"]["ProjectAppModel"][];
       };
     };
     CollectionModelProjectInvitationModel: {
@@ -2169,6 +2443,23 @@ export interface components {
         | "branch.management"
         | "branch.protected-modify"
         | "organization-quotas.view"
+        | "apps.manage"
+        | "organization-members.view"
+        | "organization-members.manage"
+        | "organization-usage.view"
+        | "organization-projects.create"
+        | "organization-settings.manage"
+        | "organization.delete"
+        | "organization-apps.manage"
+        | "organization-slack.manage"
+        | "organization-ai.manage"
+        | "organization-glossaries.manage"
+        | "organization-glossary-terms.manage"
+        | "organization-translation-memory.view"
+        | "organization-translation-memory.manage"
+        | "organization-translation-memory-entries.manage"
+        | "organization-billing.view"
+        | "organization-billing.manage"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2879,6 +3170,7 @@ export interface components {
         | "project_not_found"
         | "resource_not_found"
         | "scope_not_found"
+        | "organization_scope_not_assignable_to_project"
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
@@ -3208,7 +3500,27 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_manifest_same_origin_as_tolgee"
+        | "app_not_found"
+        | "app_install_not_found"
+        | "app_already_installed"
+        | "app_already_registered"
+        | "app_not_available_for_organization"
+        | "app_not_registered"
+        | "app_manifest_changed"
+        | "plan_apps_limit_exceeded"
+        | "invalid_app_credentials"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_invalid_acting_as_user_id"
+        | "app_secret_not_found"
+        | "app_too_many_live_secrets"
+        | "app_cannot_revoke_last_secret";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3477,7 +3789,24 @@ export interface components {
         | "all.view"
         | "branch.management"
         | "branch.protected-modify"
-        | "organization-quotas.view";
+        | "organization-quotas.view"
+        | "apps.manage"
+        | "organization-members.view"
+        | "organization-members.manage"
+        | "organization-usage.view"
+        | "organization-projects.create"
+        | "organization-settings.manage"
+        | "organization.delete"
+        | "organization-apps.manage"
+        | "organization-slack.manage"
+        | "organization-ai.manage"
+        | "organization-glossaries.manage"
+        | "organization-glossary-terms.manage"
+        | "organization-translation-memory.view"
+        | "organization-translation-memory.manage"
+        | "organization-translation-memory-entries.manage"
+        | "organization-billing.view"
+        | "organization-billing.manage";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4637,6 +4966,45 @@ export interface components {
       /** @example btforg */
       slug: string;
     };
+    OwnedAppModel: {
+      /** @description The `id` declared in the app's manifest, unique across the server */
+      appId: string;
+      /** @description Whether a server admin has offered the app to every organization */
+      availableToAll: boolean;
+      baseUrl: string;
+      /** @description App-level OAuth client id, or null for an app that predates the app layer */
+      clientId?: string;
+      /** @description The app's logo: an emoji, a native Tolgee icon name, or an absolute image URL served by the app's own host. Null when the manifest declares none. */
+      icon?: string;
+      /** Format: int64 */
+      id: number;
+      /**
+       * Format: int64
+       * @description How many organizations, this one included, currently have the app installed
+       */
+      installCount: number;
+      /**
+       * Format: int32
+       * @description Consecutive failed manifest checks; zero while the manifest is answering
+       */
+      manifestFailureCount: number;
+      /** Format: int64 */
+      manifestFirstFailedAt?: number;
+      /** Format: int64 */
+      manifestLastCheckedAt?: number;
+      manifestLastError?: string;
+      /** @description `UNREACHABLE` or `INVALID`, or null while the manifest is answering */
+      manifestLastFailureKind?: string;
+      manifestUrl: string;
+      name: string;
+      /**
+       * Format: int64
+       * @description When the app was marked unhealthy, or null while it is healthy. An unhealthy app keeps working; it is only a warning that its manifest has stopped answering.
+       */
+      unhealthySince?: number;
+      /** @description The manifest's version at the last read */
+      version: string;
+    };
     PageMetadata: {
       /** Format: int64 */
       number?: number;
@@ -4798,6 +5166,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelProjectAppModel: {
+      _embedded?: {
+        projectApps?: components["schemas"]["ProjectAppModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelProjectModel: {
       _embedded?: {
         projects?: components["schemas"]["ProjectModel"][];
@@ -4837,6 +5211,18 @@ export interface components {
     PagedModelSimpleGlossaryWithStatsModel: {
       _embedded?: {
         glossaries?: components["schemas"]["SimpleGlossaryWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["SimpleOrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelSimpleProjectModel: {
+      _embedded?: {
+        projects?: components["schemas"]["SimpleProjectModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5033,6 +5419,23 @@ export interface components {
         | "branch.management"
         | "branch.protected-modify"
         | "organization-quotas.view"
+        | "apps.manage"
+        | "organization-members.view"
+        | "organization-members.manage"
+        | "organization-usage.view"
+        | "organization-projects.create"
+        | "organization-settings.manage"
+        | "organization.delete"
+        | "organization-apps.manage"
+        | "organization-slack.manage"
+        | "organization-ai.manage"
+        | "organization-glossaries.manage"
+        | "organization-glossary-terms.manage"
+        | "organization-translation-memory.view"
+        | "organization-translation-memory.manage"
+        | "organization-translation-memory-entries.manage"
+        | "organization-billing.view"
+        | "organization-billing.manage"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5139,6 +5542,23 @@ export interface components {
         | "branch.management"
         | "branch.protected-modify"
         | "organization-quotas.view"
+        | "apps.manage"
+        | "organization-members.view"
+        | "organization-members.manage"
+        | "organization-usage.view"
+        | "organization-projects.create"
+        | "organization-settings.manage"
+        | "organization.delete"
+        | "organization-apps.manage"
+        | "organization-slack.manage"
+        | "organization-ai.manage"
+        | "organization-glossaries.manage"
+        | "organization-glossary-terms.manage"
+        | "organization-translation-memory.view"
+        | "organization-translation-memory.manage"
+        | "organization-translation-memory-entries.manage"
+        | "organization-billing.view"
+        | "organization-billing.manage"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -5421,7 +5841,15 @@ export interface components {
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
         | "QA_ISSUE_IGNORE"
-        | "QA_ISSUE_UNIGNORE";
+        | "QA_ISSUE_UNIGNORE"
+        | "APP_REGISTER"
+        | "APP_INSTALL"
+        | "APP_UNINSTALL"
+        | "APP_UPDATE"
+        | "APP_ENABLE_FOR_PROJECT"
+        | "APP_DISABLE_FOR_PROJECT"
+        | "APP_SECRET_UPDATE"
+        | "APP_AVAILABILITY_UPDATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -5429,6 +5857,16 @@ export interface components {
        * @example We are Dunder Mifflin, a paper company. We sell paper. This is a project of translations for our paper selling app.
        */
       description?: string;
+    };
+    ProjectAppModel: {
+      appId: string;
+      baseUrl: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      modules: components["schemas"]["AppManifestModulesDto"];
+      name: string;
+      version: string;
     };
     /** @description Project assignments with access settings. */
     ProjectAssignmentDto: {
@@ -5446,6 +5884,12 @@ export interface components {
       readAccess: boolean;
       /** @description Whether the project can write to this TM */
       writeAccess: boolean;
+    };
+    ProjectDashboardPageModuleDto: {
+      entry: string;
+      icon: string;
+      key: string;
+      title: string;
     };
     ProjectInvitationModel: {
       code?: string;
@@ -5774,6 +6218,7 @@ export interface components {
     PublicConfigurationDTO: {
       allowRegistrations: boolean;
       appName: string;
+      appsEnabled: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
       authentication: boolean;
       billing: components["schemas"]["PublicBillingConfigurationDTO"];
@@ -6161,6 +6606,13 @@ export interface components {
        */
       expiresAt?: number;
     };
+    RegisterAppRequest: {
+      /** @description Whether to also install the app for this organization. Defaults to true; set false to only register it (the app-level credentials are still returned). */
+      install: boolean;
+      /** @description SHA-256 hex of the manifest returned by the preview. When present, the server refetches the manifest and rejects the request with `app_manifest_changed` if its bytes differ, so an app cannot widen the scopes it requests between the consent preview and this call. */
+      manifestHash?: string;
+      manifestUrl: string;
+    };
     /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
     RelatedKeyDto: {
       branch?: string;
@@ -6233,6 +6685,13 @@ export interface components {
       token: string;
       /** Format: int64 */
       updatedAt: number;
+    };
+    RotateAppSecretRequest: {
+      /**
+       * Format: int64
+       * @description How long the outgoing secret keeps working — the window the app (or an operator copying the secret in by hand) has to move to the new one. There is no immediate cutover: whether the app really adopted a delivered secret is unknowable, so the old one always lives out its window unless revoked explicitly. Capped at 7 days.
+       */
+      graceSeconds: number;
     };
     S3ContentStorageConfigDto: {
       accessKey?: string;
@@ -6767,6 +7226,7 @@ export interface components {
         | "project_not_found"
         | "resource_not_found"
         | "scope_not_found"
+        | "organization_scope_not_assignable_to_project"
         | "key_exists"
         | "third_party_auth_error_message"
         | "third_party_auth_no_email"
@@ -7096,7 +7556,27 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "app_manifest_fetch_failed"
+        | "app_manifest_invalid"
+        | "app_manifest_same_origin_as_tolgee"
+        | "app_not_found"
+        | "app_install_not_found"
+        | "app_already_installed"
+        | "app_already_registered"
+        | "app_not_available_for_organization"
+        | "app_not_registered"
+        | "app_manifest_changed"
+        | "plan_apps_limit_exceeded"
+        | "invalid_app_credentials"
+        | "app_access_forbidden"
+        | "app_not_enabled_for_project"
+        | "app_acting_as_user_not_project_member"
+        | "app_unsupported_grant_type"
+        | "app_invalid_acting_as_user_id"
+        | "app_secret_not_found"
+        | "app_too_many_live_secrets"
+        | "app_cannot_revoke_last_secret";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8512,6 +8992,296 @@ export interface operations {
       };
     };
   };
+  /** The organizations granted the app besides the owner, searchable and paged. */
+  availableOrganizations: {
+    parameters: {
+      path: {
+        appId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  addAvailableOrganization: {
+    parameters: {
+      path: {
+        appId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables the app in that organization's projects unless it stays reachable through availability to all organizations. */
+  removeAvailableOrganization: {
+    parameters: {
+      path: {
+        appId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setAvailableToAll: {
+    parameters: {
+      path: {
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables the app in every non-owner project that could only reach it through availability to all organizations. */
+  clearAvailableToAll: {
+    parameters: {
+      path: {
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Backs the installations view: which organizations hold the app, searchable and paged. */
+  installations: {
+    parameters: {
+      path: {
+        appId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns all chunk execution items currently in the batch job queue */
   getBatchJobQueue: {
     responses: {
@@ -9492,7 +10262,7 @@ export interface operations {
     };
   };
   /** Returns specific API key info */
-  get_26: {
+  get_27: {
     parameters: {
       path: {
         keyId: number;
@@ -9503,6 +10273,153 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every installation of the app on this server. The install ids are what the token endpoint exchanges for install-scoped tokens; the projects each install may act on are listed by the installation's `/projects` endpoint. */
+  listInstallations: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSelfInstallationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Paginated list of the projects the given installation of the calling app may currently act on. The list changes whenever a project owner enables or disables the app. */
+  listEnabledProjects: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Re-reads the app's manifest and updates the stored snapshot. Never widens the install's granted scopes: a manifest that requests more surfaces those as `pendingScopes` until the organization's owner approves them; scopes the manifest no longer requests are dropped. */
+  refreshInstallation: {
+    parameters: {
+      path: {
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSelfInstallationModel"];
         };
       };
       /** Bad Request */
@@ -10058,7 +10975,7 @@ export interface operations {
       };
     };
   };
-  delete_19: {
+  delete_20: {
     parameters: {
       path: {
         ids: number[];
@@ -10951,6 +11868,303 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app this organization has installed. */
+  list_5: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and installs the app it describes for the organization. The app must already be registered on this server and available to the organization: when it is not registered, the call fails with the `app_not_registered` code, and the caller may register it - becoming its owner - through the owned-apps endpoint. No credentials are disclosed here. */
+  install: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Fetches the manifest at the given URL and returns its parsed contents (including the requested scopes and a `manifestHash`) without persisting anything. Used to show a consent prompt before registering or installing; pass the hash back so the write can reject a manifest that changed. */
+  preview: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppManifestPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  /** Uninstalls the app from the organization. */
+  remove: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Re-fetches the app's manifest and updates the stored snapshot. As the organization's consent authority, this also approves the scopes the manifest now requests: the install adopts that scope set, clearing any pending permission requests. This is the only path that may widen an install's granted scopes. */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppInstallModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Issues a short-lived JWT bound to (install, current user) that the dashboard iframe uses to call Tolgee's REST API on behalf of the user. The token is organization-wide: it works on every project the install is enabled for, always capped by the user's own permissions there. */
+  mintToken: {
+    parameters: {
+      path: {
+        organizationId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppTokenModel"];
         };
       };
       /** Bad Request */
@@ -11919,7 +13133,7 @@ export interface operations {
       };
     };
   };
-  get_25: {
+  get_26: {
     parameters: {
       path: {
         organizationId: number;
@@ -12487,6 +13701,455 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every app the organization registered, together with the health of its manifest. An app the organization also installed appears in the installed apps list as well. */
+  list_4: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelOwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Registers the app described by the manifest and, unless `install` is false, installs it for the organization. The organization becomes the app's owner, and the response is the only place the app-level credentials are ever disclosed. When the app is already registered the call fails with `app_already_registered`; installing an existing app is the install endpoint. */
+  register: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppRegisteredModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterAppRequest"];
+      };
+    };
+  };
+  get_25: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OwnedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Takes the app down across the whole server: every organization's install is removed and the app's credentials are revoked. Use this to retire an app or to kill a compromised one in a single step, rather than uninstalling it per organization. */
+  delete_17: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns every secret of the app, revoked and expired ones included, without disclosing any of them. At rest an app has a single active secret; older ones, each with an `expiresAt`, linger only while a rotation's grace window is open. */
+  listSecrets: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Mints a replacement secret and puts every other active one on a deadline. The new secret is returned here — the only place it is disclosed. The old secrets keep working until `previousExpiresAt` — the `graceSeconds` window — and can be revoked earlier by hand; there is no immediate cutover, because Tolgee cannot know the app has adopted the new secret. Refused while the app already has the maximum number of active secrets. Installs, availability and per-project enablements are untouched. */
+  rotateSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretRotationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RotateAppSecretRequest"];
+      };
+    };
+  };
+  /** Ends this one secret at once — how a rotation's grace window is cut short, and how a leaked credential is retired. Revoking the app's only active secret is refused unless `force=true`, so an ordinary revoke cannot cut the app off by mistake; `force` also invalidates every access token already minted from the app's secrets. It does not touch the app's OTHER live secrets, so to fully contain a compromise revoke each secret (a holder of a live secret can mint more) or delete the app, which retires every credential in one step. Idempotent. */
+  revokeSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+        secretId: number;
+      };
+      query: {
+        /** Revoke even when this is the app's last active secret, and invalidate every access token already minted from the app's secrets. Use to retire a leaked credential; without it, revoking the only active secret is refused so the app can't be cut off by mistake. */
+        force?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Unlike a client secret, the webhook signing secret is stored in the clear — Tolgee needs it to sign every delivery — so the owner can read it back here to configure the app by hand. It signs outbound lifecycle deliveries and authenticates nothing towards Tolgee. */
+  getWebhookSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppWebhookSecretModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Mints a new webhook signing secret. The new secret is both returned here — the only place it is disclosed — and delivered to the app, signed with the old secret so a running app adopts it automatically; the `delivery` field says whether it landed. A running app keeps accepting the old secret during the overlap and drops it on its own next rotation. */
+  rotateWebhookSecret: {
+    parameters: {
+      path: {
+        organizationId: number;
+        appId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppWebhookSecretModel"];
         };
       };
       /** Bad Request */
@@ -15464,6 +17127,204 @@ export interface operations {
       };
     };
   };
+  /** Returns every app the project's organization has installed, each annotated with whether it is enabled for this project. Requires apps.manage: it discloses the organization's whole app inventory, including apps not enabled for this project. The default project view uses the `/enabled` listing instead. */
+  list_12: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns only the apps enabled for this project, which every project member needs to render their dashboard pages. Discloses nothing about the organization's other apps. */
+  listEnabled: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Enables the given app install for this project. Idempotent. */
+  enable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables the given app for this project. Idempotent - no-op if it wasn't enabled. */
+  disable: {
+    parameters: {
+      path: {
+        projectId: number;
+        installId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Returns default auto translation settings for project (deprecated: use per language config with null language id) */
   getAutoTranslationSettings: {
     parameters: {
@@ -15667,7 +17528,7 @@ export interface operations {
       };
     };
   };
-  list_4: {
+  list_6: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -19596,7 +21457,7 @@ export interface operations {
       };
     };
   };
-  list_8: {
+  list_10: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -20242,7 +22103,7 @@ export interface operations {
       };
     };
   };
-  delete_17: {
+  delete_18: {
     parameters: {
       path: {
         ids: number[];
@@ -25696,7 +27557,7 @@ export interface operations {
     };
   };
   /** Always readable. When the TRANSLATION_MEMORY feature is not enabled for the organization, only the project-type assignment (if any) is returned so the settings page can still show the row that already drives in-project suggestions. */
-  list_6: {
+  list_8: {
     parameters: {
       path: {
         projectId: number;
@@ -28191,6 +30052,54 @@ export interface operations {
       };
     };
   };
+  /** OAuth 2.0 client-credentials grant. Authenticates with the app-level credentials, names an installation via `install_id`, and returns a short-lived access token the app's backend uses to call Tolgee's REST API as that install. Omit `install_id` to get an app-level token for app-level operations (installation discovery); the install ids come from there. */
+  token: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AppAccessTokenModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AppClientCredentialsRequest"];
+      };
+    };
+  };
   identify: {
     responses: {
       /** OK */
@@ -28599,6 +30508,23 @@ export interface operations {
               | "branch.management"
               | "branch.protected-modify"
               | "organization-quotas.view"
+              | "apps.manage"
+              | "organization-members.view"
+              | "organization-members.manage"
+              | "organization-usage.view"
+              | "organization-projects.create"
+              | "organization-settings.manage"
+              | "organization.delete"
+              | "organization-apps.manage"
+              | "organization-slack.manage"
+              | "organization-ai.manage"
+              | "organization-glossaries.manage"
+              | "organization-glossary-terms.manage"
+              | "organization-translation-memory.view"
+              | "organization-translation-memory.manage"
+              | "organization-translation-memory-entries.manage"
+              | "organization-billing.view"
+              | "organization-billing.manage"
             )[];
           };
         };

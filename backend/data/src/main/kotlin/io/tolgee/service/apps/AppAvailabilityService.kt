@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class AppAvailabilityService(
   private val appAvailabilityRepository: AppAvailabilityRepository,
   private val appEnabledForProjectRepository: AppEnabledForProjectRepository,
+  private val appEnablementCache: AppEnablementCache,
 ) {
   /** Server-admin action: offer the app to every organization. Idempotent. */
   @Transactional
@@ -32,6 +33,9 @@ class AppAvailabilityService(
     appAvailabilityRepository.delete(sentinel)
     appAvailabilityRepository.flush()
     appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
+    // The bulk disable removed enablements for still-live installs across organizations; which ones is
+    // not known here, and withdrawing availability is a rare admin action, so evict every entry.
+    appEnablementCache.evictAll()
   }
 
   /** Server-admin action: make the app installable by one organization. Idempotent. */
@@ -54,6 +58,8 @@ class AppAvailabilityService(
     appAvailabilityRepository.delete(existing)
     appAvailabilityRepository.flush()
     appEnabledForProjectRepository.disableWhereNoLongerAvailable(appEntityId)
+    // See clearAvailableToAll: the bulk disable touched an unknown set of installs, so evict every entry.
+    appEnablementCache.evictAll()
   }
 
   /** Whether the app carries the all-organizations sentinel. */
