@@ -42,6 +42,28 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns bad request when sorting by an unknown property`() {
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?sort=keyName")
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("unknown_sort_property")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns bad request when sorting dereferences a basic property`() {
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?sort=name.nope")
+      .andIsBadRequest
+      .andAssertThatJson {
+        node("code").isEqualTo("unknown_sort_property")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `returns all keys`() {
     testData.addNKeys(120)
     testData.addNBranchedKeys(10)

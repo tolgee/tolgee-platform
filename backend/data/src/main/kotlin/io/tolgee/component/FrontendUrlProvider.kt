@@ -2,6 +2,8 @@ package io.tolgee.component
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @Component
@@ -19,20 +21,15 @@ class FrontendUrlProvider(
     }
 
   private fun getFromServerRequest(): String {
-    try {
-      val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
-      builder.replacePath("")
-      builder.replaceQuery("")
-      return builder.build().toUriString()
-    } catch (e: IllegalStateException) {
-      if (e.message?.contains("No current ServletRequestAttributes") == true) {
-        throw IllegalStateException(
+    val attributes =
+      RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
+        ?: throw IllegalStateException(
           "Trying to find frontend url, but there is no current request. " +
             "You will have to specify frontend url in application properties.",
         )
-      }
-      throw e
-    }
+    val builder = ServletUriComponentsBuilder.fromRequestUri(attributes.request)
+    builder.replacePath("")
+    return builder.build().toUriString()
   }
 
   fun getSubscriptionsUrl(organizationSlug: String): String =

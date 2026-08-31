@@ -225,8 +225,7 @@ class EeSubscriptionServiceImpl(
       try {
         client.releaseKeyRemote(subscription)
       } catch (e: HttpClientErrorException.NotFound) {
-        val licenceKeyNotFound = e.message?.contains(Message.LICENSE_KEY_NOT_FOUND.code) == true
-        if (!licenceKeyNotFound) {
+        if (e.parseTolgeeErrorBody()?.code != Message.LICENSE_KEY_NOT_FOUND.code) {
           throw e
         }
       }
