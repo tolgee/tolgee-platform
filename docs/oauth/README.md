@@ -306,10 +306,18 @@ These are known gaps, deferred to the client rounds that first exercise them:
   comment. That bypass applied to project API keys too, so a key could act on those resources while carrying none of
   `batch-jobs.view`, `batch-jobs.cancel`, `translation-suggestions.manage` or `translation-comments.edit`. A key is a
   scoped capability, so it now has to carry the real scope; a webapp JWT and a PAT still carry the user's full
-  authority and are unaffected. Existing keys are not backfilled — unlike `tasks.assigned-access`, the scopes here
-  already exist and adding them to every key would grant more than the bypass did. A key that relied on it needs the
-  scope added, and `GET /v2/projects/{id}/batch-jobs/{jobId}` is the likeliest one to notice:
-  `translations.batch-machine` does not expand to `batch-jobs.view`.
+  authority and are unaffected. Existing keys are not backfilled: the scopes here already exist, and adding them to
+  every key would grant more than the bypass did. A key that relied on it needs the scope added, and
+  `GET /v2/projects/{id}/batch-jobs/{jobId}` is the likeliest one to notice: `translations.batch-machine` does not
+  expand to `batch-jobs.view`.
+
+- **Granular permissions and project API keys lose the task-assignee elevation** (breaking change). Being a task's
+  assignee used to be enough to view and edit that task whatever the permission said. `tasks.assigned-access` now
+  gates it. Role-based permissions pick the scope up for free because `ProjectPermissionType` expands at runtime,
+  but granular permissions and API keys store their scope list literally, so on upgrade they simply no longer carry
+  it. There is deliberately no backfill: granting a new scope to every existing permission that holds any scope
+  would widen a lot of grants at once to restore a bypass, and losing an elevation fails closed where granting one
+  does not. Anyone who relied on it adds `tasks.assigned-access` explicitly.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client

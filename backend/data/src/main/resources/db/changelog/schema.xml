@@ -5938,10 +5938,4 @@
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
-    <changeSet author="anty" id="tasks-assigned-access-backfill">
-        <sqlFile path="classpath:db/changelog/tasksAssignedAccessBackfill.sql" splitStatements="true"/>
-        <rollback>
-            <sqlFile path="classpath:db/changelog/tasksAssignedAccessBackfillRollback.sql" splitStatements="true"/>
-        </rollback>
-    </changeSet>
 </databaseChangeLog>
