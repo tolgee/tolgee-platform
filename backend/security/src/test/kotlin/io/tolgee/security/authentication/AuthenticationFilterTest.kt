@@ -334,6 +334,63 @@ class AuthenticationFilterTest {
   }
 
   @Test
+  fun `the authorization server's endpoints still enter the auth rate limiter`() {
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
+      .thenThrow(RateLimitedException(1000L, true))
+
+    val req = MockHttpServletRequest("POST", "/oauth2/token")
+
+    assertThrows<RateLimitedException> {
+      authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+    }
+  }
+
+  @Test
+  fun `doAuthenticate skips credential resolution on the authorization server's own endpoints`() {
+    val paths =
+      listOf(
+        "/oauth2/token",
+        "/oauth2/revoke",
+        "/.well-known/oauth-authorization-server",
+        // The dispatcher strips matrix parameters and decodes before matching, so the skip has to see the same path.
+        "/oauth2/token;a=b",
+        "/oauth2/%74oken",
+      )
+    paths.forEach { path ->
+      SecurityContextHolder.clearContext()
+      val req = MockHttpServletRequest("POST", path)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+      assertThat(SecurityContextHolder.getContext().authentication).isNull()
+    }
+  }
+
+  @Test
+  fun `the exemption survives a non-empty context path`() {
+    SecurityContextHolder.clearContext()
+    val req = MockHttpServletRequest("POST", "/tolgee/oauth2/token")
+    req.contextPath = "/tolgee"
+    req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+    assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+    assertThat(SecurityContextHolder.getContext().authentication).isNull()
+  }
+
+  @Test
+  fun `the exemption is by exact path, so a neighbour under the same prefix is still authenticated`() {
+    listOf("/.well-known/security.txt", "/.well-known/oauth-authorization-server/extra", "/oauth2/consent").forEach {
+      val req = MockHttpServletRequest("GET", it)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertThrows<AuthenticationException> {
+        authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+      }
+    }
+  }
+
+  @Test
   fun `it does not filter when request is OPTIONS`() {
     val req = MockHttpServletRequest()
     val res = MockHttpServletResponse()

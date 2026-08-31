@@ -8,6 +8,7 @@ import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.component.TestClockHeaderFilter
 import io.tolgee.component.VersionFilter
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.security.oauth2.OAuth2Constants
 import jakarta.servlet.MultipartConfigElement
 import org.springframework.boot.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
@@ -59,6 +60,8 @@ class WebConfiguration(
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
+    // OAuth 2.1 §3.1 forbids CORS here; see OAuth2AuthorizationServerController.
+    registry.addMapping(OAuth2Constants.AUTHORIZE_PATH).allowedOrigins()
     registry
       .addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
