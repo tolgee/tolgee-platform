@@ -96,4 +96,16 @@ export const useHasSupportChat = () => {
   return hasSupportChat({ limitedView, features });
 };
 
+export const useCanCreateProject = () => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const isOrganizationOwnerOrMaintainer = useIsOrganizationOwnerOrMaintainer();
+  const isAdmin = useIsAdmin();
+
+  if (!preferredOrganization) {
+    return false;
+  }
+
+  return isOrganizationOwnerOrMaintainer || isAdmin;
+};
+
 const EMPTY_LIST = [];
