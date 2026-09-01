@@ -19527,7 +19527,7 @@ export interface operations {
         filterTaskKeysDone?: boolean;
         /** Select only keys currently linked to a task in any of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so this reflects current task membership rather than an immutable audit log. */
         filterHasTaskInLang?: string[];
-        /** Select only keys not currently linked to a task in at least one of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
+        /** Select only keys not currently linked to a task in any of the provided languages, the exact complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
         filterHasNoTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
@@ -19786,7 +19786,7 @@ export interface operations {
         filterTaskKeysDone?: boolean;
         /** Select only keys currently linked to a task in any of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so this reflects current task membership rather than an immutable audit log. */
         filterHasTaskInLang?: string[];
-        /** Select only keys not currently linked to a task in at least one of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
+        /** Select only keys not currently linked to a task in any of the provided languages, the exact complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
         filterHasNoTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
@@ -20089,7 +20089,7 @@ export interface operations {
         filterTaskKeysDone?: boolean;
         /** Select only keys currently linked to a task in any of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so this reflects current task membership rather than an immutable audit log. */
         filterHasTaskInLang?: string[];
-        /** Select only keys not currently linked to a task in at least one of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
+        /** Select only keys not currently linked to a task in any of the provided languages, the exact complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
         filterHasNoTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
@@ -26151,7 +26151,7 @@ export interface operations {
         filterTaskKeysDone?: boolean;
         /** Select only keys currently linked to a task in any of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so this reflects current task membership rather than an immutable audit log. */
         filterHasTaskInLang?: string[];
-        /** Select only keys not currently linked to a task in at least one of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
+        /** Select only keys not currently linked to a task in any of the provided languages, the exact complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
         filterHasNoTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
@@ -26622,7 +26622,7 @@ export interface operations {
         filterTaskKeysDone?: boolean;
         /** Select only keys currently linked to a task in any of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so this reflects current task membership rather than an immutable audit log. */
         filterHasTaskInLang?: string[];
-        /** Select only keys not currently linked to a task in at least one of the provided languages. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
+        /** Select only keys not currently linked to a task in any of the provided languages, the exact complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed from a task or when the branch holding it is deleted, so a key can reappear here after having been in a task. */
         filterHasNoTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];

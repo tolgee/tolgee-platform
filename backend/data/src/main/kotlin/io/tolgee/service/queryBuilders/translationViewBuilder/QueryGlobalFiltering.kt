@@ -483,8 +483,7 @@ class QueryGlobalFiltering(
   private fun filterHasNoTaskInLang() {
     val languageIds =
       queryBase.queryTranslationFiltering.languageIdsForTags(params.filterHasNoTaskInLang) ?: return
-    val perLanguage = languageIds.map { cb.not(taskInLanguagePredicate(listOf(it), forceCorrelated = true)) }
-    queryBase.whereConditions.add(cb.or(*perLanguage.toTypedArray()))
+    queryBase.whereConditions.add(cb.not(taskInLanguagePredicate(languageIds, forceCorrelated = true)))
   }
 
   private fun taskInLanguagePredicate(

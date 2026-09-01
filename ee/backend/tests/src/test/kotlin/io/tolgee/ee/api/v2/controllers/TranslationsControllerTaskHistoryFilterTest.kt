@@ -138,7 +138,7 @@ class TranslationsControllerTaskHistoryFilterTest : ProjectAuthControllerTest("/
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `matches keys untouched in at least one of several languages`() {
+  fun `matches only keys untouched in every one of several languages`() {
     initTestData()
     testData.addKeyWithOwnTask("czech only", number = 10, taskLanguage = testData.czechLanguage)
     saveTestData()
@@ -147,10 +147,26 @@ class TranslationsControllerTaskHistoryFilterTest : ProjectAuthControllerTest("/
       "/translations?filterHasNoTaskInLang=en&filterHasNoTaskInLang=cs",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
-        isArray.hasSize(3)
-        node("[2].keyName").isEqualTo("czech only")
+        isArray.hasSize(2)
+        node("[0].keyName").isEqualTo("key 2")
+        node("[1].keyName").isEqualTo("key 3")
       }
-      node("page.totalElements").isEqualTo(3)
+      node("page.totalElements").isEqualTo(2)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `keeps the two directions disjoint across several languages`() {
+    initTestData()
+    testData.addKeyWithOwnTask("czech only", number = 10, taskLanguage = testData.czechLanguage)
+    saveTestData()
+
+    performProjectAuthGet(
+      "/translations?filterHasTaskInLang=en&filterHasTaskInLang=cs" +
+        "&filterHasNoTaskInLang=en&filterHasNoTaskInLang=cs",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
     }
   }
 
