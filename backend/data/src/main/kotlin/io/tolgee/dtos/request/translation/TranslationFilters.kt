@@ -219,10 +219,11 @@ $PATTERN_GRAMMAR_DOC""",
 
   @field:Parameter(
     description =
-      "Select only keys not currently linked to a task in at least one of the provided languages. " +
-        "Tasks in all states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) " +
-        "count. The link is dropped when a key is removed from a task or when the branch holding it " +
-        "is deleted, so a key can reappear here after having been in a task.",
+      "Select only keys not currently linked to a task in any of the provided languages, the exact " +
+        "complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) " +
+        "and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed " +
+        "from a task or when the branch holding it is deleted, so a key can reappear here after " +
+        "having been in a task.",
   )
   var filterHasNoTaskInLang: List<String>? = null
 
