@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
+import org.springframework.test.web.servlet.ResultActions
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -74,6 +75,13 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
+  fun `a managed member with no stored role is listed and can be re-enabled`() {
+    assertMemberFlags(testData.nullRoleDisabledManagedMember.username!!, managed = true, disabled = true)
+    enable(testData.nullRoleDisabledManagedMember.id).andIsOk
+    assertDisabledBy(testData.nullRoleDisabledManagedMember.id, null)
+  }
+
+  @Test
   fun `a member disabled by the organization that manages them elsewhere stays hidden here`() {
     assertNotListed(testData.disabledByOtherOrgPlainMember.username!!)
   }
@@ -89,6 +97,19 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     disable(testData.managedMember.id).andIsOk
     assertListedExactlyOnce(testData.multiProjectMember.username!!)
     assertListingShowsExactly(visibleMembers)
+  }
+
+  @Test
+  fun `a platform supporter cannot disable or enable through the org endpoints`() {
+    val supporter =
+      userAccountService.get(testData.outsidePlatformAdmin.id).apply {
+        role = UserAccount.Role.SUPPORTER
+        userAccountService.save(this)
+      }
+    userAccount = supporter
+
+    disable(testData.managedMember.id).andIsForbidden
+    enable(testData.orgDisabledManagedMember.id).andIsForbidden
   }
 
   @Test
@@ -122,6 +143,11 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
+  fun `the role of a disabled staff account attributed to the organization cannot be changed`() {
+    setRole(testData.orgDisabledManagedPlatformAdmin.id).andIsNotFound
+  }
+
+  @Test
   fun `the role of a member another organization disabled cannot be changed`() {
     setRole(testData.disabledByOtherOrgPlainMember.id).andIsNotFound
   }
@@ -129,20 +155,14 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `cannot disable a platform admin managed by the organization`() {
     disable(testData.managedPlatformAdmin.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
+      .andHasCustomValidation(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT)
     assertMemberFlags(testData.managedPlatformAdmin.username!!, managed = true, disabled = false)
   }
 
   @Test
   fun `cannot disable a platform supporter managed by the organization`() {
     disable(testData.managedPlatformSupporter.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
+      .andHasCustomValidation(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT)
     assertMemberFlags(testData.managedPlatformSupporter.username!!, managed = true, disabled = false)
   }
 
@@ -152,12 +172,14 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
+  fun `a disabled supporter account attributed to the organization is not listed`() {
+    assertNotListed(testData.orgDisabledManagedPlatformSupporter.username!!)
+  }
+
+  @Test
   fun `cannot enable a platform admin whose disable was attributed to the organization`() {
     enable(testData.orgDisabledManagedPlatformAdmin.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT.code)
+      .andHasCustomValidation(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT)
     assertThat(userAccountService.findActiveOrDisabled(testData.orgDisabledManagedPlatformAdmin.id)!!.disabledAt)
       .isNotNull()
   }
@@ -165,33 +187,28 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `enabling an already-enabled platform admin managed by the organization stays a no-op`() {
     enable(testData.managedPlatformAdmin.id).andIsOk
+    val user = userAccountService.findActiveOrDisabled(testData.managedPlatformAdmin.id)!!
+    assertThat(user.disabledAt).isNull()
+    assertThat(user.disabledBy).isNull()
+    assertThat(user.role).isEqualTo(UserAccount.Role.ADMIN)
   }
 
   @Test
   fun `cannot disable a non-managed member`() {
     disable(testData.nonManagedMember.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
   fun `cannot enable a non-managed member`() {
     enable(testData.nonManagedMember.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
   fun `cannot disable a user managed by another organization`() {
     disable(testData.managedByOtherOrg.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
@@ -204,10 +221,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `an owner cannot enable themselves, they are not a managed member`() {
     enable(testData.owner.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
@@ -260,20 +274,14 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `cannot enable a user managed by another organization`() {
     enable(testData.managedByOtherOrg.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
   fun `org owner cannot re-enable a user a platform admin disabled`() {
     userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
     enable(testData.managedMember.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+      .andHasCustomValidation(Message.USER_DISABLED_BY_ADMIN)
     assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
   }
 
@@ -281,10 +289,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   fun `an org disable is rejected, not silently dropped, on an admin-disabled account`() {
     userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
     disable(testData.managedMember.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+      .andHasCustomValidation(Message.USER_DISABLED_BY_ADMIN)
     assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
   }
 
@@ -294,10 +299,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     userAccountService.disable(testData.managedMember.id, UserDisabledBy.ADMIN)
     assertDisabledBy(testData.managedMember.id, UserDisabledBy.ADMIN)
     enable(testData.managedMember.id)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_DISABLED_BY_ADMIN.code)
+      .andHasCustomValidation(Message.USER_DISABLED_BY_ADMIN)
   }
 
   @Test
@@ -348,10 +350,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   fun `a managed user cannot leave their managing organization`() {
     userAccount = testData.managedMember
     performAuthPut("/v2/organizations/${testData.organization.id}/leave", null)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
@@ -363,7 +362,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   }
 
   @Test
-  fun `a member an admin disabled cannot be removed`() {
+  fun `a non-managed disabled member cannot be removed`() {
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/users/${testData.disabledNonManagedMember.id}",
       null,
@@ -373,10 +372,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
   @Test
   fun `removing a managed user is rejected`() {
     performAuthDelete("/v2/organizations/${testData.organization.id}/users/${testData.managedMember.id}", null)
-      .andIsBadRequest
-      .andAssertError
-      .isCustomValidation
-      .hasMessage(Message.USER_IS_MANAGED_BY_ORGANIZATION.code)
+      .andHasCustomValidation(Message.USER_IS_MANAGED_BY_ORGANIZATION)
   }
 
   @Test
@@ -453,6 +449,11 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
     assertThat(userAccountService.findActiveOrDisabled(userId)!!.disabledBy).isEqualTo(expected)
   }
 
+  private fun ResultActions.andHasCustomValidation(message: Message) {
+    this.andIsBadRequest.andAssertError.isCustomValidation
+      .hasMessage(message.code)
+  }
+
   private val visibleMembers
     get() =
       listOf(
@@ -460,6 +461,7 @@ class OrganizationControllerManagedUsersTest : BaseOrganizationControllerTest() 
         testData.managedMember,
         testData.nonManagedMember,
         testData.orgDisabledManagedMember,
+        testData.nullRoleDisabledManagedMember,
         testData.managedPlatformAdmin,
         testData.managedPlatformSupporter,
         testData.managedByOtherOrg,

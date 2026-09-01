@@ -9,7 +9,6 @@ import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnBeforeOrganizationSeatIncrease
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Invitation
@@ -285,11 +284,11 @@ class OrganizationRoleService(
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
     val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException()
-    if (!isVisibleToOrganization(user, organizationId)) {
+    if (isHiddenFromOrganizationByDisable(user, organizationId)) {
       throw NotFoundException()
     }
 
-    removeRole(userId, organizationId)
+    removeFromOrganization(userId, organizationId)
   }
 
   @Transactional
@@ -297,12 +296,7 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    if (authenticationFacade.authenticatedUser.id == userId) {
-      throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
-    }
-    if (!isManagedBy(userId, organizationId)) {
-      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
-    }
+    checkManagedBy(userId, organizationId)
 
     userAccountService.disable(userId, UserDisabledBy.ORGANIZATION)
   }
@@ -312,15 +306,13 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    if (!isManagedBy(userId, organizationId)) {
-      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
-    }
+    checkManagedBy(userId, organizationId)
 
-    val seatTaken = userAccountService.enable(userId, UserDisabledBy.ORGANIZATION)
+    val becameEnabled = userAccountService.enable(userId, UserDisabledBy.ORGANIZATION)
 
-    // Skipping the publish skips the seat-limit check: a platform admin must be able to re-enable
-    // regardless of the organization's plan.
-    if (seatTaken && !authenticationFacade.authenticatedUser.isAdmin()) {
+    // Published after the enable but before commit, so the listener's own transaction still counts the
+    // organization without this user and has to add the seat being taken.
+    if (becameEnabled) {
       applicationEventPublisher.publishEvent(OnBeforeOrganizationSeatIncrease(this, organizationId))
     }
   }
@@ -330,7 +322,16 @@ class OrganizationRoleService(
     organizationId: Long,
   ): Boolean = getManagedBy(userId)?.id == organizationId
 
-  private fun removeRole(
+  private fun checkManagedBy(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    if (!isManagedBy(userId, organizationId)) {
+      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
+    }
+  }
+
+  private fun removeFromOrganization(
     userId: Long,
     organizationId: Long,
   ) {
@@ -371,23 +372,13 @@ class OrganizationRoleService(
     self.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
   }
 
-  /** Mirrors the disabled-member arm of [io.tolgee.repository.UserAccountRepository.getAllInOrganization]. */
-  private fun isVisibleToOrganization(
-    user: UserAccount,
-    organizationId: Long,
-  ): Boolean {
-    if (user.disabledAt == null) return true
-    if (user.isSupporterOrAdmin()) return false
-    return user.disabledBy == UserDisabledBy.ORGANIZATION && isManagedBy(user.id, organizationId)
-  }
-
   fun setMemberRole(
     organizationId: Long,
     userId: Long,
     dto: SetOrganizationRoleDto,
   ) {
     val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException()
-    if (!isVisibleToOrganization(user, organizationId)) {
+    if (isHiddenFromOrganizationByDisable(user, organizationId)) {
       throw NotFoundException()
     }
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
@@ -395,6 +386,16 @@ class OrganizationRoleService(
       organizationRoleRepository.save(it)
     } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
     evictCache(organizationId, userId)
+  }
+
+  /** Keep in step with the disabled-member arm of [io.tolgee.repository.UserAccountRepository.getAllInOrganization]. */
+  private fun isHiddenFromOrganizationByDisable(
+    user: UserAccount,
+    organizationId: Long,
+  ): Boolean {
+    if (user.disabledAt == null) return false
+    if (user.isSupporterOrAdmin()) return true
+    return user.disabledBy != UserDisabledBy.ORGANIZATION || !isManagedBy(user.id, organizationId)
   }
 
   fun createForInvitation(

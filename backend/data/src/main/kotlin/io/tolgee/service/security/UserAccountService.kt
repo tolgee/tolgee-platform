@@ -654,21 +654,20 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun disable(
     userId: Long,
-    disabledBy: UserDisabledBy,
+    actingAs: UserDisabledBy,
   ) {
     val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
-    checkOrganizationMayActOnAccount(user, disabledBy)
+    checkOrganizationMayActOnAccount(user, actingAs)
     if (user.disabledAt != null) {
-      takeOverDisable(user, disabledBy)
+      takeOverDisable(user, actingAs)
       return
     }
     user.disabledAt = currentDateProvider.date
-    user.disabledBy = disabledBy
+    user.disabledBy = actingAs
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
-  /** @return whether the account actually changed from disabled to enabled. */
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
   fun enable(
@@ -688,7 +687,6 @@ class UserAccountService(
     return true
   }
 
-  /** changeSet 1785252020000-2 can leave a managed staff account carrying an ORGANIZATION origin. */
   private fun checkOrganizationMayActOnAccount(
     user: UserAccount,
     actingAs: UserDisabledBy,
@@ -700,13 +698,13 @@ class UserAccountService(
 
   private fun takeOverDisable(
     user: UserAccount,
-    disabledBy: UserDisabledBy,
+    actingAs: UserDisabledBy,
   ) {
-    if (user.disabledBy == disabledBy) return
-    if (!canOverrideDisable(user.disabledBy, disabledBy)) {
+    if (user.disabledBy == actingAs) return
+    if (!canOverrideDisable(user.disabledBy, actingAs)) {
       throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
     }
-    user.disabledBy = disabledBy
+    user.disabledBy = actingAs
     this.save(user)
   }
 
@@ -715,8 +713,6 @@ class UserAccountService(
     requestedBy: UserDisabledBy,
   ): Boolean {
     if (requestedBy == UserDisabledBy.ADMIN) return true
-    // An unrecorded origin stays with the platform: it is either a disable predating the column or a
-    // demo account, and neither is the organization's to release.
     return storedDisabledBy == UserDisabledBy.ORGANIZATION
   }
 

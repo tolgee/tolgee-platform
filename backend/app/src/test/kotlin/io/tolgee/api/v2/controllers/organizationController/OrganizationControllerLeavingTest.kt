@@ -9,7 +9,6 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -18,15 +17,6 @@ import org.springframework.data.domain.PageRequest
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
-  // A leftover disabled row is invisible to createUserIfNotExists (findActive) but still holds the
-  // username unique index, so the next run would fail on the insert.
-  @AfterEach
-  fun deleteDisabledFixtureUsers() {
-    listOf(DISABLED_SECOND_OWNER, DISABLED_SOLE_OWNER).forEach { username ->
-      userAccountService.findActiveOrDisabled(username)?.let { userAccountService.delete(it) }
-    }
-  }
-
   @Test
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }

@@ -20,7 +20,7 @@ import { RemoveUserButton } from 'tg.views/organizations/members/RemoveUserButto
 import {
   DisableUserButton,
   EnableUserButton,
-} from 'tg.views/organizations/members/DisableEnableUserButton';
+} from 'tg.views/organizations/members/UserAvailabilityButton';
 import { UpdateRoleButton } from 'tg.views/organizations/members/UpdateRoleButton';
 import { useLeaveOrganization } from 'tg.views/organizations/useLeaveOrganization';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
@@ -88,8 +88,8 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
 
   const [projectsOpen, setProjectsOpen] = useState(false);
 
-  // A SUPPORTER's bypass is read-only (OrganizationAuthorizationInterceptor.canBypass), so these
-  // PUTs would 403 for them.
+  // A SUPPORTER's bypass is read-only (OrganizationAuthorizationInterceptor.canBypass), so the
+  // disable, enable and remove calls below would 403 for them.
   const canManageMembers = organization?.currentUserRole === 'OWNER' || isAdmin;
 
   const renderMemberAction = () => {
