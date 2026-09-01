@@ -7,13 +7,12 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.project.SetPermissionLanguageParams
 import io.tolgee.ee.service.EePermissionService
 import io.tolgee.facade.ProjectPermissionFacade
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.organization.OrganizationRoleService
 import org.springdoc.core.annotations.ParameterObject
@@ -69,7 +68,7 @@ class AdvancedPermissionController(
       "Set default granular (scope-based) permissions for organization users, " +
         "who don't have direct project permissions set.",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
   @RequiresFeatures(Feature.GRANULAR_PERMISSIONS)
   fun setBasePermissions(
     @PathVariable organizationId: Long,

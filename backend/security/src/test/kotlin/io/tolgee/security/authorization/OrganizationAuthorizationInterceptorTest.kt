@@ -23,6 +23,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -141,16 +142,34 @@ class OrganizationAuthorizationInterceptorTest {
       .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
       .thenReturn(true)
     Mockito
-      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
-      .thenReturn(false)
+      .`when`(organizationRoleService.getOrganizationScopes(1337L, 1337L))
+      .thenReturn(emptySet())
 
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
 
     Mockito
-      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
-      .thenReturn(true)
+      .`when`(organizationRoleService.getOrganizationScopes(1337L, 1337L))
+      .thenReturn(OrganizationRoleType.OWNER.availableScopes.toSet())
 
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsOk
+  }
+
+  @Test
+  fun `enforces a granular org scope declared with RequiresOrganizationScopes`() {
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
+      .thenReturn(true)
+    Mockito
+      .`when`(organizationRoleService.getOrganizationScopes(1337L, 1337L))
+      .thenReturn(OrganizationRoleType.MEMBER.availableScopes.toSet())
+
+    mockMvc.perform(get("/v2/organizations/1337/requires-members-manage")).andIsForbidden
+
+    Mockito
+      .`when`(organizationRoleService.getOrganizationScopes(1337L, 1337L))
+      .thenReturn(setOf(Scope.ORGANIZATION_MEMBERS_MANAGE))
+
+    mockMvc.perform(get("/v2/organizations/1337/requires-members-manage")).andIsOk
   }
 
   @Test
@@ -192,8 +211,8 @@ class OrganizationAuthorizationInterceptorTest {
   fun `the view floor grants default endpoints but not role-required ones`() {
     Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
     Mockito
-      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
-      .thenReturn(false)
+      .`when`(organizationRoleService.getOrganizationScopes(1337L, 1337L))
+      .thenReturn(emptySet())
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
@@ -254,33 +273,39 @@ class OrganizationAuthorizationInterceptorTest {
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-owner")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwner(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
+    @GetMapping("/v2/organizations/{id}/requires-members-manage")
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_MEMBERS_MANAGE])
+    fun requiresMembersManage(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
+
     @PostMapping("/v2/organizations/{id}/requires-owner-write-method")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerWriteMethod(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-owner-write-annotation")
     @WriteOperation
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerWriteAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @PostMapping("/v2/organizations/{id}/requires-owner-read-annotation")
     @ReadOnlyOperation
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     fun requiresOwnerReadAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/nonsense-perms")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    @RequiresOrganizationScopes([Scope.ORGANIZATION_SETTINGS_MANAGE])
     @UseDefaultPermissions
     fun nonsensePerms(
       @PathVariable id: Long,

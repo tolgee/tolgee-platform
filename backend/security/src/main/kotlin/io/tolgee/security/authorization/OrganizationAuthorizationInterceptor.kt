@@ -20,7 +20,7 @@ import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -37,7 +37,7 @@ import org.springframework.web.method.HandlerMethod
 /**
  * This interceptor performs an authorization step to access organization-related endpoints.
  * By default it enforces the org view floor (see [OrganizationRoleService.canUserViewStrictOrPublic]).
- * Anything beyond viewing must require a role via `@RequiresOrganizationRole`.
+ * Anything beyond viewing must require scopes via `@RequiresOrganizationScopes`.
  */
 @Component
 class OrganizationAuthorizationInterceptor(
@@ -64,12 +64,12 @@ class OrganizationAuthorizationInterceptor(
         ?: return true
 
     var bypassed = false
-    val requiredRole = getRequiredRole(request, handler)
+    val requiredScopes = getRequiredScopes(request, handler)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
       userId,
-      requiredRole ?: "read-only",
+      requiredScopes ?: "read-only",
     )
 
     // raw floor, not canUserViewOrPublic: admin/supporter access must fall through to canBypass below to stay audit-logged
@@ -93,18 +93,21 @@ class OrganizationAuthorizationInterceptor(
       bypassed = true
     }
 
-    if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!canBypass(request, handler)) {
-        logger.debug(
-          "Rejecting access to org#{} for user#{} - Insufficient role",
-          organization.id,
-          userId,
-        )
+    if (requiredScopes != null) {
+      val userScopes = organizationRoleService.getOrganizationScopes(userId, organization.id)
+      if (!userScopes.containsAll(requiredScopes)) {
+        if (!canBypass(request, handler)) {
+          logger.debug(
+            "Rejecting access to org#{} for user#{} - Insufficient organization scopes",
+            organization.id,
+            userId,
+          )
 
-        throw PermissionException()
+          throw PermissionException()
+        }
+
+        bypassed = true
       }
-
-      bypassed = true
     }
 
     if (bypassed) {
@@ -121,26 +124,31 @@ class OrganizationAuthorizationInterceptor(
     return true
   }
 
-  private fun getRequiredRole(
+  /**
+   * The organization scopes an endpoint requires, or null when it only needs the view floor
+   * (`@UseDefaultPermissions`).
+   */
+  private fun getRequiredScopes(
     request: HttpServletRequest,
     handler: HandlerMethod,
-  ): OrganizationRoleType? {
+  ): Set<Scope>? {
     val defaultPerms = AnnotationUtils.getAnnotation(handler.method, UseDefaultPermissions::class.java)
-    val orgPermission = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationRole::class.java)
+    val orgScopes = AnnotationUtils.getAnnotation(handler.method, RequiresOrganizationScopes::class.java)
 
-    if (defaultPerms == null && orgPermission == null) {
+    val present = listOfNotNull(defaultPerms, orgScopes)
+    if (present.isEmpty()) {
       // A permission policy MUST be explicitly defined.
       throw RuntimeException("No permission policy have been set for URI ${request.requestURI}!")
     }
-
-    if (defaultPerms != null && orgPermission != null) {
-      // Policy doesn't make sense
+    if (present.size > 1) {
       throw RuntimeException(
-        "Both `@UseDefaultPermissions` and `@RequiresOrganizationRole` have been set for this endpoint!",
+        "Only one of `@UseDefaultPermissions`, `@RequiresOrganizationScopes` " +
+          "may be set for URI ${request.requestURI}!",
       )
     }
 
-    return orgPermission?.role
+    orgScopes?.let { return it.scopes.toSet() }
+    return null
   }
 
   private fun canBypass(

@@ -40,6 +40,8 @@ class McpRequestContext(
     // so unauthenticated tool calls reach this point and must be rejected here.
     requireAuthenticated()
     // Order mirrors the HTTP interceptor chain:
+    // 0. AppAccessInterceptor — MCP has no app-specific route, so app tokens are denied outright.
+    denyAppTokens()
     // 1. RateLimitInterceptor
     applyRateLimit(spec)
     // 2. AuthenticationInterceptor (token type check)
@@ -68,6 +70,13 @@ class McpRequestContext(
   private fun requireAuthenticated() {
     if (authenticationFacade.authenticatedUserOrNull == null) {
       throw AuthenticationException(Message.UNAUTHENTICATED)
+    }
+  }
+
+  /** Mirrors [io.tolgee.security.authentication.AppAccessInterceptor], which does not run off the MVC chain. */
+  private fun denyAppTokens() {
+    if (authenticationFacade.isAppAuth) {
+      throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
     }
   }
 
@@ -108,13 +117,13 @@ class McpRequestContext(
     }
   }
 
-  /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.isUserOfRole] */
+  /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.getOrganizationScopes] */
   private fun checkOrgRole(spec: ToolEndpointSpec) {
-    val requiredRole = spec.requiredOrgRole ?: return
+    val requiredScopes = spec.requiredOrgScopes?.toSet() ?: return
     val orgId = organizationHolder.organizationOrNull?.id ?: return
     val userId = authenticationFacade.authenticatedUser.id
 
-    if (!organizationRoleService.isUserOfRole(userId, orgId, requiredRole)) {
+    if (!organizationRoleService.getOrganizationScopes(userId, orgId).containsAll(requiredScopes)) {
       throw PermissionException()
     }
   }

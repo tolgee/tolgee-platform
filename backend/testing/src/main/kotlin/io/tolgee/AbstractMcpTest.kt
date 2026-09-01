@@ -34,14 +34,20 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
 
   fun createMcpClientWithoutAuth(): McpSyncClient = createMcpClientWithHeader(null)
 
-  private fun createMcpClientWithHeader(apiKeyHeader: String?): McpSyncClient {
+  fun createMcpClientWithBearer(token: String): McpSyncClient =
+    createMcpClientWithHeader("Bearer $token", headerName = "Authorization")
+
+  private fun createMcpClientWithHeader(
+    headerValue: String?,
+    headerName: String = "X-API-Key",
+  ): McpSyncClient {
     val transport =
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
         .customizeRequest { builder ->
-          if (apiKeyHeader != null) {
-            builder.header("X-API-Key", apiKeyHeader)
+          if (headerValue != null) {
+            builder.header(headerName, headerValue)
           }
         }.build()
 
@@ -90,7 +96,7 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     )
   }
 
-  fun createTestDataWithPak(scopes: Set<Scope> = Scope.entries.toSet()): McpPakTestData {
+  fun createTestDataWithPak(scopes: Set<Scope> = Scope.projectAssignable): McpPakTestData {
     var apiKey: ApiKey? = null
     val base = BaseTestData(userName = "pak_test_user", projectName = "pak_test_project")
     base.projectBuilder.build {

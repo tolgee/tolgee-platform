@@ -48,6 +48,16 @@ class V2ProjectsInvitationControllerEeTest : ProjectAuthControllerTest("/v2/proj
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `rejects an organization-level scope on an invitation`() {
+    invitationTestUtil
+      .perform {
+        scopes = setOf("organization-members.manage")
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ORGANIZATION_SCOPE_NOT_ASSIGNABLE_TO_PROJECT)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `fails when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = setOf()
     invitationTestUtil

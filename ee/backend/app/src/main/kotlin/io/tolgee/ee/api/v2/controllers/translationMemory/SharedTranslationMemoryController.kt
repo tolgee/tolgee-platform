@@ -18,7 +18,7 @@ import io.tolgee.ee.data.translationMemory.SharedTranslationMemoryRequest
 import io.tolgee.ee.data.translationMemory.UpdateProjectTmSettingsRequest
 import io.tolgee.ee.service.translationMemory.SharedTranslationMemoryService
 import io.tolgee.ee.service.translationMemory.TranslationMemoryRowListingService
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryWithStats
 import io.tolgee.repository.translationMemory.TranslationMemoryProjectRepository
@@ -26,7 +26,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -64,7 +64,7 @@ class SharedTranslationMemoryController(
   @PostMapping("/translation-memories")
   @Operation(summary = "Create shared translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_CREATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   @Transactional
@@ -85,7 +85,7 @@ class SharedTranslationMemoryController(
         "TM list without switching into project settings.",
   )
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_UPDATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   @Transactional
@@ -104,7 +104,7 @@ class SharedTranslationMemoryController(
   @PutMapping("/translation-memories/{translationMemoryId:[0-9]+}")
   @Operation(summary = "Update shared translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_UPDATE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   @Transactional
@@ -120,7 +120,7 @@ class SharedTranslationMemoryController(
   @DeleteMapping("/translation-memories/{translationMemoryId:[0-9]+}")
   @Operation(summary = "Delete shared translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_MANAGE])
   @RequestActivity(ActivityType.TRANSLATION_MEMORY_DELETE)
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   @Transactional
@@ -134,7 +134,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories/{translationMemoryId:[0-9]+}")
   @Operation(summary = "Get translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun get(
     @PathVariable organizationId: Long,
@@ -147,7 +147,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories")
   @Operation(summary = "Get all translation memories in the organization")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAll(
     @PathVariable organizationId: Long,
@@ -161,7 +161,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories-with-stats")
   @Operation(summary = "Get all translation memories with statistics")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAllWithStats(
     @PathVariable organizationId: Long,
@@ -183,7 +183,7 @@ class SharedTranslationMemoryController(
         "without waiting on the per-TM virtual-row aggregation.",
   )
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getEntryCounts(
     @PathVariable organizationId: Long,
@@ -200,7 +200,7 @@ class SharedTranslationMemoryController(
   @GetMapping("/translation-memories/{translationMemoryId:[0-9]+}/assigned-projects")
   @Operation(summary = "Get projects assigned to a translation memory")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MEMBER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_TRANSLATION_MEMORY_VIEW])
   @RequiresFeatures(Feature.TRANSLATION_MEMORY)
   fun getAssignedProjects(
     @PathVariable organizationId: Long,

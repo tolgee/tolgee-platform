@@ -27,6 +27,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.AppProjectContextBinder
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
 import io.tolgee.security.ProjectHolder
@@ -38,7 +39,9 @@ import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.tracing.TolgeeTracingContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -90,6 +93,7 @@ class ProjectAuthorizationInterceptorTest {
       projectHolder,
       organizationHolder,
       activityHolder,
+      Mockito.mock(AppProjectContextBinder::class.java),
     )
 
   private val projectAuthenticationInterceptor =

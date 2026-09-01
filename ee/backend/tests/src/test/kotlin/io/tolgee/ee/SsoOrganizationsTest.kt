@@ -12,7 +12,6 @@ import io.tolgee.ee.utils.SsoMultiTenantsMocks
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.service.TenantService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -122,7 +121,7 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     loginAsSsoUser()
     val userName = SsoMultiTenantsMocks.jwtClaimsSet.get("email") as String
     val user = userAccountService.get(userName)
-    assertThat(organizationRoleService.isUserOfRole(user.id, testData.organization.id, OrganizationRoleType.MEMBER))
+    assertThat(organizationRoleService.hasAnyOrganizationRole(user.id, testData.organization.id))
       .isEqualTo(true)
   }
 

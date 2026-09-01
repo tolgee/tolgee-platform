@@ -138,6 +138,15 @@ data class UserAccount(
   @ColumnDefault("false")
   var isDemo: Boolean = false
 
+  /**
+   * An app install acting as itself rather than a person — see
+   * [io.tolgee.model.apps.AppInstall.principal]. Must be filtered out of every query that counts
+   * or lists people (seats, user listings, sign-in lookups, the org-backfill job).
+   */
+  @Column(name = "is_app_principal", nullable = false)
+  @ColumnDefault("false")
+  var isAppPrincipal: Boolean = false
+
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()
 

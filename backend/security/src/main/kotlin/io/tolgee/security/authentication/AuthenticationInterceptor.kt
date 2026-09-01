@@ -68,13 +68,19 @@ class AuthenticationInterceptor(
       }
     }
 
-    if (
-      requiresSuperAuth &&
-      authenticationProperties.enabled &&
-      authenticationFacade.authenticatedUser.needsSuperJwt &&
-      !authenticationFacade.isUserSuperAuthenticated
-    ) {
-      throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
+    if (requiresSuperAuth && authenticationProperties.enabled) {
+      // An app token is a machine credential and can never be super-authenticated. Without this it
+      // would pass vacuously: its synthetic principal is MANAGED, so needsSuperJwt is false.
+      if (authenticationFacade.isAppAuth) {
+        throw PermissionException(Message.APP_ACCESS_FORBIDDEN)
+      }
+
+      if (
+        authenticationFacade.authenticatedUser.needsSuperJwt &&
+        !authenticationFacade.isUserSuperAuthenticated
+      ) {
+        throw PermissionException(Message.EXPIRED_SUPER_JWT_TOKEN)
+      }
     }
 
     return true
