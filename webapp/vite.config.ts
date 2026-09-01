@@ -83,6 +83,27 @@ export default defineConfig(({ mode }) => {
       host: process.env.VITE_HOST || undefined,
       // this sets a default port to 3000
       port: Number(process.env.VITE_PORT) || 3000,
+      // Single-origin proxy for local OAuth testing; see docs/oauth/README.md.
+      proxy: process.env.VITE_DEV_PROXY_TARGET
+        ? Object.fromEntries(
+            [
+              '/v2',
+              '/api',
+              '/oauth2/authorize',
+              '/oauth2/token',
+              '/oauth2/revoke',
+              '/.well-known',
+            ].map((path) => [
+              path,
+              // Not the string shorthand: Vite expands that to changeOrigin: true, and the backend does not read
+              // X-Forwarded-* (see the `server:` comment in application.yaml), so it would emit URLs for its own host.
+              {
+                target: process.env.VITE_DEV_PROXY_TARGET,
+                changeOrigin: false,
+              },
+            ])
+          )
+        : undefined,
       // this enables direct access to library sources
       fs: {
         allow: [
