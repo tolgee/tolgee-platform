@@ -272,12 +272,9 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
     state: TaskState,
     type: TaskType,
     number: Long,
-    taskLanguage: Language = englishLanguage,
-    taskKeys: Collection<KeyBuilder> = keysInTask,
-  ): TaskBuilder {
-    lateinit var createdTask: TaskBuilder
+  ) {
     projectBuilder.apply {
-      createdTask =
+      blockedTask =
         addTask {
           this.number = number
           this.name = name
@@ -288,22 +285,20 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
               user,
             )
           project = projectBuilder.self
-          language = taskLanguage
+          language = englishLanguage
           author = projectUser.self
           this.state = state
         }
 
-      taskKeys.forEach {
+      keysInTask.forEach {
         addTaskKey {
-          task = createdTask.self
+          task = blockedTask.self
           key = it.self
           done = true
           author = user
         }
       }
     }
-    blockedTask = createdTask
-    return createdTask
   }
 
   fun addKeyWithOwnTask(
