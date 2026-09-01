@@ -2076,6 +2076,7 @@
   "plan_migration_not_found": "Migrare de plan negăsită",
   "plan_not_available_any_more": "Acest plan nu mai este disponibil",
   "plan_not_found": "Plan negăsit",
+  "plan_not_priced_in_organization_currency": "Această organizație este facturată într-o monedă pentru care acest plan nu are prețuri. Adăugați prețuri în acea monedă pentru plan.",
   "plan_seat_limit_exceeded": "Această instanță Tolgee a depășit limita de utilizatori. Vă rugăm să contactați administratorul de sistem al companiei de administrare.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Nu putem accepta invitația dumneavoastră deoarece organizația care vă invită a atins limita de locuri. Vă rugăm să îi contactați pentru a elibera sau achiziționa locuri suplimentare înainte de a vă putea alătura.",
   "plan_translation_limit_exceeded": "Limita de traducere a planului a fost depășită",

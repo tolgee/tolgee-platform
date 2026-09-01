@@ -2075,6 +2075,7 @@
   "plan_migration_not_found": "Migration du plan introuvable",
   "plan_not_available_any_more": "Ce forfait n'est plus disponible",
   "plan_not_found": "Plan introuvable",
+  "plan_not_priced_in_organization_currency": "Cette organisation est facturée dans une devise pour laquelle ce plan n'a aucun prix. Ajoutez des prix dans cette devise au plan.",
   "plan_seat_limit_exceeded": "Cette instance Tolgee a dépassé la limite de sièges. Veuillez contacter l'administrateur système de l'entreprise gestionnaire.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Nous ne pouvons pas accepter votre invitation car l'organisation invitante a atteint sa limite de places. Veuillez les contacter pour libérer ou acheter des places supplémentaires avant de pouvoir rejoindre.",
   "plan_translation_limit_exceeded": "Dépassement de la limite de traduction du plan",

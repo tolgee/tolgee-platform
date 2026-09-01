@@ -2082,6 +2082,7 @@
   "plan_migration_not_found": "Migrace plánu nenalezena",
   "plan_not_available_any_more": "Tento tarif již není dostupný",
   "plan_not_found": "Plán nenalezen",
+  "plan_not_priced_in_organization_currency": "Tato organizace je fakturována v měně, pro kterou tento plán nemá žádné ceny. Přidejte k plánu ceny v této měně.",
   "plan_seat_limit_exceeded": "Tato instance Tolgee překročila limit uživatelů. Kontaktujte prosím správce systému ze spravující společnosti.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Nemůžeme přijmout vaše pozvání, protože pozývající organizace dosáhla svého limitu míst. Prosím, kontaktujte je, aby uvolnili nebo zakoupili další místa, než se budete moci připojit.",
   "plan_translation_limit_exceeded": "Překročen limit překladů současného plánu",

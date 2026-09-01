@@ -2079,6 +2079,7 @@
   "plan_migration_not_found": "Planoverførsel ikke fundet",
   "plan_not_available_any_more": "Denne plan er ikke længere tilgængelig",
   "plan_not_found": "Plan ikke fundet",
+  "plan_not_priced_in_organization_currency": "Denne organisation faktureres i en valuta, som denne plan ikke har priser for. Tilføj priser i den valuta til planen.",
   "plan_seat_limit_exceeded": "Denne Tolgee-instans har overskredet sædegrænsen. Kontakt venligst systemadministratoren fra administrationsselskabet.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Vi kan ikke acceptere din invitation, fordi den inviterende organisation har nået sin sædegrænse. Kontakt dem venligst for at frigøre eller købe flere sæder, før du kan deltage.",
   "plan_translation_limit_exceeded": "Oversættelsesgrænsen for planen er overskredet",

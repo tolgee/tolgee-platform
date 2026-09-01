@@ -2082,6 +2082,7 @@
   "plan_migration_not_found": "Plan migration not found",
   "plan_not_available_any_more": "This plan is no longer available",
   "plan_not_found": "Plan not found",
+  "plan_not_priced_in_organization_currency": "This organization is billed in a currency this plan has no prices for. Add prices in that currency to the plan.",
   "plan_seat_limit_exceeded": "This Tolgee instance has exceeded the seat limit. Please contact the system administrator from the managing company.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "We cannot accept your invitation because the inviting organization has reached its seat limit. Please contact them to free up or purchase additional seats before you can join.",
   "plan_translation_limit_exceeded": "Plan translation limit exceeded",

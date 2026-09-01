@@ -2077,6 +2077,7 @@
   "plan_migration_not_found": "未找到计划迁移",
   "plan_not_available_any_more": "此计划已不再可用",
   "plan_not_found": "未找到计划",
+  "plan_not_priced_in_organization_currency": "该组织的计费货币,此方案未设置对应价格。请为该方案添加该货币的价格。",
   "plan_seat_limit_exceeded": "此 Tolgee 实例已超出席位限制。请联系管理公司的系统管理员。",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "我们无法接受您的邀请，因为邀请组织已达到席位限制。请联系他们释放或购买额外的席位，然后您才能加入。",
   "plan_translation_limit_exceeded": "翻译计划超出限制",

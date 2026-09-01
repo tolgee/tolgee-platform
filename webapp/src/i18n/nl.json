@@ -2080,6 +2080,7 @@
   "plan_migration_not_found": "Planmigratie niet gevonden",
   "plan_not_available_any_more": "Dit abonnement is niet meer beschikbaar",
   "plan_not_found": "Plan niet gevonden",
+  "plan_not_priced_in_organization_currency": "Deze organisatie wordt gefactureerd in een valuta waarvoor dit abonnement geen prijzen heeft. Voeg prijzen in die valuta toe aan het abonnement.",
   "plan_seat_limit_exceeded": "Deze Tolgee-instantie heeft de limiet voor gebruikers overschreden. Neem contact op met de systeembeheerder van het beheerbedrijf.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "We kunnen uw uitnodiging niet accepteren omdat de uitnodigende organisatie haar zetellimiet heeft bereikt. Neem contact met hen op om plaatsen vrij te maken of extra plaatsen aan te schaffen voordat u kunt deelnemen.",
   "plan_translation_limit_exceeded": "Vertaal limiet van het plan overschreden",

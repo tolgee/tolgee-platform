@@ -1,3 +1,10 @@
+## [3.219.5](https://github.com/tolgee/tolgee-platform/compare/v3.219.4...v3.219.5) (2026-09-01)
+
+
+### Bug Fixes
+
+* size the async and streaming thread pools instead of leaving both single-threaded ([#3843](https://github.com/tolgee/tolgee-platform/issues/3843)) ([cf3cb3c](https://github.com/tolgee/tolgee-platform/commit/cf3cb3cd0af09b3e9152e13b7993642cb945424a)), closes [tolgee/deployment#801](https://github.com/tolgee/deployment/issues/801) [tolgee/deployment#801](https://github.com/tolgee/deployment/issues/801) [tolgee/billing#291](https://github.com/tolgee/billing/issues/291)
+
 ## [3.219.4](https://github.com/tolgee/tolgee-platform/compare/v3.219.3...v3.219.4) (2026-08-31)
 
 

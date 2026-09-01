@@ -1868,6 +1868,7 @@
   "plan_limit_dialog_words_scheduled_change": "Zmiana planu jest już zaplanowana, dlatego automatyczne uaktualnianie jest wstrzymane do czasu jej wprowadzenia. Anuluj zaplanowaną zmianę, aby umożliwić automatyczne podwyższenie taryfy.",
   "plan_not_available_any_more": "Ten plan nie jest już dostępny",
   "plan_not_found": "Nie znaleziono planu",
+  "plan_not_priced_in_organization_currency": "Ta organizacja jest rozliczana w walucie, dla której ten plan nie ma cen. Dodaj ceny w tej walucie do planu.",
   "plan_seat_limit_exceeded": "Ta instancja Tolgee przekroczyła limit miejsc. Proszę skontaktować się z administratorem systemu z firmy zarządzającej.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Nie możemy zaakceptować Twojego zaproszenia, ponieważ zapraszająca organizacja osiągnęła swój limit miejsc. Skontaktuj się z nimi, aby zwolnić lub zakupić dodatkowe miejsca, zanim będziesz mógł dołączyć.",
   "plan_translation_limit_exceeded": "Przekroczono limit tłumaczeń w planie",

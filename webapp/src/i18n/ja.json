@@ -2082,6 +2082,7 @@
   "plan_migration_not_found": "プラン移行が見つかりません",
   "plan_not_available_any_more": "このプランは利用できなくなりました",
   "plan_not_found": "プランが見つかりません",
+  "plan_not_priced_in_organization_currency": "この組織はこのプランに価格が設定されていない通貨で請求されています。プランにその通貨の価格を追加してください。",
   "plan_seat_limit_exceeded": "この Tolgee インスタンスはシート制限を超えています。管理会社のシステム管理者に連絡してください。",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "招待元の組織がシートの上限に達しているため、招待を受け入れられません。参加する前に、シートを解放するか追加購入するように連絡してください。",
   "plan_translation_limit_exceeded": "プラン翻訳の制限を超えました",

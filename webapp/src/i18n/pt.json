@@ -2073,6 +2073,7 @@
   "plan_migration_not_found": "Migração de plano não encontrada",
   "plan_not_available_any_more": "Este plano não está mais disponível",
   "plan_not_found": "Plano não encontrado",
+  "plan_not_priced_in_organization_currency": "Esta organização é faturada numa moeda para a qual este plano não tem preços. Adicione preços nessa moeda ao plano.",
   "plan_seat_limit_exceeded": "Esta instância do Tolgee excedeu o limite de usuários. Por favor, entre em contato com o administrador do sistema da empresa responsável.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Não podemos aceitar o seu convite porque a organização convidante atingiu o limite de assentos. Por favor, entre em contato com eles para liberar ou comprar assentos adicionais antes que você possa ingressar.",
   "plan_translation_limit_exceeded": "Limite de traduções do plano excedido",

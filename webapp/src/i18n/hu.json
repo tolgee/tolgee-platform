@@ -2073,6 +2073,7 @@
   "plan_migration_not_found": "Csomagváltás nem található",
   "plan_not_available_any_more": "Ez a csomag már nem elérhető",
   "plan_not_found": "Csomag nem található",
+  "plan_not_priced_in_organization_currency": "Ez a szervezet olyan pénznemben kap számlát, amelyben ehhez a csomaghoz nincsenek megadva árak. Adjon meg árakat ebben a pénznemben a csomaghoz.",
   "plan_seat_limit_exceeded": "Ez a Tolgee példány túllépte a felhasználói limitet. Kérjük, lépjen kapcsolatba a rendszergazdával a kezelő cégtől.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "Nem tudjuk elfogadni a meghívását, mert a meghívó szervezet elérte a helyek számának korlátját. Kérjük, vegye fel velük a kapcsolatot, hogy felszabadítsanak vagy vásároljanak további helyeket, mielőtt csatlakozhatna.",
   "plan_translation_limit_exceeded": "A fordítási korlátot elérted a tervek között",
