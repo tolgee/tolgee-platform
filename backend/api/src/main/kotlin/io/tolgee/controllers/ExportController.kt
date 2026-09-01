@@ -14,6 +14,7 @@ import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
@@ -76,7 +77,7 @@ class ExportController(
         "attachment; filename=\"${projectHolder.project.name}.zip\"",
       )
 
-      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_JSON_ZIP) { out: OutputStream ->
         val zipOutputStream = ZipOutputStream(out)
         val translations =
           translationService.getTranslations(

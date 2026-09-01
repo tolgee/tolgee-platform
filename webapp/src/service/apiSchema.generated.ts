@@ -3208,7 +3208,8 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "server_busy";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7096,7 +7097,8 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "server_busy";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
