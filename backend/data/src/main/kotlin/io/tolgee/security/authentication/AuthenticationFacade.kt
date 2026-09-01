@@ -101,6 +101,37 @@ class AuthenticationFacade(
   val isPersonalAccessTokenAuth: Boolean
     get() = if (isAuthenticated) authentication.credentials is PatDto else false
 
+  val isAppAuth: Boolean
+    get() = SecurityContextHolder.getContext().authentication is AppAuthentication
+
+  val appAuthentication: AppAuthentication
+    get() =
+      SecurityContextHolder.getContext().authentication as? AppAuthentication
+        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+
+  /**
+   * The person this request is on behalf of, or null when an app install acts as itself.
+   *
+   * An install-context app token is not a person: it belongs to an organization and outlives whoever
+   * registered it. Anything that is about a person — who a change is attributed to, whose
+   * per-language grants narrow the request — must use this rather than the principal, which on that
+   * path is only the registering user's identity. [actingAppInstallId] identifies the actor instead.
+   */
+  val actingPersonUserId: Long?
+    get() {
+      if (!isAppAuth) return authenticatedUserOrNull?.id
+      appAuthentication.actingAsUserAccount?.let { return it.id }
+      if (appAuthentication.isInstallContext) return null
+      return authenticatedUserOrNull?.id
+    }
+
+  /** The install a change was made through, or null when no app token was used. */
+  val actingAppInstallId: Long?
+    get() {
+      if (!isAppAuth) return null
+      return appAuthentication.appInstall.id
+    }
+
   val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 

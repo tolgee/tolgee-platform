@@ -10,10 +10,11 @@ import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
 import { ProjectSettingsExportImport } from './ProjectSettingsExportImport';
+import { ProjectSettingsApps } from 'tg.views/projects/project/ProjectSettingsApps';
 import { useAddProjectSettingsTabs } from 'tg.ee';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { useIsAdmin } from 'tg.globalContext/helpers';
+import { useConfig, useIsAdmin } from 'tg.globalContext/helpers';
 
 export type ProjectSettingsTab = {
   value: string;
@@ -39,6 +40,7 @@ export const ProjectSettingsView = () => {
   const { satisfiesPermission } = useProjectPermissions();
   const reportEvent = useReportEvent();
   const isAdmin = useIsAdmin();
+  const config = useConfig();
 
   let tabs = [
     {
@@ -73,6 +75,17 @@ export const ProjectSettingsView = () => {
       component: ProjectSettingsExportImport,
       enabled: isAdmin,
       routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_EXPORT_IMPORT.template),
+    },
+    {
+      value: 'apps',
+      label: t('project_settings_menu_apps', 'Apps'),
+      link: LINKS.PROJECT_EDIT_APPS.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
+      dataCy: 'project-settings-menu-apps',
+      component: ProjectSettingsApps,
+      enabled: config.appsEnabled && satisfiesPermission('project.edit'),
+      routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_APPS.template),
     },
   ] as ProjectSettingsTab[];
 

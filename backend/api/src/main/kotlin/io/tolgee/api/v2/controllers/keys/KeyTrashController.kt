@@ -78,7 +78,7 @@ class KeyTrashController(
     val data =
       keyTrashService.getTrashedKeysWithTranslations(
         projectId = projectHolder.project.id,
-        userId = authenticationFacade.authenticatedUser.id,
+        userId = authenticationFacade.actingPersonUserId,
         pageable = pageable,
         params = params,
       )
@@ -99,7 +99,7 @@ class KeyTrashController(
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
+        authenticationFacade.actingPersonUserId,
       )
     return SelectAllResponse(
       translationService.getSelectAllKeys(

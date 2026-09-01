@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Holds TOLGEE_APP_REGISTRATION_TOKEN — never commit.
+.env.local
+
+# Local state: the dev-tunnel URLs and install.json, which holds the app's
+# one-time client secret. Never commit.
+.tolgee-dev/
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.iml
+*.log

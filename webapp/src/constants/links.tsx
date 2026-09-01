@@ -66,6 +66,9 @@ export enum PARAMS {
   BRANCH = 'branch',
   MERGE_ID = 'mergeId',
   PLAN_MIGRATION_ID = 'migrationId',
+  APP_INSTALL_ID = 'appInstallId',
+  APP_MODULE_KEY = 'appModuleKey',
+  APP_ID = 'appId',
 }
 
 export class LINKS {
@@ -284,6 +287,16 @@ export class LINKS {
 
   static ORGANIZATION_APPS = Link.ofParent(LINKS.ORGANIZATION, 'apps');
 
+  static ORGANIZATION_APPS_OWNED = Link.ofParent(
+    LINKS.ORGANIZATION_APPS,
+    'owned'
+  );
+
+  static ORGANIZATION_APP = Link.ofParent(
+    LINKS.ORGANIZATION_APPS_OWNED,
+    p(PARAMS.APP_ID)
+  );
+
   static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(
     LINKS.ORGANIZATION_APPS,
     'slack-oauth2-success'
@@ -369,6 +382,11 @@ export class LINKS {
 
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
+  static PROJECT_APP_PAGE = Link.ofParent(
+    LINKS.PROJECT,
+    'apps/' + p(PARAMS.APP_INSTALL_ID) + '/' + p(PARAMS.APP_MODULE_KEY)
+  );
+
   /**
    * Visible with edit permissions
    */
@@ -392,6 +410,7 @@ export class LINKS {
     LINKS.PROJECT_EDIT,
     'export-import'
   );
+  static PROJECT_EDIT_APPS = Link.ofParent(LINKS.PROJECT_EDIT, 'apps');
 
   static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 

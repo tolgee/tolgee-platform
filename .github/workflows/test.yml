@@ -376,6 +376,29 @@ jobs:
         run: npm test
         working-directory: ./webapp
 
+  apps-check:
+    name: Apps workspace check 🧩
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      # --ignore-scripts keeps cloudflared's postinstall from downloading its
+      # ~38 MB binary; it is a dev-tunnel convenience nothing here runs.
+      - name: Install apps dependencies
+        run: npm ci --ignore-scripts
+        working-directory: ./apps
+
+      # Builds the SDK first — the generator and the example apps typecheck
+      # against its dist/, not its sources.
+      - name: Build, typecheck and test the apps workspace
+        run: npm run check
+        working-directory: ./apps
+
   schema-check:
     name: Schema Check 📋
     needs: [backend-build]
@@ -395,7 +418,7 @@ jobs:
 
       - name: Start backend
         run: |
-          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
+          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev --tolgee.apps.enabled=true' &
           echo "Waiting for backend to start..."
           timeout 180 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
           echo "Backend is ready"
@@ -651,6 +674,7 @@ jobs:
       - frontend-code-check
       - frontend-test
       - frontend-test-without-ee
+      - apps-check
       - schema-check
       - migration-check
       - data-cy-check
@@ -695,6 +719,10 @@ jobs:
 
           if [[ "${{ needs.frontend-test-without-ee.result }}" != "success" ]]; then
             failed_jobs+=("frontend-test-without-ee")
+          fi
+
+          if [[ "${{ needs.apps-check.result }}" != "success" ]]; then
+            failed_jobs+=("apps-check")
           fi
 
           if [[ "${{ needs.schema-check.result }}" != "success" ]]; then

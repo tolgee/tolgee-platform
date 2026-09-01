@@ -637,7 +637,7 @@ class UserAccountService(
   }
 
   fun countAll(): Long {
-    return userAccountRepository.count()
+    return userAccountRepository.countAllPeople()
   }
 
   fun countAllEnabled(): Long {

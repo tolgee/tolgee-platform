@@ -32,6 +32,7 @@ import java.util.Date
   indexes = [
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
+    Index(columnList = "appInstallId"),
     Index(columnList = "type"),
     Index(columnList = "organizationId"),
     Index(columnList = "timestamp"),
@@ -59,6 +60,13 @@ class ActivityRevision : java.io.Serializable {
    * We don't want a foreign key, since user could have been deleted
    */
   var authorId: Long? = null
+
+  /**
+   * The app install that made the change, when the request was authenticated with an app token. Set
+   * alongside [authorId] when the app acted as a specific user, and on its own when it acted as
+   * itself. No foreign key, for the same reason as [authorId].
+   */
+  var appInstallId: Long? = null
 
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)

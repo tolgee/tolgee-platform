@@ -18,7 +18,7 @@ class KeyTrashService(
   @Transactional
   fun getTrashedKeysWithTranslations(
     projectId: Long,
-    userId: Long,
+    userId: Long?,
     pageable: Pageable,
     params: TranslationFilters,
   ): Page<KeyWithTranslationsView> {

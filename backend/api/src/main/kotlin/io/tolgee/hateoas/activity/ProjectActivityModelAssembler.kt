@@ -33,6 +33,14 @@ class ProjectActivityModelAssembler(
             deleted = view.authorDeleted,
           )
         },
+      app =
+        view.appInstallId?.let {
+          ProjectActivityAppModel(
+            installId = it,
+            appId = view.appAppId,
+            name = view.appName,
+          )
+        },
       modifiedEntities = getModifiedEntities(view),
       meta = view.meta,
       counts = view.counts,

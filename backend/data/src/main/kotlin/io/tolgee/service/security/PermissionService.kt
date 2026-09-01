@@ -119,7 +119,7 @@ class PermissionService(
         organizationRole = organizationRole,
         organizationBasePermission = organizationBasePermission,
         directPermission = projectPermission,
-        userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
+        serverRoleOf(userAccountId),
         isProjectPublic = project.public,
       )
 
@@ -130,6 +130,19 @@ class PermissionService(
       directPermissions = projectPermission,
       suggestionsMode = project.suggestionsMode,
     )
+  }
+
+  /**
+   * An app install resolves the person who registered it, and that person may since have been
+   * disabled or deleted — the install must not stop working with them. Their stored project and
+   * organization permissions still describe what this lookup is about; only the server role, which
+   * an inactive account no longer exercises, is dropped. An id belonging to nobody at all is still a
+   * bug worth failing on.
+   */
+  private fun serverRoleOf(userAccountId: Long): UserAccount.Role? {
+    userAccountService.findDto(userAccountId)?.let { return it.role }
+    if (userAccountService.getAllByIdsIncludingDeleted(setOf(userAccountId)).isNotEmpty()) return null
+    throw IllegalStateException("User not found")
   }
 
   @Transactional(readOnly = true)

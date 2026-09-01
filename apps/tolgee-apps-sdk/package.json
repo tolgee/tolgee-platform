@@ -1,0 +1,56 @@
+{
+  "name": "@tolgee/apps-sdk",
+  "version": "0.0.1-alpha.8",
+  "description": "SDK for building Tolgee Apps — manifest types, the iframe postMessage handshake, and server-side registration/token helpers.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tolgee/tolgee-platform.git",
+    "directory": "apps/tolgee-apps-sdk"
+  },
+  "homepage": "https://github.com/tolgee/tolgee-platform/tree/main/apps/tolgee-apps-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/tolgee/tolgee-platform/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@tginternal/client": "0.0.0-prerelease.c8329b552"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.9",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "~6.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

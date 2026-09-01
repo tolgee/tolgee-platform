@@ -1,0 +1,62 @@
+/*
+ * Colors come from `applyTolgeeTheme(context.theme)`, which sets the
+ * `--tg-color-*` custom properties from Tolgee's own palette. The fallbacks
+ * only apply before the host's init message arrives.
+ */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, system-ui, sans-serif;
+  color: var(--tg-color-text, #222);
+  background: var(--tg-color-background, #fff);
+}
+
+main {
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+code {
+  background: var(--tg-color-background-paper, #f3f3f3);
+  border: 1px solid var(--tg-color-divider, #e0e0e0);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--tg-color-text-secondary, #666);
+  font-size: 13px;
+}
+
+.kv {
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kv th {
+  text-align: left;
+  padding: 4px 16px 4px 0;
+  font-weight: 500;
+  color: var(--tg-color-text-secondary, #666);
+  white-space: nowrap;
+}
+
+.kv td {
+  padding: 4px 0;
+}
+
+.error {
+  margin-top: 16px;
+  color: var(--tg-color-error, crimson);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}

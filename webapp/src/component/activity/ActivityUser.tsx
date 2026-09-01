@@ -1,4 +1,5 @@
 import { Box, styled } from '@mui/material';
+import { T } from '@tolgee/react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
@@ -29,6 +30,21 @@ const StyledUser = styled(Box)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const StyledApp = styled('span')`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const StyledAppBadge = styled('span')`
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  background: ${({ theme }) => theme.palette.tokens.background.selected};
 `;
 
 type Props = {
@@ -63,6 +79,14 @@ export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
           <UserName {...item.author} />
         ) : (
           item.author?.name
+        )}
+        {!item.author && item.app && (
+          <StyledApp data-cy="activity-app" data-cy-app-id={item.app.appId}>
+            {item.app.name ?? item.app.appId}
+            <StyledAppBadge>
+              <T keyName="activity_author_app_badge" defaultValue="App" />
+            </StyledAppBadge>
+          </StyledApp>
         )}
       </StyledUser>
       <Box gridArea="time">

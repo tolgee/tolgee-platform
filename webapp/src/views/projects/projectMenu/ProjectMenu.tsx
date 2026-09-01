@@ -24,6 +24,8 @@ import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
 import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { AppIcon } from 'tg.component/apps/AppIcon';
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -157,6 +159,26 @@ export const ProjectMenu = () => {
 
   const items = addEeItems(baseItems);
 
+  const enabledApps = useApiQuery({
+    url: '/v2/projects/{projectId}/apps/enabled',
+    method: 'get',
+    path: { projectId: project.id },
+    options: {
+      enabled: config.appsEnabled,
+    },
+  });
+
+  const enabledAppPages = (
+    enabledApps.data?._embedded?.projectApps ?? []
+  ).flatMap((app) =>
+    (app.modules?.['project-dashboard-page'] ?? []).map((module) => ({
+      installId: app.id,
+      moduleKey: module.key,
+      title: module.title,
+      icon: module.icon,
+    }))
+  );
+
   return (
     <SideMenu>
       <SideLogo hidden={!topBarHeight} />
@@ -177,6 +199,20 @@ export const ProjectMenu = () => {
           />
         );
       })}
+      {enabledAppPages.map((page) => (
+        <SideMenuItem
+          key={`app-${page.installId}-${page.moduleKey}`}
+          linkTo={LINKS.PROJECT_APP_PAGE.build({
+            [PARAMS.PROJECT_ID]: project.id,
+            [PARAMS.APP_INSTALL_ID]: page.installId,
+            [PARAMS.APP_MODULE_KEY]: page.moduleKey,
+          })}
+          text={page.title}
+          icon={<AppIcon icon={page.icon} />}
+          data-cy="project-menu-item-app"
+          data-cy-app-install={page.installId}
+        />
+      ))}
     </SideMenu>
   );
 };

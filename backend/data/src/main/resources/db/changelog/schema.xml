@@ -5876,4 +5876,309 @@
             END $$;
         </sql>
     </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-1">
+        <createTable tableName="app">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="appPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(64)"/>
+            <column name="webhook_secret" type="VARCHAR(255)"/>
+            <column name="available_to_all_organizations" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tokens_invalid_before" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="manifest_last_checked_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="manifest_failure_count" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_first_failed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="manifest_last_error" type="VARCHAR(500)"/>
+            <column name="manifest_last_failure_kind" type="VARCHAR(32)"/>
+            <column name="unhealthy_since" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="unhealthy_notified_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+        <addUniqueConstraint columnNames="app_id" constraintName="app_app_id_unique" tableName="app"/>
+        <addUniqueConstraint columnNames="client_id" constraintName="app_client_id_unique" tableName="app"/>
+        <createIndex indexName="IDX_app_organization_id" tableName="app">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_author_id" tableName="app">
+            <column name="author_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app"
+                                 constraintName="FK_app_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app"
+                                 constraintName="FK_app_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-2">
+        <createTable tableName="app_install">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_installPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="registered_app_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="principal_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manifest_json" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="organization_id, app_id"
+                             constraintName="app_install_organization_id_app_id_unique"
+                             tableName="app_install"/>
+        <createIndex indexName="IDX_app_install_registered_app_id" tableName="app_install">
+            <column name="registered_app_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_install_organization_id" tableName="app_install">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_install_author_id" tableName="app_install">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_install_principal_id" tableName="app_install">
+            <column name="principal_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="registered_app_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_organization"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="principal_id"
+                                 baseTableName="app_install"
+                                 constraintName="FK_app_install_principal"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-3">
+        <createTable tableName="app_enabled_for_project">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_enabled_for_projectPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="app_install_id, project_id"
+                             constraintName="app_enabled_for_project_unique"
+                             tableName="app_enabled_for_project"/>
+        <createIndex indexName="IDX_app_enabled_for_project_app_install_id" tableName="app_enabled_for_project">
+            <column name="app_install_id"/>
+        </createIndex>
+        <createIndex indexName="IDX_app_enabled_for_project_project_id" tableName="app_enabled_for_project">
+            <column name="project_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_project"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="app_enabled_for_project"
+                                 constraintName="FK_app_enabled_for_project_author"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-4">
+        <createTable tableName="app_install_granted_scope">
+            <column name="app_install_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="app_install_id, scope"
+                       constraintName="app_install_granted_scopePK"
+                       tableName="app_install_granted_scope"/>
+        <addForeignKeyConstraint baseColumnNames="app_install_id"
+                                 baseTableName="app_install_granted_scope"
+                                 constraintName="FK_app_install_granted_scope_app_install"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app_install"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-5">
+        <createTable tableName="app_secret">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="app_secretPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="app_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_hash" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_prefix" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_suffix" type="VARCHAR(8)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_used_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="secret_expires_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="revoked_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+        <addUniqueConstraint columnNames="secret_hash"
+                             constraintName="app_secret_secret_hash_unique"
+                             tableName="app_secret"/>
+        <createIndex indexName="IDX_app_secret_app_id" tableName="app_secret">
+            <column name="app_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="app_id"
+                                 baseTableName="app_secret"
+                                 constraintName="FK_app_secret_app"
+                                 deferrable="false"
+                                 initiallyDeferred="false"
+                                 referencedColumnNames="id"
+                                 referencedTableName="app"
+                                 onDelete="CASCADE"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-6">
+        <comment>Which install (rather than which person) made the change, for app-authenticated
+            writes. No foreign key, matching author_id: activity outlives the entity it points at.
+        </comment>
+        <addColumn tableName="activity_revision">
+            <column name="app_install_id" type="BIGINT"/>
+        </addColumn>
+        <createIndex indexName="IDX_activity_revision_app_install_id" tableName="activity_revision">
+            <column name="app_install_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jcizmar" id="1783771000000-7">
+        <comment>Marks an install's own account so it is kept out of seats, user listings and sign-in
+            while still resolving as a real principal for the writes an install makes.</comment>
+        <addColumn tableName="user_account">
+            <column name="is_app_principal" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

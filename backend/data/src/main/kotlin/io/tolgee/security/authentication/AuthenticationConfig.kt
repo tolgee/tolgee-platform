@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.security.Key
+import java.security.MessageDigest
 
 @Configuration
 class AuthenticationConfig(
@@ -35,6 +36,19 @@ class AuthenticationConfig(
     @Qualifier("jwt_signing_secret") bytes: ByteArray,
   ): Key {
     return Keys.hmacShaKeyFor(bytes)
+  }
+
+  /**
+   * App tokens are signed with a key domain-separated from the user-session key, so a leak or
+   * confusion on one path cannot forge tokens for the other. Derived deterministically from the same
+   * secret, so no extra configuration is required.
+   */
+  @Bean("apps_jwt_signing_key")
+  fun appsJwtSigningKey(
+    @Qualifier("jwt_signing_secret") bytes: ByteArray,
+  ): Key {
+    val derived = MessageDigest.getInstance("SHA-512").digest(bytes + APPS_KEY_DERIVATION_LABEL)
+    return Keys.hmacShaKeyFor(derived)
   }
 
   @Bean("jwt_signing_secret")
@@ -54,6 +68,7 @@ class AuthenticationConfig(
   }
 
   companion object {
+    private val APPS_KEY_DERIVATION_LABEL = "tolgee-apps-token-v1".toByteArray()
     const val GENERATED_JWT_SECRET_FILE_NAME = "jwt.secret"
   }
 }

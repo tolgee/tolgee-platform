@@ -59,16 +59,25 @@ class UrlSecurity(
       }
 
     for (address in addresses) {
-      if (address.isLoopbackAddress ||
-        address.isSiteLocalAddress ||
-        address.isLinkLocalAddress ||
-        address.isAnyLocalAddress ||
-        address.isMulticastAddress ||
-        isIpv6UniqueLocal(address)
-      ) {
+      if (isBlockedAddress(address)) {
         throw BadRequestException(Message.URL_NOT_VALID)
       }
     }
+  }
+
+  /**
+   * [validateUrl] resolves the host itself, but an HTTP client resolves it again when it connects —
+   * a host serving low-TTL DNS can answer the two lookups differently (DNS rebinding). Clients that
+   * fetch app-controlled URLs must therefore re-check the address they actually connect to.
+   */
+  fun isBlockedAddress(address: InetAddress): Boolean {
+    if (internalProperties.disableUrlSsrfProtection) return false
+    return address.isLoopbackAddress ||
+      address.isSiteLocalAddress ||
+      address.isLinkLocalAddress ||
+      address.isAnyLocalAddress ||
+      address.isMulticastAddress ||
+      isIpv6UniqueLocal(address)
   }
 
   // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress

@@ -138,6 +138,19 @@ data class UserAccount(
   @ColumnDefault("false")
   var isDemo: Boolean = false
 
+  /**
+   * Whether this account is an app install acting as itself rather than a person — see
+   * [io.tolgee.model.apps.AppInstall.principal].
+   *
+   * It is a live, enabled account so that everything resolving the current principal to a row keeps
+   * working, which is precisely why it must be filtered out of every query that counts or lists
+   * people: seats, the administration user list, the sign-in lookups, and the migration job that
+   * hands an organization to every user without one.
+   */
+  @Column(name = "is_app_principal", nullable = false)
+  @ColumnDefault("false")
+  var isAppPrincipal: Boolean = false
+
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()
 
