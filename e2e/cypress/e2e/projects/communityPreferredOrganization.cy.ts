@@ -5,6 +5,7 @@ import {
   assertSwitchedToOrganization,
   gcy,
   gcyAdvanced,
+  openPublicProject,
   switchToOrganization,
 } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
@@ -27,30 +28,28 @@ describe('Community preferred organization', () => {
     publicProjectsData.clean();
   });
 
-  const openPublicProject = () => {
-    cy.visit(`${HOST}/public-projects`);
-    waitForGlobalLoading();
-    gcy('dashboard-projects-list-item').contains('Community Alpha').click();
-    cy.url().should('match', /\/projects\/[0-9]+/);
-    waitForGlobalLoading();
-  };
-
   it('switches a guest to the owning organization and shows its public projects', () => {
-    openPublicProject();
+    openPublicProject('Community Alpha');
     gcy('notistack-snackbar').should('not.exist');
     assertSwitchedToOrganization('publicProjectsUser');
 
     cy.visit(`${HOST}/`);
     waitForGlobalLoading();
     gcy('dashboard-projects-list-item').should('have.length', 6);
-    cy.contains('Community Outsider').should('not.exist');
-    cy.contains('Private project').should('not.exist');
+    gcyAdvanced({
+      value: 'dashboard-projects-list-item',
+      name: 'Community Outsider',
+    }).should('not.exist');
+    gcyAdvanced({
+      value: 'dashboard-projects-list-item',
+      name: 'Private project',
+    }).should('not.exist');
     gcy('global-plus-button').should('not.exist');
     gcy('project-list-more-button').should('not.exist');
   });
 
   it('restores the full member experience after switching back to the own organization', () => {
-    openPublicProject();
+    openPublicProject('Community Alpha');
     assertSwitchedToOrganization('publicProjectsUser');
 
     cy.visit(`${HOST}/`);
@@ -67,13 +66,13 @@ describe('Community preferred organization', () => {
       statusCode: 403,
       body: { code: 'operation_not_permitted' },
     });
-    openPublicProject();
+    openPublicProject('Community Alpha');
     cy.url().should('match', /\/projects\/[0-9]+/);
     gcy('global-base-view-content').should('exist');
   });
 
   it('shows glossaries but hides translation memories in the foreign org settings', () => {
-    openPublicProject();
+    openPublicProject('Community Alpha');
     cy.visit(
       `${HOST}/organizations/${organizations['publicProjectsUser'].slug}/profile`
     );
