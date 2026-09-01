@@ -23,9 +23,11 @@ class DisableManagedUserTestData : BaseTestData() {
   lateinit var adminDisabledManagedMember: UserAccount
   lateinit var orgDisabledManagedMember: UserAccount
   lateinit var nullOriginDisabledManagedMember: UserAccount
+  lateinit var nullRoleDisabledManagedMember: UserAccount
   lateinit var managedPlatformAdmin: UserAccount
   lateinit var managedPlatformSupporter: UserAccount
   lateinit var orgDisabledManagedPlatformAdmin: UserAccount
+  lateinit var orgDisabledManagedPlatformSupporter: UserAccount
   lateinit var outsidePlatformAdmin: UserAccount
   lateinit var projectOnlyMember: UserAccount
   lateinit var multiProjectMember: UserAccount
@@ -77,6 +79,14 @@ class DisableManagedUserTestData : BaseTestData() {
         nullOriginDisabledManagedMember = this
       }
       addUserAccountWithoutOrganization {
+        username = "legacynullrole@acting.org"
+        name = "Null Role Org Disabled Managed Member"
+        role = null
+        disabledAt = DISABLED_AT
+        disabledBy = UserDisabledBy.ORGANIZATION
+        nullRoleDisabledManagedMember = this
+      }
+      addUserAccountWithoutOrganization {
         username = "platformadmin@acting.org"
         name = "Platform Admin Managed Member"
         role = UserAccount.Role.ADMIN
@@ -95,6 +105,14 @@ class DisableManagedUserTestData : BaseTestData() {
         disabledAt = DISABLED_AT
         disabledBy = UserDisabledBy.ORGANIZATION
         orgDisabledManagedPlatformAdmin = this
+      }
+      addUserAccountWithoutOrganization {
+        username = "legacysupporter@acting.org"
+        name = "Legacy Org Disabled Platform Supporter"
+        role = UserAccount.Role.SUPPORTER
+        disabledAt = DISABLED_AT
+        disabledBy = UserDisabledBy.ORGANIZATION
+        orgDisabledManagedPlatformSupporter = this
       }
       addUserAccountWithoutOrganization {
         username = "outsideadmin@tolgee.io"
@@ -155,6 +173,11 @@ class DisableManagedUserTestData : BaseTestData() {
           managed = true
         }
         addRole {
+          user = nullRoleDisabledManagedMember
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
           user = multiProjectMember
           type = OrganizationRoleType.MEMBER
         }
@@ -170,6 +193,11 @@ class DisableManagedUserTestData : BaseTestData() {
         }
         addRole {
           user = orgDisabledManagedPlatformAdmin
+          type = OrganizationRoleType.MEMBER
+          managed = true
+        }
+        addRole {
+          user = orgDisabledManagedPlatformSupporter
           type = OrganizationRoleType.MEMBER
           managed = true
         }

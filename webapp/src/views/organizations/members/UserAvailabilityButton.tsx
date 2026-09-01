@@ -19,19 +19,19 @@ type Props = {
     | '/v2/organizations/{organizationId}/users/{userId}/enable';
 };
 
-const ToggleUserEnabledButton = (props: Props) => {
+const UserAvailabilityButton = (props: Props) => {
   const organization = useOrganization();
-  const toggleLoadable = useApiMutation({
+  const submitLoadable = useApiMutation({
     url: props.url,
     method: 'put',
     invalidatePrefix: '/v2/organizations',
   });
 
-  const toggleUser = () => {
+  const confirmAndSubmit = () => {
     confirmation({
       message: props.confirmMessage,
       onConfirm: () =>
-        toggleLoadable.mutate(
+        submitLoadable.mutate(
           {
             path: {
               organizationId: organization!.id,
@@ -49,7 +49,11 @@ const ToggleUserEnabledButton = (props: Props) => {
 
   return (
     <Tooltip title={props.tooltip}>
-      <IconButton data-cy={props.dataCy} onClick={toggleUser} size="small">
+      <IconButton
+        data-cy={props.dataCy}
+        onClick={confirmAndSubmit}
+        size="small"
+      >
         {props.icon}
       </IconButton>
     </Tooltip>
@@ -62,7 +66,7 @@ export const DisableUserButton = (props: {
 }) => {
   const { t } = useTranslate();
   return (
-    <ToggleUserEnabledButton
+    <UserAvailabilityButton
       userId={props.userId}
       dataCy="organization-members-disable-user-button"
       url="/v2/organizations/{organizationId}/users/{userId}/disable"
@@ -91,7 +95,7 @@ export const EnableUserButton = (props: {
 }) => {
   const { t } = useTranslate();
   return (
-    <ToggleUserEnabledButton
+    <UserAvailabilityButton
       userId={props.userId}
       dataCy="organization-members-enable-user-button"
       url="/v2/organizations/{organizationId}/users/{userId}/enable"
