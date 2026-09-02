@@ -21,6 +21,7 @@ class KeysLimitCheckerTest {
     keys = keys,
     seats = unlimitedLimit(),
     mtCreditsInCents = unlimitedLimit(),
+    words = unlimitedLimit(),
   )
 
   @Test

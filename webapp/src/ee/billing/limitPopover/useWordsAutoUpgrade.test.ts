@@ -1,0 +1,147 @@
+import { describe, expect, it } from 'vitest';
+import {
+  isWordsAutoUpgradeAvailable,
+  isWordsAutoUpgradeIneffective,
+  wordsAutoUpgradeIneffectiveReason,
+} from './useWordsAutoUpgrade';
+
+describe('words auto-upgrade offer', () => {
+  const subscription = (overrides = {}) =>
+    ({
+      plan: { metricType: 'HOSTED_WORDS', free: false },
+      autoUpgradeEnabled: false,
+      ...overrides,
+    } as any);
+
+  it('is offered on a paid word plan whose words are exhausted', () => {
+    expect(isWordsAutoUpgradeAvailable(subscription(), true)).toBe(true);
+  });
+
+  it('is not offered when the limit that was hit is not the word limit', () => {
+    // The popover opens for MT-credit limits too, on the same plan.
+    expect(isWordsAutoUpgradeAvailable(subscription(), false)).toBe(false);
+  });
+
+  it('is not offered on a plan that does not meter words', () => {
+    const keysPlan = subscription({
+      plan: { metricType: 'KEYS_SEATS', free: false },
+    });
+
+    expect(isWordsAutoUpgradeAvailable(keysPlan, true)).toBe(false);
+  });
+
+  it('is not offered on a free plan, which has nothing to upgrade from', () => {
+    const freePlan = subscription({
+      plan: { metricType: 'HOSTED_WORDS', free: true },
+    });
+
+    expect(isWordsAutoUpgradeAvailable(freePlan, true)).toBe(false);
+  });
+
+  it('is not offered when auto-upgrade is already on', () => {
+    expect(
+      isWordsAutoUpgradeAvailable(
+        subscription({ autoUpgradeEnabled: true }),
+        true
+      )
+    ).toBe(false);
+  });
+
+  it('is not offered before the subscription has loaded', () => {
+    expect(isWordsAutoUpgradeAvailable(undefined, true)).toBe(false);
+  });
+
+  describe('when auto-upgrade is already on', () => {
+    const enabled = subscription({ autoUpgradeEnabled: true });
+
+    it('says so instead of offering the toggle', () => {
+      // The server only blocks with auto-upgrade on when it cannot apply, so the toggle is a no-op.
+      expect(isWordsAutoUpgradeIneffective(enabled, true)).toBe(true);
+      expect(isWordsAutoUpgradeAvailable(enabled, true)).toBe(false);
+    });
+
+    it('says nothing when the limit that was hit is not the word limit', () => {
+      expect(isWordsAutoUpgradeIneffective(enabled, false)).toBe(false);
+    });
+
+    it('says nothing on a plan that does not meter words', () => {
+      const keysPlan = subscription({
+        plan: { metricType: 'KEYS_SEATS', free: false },
+        autoUpgradeEnabled: true,
+      });
+
+      expect(isWordsAutoUpgradeIneffective(keysPlan, true)).toBe(false);
+    });
+
+    it('says nothing before the subscription has loaded', () => {
+      expect(isWordsAutoUpgradeIneffective(undefined, true)).toBe(false);
+    });
+
+    describe('the reason it cannot be applied', () => {
+      const ladder = [
+        { id: 1, includedWords: 50_000 },
+        { id: 2, includedWords: 200_000 },
+      ];
+      // the subscription no longer carries the ladder; it arrives from the plans listing
+      const offering = (currentTierId: number) => ({
+        tiers: ladder,
+        currentTierId,
+      });
+      const onTier = (extra = {}) =>
+        subscription({ autoUpgradeEnabled: true, ...extra });
+
+      it('is the largest tier when there is nothing bigger to move to', () => {
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(), offering(2))).toBe(
+          'largestTier'
+        );
+      });
+
+      it('is the scheduled change when one is pending', () => {
+        const withDowngrade = onTier({
+          scheduledDowngrade: { name: 'Translate' },
+        });
+        expect(
+          wordsAutoUpgradeIneffectiveReason(withDowngrade, offering(1))
+        ).toBe('scheduledChange');
+      });
+
+      it('still says largest tier when a change is also pending, because cancelling it would not help', () => {
+        // Nothing above tier 2, so undoing the scheduled change gives auto-upgrade nowhere to go.
+        const both = onTier({ scheduledDowngrade: { name: 'Translate' } });
+        expect(wordsAutoUpgradeIneffectiveReason(both, offering(2))).toBe(
+          'largestTier'
+        );
+      });
+
+      it('says scheduled change mid-ladder, where cancelling does restore the headroom', () => {
+        const midLadder = onTier({ scheduledDowngrade: { name: 'Translate' } });
+        expect(wordsAutoUpgradeIneffectiveReason(midLadder, offering(1))).toBe(
+          'scheduledChange'
+        );
+      });
+
+      it('falls back to other when neither applies', () => {
+        // e.g. cancelling at period end, or a non-active status
+        expect(wordsAutoUpgradeIneffectiveReason(onTier(), offering(1))).toBe(
+          'other'
+        );
+      });
+
+      it('falls back to other before the subscription has loaded', () => {
+        expect(wordsAutoUpgradeIneffectiveReason(undefined)).toBe('other');
+      });
+    });
+  });
+
+  it('offers exactly one of the two messages, never both', () => {
+    [false, true].forEach((autoUpgradeEnabled) => {
+      const sub = subscription({ autoUpgradeEnabled });
+      expect(
+        [
+          isWordsAutoUpgradeAvailable(sub, true),
+          isWordsAutoUpgradeIneffective(sub, true),
+        ].filter(Boolean)
+      ).toHaveLength(1);
+    });
+  });
+});

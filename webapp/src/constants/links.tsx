@@ -227,6 +227,11 @@ export class LINKS {
 
   static ORGANIZATION_BILLING = Link.ofParent(LINKS.ORGANIZATION, 'billing');
 
+  static ORGANIZATION_BILLING_PLANS = Link.ofParent(
+    LINKS.ORGANIZATION_BILLING,
+    'plans'
+  );
+
   static ORGANIZATION_SUBSCRIPTIONS = Link.ofParent(
     LINKS.ORGANIZATION,
     'subscriptions'
