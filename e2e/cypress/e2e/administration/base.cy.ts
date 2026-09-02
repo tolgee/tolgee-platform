@@ -122,12 +122,17 @@ function changeUserRole(user: string, role: 'Admin' | 'Supporter' | 'User') {
   assertMessage('Role changed');
 }
 
+function openUserMenuOrganizationSwitch() {
+  gcy('global-user-menu-button').click();
+  gcy('user-menu-organization-switch').click();
+}
+
 function assertOrganizationAddButtonVisible() {
-  gcy('organization-switch').click();
+  openUserMenuOrganizationSwitch();
   gcy('switch-popover-new').should('be.visible');
 }
 
 function assertOrganizationAddButtonNotVisible() {
-  gcy('organization-switch').click();
+  openUserMenuOrganizationSwitch();
   gcy('switch-popover-new').should('not.exist');
 }

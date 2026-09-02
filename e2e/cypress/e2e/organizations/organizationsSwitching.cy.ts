@@ -67,6 +67,12 @@ describe('Organization switching', () => {
     assertOrganizationIsPreferred('Microsoft');
   });
 
+  it('does not offer creating an organization from the breadcrumb switcher', () => {
+    gcy('organization-switch').click();
+    gcy('switch-popover-item').first().should('be.visible');
+    gcy('switch-popover-new').should('not.exist');
+  });
+
   const visit = () => {
     cy.visit(`${HOST}/projects`);
   };
