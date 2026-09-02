@@ -1,3 +1,10 @@
+## [3.219.6](https://github.com/tolgee/tolgee-platform/compare/v3.219.5...v3.219.6) (2026-09-02)
+
+
+### Bug Fixes
+
+* hard-delete project fails on branch merge, snapshot and content delivery FKs ([#3853](https://github.com/tolgee/tolgee-platform/issues/3853)) ([857b8e7](https://github.com/tolgee/tolgee-platform/commit/857b8e70da997d181bc8409fc1394498b9bf4943)), closes [#3832](https://github.com/tolgee/tolgee-platform/issues/3832) [#3832](https://github.com/tolgee/tolgee-platform/issues/3832) [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3832](https://github.com/tolgee/tolgee-platform/issues/3832)
+
 ## [3.219.5](https://github.com/tolgee/tolgee-platform/compare/v3.219.4...v3.219.5) (2026-09-01)
 
 

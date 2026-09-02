@@ -1852,7 +1852,7 @@
   "organization_llm_providers_title": "LLM 提供商",
   "organization_load_failed_message": "无法加载此组织。请刷新页面重试。",
   "organization_load_failed_title": "无法加载组织",
-  "organization_member_disabled_label": "已停用",
+  "organization_member_disabled_label": "已禁用",
   "organization_member_privileges_set": "权限已设置",
   "organization_member_privileges_text": "所有组织用户在该组织的每个项目中都具有这些权限。",
   "organization_member_privileges_title": "团队成员权限",
