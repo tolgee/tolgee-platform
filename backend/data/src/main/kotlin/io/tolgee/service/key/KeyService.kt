@@ -526,6 +526,7 @@ class KeyService(
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
     taskKeyRepository.deleteAllByKeyProjectId(projectId)
+    branchMergeService.deleteChangesByProjectId(projectId)
 
     entityManager
       .createQuery("""delete from Key where project.id = :projectId""")

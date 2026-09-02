@@ -126,6 +126,4 @@ interface BranchService {
   fun enableBranchingOnProject(projectId: Long)
 
   fun deleteAllByProjectId(projectId: Long)
-
-  fun deleteBranchMergeChangesByKeyIds(keyIds: Set<Long>)
 }

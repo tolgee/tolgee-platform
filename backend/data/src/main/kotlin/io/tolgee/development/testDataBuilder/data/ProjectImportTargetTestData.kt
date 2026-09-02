@@ -15,7 +15,8 @@ import io.tolgee.model.key.Key
  * branch merge/snapshot rows hanging off them), plus a separate sibling project in the same organization
  * whose content must stay completely untouched (blast-radius isolation). The merge/snapshot rows exist so
  * the clear-in-place FK ordering is exercised — they FK key/branch with no DB cascade, so the wipe must
- * delete them before keys/branches or it FK-violates.
+ * delete them before keys/branches or it FK-violates. ProjectHardDeletingServiceTest covers the same
+ * ordering with these rows, so dropping them silently guts that test too.
  */
 class ProjectImportTargetTestData :
   BaseTestData(userName = "import-target-owner", projectName = "import-target-project") {
