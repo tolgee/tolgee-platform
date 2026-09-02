@@ -30,7 +30,9 @@ import jakarta.persistence.Tuple
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import jakarta.persistence.criteria.Subquery
 import org.hibernate.query.criteria.JpaCteContainer
 import org.hibernate.query.criteria.JpaCteCriteria
@@ -453,27 +455,76 @@ class QueryGlobalFiltering(
 
   private fun filterTask() {
     val taskNumbers = params.filterTaskNumber ?: return
+    queryBase.whereConditions.add(
+      taskKeyPredicate { tkRoot ->
+        val conditions = mutableListOf<Predicate>()
+        conditions.add(tkRoot.get(TaskKey_.task).get(Task_.number).`in`(taskNumbers))
+        if (params.filterTaskKeysNotDone == true) {
+          conditions.add(cb.equal(tkRoot.get(TaskKey_.done), false))
+        }
+        if (params.filterTaskKeysDone == true) {
+          conditions.add(cb.equal(tkRoot.get(TaskKey_.done), true))
+        }
+        conditions
+      },
+    )
+  }
 
+  fun applyTaskHistoryFilters() {
+    filterHasTaskInLang()
+    filterHasNoTaskInLang()
+  }
+
+  private fun filterHasTaskInLang() {
+    val languageIds =
+      queryBase.queryTranslationFiltering.languageIdsForTags(params.filterHasTaskInLang) ?: return
+    queryBase.whereConditions.add(taskInLanguagePredicate(languageIds))
+  }
+
+  private fun filterHasNoTaskInLang() {
+    val languageIds =
+      queryBase.queryTranslationFiltering.languageIdsForTags(params.filterHasNoTaskInLang) ?: return
+    queryBase.whereConditions.add(cb.not(taskInLanguagePredicate(languageIds, forceCorrelated = true)))
+  }
+
+  private fun taskInLanguagePredicate(
+    languageIds: List<Long>,
+    forceCorrelated: Boolean = false,
+  ): Predicate =
+    taskKeyPredicate(forceCorrelated) { tkRoot ->
+      listOf(
+        taskLanguagePredicate(
+          tkRoot.get(TaskKey_.task).get(Task_.language).get(Language_.id),
+          languageIds,
+        ),
+      )
+    }
+
+  private fun taskLanguagePredicate(
+    languageIdPath: Path<Long>,
+    languageIds: List<Long>,
+  ): Predicate {
+    if (languageIds.size == 1) return cb.equal(languageIdPath, cb.literal(languageIds.first()))
+    return languageIdPath.`in`(languageIds)
+  }
+
+  private fun taskKeyPredicate(
+    forceCorrelated: Boolean = false,
+    extraConditions: (Root<TaskKey>) -> List<Predicate>,
+  ): Predicate {
+    val useInClause = isCountQuery && !forceCorrelated
     val subquery = queryBase.query.subquery(Long::class.java)
     val tkRoot = subquery.from(TaskKey::class.java)
+    val keyIdPath = tkRoot.get(TaskKey_.key).get(Key_.id)
     val conditions = mutableListOf<Predicate>()
-    if (isCountQuery) {
-      subquery.select(tkRoot.get(TaskKey_.key).get(Key_.id))
-    } else {
-      subquery.select(cb.literal(1L))
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.key).get(Key_.id), queryBase.root.get(Key_.id)))
+    conditions.addAll(extraConditions(tkRoot))
+    if (!useInClause) {
+      conditions.add(cb.equal(keyIdPath, queryBase.root.get(Key_.id)))
     }
-    conditions.add(tkRoot.get(TaskKey_.task).get(Task_.number).`in`(taskNumbers))
-    if (params.filterTaskKeysNotDone == true) {
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), false))
-    }
-    if (params.filterTaskKeysDone == true) {
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), true))
-    }
+    subquery.select(if (useInClause) keyIdPath else cb.literal(1L))
     subquery.where(cb.and(*conditions.toTypedArray()))
-    queryBase.whereConditions.add(
-      if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery),
-    )
+    if (useInClause) return queryBase.root.get(Key_.id).`in`(subquery)
+    return cb.exists(subquery)
   }
 
   private fun filterRevisionId() {

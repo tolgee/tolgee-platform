@@ -1,5 +1,9 @@
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import { toggleLang, visitTranslations } from '../../common/translations';
+import {
+  selectAllLanguages,
+  toggleLang,
+  visitTranslations,
+} from '../../common/translations';
 import { assertMessage, assertMultiselect } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 import { translationsTestData } from '../../common/apiCalls/testData/testData';
@@ -55,6 +59,35 @@ describe('Translations Base', () => {
       'German',
       'English',
     ]);
+  });
+
+  it('drops a language scoped filter when its language is deselected', () => {
+    selectAllLanguages();
+
+    cy.gcy('translations-filter-select').click();
+    cy.waitForDom();
+    cy.gcy('submenu-item').contains('Translations').click();
+    cy.waitForDom();
+    cy.gcy('filter-item').contains('Translated').click();
+    cy.gcy('translations-filter-apply-for-expand').click();
+    cy.gcy('translations-filter-apply-for-language').contains('German').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    waitForGlobalLoading();
+
+    cy.location('search').should((search) => {
+      expect(decodeURIComponent(search)).to.contain(
+        '"filterTranslationLanguage":"de"'
+      );
+    });
+
+    toggleLang('German');
+
+    cy.location('search').should((search) => {
+      const filters = decodeURIComponent(search);
+      expect(filters).not.to.contain('filterTranslationLanguage');
+      expect(filters).to.contain('filterTranslationState');
+    });
   });
 
   it('filters unresolved comments', () => {

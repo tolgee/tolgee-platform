@@ -209,6 +209,25 @@ $PATTERN_GRAMMAR_DOC""",
   var filterTaskKeysDone: Boolean? = null
 
   @field:Parameter(
+    description =
+      "Select only keys currently linked to a task in any of the provided languages. Tasks in all " +
+        "states (including CANCELED and FINISHED) and of both types (TRANSLATE, REVIEW) count. The " +
+        "link is dropped when a key is removed from a task or when the branch holding it is deleted, " +
+        "so this reflects current task membership rather than an immutable audit log.",
+  )
+  var filterHasTaskInLang: List<String>? = null
+
+  @field:Parameter(
+    description =
+      "Select only keys not currently linked to a task in any of the provided languages, the exact " +
+        "complement of filterHasTaskInLang. Tasks in all states (including CANCELED and FINISHED) " +
+        "and of both types (TRANSLATE, REVIEW) count. The link is dropped when a key is removed " +
+        "from a task or when the branch holding it is deleted, so a key can reappear here after " +
+        "having been in a task.",
+  )
+  var filterHasNoTaskInLang: List<String>? = null
+
+  @field:Parameter(
     description = "Filter keys with unresolved comments in lang",
   )
   var filterHasUnresolvedCommentsInLang: List<String>? = null
