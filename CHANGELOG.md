@@ -1,3 +1,10 @@
+## [3.219.7](https://github.com/tolgee/tolgee-platform/compare/v3.219.6...v3.219.7) (2026-09-02)
+
+
+### Bug Fixes
+
+* bump Jackson to 2.21.6 / 3.1.6 to patch CVE-2026-19032 ([#3895](https://github.com/tolgee/tolgee-platform/issues/3895)) ([2ec5372](https://github.com/tolgee/tolgee-platform/commit/2ec537287bd270bf71f15b29d0c3a9bc7f386a8f)), closes [#3866](https://github.com/tolgee/tolgee-platform/issues/3866) [#3840](https://github.com/tolgee/tolgee-platform/issues/3840) [#3857](https://github.com/tolgee/tolgee-platform/issues/3857) [#6115](https://github.com/tolgee/tolgee-platform/issues/6115) [#6156](https://github.com/tolgee/tolgee-platform/issues/6156) [#6101](https://github.com/tolgee/tolgee-platform/issues/6101) [#6133](https://github.com/tolgee/tolgee-platform/issues/6133) [#6165](https://github.com/tolgee/tolgee-platform/issues/6165)
+
 ## [3.219.6](https://github.com/tolgee/tolgee-platform/compare/v3.219.5...v3.219.6) (2026-09-02)
 
 
