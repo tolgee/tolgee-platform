@@ -376,8 +376,16 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
-    /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
+    /** Removes the user from the organization. Users managed by the organization cannot be removed; disable them instead. */
     delete: operations["removeUser"];
+  };
+  "/v2/organizations/{organizationId}/users/{userId}/disable": {
+    /** Disables the account of a user managed by this organization. */
+    put: operations["disableManagedUser"];
+  };
+  "/v2/organizations/{organizationId}/users/{userId}/enable": {
+    /** Re-enables the disabled account of a user managed by this organization. */
+    put: operations["enableManagedUser"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     /** Sets user role in organization. Owner or Member. */
@@ -3117,6 +3125,9 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
+        | "user_is_not_managed_by_organization"
+        | "user_disabled_by_admin"
+        | "cannot_manage_platform_staff_account"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
@@ -7006,6 +7017,9 @@ export interface components {
         | "native_authentication_disabled"
         | "invitation_organization_mismatch"
         | "user_is_managed_by_organization"
+        | "user_is_not_managed_by_organization"
+        | "user_disabled_by_admin"
+        | "cannot_manage_platform_staff_account"
         | "cannot_set_sso_provider_missing_fields"
         | "namespaces_cannot_be_disabled_when_namespace_exists"
         | "namespace_cannot_be_used_when_feature_is_disabled"
@@ -7869,8 +7883,10 @@ export interface components {
     };
     UserAccountWithOrganizationRoleModel: {
       avatar?: components["schemas"]["Avatar"];
+      disabled: boolean;
       /** Format: int64 */
       id: number;
+      managed: boolean;
       mfaEnabled: boolean;
       name: string;
       /** @enum {string} */
@@ -14048,8 +14064,98 @@ export interface operations {
       };
     };
   };
-  /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
+  /** Removes the user from the organization. Users managed by the organization cannot be removed; disable them instead. */
   removeUser: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Disables the account of a user managed by this organization. */
+  disableManagedUser: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Re-enables the disabled account of a user managed by this organization. */
+  enableManagedUser: {
     parameters: {
       path: {
         organizationId: number;

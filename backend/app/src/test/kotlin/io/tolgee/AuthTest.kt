@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
@@ -288,7 +289,7 @@ class AuthTest : AbstractControllerTest() {
   fun `rejects requests from a user disabled after the token was issued`() {
     val user = userAccountService[initialUsername]
     val token = jwtService.emitToken(user.id)
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     val mvcResult =
       mvc
@@ -308,7 +309,7 @@ class AuthTest : AbstractControllerTest() {
     assertThat(oAuth2AuthUtil.authorizeOAuth2User().response.status).isEqualTo(200)
 
     val user = userAccountService.get("fakeEmail@domain.com")
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     val response = oAuth2AuthUtil.authorizeOAuth2User().response
     assertThat(response.status).isEqualTo(401)

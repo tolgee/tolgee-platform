@@ -12,6 +12,7 @@ import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -114,7 +115,7 @@ class AdministrationController(
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
     }
-    userAccountService.disable(userId)
+    userAccountService.disable(userId, UserDisabledBy.ADMIN)
   }
 
   @PutMapping(value = ["/users/{userId}/enable"])
@@ -123,7 +124,7 @@ class AdministrationController(
   fun enableUser(
     @PathVariable userId: Long,
   ) {
-    userAccountService.enable(userId)
+    userAccountService.enable(userId, UserDisabledBy.ADMIN)
   }
 
   @PutMapping(value = ["/users/{userId:[0-9]+}/set-role/{role}"])

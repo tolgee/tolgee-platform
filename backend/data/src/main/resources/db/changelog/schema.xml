@@ -5876,4 +5876,26 @@
             END $$;
         </sql>
     </changeSet>
+    <changeSet author="jirikuchynka (generated)" id="1785252020000-1">
+        <addColumn tableName="user_account">
+            <column name="disabled_by" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1785252020000-2">
+        <sql>
+            UPDATE user_account ua
+            SET disabled_by = CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM organization_role r WHERE r.user_id = ua.id AND r.managed = true
+                ) THEN 'ORGANIZATION'
+                ELSE 'ADMIN'
+            END
+            -- createDemoUser creates demo accounts already disabled, and changeSet
+            -- user-account-normalize-username-casing-and-dedup writes the username pattern below when it
+            -- retires a duplicate-email row: nobody disabled either, so they get no origin.
+            WHERE ua.disabled_at IS NOT NULL AND ua.disabled_by IS NULL AND ua.is_demo = false
+              AND (ua.username IS NULL OR ua.username NOT LIKE 'disabled-' || ua.id || '-%');
+        </sql>
+        <rollback/>
+    </changeSet>
 </databaseChangeLog>

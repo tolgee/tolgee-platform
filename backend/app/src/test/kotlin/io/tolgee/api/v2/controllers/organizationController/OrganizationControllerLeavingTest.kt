@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -20,9 +21,9 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
   fun testLeaveOrganization() {
     val testOrg = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
     organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), testOrg)
-    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNotNull
+    getPermittedOrgs().find { testOrg.id == it.id }.assert.isNotNull
     performAuthPut("/v2/organizations/${testOrg.id}/leave", null).andIsOk
-    assertThat(getPermittedOrgs().find { testOrg.id == it.id }).isNull()
+    getPermittedOrgs().find { testOrg.id == it.id }.assert.isNull()
   }
 
   private fun getPermittedOrgs() =
@@ -79,5 +80,37 @@ class OrganizationControllerLeavingTest : BaseOrganizationControllerTest() {
       .andAssertError
       .isCustomValidation
       .hasMessage("organization_has_no_other_owner")
+  }
+
+  @Test
+  fun `cannot leave when the only other owner is disabled`() {
+    val organization = executeInNewTransaction { this.organizationService.create(dummyDto, userAccount!!) }
+    val secondOwner = dbPopulator.createUserIfNotExists(DISABLED_SECOND_OWNER)
+    organizationRoleService.grantOwnerRoleToUser(secondOwner, organization)
+    userAccountService.disable(secondOwner.id, UserDisabledBy.ADMIN)
+
+    performAuthPut("/v2/organizations/${organization.id}/leave", null)
+      .andIsBadRequest
+      .andAssertError
+      .isCustomValidation
+      .hasMessage("organization_has_no_other_owner")
+  }
+
+  @Test
+  fun `a member can leave when the only owner is disabled`() {
+    val owner = dbPopulator.createUserIfNotExists(DISABLED_SOLE_OWNER)
+    val organization = executeInNewTransaction { this.organizationService.create(dummyDto, owner) }
+    executeInNewTransaction {
+      organizationRoleService.grantMemberRoleToUser(userAccountService.get(userAccount!!.id), organization)
+    }
+    userAccountService.disable(owner.id, UserDisabledBy.ADMIN)
+
+    performAuthPut("/v2/organizations/${organization.id}/leave", null).andIsOk
+    getPermittedOrgs().find { organization.id == it.id }.assert.isNull()
+  }
+
+  companion object {
+    private const val DISABLED_SECOND_OWNER = "disabledSecondOwner"
+    private const val DISABLED_SOLE_OWNER = "disabledSoleOwner"
   }
 }

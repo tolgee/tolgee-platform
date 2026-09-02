@@ -340,11 +340,6 @@ class OrganizationService(
   }
 
   @Transactional(readOnly = true)
-  fun isThereAnotherOwner(id: Long): Boolean {
-    return organizationRoleService.isAnotherOwnerInOrganization(id)
-  }
-
-  @Transactional(readOnly = true)
   fun generateSlug(
     name: String,
     oldSlug: String? = null,

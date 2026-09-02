@@ -22,6 +22,8 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserDisabledBy
+import io.tolgee.model.isSupporterOrAdmin
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.views.ExtendedUserAccountInProject
@@ -109,6 +111,10 @@ class UserAccountService(
 
   fun findActive(id: Long): UserAccount? {
     return userAccountRepository.findActive(id)
+  }
+
+  fun findActiveOrDisabled(id: Long): UserAccount? {
+    return userAccountRepository.findActiveOrDisabled(id)
   }
 
   @Transactional
@@ -646,20 +652,68 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
-  fun disable(userId: Long) {
-    val user = this.get(userId)
+  fun disable(
+    userId: Long,
+    actingAs: UserDisabledBy,
+  ) {
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    checkOrganizationMayActOnAccount(user, actingAs)
+    if (user.disabledAt != null) {
+      takeOverDisable(user, actingAs)
+      return
+    }
     user.disabledAt = currentDateProvider.date
+    user.disabledBy = actingAs
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
   }
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userId")
-  fun enable(userId: Long) {
-    val user = this.userAccountRepository.findDisabled(userId)
+  fun enable(
+    userId: Long,
+    requestedBy: UserDisabledBy,
+  ): Boolean {
+    val user = userAccountRepository.findActiveOrDisabled(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (user.disabledAt == null) return false
+    checkOrganizationMayActOnAccount(user, requestedBy)
+    if (!canOverrideDisable(user.disabledBy, requestedBy)) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
+    }
     user.disabledAt = null
+    user.disabledBy = null
     this.save(user)
     this.applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
+    return true
+  }
+
+  private fun checkOrganizationMayActOnAccount(
+    user: UserAccount,
+    actingAs: UserDisabledBy,
+  ) {
+    if (actingAs == UserDisabledBy.ORGANIZATION && user.isSupporterOrAdmin()) {
+      throw ValidationException(Message.CANNOT_MANAGE_PLATFORM_STAFF_ACCOUNT)
+    }
+  }
+
+  private fun takeOverDisable(
+    user: UserAccount,
+    actingAs: UserDisabledBy,
+  ) {
+    if (user.disabledBy == actingAs) return
+    if (!canOverrideDisable(user.disabledBy, actingAs)) {
+      throw ValidationException(Message.USER_DISABLED_BY_ADMIN)
+    }
+    user.disabledBy = actingAs
+    this.save(user)
+  }
+
+  private fun canOverrideDisable(
+    storedDisabledBy: UserDisabledBy?,
+    requestedBy: UserDisabledBy,
+  ): Boolean {
+    if (requestedBy == UserDisabledBy.ADMIN) return true
+    return storedDisabledBy == UserDisabledBy.ORGANIZATION
   }
 
   fun transferLegacyNoAuthUser() {
