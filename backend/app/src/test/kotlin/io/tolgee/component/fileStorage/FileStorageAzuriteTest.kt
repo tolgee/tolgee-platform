@@ -21,12 +21,12 @@ import org.springframework.test.context.ContextConfiguration
   properties = [
     "tolgee.internal.use-in-memory-file-storage=false",
     "tolgee.file-storage.azure.enabled=true",
-    "tolgee.file-storage.azure.container-name=${FileStorageAzureBlobTest.CONTAINER_NAME}",
+    "tolgee.file-storage.azure.container-name=${FileStorageAzuriteTest.CONTAINER_NAME}",
   ],
 )
-@ContextConfiguration(initializers = [FileStorageAzureBlobTest.Companion.Initializer::class])
+@ContextConfiguration(initializers = [FileStorageAzuriteTest.Companion.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class FileStorageAzureBlobTest : AbstractFileStorageServiceTest() {
+class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
   companion object {
     const val CONTAINER_NAME = "tolgee-test"
     val azuriteRunner = AzuriteRunner()
@@ -97,6 +97,11 @@ class FileStorageAzureBlobTest : AbstractFileStorageServiceTest() {
       .exists()
       .assert
       .isFalse()
+  }
+
+  @Test
+  fun `deleteFile tolerates a missing blob`() {
+    fileStorage.deleteFile("not_existing")
   }
 
   @Test

@@ -31,14 +31,28 @@ class FileStorageConfiguration(
       "Both tolgee.file-storage.s3 and tolgee.file-storage.azure are enabled. Configure exactly one file storage."
     }
     if (azureConfig.enabled) {
-      check(!azureConfig.connectionString.isNullOrBlank() && !azureConfig.containerName.isNullOrBlank()) {
-        "tolgee.file-storage.azure is enabled, but connection-string or container-name is not set."
-      }
-      return azureFileStorageFactory.create(azureConfig)
+      return createAzureFileStorage()
     }
     if (s3config.enabled) {
       return s3FileStorageFactory.create(s3config)
     }
     return LocalFileStorage(tolgeeProperties = properties)
+  }
+
+  private fun createAzureFileStorage(): FileStorage {
+    check(!azureConfig.connectionString.isNullOrBlank()) {
+      "tolgee.file-storage.azure is enabled, but connection-string is not set."
+    }
+    check(!azureConfig.containerName.isNullOrBlank()) {
+      "tolgee.file-storage.azure is enabled, but container-name is not set."
+    }
+    try {
+      return azureFileStorageFactory.create(azureConfig)
+    } catch (e: Exception) {
+      throw IllegalStateException(
+        "Cannot create the Azure Blob Storage client from tolgee.file-storage.azure: ${e.cause?.message ?: e.message}",
+        e,
+      )
+    }
   }
 }

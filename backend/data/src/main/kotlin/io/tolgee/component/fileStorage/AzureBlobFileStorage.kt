@@ -22,8 +22,7 @@ open class AzureBlobFileStorage(
 
   override fun deleteFile(storageFilePath: String) {
     try {
-      client.getBlobClient(storageFilePath).delete()
-      return
+      client.getBlobClient(storageFilePath).deleteIfExists()
     } catch (e: Exception) {
       throw FileStoreException("Can not delete file using Azure Blob!", storageFilePath, e)
     }
@@ -34,12 +33,10 @@ open class AzureBlobFileStorage(
     bytes: ByteArray,
   ) {
     try {
-      val client = client.getBlobClient(storageFilePath)
-      client.upload(BinaryData.fromBytes(bytes), true)
+      client.getBlobClient(storageFilePath).upload(BinaryData.fromBytes(bytes), true)
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using Azure Blob!", storageFilePath, e)
     }
-    return
   }
 
   override fun fileExists(storageFilePath: String): Boolean {
@@ -54,8 +51,12 @@ open class AzureBlobFileStorage(
     val prefix = path.removePrefix("/").removeSuffix("/") + "/"
     val options = ListBlobsOptions()
     options.prefix = prefix
-    client.listBlobs(options, null).forEach {
-      client.getBlobClient(it.name).delete()
+    try {
+      client.listBlobs(options, null).forEach {
+        client.getBlobClient(it.name).delete()
+      }
+    } catch (e: Exception) {
+      throw FileStoreException("Can not prune directory using Azure Blob!", path, e)
     }
   }
 }

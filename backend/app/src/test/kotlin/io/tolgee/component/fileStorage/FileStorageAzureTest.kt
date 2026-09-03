@@ -46,14 +46,14 @@ class FileStorageAzureTest {
       .readFile(filePath)
       .toString(Charsets.UTF_8)
       .assert
-      .isEqualTo("hello")
+      .isEqualTo(content)
     verifyGetsClient()
   }
 
   @Test
   fun testDeleteFile() {
     azureFs.deleteFile(filePath)
-    verify(blobClientMock, times(1)).delete()
+    verify(blobClientMock, times(1)).deleteIfExists()
     verifyGetsClient()
   }
 
@@ -112,6 +112,12 @@ class FileStorageAzureTest {
   fun `fileExists wraps client failures`() {
     whenever(blobClientMock.exists()).thenThrow(RuntimeException("boom"))
     assertThrows<FileStoreException> { azureFs.fileExists(filePath) }
+  }
+
+  @Test
+  fun `pruneDirectory wraps client failures`() {
+    whenever(containerClientMock.listBlobs(any(), eq(null))).thenThrow(RuntimeException("boom"))
+    assertThrows<FileStoreException> { azureFs.pruneDirectory("hello") }
   }
 
   private fun verifyGetsClient() {

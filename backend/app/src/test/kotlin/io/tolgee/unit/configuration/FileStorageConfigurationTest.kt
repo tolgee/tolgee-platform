@@ -7,13 +7,17 @@ import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.FileStorageConfiguration
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.fixtures.AzuriteRunner
 import io.tolgee.testing.assert
 import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class FileStorageConfigurationTest {
+  companion object {
+    const val WELL_FORMED_CONNECTION_STRING =
+      "DefaultEndpointsProtocol=http;AccountName=unit;AccountKey=dGVzdA==;BlobEndpoint=http://127.0.0.1:1/unit;"
+  }
+
   private val properties = TolgeeProperties()
 
   @Test
@@ -52,19 +56,35 @@ class FileStorageConfigurationTest {
 
   @Test
   fun `fails when azure is enabled without connection string`() {
-    enableAzure()
-    properties.fileStorage.azure.connectionString = null
-    assertThrows<IllegalStateException> { fileStorage() }
-      .message
-      .assert
-      .contains("connection-string")
+    listOf(null, " ").forEach { blank ->
+      enableAzure()
+      properties.fileStorage.azure.connectionString = blank
+      assertThrows<IllegalStateException> { fileStorage() }
+        .message
+        .assert
+        .contains("connection-string is not set")
+    }
   }
 
   @Test
   fun `fails when azure is enabled without container name`() {
+    listOf(null, " ").forEach { blank ->
+      enableAzure()
+      properties.fileStorage.azure.containerName = blank
+      assertThrows<IllegalStateException> { fileStorage() }
+        .message
+        .assert
+        .contains("container-name is not set")
+    }
+  }
+
+  @Test
+  fun `names the azure properties when the connection string is malformed`() {
     enableAzure()
-    properties.fileStorage.azure.containerName = ""
-    assertThrows<IllegalStateException> { fileStorage() }
+    properties.fileStorage.azure.connectionString = "not-a-connection-string"
+    val exception = assertThrows<IllegalStateException> { fileStorage() }
+    exception.message.assert.contains("tolgee.file-storage.azure")
+    exception.cause.assert.isNotNull
   }
 
   private fun fileStorage() =
@@ -73,7 +93,7 @@ class FileStorageConfigurationTest {
   private fun enableAzure() {
     properties.fileStorage.azure.apply {
       enabled = true
-      connectionString = AzuriteRunner.connectionString
+      connectionString = WELL_FORMED_CONNECTION_STRING
       containerName = "container"
     }
   }

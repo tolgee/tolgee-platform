@@ -20,9 +20,9 @@ class AzureFileStorageFactory {
       return AzureBlobFileStorage(containerClient)
     } catch (e: Exception) {
       if (e is IllegalArgumentException && e.message == "Invalid connection string.") {
-        throw InvalidConnectionStringException()
+        throw InvalidConnectionStringException(e)
       }
-      throw BadRequestException(Message.CANNOT_CREATE_AZURE_STORAGE_CLIENT)
+      throw BadRequestException(Message.CANNOT_CREATE_AZURE_STORAGE_CLIENT, e)
     }
   }
 }
