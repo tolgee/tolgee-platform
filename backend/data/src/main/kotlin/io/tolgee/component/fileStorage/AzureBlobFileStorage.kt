@@ -8,7 +8,6 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.models.ListBlobsOptions
 import io.tolgee.exceptions.FileStoreException
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 
 open class AzureBlobFileStorage(
   private val client: BlobContainerClient,
@@ -44,11 +43,10 @@ open class AzureBlobFileStorage(
   }
 
   override fun fileExists(storageFilePath: String): Boolean {
-    return try {
-      client.getBlobClient(storageFilePath).exists()
-      true
-    } catch (e: NoSuchKeyException) {
-      false
+    try {
+      return client.getBlobClient(storageFilePath).exists()
+    } catch (e: Exception) {
+      throw FileStoreException("Can not check file existence using Azure Blob!", storageFilePath, e)
     }
   }
 

@@ -9,9 +9,11 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobClient
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.models.BlobItem
+import io.tolgee.exceptions.FileStoreException
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -96,6 +98,20 @@ class FileStorageAzureTest {
     azureFs.fileExists(filePath).assert.isTrue()
     verifyGetsClient()
     verify(blobClientMock, times(1)).exists()
+  }
+
+  @Test
+  fun `fileExists returns false when blob is missing`() {
+    whenever(blobClientMock.exists()).thenReturn(false)
+    azureFs.fileExists(filePath).assert.isFalse()
+    verifyGetsClient()
+    verify(blobClientMock, times(1)).exists()
+  }
+
+  @Test
+  fun `fileExists wraps client failures`() {
+    whenever(blobClientMock.exists()).thenThrow(RuntimeException("boom"))
+    assertThrows<FileStoreException> { azureFs.fileExists(filePath) }
   }
 
   private fun verifyGetsClient() {
