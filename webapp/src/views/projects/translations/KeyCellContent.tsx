@@ -1,6 +1,7 @@
 import React from 'react';
 import { styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import { useTranslate } from '@tolgee/react';
 
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { MarkdownLink } from 'tg.component/common/MarkdownLink';
@@ -23,6 +24,8 @@ export const StyledDescription = styled('div')`
       : theme.palette.emphasis[500]};
 `;
 
+const Markdown = styled('div')``;
+
 type Props = {
   keyName: string;
   description?: string | null;
@@ -34,6 +37,8 @@ export const KeyCellContent: React.FC<React.PropsWithChildren<Props>> = ({
   description,
   width,
 }) => {
+  const { t } = useTranslate();
+
   return (
     <>
       <StyledKey data-cy="translations-key-name">
@@ -43,14 +48,28 @@ export const KeyCellContent: React.FC<React.PropsWithChildren<Props>> = ({
       </StyledKey>
       {description && (
         <StyledDescription data-cy="translations-key-cell-description">
-          <LimitedHeightText maxLines={5}>
-            <ReactMarkdown
-              components={{
-                a: MarkdownLink,
-              }}
-            >
-              {description}
-            </ReactMarkdown>
+          <LimitedHeightText
+            maxLines={5}
+            expandControls={{
+              showMore: t(
+                'translations_key_description_show_more',
+                'Show more'
+              ),
+              showLess: t(
+                'translations_key_description_show_less',
+                'Show less'
+              ),
+            }}
+          >
+            <Markdown>
+              <ReactMarkdown
+                components={{
+                  a: MarkdownLink,
+                }}
+              >
+                {description}
+              </ReactMarkdown>
+            </Markdown>
           </LimitedHeightText>
         </StyledDescription>
       )}
