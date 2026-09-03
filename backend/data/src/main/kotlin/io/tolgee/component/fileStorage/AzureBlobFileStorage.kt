@@ -48,12 +48,10 @@ open class AzureBlobFileStorage(
   }
 
   override fun pruneDirectory(path: String) {
-    val prefix = path.removePrefix("/").removeSuffix("/") + "/"
-    val options = ListBlobsOptions()
-    options.prefix = prefix
+    val options = ListBlobsOptions().setPrefix(path.removePrefix("/").removeSuffix("/") + "/")
     try {
       client.listBlobs(options, null).forEach {
-        client.getBlobClient(it.name).delete()
+        client.getBlobClient(it.name).deleteIfExists()
       }
     } catch (e: Exception) {
       throw FileStoreException("Can not prune directory using Azure Blob!", path, e)

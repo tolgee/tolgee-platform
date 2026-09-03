@@ -14,9 +14,9 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -61,14 +61,9 @@ class FileStorageAzureTest {
   fun testStoreFile() {
     val bytes = content.toByteArray(Charsets.UTF_8)
     azureFs.storeFile(filePath, bytes)
-    verify(blobClientMock, times(1)).upload(any<BinaryData>(), eq(true))
-    val binaryData =
-      Mockito
-        .mockingDetails(blobClientMock)
-        .invocations
-        .single()
-        .arguments[0] as BinaryData
-    binaryData
+    val uploaded = argumentCaptor<BinaryData>()
+    verify(blobClientMock, times(1)).upload(uploaded.capture(), eq(true))
+    uploaded.firstValue
       .toBytes()
       .toString(Charsets.UTF_8)
       .assert
@@ -89,7 +84,7 @@ class FileStorageAzureTest {
     )
     azureFs.pruneDirectory("hello")
     verifyGetsClient()
-    verify(blobClientMock, times(1)).delete()
+    verify(blobClientMock, times(1)).deleteIfExists()
   }
 
   @Test

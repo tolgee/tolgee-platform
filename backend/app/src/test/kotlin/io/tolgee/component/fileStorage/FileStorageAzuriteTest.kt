@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
@@ -101,7 +102,7 @@ class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
 
   @Test
   fun `deleteFile tolerates a missing blob`() {
-    fileStorage.deleteFile("not_existing")
+    assertDoesNotThrow { fileStorage.deleteFile("not_existing") }
   }
 
   @Test

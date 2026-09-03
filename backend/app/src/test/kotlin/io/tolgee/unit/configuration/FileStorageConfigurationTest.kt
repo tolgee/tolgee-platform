@@ -7,10 +7,14 @@ import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.FileStorageConfiguration
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.exceptions.InvalidConnectionStringException
 import io.tolgee.testing.assert
 import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 
 class FileStorageConfigurationTest {
   companion object {
@@ -54,37 +58,44 @@ class FileStorageConfigurationTest {
       .contains("exactly one")
   }
 
-  @Test
-  fun `fails when azure is enabled without connection string`() {
-    listOf(null, " ").forEach { blank ->
-      enableAzure()
-      properties.fileStorage.azure.connectionString = blank
-      assertThrows<IllegalStateException> { fileStorage() }
-        .message
-        .assert
-        .contains("connection-string is not set")
-    }
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = [" "])
+  fun `fails when azure is enabled without connection string`(blank: String?) {
+    enableAzure()
+    properties.fileStorage.azure.connectionString = blank
+    assertThrows<IllegalStateException> { fileStorage() }
+      .message
+      .assert
+      .contains("connection-string is not set")
+  }
+
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = [" "])
+  fun `fails when azure is enabled without container name`(blank: String?) {
+    enableAzure()
+    properties.fileStorage.azure.containerName = blank
+    assertThrows<IllegalStateException> { fileStorage() }
+      .message
+      .assert
+      .contains("container-name is not set")
   }
 
   @Test
-  fun `fails when azure is enabled without container name`() {
-    listOf(null, " ").forEach { blank ->
-      enableAzure()
-      properties.fileStorage.azure.containerName = blank
-      assertThrows<IllegalStateException> { fileStorage() }
-        .message
-        .assert
-        .contains("container-name is not set")
-    }
-  }
-
-  @Test
-  fun `names the azure properties when the connection string is malformed`() {
+  fun `names the azure properties and keeps the SDK cause when the connection string is malformed`() {
     enableAzure()
     properties.fileStorage.azure.connectionString = "not-a-connection-string"
     val exception = assertThrows<IllegalStateException> { fileStorage() }
     exception.message.assert.contains("tolgee.file-storage.azure")
-    exception.cause.assert.isNotNull
+    exception.cause.assert.isInstanceOf(InvalidConnectionStringException::class.java)
+    exception.cause!!
+      .cause.assert
+      .isInstanceOf(IllegalArgumentException::class.java)
+    exception.cause!!
+      .cause!!
+      .message.assert
+      .isEqualTo("Invalid connection string.")
   }
 
   private fun fileStorage() =
