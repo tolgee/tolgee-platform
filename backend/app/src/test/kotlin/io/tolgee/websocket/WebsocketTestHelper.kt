@@ -53,28 +53,37 @@ class WebsocketTestHelper(
     logger.debug("Connecting websocket (userId={}, projectId={}, dest={})", userId, projectId, path)
     receivedMessages = LinkedBlockingDeque()
 
-    // Register the latch BEFORE the connect: the connect future's completion
-    // races against the test worker resuming from .get(), and ConcurrentHashMap
-    // visibility was not enough — we previously saw `awaitSubscribed` find the
-    // latch missing in the same millisecond `register` happened on the
-    // StompSession callback thread. Generating the correlationId here and
-    // registering synchronously guarantees a strict happens-before.
     val correlationId = UUID.randomUUID().toString()
-    WebsocketTestSubscribeSync.register(correlationId)
-
     webSocketStompClient.messageConverter = SimpleMessageConverter()
-    sessionHandler = MySessionHandler(path, receivedMessages, correlationId)
-    connection =
+    val handler = MySessionHandler(path, receivedMessages, correlationId)
+    sessionHandler = handler
+    val session =
       webSocketStompClient
         .connectAsync(
           "http://localhost:$port/websocket",
           WebSocketHttpHeaders(),
           getAuthHeaders(),
-          sessionHandler!!,
+          handler,
         ).get(10, TimeUnit.SECONDS)
+    connection = session
+
+    // Every STOMP frame of a session must be written by this thread. Tomcat's remote endpoint
+    // rejects a second concurrent write with "state [TEXT_PARTIAL_WRITING]", and subscribing from
+    // StompSessionHandler.afterConnected would put that write on the STOMP callback thread —
+    // which Spring runs *after* completing the connect future, so listen() would already have
+    // returned and the next frame would race it.
+    WebsocketTestSubscribeSync.register(correlationId)
+    handler.subscription =
+      session.subscribe(
+        StompHeaders().apply {
+          destination = path
+          add(WebsocketTestSubscribeSync.CORRELATION_HEADER, correlationId)
+        },
+        handler,
+      )
     logger.debug(
       "Client SUBSCRIBE sent (sessionId={}, dest={}, correlationId={}, t={}ms)",
-      connection?.sessionId,
+      session.sessionId,
       path,
       correlationId,
       System.currentTimeMillis(),
@@ -157,19 +166,6 @@ class WebsocketTestHelper(
 
     private fun recordStatus(newStatus: AuthenticationStatus) {
       statusTransitions.add(newStatus)
-    }
-
-    override fun afterConnected(
-      session: StompSession,
-      connectedHeaders: StompHeaders,
-    ) {
-      logger.debug("Websocket session {} connected, subscribing to {}", session.sessionId, dest)
-      val subscribeHeaders =
-        StompHeaders().apply {
-          destination = dest
-          add(WebsocketTestSubscribeSync.CORRELATION_HEADER, subscribeCorrelationId)
-        }
-      subscription = session.subscribe(subscribeHeaders, this)
     }
 
     override fun handleException(
