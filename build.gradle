@@ -203,6 +203,17 @@ subprojects {
     }
 }
 
+ext.setTestSharding = { test ->
+    // TestShardCondition is registered via META-INF/services and only loads with autodetection on
+    test.systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    def shardIndex = System.getenv('SHARD_INDEX')
+    def shardTotal = System.getenv('SHARD_TOTAL')
+    if (shardIndex != null && shardTotal != null) {
+        test.systemProperty 'tolgee.test.shard.index', shardIndex
+        test.systemProperty 'tolgee.test.shard.total', shardTotal
+    }
+}
+
 // Define the setTestRetry method at the root level so it can be used by all subprojects
 ext.setTestRetry = { test ->
     boolean isCiServer = System.getenv().containsKey("CI")
