@@ -100,6 +100,7 @@ export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
+export { usePlanLimitBanner } from '../ee/billing/component/PlanLimitBanner';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 
