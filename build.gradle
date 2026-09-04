@@ -184,6 +184,8 @@ subprojects {
         testLogging {
             events "passed", "skipped", "failed", "started"
         }
+        // loads the extensions registered in META-INF/services, e.g. TestShardCondition
+        systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
     }
 
     tasks.matching {
@@ -201,6 +203,22 @@ subprojects {
     }.configureEach {
         onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
     }
+}
+
+ext.setTestSharding = { test ->
+    def shardIndex = System.getenv('SHARD_INDEX')
+    def shardTotal = System.getenv('SHARD_TOTAL')
+    // unsharded matrix rows pass the variables as empty strings
+    if (!shardIndex || !shardTotal) {
+        return
+    }
+    def valid = shardIndex.isInteger() && shardTotal.isInteger() && shardIndex.toInteger() < shardTotal.toInteger()
+    if (!valid) {
+        // an index outside the range skips every class and the task passes having run nothing
+        throw new GradleException("SHARD_INDEX=$shardIndex must be a number below SHARD_TOTAL=$shardTotal")
+    }
+    test.systemProperty 'tolgee.test.shard.index', shardIndex
+    test.systemProperty 'tolgee.test.shard.total', shardTotal
 }
 
 // Define the setTestRetry method at the root level so it can be used by all subprojects
