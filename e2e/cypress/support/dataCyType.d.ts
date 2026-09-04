@@ -559,6 +559,8 @@ declare namespace DataCy {
         "permissions-menu-inherited-message": true;
         "permissions-menu-reset-to-organization": true;
         "permissions-menu-save": true;
+        "plan-limit-banner": true;
+        "plan-limit-banner-upgrade-link": true;
         "plan-limit-dialog-close": true;
         "plan-limit-dialog-contact-us": true;
         "plan-limit-dialog-enable-auto-upgrade": true;
