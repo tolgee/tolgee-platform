@@ -203,6 +203,15 @@ subprojects {
     }
 }
 
+ext.setTestSharding = { test ->
+    def shardIndex = System.getenv('SHARD_INDEX')
+    def shardTotal = System.getenv('SHARD_TOTAL')
+    if (shardIndex != null && shardTotal != null) {
+        test.systemProperty 'tolgee.test.shard.index', shardIndex
+        test.systemProperty 'tolgee.test.shard.total', shardTotal
+    }
+}
+
 // Define the setTestRetry method at the root level so it can be used by all subprojects
 ext.setTestRetry = { test ->
     boolean isCiServer = System.getenv().containsKey("CI")
