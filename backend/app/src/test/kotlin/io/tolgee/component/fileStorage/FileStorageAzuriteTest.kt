@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.file-storage.azure.container-name=${FileStorageAzuriteTest.CONTAINER_NAME}",
   ],
 )
-@ContextConfiguration(initializers = [FileStorageAzuriteTest.Companion.Initializer::class])
+@ContextConfiguration(initializers = [FileStorageAzuriteTest.Initializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
   companion object {
@@ -34,22 +34,22 @@ class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
 
     val container: BlobContainerClient by lazy {
       BlobServiceClientBuilder()
-        .connectionString(AzuriteRunner.connectionString)
+        .connectionString(azuriteRunner.connectionString)
         .buildClient()
         .getBlobContainerClient(CONTAINER_NAME)
     }
+  }
 
-    /**
-     * Beans write to the storage during context startup, so the container must exist before the context is built.
-     */
-    class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-      override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
-        azuriteRunner.run()
-        container.createIfNotExists()
-        TestPropertyValues
-          .of(mapOf("tolgee.file-storage.azure.connection-string" to AzuriteRunner.connectionString))
-          .applyTo(configurableApplicationContext)
-      }
+  /**
+   * Beans write to the storage during context startup, so the container must exist before the context is built.
+   */
+  class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
+    override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
+      azuriteRunner.run()
+      container.createIfNotExists()
+      TestPropertyValues
+        .of(mapOf("tolgee.file-storage.azure.connection-string" to azuriteRunner.connectionString))
+        .applyTo(configurableApplicationContext)
     }
   }
 
@@ -117,7 +117,8 @@ class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
     val content = testFileContent.toByteArray(Charsets.UTF_8)
     fileStorage.storeFile("test/a.txt", content)
     fileStorage.storeFile("test/sub/b.txt", content)
-    fileStorage.storeFile("other/c.txt", content)
+    fileStorage.storeFile("test-v2/c.txt", content)
+    fileStorage.storeFile("other/d.txt", content)
 
     fileStorage.pruneDirectory("test")
 
@@ -125,7 +126,7 @@ class FileStorageAzuriteTest : AbstractFileStorageServiceTest() {
       .listBlobs()
       .map { it.name }
       .assert
-      .containsExactly("other/c.txt")
+      .containsExactlyInAnyOrder("test-v2/c.txt", "other/d.txt")
   }
 
   private fun uploadTestFile() {

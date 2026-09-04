@@ -88,14 +88,11 @@ class FileStorageConfigurationTest {
     properties.fileStorage.azure.connectionString = "not-a-connection-string"
     val exception = assertThrows<IllegalStateException> { fileStorage() }
     exception.message.assert.contains("tolgee.file-storage.azure")
-    exception.cause.assert.isInstanceOf(InvalidConnectionStringException::class.java)
-    exception.cause!!
-      .cause.assert
-      .isInstanceOf(IllegalArgumentException::class.java)
-    exception.cause!!
-      .cause!!
-      .message.assert
-      .isEqualTo("Invalid connection string.")
+    val factoryFailure = exception.cause
+    factoryFailure.assert.isInstanceOf(InvalidConnectionStringException::class.java)
+    val sdkFailure = factoryFailure?.cause
+    sdkFailure.assert.isInstanceOf(IllegalArgumentException::class.java)
+    sdkFailure?.message.assert.isEqualTo("Invalid connection string.")
   }
 
   private fun fileStorage() =

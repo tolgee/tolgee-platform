@@ -9,6 +9,7 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobClient
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.models.BlobItem
+import com.azure.storage.blob.models.ListBlobsOptions
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +26,7 @@ import org.mockito.kotlin.whenever
 class FileStorageAzureTest {
   private lateinit var azureFs: AzureBlobFileStorage
   private lateinit var containerClientMock: BlobContainerClient
-  private val filePath = "/hello/hello/en.json"
+  private val filePath = "hello/hello/en.json"
   private val content = "hello"
   private lateinit var blobClientMock: BlobClient
 
@@ -83,6 +84,10 @@ class FileStorageAzureTest {
       ).iterator(),
     )
     azureFs.pruneDirectory("hello")
+    val options = argumentCaptor<ListBlobsOptions>()
+    verify(containerClientMock, times(1)).listBlobs(options.capture(), eq(null))
+    options.firstValue.prefix.assert
+      .isEqualTo("hello/")
     verifyGetsClient()
     verify(blobClientMock, times(1)).deleteIfExists()
   }

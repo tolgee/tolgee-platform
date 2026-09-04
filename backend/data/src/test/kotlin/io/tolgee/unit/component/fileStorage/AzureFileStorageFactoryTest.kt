@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class AzureFileStorageFactoryTest {
+  companion object {
+    const val BAD_ENDPOINT_CONNECTION_STRING =
+      "DefaultEndpointsProtocol=http;AccountName=unit;AccountKey=dGVzdA==;BlobEndpoint=::not-a-url::;"
+  }
+
   private val factory = AzureFileStorageFactory()
 
   @Test
@@ -38,10 +43,5 @@ class AzureFileStorageFactoryTest {
   ) = object : AzureBlobConfig {
     override var connectionString: String? = connectionString
     override var containerName: String? = containerName
-  }
-
-  companion object {
-    const val BAD_ENDPOINT_CONNECTION_STRING =
-      "DefaultEndpointsProtocol=http;AccountName=unit;AccountKey=dGVzdA==;BlobEndpoint=::not-a-url::;"
   }
 }
