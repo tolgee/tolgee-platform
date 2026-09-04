@@ -32,6 +32,8 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
     !usage.isPayAsYouGo &&
     Number(mostCriticalProgress) > BILLING_CRITICAL_FRACTION;
 
+  const isExceeded = !usage.isPayAsYouGo && mostCriticalProgress >= 1;
+
   return {
     stringsProgress,
     keysProgress,
@@ -39,6 +41,7 @@ export const getProgressData = ({ usage }: { usage: UsageModel }) => {
     creditProgress,
     mostCriticalProgress,
     isCritical,
+    isExceeded,
   };
 };
 
