@@ -1,20 +1,24 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.WebsocketAuthenticationTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addMinutes
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -36,12 +40,26 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @Autowired
   lateinit var notificationService: NotificationService
 
+  @Autowired
+  lateinit var grantRepository: OAuth2GrantRepository
+
+  @Autowired
+  lateinit var keyGenerator: KeyGenerator
+
+  private lateinit var oauthTokens: OAuth2TestTokens
+
   @LocalServerPort
   private val port: Int? = null
 
   @BeforeEach
   fun before() {
     testData = WebsocketAuthenticationTestData()
+    oauthTokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
+  }
+
+  @AfterEach
+  fun cleanUpTokens() {
+    oauthTokens.deleteAll()
   }
 
   @Test
@@ -289,6 +307,76 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     )
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `works with an OAuth token`() {
+    saveTestData()
+
+    testItWorksWithAuth(auth = WebsocketTestHelper.Auth(bearerToken = oauthToken()))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `forbidden with insufficient scopes on an OAuth token`() {
+    saveTestData()
+
+    // members.view is standalone in the hierarchy — screenshots.view would not do, it expands to keys.view.
+    testProjectSubscribeForbiddenViaControlSocket(
+      auth = WebsocketTestHelper.Auth(bearerToken = oauthToken(scopes = listOf(Scope.MEMBERS_VIEW.value))),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an OAuth token bound to another project cannot subscribe to this project's topic`() {
+    val otherProject = testData.addOtherProject()
+    saveTestData()
+
+    testProjectSubscribeForbiddenViaControlSocket(
+      auth = WebsocketTestHelper.Auth(bearerToken = oauthToken(projectIds = listOf(otherProject.id))),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an OAuth token cannot subscribe to a user topic`() {
+    saveTestData()
+    val tokenSocket = prepareSocket(WebsocketTestHelper.Auth(bearerToken = oauthToken()))
+    val ownerWitness =
+      WebsocketTestHelper(
+        port,
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
+        testData.projectBuilder.self.id,
+        testData.user.id,
+      )
+    try {
+      val deniedInbox =
+        tokenSocket.subscribeAdditional(
+          "/users/${testData.user.id}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
+        )
+      ownerWitness.listenForNotificationsChanged()
+      ownerWitness.assertNotified({ saveNotificationFor(testData.user) }) {
+        assertThatJson(it.poll()).node("data").isObject
+      }
+      deniedInbox.assert.isEmpty()
+    } finally {
+      tokenSocket.stop()
+      ownerWitness.stop()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a credential the resolver refuses cannot ride in on the handshake principal`() {
+    saveTestData()
+    // The handshake is an ordinary HTTP request, so the servlet filter chain authenticates this JWT and Spring
+    // offers it as the session principal. Only what the STOMP resolver accepted may decide a subscription.
+    testProjectSubscribeForbiddenViaControlSocket(
+      auth = WebsocketTestHelper.Auth(jwtToken = "not-a-jwt"),
+      handshakeAuthorization = "Bearer " + jwtService.emitToken(testData.user.id),
+    )
+  }
+
   private fun saveTestData() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -337,8 +425,11 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     }
   }
 
-  fun testProjectSubscribeForbiddenViaControlSocket(auth: WebsocketTestHelper.Auth) {
-    val forbiddenSocket = prepareSocket(auth)
+  fun testProjectSubscribeForbiddenViaControlSocket(
+    auth: WebsocketTestHelper.Auth,
+    handshakeAuthorization: String? = null,
+  ) {
+    val forbiddenSocket = prepareSocket(auth, handshakeAuthorization)
     val deliveryWitness = prepareSocket(WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)))
     try {
       deliveryWitness.assertNotified({ createKey() }) {
@@ -356,13 +447,22 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     socket.waitForUnauthenticated()
   }
 
-  private fun prepareSocket(auth: WebsocketTestHelper.Auth): WebsocketTestHelper {
+  private fun oauthToken(
+    scopes: List<String> = listOf(Scope.TRANSLATIONS_VIEW.value, Scope.KEYS_VIEW.value),
+    projectIds: Collection<Long>? = null,
+  ): String = oauthTokens.issue(subject = testData.user.id, scopes = scopes, projectIds = projectIds)
+
+  private fun prepareSocket(
+    auth: WebsocketTestHelper.Auth,
+    handshakeAuthorization: String? = null,
+  ): WebsocketTestHelper {
     val socket =
       WebsocketTestHelper(
         port,
         auth,
         testData.projectBuilder.self.id,
         testData.user.id,
+        handshakeAuthorization,
       )
 
     socket.listenForTranslationDataModified()
