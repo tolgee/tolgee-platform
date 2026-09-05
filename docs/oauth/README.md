@@ -219,6 +219,19 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 
 ## Round-1 limitations (tracked follow-ups)
 
+### Websockets
+
+An OAuth access token authenticates a STOMP connection the way a project API key does — `Authorization: Bearer
+tgoat_…` on the handshake or on CONNECT — and a subscription to a project topic is narrowed by the grant exactly as
+an HTTP call is: the project must be one the grant covers and the topic's scope must be one it carries.
+
+A **user topic is refused**, as it is for a project API key. `/users/{id}/…` carries the account's own
+notifications, which no scope describes; a credential the user handed to an app does not speak for the user there.
+
+Only what the STOMP resolver accepted decides a subscription. The handshake is an ordinary HTTP request, so the
+servlet filter chain authenticates it too and Spring offers that principal to later frames — a credential this
+resolver refused would otherwise ride in on it.
+
 ### PAK-parity notes
 
 An OAuth grant is deliberately treated as a project API key that may hold several projects, and is not

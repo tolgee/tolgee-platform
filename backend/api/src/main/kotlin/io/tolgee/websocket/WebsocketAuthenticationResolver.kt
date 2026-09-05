@@ -7,6 +7,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component
 @Component
 class WebsocketAuthenticationResolver(
   @Lazy private val jwtService: JwtService,
+  @Lazy private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
   @Lazy private val userAccountService: UserAccountService,
@@ -27,7 +29,7 @@ class WebsocketAuthenticationResolver(
   /**
    * Resolves STOMP CONNECT headers into TolgeeAuthentication.
    * Supports:
-   * - Authorization: Bearer <jwt>
+   * - Authorization: Bearer <jwt> or Bearer tgoat_<token> (OAuth2 access token)
    * - X-API-Key: tgpat_<token> (PAT) or tgpak_<...> (PAK, incl. legacy/raw)
    * - jwtToken: <jwt> (legacy header)
    *
@@ -38,10 +40,10 @@ class WebsocketAuthenticationResolver(
     val xApiKeyHeader = getCaseInsensitiveHeader(accessor, "x-api-key")
     val legacyJwtHeader = getCaseInsensitiveHeader(accessor, "jwtToken")
 
-    // Authorization: Bearer <jwt>
+    // Authorization: Bearer <jwt|tgoat_...>
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
-      return runCatching { jwtService.validateToken(bearer) }
+      return runCatching { oauth2AccessTokenResolver.tryResolve(bearer) ?: jwtService.validateToken(bearer) }
         .onFailure {
           logger.debug(
             "Bearer token validation failed",

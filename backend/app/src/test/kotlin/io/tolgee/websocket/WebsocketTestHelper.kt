@@ -25,6 +25,8 @@ class WebsocketTestHelper(
   val auth: Auth,
   val projectId: Long,
   val userId: Long,
+  /** Sent on the HTTP handshake rather than on STOMP CONNECT, which the servlet filter chain authenticates. */
+  val handshakeAuthorization: String? = null,
 ) : Logging {
   private var sessionHandler: MySessionHandler? = null
   lateinit var receivedMessages: LinkedBlockingDeque<String>
@@ -68,7 +70,9 @@ class WebsocketTestHelper(
       webSocketStompClient
         .connectAsync(
           "http://localhost:$port/websocket",
-          WebSocketHttpHeaders(),
+          WebSocketHttpHeaders().apply {
+            handshakeAuthorization?.let { add("Authorization", it) }
+          },
           getAuthHeaders(),
           sessionHandler!!,
         ).get(10, TimeUnit.SECONDS)
@@ -116,6 +120,7 @@ class WebsocketTestHelper(
       when {
         auth.jwtToken != null -> add("jwtToken", auth.jwtToken)
         auth.apiKey != null -> add("x-api-key", auth.apiKey)
+        auth.bearerToken != null -> add("Authorization", "Bearer ${auth.bearerToken}")
       }
     }
   }
@@ -302,10 +307,12 @@ class WebsocketTestHelper(
   data class Auth(
     val jwtToken: String? = null,
     val apiKey: String? = null,
+    /** Sent as `Authorization: Bearer <token>`, which is how a JWT or an OAuth access token arrives. */
+    val bearerToken: String? = null,
   ) {
     init {
-      if ((jwtToken == null && apiKey == null) || (jwtToken != null && apiKey != null)) {
-        throw IllegalArgumentException("Either jwtToken or apiKey must be provided")
+      if (listOfNotNull(jwtToken, apiKey, bearerToken).size != 1) {
+        throw IllegalArgumentException("Exactly one of jwtToken, apiKey or bearerToken must be provided")
       }
     }
   }

@@ -1,6 +1,5 @@
 package io.tolgee.websocket
 
-import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.ScopedCredential
@@ -49,14 +48,23 @@ class WebSocketConfig(
           val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
 
           if (accessor?.command == StompCommand.CONNECT) {
-            accessor.user = websocketAuthenticationResolver.resolve(accessor)
+            val resolved = websocketAuthenticationResolver.resolve(accessor)
+            accessor.user = resolved
+            // Remembered rather than re-read off the frame: the HTTP handshake runs through the servlet filter
+            // chain, so an unauthenticated CONNECT still inherits whatever principal that chain authenticated, and
+            // the credential this resolver refused would ride in on the next frame.
+            if (resolved != null) {
+              accessor.sessionAttributes?.put(RESOLVED_AUTHENTICATION, resolved)
+            } else {
+              accessor.sessionAttributes?.remove(RESOLVED_AUTHENTICATION)
+            }
           }
 
           if (accessor?.command != StompCommand.SUBSCRIBE) {
             return message
           }
 
-          val authentication = accessor.user as? TolgeeAuthentication
+          val authentication = accessor.sessionAttributes?.get(RESOLVED_AUTHENTICATION) as? TolgeeAuthentication
           return when (decideSubscribe(authentication, accessor.destination)) {
             SubscribeDecision.DENY -> null
             // Throwing here makes Spring close the whole WebSocket, not just reject the SUBSCRIBE.
@@ -139,7 +147,9 @@ class WebSocketConfig(
     authentication: TolgeeAuthentication,
     userId: Long,
   ): Boolean {
-    if (authentication.credentials is ApiKeyDto) {
+    // Any credential narrowed to a scope set — a project API key, an OAuth grant — speaks for an app the user
+    // handed it to, not for the user. A user topic carries the account's own notifications, which no scope covers.
+    if (authentication.credentials is ScopedCredential) {
       return false
     }
     return authentication.principal.id == userId
@@ -161,6 +171,7 @@ class WebSocketConfig(
   }
 
   private companion object {
+    const val RESOLVED_AUTHENTICATION = "tolgee_resolved_authentication"
     val PROJECT_TOPIC = "^/projects/([0-9]+)/".toRegex()
     val USER_TOPIC = "^/users/([0-9]+)/".toRegex()
   }
