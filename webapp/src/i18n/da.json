@@ -2065,6 +2065,8 @@
   "plan_has_migrations": "Planen er i øjeblikket knyttet til planmigration",
   "plan_has_subscribers": "Planen har abonnenter",
   "plan_key_limit_exceeded": "Grænse for nøgler overskredet",
+  "plan_limit_banner_reached": "Du har nået grænserne for din plan",
+  "plan_limit_banner_reached_member": "Din organisation har nået grænserne for sin plan. Kontakt en organisationsejer for at opgradere.",
   "plan_limit_dialog_close": "Luk",
   "plan_limit_dialog_contact_us": "Kontakt os",
   "plan_limit_dialog_description": "Handlingen kan ikke udføres, da det vil overskride din nuværende plangrænse",

@@ -2059,6 +2059,8 @@
   "plan_has_migrations": "Planen er for øyeblikket tilknyttet en planmigrering",
   "plan_has_subscribers": "Planen har abonnenter",
   "plan_key_limit_exceeded": "Nøkkelgrensen er overskredet",
+  "plan_limit_banner_reached": "Du har nådd grensene for planen din",
+  "plan_limit_banner_reached_member": "Organisasjonen din har nådd grensene for planen. Kontakt en organisasjonseier for å oppgradere.",
   "plan_limit_dialog_close": "Lukk",
   "plan_limit_dialog_contact_us": "Kontakt oss",
   "plan_limit_dialog_description": "Handlingen kan ikke utføres fordi det vil overstige grensen for gjeldende plan",

@@ -2062,6 +2062,8 @@
   "plan_has_migrations": "Planul este asociat în prezent cu o migrare de plan",
   "plan_has_subscribers": "Planul are abonați",
   "plan_key_limit_exceeded": "Limită de chei depășită",
+  "plan_limit_banner_reached": "Ați atins limitele planului dvs.",
+  "plan_limit_banner_reached_member": "Organizația dvs. a atins limitele planului. Contactați un proprietar al organizației pentru a actualiza planul.",
   "plan_limit_dialog_close": "Închide",
   "plan_limit_dialog_contact_us": "Contactați-ne",
   "plan_limit_dialog_description": "Operațiunea nu poate fi efectuată deoarece ar depăși limita actuală a planului tău",

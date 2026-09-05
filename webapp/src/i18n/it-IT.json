@@ -2038,6 +2038,8 @@
   "plan_has_migrations": "Il piano è attualmente associato a una migrazione del piano",
   "plan_has_subscribers": "Il piano ha abbonati",
   "plan_key_limit_exceeded": "Limite chiave superato",
+  "plan_limit_banner_reached": "Hai raggiunto i limiti del tuo piano",
+  "plan_limit_banner_reached_member": "La tua organizzazione ha raggiunto i limiti del suo piano. Contatta un proprietario dell'organizzazione per eseguire l'upgrade.",
   "plan_limit_dialog_close": "Chiudi",
   "plan_limit_dialog_contact_us": "Contattaci",
   "plan_limit_dialog_description": "L'operazione non può essere eseguita perché supererebbe il limite del piano attuale",

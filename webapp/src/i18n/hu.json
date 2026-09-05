@@ -2059,6 +2059,8 @@
   "plan_has_migrations": "A csomag jelenleg csomagmigrációhoz van társítva",
   "plan_has_subscribers": "A csomagnak előfizetői vannak",
   "plan_key_limit_exceeded": "Kulcskorlát túllépve",
+  "plan_limit_banner_reached": "Elérted a csomagod korlátait",
+  "plan_limit_banner_reached_member": "A szervezete elérte az előfizetésének korlátait. Vegye fel a kapcsolatot a szervezet tulajdonosával az előfizetés frissítése érdekében.",
   "plan_limit_dialog_close": "Bezárás",
   "plan_limit_dialog_contact_us": "Kapcsolatfelvétel",
   "plan_limit_dialog_description": "Az operáció nem hajtható végre, mert az meghaladná az aktuális tervkorlátot",

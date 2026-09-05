@@ -2061,6 +2061,8 @@
   "plan_has_migrations": "Le plan est actuellement associé à une migration de plan",
   "plan_has_subscribers": "Le plan a des abonnés",
   "plan_key_limit_exceeded": "Limite de clés dépassée",
+  "plan_limit_banner_reached": "Vous avez atteint les limites de votre forfait",
+  "plan_limit_banner_reached_member": "Votre organisation a atteint les limites de son forfait. Contactez un propriétaire de l'organisation pour effectuer une mise à niveau.",
   "plan_limit_dialog_close": "Fermer",
   "plan_limit_dialog_contact_us": "Contactez-nous",
   "plan_limit_dialog_description": "L'opération ne peut pas être effectuée car elle dépasserait la limite de votre plan actuel",

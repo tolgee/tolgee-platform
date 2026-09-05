@@ -2068,6 +2068,8 @@
   "plan_has_migrations": "プランは現在プラン移行に関連付けられています",
   "plan_has_subscribers": "プランに参加しているユーザーが存在します",
   "plan_key_limit_exceeded": "キー制限を超過",
+  "plan_limit_banner_reached": "プランの上限に達しました",
+  "plan_limit_banner_reached_member": "組織がプランの制限に達しました。組織のオーナーにアップグレードを依頼してください。",
   "plan_limit_dialog_close": "閉じる",
   "plan_limit_dialog_contact_us": "お問い合わせ",
   "plan_limit_dialog_description": "現在のプランの制限を超えるため、操作を実行できません",

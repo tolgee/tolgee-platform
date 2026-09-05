@@ -2063,6 +2063,8 @@
   "plan_has_migrations": "Plan ist derzeit mit einer Planmigration verknüpft",
   "plan_has_subscribers": "Plan hat Abonnenten",
   "plan_key_limit_exceeded": "Schlüssellimit überschritten",
+  "plan_limit_banner_reached": "Sie haben die Grenzen Ihres Plans erreicht",
+  "plan_limit_banner_reached_member": "Ihre Organisation hat die Grenzen ihres Tarifs erreicht. Kontaktieren Sie einen Organisationsinhaber, um den Tarif zu upgraden.",
   "plan_limit_dialog_close": "Schließen",
   "plan_limit_dialog_contact_us": "Kontaktieren Sie uns",
   "plan_limit_dialog_description": "Der Vorgang kann nicht durchgeführt werden, da dies Ihr aktuelles Planlimit überschreiten würde",

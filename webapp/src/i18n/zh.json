@@ -2063,6 +2063,8 @@
   "plan_has_migrations": "该计划当前与计划迁移有关联",
   "plan_has_subscribers": "计划有订阅者",
   "plan_key_limit_exceeded": "已超出词条限额",
+  "plan_limit_banner_reached": "您已达到方案的限制",
+  "plan_limit_banner_reached_member": "您的组织已达到方案限制。请联系组织所有者升级方案。",
   "plan_limit_dialog_close": "关闭",
   "plan_limit_dialog_contact_us": "联系我们",
   "plan_limit_dialog_description": "无法执行操作，因为这将超出您当前的计划限制",

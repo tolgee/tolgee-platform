@@ -2059,6 +2059,8 @@
   "plan_has_migrations": "O plano está atualmente associado à migração de planos",
   "plan_has_subscribers": "O plano tem assinantes",
   "plan_key_limit_exceeded": "Limite de chaves excedido",
+  "plan_limit_banner_reached": "Você atingiu os limites do seu plano",
+  "plan_limit_banner_reached_member": "A sua organização atingiu os limites do seu plano. Contacte um proprietário da organização para fazer upgrade.",
   "plan_limit_dialog_close": "Fechar",
   "plan_limit_dialog_contact_us": "Entre em contato conosco",
   "plan_limit_dialog_description": "A operação não pode ser executada porque excederia o limite do seu plano atual",

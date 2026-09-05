@@ -1,3 +1,10 @@
+# [3.220.0](https://github.com/tolgee/tolgee-platform/compare/v3.219.7...v3.220.0) (2026-09-05)
+
+
+### Features
+
+* OAuth 2.1 authorization server ([#3893](https://github.com/tolgee/tolgee-platform/issues/3893)) ([6ef6a0f](https://github.com/tolgee/tolgee-platform/commit/6ef6a0f931a69987dce563ceba329032dc3006f5)), closes [#3849](https://github.com/tolgee/tolgee-platform/issues/3849) [#3879](https://github.com/tolgee/tolgee-platform/issues/3879) [#3880](https://github.com/tolgee/tolgee-platform/issues/3880) [#3885](https://github.com/tolgee/tolgee-platform/issues/3885) [#3826](https://github.com/tolgee/tolgee-platform/issues/3826) [tolgee/billing#311](https://github.com/tolgee/billing/issues/311)
+
 ## [3.219.7](https://github.com/tolgee/tolgee-platform/compare/v3.219.6...v3.219.7) (2026-09-02)
 
 
