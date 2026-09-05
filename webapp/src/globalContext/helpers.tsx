@@ -1,4 +1,5 @@
 import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
+import { hasSupportChat } from 'tg.fixtures/supportChat';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
 
@@ -84,6 +85,27 @@ export const useEnabledFeatures = () => {
       return features.includes(feature);
     },
   };
+};
+
+export const useHasSupportChat = () => {
+  const limitedView = useGlobalContext(
+    (c) => c.initialData.preferredOrganization?.limitedView
+  );
+  const { features } = useEnabledFeatures();
+
+  return hasSupportChat({ limitedView, features });
+};
+
+export const useCanCreateProject = () => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const isOrganizationOwnerOrMaintainer = useIsOrganizationOwnerOrMaintainer();
+  const isAdmin = useIsAdmin();
+
+  if (!preferredOrganization) {
+    return false;
+  }
+
+  return isOrganizationOwnerOrMaintainer || isAdmin;
 };
 
 const EMPTY_LIST = [];
