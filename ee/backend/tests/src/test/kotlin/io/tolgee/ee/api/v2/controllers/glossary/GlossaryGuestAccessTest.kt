@@ -3,7 +3,9 @@ package io.tolgee.ee.api.v2.controllers.glossary
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryGuestAccessTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.glossary.GlossaryExportService
 import io.tolgee.ee.service.glossary.GlossaryService
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_NAMES
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -27,6 +29,9 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var glossaryService: GlossaryService
+
+  @Autowired
+  private lateinit var glossaryExportService: GlossaryExportService
 
   lateinit var testData: GlossaryGuestAccessTestData
 
@@ -181,21 +186,20 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
 
   @Test
   fun `guest export omits a private co-assigned project's languages`() {
-    userAccount = testData.virtualGuest
-    exportLanguageHeaders(testData.mixedGlossary.id).assert.doesNotContain("de")
-
-    userAccount = testData.user
-    exportLanguageHeaders(testData.mixedGlossary.id).assert.contains("de")
+    exportLanguageHeaders(testData.virtualGuest).assert.doesNotContain("de")
+    exportLanguageHeaders(testData.user).assert.contains("de")
   }
 
-  private fun exportLanguageHeaders(glossaryId: Long): List<String> {
+  private fun exportLanguageHeaders(user: UserAccount): List<String> {
+    setSecurityContext(user)
     val csv =
-      performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/$glossaryId/export")
-        .andIsOk
-        .andReturn()
-        .response.contentAsString
+      executeInNewTransaction {
+        val glossary = glossaryService.get(testData.organization.id, testData.mixedGlossary.id)
+        glossaryExportService.exportCsv(glossary).readBytes().toString(Charsets.UTF_8)
+      }
     val headers = csv.lines()[0].split(",").map { it.trim().removeSurrounding("\"") }
-    return headers.drop(6)
+    headers.take(GLOSSARY_CSV_HEADER_NAMES.size).assert.isEqualTo(GLOSSARY_CSV_HEADER_NAMES)
+    return headers.drop(GLOSSARY_CSV_HEADER_NAMES.size)
   }
 
   private fun assertGuestList(
