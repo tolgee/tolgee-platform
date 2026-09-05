@@ -66,6 +66,10 @@ class AuthenticationInterceptor(
       if (authenticationFacade.isProjectApiKeyAuth && !isPakAllowed(allowApiAccess)) {
         throw PermissionException(Message.PAK_ACCESS_NOT_ALLOWED)
       }
+
+      if (authenticationFacade.isOAuthTokenAuth && !isOAuthAllowed(allowApiAccess)) {
+        throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+      }
     }
 
     if (
@@ -91,6 +95,8 @@ class AuthenticationInterceptor(
   private fun isPakAllowed(annotation: AllowApiAccess): Boolean {
     return annotation.tokenType == AuthTokenType.ANY || annotation.tokenType == AuthTokenType.ONLY_PAK
   }
+
+  private fun isOAuthAllowed(annotation: AllowApiAccess): Boolean = annotation.tokenType == AuthTokenType.ANY
 
   override fun getOrder(): Int {
     return Ordered.HIGHEST_PRECEDENCE

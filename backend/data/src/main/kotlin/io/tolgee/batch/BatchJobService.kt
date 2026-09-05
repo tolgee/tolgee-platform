@@ -285,7 +285,7 @@ class BatchJobService(
       securityService.checkProjectPermission(projectId, Scope.BATCH_JOBS_VIEW)
       null
     } catch (e: PermissionException) {
-      if (authenticationFacade.isProjectApiKeyAuth) {
+      if (!authenticationFacade.canUseAuthorSelfAccess) {
         throw e
       }
       authenticationFacade.authenticatedUser.id

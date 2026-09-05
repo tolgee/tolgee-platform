@@ -16,8 +16,10 @@
 
 package io.tolgee.dtos.cacheable
 
+import io.tolgee.constants.Message
 import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.ScopedCredential
 import java.io.Serializable
 import java.util.Date
 
@@ -27,8 +29,17 @@ data class ApiKeyDto(
   val expiresAt: Date?,
   val projectId: Long,
   val userAccountId: Long,
-  val scopes: Set<Scope>,
-) : Serializable {
+  override val scopes: Set<Scope>,
+) : Serializable,
+  ScopedCredential {
+  override val singleProjectId: Long
+    get() = projectId
+
+  override val projectMismatchMessage: Message
+    get() = Message.PAK_CREATED_FOR_DIFFERENT_PROJECT
+
+  override fun coversProject(projectId: Long): Boolean = this.projectId == projectId
+
   companion object {
     fun fromEntity(apiKey: ApiKey): ApiKeyDto {
       return ApiKeyDto(

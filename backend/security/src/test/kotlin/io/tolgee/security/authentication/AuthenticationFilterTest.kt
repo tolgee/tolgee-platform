@@ -26,6 +26,7 @@ import io.tolgee.dtos.cacheable.PatDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -73,6 +74,8 @@ class AuthenticationFilterTest {
 
   private val jwtService = Mockito.mock(JwtService::class.java)
 
+  private val oauth2AccessTokenResolver = Mockito.mock(OAuth2AccessTokenResolver::class.java)
+
   private val pakService = Mockito.mock(ApiKeyService::class.java)
 
   private val patService = Mockito.mock(PatService::class.java)
@@ -95,6 +98,7 @@ class AuthenticationFilterTest {
       currentDateProvider,
       rateLimitService,
       jwtService,
+      oauth2AccessTokenResolver,
       userAccountService,
       pakService,
       patService,
@@ -244,7 +248,7 @@ class AuthenticationFilterTest {
     assertThat(authenticationFacade.isApiAuthentication).isEqualTo(true)
     assertThat(authenticationFacade.isProjectApiKeyAuth).isEqualTo(true)
     assertThat(authenticationFacade.isPersonalAccessTokenAuth).isEqualTo(false)
-    assertThat(authenticationFacade.projectApiKey).isEqualTo(apiKey)
+    assertThat(authenticationFacade.scopedCredential).isEqualTo(apiKey)
   }
 
   @Test
@@ -331,6 +335,63 @@ class AuthenticationFilterTest {
     req.removeHeader("X-API-Key")
     req.addHeader("X-API-Key", TEST_VALID_PAT)
     assertThrows<RateLimitedException> { authenticationFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `the authorization server's endpoints still enter the auth rate limiter`() {
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
+      .thenThrow(RateLimitedException(1000L, true))
+
+    val req = MockHttpServletRequest("POST", "/oauth2/token")
+
+    assertThrows<RateLimitedException> {
+      authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+    }
+  }
+
+  @Test
+  fun `doAuthenticate skips credential resolution on the authorization server's own endpoints`() {
+    val paths =
+      listOf(
+        "/oauth2/token",
+        "/oauth2/revoke",
+        "/.well-known/oauth-authorization-server",
+        // The dispatcher strips matrix parameters and decodes before matching, so the skip has to see the same path.
+        "/oauth2/token;a=b",
+        "/oauth2/%74oken",
+      )
+    paths.forEach { path ->
+      SecurityContextHolder.clearContext()
+      val req = MockHttpServletRequest("POST", path)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+      assertThat(SecurityContextHolder.getContext().authentication).isNull()
+    }
+  }
+
+  @Test
+  fun `the exemption survives a non-empty context path`() {
+    SecurityContextHolder.clearContext()
+    val req = MockHttpServletRequest("POST", "/tolgee/oauth2/token")
+    req.contextPath = "/tolgee"
+    req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+    assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+    assertThat(SecurityContextHolder.getContext().authentication).isNull()
+  }
+
+  @Test
+  fun `the exemption is by exact path, so a neighbour under the same prefix is still authenticated`() {
+    listOf("/.well-known/security.txt", "/.well-known/oauth-authorization-server/extra", "/oauth2/consent").forEach {
+      val req = MockHttpServletRequest("GET", it)
+      req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+      assertThrows<AuthenticationException> {
+        authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+      }
+    }
   }
 
   @Test

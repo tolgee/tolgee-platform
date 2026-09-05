@@ -67,6 +67,37 @@ class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
   }
 
   @Test
+  fun `OAuth auth on a project-scoped tool with ANY passes`() {
+    oauthAuthenticated()
+
+    sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = false), projectId = 99L) {}
+  }
+
+  @Test
+  fun `OAuth auth on a global tool is allowed, as it is for every other API credential`() {
+    oauthAuthenticated()
+
+    sut.executeAs(spec(allowedTokenType = AuthTokenType.ANY, isGlobalRoute = true)) {}
+  }
+
+  @Test
+  fun `OAuth auth on a tool restricted to one API token kind throws OAUTH_ACCESS_NOT_ALLOWED`() {
+    oauthAuthenticated()
+
+    assertThatThrownBy {
+      sut.executeAs(spec(allowedTokenType = AuthTokenType.ONLY_PAT, isGlobalRoute = false), projectId = 99L) {}
+    }.isInstanceOf(PermissionException::class.java)
+      .satisfies({ ex ->
+        assertThat((ex as PermissionException).tolgeeMessage).isEqualTo(Message.OAUTH_ACCESS_NOT_ALLOWED)
+      })
+  }
+
+  private fun oauthAuthenticated() {
+    whenever(authenticationFacade.isApiAuthentication).thenReturn(true)
+    whenever(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+  }
+
+  @Test
   fun `PAT auth with ONLY_PAT passes`() {
     whenever(authenticationFacade.isApiAuthentication).thenReturn(true)
     whenever(authenticationFacade.isPersonalAccessTokenAuth).thenReturn(true)

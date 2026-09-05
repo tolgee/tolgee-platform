@@ -51,6 +51,6 @@ class InvitationEmailSender(
   }
 
   fun getInvitationAcceptUrl(code: String): String {
-    return "${frontendUrlProvider.url}/accept_invitation/$code"
+    return "${frontendUrlProvider.requestDerivedUrl}/accept_invitation/$code"
   }
 }

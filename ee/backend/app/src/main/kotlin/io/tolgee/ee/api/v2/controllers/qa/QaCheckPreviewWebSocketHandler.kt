@@ -3,7 +3,6 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.sentry.Sentry
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
-import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.ee.data.qa.QaCheckPreviewDone
 import io.tolgee.ee.data.qa.QaCheckPreviewError
 import io.tolgee.ee.data.qa.QaCheckPreviewResult
@@ -21,6 +20,7 @@ import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.security.authentication.JwtService
+import io.tolgee.security.authentication.ScopedCredential
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -178,7 +178,7 @@ class QaCheckPreviewWebSocketHandler(
       projectId = projectId,
       requiredPermission = Scope.TRANSLATIONS_VIEW,
       user = auth.principal,
-      apiKey = auth.credentials as? ApiKeyDto,
+      credential = auth.credentials as? ScopedCredential,
     )
   }
 

@@ -401,6 +401,7 @@ jobs:
           echo "Backend is ready"
         env:
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
 
       - name: Generate schema
         run: npm run schema

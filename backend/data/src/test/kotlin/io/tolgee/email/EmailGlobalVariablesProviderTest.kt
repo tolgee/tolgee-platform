@@ -16,6 +16,7 @@
 
 package io.tolgee.email
 
+import io.tolgee.component.BackendUrlProvider
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -39,6 +40,9 @@ class EmailGlobalVariablesProviderTest {
   @MockitoBean
   private lateinit var frontendUrlProvider: FrontendUrlProvider
 
+  @MockitoBean
+  private lateinit var backendUrlProvider: BackendUrlProvider
+
   @Autowired
   private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
 
@@ -46,7 +50,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it returns the correct properties based on config in cloud`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(true))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
+    whenever(backendUrlProvider.stableUrl).thenReturn("https://tolgee.test")
 
     emailGlobalVariablesProvider()
       .assert
@@ -60,7 +64,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it returns the correct properties based on config in self-hosted`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
+    whenever(backendUrlProvider.stableUrl).thenReturn("https://tolgee.test")
 
     emailGlobalVariablesProvider()
       .assert
@@ -74,7 +78,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it gracefully handles bad frontend url configuration`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.backEndUrl).thenReturn("https:/tolgee.test")
+    whenever(backendUrlProvider.stableUrl).thenReturn("https:/tolgee.test")
 
     emailGlobalVariablesProvider()
       .assert
@@ -89,7 +93,6 @@ class EmailGlobalVariablesProviderTest {
     // That's a pathological situation to be in... but it can happen... :shrug:
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.frontEndUrl).thenReturn(null)
 
     emailGlobalVariablesProvider()
       .assert

@@ -7,6 +7,7 @@ import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import org.springframework.core.io.ClassPathResource
 
@@ -24,6 +25,7 @@ class UserAccountBuilder(
     var pats: MutableList<PatBuilder> = mutableListOf()
     var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
     var notifications: MutableList<NotificationBuilder> = mutableListOf()
+    var oauth2Grants: MutableList<OAuth2GrantBuilder> = mutableListOf()
   }
 
   var data = DATA()
@@ -50,4 +52,6 @@ class UserAccountBuilder(
   fun addSlackUserConnection(ft: FT<SlackUserConnection>) = addOperation(data.slackUserConnections, ft)
 
   fun addNotification(ft: FT<Notification>) = addOperation(data.notifications, ft)
+
+  fun addOAuth2Grant(ft: FT<OAuth2Grant>) = addOperation(data.oauth2Grants, ft)
 }

@@ -8,6 +8,7 @@ import io.tolgee.exceptions.StreamingUnavailableException
 import io.tolgee.testing.assert
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
 import org.springframework.core.task.TaskRejectedException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -18,7 +19,7 @@ import java.util.concurrent.RejectedExecutionException
 
 class ExceptionHandlersAsyncCapacityTest {
   private val metrics = Metrics(SimpleMeterRegistry())
-  private val exceptionHandlers = ExceptionHandlers(metrics)
+  private val exceptionHandlers = ExceptionHandlers(metrics, mock())
 
   @Test
   fun `answers a saturated streaming pool with 503 and Retry-After`() {

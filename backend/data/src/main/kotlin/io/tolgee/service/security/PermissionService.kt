@@ -24,6 +24,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -48,6 +49,8 @@ class PermissionService(
   private val userPreferencesService: UserPreferencesService,
   @Lazy
   private val applicationContext: ApplicationContext,
+  @Lazy
+  private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
 ) {
   @set:Autowired
@@ -121,6 +124,7 @@ class PermissionService(
         directPermission = projectPermission,
         userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
         isProjectPublic = project.public,
+        asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountId),
       )
 
     return ProjectPermissionData(
@@ -234,6 +238,7 @@ class PermissionService(
     directPermission: IPermission?,
     userRole: UserAccount.Role? = null,
     isProjectPublic: Boolean = false,
+    asScopedCredential: Boolean,
   ): ComputedPermissionDto {
     val computed =
       when {
@@ -248,11 +253,17 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    if (isProjectPublic && userRole != null) {
-      return computed.withCommunityFloor().getAdminOrSupporterPermissions(userRole)
-    }
+    val withFloor = computed.communityFloorIfPublic(userRole, isProjectPublic)
+    if (asScopedCredential) return withFloor
+    return withFloor.getAdminOrSupporterPermissions(userRole)
+  }
 
-    return computed.getAdminOrSupporterPermissions(userRole)
+  private fun ComputedPermissionDto.communityFloorIfPublic(
+    userRole: UserAccount.Role?,
+    isProjectPublic: Boolean,
+  ): ComputedPermissionDto {
+    if (isProjectPublic && userRole != null) return withCommunityFloor()
+    return this
   }
 
   fun createForInvitation(
