@@ -7,7 +7,8 @@ describe('authorizeRequestFromSearch', () => {
   it('carries every authorize parameter through', () => {
     const request = authorizeRequestFromSearch(
       '?client_id=ext&redirect_uri=https%3A%2F%2Fa.test%2Fcb&response_type=code' +
-        '&scope=keys.view%20translations.view&state=s1&code_challenge=c&code_challenge_method=S256&project=7'
+        '&scope=keys.view%20translations.view&state=s1&code_challenge=c&code_challenge_method=S256&project=7' +
+        '&resource=https%3A%2F%2Fmcp.example.com'
     );
     expect(request).toEqual({
       clientId: 'ext',
@@ -18,6 +19,7 @@ describe('authorizeRequestFromSearch', () => {
       codeChallenge: 'c',
       codeChallengeMethod: 'S256',
       project: '7',
+      resource: 'https://mcp.example.com',
     });
   });
 
@@ -26,6 +28,7 @@ describe('authorizeRequestFromSearch', () => {
     expect(request.state).toBeUndefined();
     expect(request.scope).toBeUndefined();
     expect(request.project).toBeUndefined();
+    expect(request.resource).toBeUndefined();
   });
 });
 

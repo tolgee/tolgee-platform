@@ -496,6 +496,7 @@ declare namespace DataCy {
         "notistack-snackbar": true;
         "oauth2-consent": true;
         "oauth2-consent-allow": true;
+        "oauth2-consent-client-identity": true;
         "oauth2-consent-deny": true;
         "oauth2-consent-error": true;
         "oauth2-consent-modify": true;
@@ -505,6 +506,7 @@ declare namespace DataCy {
         "oauth2-consent-project-one": true;
         "oauth2-consent-scope": true;
         "oauth2-consent-scopes": true;
+        "oauth2-consent-unverified": true;
         "order-translation-confirmation": true;
         "order-translation-confirmation-ok": true;
         "order-translation-invitation-checkbox": true;

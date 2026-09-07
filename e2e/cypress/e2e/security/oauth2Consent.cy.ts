@@ -162,4 +162,44 @@ describe('OAuth2 consent', () => {
     cy.gcy('oauth2-consent-allow').click();
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
   });
+
+  it('passes the resource parameter through to the authorize request', () => {
+    // Must be a resource the backend recognizes (the issuer origin or its MCP canonical URI, per OAuth2Resources) —
+    // anything else fails validation in the GET /oauth2/authorize redirect before the SPA is ever reached.
+    const resource = `${API_URL}/mcp/developer`;
+    cy.intercept('POST', '**/v2/oauth2/authorize').as('authorize');
+
+    cy.visit(
+      `${authorizeUrl(
+        'keys.view translations.view'
+      )}&resource=${encodeURIComponent(resource)}`
+    );
+
+    cy.wait('@authorize').its('request.body.resource').should('eq', resource);
+  });
+
+  it('shows an unverified-client notice when the backend marks the client unverified', () => {
+    const clientOrigin = 'https://untrusted.example.com';
+    cy.intercept('GET', '**/v2/oauth2/consent-info**', {
+      statusCode: 200,
+      body: {
+        appName: 'Untrusted App',
+        clientOrigin,
+        verified: false,
+        scopes: ['keys.view'],
+        requiredScopes: ['keys.view'],
+      },
+    }).as('consentInfo');
+
+    cy.visit(authorizeUrl('keys.view'));
+    cy.wait('@consentInfo');
+
+    cy.gcy('oauth2-consent-unverified', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-client-identity').should(
+      'contain.text',
+      clientOrigin
+    );
+  });
 });

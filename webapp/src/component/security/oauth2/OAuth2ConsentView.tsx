@@ -153,6 +153,41 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
         }
         primaryContent={
           <Box data-cy="oauth2-consent">
+            {!info.verified && (
+              <>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    mb: 1,
+                  }}
+                  data-cy="oauth2-consent-client-identity"
+                >
+                  {info.logoUri && (
+                    <Box
+                      component="img"
+                      src={info.logoUri}
+                      alt=""
+                      sx={{ width: 32, height: 32, borderRadius: 1 }}
+                    />
+                  )}
+                  <Box sx={{ color: 'text.secondary' }}>
+                    {info.clientOrigin}
+                  </Box>
+                </Box>
+                <Alert
+                  severity="warning"
+                  data-cy="oauth2-consent-unverified"
+                  sx={{ mb: 2 }}
+                >
+                  <T
+                    keyName="oauth2_consent_unverified_app"
+                    defaultValue="Tolgee hasn't verified this app. Only continue if you opened this request from an app you trust."
+                  />
+                </Alert>
+              </>
+            )}
             {isRequestedProjectInaccessible(info) && (
               <Alert
                 severity="warning"
