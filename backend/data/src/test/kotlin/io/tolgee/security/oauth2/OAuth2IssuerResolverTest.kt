@@ -86,7 +86,10 @@ class OAuth2IssuerResolverTest {
   ) = OAuth2IssuerResolver(
     BackendUrlProvider(propertiesWith(backEnd, frontEnd)),
     FrontendUrlProvider(propertiesWith(backEnd, frontEnd)),
-    mock<OAuth2ClientRegistry> { on { isEnabled } doReturn clients.isNotEmpty() },
+    mock<OAuth2ClientRegistry> {
+      on { isEnabled } doReturn clients.isNotEmpty()
+      on { this.clients } doReturn clients
+    },
   )
 
   private fun propertiesWith(

@@ -1,10 +1,13 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.OAuth2CimdProperties
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.mock
 
 class OAuth2ClientRegistryTest {
   @Test
@@ -125,5 +128,9 @@ class OAuth2ClientRegistryTest {
       browserExtensionRedirectUris = extensionUris
       cliRedirectUris = cliUris
     },
+    mock<CimdMetadataFetcher>(),
+    OAuth2CimdProperties(),
+    mock<CurrentDateProvider>(),
+    mock<OAuth2IssuerResolver>(),
   )
 }

@@ -41,7 +41,9 @@ class OAuth2IssuerResolver(
 ) {
   @PostConstruct
   fun requireConfiguredIssuer() {
-    if (clientRegistry.isEnabled) issuerUrl
+    // Not clientRegistry.isEnabled: that flag is true when the issuer itself resolves (CIMD is available whenever
+    // it does), so gating startup on it would never fail for a CIMD-only deployment with a broken issuer.
+    if (clientRegistry.clients.isNotEmpty()) issuerUrl
   }
 
   val issuerUrl: String

@@ -16,24 +16,87 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.OAuth2CimdProperties
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.net.URI
+import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 
-/** The clients Tolgee ships, built from configuration. */
+/** The clients Tolgee ships, built from configuration, plus any client resolved live via CIMD (RFC pending draft). */
 @Component
 class OAuth2ClientRegistry(
   private val properties: OAuth2ServerProperties,
+  private val cimdFetcher: CimdMetadataFetcher,
+  private val cimdProperties: OAuth2CimdProperties,
+  private val currentDateProvider: CurrentDateProvider,
+  // @Lazy: OAuth2IssuerResolver depends on this registry to decide whether it must fail startup, so a plain
+  // injection here would form a construction cycle.
+  @Lazy private val issuerResolver: OAuth2IssuerResolver,
 ) {
   val clients: List<OAuth2Client> = listOfNotNull(browserExtension(), cli())
 
+  private val cimdCache = ConcurrentHashMap<String, CacheEntry>()
+
+  private data class CacheEntry(
+    val resolved: CimdClient?,
+    val expiresAt: Date,
+  )
+
   val isEnabled: Boolean
-    get() = clients.isNotEmpty()
+    get() = clients.isNotEmpty() || cimdAvailable
 
-  fun find(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
+  fun find(clientId: String): OAuth2Client? {
+    clients.firstOrNull { it.clientId == clientId }?.let { return it }
+    return findCimd(clientId)?.client
+  }
 
-  fun isStillAuthorized(clientId: String): Boolean = find(clientId) != null
+  fun findCimd(clientId: String): CimdClient? {
+    if (!isUrlForm(clientId)) return null
+    if (!cimdAvailable) return null
+    cachedEntry(clientId)?.let { return it.resolved }
+    val resolved = cimdFetcher.fetchAndValidate(clientId)
+    val ttl = if (resolved != null) cimdProperties.cacheTtlSeconds else cimdProperties.negativeCacheTtlSeconds
+    putCapped(clientId, CacheEntry(resolved, nowPlusSeconds(ttl)))
+    return resolved
+  }
+
+  fun isStillAuthorized(clientId: String): Boolean {
+    if (clients.any { it.clientId == clientId }) return true
+    // A CIMD grant must not depend on a third-party website's uptime per request; metadata drift is caught by the
+    // grant's metadata hash at token exchange and refresh instead.
+    return isUrlForm(clientId) && cimdAvailable
+  }
+
+  private val cimdAvailable: Boolean
+    get() = runCatching { issuerResolver.issuerUrl }.isSuccess
+
+  private fun isUrlForm(clientId: String): Boolean = clientId.startsWith("https://")
+
+  private fun cachedEntry(clientId: String): CacheEntry? {
+    val entry = cimdCache[clientId] ?: return null
+    if (!entry.expiresAt.after(currentDateProvider.date)) {
+      cimdCache.remove(clientId)
+      return null
+    }
+    return entry
+  }
+
+  // The cache is keyed by attacker-chosen URLs; without a cap a scan of unique client_ids grows it without bound.
+  private fun putCapped(
+    clientId: String,
+    entry: CacheEntry,
+  ) {
+    if (cimdCache.size >= MAX_CACHE_ENTRIES) {
+      cimdCache.keys.take(cimdCache.size - MAX_CACHE_ENTRIES + 1).forEach { cimdCache.remove(it) }
+    }
+    cimdCache[clientId] = entry
+  }
+
+  private fun nowPlusSeconds(seconds: Long): Date = Date(currentDateProvider.date.time + seconds * 1000)
 
   private fun browserExtension(): OAuth2Client? {
     if (properties.browserExtensionRedirectUris.isEmpty()) return null
@@ -74,6 +137,10 @@ class OAuth2ClientRegistry(
       }
     }
     return uris
+  }
+
+  companion object {
+    private const val MAX_CACHE_ENTRIES = 10_000
   }
 }
 
