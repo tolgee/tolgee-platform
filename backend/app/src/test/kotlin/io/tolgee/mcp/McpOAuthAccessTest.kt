@@ -124,7 +124,50 @@ class McpOAuthAccessTest : AbstractMcpTest() {
     assertToolFails(createMcpClientWithBearer(token), "list_keys", expectedError = "project_not_selected")
   }
 
+  @Test
+  fun `a credential-less tools-call is challenged with 401 and resource metadata`() {
+    val body = """{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_keys","arguments":{}}}"""
+
+    val response = mcpPostWithoutAuth(body)
+
+    response.statusCode().assert.isEqualTo(401)
+    response
+      .headers()
+      .firstValue("WWW-Authenticate")
+      .orElse("")
+      .assert
+      .contains("resource_metadata=")
+  }
+
+  @Test
+  fun `a credential-less tools-list is not challenged`() {
+    val initBody =
+      """{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18",""" +
+        """"capabilities":{},"clientInfo":{"name":"test-client","version":"1.0"}}}"""
+    val initResponse = mcpPostWithoutAuth(initBody)
+    val sessionId = initResponse.headers().firstValue("Mcp-Session-Id").orElseThrow()
+
+    val listBody = """{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}"""
+    val response = mcpPostWithoutAuth(listBody, sessionId)
+
+    response.statusCode().assert.isEqualTo(200)
+  }
+
   private fun projectArgument() = mapOf("projectId" to testData.project.id)
+
+  private fun mcpPostWithoutAuth(
+    body: String,
+    sessionId: String? = null,
+  ): HttpResponse<String> {
+    val builder =
+      HttpRequest
+        .newBuilder(URI.create("http://localhost:$port/mcp/developer"))
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json, text/event-stream")
+        .POST(HttpRequest.BodyPublishers.ofString(body))
+    sessionId?.let { builder.header("Mcp-Session-Id", it) }
+    return HttpClient.newHttpClient().send(builder.build(), HttpResponse.BodyHandlers.ofString())
+  }
 
   private fun mcpInitializeWith(token: String): HttpResponse<String> {
     val body =

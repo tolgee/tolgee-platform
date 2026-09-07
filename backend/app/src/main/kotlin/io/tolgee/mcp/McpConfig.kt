@@ -4,6 +4,7 @@ import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
 import org.redisson.api.RedissonClient
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -62,6 +63,16 @@ class McpConfig {
   ): FilterRegistrationBean<McpSessionRedisFilter> {
     val filter = McpSessionRedisFilter(transportProvider, redissonClient, objectMapper)
     val registration = FilterRegistrationBean(filter)
+    registration.addUrlPatterns("/mcp/*")
+    return registration
+  }
+
+  @Bean
+  fun mcpAuthChallengeFilter(
+    challengeProvider: OAuth2BearerChallengeProvider,
+    objectMapper: ObjectMapper,
+  ): FilterRegistrationBean<McpAuthChallengeFilter> {
+    val registration = FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper))
     registration.addUrlPatterns("/mcp/*")
     return registration
   }
