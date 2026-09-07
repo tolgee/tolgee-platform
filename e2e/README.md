@@ -59,3 +59,17 @@ To run only selected specs, pass `specs` property with a comma-separated list or
    ```shell
    ./gradlew stopDockerE2e
    ```
+
+## CI sharding
+
+CI splits the specs into `E2E_TOTAL_JOBS` groups balanced by duration, using
+`e2e/spec-durations.json` (seconds per spec, measured from a CI run). A spec
+missing from the file counts as 30 seconds, so new specs need no entry. To see
+the groups:
+
+```shell
+E2E_TOTAL_JOBS=20 ./gradlew printE2eGroups
+```
+
+Refresh the file when the groups drift apart: take the `Running:` timestamps
+from the E2E job logs of a recent run and write the wall seconds per spec.
