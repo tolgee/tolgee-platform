@@ -1,3 +1,10 @@
+# [3.221.0](https://github.com/tolgee/tolgee-platform/compare/v3.220.0...v3.221.0) (2026-09-07)
+
+
+### Features
+
+* support Azure Blob Storage as main file storage ([91534b2](https://github.com/tolgee/tolgee-platform/commit/91534b2ad1d78101ba80872883d9d4ccbb50c147))
+
 # [3.220.0](https://github.com/tolgee/tolgee-platform/compare/v3.219.7...v3.220.0) (2026-09-05)
 
 
