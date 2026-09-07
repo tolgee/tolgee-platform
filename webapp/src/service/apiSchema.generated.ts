@@ -2235,11 +2235,14 @@ export interface components {
     };
     ConsentInfoModel: {
       appName: string;
+      clientOrigin?: string;
+      logoUri?: string;
       project?: components["schemas"]["OAuth2ProjectModel"];
       /** Format: int64 */
       requestedProjectId?: number;
       requiredScopes: string[];
       scopes: string[];
+      verified: boolean;
     };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
@@ -3055,6 +3058,7 @@ export interface components {
         | "oauth_access_not_allowed"
         | "invalid_oauth_token"
         | "oauth_token_expired"
+        | "oauth_wrong_audience"
         | "oauth_unknown_client"
         | "oauth_redirect_uri_not_registered"
         | "oauth_unknown_state"
@@ -4587,6 +4591,7 @@ export interface components {
       project?: string;
       /** @description Redirect URI from the client's authorize request; must be registered for the client */
       redirectUri: string;
+      resource?: string;
       responseType?: string;
       scope?: string;
       state?: string;
@@ -6994,6 +6999,7 @@ export interface components {
         | "oauth_access_not_allowed"
         | "invalid_oauth_token"
         | "oauth_token_expired"
+        | "oauth_wrong_audience"
         | "oauth_unknown_client"
         | "oauth_redirect_uri_not_registered"
         | "oauth_unknown_state"

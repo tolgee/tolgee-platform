@@ -236,6 +236,27 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
+  fun `consent-info for a pre-registered client reports it as verified with no origin or logo`() {
+    val jwt = jwt()
+    val pending = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT)
+    val info = consentInfo(jwt, pending.state)
+
+    info
+      .get("verified")
+      .asBoolean()
+      .assert
+      .isTrue()
+    info
+      .get("clientOrigin")
+      .isNull.assert
+      .isTrue()
+    info
+      .get("logoUri")
+      .isNull.assert
+      .isTrue()
+  }
+
+  @Test
   fun `consent-info describes the pending authorization it is keyed by`() {
     val jwt = jwt()
     val pending = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, scope = "translations.view")

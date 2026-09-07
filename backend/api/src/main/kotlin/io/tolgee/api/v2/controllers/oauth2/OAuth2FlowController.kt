@@ -18,6 +18,7 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
+import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
 
 /**
  * The consent screen's own API. `/oauth2/authorize` is a bare redirect into the SPA, so everything that needs to know
@@ -101,6 +103,7 @@ class OAuth2FlowController(
   ): ConsentInfoModel {
     val grant = authorizationService.findOwnPendingByConsentState(state, authenticationFacade.authenticatedUser.id)
     val client = clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val cimd = clientRegistry.findCimd(grant.clientId)
     val scopes = grant.requestedScopeValues
     val requestedProjectId = grant.projectHint
     return ConsentInfoModel(
@@ -109,6 +112,9 @@ class OAuth2FlowController(
       requiredScopes = client.requiredScopes.map { it.value }.filter { it in scopes },
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
+      verified = client.verified,
+      clientOrigin = clientOrigin(client, grant.clientId),
+      logoUri = cimd?.logoUri,
     )
   }
 
@@ -133,6 +139,21 @@ class OAuth2FlowController(
 
   private fun hintedProject(projectId: Long): OAuth2ProjectModel? =
     accessibleProject(projectId)?.let { OAuth2ProjectModel(id = it.id, name = it.name) }
+
+  private fun clientOrigin(
+    client: OAuth2Client,
+    clientId: String,
+  ): String? {
+    if (client.verified) return null
+    return originOf(clientId)
+  }
+
+  private fun originOf(clientId: String): String? {
+    val uri = runCatching { URI(clientId) }.getOrNull() ?: return null
+    val host = uri.host ?: return null
+    if (uri.port == -1) return "${uri.scheme}://$host"
+    return "${uri.scheme}://$host:${uri.port}"
+  }
 
   private fun resolveDecision(
     request: OAuth2ConsentRequest,

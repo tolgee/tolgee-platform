@@ -44,6 +44,7 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
           node("token_endpoint").isString
           node("revocation_endpoint").isString.endsWith("/oauth2/revoke")
           node("revocation_endpoint_auth_methods_supported").isArray.containsExactly("none")
+          node("client_id_metadata_document_supported").isEqualTo(true)
           node("jwks_uri").isAbsent()
         }.andReturn()
 
@@ -83,8 +84,8 @@ class OAuth2AuthorizationServerTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `the token and revocation endpoints declare a rate limit, which nothing else on this path enforces`() {
-    listOf("token", "revoke").forEach { method ->
+  fun `the authorize, token and revocation endpoints declare a rate limit`() {
+    listOf("authorize", "token", "revoke").forEach { method ->
       val annotation =
         OAuth2AuthorizationServerController::class.java.declaredMethods
           .single { it.name == method }

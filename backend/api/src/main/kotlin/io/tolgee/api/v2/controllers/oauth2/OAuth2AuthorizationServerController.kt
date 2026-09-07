@@ -50,6 +50,7 @@ class OAuth2AuthorizationServerController(
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
+  @RateLimited(limit = 30, refillDurationInMs = 60_000, isAuthentication = true)
   fun authorize(
     request: HttpServletRequest,
     @RequestParam("client_id", required = false) clientId: String?,
@@ -200,6 +201,7 @@ class OAuth2AuthorizationServerController(
         scopesSupported = OAuth2Scopes.SUPPORTED,
         revocationEndpoint = issuer + OAuth2Constants.REVOKE_PATH,
         revocationEndpointAuthMethodsSupported = listOf("none"),
+        clientIdMetadataDocumentSupported = true,
       )
     return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store").body(model)
   }
