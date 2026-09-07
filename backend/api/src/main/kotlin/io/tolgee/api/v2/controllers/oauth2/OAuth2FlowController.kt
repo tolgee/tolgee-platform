@@ -22,6 +22,7 @@ import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
+import io.tolgee.security.oauth2.OAuth2Resources
 import io.tolgee.security.oauth2.OAuth2Scopes
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
@@ -52,6 +53,7 @@ class OAuth2FlowController(
   private val projectService: ProjectService,
   private val securityService: SecurityService,
   private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2Resources: OAuth2Resources,
 ) : IController {
   @PostMapping("/authorize")
   @Operation(summary = "Record the pending grant the consent screen will act on")
@@ -74,12 +76,14 @@ class OAuth2FlowController(
       )
     val grant =
       try {
+        val audience = oauth2Resources.audienceFor(request.resource.nullIfBlank)
         authorizationService.startAuthorization(
           userId,
           client,
           request.redirectUri,
           params,
           request.project.nullIfBlank,
+          audience,
         )
       } catch (e: OAuth2Error) {
         return OAuth2AuthorizeResultModel(

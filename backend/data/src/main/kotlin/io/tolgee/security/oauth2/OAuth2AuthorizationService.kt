@@ -92,6 +92,7 @@ class OAuth2AuthorizationService(
     redirectUri: String,
     params: AuthorizeParams,
     projectHint: String?,
+    audience: OAuth2Audience,
   ): OAuth2Grant {
     val (scopes, challenge) = validateAuthorizeRequest(params)
 
@@ -104,6 +105,7 @@ class OAuth2AuthorizationService(
         codeChallenge = challenge
         requestedScopeValues = scopes
         this.projectHint = projectHint?.toLongOrNull()
+        this.audience = audience.name
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
       }

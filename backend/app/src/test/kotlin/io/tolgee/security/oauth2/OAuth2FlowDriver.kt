@@ -75,6 +75,7 @@ class OAuth2FlowDriver(
     clientState: String? = "client-state",
     hintProjectId: Long? = null,
     verifier: String = randomVerifier(),
+    resource: String? = null,
   ): PendingConsent {
     val response =
       startAuthorization(
@@ -88,6 +89,7 @@ class OAuth2FlowDriver(
           "code_challenge" to s256Challenge(verifier),
           "code_challenge_method" to "S256",
           "project" to hintProjectId?.toString(),
+          "resource" to resource,
         ),
       ).andReturn().response.contentAsString
     val state = mapper.readTree(response).get("consentState")?.asString()

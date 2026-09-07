@@ -145,4 +145,18 @@ class OAuth2AuthorizeConformanceTest : AbstractOAuth2ConformanceTest() {
   fun `a code_challenge that is not a base64url S256 digest is refused`() {
     errorRedirect(mapOf("code_challenge" to "too-short")).assert.contains("error=invalid_request")
   }
+
+  @Test
+  fun `authorize with an unknown resource error-redirects with invalid_target`() {
+    val location =
+      driver
+        .authorize(CLIENT_ID, REDIRECT, validParams() + mapOf("state" to "s1", "resource" to "https://evil.example"))
+        .andReturn()
+        .response
+        .getHeader("Location")!!
+
+    location.assert.startsWith(REDIRECT)
+    location.assert.contains("error=invalid_target")
+    location.assert.contains("state=s1")
+  }
 }

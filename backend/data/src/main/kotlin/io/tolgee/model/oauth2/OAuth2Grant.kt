@@ -3,6 +3,7 @@ package io.tolgee.model.oauth2
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Scopes
 import jakarta.persistence.Column
@@ -73,6 +74,10 @@ class OAuth2Grant : StandardAuditModel() {
   @Column(length = 2000)
   var projectSelection: String? = null
 
+  /** [OAuth2Audience] name; null on rows from before audience binding, which are [OAuth2Audience.API]. */
+  @Column(length = 16)
+  var audience: String? = null
+
   var consentState: String? = null
 
   @Temporal(TemporalType.TIMESTAMP)
@@ -121,6 +126,9 @@ class OAuth2Grant : StandardAuditModel() {
     }
 
   fun issuedTokenScopeSet(): Set<Scope> = storedScopesOf(issuedTokenScopes).toSet()
+
+  val audienceValue: OAuth2Audience
+    get() = audience?.let { runCatching { OAuth2Audience.valueOf(it) }.getOrNull() } ?: OAuth2Audience.API
 
   /**
    * Project ids the authorization is bound to, or null for [OAuth2Constants.ALL_PROJECTS].

@@ -16,7 +16,7 @@ class OAuth2MetadataDisabledTest {
 
   @Test
   fun `the RFC 8414 document is not served, and the issuer is never read`() {
-    val controller = OAuth2AuthorizationServerController(mock(), disabledRegistry, issuerResolver, mock())
+    val controller = OAuth2AuthorizationServerController(mock(), disabledRegistry, issuerResolver, mock(), mock())
 
     assertThatThrownBy { controller.metadata() }.isInstanceOf(NotFoundException::class.java)
 

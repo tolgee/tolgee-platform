@@ -14,6 +14,7 @@ import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
+import io.tolgee.security.oauth2.OAuth2Resources
 import io.tolgee.security.oauth2.OAuth2Scopes
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.util.nullIfBlank
@@ -45,6 +46,7 @@ class OAuth2AuthorizationServerController(
   private val clientRegistry: OAuth2ClientRegistry,
   private val issuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
+  private val oauth2Resources: OAuth2Resources,
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
@@ -58,6 +60,7 @@ class OAuth2AuthorizationServerController(
     @RequestParam("code_challenge", required = false) codeChallenge: String?,
     @RequestParam("code_challenge_method", required = false) codeChallengeMethod: String?,
     @RequestParam("project", required = false) project: String?,
+    @RequestParam("resource", required = false) resource: String?,
   ): ResponseEntity<Any> {
     // Errors here must not redirect: the redirect URI is exactly what has not been validated yet.
     val client = clientId.nullIfBlank?.let { clientRegistry.find(it) } ?: return badRequest("unknown client_id")
@@ -81,6 +84,7 @@ class OAuth2AuthorizationServerController(
     }
     try {
       authorizationService.validateAuthorizeRequest(params)
+      oauth2Resources.audienceFor(resource.nullIfBlank)
     } catch (e: OAuth2Error) {
       return redirect(OAuth2Redirects.error(registeredRedirect, e, issuerResolver.issuerUrl, params.state))
     }
@@ -95,6 +99,7 @@ class OAuth2AuthorizationServerController(
           "code_challenge" to params.codeChallenge,
           "code_challenge_method" to params.codeChallengeMethod,
           "project" to project.nullIfBlank,
+          "resource" to resource.nullIfBlank,
         ),
       ),
     )
@@ -277,6 +282,7 @@ class OAuth2AuthorizationServerController(
         "code_challenge",
         "code_challenge_method",
         "project",
+        "resource",
       )
     private val TOKEN_PARAMS =
       listOf("grant_type", "client_id", "code", "redirect_uri", "code_verifier", "refresh_token", "scope")

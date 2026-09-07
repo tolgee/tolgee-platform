@@ -1,5 +1,6 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.mcp.McpConstants
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
@@ -255,6 +256,30 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
       .andReturn()
       .response.status
       .let { it.assert.isEqualTo(404) }
+  }
+
+  @Test
+  fun `authorize with the mcp resource stores the mcp audience`() {
+    val resource = issuerResolver.issuerUrl + McpConstants.DEVELOPER_ENDPOINT_PATH
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, resource = resource)
+    val accessToken = tokenFrom(pending, projectId = testData.project.id).get("access_token").asString()
+
+    stored(accessToken).audienceValue.assert.isEqualTo(OAuth2Audience.MCP)
+  }
+
+  @Test
+  fun `authorize without resource stores the API audience`() {
+    val accessToken = accessToken(projectId = testData.project.id)
+
+    stored(accessToken).audienceValue.assert.isEqualTo(OAuth2Audience.API)
+  }
+
+  @Test
+  fun `a grant with no audience column value defaults its audienceValue to API`() {
+    val grant = stored(accessToken(projectId = testData.project.id))
+    grant.audience = null
+
+    grant.audienceValue.assert.isEqualTo(OAuth2Audience.API)
   }
 
   @Test
