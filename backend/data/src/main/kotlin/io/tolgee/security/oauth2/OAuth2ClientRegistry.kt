@@ -86,6 +86,8 @@ data class OAuth2Client(
   val name: String,
   val redirectUris: List<String>,
   val requiredScopes: List<Scope> = emptyList(),
+  val verified: Boolean = true,
+  val metadataHash: String? = null,
 ) {
   fun allowsRedirectUri(redirectUri: String): Boolean {
     if (parse(redirectUri) == null) return false
