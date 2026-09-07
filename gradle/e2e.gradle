@@ -1,6 +1,7 @@
 apply from: './gradle/utils.gradle'
 
 import groovy.io.FileType
+import groovy.json.JsonSlurper
 
 import java.time.Duration
 
@@ -27,13 +28,14 @@ def getE2eChunks() {
         return List.of(list)
     }
 
-    def remainingChunks = Integer.parseInt(totalJobs)
-    def chunks = [] as ArrayList<List<String>>
-    while (remainingChunks > 0) {
-        def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger()
-        chunks.add(list.subList(0, toIndex))
-        list = list.subList(toIndex, list.size())
-        remainingChunks--
+    // Seconds per spec measured from a CI run; specs missing here count as 30s.
+    def durations = new JsonSlurper().parse(new File("$E2E_DIR/spec-durations.json"))
+    def chunks = (1..Integer.parseInt(totalJobs)).collect { [] as List<String> }
+    def totals = new int[chunks.size()]
+    list.sort(false) { -(durations[it] ?: 30) }.each { spec ->
+        def i = (0..<totals.length).min { totals[it] }
+        chunks[i].add(spec)
+        totals[i] += durations[spec] ?: 30
     }
     return chunks
 }
