@@ -100,6 +100,31 @@ class UrlSecurityTest {
     assertUrlNotValid { urlSecurity.validateUrl("http://", allowLocalAddresses = true) }
   }
 
+  @Test
+  fun `validateUrlAndResolve returns the resolved addresses for a valid external URL`() {
+    val addresses = urlSecurity.validateUrlAndResolve("http://example.com/webhook")
+    addresses.assert.isNotNull
+    addresses!!.isNotEmpty().assert.isTrue()
+  }
+
+  @Test
+  fun `validateUrlAndResolve throws the same rejections as validateUrl`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrlAndResolve("http://127.0.0.1/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrlAndResolve("ftp://example.com/file") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrlAndResolve("not-a-url") }
+  }
+
+  @Test
+  fun `validateUrlAndResolve returns null instead of resolving when SSRF protection is disabled`() {
+    val disabled = UrlSecurity(InternalProperties().apply { disableUrlSsrfProtection = true })
+    disabled.validateUrlAndResolve("http://127.0.0.1/admin").assert.isNull()
+  }
+
+  @Test
+  fun `validateUrlAndResolve returns null instead of resolving when local addresses are allowed`() {
+    urlSecurity.validateUrlAndResolve("http://127.0.0.1/webhook", allowLocalAddresses = true).assert.isNull()
+  }
+
   private fun assertUrlNotValid(executable: () -> Unit) {
     val exception = assertThrows<BadRequestException>(executable)
     exception.code.assert.isEqualTo(Message.URL_NOT_VALID.code)

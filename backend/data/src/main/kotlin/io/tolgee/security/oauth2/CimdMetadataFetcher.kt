@@ -45,8 +45,14 @@ class CimdMetadataFetcher(
 ) : Logging {
   fun fetchAndValidate(clientIdUrl: String): CimdClient? {
     if (!isSafeUrl(clientIdUrl)) return null
+    val addresses =
+      try {
+        urlSecurity.validateUrlAndResolve(clientIdUrl)
+      } catch (_: Exception) {
+        return null
+      }
 
-    val document = fetch(clientIdUrl) ?: return null
+    val document = fetch(clientIdUrl, addresses) ?: return null
     // Defense in depth: buildClient already reads every field fail-closed, but it builds a client out of untrusted
     // metadata, so any residual throw must still resolve to null rather than surface as a 500 on /oauth2/authorize.
     return try {
@@ -57,7 +63,7 @@ class CimdMetadataFetcher(
     }
   }
 
-  private fun isSafeUrl(clientIdUrl: String): Boolean {
+  internal fun isSafeUrl(clientIdUrl: String): Boolean {
     val uri =
       try {
         URI(clientIdUrl)
@@ -71,19 +77,20 @@ class CimdMetadataFetcher(
     ) {
       return false
     }
-    return try {
-      urlSecurity.validateUrl(clientIdUrl)
-      true
-    } catch (_: Exception) {
-      false
-    }
+    return true
   }
 
-  internal fun fetch(clientIdUrl: String): JsonNode? {
+  // pinnedAddresses is null exactly when UrlSecurity resolved nothing to pin to (SSRF protection disabled for
+  // local dev/E2E) — otherwise it is the very array UrlSecurity just validated, and pinning the connection to it
+  // is what closes the window between that validation and this connect: a second, independent DNS lookup here
+  // could return a different (attacker-controlled) address than the one already checked.
+  internal fun fetch(
+    clientIdUrl: String,
+    pinnedAddresses: Array<InetAddress>?,
+  ): JsonNode? {
     val host = URI(clientIdUrl).host ?: return null
-    val pinned = validatedAddresses(host) ?: return null
     return try {
-      pinnedClient(host, pinned).use { client ->
+      pinnedClient(host, pinnedAddresses).use { client ->
         client.execute(HttpGet(clientIdUrl).apply { addHeader("Accept", "application/json") }) { response ->
           if (response.code != 200) return@execute null
           val bytes = response.entity?.content?.use { readCapped(it) } ?: return@execute null
@@ -96,42 +103,43 @@ class CimdMetadataFetcher(
     }
   }
 
-  // UrlSecurity has already vetted the URL, but it resolves DNS at validation time while the connection resolves
-  // again at connect time; pinning the connection to these exact addresses is what closes that rebinding window.
-  private fun validatedAddresses(host: String): Array<InetAddress>? =
-    runCatching { InetAddress.getAllByName(host.removeSurrounding("[", "]")) }.getOrNull()
-
   private fun pinnedClient(
     host: String,
-    addresses: Array<InetAddress>,
+    addresses: Array<InetAddress>?,
   ): CloseableHttpClient {
-    val resolver =
-      object : DnsResolver {
-        override fun resolve(resolvedHost: String): Array<InetAddress> {
-          if (!resolvedHost.equals(host, ignoreCase = true)) throw UnknownHostException(resolvedHost)
-          return addresses
-        }
-
-        override fun resolveCanonicalHostname(resolvedHost: String): String = resolvedHost
-      }
-    val connectionManager =
+    val connectionManagerBuilder =
       PoolingHttpClientConnectionManagerBuilder
         .create()
-        .setDnsResolver(resolver)
         .setDefaultConnectionConfig(
           ConnectionConfig
             .custom()
             .setConnectTimeout(Timeout.ofMilliseconds(properties.fetchTimeoutMs))
             .setSocketTimeout(Timeout.ofMilliseconds(properties.fetchTimeoutMs))
             .build(),
-        ).build()
+        )
+    if (addresses != null) {
+      connectionManagerBuilder.setDnsResolver(pinnedResolver(host, addresses))
+    }
     return HttpClients
       .custom()
-      .setConnectionManager(connectionManager)
+      .setConnectionManager(connectionManagerBuilder.build())
       .disableRedirectHandling()
       .disableAutomaticRetries()
       .build()
   }
+
+  private fun pinnedResolver(
+    host: String,
+    addresses: Array<InetAddress>,
+  ): DnsResolver =
+    object : DnsResolver {
+      override fun resolve(resolvedHost: String): Array<InetAddress> {
+        if (!resolvedHost.equals(host, ignoreCase = true)) throw UnknownHostException(resolvedHost)
+        return addresses
+      }
+
+      override fun resolveCanonicalHostname(resolvedHost: String): String = resolvedHost
+    }
 
   internal fun readCapped(stream: InputStream): ByteArray? {
     val max = properties.maxDocumentBytes.toInt()
@@ -147,10 +155,10 @@ class CimdMetadataFetcher(
     if (document.get("client_id").textOrNull() != clientIdUrl) return null
     if (document.get("token_endpoint_auth_method").textOrNull() != "none") return null
 
-    val grantTypes = stringList(document.get("grant_types"))
+    val grantTypes = stringList(document.get("grant_types")) ?: return null
     if (grantTypes.isNotEmpty() && !grantTypes.contains("authorization_code")) return null
 
-    val redirectUris = stringList(document.get("redirect_uris"))
+    val redirectUris = stringList(document.get("redirect_uris")) ?: return null
     if (redirectUris.isEmpty()) return null
     if (!redirectUris.all { isAcceptableRedirect(it, clientIdUrl) }) return null
 
@@ -214,9 +222,17 @@ class CimdMetadataFetcher(
     return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
   }
 
-  private fun stringList(node: JsonNode?): List<String> {
-    if (node == null || !node.isArray) return emptyList()
-    return node.mapNotNull { it.textOrNull() }
+  // A field that is present but not a well-formed string array (wrong shape, or any element that isn't a plain
+  // string) must reject the whole document rather than silently drop the bad entries — a mix of one valid and one
+  // container-valued redirect_uri would otherwise register the valid one while hiding that the document is bogus.
+  private fun stringList(node: JsonNode?): List<String>? {
+    if (node == null) return emptyList()
+    if (!node.isArray) return null
+    val values = mutableListOf<String>()
+    for (i in 0 until node.size()) {
+      values += node.get(i).textOrNull() ?: return null
+    }
+    return values
   }
 
   // Jackson's asString() coerces scalars but throws on a container node (object/array), so an attacker-supplied field

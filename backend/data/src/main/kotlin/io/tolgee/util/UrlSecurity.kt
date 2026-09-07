@@ -26,7 +26,22 @@ class UrlSecurity(
     url: String,
     allowLocalAddresses: Boolean = false,
   ) {
-    if (internalProperties.disableUrlSsrfProtection) return
+    validateUrlAndResolve(url, allowLocalAddresses)
+  }
+
+  /**
+   * Same checks as [validateUrl], but returns the addresses that were resolved and validated instead of discarding
+   * them. A caller that connects afterward should pin its connection to exactly this array — a second, independent
+   * DNS lookup at connect time could return a different (attacker-controlled) address than the one validated here.
+   *
+   * Returns null when nothing was actually resolved: SSRF protection is disabled, or [allowLocalAddresses] let the
+   * host through without a lookup. Both mirror [validateUrl]'s existing short-circuits.
+   */
+  fun validateUrlAndResolve(
+    url: String,
+    allowLocalAddresses: Boolean = false,
+  ): Array<InetAddress>? {
+    if (internalProperties.disableUrlSsrfProtection) return null
 
     val uri =
       try {
@@ -42,7 +57,7 @@ class UrlSecurity(
 
     val host = uri.host ?: throw BadRequestException(Message.URL_NOT_VALID)
 
-    if (allowLocalAddresses) return
+    if (allowLocalAddresses) return null
 
     val lowerHost = host.lowercase()
     if (lowerHost == "localhost" || lowerHost.endsWith(".localhost")) {
@@ -69,6 +84,8 @@ class UrlSecurity(
         throw BadRequestException(Message.URL_NOT_VALID)
       }
     }
+
+    return addresses
   }
 
   // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress

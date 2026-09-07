@@ -24,6 +24,7 @@ import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.security.MessageDigest
 import java.util.Base64
@@ -95,12 +96,11 @@ class CimdMetadataFetcherTest {
   }
 
   @Test
-  fun `does not reject a host when the allow-list is empty (any public host allowed)`() {
+  fun `isSafeUrl allows any https host when the allow-list is empty`() {
     val properties = OAuth2CimdProperties().apply { allowedHosts = listOf() }
-    // No allow-list restriction; the URL is only rejected here because nothing is actually served at this host,
-    // so the fetch itself fails — never because of the allow-list / SSRF gate this test exercises.
     val fetcher = fetcher(ssrfDisabled = true, properties)
-    fetcher.fetchAndValidate("https://example.com/client").assert.isNull()
+    fetcher.isSafeUrl("https://example.com/client").assert.isTrue()
+    fetcher.isSafeUrl("https://another-host.example.org/client").assert.isTrue()
   }
 
   @Test
@@ -296,13 +296,71 @@ class CimdMetadataFetcherTest {
     try {
       val base = "http://127.0.0.1:${server.address.port}"
       val fetcher = fetcher(ssrfDisabled = true)
-      fetcher.fetch("$base/ok").assert.isNotNull
-      fetcher.fetch("$base/notfound").assert.isNull()
+      fetcher.fetch("$base/ok", pinnedAddresses = null).assert.isNotNull
+      fetcher.fetch("$base/notfound", pinnedAddresses = null).assert.isNull()
       // Redirects are disabled: an allow-listed host must not 302 us onto an internal address.
-      fetcher.fetch("$base/redirect").assert.isNull()
+      fetcher.fetch("$base/redirect", pinnedAddresses = null).assert.isNull()
       redirectTargetHit.get().assert.isFalse()
     } finally {
       server.stop(0)
     }
+  }
+
+  @Test
+  fun `fetch connects to the pinned addresses instead of re-resolving the host`() {
+    val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+    server.createContext("/ok") { ex ->
+      val body = mapper.writeValueAsBytes(validDocument())
+      ex.sendResponseHeaders(200, body.size.toLong())
+      ex.responseBody.use { it.write(body) }
+    }
+    server.start()
+    try {
+      val url = "http://127.0.0.1:${server.address.port}/ok"
+      val fetcher = fetcher(ssrfDisabled = true)
+
+      // Pinned to the address the server actually listens on: succeeds.
+      fetcher.fetch(url, pinnedAddresses = arrayOf(InetAddress.getByName("127.0.0.1"))).assert.isNotNull
+
+      // Pinned to a different loopback address nothing listens on: the DNS resolver is expected to hand out
+      // exactly this address rather than re-resolving "127.0.0.1" from the URL, so the connection must fail even
+      // though the real host would have worked.
+      fetcher.fetch(url, pinnedAddresses = arrayOf(InetAddress.getByName("127.0.0.2"))).assert.isNull()
+    } finally {
+      server.stop(0)
+    }
+  }
+
+  @Test
+  fun `buildClient rejects redirect_uris mixing a valid string with a container node`() {
+    val document = mapper.createObjectNode()
+    document.put("client_id", "https://example.com/client")
+    document.put("token_endpoint_auth_method", "none")
+    document.set("grant_types", mapper.valueToTree<JsonNode>(listOf("authorization_code")))
+    document.set(
+      "redirect_uris",
+      mapper.createArrayNode().add("https://example.com/callback").add(mapper.createObjectNode()),
+    )
+    fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document).assert.isNull()
+  }
+
+  @Test
+  fun `buildClient rejects grant_types mixing a valid string with a container node`() {
+    val document = mapper.createObjectNode()
+    document.put("client_id", "https://example.com/client")
+    document.put("token_endpoint_auth_method", "none")
+    document.set("grant_types", mapper.createArrayNode().add("authorization_code").add(mapper.createObjectNode()))
+    document.set("redirect_uris", mapper.valueToTree<JsonNode>(listOf("https://example.com/callback")))
+    fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document).assert.isNull()
+  }
+
+  @Test
+  fun `buildClient rejects a grant_types that is present but not an array`() {
+    val document = mapper.createObjectNode()
+    document.put("client_id", "https://example.com/client")
+    document.put("token_endpoint_auth_method", "none")
+    document.put("grant_types", "authorization_code")
+    document.set("redirect_uris", mapper.valueToTree<JsonNode>(listOf("https://example.com/callback")))
+    fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document).assert.isNull()
   }
 }
