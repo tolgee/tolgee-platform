@@ -115,4 +115,37 @@ class McpAuthChallengeFilterTest {
     chain.request.assert.isNotNull()
     response.status.assert.isEqualTo(200)
   }
+
+  @Test
+  fun `a tools-call body over the peek cap passes through unchallenged and stays fully readable`() {
+    val hugeBody =
+      """{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"pad":"${"a".repeat(70 * 1024)}"}}"""
+    val request = postRequest(hugeBody)
+    val response = MockHttpServletResponse()
+    val chain = MockFilterChain()
+
+    filter.doFilter(request, response, chain)
+
+    response.status.assert.isEqualTo(200)
+    chain.request.assert.isNotNull()
+    val forwarded = chain.request as jakarta.servlet.http.HttpServletRequest
+    val body = forwarded.inputStream.readAllBytes().toString(Charsets.UTF_8)
+    body.assert.isEqualTo(hugeBody)
+  }
+
+  @Test
+  fun `a credential-less non-tools-call request stays readable through getReader too`() {
+    val body = """{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"""
+    val request = postRequest(body)
+    val response = MockHttpServletResponse()
+    val chain = MockFilterChain()
+
+    filter.doFilter(request, response, chain)
+
+    val forwarded = chain.request as jakarta.servlet.http.HttpServletRequest
+    forwarded.reader
+      .readText()
+      .assert
+      .isEqualTo(body)
+  }
 }
