@@ -18,6 +18,7 @@ package io.tolgee.configuration
 
 import io.tolgee.component.ExceptionHandlerFilter
 import io.tolgee.component.TransferEncodingHeaderDebugFilter
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.authentication.AdminAccessInterceptor
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
@@ -77,6 +78,7 @@ class WebSecurityConfig(
   @Lazy
   private val featureAuthorizationInterceptor: FeatureAuthorizationInterceptor,
   private val exceptionHandlerFilter: ExceptionHandlerFilter,
+  private val tolgeeProperties: TolgeeProperties,
 ) : WebMvcConfigurer {
   @Bean
   fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
@@ -121,8 +123,17 @@ class WebSecurityConfig(
   fun internalSecurityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
     return httpSecurity
       .securityMatcher(*INTERNAL_ENDPOINTS)
-      .authorizeHttpRequests { it.anyRequest().denyAll() }
-      .build()
+      .csrf { it.disable() }
+      .cors(Customizer.withDefaults())
+      .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+      .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .authorizeHttpRequests {
+        if (tolgeeProperties.internal.testClockEnabled) {
+          it.requestMatchers(*TEST_CLOCK_ENDPOINTS).hasRole("SUPPORTER")
+        }
+        it.anyRequest().denyAll()
+      }.build()
   }
 
   override fun addInterceptors(registry: InterceptorRegistry) {
@@ -172,6 +183,7 @@ class WebSecurityConfig(
       )
     private val ADMIN_ENDPOINTS = arrayOf("/v2/administration/**", "/v2/ee-license/**")
     private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
+    private val TEST_CLOCK_ENDPOINTS = arrayOf("/internal/time/**", "/internal/test-clock-helper/**")
     private val PROJECT_ENDPOINTS = arrayOf("/v2/projects/**", "/api/project/**", "/api/repository/**")
     private val ORGANIZATION_ENDPOINTS = arrayOf("/v2/organizations/**")
   }
