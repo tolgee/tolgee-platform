@@ -2,6 +2,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.mcp.McpConstants
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.testing.assert
@@ -20,6 +21,39 @@ class OAuth2AccessTokenFlowTest : AbstractOAuth2FlowTest() {
     stored(accessToken)
       .userAccount.id.assert
       .isEqualTo(testData.user.id)
+    apiRequest(accessToken).andIsOk
+  }
+
+  @Test
+  fun `an mcp-audience token is rejected on the REST api`() {
+    val resource = issuerResolver.issuerUrl + McpConstants.DEVELOPER_ENDPOINT_PATH
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, resource = resource)
+    val accessToken = tokenFrom(pending, projectId = testData.project.id).get("access_token").asString()
+    stored(accessToken).audienceValue.assert.isEqualTo(OAuth2Audience.MCP)
+
+    val response = apiRequest(accessToken).andIsUnauthorized.andReturn().response
+    response
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("""error="invalid_token"""")
+  }
+
+  @Test
+  fun `an api-audience token keeps working on the REST api`() {
+    val accessToken = accessToken(projectId = testData.project.id)
+    stored(accessToken).audienceValue.assert.isEqualTo(OAuth2Audience.API)
+
+    apiRequest(accessToken).andIsOk
+  }
+
+  @Test
+  fun `a legacy grant with null audience resolves as api`() {
+    val accessToken = accessToken(projectId = testData.project.id)
+    val grant = stored(accessToken)
+    grant.audience = null
+    repository.save(grant)
+
     apiRequest(accessToken).andIsOk
   }
 

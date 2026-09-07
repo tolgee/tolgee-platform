@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.newOAuth2Grant
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.service.security.UserAccountService
 import java.time.Duration
@@ -29,6 +30,7 @@ class OAuth2TestTokens(
     clientId: String = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
     issuedAt: Instant = Instant.now(),
     expiresAt: Instant = issuedAt.plus(Duration.ofMinutes(30)),
+    audience: OAuth2Audience = OAuth2Audience.API,
   ): String {
     val token = keyGenerator.generate()
     val grant =
@@ -39,6 +41,7 @@ class OAuth2TestTokens(
         accessTokenHash = keyGenerator.hash(token)
         accessTokenIssuedAt = Date.from(issuedAt)
         accessTokenExpiresAt = Date.from(expiresAt)
+        this.audience = audience.name
       }
     repository.save(grant)
     issuedGrantIds.add(grant.id)

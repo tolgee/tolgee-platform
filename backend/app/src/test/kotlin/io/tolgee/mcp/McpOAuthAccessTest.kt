@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.McpOAuthTestData
 import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -112,7 +113,13 @@ class McpOAuthAccessTest : AbstractMcpTest() {
 
   @Test
   fun `an all-projects token has no implicit project to fall back on`() {
-    val token = tokens.issue(subject = testData.user.id, scopes = listOf(Scope.KEYS_VIEW.value), projectIds = null)
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.KEYS_VIEW.value),
+        projectIds = null,
+        audience = OAuth2Audience.MCP,
+      )
 
     assertToolFails(createMcpClientWithBearer(token), "list_keys", expectedError = "project_not_selected")
   }
@@ -142,5 +149,6 @@ class McpOAuthAccessTest : AbstractMcpTest() {
       subject = testData.user.id,
       scopes = scopes,
       projectIds = listOf(projectId),
+      audience = OAuth2Audience.MCP,
     )
 }

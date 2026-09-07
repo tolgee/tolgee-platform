@@ -36,7 +36,10 @@ class OAuth2AccessTokenResolver(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  fun tryResolve(token: String): TolgeeAuthentication? {
+  fun tryResolve(
+    token: String,
+    expectedAudience: OAuth2Audience,
+  ): TolgeeAuthentication? {
     // Tolgee's own JWTs are the other kind of Bearer token on this path; the prefix is what tells the two apart
     // without a store lookup.
     if (!token.startsWith(OAUTH_ACCESS_TOKEN_PREFIX)) return null
@@ -52,6 +55,10 @@ class OAuth2AccessTokenResolver(
     // A grant outlives the client it was issued to, so this is checked per request rather than at issue time.
     if (!clientRegistry.isStillAuthorized(grant.clientId)) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    }
+
+    if (grant.audienceValue != expectedAudience) {
+      throw AuthenticationException(Message.OAUTH_WRONG_AUDIENCE)
     }
 
     val user =
