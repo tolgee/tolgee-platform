@@ -7,6 +7,7 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
@@ -45,14 +46,14 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     currentUserWebsocket =
       WebsocketTestHelper(
         port,
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
         testData.projectBuilder.self.id,
         testData.user.id,
       )
     anotherUserWebsocket =
       WebsocketTestHelper(
         port,
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(anotherUser.id)),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(anotherUser.id, type = UserSessionType.TEST)),
         testData.projectBuilder.self.id,
         anotherUser.id,
       )

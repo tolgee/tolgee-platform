@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.service.notification.NotificationService
@@ -50,7 +51,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     saveTestData()
     testItWorksWithAuth(
       auth =
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
     )
   }
 
@@ -86,7 +87,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     val user2 = testData.addSecondUser()
     saveTestData()
     testProjectSubscribeForbidden(
-      auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id)),
+      auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id, type = UserSessionType.TEST)),
       ownUserId = user2.self.id,
     )
   }
@@ -181,7 +182,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     val ownerWitness =
       WebsocketTestHelper(
         port,
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
         testData.projectBuilder.self.id,
         testData.user.id,
       )
@@ -205,7 +206,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `denies subscription to an unrecognized destination`() {
     saveTestData()
-    val socket = prepareSocket(WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)))
+    val socket =
+      prepareSocket(
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
+      )
     try {
       val wildcardInbox = socket.subscribeAdditional("/**")
       socket.assertNotified({ createKey() }) {
@@ -221,7 +225,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `denies an out-of-range project id without closing the connection`() {
     saveTestData()
-    val socket = prepareSocket(WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)))
+    val socket =
+      prepareSocket(
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
+      )
     try {
       val overflowInbox =
         socket.subscribeAdditional(
@@ -320,7 +327,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   ) {
     val forbiddenSocket =
       WebsocketTestHelper(port, auth, testData.projectBuilder.self.id, ownUserId)
-    val deliveryWitness = prepareSocket(WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)))
+    val deliveryWitness =
+      prepareSocket(
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
+      )
     try {
       forbiddenSocket.listenForNotificationsChanged()
       val deniedInbox =
@@ -339,7 +349,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
 
   fun testProjectSubscribeForbiddenViaControlSocket(auth: WebsocketTestHelper.Auth) {
     val forbiddenSocket = prepareSocket(auth)
-    val deliveryWitness = prepareSocket(WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)))
+    val deliveryWitness =
+      prepareSocket(
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
+      )
     try {
       deliveryWitness.assertNotified({ createKey() }) {
         assertThatJson(it.poll()).node("data").isObject

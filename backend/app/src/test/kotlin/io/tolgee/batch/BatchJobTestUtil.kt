@@ -25,6 +25,7 @@ import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.translation.AutoTranslationService
@@ -273,7 +274,7 @@ class BatchJobTestUtil(
     websocketHelper =
       WebsocketTestHelper(
         port,
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)),
         testData.projectBuilder.self.id,
         testData.user.id,
       )

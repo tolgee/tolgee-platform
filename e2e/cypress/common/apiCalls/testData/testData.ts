@@ -75,6 +75,8 @@ export const patsTestData = generateTestDataObject('pat');
 
 export const oauth2ConsentTestData = generateTestDataObject('oauth2-consent');
 
+export const sessionsTestData = generateTestDataObject('sessions');
+
 export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
 );

@@ -5,6 +5,7 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,11 +16,14 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import java.time.Duration
 import java.util.Date
+import java.util.UUID
 
 abstract class AuthorizedControllerTest :
   AbstractControllerTest(),
   AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
+
+  private var loginDeviceId: String? = null
 
   var userAccount: UserAccount?
     get() {
@@ -67,13 +71,25 @@ abstract class AuthorizedControllerTest :
 
   fun loginAsUser(userAccount: UserAccount) {
     _userAccount = userAccount
+    loginDeviceId = UUID.randomUUID().toString()
     init(generateJwtToken(_userAccount!!.id))
   }
 
-  protected fun generateJwtToken(userAccountId: Long) = jwtService.emitToken(userAccountId, isSuper = true)
+  /**
+   * Reuses the device of the current login so that moving the clock refreshes that session instead
+   * of piling up a new one on every move.
+   */
+  protected fun generateJwtToken(userAccountId: Long) =
+    jwtService.emitToken(
+      userAccountId,
+      type = UserSessionType.TEST,
+      isSuper = true,
+      refreshedDeviceId = loginDeviceId,
+      isRefresh = loginDeviceId != null,
+    )
 
   protected fun setSecurityContext(userAccount: UserAccount) {
-    val token = jwtService.emitToken(userAccount.id, isSuper = true)
+    val token = jwtService.emitToken(userAccount.id, type = UserSessionType.TEST, isSuper = true)
     val auth = jwtService.validateToken(token)
     val context = SecurityContextHolder.createEmptyContext()
     context.authentication = auth
@@ -86,6 +102,7 @@ abstract class AuthorizedControllerTest :
 
   fun logout() {
     _userAccount = null
+    loginDeviceId = null
     SecurityContextHolder.clearContext()
   }
 

@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.UserAccountOAuth2RevocationTestData
 import io.tolgee.development.testDataBuilder.newOAuth2Grant
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -31,7 +32,10 @@ class UserAccountOAuth2RevocationTest : AbstractSpringTest() {
   fun `invalidating tokens deletes the grants, not just the JWT cutoff`() {
     val grantId = insertGrant()
 
-    userAccountService.invalidateTokens(userAccountService.get(testData.subject.id))
+    userAccountService.invalidateTokens(
+      userAccountService.get(testData.subject.id),
+      AllTokensInvalidatedTrigger.PASSWORD_CHANGE,
+    )
 
     repository.existsById(grantId).assert.isFalse()
   }
@@ -40,7 +44,11 @@ class UserAccountOAuth2RevocationTest : AbstractSpringTest() {
   fun `changing the password deletes the grants`() {
     val grantId = insertGrant()
 
-    userAccountService.setUserPassword(userAccountService.get(testData.subject.id), "new-password")
+    userAccountService.setUserPassword(
+      userAccountService.get(testData.subject.id),
+      "new-password",
+      AllTokensInvalidatedTrigger.PASSWORD_CHANGE,
+    )
 
     repository.existsById(grantId).assert.isFalse()
   }

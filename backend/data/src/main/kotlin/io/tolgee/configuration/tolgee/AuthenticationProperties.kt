@@ -177,6 +177,7 @@ class AuthenticationProperties(
         "bundled list flags by mistake.",
   )
   var allowedEmailDomains: MutableList<String> = mutableListOf(),
+  var sessionAudit: SessionAuditProperties = SessionAuditProperties(),
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),

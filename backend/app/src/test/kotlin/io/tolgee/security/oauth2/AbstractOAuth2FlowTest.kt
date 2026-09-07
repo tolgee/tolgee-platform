@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.OAuth2FlowTestData
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
@@ -61,7 +62,7 @@ abstract class AbstractOAuth2FlowTest : AbstractControllerTest() {
     testDataService.cleanTestData(testData.root)
   }
 
-  protected fun jwt(): String = jwtService.emitToken(testData.user.id, isSuper = true)
+  protected fun jwt(): String = jwtService.emitToken(testData.user.id, isSuper = true, type = UserSessionType.TEST)
 
   protected fun pak(): String =
     "tgpak_" + apiKeyService.create(testData.user, setOf(Scope.TRANSLATIONS_VIEW), testData.project).encodedKey

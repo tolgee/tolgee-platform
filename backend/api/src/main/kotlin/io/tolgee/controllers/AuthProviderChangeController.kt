@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.dtos.request.auth.AcceptAuthProviderChangeRequest
 import io.tolgee.dtos.response.AuthProviderDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
@@ -78,7 +79,7 @@ class AuthProviderChangeController(
   ): JwtAuthenticationResponse {
     val user = authenticationFacade.authenticatedUserEntity
     authProviderChangeService.accept(user, request.id)
-    userAccountService.invalidateTokens(user)
+    userAccountService.invalidateTokens(user, AllTokensInvalidatedTrigger.AUTH_PROVIDER_CHANGE)
     return JwtAuthenticationResponse(jwtService.emitTokenRefreshForCurrentUser(isSuper = true))
   }
 

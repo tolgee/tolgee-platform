@@ -2,6 +2,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.testing.assert
@@ -63,7 +64,10 @@ class OAuth2AccessTokenFlowTest : AbstractOAuth2FlowTest() {
     val accessToken = accessToken(projectId = testData.project.id)
     apiRequest(accessToken).andIsOk
 
-    userAccountService.invalidateTokens(userAccountService.get(testData.user.id))
+    userAccountService.invalidateTokens(
+      userAccountService.get(testData.user.id),
+      AllTokensInvalidatedTrigger.PASSWORD_CHANGE,
+    )
 
     apiRequest(accessToken).andIsUnauthorized
     grantsForUser().assert.isZero()

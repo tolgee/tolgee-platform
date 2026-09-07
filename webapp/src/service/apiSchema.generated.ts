@@ -1006,7 +1006,7 @@ export interface paths {
     put: operations["executeComplexTagOperation"];
   };
   "/v2/projects/{projectId}/tags": {
-    get: operations["getAll_15"];
+    get: operations["getAll_16"];
   };
   "/v2/projects/{projectId}/tasks": {
     get: operations["getTasks"];
@@ -1318,6 +1318,18 @@ export interface paths {
   "/v2/user/send-email-verification": {
     /** Resends email verification email to currently authenticated user. */
     post: operations["sendEmailVerification"];
+  };
+  "/v2/user/sessions": {
+    get: operations["getAll_15"];
+  };
+  "/v2/user/sessions/current": {
+    delete: operations["revokeCurrent"];
+  };
+  "/v2/user/sessions/other": {
+    delete: operations["revokeAllOthers"];
+  };
+  "/v2/user/sessions/{id}": {
+    delete: operations["revoke"];
   };
   "/v2/user/single-owned-organizations": {
     /** Returns all organizations owned only by current user */
@@ -4998,6 +5010,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelUserSessionModel: {
+      _embedded?: {
+        sessions?: components["schemas"]["UserSessionModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelWebhookConfigModel: {
       _embedded?: {
         webhookConfigs?: components["schemas"]["WebhookConfigModel"][];
@@ -7962,6 +7980,34 @@ export interface components {
       language?: string;
       /** Format: int64 */
       preferredOrganizationId?: number;
+    };
+    UserSessionModel: {
+      city?: string;
+      country?: string;
+      countryCode?: string;
+      /** Format: int64 */
+      createdAt: number;
+      /** Format: int64 */
+      expiresAt: number;
+      /** Format: int64 */
+      id: number;
+      ip?: string;
+      isCurrent: boolean;
+      /** Format: int64 */
+      lastUsedAt?: number;
+      /** @enum {string} */
+      type:
+        | "LOGIN_NATIVE"
+        | "LOGIN_GITHUB"
+        | "LOGIN_GOOGLE"
+        | "LOGIN_OAUTH2"
+        | "LOGIN_SSO"
+        | "SIGN_UP"
+        | "EMAIL_VERIFICATION"
+        | "IMPERSONATION"
+        | "TEST"
+        | "UNKNOWN";
+      userAgent?: string;
     };
     UserStorageResponse: {
       /** @description The data stored for the field */
@@ -24838,7 +24884,7 @@ export interface operations {
       };
     };
   };
-  getAll_15: {
+  getAll_16: {
     parameters: {
       query: {
         search?: string;
@@ -30344,6 +30390,145 @@ export interface operations {
           "application/json":
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAll_15: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelUserSessionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  revokeCurrent: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  revokeAllOthers: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  revoke: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
         };
       };
     };

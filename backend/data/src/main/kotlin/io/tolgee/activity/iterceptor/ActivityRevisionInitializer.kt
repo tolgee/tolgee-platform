@@ -26,6 +26,7 @@ class ActivityRevisionInitializer(
   fun initialize() {
     revision.isInitializedByInterceptor = true
     revision.authorId = userAccount?.id ?: revision.authorId
+    revision.actingAuthorId = actingUserAccount?.id ?: revision.actingAuthorId
     revision.organizationId = organizationId ?: revision.organizationId
     revision.projectId = project?.id ?: revision.projectId
     revision.type = activityHolder.activity ?: revision.type
@@ -74,6 +75,9 @@ class ActivityRevisionInitializer(
 
   private val userAccount: UserAccountDto?
     get() = authenticationFacade.authenticatedUserOrNull
+
+  private val actingUserAccount: UserAccountDto?
+    get() = authenticationFacade.actingUserOrNull
 
   private val authenticationFacade: AuthenticationFacade by lazy {
     applicationContext.getBean(AuthenticationFacade::class.java)

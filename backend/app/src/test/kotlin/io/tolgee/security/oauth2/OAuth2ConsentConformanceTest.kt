@@ -1,6 +1,7 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.constants.Message
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 
@@ -50,7 +51,7 @@ class OAuth2ConsentConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `approving needs a super token, so a lifted session cannot mint a credential on its own`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val ordinary = pending.copy(jwt = jwtService.emitToken(testData.user.id))
+    val ordinary = pending.copy(jwt = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST))
 
     driver
       .submitConsent(ordinary)
@@ -62,7 +63,10 @@ class OAuth2ConsentConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `consent from another user cannot approve someone else's pending authorization`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val theirs = pending.copy(jwt = jwtService.emitToken(testData.otherUser.id, isSuper = true))
+    val theirs =
+      pending.copy(
+        jwt = jwtService.emitToken(testData.otherUser.id, isSuper = true, type = UserSessionType.TEST),
+      )
     driver
       .submitConsent(theirs)
       .andReturn()

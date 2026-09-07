@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.QuickStartService
 import io.tolgee.service.organization.OrganizationService
@@ -91,7 +92,11 @@ class InitialUserCreatorCommandLineRunner(
     val initialPassword = initialPasswordManager.initialPassword
     if (!passwordEncoder.matches(initialPassword, initialUser.password)) {
       logger.info("Updating initial user password...")
-      userAccountService.setUserPassword(initialUser, initialPassword)
+      userAccountService.setUserPassword(
+        initialUser,
+        initialPassword,
+        AllTokensInvalidatedTrigger.INITIAL_USER_PASSWORD,
+      )
     }
   }
 

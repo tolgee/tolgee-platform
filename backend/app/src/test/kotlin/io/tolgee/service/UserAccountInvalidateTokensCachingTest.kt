@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +36,10 @@ class UserAccountInvalidateTokensCachingTest : AbstractSpringTest() {
     userAccountService.getDto(testData.user.id)
     cachedUser().assert.isNotNull
 
-    userAccountService.invalidateTokens(userAccountService.get(testData.user.id))
+    userAccountService.invalidateTokens(
+      userAccountService.get(testData.user.id),
+      AllTokensInvalidatedTrigger.PASSWORD_CHANGE,
+    )
 
     cachedUser().assert.isNull()
     userAccountService

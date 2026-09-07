@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
@@ -37,7 +38,7 @@ class SignUpService(
       emailVerificationService.createForUser(user, dto.callbackUrl)
     }
 
-    return JwtAuthenticationResponse(jwtService.emitToken(user.id, isSuper = true))
+    return JwtAuthenticationResponse(jwtService.emitToken(user.id, type = UserSessionType.SIGN_UP, isSuper = true))
   }
 
   private fun checkNotManagedByOrganization(domain: String?) {

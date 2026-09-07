@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.security.thirdParty.GithubOAuthDelegate.GithubEmailResponse
@@ -122,7 +123,7 @@ class AuthTest : AbstractControllerTest() {
     currentDateProvider.forcedDate = Date(baseline.time - tolgeeProperties.authentication.jwtExpiration - 10_000)
 
     val user = userAccountService[initialUsername].id
-    val token = jwtService.emitToken(user)
+    val token = jwtService.emitToken(user, type = UserSessionType.TEST)
 
     currentDateProvider.forcedDate = baseline
 
@@ -291,7 +292,7 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun `rejects requests from a user disabled after the token was issued`() {
     val user = userAccountService[initialUsername]
-    val token = jwtService.emitToken(user.id)
+    val token = jwtService.emitToken(user.id, type = UserSessionType.TEST)
     userAccountService.disable(user.id)
 
     val mvcResult =
@@ -322,14 +323,14 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun `super token endpoints require super token`() {
     val admin = userAccountService[initialUsername]
-    var token = jwtService.emitToken(admin.id, isSuper = false)
+    var token = jwtService.emitToken(admin.id, type = UserSessionType.TEST, isSuper = false)
     assertExpired(token)
 
     val baseline = Date()
     val newDate = baseline.time - tolgeeProperties.authentication.jwtSuperExpiration - 10_000
 
     setForcedDate(Date(newDate))
-    token = jwtService.emitToken(admin.id, isSuper = true)
+    token = jwtService.emitToken(admin.id, type = UserSessionType.TEST, isSuper = true)
     setForcedDate(baseline)
 
     assertExpired(token)

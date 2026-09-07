@@ -34,6 +34,8 @@ export const billingMenuItems = [] as React.FC<
   React.PropsWithChildren<BillingMenuItemsProps>
 >[];
 export const apps = [] as React.FC<React.PropsWithChildren<unknown>>[];
+// Session listing and revocation are EE-only endpoints; OSS renders nothing.
+export const AccountSessions = Empty;
 export const AgencyLabel = NotIncludedInOss('AgencyLabel');
 export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
