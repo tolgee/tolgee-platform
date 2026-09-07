@@ -283,6 +283,39 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
+  fun `a changed cimd metadata hash kills the grant at refresh`() {
+    val issued = completeFlow(projectId = testData.project.id)
+    val grant = stored(issued.get("access_token").asString())
+    grant.clientMetadataHash = "h1"
+    repository.save(grant)
+
+    json(driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+    grantsForUser().assert.isZero()
+  }
+
+  @Test
+  fun `a changed cimd metadata hash kills the grant at code exchange`() {
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
+    val redirectUrl = driver.consentRedirect(pending, projectId = testData.project.id)
+    val code = driver.queryParam(redirectUrl, "code")!!
+
+    val grant = repository.findAll().first { it.userAccount.id == testData.user.id }
+    grant.clientMetadataHash = "h1"
+    repository.save(grant)
+
+    json(driver.exchangeCode(code, pending.clientId, pending.redirect, pending.verifier))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+    grantsForUser().assert.isZero()
+  }
+
+  @Test
   fun `consent rejects a project the user has no access to`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
     driver

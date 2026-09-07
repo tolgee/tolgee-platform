@@ -78,6 +78,10 @@ class OAuth2Grant : StandardAuditModel() {
   @Column(length = 16)
   var audience: String? = null
 
+  /** Hash of the CIMD client's redirect_uris at consent time; null for pre-registered clients. */
+  @Column(length = 64)
+  var clientMetadataHash: String? = null
+
   var consentState: String? = null
 
   @Temporal(TemporalType.TIMESTAMP)

@@ -106,6 +106,7 @@ class OAuth2AuthorizationService(
         requestedScopeValues = scopes
         this.projectHint = projectHint?.toLongOrNull()
         this.audience = audience.name
+        clientMetadataHash = client.metadataHash
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
       }
@@ -193,6 +194,10 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
+    if (grant.clientMetadataHash != client.metadataHash) {
+      repository.delete(grant)
+      throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    }
     if (requestedAudience != null && requestedAudience != grant.audienceValue) {
       throw OAuth2Error(OAuth2Error.INVALID_TARGET, "resource does not match the authorized audience")
     }
@@ -231,6 +236,10 @@ class OAuth2AuthorizationService(
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
     if (grant.clientId != client.clientId) {
+      repository.delete(grant)
+      throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    }
+    if (grant.clientMetadataHash != client.metadataHash) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
