@@ -16,18 +16,8 @@
 
 package io.tolgee.security.oauth2
 
-class OAuth2Error(
-  val error: String,
-  val description: String? = null,
-) : RuntimeException(description?.let { "$error: $it" } ?: error) {
-  companion object {
-    const val INVALID_REQUEST = "invalid_request"
-    const val INVALID_CLIENT = "invalid_client"
-    const val INVALID_GRANT = "invalid_grant"
-    const val INVALID_SCOPE = "invalid_scope"
-    const val ACCESS_DENIED = "access_denied"
-    const val UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type"
-    const val UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type"
-    const val INVALID_TARGET = "invalid_target"
-  }
+/** The resource server a token is bound to (RFC 8707). Stored on the grant by enum name; absent means [API]. */
+enum class OAuth2Audience {
+  API,
+  MCP,
 }
