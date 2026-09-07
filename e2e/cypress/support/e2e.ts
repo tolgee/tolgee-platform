@@ -18,6 +18,7 @@
 import './commands';
 import 'cypress-promise/register';
 import { setFeature } from '../common/features';
+import { setBypassSeatCountCheck } from '../common/apiCalls/common';
 
 require('cypress-xpath');
 
@@ -47,6 +48,7 @@ Cypress.on('window:before:load', (win) => {
 });
 
 before(() => {
+  setBypassSeatCountCheck(true);
   // turn on all features
   setFeature('GRANULAR_PERMISSIONS', true);
   setFeature('WEBHOOKS', true);

@@ -7,7 +7,6 @@ import {
   enableEmailVerification,
   login,
   logout,
-  setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import {
   communityContributionData,
@@ -26,7 +25,6 @@ describe('Community projects navigation', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     communityContributionData.clean();
     communityContributionData.generateStandard();
@@ -40,7 +38,6 @@ describe('Community projects navigation', () => {
   afterEach(() => {
     organizationTestData.clean();
     communityContributionData.clean();
-    setBypassSeatCountCheck(false);
   });
 
   const visitProjects = () => {

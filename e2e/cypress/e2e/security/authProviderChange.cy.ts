@@ -8,19 +8,16 @@ import {
   disableOrganizationsSsoProvider,
   enableGlobalSsoProvider,
   disableGlobalSsoProvider,
-  setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 
 describe('Authentication Provider Change', () => {
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     authProviderChange.clean();
     authProviderChange.generate();
   });
 
   afterEach(() => {
     authProviderChange.clean();
-    setBypassSeatCountCheck(false);
   });
 
   const testCombinations: [

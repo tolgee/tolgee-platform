@@ -1,6 +1,6 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import {
   gcy,
@@ -12,7 +12,6 @@ describe('Organization switching', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean({
       timeout: 120000,
@@ -25,7 +24,6 @@ describe('Organization switching', () => {
 
   afterEach(() => {
     organizationTestData.clean();
-    setBypassSeatCountCheck(false);
   });
 
   it('stores preferred organization on BE', () => {

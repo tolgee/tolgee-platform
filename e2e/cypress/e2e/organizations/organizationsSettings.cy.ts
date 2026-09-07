@@ -7,24 +7,19 @@ import {
   gcy,
   switchToOrganization,
 } from '../../common/shared';
-import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Organization Settings', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData.generate().then((res) => {
       organizationData = res.body as any;
       visit('Tolgee');
     });
-  });
-
-  afterEach(() => {
-    setBypassSeatCountCheck(false);
   });
 
   const newValues = {
