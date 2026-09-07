@@ -180,6 +180,7 @@ class OAuth2AuthorizationService(
     code: String?,
     redirectUri: String?,
     codeVerifier: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (code.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code is required")
     val verifier =
@@ -191,6 +192,9 @@ class OAuth2AuthorizationService(
     if (grant.codeUsedAt != null || grant.clientId != client.clientId) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    }
+    if (requestedAudience != null && requestedAudience != grant.audienceValue) {
+      throw OAuth2Error(OAuth2Error.INVALID_TARGET, "resource does not match the authorized audience")
     }
     if (isExpiredOrUnset(grant.codeExpiresAt)) {
       repository.delete(grant)
@@ -219,6 +223,7 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
     refreshToken: String?,
     requestedScope: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
@@ -228,6 +233,9 @@ class OAuth2AuthorizationService(
     if (grant.clientId != client.clientId) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    }
+    if (requestedAudience != null && requestedAudience != grant.audienceValue) {
+      throw OAuth2Error(OAuth2Error.INVALID_TARGET, "resource does not match the authorized audience")
     }
     if (isExpiredOrUnset(grant.refreshTokenExpiresAt)) {
       repository.delete(grant)

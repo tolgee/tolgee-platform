@@ -1,5 +1,6 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.mcp.McpConstants
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
@@ -202,6 +203,17 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
     val redirect = errorRedirect(mapOf("response_type" to "token"))
     redirect.assert.contains("error=unsupported_response_type")
     redirect.assert.contains("iss=")
+  }
+
+  @Test
+  fun `a token exchange with a resource that mismatches the grant audience is invalid_target`() {
+    val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
+    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val mcpResource = issuerResolver.issuerUrl + McpConstants.DEVELOPER_ENDPOINT_PATH
+
+    val result = driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier, resource = mcpResource).andReturn()
+
+    assertOAuthError(result, "invalid_target")
   }
 
   @Test

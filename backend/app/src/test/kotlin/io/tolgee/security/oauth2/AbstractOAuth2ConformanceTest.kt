@@ -26,6 +26,9 @@ abstract class AbstractOAuth2ConformanceTest : AbstractControllerTest() {
   @Autowired
   protected lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
+  @Autowired
+  protected lateinit var issuerResolver: OAuth2IssuerResolver
+
   protected lateinit var testData: OAuth2ConformanceTestData
   protected lateinit var driver: OAuth2FlowDriver
 

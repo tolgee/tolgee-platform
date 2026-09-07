@@ -70,9 +70,11 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
       }
     repository.save(grant)
 
-    assertThrows<OAuth2Error> { authorizationService.exchangeCode(client, CODE, grant.redirectUri, "b".repeat(43)) }
+    assertThrows<OAuth2Error> {
+      authorizationService.exchangeCode(client, CODE, grant.redirectUri, "b".repeat(43), null)
+    }
 
-    assertThrows<OAuth2Error> { authorizationService.exchangeCode(client, CODE, grant.redirectUri, verifier) }
+    assertThrows<OAuth2Error> { authorizationService.exchangeCode(client, CODE, grant.redirectUri, verifier, null) }
     repository.existsById(grant.id).assert.isFalse()
   }
 

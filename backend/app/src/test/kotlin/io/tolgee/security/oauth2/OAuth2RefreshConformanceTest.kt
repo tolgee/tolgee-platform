@@ -133,6 +133,22 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
+  fun `a refresh with the resource matching the grant audience succeeds`() {
+    val issued = json(tokenResult())
+
+    val result =
+      driver
+        .refresh(issued.get("refresh_token").asString(), CLIENT_ID, resource = issuerResolver.issuerUrl)
+        .andReturn()
+
+    json(result)
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+  }
+
+  @Test
   fun `a refresh token presented by the wrong client is refused, and the grant dies with it`() {
     val issued = json(tokenResult())
     val refreshToken = issued.get("refresh_token").asString()

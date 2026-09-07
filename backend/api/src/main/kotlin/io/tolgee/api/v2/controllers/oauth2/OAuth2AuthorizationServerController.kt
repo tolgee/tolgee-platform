@@ -121,11 +121,13 @@ class OAuth2AuthorizationServerController(
     @RequestParam("code_verifier", required = false) codeVerifier: String?,
     @RequestParam("refresh_token", required = false) refreshToken: String?,
     @RequestParam("scope", required = false) scope: String?,
+    @RequestParam("resource", required = false) resource: String?,
   ): ResponseEntity<Map<String, Any>> {
     try {
       requireBodyOnlyParameters(request)
       requireNoRepeatedParameters(request, TOKEN_PARAMS)
       val client = requireRegisteredClient(clientId)
+      val requestedAudience = resource.nullIfBlank?.let { oauth2Resources.audienceFor(it) }
       val tokens =
         when (grantType.nullIfBlank) {
           "authorization_code" ->
@@ -134,8 +136,10 @@ class OAuth2AuthorizationServerController(
               code.nullIfBlank,
               redirectUri.nullIfBlank,
               codeVerifier.nullIfBlank,
+              requestedAudience,
             )
-          "refresh_token" -> authorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank)
+          "refresh_token" ->
+            authorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank, requestedAudience)
           null -> throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "grant_type is required")
           else -> throw OAuth2Error(OAuth2Error.UNSUPPORTED_GRANT_TYPE)
         }
@@ -285,7 +289,7 @@ class OAuth2AuthorizationServerController(
         "resource",
       )
     private val TOKEN_PARAMS =
-      listOf("grant_type", "client_id", "code", "redirect_uri", "code_verifier", "refresh_token", "scope")
+      listOf("grant_type", "client_id", "code", "redirect_uri", "code_verifier", "refresh_token", "scope", "resource")
 
     private val REVOKE_PARAMS = listOf("token", "token_type_hint", "client_id")
   }
