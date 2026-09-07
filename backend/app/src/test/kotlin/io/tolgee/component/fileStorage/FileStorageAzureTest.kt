@@ -9,12 +9,15 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobClient
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.models.BlobItem
+import com.azure.storage.blob.models.ListBlobsOptions
+import io.tolgee.exceptions.FileStoreException
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -23,7 +26,7 @@ import org.mockito.kotlin.whenever
 class FileStorageAzureTest {
   private lateinit var azureFs: AzureBlobFileStorage
   private lateinit var containerClientMock: BlobContainerClient
-  private val filePath = "/hello/hello/en.json"
+  private val filePath = "hello/hello/en.json"
   private val content = "hello"
   private lateinit var blobClientMock: BlobClient
 
@@ -44,14 +47,14 @@ class FileStorageAzureTest {
       .readFile(filePath)
       .toString(Charsets.UTF_8)
       .assert
-      .isEqualTo("hello")
+      .isEqualTo(content)
     verifyGetsClient()
   }
 
   @Test
   fun testDeleteFile() {
     azureFs.deleteFile(filePath)
-    verify(blobClientMock, times(1)).delete()
+    verify(blobClientMock, times(1)).deleteIfExists()
     verifyGetsClient()
   }
 
@@ -59,14 +62,9 @@ class FileStorageAzureTest {
   fun testStoreFile() {
     val bytes = content.toByteArray(Charsets.UTF_8)
     azureFs.storeFile(filePath, bytes)
-    verify(blobClientMock, times(1)).upload(any<BinaryData>(), eq(true))
-    val binaryData =
-      Mockito
-        .mockingDetails(blobClientMock)
-        .invocations
-        .single()
-        .arguments[0] as BinaryData
-    binaryData
+    val uploaded = argumentCaptor<BinaryData>()
+    verify(blobClientMock, times(1)).upload(uploaded.capture(), eq(true))
+    uploaded.firstValue
       .toBytes()
       .toString(Charsets.UTF_8)
       .assert
@@ -86,8 +84,12 @@ class FileStorageAzureTest {
       ).iterator(),
     )
     azureFs.pruneDirectory("hello")
+    val options = argumentCaptor<ListBlobsOptions>()
+    verify(containerClientMock, times(1)).listBlobs(options.capture(), eq(null))
+    options.firstValue.prefix.assert
+      .isEqualTo("hello/")
     verifyGetsClient()
-    verify(blobClientMock, times(1)).delete()
+    verify(blobClientMock, times(1)).deleteIfExists()
   }
 
   @Test
@@ -96,6 +98,26 @@ class FileStorageAzureTest {
     azureFs.fileExists(filePath).assert.isTrue()
     verifyGetsClient()
     verify(blobClientMock, times(1)).exists()
+  }
+
+  @Test
+  fun `fileExists returns false when blob is missing`() {
+    whenever(blobClientMock.exists()).thenReturn(false)
+    azureFs.fileExists(filePath).assert.isFalse()
+    verifyGetsClient()
+    verify(blobClientMock, times(1)).exists()
+  }
+
+  @Test
+  fun `fileExists wraps client failures`() {
+    whenever(blobClientMock.exists()).thenThrow(RuntimeException("boom"))
+    assertThrows<FileStoreException> { azureFs.fileExists(filePath) }
+  }
+
+  @Test
+  fun `pruneDirectory wraps client failures`() {
+    whenever(containerClientMock.listBlobs(any(), eq(null))).thenThrow(RuntimeException("boom"))
+    assertThrows<FileStoreException> { azureFs.pruneDirectory("hello") }
   }
 
   private fun verifyGetsClient() {

@@ -8,7 +8,6 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobContainerClient
 import com.azure.storage.blob.models.ListBlobsOptions
 import io.tolgee.exceptions.FileStoreException
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 
 open class AzureBlobFileStorage(
   private val client: BlobContainerClient,
@@ -23,8 +22,7 @@ open class AzureBlobFileStorage(
 
   override fun deleteFile(storageFilePath: String) {
     try {
-      client.getBlobClient(storageFilePath).delete()
-      return
+      client.getBlobClient(storageFilePath).deleteIfExists()
     } catch (e: Exception) {
       throw FileStoreException("Can not delete file using Azure Blob!", storageFilePath, e)
     }
@@ -35,29 +33,28 @@ open class AzureBlobFileStorage(
     bytes: ByteArray,
   ) {
     try {
-      val client = client.getBlobClient(storageFilePath)
-      client.upload(BinaryData.fromBytes(bytes), true)
+      client.getBlobClient(storageFilePath).upload(BinaryData.fromBytes(bytes), true)
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using Azure Blob!", storageFilePath, e)
     }
-    return
   }
 
   override fun fileExists(storageFilePath: String): Boolean {
-    return try {
-      client.getBlobClient(storageFilePath).exists()
-      true
-    } catch (e: NoSuchKeyException) {
-      false
+    try {
+      return client.getBlobClient(storageFilePath).exists()
+    } catch (e: Exception) {
+      throw FileStoreException("Can not check file existence using Azure Blob!", storageFilePath, e)
     }
   }
 
   override fun pruneDirectory(path: String) {
-    val prefix = path.removePrefix("/").removeSuffix("/") + "/"
-    val options = ListBlobsOptions()
-    options.prefix = prefix
-    client.listBlobs(options, null).forEach {
-      client.getBlobClient(it.name).delete()
+    val options = ListBlobsOptions().setPrefix(path.removePrefix("/").removeSuffix("/") + "/")
+    try {
+      client.listBlobs(options, null).forEach {
+        client.getBlobClient(it.name).deleteIfExists()
+      }
+    } catch (e: Exception) {
+      throw FileStoreException("Can not prune directory using Azure Blob!", path, e)
     }
   }
 }
