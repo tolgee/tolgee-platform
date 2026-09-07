@@ -29,6 +29,11 @@ class BaseLimitsProvider : LimitsProvider {
           included = -1,
           limit = -1,
         ),
+      words =
+        UsageLimits.Limit(
+          included = -1,
+          limit = -1,
+        ),
     )
   }
 }

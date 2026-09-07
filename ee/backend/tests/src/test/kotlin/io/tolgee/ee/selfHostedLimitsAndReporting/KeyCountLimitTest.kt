@@ -9,6 +9,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.limits.PlanLimitExceededKeysException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededKeysException
+import io.tolgee.service.projectExportImport.ContentReplacementScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -31,6 +32,9 @@ class KeyCountLimitTest : AbstractSpringTest() {
   @Autowired
   @MockitoBean
   private lateinit var restTemplate: RestTemplate
+
+  @Autowired
+  private lateinit var contentReplacementScope: ContentReplacementScope
 
   @BeforeEach
   fun initMocks() {
@@ -153,6 +157,23 @@ class KeyCountLimitTest : AbstractSpringTest() {
       .assertThatThrownBy {
         keyService.restoreKey(testData.project.id, keyToSoftDelete.id)
       }.hasRootCauseInstanceOf(PlanLimitExceededKeysException::class.java)
+  }
+
+  @Test
+  fun `replacing a project's content is not blocked, even though the wipe emits no events`() {
+    saveSubscription {
+      includedKeys = 2
+      keysLimit = 2
+    }
+    val testData = saveTestData(2)
+
+    // The wipe is bulk JPQL and produces no negative delta, so without the marker the re-insert
+    // would be added to a baseline that still counts the content it replaces.
+    executeInNewTransaction {
+      contentReplacementScope.replacingContent {
+        createKey(testData)
+      }
+    }
   }
 
   // TODO: Test cannot create key when status subscription status is ERROR

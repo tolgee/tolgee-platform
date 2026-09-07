@@ -1,5 +1,7 @@
 package io.tolgee.api
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+
 enum class SubscriptionStatus(
   val active: Boolean,
 ) {
@@ -13,7 +15,8 @@ enum class SubscriptionStatus(
   /** might be stored on the EE side, but not license server (billing) side */
   KEY_USED_BY_ANOTHER_INSTANCE(false),
 
-  /** when we cannot map from stripe status */
+  /** when we cannot map from stripe status, and when a licence server reports one we do not know */
+  @JsonEnumDefaultValue
   UNKNOWN(false),
   ;
 

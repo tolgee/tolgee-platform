@@ -34,7 +34,11 @@ export const IncludedFeatures = ({
       {Object.entries(featuresObject)
         .filter(([key]) => features.includes(key as any))
         .map(([feature, translation]) => (
-          <PlanFeature key={feature} name={translation} />
+          <PlanFeature
+            key={feature}
+            name={translation}
+            dataCy="billing-plan-feature"
+          />
         ))}
     </StyledListWrapper>
   );

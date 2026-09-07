@@ -33,8 +33,8 @@ export function XPathBuilder(initialXpath = '') {
     return attributeEquals('data-cy', dataCy);
   }
 
-  function getElement() {
-    return cy.xpath(xpath);
+  function getElement(options?: Partial<Cypress.Timeoutable>) {
+    return cy.xpath(xpath, options);
   }
 
   function getInputUnderDataCy(dataCy: DataCy.Value) {

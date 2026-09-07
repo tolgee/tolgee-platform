@@ -1,9 +1,9 @@
-import { T, useTranslate } from '@tolgee/react';
-import { Box, Chip, Tooltip, Typography } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+import { Box, Chip, Tooltip } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
-import { useDateFormatter } from 'tg.hooks/useLocale';
 import { PlanTitleText } from '../Plan/PlanTitle';
+import { ActivePlanDates } from './ActivePlanDates';
 
 type Status = components['schemas']['SelfHostedEeSubscriptionModel']['status'];
 
@@ -25,7 +25,6 @@ export const ActivePlanTitle = ({
   highlightColor,
   nonCommercial,
 }: Props) => {
-  const formatDate = useDateFormatter();
   const { t } = useTranslate();
 
   return (
@@ -45,26 +44,11 @@ export const ActivePlanTitle = ({
           </Tooltip>
         )}
       </Box>
-      <Box display="grid">
-        {createdAt && (
-          <Typography variant="caption">
-            {createdAt && (
-              <Typography variant="caption">
-                <T keyName="active-plan-subscribed-at-tooltip" />:{' '}
-                {formatDate(createdAt)}
-              </Typography>
-            )}
-          </Typography>
-        )}
-        {Boolean(periodStart && periodEnd) && (
-          <Typography variant="caption">
-            <T
-              keyName="active-plan-current-period"
-              params={{ start: periodStart, end: periodEnd }}
-            />
-          </Typography>
-        )}
-      </Box>
+      <ActivePlanDates
+        createdAt={createdAt}
+        periodStart={periodStart}
+        periodEnd={periodEnd}
+      />
     </Box>
   );
 };

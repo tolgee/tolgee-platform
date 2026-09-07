@@ -2,6 +2,7 @@ package io.tolgee.service.projectExportImport
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
+import io.tolgee.events.OnProjectContentReplaced
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -21,6 +22,7 @@ import io.tolgee.util.ImageConverter
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.core.JacksonException
@@ -56,6 +58,8 @@ class ProjectExportImportImporter(
   private val activityHolder: ActivityHolder,
   private val sideChannelHandlerRegistry: SideChannelHandlerRegistry,
   private val translationMemoryManagementService: TranslationMemoryManagementService,
+  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val contentReplacementScope: ContentReplacementScope,
 ) : Logging {
   // Without rollbackFor, a checked exception thrown mid-insert would commit with the wipe already applied,
   // leaving the target permanently emptied (the default rule rolls back only on runtime exceptions).
@@ -96,31 +100,42 @@ class ProjectExportImportImporter(
     // not leak.
     activityHolder.enableAutoCompletion = false
 
-    clearer.clear(projectService.get(targetProjectId))
+    // The wipe is bulk JPQL and emits no entity events, while the re-insert emits one per row, so a
+    // usage check that adds the inserts to a pre-wipe baseline would refuse to restore content the
+    // instance already held.
+    val (project, result) =
+      contentReplacementScope.replacingContent {
+        clearer.clear(projectService.get(targetProjectId))
 
-    // getReference, not find(): find() initializes the row now, and the project's @PostLoad seeds a fresh
-    // default language when it sees none (true right after the wipe), polluting the mirror. The lazy proxy
-    // initializes only when touched post-insert, once the source languages exist.
-    val project = entityManager.getReference(Project::class.java, targetProjectId)
-    val importingAdmin = userAccountService.get(importingAdminId)
+        // getReference, not find(): find() initializes the row now, and the project's @PostLoad seeds a fresh
+        // default language when it sees none (true right after the wipe), polluting the mirror. The lazy proxy
+        // initializes only when touched post-insert, once the source languages exist.
+        val project = entityManager.getReference(Project::class.java, targetProjectId)
+        val importingAdmin = userAccountService.get(importingAdminId)
 
-    val result =
-      corruptArchiveOnParseError {
-        deserializer.deserialize(
-          parsed.entityJsonByType,
-          project,
-          importingAdmin,
-          userResolver = cachingUserResolver(),
-          projectRecord = projectRecord,
-        )
+        val result =
+          corruptArchiveOnParseError {
+            deserializer.deserialize(
+              parsed.entityJsonByType,
+              project,
+              importingAdmin,
+              userResolver = cachingUserResolver(),
+              projectRecord = projectRecord,
+            )
+          }
+
+        mirrorProjectScalars(project, projectRecord, result.maxImportedTaskNumber)
+        // Re-seed the default PROJECT-type TM the clearer removed. After the scalar mirror, since
+        // createProjectTm reads name/baseLanguage/organizationOwner.
+        translationMemoryManagementService.createProjectTm(project)
+
+        // Inside the block on purpose: entity events for dirty updates are emitted at flush, not at
+        // the mutating call, and a flag reset in a finally can never cover the commit-time flush.
+        entityManager.flush()
+
+        project to result
       }
 
-    mirrorProjectScalars(project, projectRecord, result.maxImportedTaskNumber)
-    // Re-seed the default PROJECT-type TM the clearer removed. After the scalar mirror, since
-    // createProjectTm reads name/baseLanguage/organizationOwner.
-    translationMemoryManagementService.createProjectTm(project)
-
-    entityManager.flush()
     // Every fallible step (side-channel restore, all image conversion) runs before any blob is written to
     // the non-transactional FileStorage, so a rollback leaves no orphaned files. flush first so imported
     // keys exist in the DB before a side-channel handler's insert.
@@ -129,6 +144,7 @@ class ProjectExportImportImporter(
     restoreAvatar(project, parsed.blobs)
     writePreparedScreenshots(preparedScreenshots)
     refreshDerivedData(targetProjectId)
+    applicationEventPublisher.publishEvent(OnProjectContentReplaced(targetProjectId))
   }
 
   private fun corruptArchive(e: Exception) =

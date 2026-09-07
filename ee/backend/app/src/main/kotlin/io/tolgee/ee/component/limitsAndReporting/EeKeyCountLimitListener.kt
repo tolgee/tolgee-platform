@@ -6,6 +6,7 @@ import io.tolgee.ee.component.limitsAndReporting.generic.KeysLimitChecker
 import io.tolgee.events.EntityPreCommitEvent
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.projectExportImport.ContentReplacementScope
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.getUsageIncreaseAmount
@@ -31,12 +32,16 @@ class EeKeyCountLimitListener(
   private val keyService: KeyService,
   private val transactionManager: PlatformTransactionManager,
   private val selfHostedLimitsProvider: SelfHostedLimitsProvider,
+  private val contentReplacementScope: ContentReplacementScope,
 ) : Logging {
   private var keyCount: Long? = null
 
   @EventListener
   fun onActivity(event: EntityPreCommitEvent<Key>) {
     if (billingConfProvider().enabled) {
+      return
+    }
+    if (contentReplacementScope.isReplacingContent) {
       return
     }
 

@@ -27,8 +27,10 @@ class EeSubscriptionErrorCatchingService(
       when (body.code) {
         Message.SEATS_SPENDING_LIMIT_EXCEEDED.code,
         Message.KEYS_SPENDING_LIMIT_EXCEEDED.code,
+        Message.WORDS_SPENDING_LIMIT_EXCEEDED.code,
         Message.PLAN_KEY_LIMIT_EXCEEDED.code,
         Message.PLAN_SEAT_LIMIT_EXCEEDED.code,
+        Message.PLAN_WORD_LIMIT_EXCEEDED.code,
         ->
           throw BadRequestException(body.code, body.params)
       }

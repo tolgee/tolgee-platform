@@ -11,9 +11,18 @@ type Props = {
   title?: React.ReactNode;
   sx?: SxProps;
   className?: string;
+  dataCy?: string;
 };
 
-export function PlanFeature({ name, link, bold, title, sx, className }: Props) {
+export function PlanFeature({
+  name,
+  link,
+  bold,
+  title,
+  sx,
+  className,
+  dataCy,
+}: Props) {
   let item = wrapIf(bold, name, <b />);
 
   item = wrapIf(
@@ -23,7 +32,13 @@ export function PlanFeature({ name, link, bold, title, sx, className }: Props) {
   );
 
   return (
-    <Box display="flex" gap={0.5} alignItems="center" {...{ sx, className }}>
+    <Box
+      display="flex"
+      gap={0.5}
+      alignItems="center"
+      data-cy={dataCy}
+      {...{ sx, className }}
+    >
       <Check style={{ width: 18, height: 18 }} />
       <Typography sx={{ wordBreak: 'break-word' }} fontSize={14}>
         {item}
