@@ -1,12 +1,12 @@
 apply from: './gradle/utils.gradle'
 
 import groovy.io.FileType
+import groovy.json.JsonSlurper
 
 import java.time.Duration
 
 ext {
     E2E_DIR = "${project.projectDir}/e2e"
-    BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
 
@@ -27,15 +27,25 @@ def getE2eChunks() {
         return List.of(list)
     }
 
-    def remainingChunks = Integer.parseInt(totalJobs)
-    def chunks = [] as ArrayList<List<String>>
-    while (remainingChunks > 0) {
-        def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger()
-        chunks.add(list.subList(0, toIndex))
-        list = list.subList(toIndex, list.size())
-        remainingChunks--
+    def measured = measuredSpecSeconds()
+    def chunks = (1..Integer.parseInt(totalJobs)).collect { [] as List<String> }
+    def totals = new int[chunks.size()]
+    def longestFirst = list.toSorted { a, b -> seconds(measured, b) <=> seconds(measured, a) }
+    longestFirst.each { spec ->
+        def emptiest = (0..<totals.length).min { totals[it] }
+        chunks[emptiest].add(spec)
+        totals[emptiest] += seconds(measured, spec)
     }
     return chunks
+}
+
+def measuredSpecSeconds() {
+    return new JsonSlurper().parse(new File("$E2E_DIR/spec-durations.json"))
+}
+
+def seconds(Map measured, String spec) {
+    def defaultSeconds = 30
+    return measured.getOrDefault(spec, defaultSeconds)
 }
 
 def getE2eTestsToRun() {
@@ -111,10 +121,15 @@ tasks.register('runE2e', Exec) {
 tasks.register('printE2eGroups') {
     group = 'e2e'
     doLast {
-        getE2eChunks().indexed().forEach { index, chunk ->
-            println("Chunk: $index")
+        def measured = measuredSpecSeconds()
+        def chunks = getE2eChunks()
+        chunks.indexed().forEach { index, chunk ->
+            println("Group $index: ${chunk.sum { seconds(measured, it) }}s")
             chunk.forEach { println(" $it") }
         }
+        def onDisk = chunks.flatten() as Set
+        (onDisk - measured.keySet()).each { println("not in spec-durations.json (counted as default): $it") }
+        (measured.keySet() - onDisk).each { println("in spec-durations.json but not on disk: $it") }
     }
 }
 
