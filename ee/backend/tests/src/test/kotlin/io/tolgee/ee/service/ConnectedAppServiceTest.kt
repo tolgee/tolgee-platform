@@ -1,23 +1,20 @@
 package io.tolgee.ee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.ee.fixtures.seedConnectedGrant
+import io.tolgee.development.testDataBuilder.data.ConnectedAppsTestData
 import io.tolgee.ee.service.connectedApps.ConnectedAppService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.AuthAuditEventType
-import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.AuthAuditEventRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
-import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.Pageable
-import java.util.Date
 
 @SpringBootTest
 class ConnectedAppServiceTest : AbstractSpringTest() {
@@ -30,19 +27,24 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var authAuditEventRepository: AuthAuditEventRepository
 
-  lateinit var testData: BaseTestData
+  lateinit var testData: ConnectedAppsTestData
 
   @BeforeEach
   fun setup() {
-    testData = BaseTestData()
-    testDataService.saveTestData(testData.root)
+    testData = ConnectedAppsTestData()
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
   fun `lists only consented grants with a live refresh token`() {
-    val connected = seedGrant()
-    val pending = seedGrant(consented = false)
-    val lapsed = seedGrant(refreshExpired = true)
+    val connected = testData.addConnectedGrant()
+    val pending = testData.addPendingGrant()
+    val lapsed = testData.addLapsedGrant()
+    testDataService.saveTestData(testData.root)
 
     val ids = connectedAppService.find(testData.user.id, Pageable.ofSize(20)).content.map { it.grant.id }
 
@@ -52,9 +54,9 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
   @Test
   fun `hides grants of another user and of an unregistered client`() {
-    val unregistered = seedGrant(clientId = "no-such-client")
-    val otherUser = dbPopulator.createUserIfNotExists("connected-apps-other@tolgee.io")
-    val foreign = seedGrant(userAccountId = otherUser.id)
+    val unregistered = testData.addConnectedGrant(clientId = "no-such-client")
+    val foreign = testData.addConnectedGrant(accountBuilder = testData.otherUserAccountBuilder)
+    testDataService.saveTestData(testData.root)
 
     val ids = connectedAppService.find(testData.user.id, Pageable.ofSize(20)).content.map { it.grant.id }
 
@@ -63,7 +65,8 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
   @Test
   fun `revoking deletes the grant and records the user as initiator`() {
-    val grant = seedGrant()
+    val grant = testData.addConnectedGrant()
+    testDataService.saveTestData(testData.root)
 
     connectedAppService.revoke(grant.id, testData.user.id)
 
@@ -82,7 +85,8 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
   @Test
   fun `revoking a lapsed grant of the caller still works`() {
-    val lapsed = seedGrant(refreshExpired = true)
+    val lapsed = testData.addLapsedGrant()
+    testDataService.saveTestData(testData.root)
 
     connectedAppService.revoke(lapsed.id, testData.user.id)
 
@@ -91,8 +95,8 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
   @Test
   fun `revoking a foreign or missing grant is reported as missing`() {
-    val otherUser = dbPopulator.createUserIfNotExists("connected-apps-foreign@tolgee.io")
-    val foreign = seedGrant(userAccountId = otherUser.id)
+    val foreign = testData.addConnectedGrant(accountBuilder = testData.otherUserAccountBuilder)
+    testDataService.saveTestData(testData.root)
 
     assertThatThrownBy { connectedAppService.revoke(foreign.id, testData.user.id) }
       .isInstanceOf(NotFoundException::class.java)
@@ -102,9 +106,9 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
   @Test
   fun `revoking all deletes every grant of the caller and leaves other users alone`() {
-    val mine = seedGrant()
-    val otherUser = dbPopulator.createUserIfNotExists("connected-apps-untouched@tolgee.io")
-    val foreign = seedGrant(userAccountId = otherUser.id)
+    val mine = testData.addConnectedGrant()
+    val foreign = testData.addConnectedGrant(accountBuilder = testData.otherUserAccountBuilder)
+    testDataService.saveTestData(testData.root)
 
     connectedAppService.revokeAllForUser(testData.user.id).assert.isEqualTo(1)
 
@@ -112,20 +116,24 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
     grantRepository.existsById(foreign.id).assert.isTrue()
   }
 
-  private fun seedGrant(
-    userAccountId: Long = testData.user.id,
-    clientId: String = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
-    consented: Boolean = true,
-    refreshExpired: Boolean = false,
-  ): OAuth2Grant =
-    executeInNewTransaction {
-      seedConnectedGrant(
-        grantRepository = grantRepository,
-        user = userAccountService.get(userAccountId),
-        now = currentDateProvider.date,
-        clientId = clientId,
-        consented = consented,
-        refreshExpired = refreshExpired,
-      )
-    }
+  @Test
+  fun `revoking all sweeps a pending consent without auditing it`() {
+    val connected = testData.addConnectedGrant()
+    val pending = testData.addPendingGrant()
+    testDataService.saveTestData(testData.root)
+
+    connectedAppService.revokeAllForUser(testData.user.id).assert.isEqualTo(2)
+
+    grantRepository.existsById(pending.id).assert.isFalse()
+    val pendingEvents =
+      authAuditEventRepository.findAll().filter {
+        it.type == AuthAuditEventType.OAUTH_GRANT_REVOKED && it.targetId == pending.id
+      }
+    pendingEvents.assert.isEmpty()
+    val connectedEvents =
+      authAuditEventRepository.findAll().filter {
+        it.type == AuthAuditEventType.OAUTH_GRANT_REVOKED && it.targetId == connected.id
+      }
+    connectedEvents.assert.hasSize(1)
+  }
 }
