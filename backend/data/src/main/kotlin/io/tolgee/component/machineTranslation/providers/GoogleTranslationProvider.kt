@@ -17,13 +17,16 @@ class GoogleTranslationProvider(
     get() = !googleMachineTranslationProperties.apiKey.isNullOrEmpty()
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
+    // format("html") tells Google to parse the text as HTML and preserve tags as-is, so our
+    // <x id="tolgee-number"> placeholder survives translation intact.
+    val format = if (params.containsNumberTag) "html" else "text"
     val result =
       translateService
         .translate(
           params.text,
           Translate.TranslateOption.sourceLanguage(params.sourceLanguageTag),
           Translate.TranslateOption.targetLanguage(params.targetLanguageTag),
-          Translate.TranslateOption.format("text"),
+          Translate.TranslateOption.format(format),
         ).translatedText
     return MtValueProvider.MtResult(
       result,
