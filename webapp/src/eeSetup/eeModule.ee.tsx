@@ -18,6 +18,7 @@ import { useUserTasks } from '../globalContext/useUserTasks';
 import { AdministrationEeLicenseView } from 'tg.ee.module/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
 import { SessionsSection } from '../ee/sessions/SessionsSection';
+import { ConnectedAppsSection } from '../ee/connectedApps/ConnectedAppsSection';
 import {
   useConfig,
   useEnabledFeatures,
@@ -109,6 +110,7 @@ export const billingMenuItems = billingModule.billingMenuItems as React.FC<
 >[];
 export const apps = [SlackApp] as React.FC<React.PropsWithChildren<unknown>>[];
 export const AccountSessions = SessionsSection;
+export const AccountConnectedApps = ConnectedAppsSection;
 
 export const routes = {
   Root: () => {
