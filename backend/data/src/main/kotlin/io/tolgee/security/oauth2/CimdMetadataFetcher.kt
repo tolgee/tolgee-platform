@@ -23,6 +23,7 @@ import io.tolgee.util.logger
 import org.apache.hc.client5.http.DnsResolver
 import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.config.ConnectionConfig
+import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
@@ -30,12 +31,16 @@ import org.apache.hc.core5.util.Timeout
 import org.springframework.stereotype.Component
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.InetAddress
 import java.net.URI
 import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.Base64
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 @Component
 class CimdMetadataFetcher(
@@ -43,6 +48,17 @@ class CimdMetadataFetcher(
   private val urlSecurity: UrlSecurity,
   private val objectMapper: ObjectMapper,
 ) : Logging {
+  // A per-read socket timeout resets on every successful partial read, so it never bounds the total time spent
+  // reading a body that trickles in slower than the cap — and closing an entity that wasn't fully read (readCapped
+  // aborting early) makes HttpClient5 try to drain the rest of it to keep the connection reusable, which is just
+  // as unbounded. This watchdog is what actually enforces fetchTimeoutMs as a wall-clock deadline: cancelling the
+  // request forces the connection closed immediately (CloseMode.IMMEDIATE) instead of gracefully drained, which
+  // aborts whichever blocking call — read or drain — is in flight at the time.
+  private val fetchWatchdog: ScheduledExecutorService =
+    Executors.newSingleThreadScheduledExecutor { runnable ->
+      Thread(runnable, "cimd-fetch-watchdog").apply { isDaemon = true }
+    }
+
   fun fetchAndValidate(clientIdUrl: String): CimdClient? {
     if (!isSafeUrl(clientIdUrl)) return null
     val addresses =
@@ -71,6 +87,9 @@ class CimdMetadataFetcher(
         return false
       }
     if (uri.scheme?.lowercase() != "https") return false
+    // oauth2_grant.client_id is VARCHAR(255); a longer client_id url would 500 at grant-insert time instead of
+    // being refused up front here.
+    if (clientIdUrl.length > 255) return false
     val host = uri.host ?: return false
     if (properties.allowedHosts.isNotEmpty() &&
       properties.allowedHosts.none { it.equals(host, ignoreCase = true) }
@@ -89,17 +108,24 @@ class CimdMetadataFetcher(
     pinnedAddresses: Array<InetAddress>?,
   ): JsonNode? {
     val host = URI(clientIdUrl).host ?: return null
+    // System.nanoTime, not CurrentDateProvider: this is a wall-clock budget for an outbound socket read loop,
+    // not domain time that tests need to freeze/travel.
+    val deadlineNanos = System.nanoTime() + properties.fetchTimeoutMs * NANOS_PER_MILLI
+    val request = HttpGet(clientIdUrl).apply { addHeader("Accept", "application/json") }
+    val watchdogTask = fetchWatchdog.schedule({ request.cancel() }, properties.fetchTimeoutMs, TimeUnit.MILLISECONDS)
     return try {
       pinnedClient(host, pinnedAddresses).use { client ->
-        client.execute(HttpGet(clientIdUrl).apply { addHeader("Accept", "application/json") }) { response ->
+        client.execute(request) { response ->
           if (response.code != 200) return@execute null
-          val bytes = response.entity?.content?.use { readCapped(it) } ?: return@execute null
+          val bytes = response.entity?.content?.use { readCapped(it, deadlineNanos) } ?: return@execute null
           objectMapper.readTree(bytes)
         }
       }
     } catch (e: Exception) {
       logger.debug("CIMD fetch failed for {}: {}", clientIdUrl, e.message)
       null
+    } finally {
+      watchdogTask.cancel(false)
     }
   }
 
@@ -107,14 +133,15 @@ class CimdMetadataFetcher(
     host: String,
     addresses: Array<InetAddress>?,
   ): CloseableHttpClient {
+    val timeout = Timeout.ofMilliseconds(properties.fetchTimeoutMs)
     val connectionManagerBuilder =
       PoolingHttpClientConnectionManagerBuilder
         .create()
         .setDefaultConnectionConfig(
           ConnectionConfig
             .custom()
-            .setConnectTimeout(Timeout.ofMilliseconds(properties.fetchTimeoutMs))
-            .setSocketTimeout(Timeout.ofMilliseconds(properties.fetchTimeoutMs))
+            .setConnectTimeout(timeout)
+            .setSocketTimeout(timeout)
             .build(),
         )
     if (addresses != null) {
@@ -123,6 +150,9 @@ class CimdMetadataFetcher(
     return HttpClients
       .custom()
       .setConnectionManager(connectionManagerBuilder.build())
+      // Bounds the wait for the response to start arriving; readCapped's own deadline bounds a slow body once it
+      // has, since a per-read socket timeout resets on every trickled byte and never fires on its own.
+      .setDefaultRequestConfig(RequestConfig.custom().setResponseTimeout(timeout).build())
       .disableRedirectHandling()
       .disableAutomaticRetries()
       .build()
@@ -141,11 +171,25 @@ class CimdMetadataFetcher(
       override fun resolveCanonicalHostname(resolvedHost: String): String = resolvedHost
     }
 
-  internal fun readCapped(stream: InputStream): ByteArray? {
+  // A single readNBytes(max+1) call blocks on the underlying socket read, whose timeout resets on every
+  // successful partial read — a host dripping one byte per read call never trips it and can hold the calling
+  // thread indefinitely. Reading in bounded chunks and checking deadlineNanos between them makes fetchTimeoutMs
+  // the total wall-clock budget for the whole body, not just the gap between two bytes.
+  internal fun readCapped(
+    stream: InputStream,
+    deadlineNanos: Long,
+  ): ByteArray? {
     val max = properties.maxDocumentBytes.toInt()
-    val buffer = stream.readNBytes(max + 1)
-    if (buffer.size > max) return null
-    return buffer
+    val buffer = ByteArrayOutputStream()
+    val chunk = ByteArray(READ_CHUNK_BYTES)
+    while (true) {
+      if (System.nanoTime() >= deadlineNanos) return null
+      val read = stream.read(chunk)
+      if (read < 0) break
+      buffer.write(chunk, 0, read)
+      if (buffer.size() > max) return null
+    }
+    return buffer.toByteArray()
   }
 
   internal fun buildClient(
@@ -188,8 +232,10 @@ class CimdMetadataFetcher(
     redirectUri: String,
     clientIdUrl: String,
   ): Boolean {
-    if (isSameOrigin(redirectUri, clientIdUrl)) return true
+    // RFC 6749 §3.1.2: a registered redirect_uri must not carry a fragment component.
     val uri = runCatching { URI(redirectUri) }.getOrNull() ?: return false
+    if (uri.rawFragment != null) return false
+    if (isSameOrigin(redirectUri, clientIdUrl)) return true
     if (uri.scheme != "http" && uri.scheme != "https") return false
     return OAuth2Client.isLoopbackHost(uri.host)
   }
@@ -245,5 +291,10 @@ class CimdMetadataFetcher(
     } catch (_: Exception) {
       null
     }
+  }
+
+  companion object {
+    private const val READ_CHUNK_BYTES = 8192
+    private const val NANOS_PER_MILLI = 1_000_000L
   }
 }

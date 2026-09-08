@@ -73,6 +73,22 @@ class McpAuthChallengeFilterTest {
   }
 
   @Test
+  fun `a tools-call with an ak query parameter passes through unchallenged`() {
+    // AuthenticationFilter also accepts request.getParameter("ak") as a credential; this filter must not challenge
+    // a request that would otherwise authenticate downstream. Set via queryString directly, not addParameter —
+    // getParameter would consume the request here before the real filter/servlet ever peeks the body.
+    val request = toolsCallRequest()
+    request.queryString = "ak=tgpak_x"
+    val response = MockHttpServletResponse()
+    val chain = MockFilterChain()
+
+    filter.doFilter(request, response, chain)
+
+    chain.request.assert.isNotNull()
+    response.status.assert.isEqualTo(200)
+  }
+
+  @Test
   fun `initialize and tools-list without credentials pass through`() {
     val initializeRequest = postRequest("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}""")
     val initializeResponse = MockHttpServletResponse()

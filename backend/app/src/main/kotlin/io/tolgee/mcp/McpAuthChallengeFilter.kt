@@ -54,8 +54,16 @@ class McpAuthChallengeFilter(
     }
   }
 
+  // AuthenticationFilter also accepts an "ak" query parameter as an API key. Checked via the raw queryString, not
+  // request.getParameter("ak") — on a form-encoded POST, getParameter triggers parsing the body from the request's
+  // input stream, which would consume it before this filter gets to peek it below.
   private fun hasCredentials(request: HttpServletRequest): Boolean =
-    request.getHeader(HttpHeaders.AUTHORIZATION) != null || request.getHeader("X-API-Key") != null
+    request.getHeader(HttpHeaders.AUTHORIZATION) != null ||
+      request.getHeader("X-API-Key") != null ||
+      hasAkQueryParam(request)
+
+  private fun hasAkQueryParam(request: HttpServletRequest): Boolean =
+    request.queryString?.split("&")?.any { it.substringBefore("=") == "ak" } ?: false
 
   private fun isToolsCall(body: ByteArray): Boolean {
     val method =

@@ -24,11 +24,15 @@ import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.io.InputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.ServerSocket
 import java.security.MessageDigest
+import java.time.Duration
 import java.util.Base64
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.measureTimeMillis
 
 /**
  * Focused on the security gates of CIMD resolution: a client-id URL that is non-https, internal (SSRF), or off a
@@ -93,6 +97,24 @@ class CimdMetadataFetcherTest {
   fun `rejects a host outside a configured allow-list`() {
     val properties = OAuth2CimdProperties().apply { allowedHosts = listOf("trusted.example.com") }
     fetcher(ssrfDisabled = true, properties).fetchAndValidate("https://evil.example.com/client").assert.isNull()
+  }
+
+  @Test
+  fun `isSafeUrl rejects a client id url longer than the oauth2_grant client_id column width`() {
+    val properties = OAuth2CimdProperties().apply { allowedHosts = listOf() }
+    val fetcher = fetcher(ssrfDisabled = true, properties)
+    val overLong = "https://example.com/" + "a".repeat(256 - "https://example.com/".length)
+    overLong.length.assert.isEqualTo(256)
+    fetcher.isSafeUrl(overLong).assert.isFalse()
+  }
+
+  @Test
+  fun `isSafeUrl allows a client id url exactly at the column width`() {
+    val properties = OAuth2CimdProperties().apply { allowedHosts = listOf() }
+    val fetcher = fetcher(ssrfDisabled = true, properties)
+    val atLimit = "https://example.com/" + "a".repeat(255 - "https://example.com/".length)
+    atLimit.length.assert.isEqualTo(255)
+    fetcher.isSafeUrl(atLimit).assert.isTrue()
   }
 
   @Test
@@ -183,6 +205,14 @@ class CimdMetadataFetcherTest {
   }
 
   @Test
+  fun `buildClient rejects a same-origin redirect_uri carrying a fragment`() {
+    // RFC 6749 §3.1.2: redirect_uris must not include a fragment component; a document that pre-registers one
+    // could otherwise be used to smuggle data past the authorization response.
+    val document = validDocument(redirectUris = listOf("https://example.com/callback#frag"))
+    fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document).assert.isNull()
+  }
+
+  @Test
   fun `buildClient rejects a same-host redirect_uri on a different scheme`() {
     val document = validDocument(redirectUris = listOf("http://example.com/callback"))
     fetcher(ssrfDisabled = true).buildClient("https://example.com/client", document).assert.isNull()
@@ -252,12 +282,14 @@ class CimdMetadataFetcherTest {
     first!!.metadataHash.assert.isNotEqualTo(second!!.metadataHash)
   }
 
+  private fun farFutureDeadline(): Long = System.nanoTime() + Duration.ofSeconds(30).toNanos()
+
   @Test
   fun `readCapped returns the body at exactly the size cap`() {
     val properties = OAuth2CimdProperties().apply { maxDocumentBytes = 16 }
     val body = ByteArray(16) { 'a'.code.toByte() }
     fetcher(ssrfDisabled = true, properties)
-      .readCapped(body.inputStream())!!
+      .readCapped(body.inputStream(), farFutureDeadline())!!
       .size.assert
       .isEqualTo(16)
   }
@@ -266,7 +298,32 @@ class CimdMetadataFetcherTest {
   fun `readCapped rejects a body one byte over the cap`() {
     val properties = OAuth2CimdProperties().apply { maxDocumentBytes = 16 }
     val body = ByteArray(17) { 'a'.code.toByte() }
-    fetcher(ssrfDisabled = true, properties).readCapped(body.inputStream()).assert.isNull()
+    fetcher(ssrfDisabled = true, properties).readCapped(body.inputStream(), farFutureDeadline()).assert.isNull()
+  }
+
+  @Test
+  fun `readCapped aborts once the deadline elapses even though the stream keeps producing data`() {
+    // Simulates a host dripping bytes one read-call at a time, each arriving well inside the socket's own
+    // per-read timeout — the only thing that can end this loop is readCapped's own wall-clock deadline.
+    val drippingStream =
+      object : InputStream() {
+        override fun read(): Int = throw UnsupportedOperationException("not used by readCapped's chunked read")
+
+        override fun read(
+          b: ByteArray,
+          off: Int,
+          len: Int,
+        ): Int {
+          Thread.sleep(30)
+          b[off] = 'a'.code.toByte()
+          return 1
+        }
+      }
+    val fetcher = fetcher(ssrfDisabled = true)
+    val deadline = System.nanoTime() + Duration.ofMillis(60).toNanos()
+
+    val elapsedMs = measureTimeMillis { fetcher.readCapped(drippingStream, deadline).assert.isNull() }
+    elapsedMs.assert.isLessThan(1000)
   }
 
   @Test
@@ -328,6 +385,51 @@ class CimdMetadataFetcherTest {
       fetcher.fetch(url, pinnedAddresses = arrayOf(InetAddress.getByName("127.0.0.2"))).assert.isNull()
     } finally {
       server.stop(0)
+    }
+  }
+
+  @Test
+  fun `fetch aborts once the fetch timeout budget elapses even though bytes keep trickling in`() {
+    val serverSocket = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
+    val stop = AtomicBoolean(false)
+    val acceptThread =
+      Thread {
+        val socket =
+          try {
+            serverSocket.accept()
+          } catch (_: Exception) {
+            return@Thread
+          }
+        socket.use {
+          val out = it.getOutputStream()
+          out.write(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 1000000\r\n\r\n"
+              .toByteArray(Charsets.US_ASCII),
+          )
+          out.flush()
+          // Drips one byte every 20ms, always well inside the connection's own per-read socket timeout (150ms
+          // below) — a fetch that only bounds each individual read, not the whole fetch, would never time out here.
+          while (!stop.get()) {
+            out.write('a'.code)
+            out.flush()
+            Thread.sleep(20)
+          }
+        }
+      }
+    acceptThread.isDaemon = true
+    acceptThread.start()
+
+    try {
+      val properties = OAuth2CimdProperties().apply { fetchTimeoutMs = 150 }
+      val fetcher = fetcher(ssrfDisabled = true, properties)
+      val url = "http://127.0.0.1:${serverSocket.localPort}/slow"
+
+      val elapsedMs = measureTimeMillis { fetcher.fetch(url, pinnedAddresses = null).assert.isNull() }
+      elapsedMs.assert.isLessThan(1000)
+    } finally {
+      stop.set(true)
+      serverSocket.close()
+      acceptThread.join(2000)
     }
   }
 
