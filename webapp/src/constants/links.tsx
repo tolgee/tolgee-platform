@@ -66,6 +66,7 @@ export enum PARAMS {
   BRANCH = 'branch',
   MERGE_ID = 'mergeId',
   PLAN_MIGRATION_ID = 'migrationId',
+  APP_ID = 'appId',
 }
 
 export class LINKS {
@@ -286,6 +287,16 @@ export class LINKS {
    */
 
   static ORGANIZATION_APPS = Link.ofParent(LINKS.ORGANIZATION, 'apps');
+
+  static ORGANIZATION_APPS_OWNED = Link.ofParent(
+    LINKS.ORGANIZATION_APPS,
+    'owned'
+  );
+
+  static ORGANIZATION_APP = Link.ofParent(
+    LINKS.ORGANIZATION_APPS_OWNED,
+    p(PARAMS.APP_ID)
+  );
 
   static ORGANIZATION_APPS_SLACK_OAUTH_SUCCESS = Link.ofParent(
     LINKS.ORGANIZATION_APPS,
