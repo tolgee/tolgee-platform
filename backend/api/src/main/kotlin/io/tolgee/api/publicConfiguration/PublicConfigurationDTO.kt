@@ -24,6 +24,7 @@ class PublicConfigurationDTO(
   val appName: String,
   val showVersion: Boolean,
   val internalControllerEnabled: Boolean,
+  val testClockEnabled: Boolean,
   val maxTranslationTextLength: Long,
   val recaptchaSiteKey: String?,
   val chatwootToken: String?,
