@@ -42,11 +42,6 @@ class AwsMtValueProvider(
           .targetLanguageCode(params.targetLanguageTag)
           .settings(getSettings(params))
           .text(params.text)
-          // text/html is required for AWS to honor the translate="no" no-translate tag, so our
-          // <x id="tolgee-number"> placeholder (wrapped by HtmlNoTranslatePlaceholderProtector)
-          // survives translation intact.
-          // https://docs.aws.amazon.com/translate/latest/dg/customizing-translations-tags.html
-          .contentType(if (params.containsNumberTag) "text/html" else "text/plain")
           .build(),
       )
 
