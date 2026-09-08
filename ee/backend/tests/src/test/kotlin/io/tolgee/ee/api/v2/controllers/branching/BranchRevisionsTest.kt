@@ -1,15 +1,18 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchRevisionData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +28,9 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var branchRepository: BranchRepository
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setup() {
     testData = BranchRevisionData()
@@ -32,6 +38,12 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.project }
     currentDateProvider.forcedDate = currentDateProvider.date
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
