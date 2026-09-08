@@ -15,4 +15,10 @@ data class TranslationParams(
   val isBatch: Boolean,
   var pluralForms: Map<String, String>? = null,
   val pluralFormExamples: Map<String, String>? = null,
+  /**
+   * True when [text] contains the `<x id="tolgee-number">` tag protecting the ICU `#` plural
+   * placeholder (see [io.tolgee.service.machineTranslation.PluralTranslationUtil]). Providers use this
+   * to switch on their own tag-preserving/HTML mode so the engine doesn't mangle the tag.
+   */
+  val containsNumberTag: Boolean = false,
 )

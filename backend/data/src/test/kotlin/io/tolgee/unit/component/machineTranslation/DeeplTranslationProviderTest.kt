@@ -46,6 +46,7 @@ class DeeplTranslationProviderTest {
       eq("DE"),
       any(),
       eq("Button label on the settings screen"),
+      eq(false),
     )
   }
 

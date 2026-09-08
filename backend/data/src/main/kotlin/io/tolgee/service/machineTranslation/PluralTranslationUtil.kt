@@ -64,9 +64,17 @@ class PluralTranslationUtil(
 
   companion object {
     const val REPLACE_NUMBER_PLACEHOLDER = "{%{REPLACE_NUMBER}%}"
-    private const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
+    const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
     private const val TOLGEE_TAG_CLOSE = "</x>"
     val TOLGEE_TAG_REGEX = "$TOLGEE_TAG_OPEN.*?$TOLGEE_TAG_CLOSE".toRegex()
+
+    /**
+     * Whether the text contains the [TOLGEE_TAG_OPEN] marker used to protect the ICU plural
+     * "replace number" (`#`) placeholder while translating plural forms one by one. Providers must be
+     * told (via their own tag-handling/HTML mode) to leave this tag untouched, otherwise the engine is
+     * free to mangle or drop it, breaking [MtBatchTranslator] restoration of the `#` placeholder.
+     */
+    fun containsNumberTag(text: String): Boolean = text.contains(TOLGEE_TAG_OPEN)
 
     /**
      * Returns all target forms with examples from source
