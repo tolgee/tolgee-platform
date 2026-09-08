@@ -1006,7 +1006,7 @@ export interface paths {
     put: operations["executeComplexTagOperation"];
   };
   "/v2/projects/{projectId}/tags": {
-    get: operations["getAll_16"];
+    get: operations["getAll_17"];
   };
   "/v2/projects/{projectId}/tasks": {
     get: operations["getTasks"];
@@ -1292,6 +1292,12 @@ export interface paths {
   "/v2/user/avatar": {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
+  };
+  "/v2/user/connected-apps": {
+    get: operations["getAll_16"];
+  };
+  "/v2/user/connected-apps/{id}": {
+    delete: operations["revoke_1"];
   };
   "/v2/user/generate-super-token": {
     /** Generates new JWT token permitted to sensitive operations */
@@ -2244,6 +2250,24 @@ export interface components {
     };
     ConnectToSlackUrlModel: {
       url: string;
+    };
+    ConnectedAppModel: {
+      allProjects: boolean;
+      /** Format: int64 */
+      authorizedAt: number;
+      clientId: string;
+      clientName: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastActiveAt?: number;
+      projects: components["schemas"]["ConnectedAppProjectModel"][];
+      scopes: string[];
+    };
+    ConnectedAppProjectModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
     };
     ConsentInfoModel: {
       appName: string;
@@ -4767,6 +4791,12 @@ export interface components {
     PagedModelBranchModel: {
       _embedded?: {
         branches?: components["schemas"]["BranchModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelConnectedAppModel: {
+      _embedded?: {
+        connectedApps?: components["schemas"]["ConnectedAppModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -24884,7 +24914,7 @@ export interface operations {
       };
     };
   };
-  getAll_16: {
+  getAll_17: {
     parameters: {
       query: {
         search?: string;
@@ -30070,6 +30100,101 @@ export interface operations {
       };
     };
   };
+  getAll_16: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelConnectedAppModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  revoke_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   /** Generates new JWT token permitted to sensitive operations */
   getSuperToken: {
     responses: {
@@ -30415,25 +30540,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -30445,25 +30578,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -30475,25 +30616,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
@@ -30510,25 +30659,33 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json": string;
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
