@@ -2068,6 +2068,7 @@
   "plan_limit_dialog_description": "L'opération ne peut pas être effectuée car elle dépasserait la limite de votre plan actuel",
   "plan_limit_dialog_enable_auto_upgrade": "Activer la mise à niveau automatique",
   "plan_limit_dialog_go_to_billing": "Mettre à niveau le plan",
+  "plan_limit_dialog_organization_limit_description": "La limite du forfait de l'organisation a été atteinte. Contactez le propriétaire de l'organisation pour effectuer une mise à niveau du forfait.",
   "plan_limit_dialog_self_hosted_words": "La limite de mots de votre licence est atteinte. Activez la mise à niveau automatique ou passez à un plan supérieur dans Tolgee Cloud, ou contactez-nous.",
   "plan_limit_dialog_title": "Limite dépassée",
   "plan_limit_dialog_words_auto_upgrade_hint": "La limite de mots de votre forfait a été atteinte et la mise à niveau automatique est désactivée, l'ajout de contenu supplémentaire est donc bloqué. Activez la mise à niveau automatique pour passer à un palier de mots supérieur automatiquement, ou mettez à niveau votre forfait manuellement.",

@@ -2069,6 +2069,7 @@
   "plan_limit_dialog_description": "Operațiunea nu poate fi efectuată deoarece ar depăși limita actuală a planului tău",
   "plan_limit_dialog_enable_auto_upgrade": "Activează upgrade-ul automat",
   "plan_limit_dialog_go_to_billing": "Actualizați planul",
+  "plan_limit_dialog_organization_limit_description": "Limita planului organizației a fost atinsă. Contactați proprietarul organizației pentru a actualiza planul.",
   "plan_limit_dialog_self_hosted_words": "Limita de cuvinte a licenței a fost atinsă. Activați upgrade-ul automat sau treceți la un plan superior în Tolgee Cloud, sau contactați-ne.",
   "plan_limit_dialog_title": "Limită depășită",
   "plan_limit_dialog_words_auto_upgrade_hint": "Limita de cuvinte a planului tău a fost atinsă și upgrade-ul automat este dezactivat, astfel încât adăugarea de conținut suplimentar este blocată. Activează upgrade-ul automat pentru a trece automat la un nivel de cuvinte mai mare sau actualizează-ți planul manual.",

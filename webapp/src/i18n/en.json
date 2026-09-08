@@ -2075,6 +2075,7 @@
   "plan_limit_dialog_description": "Operation can't be performed because that would exceed your current plan limit",
   "plan_limit_dialog_enable_auto_upgrade": "Enable auto-upgrade",
   "plan_limit_dialog_go_to_billing": "Upgrade plan",
+  "plan_limit_dialog_organization_limit_description": "The organization's plan limit has been reached. Contact the organization owner to upgrade the plan.",
   "plan_limit_dialog_self_hosted_words": "Your licence's word limit is reached. Enable auto-upgrade or switch to a higher plan in Tolgee Cloud, or contact us.",
   "plan_limit_dialog_title": "Limit exceeded",
   "plan_limit_dialog_words_auto_upgrade_hint": "Your plan's word limit was reached and auto-upgrade is disabled, so adding more content is blocked. Enable auto-upgrade to move to a higher word tier automatically, or upgrade your plan manually.",

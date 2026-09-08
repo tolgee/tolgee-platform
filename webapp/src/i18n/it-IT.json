@@ -2045,6 +2045,7 @@
   "plan_limit_dialog_description": "L'operazione non può essere eseguita perché supererebbe il limite del piano attuale",
   "plan_limit_dialog_enable_auto_upgrade": "Abilita l'aggiornamento automatico",
   "plan_limit_dialog_go_to_billing": "Aggiorna piano",
+  "plan_limit_dialog_organization_limit_description": "Il limite del piano dell'organizzazione è stato raggiunto. Contatta il proprietario dell'organizzazione per eseguire l'upgrade del piano.",
   "plan_limit_dialog_self_hosted_words": "Il limite di parole della tua licenza è stato raggiunto. Attiva l'aggiornamento automatico o passa a un piano più grande in Tolgee Cloud, oppure contattaci.",
   "plan_limit_dialog_title": "Limite superato",
   "plan_limit_dialog_words_auto_upgrade_hint": "Il limite di parole del tuo piano è stato raggiunto e l'aggiornamento automatico è disabilitato, quindi l'aggiunta di ulteriori contenuti è bloccata. Abilita l'aggiornamento automatico per passare automaticamente a un livello di parole superiore, oppure aggiorna il tuo piano manualmente.",

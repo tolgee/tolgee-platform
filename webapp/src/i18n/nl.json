@@ -2073,6 +2073,7 @@
   "plan_limit_dialog_description": "Deze actie kan niet worden uitgevoerd omdat dit uw huidige planlimiet zou overschrijden",
   "plan_limit_dialog_enable_auto_upgrade": "Automatisch upgraden inschakelen",
   "plan_limit_dialog_go_to_billing": "Abonnement upgraden",
+  "plan_limit_dialog_organization_limit_description": "De abonnementslimiet van de organisatie is bereikt. Neem contact op met de organisatie-eigenaar om het abonnement te upgraden.",
   "plan_limit_dialog_self_hosted_words": "De woordlimiet van uw licentie is bereikt. Schakel automatisch upgraden in of stap over naar een hoger plan in Tolgee Cloud, of neem contact met ons op.",
   "plan_limit_dialog_title": "Limiet overschreden",
   "plan_limit_dialog_words_auto_upgrade_hint": "Het woordlimiet van je abonnement is bereikt en automatisch upgraden is uitgeschakeld, waardoor het toevoegen van meer inhoud wordt geblokkeerd. Schakel automatisch upgraden in om automatisch naar een hoger woordniveau te gaan, of upgrade je abonnement handmatig.",

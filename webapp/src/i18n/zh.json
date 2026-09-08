@@ -2070,6 +2070,7 @@
   "plan_limit_dialog_description": "无法执行操作，因为这将超出您当前的计划限制",
   "plan_limit_dialog_enable_auto_upgrade": "启用自动升级",
   "plan_limit_dialog_go_to_billing": "升级计划",
+  "plan_limit_dialog_organization_limit_description": "该组织的方案限制已达到。请联系组织所有者升级方案。",
   "plan_limit_dialog_self_hosted_words": "您的许可证单词数已达上限。请在 Tolgee Cloud 中启用自动升级或切换到更高的方案，或联系我们。",
   "plan_limit_dialog_title": "已超出限额",
   "plan_limit_dialog_words_auto_upgrade_hint": "您的套餐字数限制已达到，且自动升级已禁用，因此无法添加更多内容。启用自动升级以自动升级到更高的字数层级，或手动升级您的套餐。",

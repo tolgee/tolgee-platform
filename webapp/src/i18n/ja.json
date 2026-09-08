@@ -2075,6 +2075,7 @@
   "plan_limit_dialog_description": "現在のプランの制限を超えるため、操作を実行できません",
   "plan_limit_dialog_enable_auto_upgrade": "自動アップグレードを有効にする",
   "plan_limit_dialog_go_to_billing": "プランをアップグレード",
+  "plan_limit_dialog_organization_limit_description": "組織のプランの制限に達しました。組織のオーナーにプランのアップグレードを依頼してください。",
   "plan_limit_dialog_self_hosted_words": "ライセンスの単語数上限に達しました。Tolgee Cloud で自動アップグレードを有効にするか、上位プランに切り替えるか、またはお問い合わせください。",
   "plan_limit_dialog_title": "制限を超過",
   "plan_limit_dialog_words_auto_upgrade_hint": "プランの単語数制限に達し、自動アップグレードが無効になっているため、コンテンツの追加がブロックされています。\n自動アップグレードを有効にするか、プランを手動でアップグレードして、より上位の単語数プランに自動的に移行できます。",

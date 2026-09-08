@@ -1,3 +1,11 @@
+## [3.221.1](https://github.com/tolgee/tolgee-platform/compare/v3.221.0...v3.221.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* stop dropping characters typed into the AI prompt editor ([#3892](https://github.com/tolgee/tolgee-platform/issues/3892)) ([c88fc7f](https://github.com/tolgee/tolgee-platform/commit/c88fc7f107e32c56967b3da05e0c2a0260ae0b70))
+* wrap long unbreakable comment text so the resolve action stays reachable ([#3906](https://github.com/tolgee/tolgee-platform/issues/3906)) ([87e178d](https://github.com/tolgee/tolgee-platform/commit/87e178d243e2afb0cd31c03c307390d801950708)), closes [#3905](https://github.com/tolgee/tolgee-platform/issues/3905)
+
 # [3.221.0](https://github.com/tolgee/tolgee-platform/compare/v3.220.0...v3.221.0) (2026-09-07)
 
 

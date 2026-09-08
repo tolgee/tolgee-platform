@@ -2066,6 +2066,7 @@
   "plan_limit_dialog_description": "Az operáció nem hajtható végre, mert az meghaladná az aktuális tervkorlátot",
   "plan_limit_dialog_enable_auto_upgrade": "Automatikus frissítés bekapcsolása",
   "plan_limit_dialog_go_to_billing": "Terv frissítése",
+  "plan_limit_dialog_organization_limit_description": "A szervezet előfizetése elérte a korlátait. Vegye fel a kapcsolatot a szervezet tulajdonosával az előfizetés frissítése érdekében.",
   "plan_limit_dialog_self_hosted_words": "Elérte a licenc szólimitjét. Kapcsolja be az automatikus frissítést, vagy váltson magasabb csomagra a Tolgee Cloudban, vagy lépjen kapcsolatba velünk.",
   "plan_limit_dialog_title": "A limit túllépve",
   "plan_limit_dialog_words_auto_upgrade_hint": "Elérted a csomagod szólimitjét, és az automatikus frissítés ki van kapcsolva, ezért további tartalom hozzáadása nem lehetséges. Kapcsold be az automatikus frissítést, hogy automatikusan magasabb szókategóriára lépj, vagy frissítsd a csomagod manuálisan.",

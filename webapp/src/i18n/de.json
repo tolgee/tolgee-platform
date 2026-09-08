@@ -2070,6 +2070,7 @@
   "plan_limit_dialog_description": "Der Vorgang kann nicht durchgeführt werden, da dies Ihr aktuelles Planlimit überschreiten würde",
   "plan_limit_dialog_enable_auto_upgrade": "Automatisches Upgrade aktivieren",
   "plan_limit_dialog_go_to_billing": "Plan hochstufen",
+  "plan_limit_dialog_organization_limit_description": "Das Tariflimit der Organisation wurde erreicht. Kontaktieren Sie den Organisationsinhaber, um den Tarif zu upgraden.",
   "plan_limit_dialog_self_hosted_words": "Das Wortlimit Ihrer Lizenz ist erreicht. Aktivieren Sie das automatische Upgrade oder wechseln Sie in Tolgee Cloud zu einem höheren Plan, oder kontaktieren Sie uns.",
   "plan_limit_dialog_title": "Limit überschritten",
   "plan_limit_dialog_words_auto_upgrade_hint": "Das Wortlimit deines Plans wurde erreicht und das automatische Upgrade ist deaktiviert, daher ist das Hinzufügen weiterer Inhalte blockiert. Aktiviere das automatische Upgrade, um automatisch zu einer höheren Wortstufe zu wechseln, oder aktualisiere deinen Plan manuell.",

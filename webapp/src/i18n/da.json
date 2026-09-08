@@ -2072,6 +2072,7 @@
   "plan_limit_dialog_description": "Handlingen kan ikke udføres, da det vil overskride din nuværende plangrænse",
   "plan_limit_dialog_enable_auto_upgrade": "Aktivér automatisk opgradering",
   "plan_limit_dialog_go_to_billing": "Opgradér plan",
+  "plan_limit_dialog_organization_limit_description": "Organisationens planbegrænsning er nået. Kontakt organisationsejeren for at opgradere planen.",
   "plan_limit_dialog_self_hosted_words": "Din licens' ordgrænse er nået. Aktivér automatisk opgradering eller skift til en højere plan i Tolgee Cloud, eller kontakt os.",
   "plan_limit_dialog_title": "Grænse for forbrug overskredet",
   "plan_limit_dialog_words_auto_upgrade_hint": "Din plans ordgrænse er nået, og automatisk opgradering er deaktiveret, så det er blokeret at tilføje mere indhold. Aktivér automatisk opgradering for at gå til et højere ordniveau automatisk, eller opgrader din plan manuelt.",

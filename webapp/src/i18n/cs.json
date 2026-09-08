@@ -2075,6 +2075,7 @@
   "plan_limit_dialog_description": "Operaci nelze provést, protože by byl překročen limit daný vaším současným předplatným",
   "plan_limit_dialog_enable_auto_upgrade": "Povolit automatické navýšení",
   "plan_limit_dialog_go_to_billing": "Navýšit plán",
+  "plan_limit_dialog_organization_limit_description": "Limit plánu organizace byl dosažen. O upgrade plánu požádejte vlastníka organizace.",
   "plan_limit_dialog_self_hosted_words": "Byl dosažen limit slov vaší licence. Povolte automatické navýšení nebo přejděte na vyšší plán v Tolgee Cloud, případně nás kontaktujte.",
   "plan_limit_dialog_title": "Limit překročen",
   "plan_limit_dialog_words_auto_upgrade_hint": "Byl dosažen limit slov vašeho plánu a automatické navýšení je vypnuté, proto je přidávání dalšího obsahu blokováno. Povolte automatické navýšení, chcete-li automaticky přejít na vyšší úroveň slov, nebo upgradujte plán manuálně.",
