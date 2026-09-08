@@ -69,10 +69,9 @@ object WebsocketTestSubscribeSync : Logging {
   ): Long {
     val latch = latches[correlationId]
     if (latch == null) {
-      // Should not normally happen — register() runs synchronously inside
-      // afterConnected, which completes before listen() returns. If we get
-      // here, something race-y happened (e.g. cleanup ran out of order). Log
-      // loudly with the full registry state and fall back to a short blocking
+      // Should not normally happen — register() runs on the test worker right before the
+      // SUBSCRIBE it correlates. If we get here, something race-y happened (e.g. cleanup ran out
+      // of order). Log loudly with the full registry state and fall back to a short blocking
       // sleep so the test still runs.
       logger.error(
         "WS subscribe latch missing on awaitSubscribed (correlationId={}, current latches={}). " +
