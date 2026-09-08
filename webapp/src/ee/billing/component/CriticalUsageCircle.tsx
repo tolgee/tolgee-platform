@@ -101,8 +101,12 @@ export const CriticalUsageCircle: FC<React.PropsWithChildren<unknown>> = () => {
       <>{children}</>
     );
 
-  if (!progressData || !showStats) {
+  if (!showStats) {
     return null;
+  }
+
+  if (!progressData) {
+    return <StyledContainer id={USAGE_ELEMENT_ID} />;
   }
 
   return (
