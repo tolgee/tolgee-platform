@@ -1,9 +1,11 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchRevisionData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.branching.Branch
@@ -25,6 +27,9 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var branchRepository: BranchRepository
 
+  @Autowired
+  private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setup() {
     testData = BranchRevisionData()
@@ -32,6 +37,7 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
     this.projectSupplier = { testData.project }
     currentDateProvider.forcedDate = currentDateProvider.date
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
   }
 
   @Test
