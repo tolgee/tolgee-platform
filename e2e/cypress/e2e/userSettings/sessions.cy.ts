@@ -144,7 +144,9 @@ describe('Active sessions', () => {
       visitSessions();
       gcy('sessions-revoke-all-others-button').click();
       confirmStandard();
-      assertMessage('All other sessions were revoked');
+      assertMessage(
+        'All other sessions were revoked and all apps disconnected'
+      );
 
       gcy('session-list-item').should('have.length', 1);
       gcy('session-list-item-current-badge').should('have.length', 1);

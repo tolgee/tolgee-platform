@@ -14,7 +14,9 @@ import java.util.UUID
  * Also seeds a second user account for foreign-grant / cross-user checks. Each test adds only the
  * grants it asserts on.
  */
-class ConnectedAppsTestData : BaseTestData() {
+class ConnectedAppsTestData(
+  primaryUsername: String = "test_username",
+) : BaseTestData(userName = primaryUsername) {
   val otherUserAccountBuilder: UserAccountBuilder = root.addUserAccount { username = "connected-apps-other" }
   val otherUser: UserAccount get() = otherUserAccountBuilder.self
 

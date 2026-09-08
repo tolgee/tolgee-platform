@@ -77,6 +77,8 @@ export const oauth2ConsentTestData = generateTestDataObject('oauth2-consent');
 
 export const sessionsTestData = generateTestDataObject('sessions');
 
+export const connectedAppsTestData = generateTestDataObject('connected-apps');
+
 export const languagePermissionsData = generateTestDataObject(
   'language-permissions'
 );

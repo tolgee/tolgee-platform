@@ -10,6 +10,7 @@ declare namespace DataCy {
         "accept-invitation-decline": true;
         "accept-invitation-email-mismatch": true;
         "accept-invitation-info-text": true;
+        "account-security-connected-apps": true;
         "account-security-initial-password-set": true;
         "account-security-provider-connect": true;
         "account-security-provider-disconnect": true;
@@ -152,6 +153,10 @@ declare namespace DataCy {
         "community-projects-view": true;
         "community-translation-banner": true;
         "community-translation-item": true;
+        "connected-app-list-item": true;
+        "connected-app-projects": true;
+        "connected-app-revoke-button": true;
+        "connected-apps-list-header": true;
         "content-delivery-add-button": true;
         "content-delivery-auto-publish-checkbox": true;
         "content-delivery-delete-button": true;
