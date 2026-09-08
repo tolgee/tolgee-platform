@@ -1,3 +1,10 @@
+## [3.221.2](https://github.com/tolgee/tolgee-platform/compare/v3.221.1...v3.221.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* show the plan limit popover to members without an organization role ([#3903](https://github.com/tolgee/tolgee-platform/issues/3903)) ([df1fe21](https://github.com/tolgee/tolgee-platform/commit/df1fe21f35e920e0276d8ead33f3291c132bac20))
+
 ## [3.221.1](https://github.com/tolgee/tolgee-platform/compare/v3.221.0...v3.221.1) (2026-09-08)
 
 
