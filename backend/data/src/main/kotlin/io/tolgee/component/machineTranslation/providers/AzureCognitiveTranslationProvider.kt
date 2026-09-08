@@ -21,6 +21,7 @@ class AzureCognitiveTranslationProvider(
         params.text,
         params.sourceLanguageTag.uppercase(),
         params.targetLanguageTag.uppercase(),
+        preserveTags = params.containsNumberTag,
       )
     return MtValueProvider.MtResult(
       result,

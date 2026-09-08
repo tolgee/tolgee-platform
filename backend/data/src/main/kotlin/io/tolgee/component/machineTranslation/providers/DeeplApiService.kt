@@ -26,6 +26,7 @@ class DeeplApiService(
     targetTag: String,
     formality: Formality,
     context: String? = null,
+    preserveTags: Boolean = false,
   ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -41,6 +42,13 @@ class DeeplApiService(
     }
     addFormality(requestBody, formality)
     context?.takeIf { it.isNotBlank() }?.let { requestBody.add("context", it) }
+    if (preserveTags) {
+      // Tells DeepL to parse the text as XML and leave the content of <x> tags completely
+      // untouched, so our <x id="tolgee-number"> placeholder survives translation intact.
+      // https://developers.deepl.com/docs/api-reference/translate
+      requestBody.add("tag_handling", "xml")
+      requestBody.add("ignore_tags", "x")
+    }
 
     val request = HttpEntity(requestBody, headers)
 

@@ -25,6 +25,12 @@ data class ProviderTranslateParams(
    * Only for translators supporting plurals
    */
   val pluralFormExamples: Map<String, String>? = null,
+  /**
+   * True when [text] contains the `<x id="tolgee-number">` tag protecting the ICU `#` plural
+   * placeholder. Providers use this to switch on their own tag-preserving/HTML mode so the engine
+   * doesn't mangle the tag.
+   */
+  val containsNumberTag: Boolean = false,
 ) {
   fun cacheKey(provider: String): String {
     return jacksonObjectMapper()
@@ -40,6 +46,7 @@ data class ProviderTranslateParams(
           formality,
           pluralForms,
           pluralFormExamples,
+          containsNumberTag,
           provider,
         ),
       )
