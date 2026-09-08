@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.ee.api.v2.hateoas.assemblers.UserSessionModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.UserSessionModel
+import io.tolgee.ee.service.accountSecurity.AccountRevocationService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserSession
 import io.tolgee.model.enums.UserSessionType
@@ -34,6 +35,7 @@ class UserSessionsController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<UserSession>,
   private val authenticationFacade: AuthenticationFacade,
+  private val accountRevocationService: AccountRevocationService,
 ) : IController {
   /**
    * Unlike the revoke endpoints, this one is gated: it is the only place in the API that discloses
@@ -70,11 +72,11 @@ class UserSessionsController(
   }
 
   @DeleteMapping(value = ["/other"])
-  @Operation(summary = "Revoke all sessions except the current one")
+  @Operation(summary = "Revoke all sessions except the current one and disconnect all apps")
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   fun revokeAllOthers() {
-    userSessionService.revokeAllOthers(
+    accountRevocationService.revokeAllOthers(
       userAccountId = authenticationFacade.authenticatedUser.id,
       currentDeviceId = authenticationFacade.deviceIdOrNull,
       revokedById = authenticationFacade.authenticatedUser.id,

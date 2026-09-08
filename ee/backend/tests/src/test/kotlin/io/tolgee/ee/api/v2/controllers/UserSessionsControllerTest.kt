@@ -1,6 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
-import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.development.testDataBuilder.data.ConnectedAppsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -10,8 +10,10 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.UserSession
 import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.enums.UserSessionType
+import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.AuthAuditEventRepository
 import io.tolgee.repository.UserSessionRepository
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -33,11 +35,18 @@ class UserSessionsControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var authAuditEventRepository: AuthAuditEventRepository
 
-  lateinit var testData: BaseTestData
+  @Autowired
+  lateinit var grantRepository: OAuth2GrantRepository
+
+  lateinit var testData: ConnectedAppsTestData
+  lateinit var grant: OAuth2Grant
+  lateinit var foreignGrant: OAuth2Grant
 
   @BeforeEach
   fun setup() {
-    testData = BaseTestData()
+    testData = ConnectedAppsTestData()
+    grant = testData.addConnectedGrant()
+    foreignGrant = testData.addConnectedGrant(testData.otherUserAccountBuilder)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     setForcedDate(Date())
@@ -46,6 +55,7 @@ class UserSessionsControllerTest : AuthorizedControllerTest() {
   @AfterEach
   fun cleanup() {
     clearForcedDate()
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -137,6 +147,19 @@ class UserSessionsControllerTest : AuthorizedControllerTest() {
     revokedEventsFor(foreign.deviceId).assert.isEmpty()
     // the caller can still use its own token
     performAuthGet("/v2/user/sessions").andIsOk
+  }
+
+  @Test
+  fun `revoking other sessions also disconnects the callers apps`() {
+    performAuthDelete("/v2/user/sessions/other").andIsOk
+
+    grantRepository.existsById(grant.id).assert.isFalse()
+    grantRepository.existsById(foreignGrant.id).assert.isTrue()
+    authAuditEventRepository
+      .findAll()
+      .filter { it.type == AuthAuditEventType.OAUTH_GRANT_REVOKED && it.targetId == grant.id }
+      .assert
+      .hasSize(1)
   }
 
   @Test
