@@ -3,6 +3,8 @@ package io.tolgee.repository.oauth2
 import io.tolgee.model.oauth2.OAuth2Grant
 import jakarta.persistence.LockModeType
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
@@ -79,4 +81,39 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     """,
   )
   fun deleteExpiredPendingConsents(now: Date): Int
+
+  @Query(
+    """
+    select g from OAuth2Grant g
+    where g.userAccount.id = :userAccountId
+      and g.clientId in :clientIds
+      and g.projectSelection is not null
+      and g.refreshTokenHash is not null
+      and g.refreshTokenExpiresAt > :now
+    order by g.createdAt desc
+    """,
+  )
+  fun findConnected(
+    @Param("userAccountId") userAccountId: Long,
+    @Param("clientIds") clientIds: Collection<String>,
+    @Param("now") now: Date,
+    pageable: Pageable,
+  ): Page<OAuth2Grant>
+
+  @Query(
+    """
+    select g from OAuth2Grant g
+    where g.userAccount.id = :userAccountId
+      and g.clientId in :clientIds
+      and g.projectSelection is not null
+      and g.refreshTokenHash is not null
+      and g.refreshTokenExpiresAt > :now
+    order by g.createdAt desc
+    """,
+  )
+  fun findConnected(
+    @Param("userAccountId") userAccountId: Long,
+    @Param("clientIds") clientIds: Collection<String>,
+    @Param("now") now: Date,
+  ): List<OAuth2Grant>
 }
