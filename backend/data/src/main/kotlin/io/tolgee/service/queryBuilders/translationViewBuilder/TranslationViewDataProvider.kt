@@ -49,15 +49,36 @@ class TranslationViewDataProvider(
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
+    val tasksEnabled =
+      projectFeatureGuard.isFeatureEnabled(Feature.TASKS, project) ||
+        projectFeatureGuard.isFeatureEnabled(Feature.ORDER_TRANSLATION, project)
 
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
 
     val countBuilder =
-      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
+      getTranslationsViewQueryBuilder(
+        projectId,
+        languages,
+        params,
+        pageable,
+        cursor,
+        qaEnabled,
+        qaDisabledLanguageIds,
+        tasksEnabled,
+      )
     val count = em.createQuery(countBuilder.countQuery).singleResult
 
     val translationsViewQueryBuilder =
-      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
+      getTranslationsViewQueryBuilder(
+        projectId,
+        languages,
+        params,
+        pageable,
+        cursor,
+        qaEnabled,
+        qaDisabledLanguageIds,
+        tasksEnabled,
+      )
     val query = em.createQuery(translationsViewQueryBuilder.dataQuery).setMaxResults(pageable.pageSize)
     if (cursor == null) {
       query.firstResult = pageable.offset.toInt()
@@ -300,6 +321,9 @@ class TranslationViewDataProvider(
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
+    val tasksEnabled =
+      projectFeatureGuard.isFeatureEnabled(Feature.TASKS, project) ||
+        projectFeatureGuard.isFeatureEnabled(Feature.ORDER_TRANSLATION, project)
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
@@ -311,6 +335,7 @@ class TranslationViewDataProvider(
         entityManager = em,
         qaEnabled = qaEnabled,
         qaDisabledLanguageIds = qaDisabledLanguageIds,
+        tasksEnabled = tasksEnabled,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -325,6 +350,7 @@ class TranslationViewDataProvider(
     cursor: String?,
     qaEnabled: Boolean,
     qaDisabledLanguageIds: Set<Long>,
+    tasksEnabled: Boolean,
   ) = TranslationsViewQueryBuilder(
     cb = em.criteriaBuilder,
     projectId = projectId,
@@ -335,5 +361,6 @@ class TranslationViewDataProvider(
     entityManager = em,
     qaEnabled = qaEnabled,
     qaDisabledLanguageIds = qaDisabledLanguageIds,
+    tasksEnabled = tasksEnabled,
   )
 }

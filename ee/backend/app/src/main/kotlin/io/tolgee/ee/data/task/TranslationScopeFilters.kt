@@ -12,6 +12,19 @@ data class TranslationScopeFilters(
     description = "Include keys where translation is outdated",
   )
   var filterOutdated: Boolean? = false,
+  @Schema(
+    description =
+      "Include only keys whose translation into the task language was never part of any task. " +
+        "Evaluated per task language, so a key already tasked for one language is still included " +
+        "for the others.",
+  )
+  var filterNeverInTask: Boolean? = false,
+  @Schema(
+    description =
+      "Include only keys whose translation into the task language is or was part of some task. " +
+        "Evaluated per task language.",
+  )
+  var filterHasBeenInTask: Boolean? = false,
 ) {
   val filterStateOrdinal: List<Int>? get() {
     return filterState?.map { it.ordinal }

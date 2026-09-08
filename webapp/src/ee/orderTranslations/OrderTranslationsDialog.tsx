@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 
@@ -131,12 +131,26 @@ export const OrderTranslationsDialog: React.FC<
   });
 
   const [filters, setFilters] = useState<FiltersInternal>({});
+  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
+  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
+  const selectedLanguageTags = useMemo(
+    () =>
+      languages
+        .map((id) => allLanguages.find((l) => l.id === id)?.tag)
+        .filter((tag): tag is string => Boolean(tag)),
+    [languages, allLanguages]
+  );
   const { filtersQuery, ...actions } = useTranslationFilters({
     filters,
     setFilters,
+    selectedLanguages: selectedLanguageTags,
   });
-  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
-  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
+
+  const { updateSelectedLanguages } = actions;
+  useEffect(() => {
+    updateSelectedLanguages(selectedLanguageTags);
+  }, [selectedLanguageTags]);
+
   const [successMessage, setSuccessMessage] = useState(false);
 
   const [_step, setStep] = useState<number | undefined>(undefined);
@@ -301,6 +315,8 @@ export const OrderTranslationsDialog: React.FC<
                     (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
                   ),
                   filterOutdated: stateFilters.includes('OUTDATED'),
+                  filterNeverInTask: Boolean(filters.filterHasNoTask),
+                  filterHasBeenInTask: Boolean(filters.filterHasTask),
                 },
                 content: {
                   'application/json': {
