@@ -35,12 +35,13 @@ export const PlanLimitPopoverCloud: React.FC<
 
   const progressData = usage && getProgressData({ usage });
 
-  return progressData ? (
+  return (
     <GenericPlanLimitPopover
       onClose={onClose}
       open={open}
       isPayAsYouGo={usage?.isPayAsYouGo}
       progressData={progressData}
+      usageUnavailable={!usage}
       actionButton={
         isOwner && (
           <Button
@@ -53,5 +54,5 @@ export const PlanLimitPopoverCloud: React.FC<
         )
       }
     />
-  ) : null;
+  );
 };

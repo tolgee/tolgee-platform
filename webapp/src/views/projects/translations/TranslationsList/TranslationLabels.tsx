@@ -83,9 +83,6 @@ export const TranslationLabels = ({
   );
   const { isEnabled } = useEnabledFeatures();
   const labelsEnabled = isEnabled('TRANSLATION_LABELS');
-  if (!labelsEnabled) {
-    return null;
-  }
   const { t } = useTranslate();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -136,7 +133,7 @@ export const TranslationLabels = ({
 
   useLayoutEffect(() => {
     recalculate();
-  }, [labels, recalculate]);
+  }, [labels, recalculate, labelsEnabled]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -146,9 +143,13 @@ export const TranslationLabels = ({
       ro.disconnect();
       debouncedRecalculate.clear();
     };
-  }, [debouncedRecalculate]);
+  }, [debouncedRecalculate, labelsEnabled]);
 
   const overflowCount = labels?.length - visibleCount;
+
+  if (!labelsEnabled) {
+    return null;
+  }
 
   return (
     <StyledLabels className={className}>

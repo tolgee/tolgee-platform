@@ -551,6 +551,7 @@ declare namespace DataCy {
         "permissions-menu-reset-to-organization": true;
         "permissions-menu-save": true;
         "plan-limit-dialog-close": true;
+        "plan-limit-dialog-organization-limit-message": true;
         "plan-limit-exceeded-popover": true;
         "plan_seat_limit_exceeded_while_accepting_invitation_message": true;
         "profile": true;

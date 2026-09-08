@@ -21,6 +21,7 @@ type PlanLimitPopoverProps = PlanLimitPopoverWrapperProps & {
   progressData?: Partial<ProgressData>;
   actionButton?: React.ReactNode;
   loading?: boolean;
+  usageUnavailable?: boolean;
 };
 
 const StyledDialogContent = styled(DialogContent)`
@@ -31,7 +32,15 @@ const StyledDialogContent = styled(DialogContent)`
 
 export const GenericPlanLimitPopover: FC<
   React.PropsWithChildren<PlanLimitPopoverProps>
-> = ({ open, onClose, isPayAsYouGo, progressData, actionButton, loading }) => {
+> = ({
+  open,
+  onClose,
+  isPayAsYouGo,
+  progressData,
+  actionButton,
+  loading,
+  usageUnavailable,
+}) => {
   return (
     <PlanLimitPopoverWrapper
       open={open}
@@ -43,7 +52,16 @@ export const GenericPlanLimitPopover: FC<
       </DialogTitle>
       <StyledDialogContent>
         <DialogContentText id="alert-dialog-description">
-          <T keyName="plan_limit_dialog_description" />
+          {usageUnavailable ? (
+            <span data-cy="plan-limit-dialog-organization-limit-message">
+              <T
+                keyName="plan_limit_dialog_organization_limit_description"
+                defaultValue="The organization's plan limit has been reached. Contact the organization owner to upgrade the plan."
+              />
+            </span>
+          ) : (
+            <T keyName="plan_limit_dialog_description" />
+          )}
         </DialogContentText>
         {progressData && isPayAsYouGo !== undefined ? (
           <UsageDetailed {...progressData} isPayAsYouGo={isPayAsYouGo} />
