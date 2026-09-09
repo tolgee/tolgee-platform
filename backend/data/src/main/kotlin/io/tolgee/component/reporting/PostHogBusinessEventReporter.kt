@@ -79,22 +79,21 @@ class PostHogBusinessEventReporter(
   /**
    * PostHog accepts user information in $set property.
    *
-   * This method returns map with $set property if user information is present
-   * or if instanceId is sent by self-hosted instance.
+   * This method returns map with $set property if user information is present,
+   * if instanceId is sent by self-hosted instance, or if the event carries
+   * person properties of its own.
    */
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
-    val setEntry =
-      data.userAccountDto?.let { userAccountDto ->
-        getSetMapOfUserData(userAccountDto)
-      } ?: data.instanceId?.let {
-        mapOf(
-          "${'$'}set" to
-            mapOf(
-              "instanceId" to it,
-            ),
-        )
-      } ?: emptyMap()
-    return setEntry + getAnonIdMap(data)
+    val userSet = data.userAccountDto?.let { getSetMapOfUserData(it) }
+    val instanceSet = data.instanceId?.let { mapOf("${'$'}set" to mapOf("instanceId" to it)) }
+
+    @Suppress("UNCHECKED_CAST")
+    val baseSet = ((userSet ?: instanceSet)?.get("${'$'}set") as? Map<String, Any?>) ?: emptyMap()
+
+    val merged = baseSet + (data.personProperties ?: emptyMap())
+    if (merged.isEmpty()) return getAnonIdMap(data)
+
+    return mapOf("${'$'}set" to merged) + getAnonIdMap(data)
   }
 
   private fun getSetMapOfUserData(userAccountDto: UserAccountDto) =
