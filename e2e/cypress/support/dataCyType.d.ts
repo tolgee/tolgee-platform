@@ -245,6 +245,7 @@ declare namespace DataCy {
         "global-form-cancel-button": true;
         "global-form-save-button": true;
         "global-form-select": true;
+        "global-help-menu-button": true;
         "global-language-menu": true;
         "global-list-items": true;
         "global-list-pagination": true;

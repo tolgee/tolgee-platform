@@ -189,6 +189,14 @@ export const assertSwitchedToOrganization = (name: string) => {
   return cy.gcy('organization-switch').contains(name).should('be.visible');
 };
 
+export const openPublicProject = (name: string) => {
+  cy.visit(`${HOST}/public-projects`);
+  waitForGlobalLoading();
+  gcyAdvanced({ value: 'dashboard-projects-list-item', name }).click();
+  cy.url().should('match', /\/projects\/[0-9]+/);
+  waitForGlobalLoading();
+};
+
 export const visitProjectSettings = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
 };

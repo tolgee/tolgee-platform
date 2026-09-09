@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@mui/material';
 import {
   useConfig,
+  useHasSupportChat,
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
@@ -80,16 +81,11 @@ function toggleChatwoot() {
 export function useChatwoot() {
   const user = useUser();
   const { preferredOrganization } = usePreferredOrganization();
+  const hasSupportChat = useHasSupportChat();
   const config = useConfig();
   const token = config?.chatwootToken;
 
-  const enabledFeatures = preferredOrganization?.enabledFeatures;
-
-  const hasStandardSupport =
-    enabledFeatures?.includes('STANDARD_SUPPORT') ||
-    enabledFeatures?.includes('PREMIUM_SUPPORT');
-
-  const available = !!(token && user && hasStandardSupport);
+  const available = !!(token && user && hasSupportChat);
 
   const {
     palette: { mode },
@@ -98,10 +94,10 @@ export function useChatwoot() {
   const darkMode = mode === 'dark';
 
   useEffect(() => {
-    if (token) {
+    if (available) {
       loadChatwootOnce(token, darkMode);
     }
-  }, [token]);
+  }, [available, token]);
 
   const openChatwoot = async () => {
     if (!available) {

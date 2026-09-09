@@ -97,8 +97,7 @@ class ProjectsController(
   ): ProjectModel {
     organizationRoleService.checkUserCanCreateProject(dto.organizationId)
     val project = projectCreationService.createProject(dto)
-    if (organizationRoleService.getType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
-      // Maintainers get full access to projects they create
+    if (organizationRoleService.findType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
       permissionService.grantFullAccessToProject(authenticationFacade.authenticatedUserEntity, project)
     }
     return projectModelAssembler.toModel(projectService.getView(project.id))

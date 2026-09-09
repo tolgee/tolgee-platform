@@ -153,7 +153,7 @@ describe('Community projects navigation', () => {
     }).should('not.exist');
   });
 
-  it('shows the empty state and hides search when there are no contributions', () => {
+  it('shows the empty state and hides search when there are no public projects', () => {
     publicProjectsData.clean();
     communityContributionData.clean();
     visitCommunity();
@@ -279,7 +279,6 @@ describe('Community projects search threshold', () => {
     login('publicProjectsUser');
     cy.visit(`${HOST}/community-projects`);
     waitForGlobalLoading();
-    disableMyContributions();
   });
 
   afterEach(() => {
