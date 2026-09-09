@@ -40,10 +40,7 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import {
-  BillingMenuItemsProps,
-  OnboardingSurveyGateProps,
-} from './EeModuleType';
+import { BillingMenuItemsProps } from './EeModuleType';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { TranslationMemoriesListView } from '../ee/translationMemory/views/TranslationMemoriesListView';
@@ -502,6 +499,4 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
   };
 };
 
-export const OnboardingSurveyGate = ({
-  children,
-}: OnboardingSurveyGateProps) => <>{children}</>;
+export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';
