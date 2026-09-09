@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.UserSessionType
 import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -46,6 +48,7 @@ class ConnectedAppsControllerTest : AuthorizedControllerTest() {
         node("[0].id").isEqualTo(connected.id)
         node("[0].clientName").isEqualTo("Tolgee Browser Extension")
         node("[0].allProjects").isEqualTo(true)
+        node("[0].scopes").isArray.containsExactly("translations.view")
       }
     }
   }
@@ -68,6 +71,15 @@ class ConnectedAppsControllerTest : AuthorizedControllerTest() {
     val token = jwtService.emitToken(testData.user.id, type = UserSessionType.LOGIN_NATIVE, isSuper = false)
 
     performWithToken(HttpMethod.GET, "/v2/user/connected-apps", token).andIsOk
+  }
+
+  @Test
+  fun `carries no @AllowApiAccess, so an OAuth access token stays refused by the interceptor`() {
+    val getAllMethod = ConnectedAppsController::class.java.getDeclaredMethod("getAll", Pageable::class.java)
+    val revokeMethod = ConnectedAppsController::class.java.getDeclaredMethod("revoke", Long::class.javaPrimitiveType)
+
+    getAllMethod.getAnnotation(AllowApiAccess::class.java).assert.isNull()
+    revokeMethod.getAnnotation(AllowApiAccess::class.java).assert.isNull()
   }
 
   private fun listedIds(): List<Long> {

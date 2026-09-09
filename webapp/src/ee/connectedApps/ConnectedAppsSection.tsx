@@ -29,6 +29,9 @@ export const ConnectedAppsSection = () => {
   });
 
   const total = list.data?.page?.totalElements ?? 0;
+  if (list.isLoading) {
+    return null;
+  }
   if (list.isSuccess && total === 0) {
     return null;
   }

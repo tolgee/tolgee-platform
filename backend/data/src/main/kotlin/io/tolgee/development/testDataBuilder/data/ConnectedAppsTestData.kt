@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.security.oauth2.OAuth2Constants
 import java.util.Date
@@ -24,9 +25,11 @@ class ConnectedAppsTestData(
     accountBuilder: UserAccountBuilder = userAccountBuilder,
     clientId: String = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
     projectIds: List<Long>? = null,
+    scopeValues: List<String> = listOf(Scope.TRANSLATIONS_VIEW.value),
   ): OAuth2Grant =
     addGrant(accountBuilder, clientId, refreshTokenExpired = false) {
       projectSelection = projectIds?.joinToString(",") ?: OAuth2Constants.ALL_PROJECTS
+      requestedScopeValues = scopeValues
       issuedTokenScopeValues = requestedScopeValues
     }
 
@@ -38,9 +41,11 @@ class ConnectedAppsTestData(
   fun addLapsedGrant(
     accountBuilder: UserAccountBuilder = userAccountBuilder,
     clientId: String = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
+    scopeValues: List<String> = listOf(Scope.TRANSLATIONS_VIEW.value),
   ): OAuth2Grant =
     addGrant(accountBuilder, clientId, refreshTokenExpired = true) {
       projectSelection = OAuth2Constants.ALL_PROJECTS
+      requestedScopeValues = scopeValues
       issuedTokenScopeValues = requestedScopeValues
     }
 

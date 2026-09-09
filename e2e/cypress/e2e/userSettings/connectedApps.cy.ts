@@ -15,29 +15,26 @@ describe('Connected apps', () => {
     connectedAppsTestData.clean();
   });
 
+  const cliRow = () =>
+    gcyAdvanced({
+      value: 'connected-app-list-item',
+      'client-id': 'tolgee-cli',
+    });
+
   it('lists the authorized apps', () => {
     gcy('account-security-connected-apps').should('be.visible');
     gcy('connected-app-list-item').should('have.length', 2);
-    gcyAdvanced({
-      value: 'connected-app-list-item',
-      'client-id': 'tolgee-cli',
-    }).should('exist');
+    cliRow().should('exist');
+    // the CLI grant is bound to the fixture's own project, not left resolving to a literal "0"
+    cliRow().findDcy('connected-app-projects').should('contain', 'test_project');
   });
 
   it('disconnects an app', () => {
-    gcyAdvanced({
-      value: 'connected-app-list-item',
-      'client-id': 'tolgee-cli',
-    })
-      .findDcy('connected-app-revoke-button')
-      .click();
+    cliRow().findDcy('connected-app-revoke-button').click();
     confirmStandard();
 
     gcy('connected-app-list-item').should('have.length', 1);
-    gcyAdvanced({
-      value: 'connected-app-list-item',
-      'client-id': 'tolgee-cli',
-    }).should('not.exist');
+    cliRow().should('not.exist');
   });
 
   it('hides the section once nothing is connected', () => {

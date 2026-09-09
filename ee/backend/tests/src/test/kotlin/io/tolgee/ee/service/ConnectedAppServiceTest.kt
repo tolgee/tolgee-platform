@@ -2,6 +2,7 @@ package io.tolgee.ee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.ConnectedAppsTestData
+import io.tolgee.ee.service.connectedApps.ConnectedAppProject
 import io.tolgee.ee.service.connectedApps.ConnectedAppService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.AuthAuditEventType
@@ -50,6 +51,25 @@ class ConnectedAppServiceTest : AbstractSpringTest() {
 
     ids.assert.contains(connected.id)
     ids.assert.doesNotContain(pending.id, lapsed.id)
+  }
+
+  @Test
+  fun `degrades to the id string for a project the grant is bound to but that no longer exists`() {
+    val nonExistentProjectId = testData.project.id + 999999
+    val grant = testData.addConnectedGrant(projectIds = listOf(nonExistentProjectId))
+    testDataService.saveTestData(testData.root)
+
+    val view =
+      connectedAppService
+        .find(testData.user.id, Pageable.ofSize(20))
+        .content
+        .first { it.grant.id == grant.id }
+
+    view.projects.assert.hasSize(1)
+    view.projects
+      .first()
+      .assert
+      .isEqualTo(ConnectedAppProject(nonExistentProjectId, nonExistentProjectId.toString()))
   }
 
   @Test

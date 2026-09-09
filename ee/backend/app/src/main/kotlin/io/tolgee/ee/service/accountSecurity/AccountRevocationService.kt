@@ -8,8 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * The one place that knows a sweep was a person pressing "revoke all other sessions" rather than a
  * password changing - which is what decides that it should produce a revocation event per grant.
- * `OAuth2AuthorizationService.revokeAllForUser` stays free of that policy because it is also the
- * password-change and account-deletion path, where `ALL_TOKENS_INVALIDATED` already records the sweep.
  */
 @Service
 class AccountRevocationService(
