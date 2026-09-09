@@ -16,6 +16,8 @@
 
 package io.tolgee.security.ratelimit
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
@@ -61,6 +63,7 @@ class RateLimitInterceptorTest {
         rateLimitProperties,
         authenticationFacade,
         ResilientCacheAccessor(),
+        Metrics(SimpleMeterRegistry()),
       ),
     )
 
