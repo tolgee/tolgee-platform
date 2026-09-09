@@ -40,7 +40,10 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import { BillingMenuItemsProps } from './EeModuleType';
+import {
+  BillingMenuItemsProps,
+  OnboardingSurveyGateProps,
+} from './EeModuleType';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { TranslationMemoriesListView } from '../ee/translationMemory/views/TranslationMemoriesListView';
@@ -498,3 +501,7 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
     return tabs;
   };
 };
+
+export const OnboardingSurveyGate = ({
+  children,
+}: OnboardingSurveyGateProps) => <>{children}</>;
