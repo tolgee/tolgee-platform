@@ -276,7 +276,7 @@ class DbPopulatorReal(
           project = project,
           key = API_KEY,
           userAccount = user!!,
-          scopesEnum = Scope.values().toSet(),
+          scopesEnum = Scope.projectAssignable,
         )
       project.apiKeys.add(apiKey)
       apiKeyService.save(apiKey)

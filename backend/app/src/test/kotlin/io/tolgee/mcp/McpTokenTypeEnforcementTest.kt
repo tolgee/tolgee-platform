@@ -1,12 +1,30 @@
 package io.tolgee.mcp
 
 import io.tolgee.AbstractMcpTest
+import io.tolgee.development.testDataBuilder.data.AppsWithInstallsTestData
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.authentication.AppTokenService
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 class McpTokenTypeEnforcementTest : AbstractMcpTest() {
+  @Autowired
+  lateinit var appTokenService: AppTokenService
+
+  /** MCP is dispatched off the MVC chain, so it must mirror AppAccessInterceptor and deny app tokens. */
+  @Test
+  fun `an app token cannot call MCP tools`() {
+    val data = AppsWithInstallsTestData()
+    testDataService.saveTestData(data.root)
+    val token = appTokenService.mintInstallContextToken(data.enabledInstall.id)
+
+    val client = createMcpClientWithBearer(token)
+
+    assertToolFails(client, "list_projects", expectedError = "app_access_forbidden")
+  }
+
   @Test
   fun `PAK cannot call list_projects`() {
     val pakData = createTestDataWithPak()

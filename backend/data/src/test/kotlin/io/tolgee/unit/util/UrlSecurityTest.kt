@@ -63,6 +63,28 @@ class UrlSecurityTest {
   }
 
   @Test
+  fun `blocks reserved IPv4 ranges`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://0.1.2.3/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.100.100.200/latest/meta-data/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.64.0.1/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.0.0.170/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://198.18.0.1/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://240.0.0.1/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://255.255.255.255/") }
+  }
+
+  @Test
+  fun `allows public addresses adjacent to reserved IPv4 ranges`() {
+    assertDoesNotThrow { urlSecurity.validateUrl("http://100.63.255.255/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://100.128.0.1/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://198.17.255.255/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://198.20.0.1/") }
+    // The documentation ranges stay usable as public stand-ins.
+    assertDoesNotThrow { urlSecurity.validateUrl("http://203.0.113.10/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://198.51.100.5/") }
+  }
+
+  @Test
   fun `blocks IPv6 unique-local addresses`() {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[fd00::1]/") }
   }

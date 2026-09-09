@@ -3,11 +3,13 @@ package io.tolgee.mcp.tools
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -105,7 +107,11 @@ class ProjectMcpTools(
           )
 
         executeInNewTransaction(transactionManager) {
-          organizationRoleService.checkUserCanCreateProject(dto.organizationId)
+          organizationRoleService.checkOrganizationScope(
+            dto.organizationId,
+            Scope.ORGANIZATION_PROJECTS_CREATE,
+            Message.USER_IS_NOT_OWNER_OR_MAINTAINER_OF_ORGANIZATION,
+          )
           val project = projectCreationService.createProject(dto)
           val result =
             mapOf(

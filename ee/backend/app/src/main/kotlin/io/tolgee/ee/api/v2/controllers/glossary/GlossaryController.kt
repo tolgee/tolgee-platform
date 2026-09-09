@@ -19,14 +19,14 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.service.glossary.GlossaryService
 import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -67,7 +67,7 @@ class GlossaryController(
   @PostMapping("/glossaries")
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARIES_MANAGE])
   @RequestActivity(ActivityType.GLOSSARY_CREATE)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
@@ -84,7 +84,7 @@ class GlossaryController(
   @PutMapping("/glossaries/{glossaryId:[0-9]+}")
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARIES_MANAGE])
   @RequestActivity(ActivityType.GLOSSARY_UPDATE)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
@@ -104,7 +104,7 @@ class GlossaryController(
   @DeleteMapping("/glossaries/{glossaryId:[0-9]+}")
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARIES_MANAGE])
   @RequestActivity(ActivityType.GLOSSARY_DELETE)
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional

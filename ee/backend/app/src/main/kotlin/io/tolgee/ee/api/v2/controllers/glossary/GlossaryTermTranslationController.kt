@@ -10,11 +10,11 @@ import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermTranslationModel
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.ee.service.glossary.GlossaryTermTranslationService
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import io.tolgee.security.authorization.UseDefaultPermissions
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,7 +37,7 @@ class GlossaryTermTranslationController(
   @PostMapping()
   @Operation(summary = "Set a new glossary term translation for language")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
-  @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_GLOSSARY_TERMS_MANAGE])
   @RequiresFeatures(Feature.GLOSSARY)
   @Transactional
   @RequestActivity(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)

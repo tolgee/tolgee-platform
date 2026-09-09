@@ -1,0 +1,419 @@
+package io.tolgee.api.v2.controllers.apps
+
+import io.tolgee.constants.Message
+import io.tolgee.development.testDataBuilder.data.AppsTestData
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.security.authentication.AppTokenService
+import io.tolgee.service.apps.AppManifestHttpClient
+import io.tolgee.service.apps.AppsTestFixtures
+import io.tolgee.service.apps.lifecycle.AppLifecycleHttpClient
+import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import tools.jackson.databind.JsonNode
+import java.time.Duration
+import java.util.Date
+
+class AppTokenAuthorizationTest : AuthorizedControllerTest() {
+  @Autowired
+  lateinit var appTokenService: AppTokenService
+
+  @MockitoBean
+  @Autowired
+  lateinit var appManifestHttpClient: AppManifestHttpClient
+
+  @MockitoBean
+  @Autowired
+  lateinit var appLifecycleHttpClient: AppLifecycleHttpClient
+
+  lateinit var testData: AppsTestData
+  var installId: Long = 0
+  lateinit var installToken: String
+
+  @BeforeEach
+  fun setup() {
+    testData = AppsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    AppsTestFixtures.mockManifest(appManifestHttpClient, MANIFEST)
+
+    val registration =
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/owned-apps",
+        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
+      ).andIsOk.andReturn().response.contentAsString
+    val json = objectMapper.readTree(registration)
+    installId = json.get("installId").asLong()
+
+    performAuthPut("/v2/projects/${testData.project.id}/apps/$installId", null).andIsOk
+    installToken = requestInstallToken(json)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    currentDateProvider.forcedDate = null
+    testDataService.cleanTestData(testData.root)
+  }
+
+  @Test
+  fun `reaches a project endpoint within the install's granted scopes`() {
+    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
+  }
+
+  @Test
+  fun `is rejected on the current-user endpoint`() {
+    asApp(get("/v2/user")).andIsForbidden.andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `is rejected when minting a token for an install`() {
+    asApp(post("/v2/organizations/${testData.organization.id}/apps/$installId/token"))
+      .andIsNotFound
+  }
+
+  @Test
+  fun `cannot manage apps even when its grant covers apps manage`() {
+    AppsTestFixtures.mockManifest(appManifestHttpClient, APPS_MANAGE_MANIFEST)
+    val registration =
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/owned-apps",
+        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
+      ).andIsOk.andReturn().response.contentAsString
+    val json = objectMapper.readTree(registration)
+    val privilegedInstallId = json.get("installId").asLong()
+    performAuthPut("/v2/projects/${testData.project.id}/apps/$privilegedInstallId", null).andIsOk
+    val privilegedToken = requestInstallToken(json)
+
+    asToken(privilegedToken, get("/v2/projects/${testData.project.id}/apps"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+
+    asToken(privilegedToken, put("/v2/projects/${testData.project.id}/apps/$installId"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+
+    asToken(privilegedToken, delete("/v2/projects/${testData.project.id}/apps/$installId"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `cannot reach a super-authentication endpoint even when its grant covers the scope`() {
+    AppsTestFixtures.mockManifest(appManifestHttpClient, PROJECT_EDIT_MANIFEST)
+    val registration =
+      performAuthPost(
+        "/v2/organizations/${testData.organization.id}/owned-apps",
+        mapOf("manifestUrl" to AppsTestFixtures.MANIFEST_URL),
+      ).andIsOk.andReturn().response.contentAsString
+    val json = objectMapper.readTree(registration)
+    val editInstallId = json.get("installId").asLong()
+    performAuthPut("/v2/projects/${testData.project.id}/apps/$editInstallId", null).andIsOk
+    val editToken = requestInstallToken(json)
+
+    asToken(editToken, delete("/v2/projects/${testData.project.id}"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `is rejected on a legacy api project route for a project it is not enabled for`() {
+    asApp(get("/api/project/${testData.siblingProject.id}/export/jsonZip"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `is rejected on a v2 project route for a project it is not enabled for`() {
+    asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `denies a scope outside the grant that is only checked in the handler body`() {
+    asApp(
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"brand-new-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+  }
+
+  @Test
+  fun `keeps working once its author has been disabled`() {
+    userAccountService.disable(testData.user.id)
+    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
+  }
+
+  @Test
+  fun `keeps working once its author has been deleted`() {
+    // Somebody else has to own the organization first, or deleting its only owner takes it with them.
+    organizationRoleService.setMemberRole(
+      testData.organization.id,
+      testData.member.id,
+      SetOrganizationRoleDto(OrganizationRoleType.OWNER),
+    )
+    userAccountService.delete(testData.user.id)
+
+    asApp(get("/v2/projects/${testData.project.id}/translations")).andIsOk
+  }
+
+  @Test
+  fun `does not gain the author's server-admin privileges`() {
+    val author = userAccountService.get(testData.user.id)
+    author.role = UserAccount.Role.ADMIN
+    userAccountService.save(author)
+
+    asApp(get("/v2/projects/${testData.siblingProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+
+    asApp(
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"brand-new-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+  }
+
+  @Test
+  fun `reports an expired token as expired rather than invalid`() {
+    currentDateProvider.forcedDate =
+      Date(currentDateProvider.date.time + tolgeeProperties.apps.tokenExpiration + 10_000)
+
+    asApp(get("/v2/projects/${testData.project.id}/translations"))
+      .andIsUnauthorized
+      .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
+  }
+
+  @Test
+  fun `a user-context token works on every enabled project of the organization`() {
+    userAccount = testData.user
+    performAuthPut("/v2/projects/${testData.siblingProject.id}/apps/$installId", null).andIsOk
+
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+    asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations")).andIsOk
+  }
+
+  @Test
+  fun `reports the specific not-enabled error for a project the iframe user is a member of`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.siblingProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+  }
+
+  @Test
+  fun `stays opaque on a foreign organization's project`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = false,
+      )
+
+    asToken(token, get("/v2/projects/${testData.otherProject.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+    asToken(token, get("/v2/projects/999999999/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_ACCESS_FORBIDDEN)
+  }
+
+  @Test
+  fun `reports the specific not-enabled error once the project's enablement is revoked`() {
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = false,
+      )
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    userAccount = testData.user
+    performAuthDelete("/v2/projects/${testData.project.id}/apps/$installId").andIsOk
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations"))
+      .andIsForbidden
+      .andHasErrorMessage(Message.APP_NOT_ENABLED_FOR_PROJECT)
+  }
+
+  @Test
+  fun `narrows a user-context token to the iframe user's own project scopes`() {
+    val memberToken =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.member.id,
+        isReadOnly = false,
+      )
+
+    asToken(memberToken, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    asToken(
+      memberToken,
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"member-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+  }
+
+  @Test
+  fun `rejects a user-context token once the iframe user's tokens are globally invalidated`() {
+    currentDateProvider.forcedDate = currentDateProvider.date
+    val token =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = false,
+      )
+    asToken(token, get("/v2/projects/${testData.project.id}/translations")).andIsOk
+
+    currentDateProvider.move(Duration.ofSeconds(2))
+    userAccountService.invalidateTokens(userAccountService.get(testData.user.id))
+
+    asToken(token, get("/v2/projects/${testData.project.id}/translations"))
+      .andIsUnauthorized
+      .andHasErrorMessage(Message.EXPIRED_JWT_TOKEN)
+  }
+
+  @Test
+  fun `honours the read-only flag carried by a user-context token`() {
+    val readOnlyToken =
+      appTokenService.mintUserContextToken(
+        installId = installId,
+        userId = testData.user.id,
+        isReadOnly = true,
+      )
+
+    asToken(
+      readOnlyToken,
+      post("/v2/projects/${testData.project.id}/translations")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""{"key":"brand-new-key","translations":{"en":"Hello"}}"""),
+    ).andIsForbidden.andHasErrorMessage(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
+  }
+
+  @Test
+  fun `mints a read-write user-context token for a read-write session`() {
+    val response =
+      performAuthPost("/v2/organizations/${testData.organization.id}/apps/$installId/token", null)
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+    val token = objectMapper.readTree(response).get("token").asText()
+
+    appTokenService
+      .validateToken(token)
+      .isReadOnly.assert
+      .isEqualTo(false)
+  }
+
+  private fun asApp(builder: MockHttpServletRequestBuilder): ResultActions = asToken(installToken, builder)
+
+  private fun asToken(
+    token: String,
+    builder: MockHttpServletRequestBuilder,
+  ): ResultActions {
+    logout()
+    return perform(builder.header(HttpHeaders.AUTHORIZATION, "Bearer $token"))
+  }
+
+  private fun requestInstallToken(registration: JsonNode): String {
+    val response =
+      perform(
+        post("/v2/public/apps/token")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+            objectMapper.writeValueAsString(
+              mapOf(
+                "grant_type" to "client_credentials",
+                "client_id" to registration.get("clientId").asText(),
+                "client_secret" to registration.get("clientSecret").asText(),
+                "install_id" to registration.get("installId").asLong(),
+              ),
+            ),
+          ),
+      ).andIsOk.andReturn().response.contentAsString
+    return objectMapper.readTree(response).get("access_token").asText()
+  }
+
+  companion object {
+    private val MANIFEST: String =
+      """
+      {
+        "id": "test-app",
+        "name": "Test App",
+        "version": "0.1.0",
+        "baseUrl": "https://app.example.com",
+        "scopes": ["translations.edit"],
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
+      }
+      """.trimIndent()
+
+    private val PROJECT_EDIT_MANIFEST: String =
+      """
+      {
+        "id": "editor-app",
+        "name": "Editor App",
+        "version": "0.1.0",
+        "baseUrl": "https://editor.example.com",
+        "scopes": ["project.edit"],
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
+      }
+      """.trimIndent()
+
+    private val APPS_MANAGE_MANIFEST: String =
+      """
+      {
+        "id": "privileged-app",
+        "name": "Privileged App",
+        "version": "0.1.0",
+        "baseUrl": "https://privileged.example.com",
+        "scopes": ["apps.manage"],
+        "modules": {
+          "project-dashboard-page": [
+            {"key": "home", "title": "Home", "icon": "🏠", "entry": "/"}
+          ]
+        }
+      }
+      """.trimIndent()
+  }
+}

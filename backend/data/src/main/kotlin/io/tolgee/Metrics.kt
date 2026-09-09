@@ -295,4 +295,51 @@ class Metrics(
       .tag("stream_type", streamType.tag)
       .publishPercentileHistogram()
       .register(meterRegistry)
+  // Apps Metrics
+  // ==========================================================================
+
+  fun recordAppRegistered() {
+    Counter
+      .builder("tolgee.apps.registered")
+      .description("Number of apps registered on this server")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  fun recordAppInstalled() {
+    Counter
+      .builder("tolgee.apps.installed")
+      .description("Number of app installations created")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  fun recordAppEnabledForProject() {
+    Counter
+      .builder("tolgee.apps.enabled_for_project")
+      .description("Number of times an app install was enabled for a project")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  fun recordAppTokenMinted() {
+    Counter
+      .builder("tolgee.apps.token_minted")
+      .description("Number of install-scoped access tokens minted for apps")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  fun recordAppLifecycleDelivery(
+    eventType: String,
+    outcome: String,
+  ) {
+    Counter
+      .builder("tolgee.apps.lifecycle_delivery")
+      .tag("event_type", eventType)
+      .tag("outcome", outcome)
+      .description("Outcomes of outbound app lifecycle deliveries")
+      .register(meterRegistry)
+      .increment()
+  }
 }

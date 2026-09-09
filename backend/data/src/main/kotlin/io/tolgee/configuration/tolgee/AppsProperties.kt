@@ -1,0 +1,49 @@
+package io.tolgee.configuration.tolgee
+
+import io.tolgee.configuration.annotations.DocProperty
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+@ConfigurationProperties(prefix = "tolgee.apps")
+@DocProperty(description = "Configuration for Tolgee Apps (plugins).", displayName = "Apps")
+class AppsProperties {
+  @DocProperty(
+    description =
+      "Enables the Tolgee Apps feature. When disabled, all apps endpoints are absent " +
+        "and the web UI hides every apps-related screen.",
+  )
+  var enabled: Boolean = false
+
+  @DocProperty(
+    description =
+      "When enabled, Tolgee App manifest URLs may target otherwise-blocked address ranges — " +
+        "loopback, private/site-local, link-local, IPv6 unique-local, multicast and " +
+        "wildcard/any-local addresses. Useful for local development and integration testing.\n" +
+        "\n" +
+        ":::danger\n" +
+        "This removes SSRF protection for app manifest fetches. Keep it **disabled** on production " +
+        "and multi-tenant servers — anyone able to register an app could otherwise reach internal " +
+        "services.\n" +
+        ":::\n\n",
+  )
+  var allowLocalAddresses: Boolean = false
+
+  @DocProperty(
+    description =
+      "Connect/read timeout in milliseconds for every request Tolgee makes to an app-controlled " +
+        "host (manifest fetches, lifecycle deliveries).",
+  )
+  var requestTimeoutMs: Long = 5000
+
+  @DocProperty(
+    description =
+      "Lifetime of app access tokens in milliseconds — both the token the dashboard iframe uses and " +
+        "the one an app backend gets from the client-credentials grant.\n" +
+        "\n" +
+        "Deliberately much shorter than `tolgee.authentication.jwt-expiration`: an app token is " +
+        "handed to third-party code, so it should be cheap to leak. Scope changes and app " +
+        "disablement take effect immediately regardless of this value — it only bounds how long a " +
+        "*stolen* token stays usable.",
+    defaultExplanation = "= 1 hour",
+  )
+  var tokenExpiration: Long = 60 * 60 * 1000
+}

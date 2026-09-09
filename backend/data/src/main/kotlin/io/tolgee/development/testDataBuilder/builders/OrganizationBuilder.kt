@@ -8,11 +8,14 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
+import io.tolgee.model.apps.App
+import io.tolgee.model.apps.AppInstall
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.translationMemory.TranslationMemory
+import io.tolgee.service.apps.AppInstallPrincipalService
 import org.springframework.core.io.ClassPathResource
 import java.util.Date
 
@@ -27,6 +30,8 @@ class OrganizationBuilder(
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
     var tenant: SsoTenantBuilder? = null
     var llmProviders: MutableList<LlmProviderBuilder> = mutableListOf()
+    val apps: MutableList<AppBuilder> = mutableListOf()
+    val appInstalls: MutableList<AppInstallBuilder> = mutableListOf()
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -84,6 +89,16 @@ class OrganizationBuilder(
   }
 
   val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
+
+  fun addApp(ft: FT<App>) = addOperation(data.apps, AppBuilder(this), ft)
+
+  fun addAppInstall(ft: FT<AppInstall>): AppInstallBuilder {
+    val builder = addOperation(data.appInstalls, AppInstallBuilder(this), ft)
+    runCatching { builder.self.app.name }.getOrNull()?.let { appName ->
+      builder.principalBuilder.self.name = AppInstallPrincipalService.displayName(appName)
+    }
+    return builder
+  }
 
   fun addGlossary(ft: FT<Glossary>) = addOperation(data.glossaries, ft)
 

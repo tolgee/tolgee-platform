@@ -95,6 +95,8 @@ tolgee:
       secretKey: aaa
   billing:
     enabled: false
+  apps:
+    enabled: true
   telemetry:
     enabled: false
     server: http://localhost:8080

@@ -53,6 +53,8 @@ class AuthenticationFilter(
   @Lazy
   private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy
+  private val appTokenAuthenticator: AppTokenAuthenticator,
+  @Lazy
   private val userAccountService: UserAccountService,
   @Lazy
   private val apiKeyService: ApiKeyService,
@@ -61,6 +63,19 @@ class AuthenticationFilter(
   @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
+  companion object {
+    const val ACTING_AS_USER_HEADER = "X-Tolgee-Act-As-User-Id"
+
+    private val AUTHORIZATION_SERVER_PATHS =
+      setOf(
+        OAuth2Constants.AUTHORIZE_PATH,
+        OAuth2Constants.TOKEN_PATH,
+        OAuth2Constants.REVOKE_PATH,
+        OAuth2Constants.AUTHORIZATION_SERVER_METADATA_PATH,
+        OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH,
+      )
+  }
+
   private val authenticationProperties
     get() = tolgeeProperties.authentication
   private val internalProperties
@@ -101,10 +116,11 @@ class AuthenticationFilter(
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
-        val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
-        checkIfSsoUserStillValid(auth.principal)
 
-        SecurityContextHolder.getContext().authentication = auth
+        val handledAppAuth = handleAppAuthentication(request, token)
+        if (handledAppAuth) return
+
+        handleJwtAuth(token)
         return
       }
 
@@ -141,6 +157,29 @@ class AuthenticationFilter(
           isSuperToken = true,
         )
     }
+  }
+
+  private fun handleJwtAuth(token: String) {
+    val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
+    checkIfSsoUserStillValid(auth.principal)
+
+    SecurityContextHolder.getContext().authentication = auth
+  }
+
+  private fun handleAppAuthentication(
+    request: HttpServletRequest,
+    token: String,
+  ): Boolean {
+    val appAuth = appTokenAuthenticator.authenticate(request, token)
+    if (appAuth != null) {
+      if (!appAuth.isInstallContext && !appAuth.isAppLevel) {
+        checkIfSsoUserStillValid(appAuth.principal)
+      }
+      SecurityContextHolder.getContext().authentication = appAuth
+      return true
+    }
+
+    return false
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
@@ -228,16 +267,5 @@ class AuthenticationFilter(
       userAccountService.findInitialUser()
         ?: throw IllegalStateException("Initial user does not exists")
     UserAccountDto.fromEntity(account)
-  }
-
-  companion object {
-    private val AUTHORIZATION_SERVER_PATHS =
-      setOf(
-        OAuth2Constants.AUTHORIZE_PATH,
-        OAuth2Constants.TOKEN_PATH,
-        OAuth2Constants.REVOKE_PATH,
-        OAuth2Constants.AUTHORIZATION_SERVER_METADATA_PATH,
-        OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH,
-      )
   }
 }

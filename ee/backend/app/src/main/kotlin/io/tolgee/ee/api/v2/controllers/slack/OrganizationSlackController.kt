@@ -15,11 +15,11 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.slack.ConnectToSlackUrlModel
 import io.tolgee.hateoas.organization.slack.WorkspaceModel
 import io.tolgee.hateoas.organization.slack.WorkspaceModelAssembler
-import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresFeatures
-import io.tolgee.security.authorization.RequiresOrganizationRole
+import io.tolgee.security.authorization.RequiresOrganizationScopes
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -47,7 +47,7 @@ class OrganizationSlackController(
     summary = "Get connect URL for Slack authentication",
     description = "Returns URL to which user should be redirected to connect Slack workspace",
   )
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SLACK_MANAGE])
   fun connectToSlack(
     @PathVariable organizationId: Long,
   ): ConnectToSlackUrlModel {
@@ -62,7 +62,7 @@ class OrganizationSlackController(
   }
 
   @PostMapping("/connect")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SLACK_MANAGE])
   @Operation(
     summary = "Connect Slack workspace to organization",
     description =
@@ -86,7 +86,7 @@ class OrganizationSlackController(
   }
 
   @GetMapping("/workspaces")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SLACK_MANAGE])
   @Operation(
     summary = "Get connected workspaces",
     description = "Returns a list of workspaces connected to the organization",
@@ -99,7 +99,7 @@ class OrganizationSlackController(
   }
 
   @DeleteMapping("/workspaces/{workspaceId}")
-  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresOrganizationScopes([Scope.ORGANIZATION_SLACK_MANAGE])
   @Operation(
     summary = "Disconnect workspace",
     description = "Disconnects a workspace from the organization",

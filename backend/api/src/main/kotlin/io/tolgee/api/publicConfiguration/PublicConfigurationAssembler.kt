@@ -74,6 +74,7 @@ class PublicConfigurationAssembler(
       authMethods = properties.authentication.asAuthMethodsDTO(),
       translationsViewLanguagesLimit = properties.translationsViewLanguagesLimit,
       llm = PublicLlmConfigurationDTO(llmPropertiesService.isEnabled()),
+      appsEnabled = properties.apps.enabled,
     )
   }
 

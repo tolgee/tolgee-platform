@@ -124,6 +124,7 @@ class TolgeeProperties(
   var telemetry: TelemetryProperties = TelemetryProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
   var webhook: WebhookProperties = WebhookProperties(),
+  var apps: AppsProperties = AppsProperties(),
   var slack: SlackProperties = SlackProperties(),
   @DocProperty(hidden = true)
   var plausible: PlausibleProperties = PlausibleProperties(),

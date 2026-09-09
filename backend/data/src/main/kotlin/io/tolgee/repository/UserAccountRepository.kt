@@ -110,7 +110,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     "from UserAccount ua where lower(ua.username) = lower(:username) " +
-      "and ua.deletedAt is null and ua.disabledAt is null",
+      "and ua.deletedAt is null and ua.disabledAt is null and ua.isAppPrincipal = false",
   )
   fun findActive(username: String): UserAccount?
 
@@ -122,6 +122,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       select * from user_account
       where regexp_replace(lower(username), '\+[^@]*@', '@') = :normalizedEmail
         and deleted_at is null
+        and is_app_principal = false
     """,
     nativeQuery = true,
   )
@@ -130,7 +131,10 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where ua.id = :id and ua.deletedAt is null and ua.disabledAt is null")
   fun findActive(id: Long): UserAccount?
 
-  @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
+  @Query(
+    "from UserAccount ua where lower(ua.username) = lower(:username) " +
+      "and ua.deletedAt is null and ua.isAppPrincipal = false",
+  )
   fun findActiveOrDisabled(username: String): UserAccount?
 
   @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")
@@ -292,10 +296,13 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     left join ua.organizationRoles orl
     where orl is null
       and ua.deletedAt is null
+      and ua.isAppPrincipal = false
   """,
   )
   fun findAllWithoutAnyOrganization(pageable: Pageable): Page<UserAccount>
 
+  // An app install's principal deliberately has no organization role. Without this filter the
+  // legacy migration below would hand every install a personal organization of its own.
   @Query(
     """
     select ua.id
@@ -303,6 +310,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     left join ua.organizationRoles orl
     where orl is null
       and ua.deletedAt is null
+      and ua.isAppPrincipal = false
   """,
   )
   fun findAllWithoutAnyOrganizationIds(): List<Long>
@@ -314,6 +322,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       like lower(concat('%', cast(:search as text),'%')) 
       or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
       and userAccount.deletedAt is null
+      and userAccount.isAppPrincipal = false
   """,
   )
   fun findAllWithDisabledPaged(
@@ -330,7 +339,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     value = """
-    select count(ua) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null and ua.isDemo = false
+    select count(ua) from UserAccount ua
+    where ua.disabledAt is null and ua.deletedAt is null and ua.isDemo = false and ua.isAppPrincipal = false
   """,
   )
   fun countAllEnabled(): Long
