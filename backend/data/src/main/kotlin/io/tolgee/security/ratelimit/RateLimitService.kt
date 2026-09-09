@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
@@ -28,6 +29,8 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class RateLimitService(
@@ -38,11 +41,14 @@ class RateLimitService(
   @Lazy
   private val authenticationFacade: AuthenticationFacade,
   private val resilientCacheAccessor: ResilientCacheAccessor,
+  private val metrics: Metrics,
 ) {
   private val cache: Cache by lazy {
     cacheManager.getCache(Caches.RATE_LIMITS)
       ?: throw RuntimeException("Could not initialize cache!")
   }
+
+  private val inFlightConsumers = ConcurrentHashMap<String, AtomicInteger>()
 
   /**
    * Consumes a token from the provided rate limit policy.
@@ -70,26 +76,51 @@ class RateLimitService(
     if (policy == null) return
 
     val lockName = getLockName(policy)
-    lockingProvider.withLocking(lockName) {
-      val bucket = resilientCacheAccessor.get(cache, policy.bucketName, Bucket::class.java)
-      try {
-        val consumed = doConsumeBucket(policy, bucket)
+    val inFlight = inFlightConsumers.computeIfAbsent(lockName) { AtomicInteger() }
+    val concurrent = inFlight.incrementAndGet()
+    try {
+      val maxConcurrent = rateLimitProperties.maxConcurrentPerBucket
+      if (maxConcurrent > 0 && concurrent > maxConcurrent) {
+        rejectWithoutConsuming(policy, "concurrency_cap")
+      }
+
+      lockingProvider.tryWithLocking(lockName, Duration.ofMillis(rateLimitProperties.lockWaitMs)) {
+        val bucket = resilientCacheAccessor.get(cache, policy.bucketName, Bucket::class.java)
         try {
-          if (!cond()) {
+          val consumed = doConsumeBucket(policy, bucket)
+          try {
+            if (!cond()) {
+              cache.put(policy.bucketName, consumed)
+            }
+          } catch (e: Exception) {
             cache.put(policy.bucketName, consumed)
+            throw e
           }
-        } catch (e: Exception) {
-          cache.put(policy.bucketName, consumed)
+        } catch (e: RateLimitedException) {
+          updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
+          throw e
+        } catch (e: RateLimitBlockedException) {
+          updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
           throw e
         }
-      } catch (e: RateLimitedException) {
-        updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
-        throw e
-      } catch (e: RateLimitBlockedException) {
-        updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
-        throw e
+      } ?: rejectWithoutConsuming(policy, "lock_timeout")
+    } finally {
+      if (inFlight.decrementAndGet() <= 0) {
+        inFlightConsumers.remove(lockName, inFlight)
       }
     }
+  }
+
+  /**
+   * Rejects a request due to bucket contention, without touching the bucket itself.
+   * No strike is recorded — the bucket cannot be read or written safely without holding the lock.
+   */
+  private fun rejectWithoutConsuming(
+    policy: RateLimitPolicy,
+    reason: String,
+  ): Nothing {
+    metrics.rateLimitConcurrencyRejectionsCounter(reason).increment()
+    throw RateLimitedException(rateLimitProperties.lockWaitMs, policy.global)
   }
 
   /**
