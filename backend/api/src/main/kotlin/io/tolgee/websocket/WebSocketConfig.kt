@@ -3,8 +3,8 @@ package io.tolgee.websocket
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.authentication.ScopedCredential
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.withSecurityContext
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.logger
 import org.springframework.context.annotation.Configuration
@@ -18,7 +18,6 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageHeaderAccessor
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
@@ -119,13 +118,11 @@ class WebSocketConfig(
     projectId: Long,
   ): Boolean {
     try {
-      // SecurityService.checkProjectPermissionNoApiKey reads the scoped credential off the SecurityContext.
       withSecurityContext(authentication) {
         securityService.checkProjectPermission(
           projectId = projectId,
           requiredPermission = Scope.KEYS_VIEW,
           user = authentication.principal,
-          credential = authentication.credentials as? ScopedCredential,
         )
       }
     } catch (e: PermissionException) {
@@ -143,21 +140,6 @@ class WebSocketConfig(
       return false
     }
     return authentication.principal.id == userId
-  }
-
-  private fun <T> withSecurityContext(
-    authentication: TolgeeAuthentication,
-    body: () -> T,
-  ): T {
-    val previous = SecurityContextHolder.getContext()
-    try {
-      SecurityContextHolder.setContext(
-        SecurityContextHolder.createEmptyContext().apply { this.authentication = authentication },
-      )
-      return body()
-    } finally {
-      SecurityContextHolder.setContext(previous)
-    }
   }
 
   private companion object {

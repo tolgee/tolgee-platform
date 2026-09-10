@@ -139,22 +139,18 @@ class SecurityService(
 
   /**
    * Checks the user's own permission on the project, then narrows it by the scoped credential.
-   *
-   * [credential] defaults to the one in the security context; pass it explicitly off the request thread, where
-   * there is none (see `WebSocketConfig`).
    */
   fun checkProjectPermission(
     projectId: Long,
     requiredPermission: Scope,
     user: UserAccountDto? = null,
-    credential: ScopedCredential? = null,
   ) {
     val user = user ?: activeUser
     // Always check for the current user even when a scoped credential is presented: the credential can only narrow
     // what the user already has, never widen it.
     checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
-    val credential = credential ?: authenticationFacade.scopedCredential ?: return
+    val credential = authenticationFacade.scopedCredential ?: return
     requireCoversProject(credential, projectId)
     if (!Scope.expand(credential.scopes).contains(requiredPermission)) {
       throw PermissionException(missingScopes = listOf(requiredPermission))
