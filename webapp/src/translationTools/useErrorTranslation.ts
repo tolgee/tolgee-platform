@@ -508,6 +508,11 @@ export function useErrorTranslation() {
           'plan_not_priced_in_organization_currency',
           'This organization is billed in a currency this plan has no prices for. Add prices in that currency to the plan.'
         );
+      case 'plan_is_not_a_downgrade':
+        return t(
+          'plan_is_not_a_downgrade',
+          'Only a smaller plan can be scheduled for the end of the period. Change to this plan right away instead.'
+        );
       case 'keys_spending_limit_exceeded':
         return t('keys_spending_limit_exceeded');
 
