@@ -133,7 +133,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query("from UserAccount ua where lower(ua.username) = lower(:username) and ua.deletedAt is null")
   fun findActiveOrDisabled(username: String): UserAccount?
 
-  @Query("from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true")
+  @Query(
+    "from UserAccount ua left join fetch ua.emailVerification where ua.isInitialUser = true and ua.deletedAt is null",
+  )
   fun findInitialUser(): UserAccount?
 
   @Modifying
@@ -149,7 +151,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
      ua.thirdPartyAuthType = null,
      ua.avatarHash = null,
      ua.username = 'former',
-     ua.name = 'Former user'
+     ua.name = 'Former user',
+     ua.isInitialUser = false
      where ua = :user
      """,
   )
