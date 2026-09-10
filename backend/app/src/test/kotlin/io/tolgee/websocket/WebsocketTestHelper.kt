@@ -2,9 +2,12 @@ package io.tolgee.websocket
 
 import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
+import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.messaging.MessagingException
 import org.springframework.messaging.converter.SimpleMessageConverter
+import org.springframework.messaging.simp.stomp.ConnectionLostException
 import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
@@ -12,6 +15,7 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
 import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
+import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport
 import org.springframework.web.socket.sockjs.client.SockJsClient
 import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import java.lang.reflect.Type
@@ -25,26 +29,40 @@ class WebsocketTestHelper(
   val auth: Auth,
   val projectId: Long,
   val userId: Long,
+  val handshakeAuthorization: String? = null,
+  val useHttpTransport: Boolean = false,
 ) : Logging {
   private var sessionHandler: MySessionHandler? = null
   lateinit var receivedMessages: LinkedBlockingDeque<String>
 
+  val statusTransitions: List<MySessionHandler.AuthenticationStatus>
+    get() =
+      (
+        sessionHandler
+          ?: error("listen() must be called, and stop() not yet, before reading statusTransitions")
+      ).statusTransitions
+
   fun listenForTranslationDataModified() {
-    listen("/projects/$projectId/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}")
+    listen(WebsocketEventType.TRANSLATION_DATA_MODIFIED.projectDestinationFor(projectId))
   }
 
   fun listenForBatchJobProgress() {
-    listen("/projects/$projectId/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}")
+    listen(WebsocketEventType.BATCH_JOB_PROGRESS.projectDestinationFor(projectId))
   }
 
   fun listenForNotificationsChanged() {
-    listen("/users/$userId/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}")
+    listen(WebsocketEventType.NOTIFICATIONS_CHANGED.userDestinationFor(userId))
   }
 
+  private val transports
+    get() =
+      when {
+        useHttpTransport -> listOf(RestTemplateXhrTransport())
+        else -> listOf(WebSocketTransport(StandardWebSocketClient()))
+      }
+
   private val webSocketStompClient by lazy {
-    WebSocketStompClient(
-      SockJsClient(listOf(WebSocketTransport(StandardWebSocketClient()))),
-    )
+    WebSocketStompClient(SockJsClient(transports)).apply { messageConverter = SimpleMessageConverter() }
   }
 
   private var connection: StompSession? = null
@@ -62,16 +80,8 @@ class WebsocketTestHelper(
     val correlationId = UUID.randomUUID().toString()
     WebsocketTestSubscribeSync.register(correlationId)
 
-    webSocketStompClient.messageConverter = SimpleMessageConverter()
     sessionHandler = MySessionHandler(path, receivedMessages, correlationId)
-    connection =
-      webSocketStompClient
-        .connectAsync(
-          "http://localhost:$port/websocket",
-          WebSocketHttpHeaders(),
-          getAuthHeaders(),
-          sessionHandler!!,
-        ).get(10, TimeUnit.SECONDS)
+    connection = connect(sessionHandler!!)
     logger.debug(
       "Client SUBSCRIBE sent (sessionId={}, dest={}, correlationId={}, t={}ms)",
       connection?.sessionId,
@@ -81,7 +91,26 @@ class WebsocketTestHelper(
     )
   }
 
-  fun subscribeAdditional(path: String): LinkedBlockingDeque<String> {
+  fun send(
+    destination: String,
+    payload: String,
+  ) {
+    val session = connection ?: error("listen() must be called before send()")
+    session.send(destination, payload.toByteArray())
+  }
+
+  private fun connect(handler: StompSessionHandlerAdapter): StompSession =
+    webSocketStompClient
+      .connectAsync(
+        "http://localhost:$port/websocket",
+        WebSocketHttpHeaders().apply {
+          handshakeAuthorization?.let { add("Authorization", it) }
+        },
+        getAuthHeaders(),
+        handler,
+      ).get(10, TimeUnit.SECONDS)
+
+  fun subscribeAdditional(path: String): AdditionalSubscription {
     val session = connection ?: error("listen() must be called before subscribeAdditional()")
     val primary = sessionHandler ?: error("listen() must be called before subscribeAdditional()")
     WebsocketTestSubscribeSync.awaitSubscribed(primary.subscribeCorrelationId, timeoutMs = 5000)
@@ -94,21 +123,60 @@ class WebsocketTestHelper(
       MySessionHandler(path, inbox, UUID.randomUUID().toString()),
     )
 
-    // A denied subscribe has no ack of its own; this trailing correlated subscribe is the barrier
-    // that guarantees the one above was processed before we return.
+    val barrierInbox = subscribeBarrierAndAwaitProcessing()
+    logger.debug("Additional SUBSCRIBE processed (sessionId={}, dest={})", session.sessionId, path)
+    return AdditionalSubscription(inbox, barrierInbox)
+  }
+
+  /** Frames on one session are handled in order, so everything sent before this barrier is processed too. */
+  fun subscribeBarrierAndAwaitProcessing(): LinkedBlockingDeque<String> {
+    val session = connection ?: error("listen() must be called before subscribeBarrierAndAwaitProcessing()")
+    val primary = sessionHandler ?: error("listen() must be called before subscribeBarrierAndAwaitProcessing()")
     val barrierId = UUID.randomUUID().toString()
+    val barrierInbox = LinkedBlockingDeque<String>()
     WebsocketTestSubscribeSync.register(barrierId)
     session.subscribe(
       StompHeaders().apply {
         destination = primary.dest
         add(WebsocketTestSubscribeSync.CORRELATION_HEADER, barrierId)
       },
-      MySessionHandler(primary.dest, LinkedBlockingDeque(), barrierId),
+      MySessionHandler(primary.dest, barrierInbox, barrierId),
     )
-    WebsocketTestSubscribeSync.awaitSubscribed(barrierId, timeoutMs = 5000)
+    WebsocketTestSubscribeSync.awaitSubscribedOrFail(barrierId, timeoutMs = 5000)
     WebsocketTestSubscribeSync.cleanup(barrierId)
-    logger.debug("Additional SUBSCRIBE processed (sessionId={}, dest={})", session.sessionId, path)
-    return inbox
+    return barrierInbox
+  }
+
+  /**
+   * Only an allowed SUBSCRIBE publishes the `SessionSubscribeEvent` this reads, and it is published before the
+   * broker registers the subscription. So call this only once a broadcast on the destination has been observed,
+   * or a missing acknowledgement proves nothing.
+   */
+  fun assertSubscribeNotAcknowledged() {
+    val primary = sessionHandler ?: error("listen() must be called before assertSubscribeNotAcknowledged()")
+    if (!WebsocketTestSubscribeSync.wasNotified(primary.subscribeCorrelationId)) return
+    throw AssertionError("The server acknowledged a SUBSCRIBE to ${primary.dest} that should have been denied")
+  }
+
+  fun assertSubscribeAcknowledged() {
+    val primary = sessionHandler ?: error("listen() must be called before assertSubscribeAcknowledged()")
+    if (WebsocketTestSubscribeSync.wasNotified(primary.subscribeCorrelationId)) return
+    throw AssertionError("The server never acknowledged a SUBSCRIBE to ${primary.dest} that should have been allowed")
+  }
+
+  /**
+   * [inbox] is the destination under test; [laterInbox] is a subscription made after it on the session's primary
+   * destination, so a frame arriving there proves one addressed to [inbox] would already have been delivered.
+   */
+  data class AdditionalSubscription(
+    val inbox: LinkedBlockingDeque<String>,
+    val laterInbox: LinkedBlockingDeque<String>,
+  )
+
+  /** Asserts nothing reached [AdditionalSubscription.inbox], on the ordering [AdditionalSubscription] documents. */
+  fun assertNothingDelivered(denied: AdditionalSubscription) {
+    waitFor(3000) { denied.laterInbox.isNotEmpty() }
+    denied.inbox.assert.isEmpty()
   }
 
   private fun getAuthHeaders(): StompHeaders {
@@ -116,25 +184,85 @@ class WebsocketTestHelper(
       when {
         auth.jwtToken != null -> add("jwtToken", auth.jwtToken)
         auth.apiKey != null -> add("x-api-key", auth.apiKey)
+        auth.bearerToken != null -> add("Authorization", "Bearer ${auth.bearerToken}")
       }
     }
   }
 
   fun stop() {
-    val handler = sessionHandler ?: return
-    val activeConnection = connection
+    val activeConnection = connection ?: return
+    val handler = sessionHandler
     sessionHandler = null
     connection = null
-    logger.debug("Stopping websocket listener (sessionId={})", activeConnection?.sessionId)
+    logger.debug("Stopping websocket listener (sessionId={})", activeConnection.sessionId)
     try {
-      handler.subscription?.unsubscribe()
-      activeConnection?.disconnect()
+      handler?.subscription?.unsubscribe()
+      activeConnection.disconnect()
     } catch (e: IllegalStateException) {
       logger.warn("Could not unsubscribe from websocket", e)
+    } catch (e: MessagingException) {
+      logger.warn("Could not unsubscribe from a closed websocket", e)
     } finally {
-      WebsocketTestSubscribeSync.cleanup(handler.subscribeCorrelationId)
+      handler?.let { WebsocketTestSubscribeSync.cleanup(it.subscribeCorrelationId) }
       webSocketStompClient.stop()
       logger.debug("Stopped websocket listener")
+    }
+  }
+
+  /**
+   * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
+   */
+  fun assertNotified(
+    dispatchCallback: () -> Unit,
+    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
+  ) {
+    val handler = sessionHandler ?: error("listen() must be called before assertNotified()")
+    WebsocketTestSubscribeSync.awaitSubscribed(handler.subscribeCorrelationId, timeoutMs = 2000)
+    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", handler.dest, System.currentTimeMillis())
+    dispatchCallback()
+    waitFor(3000) {
+      receivedMessages.isNotEmpty()
+    }
+    logger.debug(
+      "assertNotified: broadcast received (dest={}, t={}ms)",
+      handler.dest,
+      System.currentTimeMillis(),
+    )
+    assertCallback(receivedMessages)
+  }
+
+  fun waitForUnauthenticated() {
+    waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
+  }
+
+  private fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
+    try {
+      waitFor(5000) {
+        sessionHandler?.statusTransitions?.contains(status) == true
+      }
+    } catch (e: WaitNotSatisfiedException) {
+      val transitions = sessionHandler?.statusTransitions ?: emptyList<MySessionHandler.AuthenticationStatus>()
+      logger.error(
+        "Expected websocket authentication status {} never observed; transitions={}. " +
+          "If transitions are only [CONNECTION_LOST], the server's STOMP ERROR frame " +
+          "was lost in the flush-before-close window — investigate the server-side " +
+          "ERROR delivery path rather than relaxing the test.",
+        status,
+        transitions,
+      )
+      throw e
+    }
+  }
+
+  data class Auth(
+    val jwtToken: String? = null,
+    val apiKey: String? = null,
+    val bearerToken: String? = null,
+  ) {
+    init {
+      if (listOfNotNull(jwtToken, apiKey, bearerToken).size > 1) {
+        throw IllegalArgumentException("At most one of jwtToken, apiKey or bearerToken may be provided")
+      }
     }
   }
 
@@ -153,10 +281,6 @@ class WebsocketTestHelper(
     enum class AuthenticationStatus {
       UNAUTHENTICATED,
       CONNECTION_LOST,
-    }
-
-    private fun recordStatus(newStatus: AuthenticationStatus) {
-      statusTransitions.add(newStatus)
     }
 
     override fun afterConnected(
@@ -194,9 +318,7 @@ class WebsocketTestHelper(
       exception: Throwable,
     ) {
       super.handleTransportError(session, exception)
-      if (statusTransitions.isEmpty() &&
-        exception is org.springframework.messaging.simp.stomp.ConnectionLostException
-      ) {
+      if (statusTransitions.isEmpty() && exception is ConnectionLostException) {
         recordStatus(AuthenticationStatus.CONNECTION_LOST)
       }
       logger.error(
@@ -231,11 +353,7 @@ class WebsocketTestHelper(
         return
       }
 
-      try {
-        receivedMessages.add(o.decodeToString())
-      } catch (e: InterruptedException) {
-        throw RuntimeException(e)
-      }
+      receivedMessages.add(o.decodeToString())
     }
 
     private fun handleUnauthenticated(messageHeader: String?) {
@@ -244,69 +362,9 @@ class WebsocketTestHelper(
         recordStatus(AuthenticationStatus.UNAUTHENTICATED)
       }
     }
-  }
 
-  /**
-   * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
-   */
-  fun assertNotified(
-    dispatchCallback: () -> Unit,
-    assertCallback: ((value: LinkedBlockingDeque<String>) -> Unit),
-  ) {
-    val handler = sessionHandler ?: error("listen() must be called before assertNotified()")
-    // Wait for the server's SessionSubscribeEvent for this specific subscription.
-    // Replaces a fragile Thread.sleep(200) with real synchronization. Note the
-    // event fires when the SUBSCRIBE hits the inbound channel; broker
-    // registration follows microseconds later on the same channel pipeline. If
-    // a broadcast goes missing despite the latch having counted down, that
-    // gap is the suspect — the timing logs in WebsocketTestSubscribeSync
-    // will make it visible.
-    WebsocketTestSubscribeSync.awaitSubscribed(handler.subscribeCorrelationId, timeoutMs = 2000)
-    logger.debug("assertNotified: dispatching (dest={}, t={}ms)", handler.dest, System.currentTimeMillis())
-    dispatchCallback()
-    waitFor(3000) {
-      receivedMessages.isNotEmpty()
-    }
-    logger.debug(
-      "assertNotified: broadcast received (dest={}, t={}ms)",
-      handler.dest,
-      System.currentTimeMillis(),
-    )
-    assertCallback(receivedMessages)
-    stop()
-  }
-
-  fun waitForUnauthenticated() {
-    waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
-  }
-
-  private fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
-    try {
-      waitFor(5000) {
-        sessionHandler?.statusTransitions?.contains(status) == true
-      }
-    } catch (e: WaitNotSatisfiedException) {
-      val transitions = sessionHandler?.statusTransitions ?: emptyList<MySessionHandler.AuthenticationStatus>()
-      logger.error(
-        "Expected websocket authentication status {} never observed; transitions={}. " +
-          "If transitions are only [CONNECTION_LOST], the server's STOMP ERROR frame " +
-          "was lost in the flush-before-close window — investigate the server-side " +
-          "ERROR delivery path rather than relaxing the test.",
-        status,
-        transitions,
-      )
-      throw e
-    }
-  }
-
-  data class Auth(
-    val jwtToken: String? = null,
-    val apiKey: String? = null,
-  ) {
-    init {
-      if ((jwtToken == null && apiKey == null) || (jwtToken != null && apiKey != null)) {
-        throw IllegalArgumentException("Either jwtToken or apiKey must be provided")
-      }
+    private fun recordStatus(newStatus: AuthenticationStatus) {
+      statusTransitions.add(newStatus)
     }
   }
 }
