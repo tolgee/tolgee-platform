@@ -51,7 +51,19 @@ class AuthenticationDisabledFilterTest {
   private val userAccount = mock(UserAccount::class.java)
 
   private val authenticationDisabledFilter =
-    AuthenticationFilter(tolgeeProperties, mock(), mock(), mock(), mock(), userAccountService, mock(), mock(), mock())
+    AuthenticationFilter(
+      tolgeeProperties = tolgeeProperties,
+      currentDateProvider = mock(),
+      rateLimitService = mock(),
+      jwtService = mock(),
+      oauth2AccessTokenResolver = mock(),
+      userAccountService = userAccountService,
+      apiKeyService = mock(),
+      patService = mock(),
+      disabledAuthenticationResolver =
+        DisabledAuthenticationResolver(userAccountService, tolgeeProperties),
+      ssoDelegate = mock(),
+    )
 
   @BeforeEach
   fun setupMocksAndSecurityCtx() {
