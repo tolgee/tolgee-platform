@@ -8,4 +8,8 @@ enum class WebsocketEventType {
   ;
 
   val typeName get() = name.lowercase().replace("_", "-")
+
+  fun projectDestinationFor(projectId: Long) = "/projects/$projectId/$typeName"
+
+  fun userDestinationFor(userId: Long) = "/users/$userId/$typeName"
 }
