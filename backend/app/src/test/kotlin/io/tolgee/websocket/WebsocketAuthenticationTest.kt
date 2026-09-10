@@ -1,8 +1,10 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.WebsocketAuthenticationTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.fixtures.OAuth2TestTokens
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.Pat
@@ -10,6 +12,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
+import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.service.notification.NotificationService
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -47,7 +50,15 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   lateinit var notificationService: NotificationService
 
   @Autowired
+  lateinit var grantRepository: OAuth2GrantRepository
+
+  @Autowired
+  lateinit var keyGenerator: KeyGenerator
+
+  @Autowired
   lateinit var simpUserRegistry: SimpUserRegistry
+
+  private lateinit var oauthTokens: OAuth2TestTokens
 
   @LocalServerPort
   private val port: Int? = null
@@ -55,10 +66,12 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @BeforeEach
   fun before() {
     testData = WebsocketAuthenticationTestData()
+    oauthTokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
   fun cleanUp() {
+    oauthTokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -262,6 +275,87 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `works with an OAuth token covering every project`() {
+    saveTestData()
+
+    assertProjectEventsReceived(auth = Auth(bearerToken = oauthTokenForAnyProject()))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `works with an OAuth token bound to this project`() {
+    saveTestData()
+
+    assertProjectEventsReceived(
+      auth = Auth(bearerToken = oauthTokenBoundTo(testData.projectBuilder.self.id)),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `forbidden with insufficient scopes on an OAuth token`() {
+    saveTestData()
+
+    assertProjectSubscribeForbidden(
+      auth = Auth(bearerToken = oauthTokenForAnyProject(scopes = listOf(Scope.MEMBERS_VIEW.value))),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an OAuth token bound to another project cannot subscribe to this project's topic`() {
+    val otherProject = testData.addOtherProject()
+    saveTestData()
+
+    assertProjectSubscribeForbidden(
+      auth = Auth(bearerToken = oauthTokenBoundTo(otherProject.id)),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an OAuth token cannot subscribe to a user topic`() {
+    saveTestData()
+    assertUserTopicSubscribeForbidden(Auth(bearerToken = oauthTokenForAnyProject()))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `unauthenticated with an invalid OAuth token`() {
+    saveTestData()
+    assertSocketClosedAsUnauthenticated(
+      auth = Auth(bearerToken = "tgoat_invalid"),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `unauthenticated with an expired OAuth token`() {
+    saveTestData()
+    val expiredToken =
+      oauthTokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.TRANSLATIONS_VIEW.value, Scope.KEYS_VIEW.value),
+        projectIds = null,
+        issuedAt = Instant.now().minus(Duration.ofHours(2)),
+        expiresAt = Instant.now().minus(Duration.ofHours(1)),
+      )
+
+    assertSocketClosedAsUnauthenticated(auth = Auth(bearerToken = expiredToken))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `unauthenticated with a revoked OAuth grant`() {
+    saveTestData()
+    val revokedToken = oauthTokenForAnyProject()
+    oauthTokens.revoke(revokedToken)
+
+    assertSocketClosedAsUnauthenticated(auth = Auth(bearerToken = revokedToken))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `a credential the resolver refuses cannot ride in on the handshake principal`() {
     saveTestData()
     assertSocketClosedAsUnauthenticated(
@@ -277,6 +371,21 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     assertProjectEventsReceived(
       auth = Auth(bearerToken = jwtService.emitToken(testData.user.id)),
     )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an all-projects OAuth token cannot reach a project its user has no permission on`() {
+    val user2 = testData.addSecondUser()
+    saveTestData()
+    val tokenForUser2 =
+      oauthTokens.issue(
+        subject = user2.self.id,
+        scopes = listOf(Scope.TRANSLATIONS_VIEW.value, Scope.KEYS_VIEW.value),
+        projectIds = null,
+      )
+
+    assertProjectSubscribeForbidden(auth = Auth(bearerToken = tokenForUser2))
   }
 
   @Test
@@ -319,6 +428,16 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     } finally {
       socket.stop()
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an OAuth token presented only on the handshake yields an unauthenticated socket`() {
+    saveTestData()
+    assertSocketClosedAsUnauthenticated(
+      auth = Auth(),
+      handshakeAuthorization = "Bearer " + oauthTokenForAnyProject(),
+    )
   }
 
   @Test
@@ -524,6 +643,15 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
       socket.stop()
     }
   }
+
+  private fun oauthTokenForAnyProject(
+    scopes: List<String> = listOf(Scope.TRANSLATIONS_VIEW.value, Scope.KEYS_VIEW.value),
+  ): String = oauthTokens.issue(subject = testData.user.id, scopes = scopes, projectIds = null)
+
+  private fun oauthTokenBoundTo(
+    projectId: Long,
+    scopes: List<String> = listOf(Scope.TRANSLATIONS_VIEW.value, Scope.KEYS_VIEW.value),
+  ): String = oauthTokens.issue(subject = testData.user.id, scopes = scopes, projectIds = listOf(projectId))
 
   private fun ownerAuth(): Auth = Auth(jwtToken = jwtService.emitToken(testData.user.id))
 

@@ -8,6 +8,7 @@ import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.authentication.DisabledAuthenticationResolver
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component
 @Component
 class WebsocketAuthenticationResolver(
   @Lazy private val jwtService: JwtService,
+  @Lazy private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
   @Lazy private val disabledAuthenticationResolver: DisabledAuthenticationResolver,
@@ -37,7 +39,9 @@ class WebsocketAuthenticationResolver(
 
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
-      return attempt("Bearer token") { jwtService.validateToken(bearer) }
+      return attempt("Bearer token") {
+        oauth2AccessTokenResolver.tryResolve(bearer) ?: jwtService.validateToken(bearer)
+      }
     }
 
     if (!xApiKeyHeader.isNullOrBlank()) {
