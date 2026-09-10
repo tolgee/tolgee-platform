@@ -120,7 +120,7 @@ class NotificationController(
       )
 
     websocketEventPublisher(
-      "/users/${event.userId}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
+      WebsocketEventType.NOTIFICATIONS_CHANGED.userDestinationFor(event.userId),
       websocketEvent,
     )
   }

@@ -5,8 +5,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
+import io.tolgee.security.authentication.DisabledAuthenticationResolver
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -19,70 +21,50 @@ import org.springframework.stereotype.Component
 @Component
 class WebsocketAuthenticationResolver(
   @Lazy private val jwtService: JwtService,
+  @Lazy private val oauth2AccessTokenResolver: OAuth2AccessTokenResolver,
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
+  @Lazy private val disabledAuthenticationResolver: DisabledAuthenticationResolver,
   @Lazy private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
-  /**
-   * Resolves STOMP CONNECT headers into TolgeeAuthentication.
-   * Supports:
-   * - Authorization: Bearer <jwt>
-   * - X-API-Key: tgpat_<token> (PAT) or tgpak_<...> (PAK, incl. legacy/raw)
-   * - jwtToken: <jwt> (legacy header)
-   *
-   * It retrieves the headers from the accessor and validates them.
-   */
   fun resolve(accessor: StompHeaderAccessor): TolgeeAuthentication? {
+    return resolveCredential(accessor) ?: disabledAuthenticationResolver.resolve()
+  }
+
+  private fun resolveCredential(accessor: StompHeaderAccessor): TolgeeAuthentication? {
     val authorizationHeader = getCaseInsensitiveHeader(accessor, "authorization")
     val xApiKeyHeader = getCaseInsensitiveHeader(accessor, "x-api-key")
     val legacyJwtHeader = getCaseInsensitiveHeader(accessor, "jwtToken")
 
-    // Authorization: Bearer <jwt>
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
-      return runCatching { jwtService.validateToken(bearer) }
-        .onFailure {
-          logger.debug(
-            "Bearer token validation failed",
-            it,
-          )
-        }.getOrNull()
-    }
-
-    // X-API-Key: PAT / PAK
-    val xApiKey = xApiKeyHeader
-    if (!xApiKey.isNullOrBlank()) {
-      return when {
-        xApiKey.startsWith(PAT_PREFIX) ->
-          runCatching { patAuth(xApiKey) }
-            .onFailure {
-              logger.debug(
-                "PAT authentication failed",
-                it,
-              )
-            }.getOrNull()
-
-        else ->
-          runCatching { pakAuth(xApiKey) }
-            .onFailure { logger.debug("PAK authentication failed", it) }
-            .getOrNull()
+      return attempt("Bearer token") {
+        oauth2AccessTokenResolver.tryResolve(bearer) ?: jwtService.validateToken(bearer)
       }
     }
 
-    // Legacy jwtToken header
+    if (!xApiKeyHeader.isNullOrBlank()) {
+      return when {
+        xApiKeyHeader.startsWith(PAT_PREFIX) -> attempt("PAT") { patAuth(xApiKeyHeader) }
+        else -> attempt("PAK") { pakAuth(xApiKeyHeader) }
+      }
+    }
+
     if (!legacyJwtHeader.isNullOrBlank()) {
-      return runCatching { jwtService.validateToken(legacyJwtHeader) }
-        .onFailure {
-          logger.debug(
-            "Legacy JWT validation failed",
-            it,
-          )
-        }.getOrNull()
+      return attempt("Legacy JWT") { jwtService.validateToken(legacyJwtHeader) }
     }
 
     return null
   }
+
+  private fun attempt(
+    credentialKind: String,
+    resolve: () -> TolgeeAuthentication?,
+  ): TolgeeAuthentication? =
+    runCatching(resolve)
+      .onFailure { logger.debug("{} authentication failed", credentialKind, it) }
+      .getOrNull()
 
   private fun extractBearer(value: String?): String? {
     if (value == null) return null
@@ -135,26 +117,14 @@ class WebsocketAuthenticationResolver(
     )
   }
 
-  /**
-   * Case-insensitive header lookup for STOMP headers.
-   * Searches through message headers using case-insensitive comparison.
-   */
   private fun getCaseInsensitiveHeader(
     accessor: StompHeaderAccessor,
     headerName: String,
-  ): String? {
-    val messageHeaders = accessor.messageHeaders
-    return messageHeaders.entries
-      .firstOrNull { (key, value) ->
-        key.equals("nativeHeaders", ignoreCase = true) && value is Map<*, *>
-      }?.let { (_, nativeHeadersMap) ->
-        @Suppress("UNCHECKED_CAST")
-        val nativeHeaders = nativeHeadersMap as Map<String, List<String>>
-        nativeHeaders.entries
-          .firstOrNull { (key, _) ->
-            key.equals(headerName, ignoreCase = true)
-          }?.value
-          ?.firstOrNull()
-      }
-  }
+  ): String? =
+    accessor
+      .toNativeHeaderMap()
+      .entries
+      .firstOrNull { it.key.equals(headerName, ignoreCase = true) }
+      ?.value
+      ?.firstOrNull()
 }

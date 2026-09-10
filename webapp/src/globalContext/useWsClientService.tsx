@@ -11,7 +11,13 @@ export const useWebsocketService = (
   useEffect(() => {
     if (allowPrivate) {
       const newClient = WebsocketClient({
-        authentication: { jwtToken: jwtToken! },
+        authentication: { jwtToken },
+        onError: (unauthenticated) => {
+          if (unauthenticated) {
+            newClient.deactivate();
+            setClientConnected(false);
+          }
+        },
         serverUrl: import.meta.env.VITE_APP_API_URL,
         onConnected: () => setClientConnected(true),
         onConnectionClose: () => setClientConnected(false),

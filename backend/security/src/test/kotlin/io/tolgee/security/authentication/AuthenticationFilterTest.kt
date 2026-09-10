@@ -102,6 +102,7 @@ class AuthenticationFilterTest {
       userAccountService,
       pakService,
       patService,
+      DisabledAuthenticationResolver(userAccountService, tolgeeProperties),
       ssoDelegate,
     )
 
