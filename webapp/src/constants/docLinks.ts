@@ -10,4 +10,5 @@ export const DOCS_LINKS = {
   poMsgctxt: `${DOCS_ROOT}/platform/formats/po#message-context-msgctxt-and-key-names`,
   supportedFormats: `${DOCS_ROOT}/platform/supported_formats`,
   scopedSearch: `${DOCS_ROOT}/platform/translation_process/scoped_search`,
+  apps: `${DOCS_ROOT}/platform/apps`,
 };

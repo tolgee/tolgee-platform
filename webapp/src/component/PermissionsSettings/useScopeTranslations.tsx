@@ -4,7 +4,7 @@ import { PermissionModelScope } from './types';
 export const useScopeTranslations = () => {
   const { t } = useTranslate();
 
-  const labels: Record<PermissionModelScope, string> = {
+  const labels: Partial<Record<PermissionModelScope, string>> = {
     admin: t('permissions_item_admin'),
     'translations.view': t('permissions_item_translations_view'),
     'translations.edit': t('permissions_item_translations_edit'),
