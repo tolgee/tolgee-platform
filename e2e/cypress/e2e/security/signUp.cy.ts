@@ -136,6 +136,21 @@ context('Sign up', () => {
     checkAnonymousUserIdentified();
   });
 
+  it('Shows success (not error) when visiting the same verification link again', () => {
+    fillAndSubmitSignUpForm(TEST_USERNAME);
+    cy.contains('Thank you for signing up!').should('be.visible');
+    cy.contains('Check your inbox');
+
+    cy.wait(1000);
+    getParsedEmailVerification().then((r) => {
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Email was verified');
+
+      cy.visit(r.verifyEmailLink);
+      assertMessage('Email was verified');
+    });
+  });
+
   it('Signs up and resend email verification', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.contains('Thank you for signing up!').should('be.visible');
