@@ -67,10 +67,12 @@ type Props = {
   hideQuickStart?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
+  nonInteractive?: boolean;
 };
 
 export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   hideQuickStart,
+  nonInteractive,
   ...announcementProps
 }) => {
   const config = useConfig();
@@ -83,50 +85,57 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
 
   const theme = useTheme();
 
+  const logoContent = (
+    <Box display="flex" alignItems="center">
+      <StyledLogoWrapper
+        pr={1}
+        display="flex"
+        justifyItems="center"
+        className="logoWrapper"
+      >
+        <TolgeeLogo
+          fontSize="large"
+          sx={{ color: theme.palette.navbar.logo }}
+        />
+      </StyledLogoWrapper>
+      <StyledLogoTitle variant="h5" color="inherit">
+        {config.appName}
+      </StyledLogoTitle>
+      <TrialChip />
+      {config.showVersion && (
+        <StyledVersion variant="body1">{config.version}</StyledVersion>
+      )}
+    </Box>
+  );
+
   return (
     <StyledAppBar
       sx={{
         top: topBannerSize,
-        transform: topBarHidden
-          ? `translate(0px, -55px)`
-          : `translate(0px, 0px)`,
+        transform:
+          !nonInteractive && topBarHidden
+            ? `translate(0px, -55px)`
+            : `translate(0px, 0px)`,
       }}
     >
       <StyledToolbar>
         <Box flexGrow={1} display="flex">
-          <Box>
-            <StyledTolgeeLink to={'/'}>
-              <Box display="flex" alignItems="center">
-                <StyledLogoWrapper
-                  pr={1}
-                  display="flex"
-                  justifyItems="center"
-                  className="logoWrapper"
-                >
-                  <TolgeeLogo
-                    fontSize="large"
-                    sx={{ color: theme.palette.navbar.logo }}
-                  />
-                </StyledLogoWrapper>
-                <StyledLogoTitle variant="h5" color="inherit">
-                  {config.appName}
-                </StyledLogoTitle>
-                <TrialChip />
-                {config.showVersion && (
-                  <StyledVersion variant="body1">
-                    {config.version}
-                  </StyledVersion>
-                )}
-              </Box>
-            </StyledTolgeeLink>
+          <Box data-cy="top-bar-logo">
+            {nonInteractive ? (
+              logoContent
+            ) : (
+              <StyledTolgeeLink to={'/'}>{logoContent}</StyledTolgeeLink>
+            )}
           </Box>
-          <TopBarAnnouncements {...announcementProps} />
+          {!nonInteractive && <TopBarAnnouncements {...announcementProps} />}
         </Box>
-        {user && <NotificationsTopBarButton />}
-        <TopBarTestClockInfo />
-        {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
-        {!user && <LanguageMenu />}
-        {user && <UserMenu />}
+        {!nonInteractive && user && <NotificationsTopBarButton />}
+        {!nonInteractive && <TopBarTestClockInfo />}
+        {!nonInteractive && quickStartEnabled && !hideQuickStart && (
+          <QuickStartTopBarButton />
+        )}
+        {(nonInteractive || !user) && <LanguageMenu />}
+        {!nonInteractive && user && <UserMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
