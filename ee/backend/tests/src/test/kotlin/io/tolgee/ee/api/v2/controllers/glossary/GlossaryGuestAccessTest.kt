@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
@@ -45,7 +46,6 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
   @AfterEach
   fun cleanup() {
     testDataService.cleanTestData(testData.root)
-    userAccount = null
     enabledFeaturesProvider.forceEnabled = null
   }
 
@@ -186,16 +186,27 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
 
   @Test
   fun `guest export omits a private co-assigned project's languages`() {
-    exportLanguageHeaders(testData.virtualGuest).assert.doesNotContain("de")
-    exportLanguageHeaders(testData.user).assert.contains("de")
+    exportMixedGlossaryLanguageHeaders(testData.virtualGuest).assert.isEqualTo(listOf("fr"))
+    exportMixedGlossaryLanguageHeaders(testData.user).assert.isEqualTo(listOf("de", "fr"))
   }
 
-  private fun exportLanguageHeaders(user: UserAccount): List<String> {
+  @Test
+  fun `guest may call the glossary export endpoint`() {
+    userAccount = testData.virtualGuest
+    ignoreTestOnSpringBug {
+      performAuthGet(
+        "/v2/organizations/${testData.organization.id}/glossaries/${testData.mixedGlossary.id}/export",
+      ).andIsOk
+    }
+  }
+
+  private fun exportMixedGlossaryLanguageHeaders(user: UserAccount): List<String> {
+    userAccount = user
     setSecurityContext(user)
     val csv =
       executeInNewTransaction {
         val glossary = glossaryService.get(testData.organization.id, testData.mixedGlossary.id)
-        glossaryExportService.exportCsv(glossary).readBytes().toString(Charsets.UTF_8)
+        glossaryExportService.exportCsv(glossary).bufferedReader().readText()
       }
     val headers = csv.lines()[0].split(",").map { it.trim().removeSurrounding("\"") }
     headers.take(GLOSSARY_CSV_HEADER_NAMES.size).assert.isEqualTo(GLOSSARY_CSV_HEADER_NAMES)
