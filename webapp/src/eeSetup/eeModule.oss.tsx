@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
@@ -103,4 +103,4 @@ export const useAddProjectSettingsTabs =
 
 export const OnboardingSurveyGate = ({
   children,
-}: OnboardingSurveyGateProps) => <>{children}</>;
+}: OnboardingSurveyGateProps): ReactElement | null => <>{children}</>;
