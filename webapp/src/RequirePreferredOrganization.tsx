@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import {
   useIsEmailVerified,
   usePreferredOrganization,
@@ -19,15 +19,17 @@ export const RequirePreferredOrganization: FC<
   const { preferredOrganization, isFetching } = usePreferredOrganization();
 
   const isEmailVerified = useIsEmailVerified();
-  if (!isEmailVerified) {
-    return <>{props.children}</>;
-  }
-  if (allowPrivate && !preferredOrganization && isFetching) {
-    return null;
-  }
 
-  if (allowPrivate && !preferredOrganization && !isFetching) {
-    return (
+  let content: ReactNode = props.children;
+  if (isEmailVerified && allowPrivate && !preferredOrganization && isFetching) {
+    content = null;
+  } else if (
+    isEmailVerified &&
+    allowPrivate &&
+    !preferredOrganization &&
+    !isFetching
+  ) {
+    content = (
       <DashboardPage>
         <CompactView
           primaryContent={
@@ -42,5 +44,5 @@ export const RequirePreferredOrganization: FC<
     );
   }
 
-  return <OnboardingSurveyGate>{props.children}</OnboardingSurveyGate>;
+  return <OnboardingSurveyGate>{content}</OnboardingSurveyGate>;
 };
