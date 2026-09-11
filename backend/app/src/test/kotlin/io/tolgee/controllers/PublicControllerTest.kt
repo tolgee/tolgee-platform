@@ -114,6 +114,36 @@ class PublicControllerTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `sets userSource as a person property on sign up`() {
+    val dto =
+      SignUpDto(
+        name = "Pavel Novak",
+        password = "aaaaaaaaa",
+        email = "usersource@aaaa.com",
+        userSource = "google_ads",
+      )
+    performPost("/api/public/sign_up", dto).andIsOk
+
+    val params = assertPostHogEventReported(postHog, "SIGN_UP")
+
+    @Suppress("UNCHECKED_CAST")
+    val set = params["\$set"] as Map<String, Any?>
+    set["userSource"].assert.isEqualTo("google_ads")
+  }
+
+  @Test
+  fun `omits userSource from person properties when not provided`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "no-usersource@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+
+    val params = assertPostHogEventReported(postHog, "SIGN_UP")
+
+    @Suppress("UNCHECKED_CAST")
+    val set = params["\$set"] as Map<String, Any?>
+    set.assert.doesNotContainKey("userSource")
+  }
+
+  @Test
   fun `doesn't create organization when invitation provided`() {
     val base = dbPopulator.createBase()
     val project = base.project

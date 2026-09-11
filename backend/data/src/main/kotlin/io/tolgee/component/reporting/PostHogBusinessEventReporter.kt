@@ -77,13 +77,7 @@ class PostHogBusinessEventReporter(
     postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)
   }
 
-  /**
-   * PostHog accepts user information in $set property.
-   *
-   * This method returns map with $set property if user information is present,
-   * if instanceId is sent by self-hosted instance, or if the event carries
-   * person properties of its own.
-   */
+  // PostHog accepts user information in the $set property.
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
     val userSet = data.userAccountDto?.let { getUserDataMap(it) }
     val instanceSet = data.instanceId?.let { mapOf("instanceId" to it) }
