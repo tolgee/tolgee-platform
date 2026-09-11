@@ -19,4 +19,5 @@ class InitialDataModel(
   var eeSubscription: InitialDataEeSubscriptionModel? = null,
   var qaCheckCategories: List<QaCheckCategoryModel>? = null,
   var hasCommunityContributions: Boolean = false,
+  var onboardingSurveyVersion: String? = null,
 )

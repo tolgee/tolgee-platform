@@ -3782,6 +3782,7 @@ export interface components {
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
       hasCommunityContributions: boolean;
       languageTag?: string;
+      onboardingSurveyVersion?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       qaCheckCategories?: components["schemas"]["QaCheckCategoryModel"][];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
