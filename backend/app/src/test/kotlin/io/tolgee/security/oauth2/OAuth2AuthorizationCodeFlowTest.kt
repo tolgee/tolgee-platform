@@ -1,6 +1,8 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -36,7 +38,11 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
     completeFlow(projectId = testData.project.id)
     grantsForUser().assert.isNotZero()
 
-    userAccountService.setUserPassword(userAccountService.get(testData.user.id), "new-password-123")
+    userAccountService.setUserPassword(
+      userAccountService.get(testData.user.id),
+      "new-password-123",
+      AllTokensInvalidatedTrigger.PASSWORD_CHANGE,
+    )
 
     grantsForUser().assert.isZero()
   }
@@ -251,7 +257,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   fun `consent-info for another user's pending authorization is not found`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
     driver
-      .consentInfo(jwtService.emitToken(testData.otherUser.id), pending.state)
+      .consentInfo(jwtService.emitToken(testData.otherUser.id, type = UserSessionType.TEST), pending.state)
       .andReturn()
       .response.status
       .let { it.assert.isEqualTo(404) }

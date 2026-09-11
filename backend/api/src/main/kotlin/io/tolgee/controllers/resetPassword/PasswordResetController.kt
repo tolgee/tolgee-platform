@@ -10,6 +10,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.UserAccountService
@@ -71,7 +72,7 @@ class PasswordResetController(
     if (userAccount.accountType === UserAccount.AccountType.THIRD_PARTY) {
       userAccountService.setAccountType(userAccount, UserAccount.AccountType.LOCAL)
     }
-    userAccountService.setUserPassword(userAccount, request.password)
+    userAccountService.setUserPassword(userAccount, request.password, AllTokensInvalidatedTrigger.PASSWORD_RESET)
     userAccountService.removeResetCode(userAccount)
   }
 

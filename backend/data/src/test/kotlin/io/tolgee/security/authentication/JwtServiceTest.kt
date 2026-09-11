@@ -23,7 +23,9 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.service.security.UserSessionService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -56,6 +58,10 @@ class JwtServiceTest {
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
+  private val userSessionService = Mockito.mock(UserSessionService::class.java)
+
+  private val userSessionAccessManager = Mockito.mock(UserSessionAccessManager::class.java)
+
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
   private val adminActor = Mockito.mock(UserAccountDto::class.java)
   private val supporterActor = Mockito.mock(UserAccountDto::class.java)
@@ -67,6 +73,8 @@ class JwtServiceTest {
       currentDateProvider,
       userAccountService,
       authenticationFacade,
+      userSessionService,
+      userSessionAccessManager,
     )
 
   @BeforeEach
@@ -104,7 +112,7 @@ class JwtServiceTest {
 
   @Test
   fun `it generates and understands tokens`() {
-    val token = jwtService.emitToken(TEST_USER_ID)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST)
     val auth = jwtService.validateToken(token)
 
     assertThat(auth.principal.id).isEqualTo(TEST_USER_ID)
@@ -123,8 +131,8 @@ class JwtServiceTest {
 
   @Test
   fun `it stores the super powers of tokens when it has them`() {
-    val token = jwtService.emitToken(TEST_USER_ID)
-    val superToken = jwtService.emitToken(TEST_USER_ID, isSuper = true)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST)
+    val superToken = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST, isSuper = true)
 
     val auth = jwtService.validateToken(token)
     val superAuth = jwtService.validateToken(superToken)
@@ -136,7 +144,7 @@ class JwtServiceTest {
   @Test
   fun `it ignores super powers when they are expired`() {
     val now = currentDateProvider.date.time
-    val superToken = jwtService.emitToken(TEST_USER_ID, isSuper = true)
+    val superToken = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST, isSuper = true)
 
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
 
@@ -166,7 +174,7 @@ class JwtServiceTest {
   @Test
   fun `it rejects expired tokens`() {
     val now = currentDateProvider.date.time
-    val token = jwtService.emitToken(TEST_USER_ID)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST)
 
     assertDoesNotThrow { jwtService.validateToken(token) }
 
@@ -178,7 +186,7 @@ class JwtServiceTest {
   @Test
   fun `it rejects tokens emitted before user tokens validity period`() {
     val now = currentDateProvider.date.time
-    val token = jwtService.emitToken(TEST_USER_ID)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST)
 
     assertDoesNotThrow { jwtService.validateToken(token) }
 
@@ -220,7 +228,7 @@ class JwtServiceTest {
     val noSigToken =
       "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0." +
         "eyJzdWIiOiIxMzM3IiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyMzkwMjJ9"
-    val token = jwtService.emitToken(TEST_USER_ID)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST)
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
 
     assertThrows<AuthenticationException> { jwtService.validateToken(invalidToken) }
@@ -236,7 +244,7 @@ class JwtServiceTest {
 
   @Test
   fun `it sets read-only flag in tokens`() {
-    val token = jwtService.emitToken(TEST_USER_ID, isReadOnly = true)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST, isReadOnly = true)
     val auth = jwtService.validateToken(token)
 
     assertThat(auth.isReadOnly).isTrue()
@@ -245,7 +253,7 @@ class JwtServiceTest {
 
   @Test
   fun `it carries actor information for admin actor`() {
-    val token = jwtService.emitToken(TEST_USER_ID, actingAsUserAccountId = ADMIN_ACTOR_ID)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST, actingAsUserAccountId = ADMIN_ACTOR_ID)
     val auth = jwtService.validateToken(token)
 
     assertThat(auth.isReadOnly).isFalse()
@@ -257,21 +265,33 @@ class JwtServiceTest {
   fun `it rejects read-only tokens for admin subject`() {
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
 
-    val token = jwtService.emitToken(TEST_USER_ID, isReadOnly = true)
+    val token = jwtService.emitToken(TEST_USER_ID, type = UserSessionType.TEST, isReadOnly = true)
 
     assertThrows<AuthenticationException> { jwtService.validateToken(token) }
   }
 
   @Test
   fun `it rejects supporter actor impersonation when not read-only`() {
-    val token = jwtService.emitToken(TEST_USER_ID, actingAsUserAccountId = SUPPORTER_ACTOR_ID, isReadOnly = false)
+    val token =
+      jwtService.emitToken(
+        TEST_USER_ID,
+        type = UserSessionType.TEST,
+        actingAsUserAccountId = SUPPORTER_ACTOR_ID,
+        isReadOnly = false,
+      )
 
     assertThrows<AuthenticationException> { jwtService.validateToken(token) }
   }
 
   @Test
   fun `it allows supporter actor impersonation when read-only`() {
-    val token = jwtService.emitToken(TEST_USER_ID, actingAsUserAccountId = SUPPORTER_ACTOR_ID, isReadOnly = true)
+    val token =
+      jwtService.emitToken(
+        TEST_USER_ID,
+        type = UserSessionType.TEST,
+        actingAsUserAccountId = SUPPORTER_ACTOR_ID,
+        isReadOnly = true,
+      )
     val auth = jwtService.validateToken(token)
 
     assertThat(auth.isReadOnly).isTrue()
