@@ -7,6 +7,7 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { OnboardingSurveyGate } from 'tg.ee';
 
 export const RequirePreferredOrganization: FC<
   React.PropsWithChildren<unknown>
@@ -41,5 +42,5 @@ export const RequirePreferredOrganization: FC<
     );
   }
 
-  return <>{props.children}</>;
+  return <OnboardingSurveyGate>{props.children}</OnboardingSurveyGate>;
 };

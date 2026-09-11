@@ -132,6 +132,14 @@ abstract class AuthorizedControllerTest :
     return authorizedRequestPerformer.performAuthPut(url, content)
   }
 
+  override fun performAuthPatch(
+    url: String,
+    content: Any?,
+  ): ResultActions {
+    loginAsAdminIfNotLogged()
+    return authorizedRequestPerformer.performAuthPatch(url, content)
+  }
+
   override fun performAuthPost(
     url: String,
     content: Any?,

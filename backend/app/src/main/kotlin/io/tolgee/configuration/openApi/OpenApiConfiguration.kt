@@ -257,6 +257,8 @@ class OpenApiConfiguration {
     private const val BILLING_LLM = "/v2/**/llm/**"
     private const val BILLING_PUBLIC_SESSION = "/v2/public/session"
     private const val BILLING_PUBLIC_SESSION_SUB = "/v2/public/session/**"
+    private const val BILLING_ONBOARDING_SURVEY = "/v2/onboarding-survey"
+    private const val BILLING_ONBOARDING_SURVEY_SUB = "/v2/onboarding-survey/**"
     private val BILLING =
       arrayOf(
         BILLING_MAIN,
@@ -266,6 +268,8 @@ class OpenApiConfiguration {
         BILLING_LLM,
         BILLING_PUBLIC_SESSION,
         BILLING_PUBLIC_SESSION_SUB,
+        BILLING_ONBOARDING_SURVEY,
+        BILLING_ONBOARDING_SURVEY_SUB,
       )
     private val PATH_WITH_PROJECT_ID_REGEX = "^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex()
   }
