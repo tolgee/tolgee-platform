@@ -86,7 +86,11 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   const theme = useTheme();
 
   const logoContent = (
-    <Box display="flex" alignItems="center">
+    <Box
+      display="flex"
+      alignItems="center"
+      sx={{ color: (theme) => theme.palette.navbar.text }}
+    >
       <StyledLogoWrapper
         pr={1}
         display="flex"
