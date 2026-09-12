@@ -45,7 +45,7 @@ class EeWordCountLimitListener(
     if (!limits.metersWords || !limits.words.isEnforced) {
       return
     }
-    if (limits.words.autoUpgradeEffective == true) {
+    if (limits.autoUpgradeEffective) {
       return
     }
 

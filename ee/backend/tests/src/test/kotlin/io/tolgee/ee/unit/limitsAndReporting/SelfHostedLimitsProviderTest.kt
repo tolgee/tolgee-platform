@@ -36,26 +36,18 @@ class SelfHostedLimitsProviderTest {
 
   @Test
   fun `returns the words limit stored on the subscription`() {
-    val limits =
-      provider(subscriptionDto(includedWords = 100000, wordsLimit = 100000))
-        .getLimits()
-        .words
+    val limits = provider(subscriptionDto(includedWords = 100000, wordsLimit = 100000)).getLimits()
 
-    assertThat(limits).isEqualTo(
-      UsageLimits.Limit(included = 100000, limit = 100000, autoUpgradeEffective = false),
-    )
+    assertThat(limits.words).isEqualTo(UsageLimits.Limit(included = 100000, limit = 100000))
+    assertThat(limits.autoUpgradeEffective).isFalse()
   }
 
   @Test
   fun `no word limit on the subscription - returns unlimited (behaviour preserving)`() {
-    val limits =
-      provider(subscriptionDto(includedWords = -1, wordsLimit = -1))
-        .getLimits()
-        .words
+    val limits = provider(subscriptionDto(includedWords = -1, wordsLimit = -1)).getLimits()
 
-    assertThat(limits).isEqualTo(
-      UsageLimits.Limit(included = -1, limit = -1, autoUpgradeEffective = false),
-    )
+    assertThat(limits.words).isEqualTo(UsageLimits.Limit(included = -1, limit = -1))
+    assertThat(limits.autoUpgradeEffective).isFalse()
   }
 
   /**

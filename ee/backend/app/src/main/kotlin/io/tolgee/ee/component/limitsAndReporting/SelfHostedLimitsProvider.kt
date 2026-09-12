@@ -22,13 +22,9 @@ class SelfHostedLimitsProvider(
       seats = UsageLimits.Limit(included = subscription.includedSeats, limit = subscription.seatsLimit),
       strings = DEFAULT_LIMITS.strings,
       mtCreditsInCents = DEFAULT_LIMITS.mtCreditsInCents,
-      words =
-        UsageLimits.Limit(
-          included = subscription.includedWords,
-          limit = subscription.wordsLimit,
-          autoUpgradeEffective = subscription.autoUpgradeEffective,
-        ),
+      words = UsageLimits.Limit(included = subscription.includedWords, limit = subscription.wordsLimit),
       metersWords = subscription.metersWords,
+      autoUpgradeEffective = subscription.autoUpgradeEffective,
       isTrial = false,
     )
   }

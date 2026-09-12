@@ -19,6 +19,8 @@ data class UsageLimits(
    * whose allowance is unlimited or negotiated, so the numbers cannot tell the two apart.
    */
   val metersWords: Boolean = false,
+  /** What the instance enforces on: the customer's setting AND eligible AND a higher tier exists. */
+  val autoUpgradeEffective: Boolean = false,
 ) {
   data class Limit(
     /**
@@ -33,11 +35,6 @@ data class UsageLimits(
      * -1 if unlimited
      */
     val limit: Long,
-    /**
-     * Null where the licence does not model auto-upgrade for this metric, which today is every
-     * metric but words.
-     */
-    val autoUpgradeEffective: Boolean? = null,
   ) {
     /**
      * A metered plan whose allowance is unlimited (-1) or negotiated (-2) sends no ceiling, and
