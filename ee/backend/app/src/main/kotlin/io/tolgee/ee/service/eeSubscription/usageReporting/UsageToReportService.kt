@@ -185,19 +185,8 @@ class UsageToReportService(
   }
 
   /**
-   * Reads and clears the flag in one statement, so the answer comes from the row rather than from
-   * the cached DTO — an eviction that lands before the raising writer commits would otherwise let a
-   * concurrent read repopulate the cache with a stale `false` that nothing evicts again.
-   *
-   * Its own transaction, so the row lock is not held across the caller's word count. That also
-   * means a caller whose own transaction already touched this row would block on itself — only the
-   * reporting path may call it.
-   *
-   * The eviction condition keeps an idle word-metered instance from evicting the cache on every
-   * tick: the recount window stays open until something is actually counted, so this otherwise runs
-   * once a minute forever and clears nothing. `#result` requires beforeInvocation to stay false.
-   *
-   * @return whether the flag was raised, and therefore whether a recount is owed
+   * Its own transaction, so a caller whose transaction already touched this row blocks on itself.
+   * The eviction condition reads `#result`, which requires beforeInvocation to stay false.
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1", condition = "#result")
