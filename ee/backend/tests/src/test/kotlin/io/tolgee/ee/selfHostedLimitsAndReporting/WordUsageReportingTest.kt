@@ -390,7 +390,7 @@ class WordUsageReportingTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `creating a key does not, even though creation lists deletedAt among its modifications`() {
+  fun `creating a key does not mark words dirty, though its modifications list deletedAt`() {
     withDeferralWindowOpen { testData ->
       executeInNewTransaction {
         keyService.create(testData.projectBuilder.self, CreateKeyDto(name = "no-translations-key"))
