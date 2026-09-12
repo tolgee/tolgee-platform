@@ -3,7 +3,7 @@ import { Box, Chip, Tooltip } from '@mui/material';
 
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanTitleText } from '../Plan/PlanTitle';
-import { ActivePlanDates } from './ActivePlanDates';
+import { ActivePlanDates } from 'tg.ee.module/billing/component/ActiveSubscription/ActivePlanDates';
 
 type Status = components['schemas']['SelfHostedEeSubscriptionModel']['status'];
 

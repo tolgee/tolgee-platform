@@ -18,7 +18,7 @@ export const getSelfHostedProgressData = ({
     isLimitEnforced(usage.seats.limit)
   );
 
-  const creditsProgress = new ProgressItem(
+  const creditProgress = new ProgressItem(
     usage.credits.included,
     usage.credits.current
   );
@@ -34,7 +34,7 @@ export const getSelfHostedProgressData = ({
   return {
     keysProgress,
     seatsProgress,
-    creditProgress: creditsProgress,
+    creditProgress,
     wordsProgress,
   };
 };
