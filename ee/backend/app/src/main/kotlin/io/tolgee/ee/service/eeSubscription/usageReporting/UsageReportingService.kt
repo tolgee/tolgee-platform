@@ -179,7 +179,7 @@ class UsageReportingService(
       return usageToReport.wordsToReport
     }
     return try {
-      recountWords(usageToReport)
+      recountWordsIfDirty(usageToReport)
     } catch (e: Throwable) {
       // Throwable, not Exception: takeWordsDirty has already committed the flag clear by the time
       // the count runs, so an Error escaping it (this path produced a StackOverflowError once
@@ -195,7 +195,7 @@ class UsageReportingService(
     }
   }
 
-  private fun recountWords(usageToReport: UsageToReportDto): Long {
+  private fun recountWordsIfDirty(usageToReport: UsageToReportDto): Long {
     if (!usageToReportService.takeWordsDirty()) {
       return usageToReport.wordsToReport
     }

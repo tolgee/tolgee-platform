@@ -40,10 +40,6 @@ class EeWordCountReportingListener(
   @Order(Ordered.LOWEST_PRECEDENCE)
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
-    if (billingConfProvider().enabled) {
-      return
-    }
-
     runSentryCatching {
       if (event.changesWordCount()) {
         onWordCountChanged()
@@ -54,9 +50,6 @@ class EeWordCountReportingListener(
   @Order(Ordered.LOWEST_PRECEDENCE)
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onOrganizationDeleted(event: BeforeOrganizationDeleteEvent) {
-    if (billingConfProvider().enabled) {
-      return
-    }
     runSentryCatching { onWordCountChanged() }
   }
 
@@ -67,9 +60,6 @@ class EeWordCountReportingListener(
   @Order(Ordered.LOWEST_PRECEDENCE)
   @EventListener
   fun onBranchDeleted(event: OnBranchSoftDeleted) {
-    if (billingConfProvider().enabled) {
-      return
-    }
     runSentryCatching { onWordCountChanged() }
   }
 
@@ -80,13 +70,13 @@ class EeWordCountReportingListener(
   @Order(Ordered.LOWEST_PRECEDENCE)
   @EventListener
   fun onProjectContentReplaced(event: OnProjectContentReplaced) {
-    if (billingConfProvider().enabled) {
-      return
-    }
     runSentryCatching { onWordCountChanged() }
   }
 
   fun onWordCountChanged() {
+    if (billingConfProvider().enabled) {
+      return
+    }
     if (!selfHostedLimitsProvider.getLimits().metersWords) {
       return
     }
@@ -95,7 +85,7 @@ class EeWordCountReportingListener(
   }
 
   private fun OnProjectActivityEvent.changesWordCount(): Boolean {
-    if (modifiedEntities.keys.any { it == Translation::class }) {
+    if (modifiedEntities.containsKey(Translation::class)) {
       return true
     }
     if (hasDeletionStateChangeOf(*SOFT_DELETABLE_COUNTED_ENTITIES)) {
