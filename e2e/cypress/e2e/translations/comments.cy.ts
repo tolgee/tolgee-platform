@@ -27,6 +27,28 @@ describe('Translation comments', () => {
     createComment('Cool comment 1', 'A key', 'en');
   });
 
+  it('wraps a long link and keeps the resolve button on screen', () => {
+    logInAs('franta');
+    const longLink =
+      'https://tolgee-workspace.slack.com/archives/C01ABCDEFGH/p1712345678901234';
+    createComment(longLink, 'A key', 'en');
+
+    cy.gcy('comment-text')
+      .contains(longLink)
+      .closestDcy('comment')
+      .findDcy('comment-resolve')
+      .should(($button) => {
+        const panelRight = $button
+          .closest('[data-cy="translation-panel-content"]')[0]
+          .getBoundingClientRect().right;
+        expect($button[0].getBoundingClientRect().right).to.be.at.most(
+          panelRight
+        );
+      });
+
+    resolveComment(longLink);
+  });
+
   it('franta can delete all comments (manage)', () => {
     logInAs('franta');
     userCanDeleteComment('C key', 'en', 'First comment');

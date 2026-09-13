@@ -380,7 +380,7 @@ class AutoTranslationService(
     if (!hasDefault) {
       return (list ?: listOf()) + listOf(AutoTranslationConfig().also { it.project = project })
     }
-    return list!!
+    return list
   }
 
   fun getConfigs(

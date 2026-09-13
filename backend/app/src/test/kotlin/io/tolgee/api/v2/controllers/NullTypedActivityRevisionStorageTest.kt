@@ -71,7 +71,7 @@ class NullTypedActivityRevisionStorageTest : AuthorizedControllerTest() {
       entityManager
         .createQuery(
           "select count(ar) from ActivityRevision ar where ar.projectId = :projectId",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("projectId", testData.project.id)
         .singleResult
         .toLong()

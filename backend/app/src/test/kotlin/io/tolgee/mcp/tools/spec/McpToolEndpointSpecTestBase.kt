@@ -46,6 +46,8 @@ abstract class McpToolEndpointSpecTestBase {
 
     whenever(activityHolder.businessEventData).thenReturn(businessEventData)
     whenever(authenticationFacade.authenticatedUserOrNull).thenReturn(mock<UserAccountDto>())
+    // No implicit project by default (a mock's numeric getter would otherwise answer 0, not null); the PAK case overrides.
+    whenever(authenticationFacade.implicitProjectId).thenReturn(null)
 
     sut =
       McpRequestContext(

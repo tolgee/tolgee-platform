@@ -23,7 +23,7 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
 
     ImportFile(importData = import, name = "en.json").let {
       importFileRepository.save(it).let { saved ->
-        importFileRepository.getOne(saved.id).let { got ->
+        importFileRepository.getReferenceById(saved.id).let { got ->
           assertThat(got.name).isEqualTo(it.name)
           assertThat(got.importData).isEqualTo(import)
           assertThat(got.id).isGreaterThan(0L)

@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.TestPropertySource
 import tools.jackson.databind.JsonNode
+import java.net.http.HttpRequest
 import java.time.Duration
 
 // OSIV is disabled to replicate production MCP environment where tool handlers
@@ -34,16 +35,23 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
 
   fun createMcpClientWithoutAuth(): McpSyncClient = createMcpClientWithHeader(null)
 
-  private fun createMcpClientWithHeader(apiKeyHeader: String?): McpSyncClient {
+  fun createMcpClientWithBearer(accessToken: String): McpSyncClient =
+    createMcpClient { it.header("Authorization", "Bearer $accessToken") }
+
+  private fun createMcpClientWithHeader(apiKeyHeader: String?): McpSyncClient =
+    createMcpClient { builder ->
+      if (apiKeyHeader != null) {
+        builder.header("X-API-Key", apiKeyHeader)
+      }
+    }
+
+  private fun createMcpClient(customizeRequest: (HttpRequest.Builder) -> Unit): McpSyncClient {
     val transport =
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder ->
-          if (apiKeyHeader != null) {
-            builder.header("X-API-Key", apiKeyHeader)
-          }
-        }.build()
+        .customizeRequest { builder -> customizeRequest(builder) }
+        .build()
 
     val client =
       McpClient

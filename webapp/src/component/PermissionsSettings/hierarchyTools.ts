@@ -247,3 +247,20 @@ export const updateByDependenciesSoftly = (
   });
   return newState;
 };
+
+// `blockingScopes` is load-bearing: handleToggle's uncheck path removes only the toggled scopes and does no
+// dependent cleanup, so without this term a user can uncheck keys.view while keys.edit stays checked.
+export const isNodeDisabled = ({
+  myScopes,
+  lockedScopes,
+  blockingScopes,
+}: {
+  myScopes: PermissionModelScope[];
+  lockedScopes: PermissionModelScope[] | undefined;
+  blockingScopes: PermissionModelScope[];
+}): boolean => {
+  const lockedRequired =
+    myScopes.length > 0 &&
+    myScopes.every((scope) => lockedScopes?.includes(scope) ?? false);
+  return lockedRequired || blockingScopes.length > 0;
+};

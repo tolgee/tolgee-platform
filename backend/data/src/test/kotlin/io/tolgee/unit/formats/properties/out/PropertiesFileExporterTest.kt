@@ -157,7 +157,7 @@ class PropertiesFileExporterTest {
       filePathProvider =
         ExportFilePathProvider(
           template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "properties",
+          extension = params.format.extension,
         ),
     )
   }

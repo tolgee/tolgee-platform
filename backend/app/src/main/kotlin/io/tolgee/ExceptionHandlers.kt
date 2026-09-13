@@ -4,6 +4,7 @@ import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.tolgee.Metrics
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -12,17 +13,22 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.StreamingUnavailableException
+import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.util.Logging
+import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.QueryException
 import org.springframework.dao.InvalidDataAccessApiUsageException
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -36,18 +42,22 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.IOException
-import java.io.Serializable
 import java.util.Arrays
 import java.util.Collections
+import java.util.concurrent.RejectedExecutionException
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class ExceptionHandlers : Logging {
+class ExceptionHandlers(
+  private val metrics: Metrics,
+  private val bearerChallengeProvider: OAuth2BearerChallengeProvider,
+) : Logging {
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,
@@ -69,7 +79,7 @@ class ExceptionHandlers : Logging {
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   fun handleValidationExceptions(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
-      ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOf(ex.parameter.parameterName) as List<Serializable>?),
+      ErrorResponseBody(Message.WRONG_PARAM_TYPE.code, listOfNotNull(ex.parameter.parameterName)),
       HttpStatus.BAD_REQUEST,
     )
   }
@@ -166,9 +176,16 @@ class ExceptionHandlers : Logging {
     ],
   )
   @ExceptionHandler(ErrorException::class)
-  fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
+  fun handleServerError(
+    ex: ErrorException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
     logger.debug("Exception with response status {} caught", ex.httpStatus, ex)
-    return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
+    val builder = ResponseEntity.status(ex.httpStatus)
+    bearerChallengeProvider.challengeFor(request, ex.httpStatus)?.let {
+      builder.header(HttpHeaders.WWW_AUTHENTICATE, it)
+    }
+    return builder.body(ex.errorResponseBody)
   }
 
   @ExceptionHandler(EntityNotFoundException::class)
@@ -241,9 +258,12 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler(QueryException::class)
-  fun handleQueryException(ex: QueryException): ResponseEntity<ErrorResponseBody> {
+  fun handleQueryException(
+    ex: QueryException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
     if (ex.message!!.contains("could not resolve property")) {
-      return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY))
+      return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY), request)
     }
     throw ex
   }
@@ -261,6 +281,63 @@ class ExceptionHandlers : Logging {
   fun handleRateLimitBlocked(ex: RateLimitBlockedException): ResponseEntity<Unit> {
     logger.debug("Rate limit blocked (strike {})", ex.strikeCount)
     return ResponseEntity.status(444).build()
+  }
+
+  @ExceptionHandler(RejectedExecutionException::class)
+  fun handleAsyncCapacityExceeded(
+    ex: RejectedExecutionException,
+    response: HttpServletResponse,
+  ): ResponseEntity<ErrorResponseBody> {
+    if (!isStreamingUnavailable(ex)) {
+      return handleOtherExceptions(ex)
+    }
+    logger.debug("Streaming pool saturated, rejecting request", ex)
+    return serverBusy(response)
+  }
+
+  @ExceptionHandler(AsyncRequestTimeoutException::class)
+  fun handleAsyncRequestTimeout(
+    ex: AsyncRequestTimeoutException,
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+  ): ResponseEntity<ErrorResponseBody> {
+    // A stream that ran and still timed out is a slowness regression, not capacity, and reporting it
+    // is the point. Only one that never left the queue is the same condition as a rejection.
+    if (request.getAttribute(StreamingResponseBodyProvider.STREAM_STARTED_ATTRIBUTE) != null) {
+      return handleOtherExceptions(ex)
+    }
+    metrics.streamingQueueTimeoutCounter.increment()
+    logger.debug("Request timed out waiting for a streaming thread", ex)
+    return serverBusy(response)
+  }
+
+  private fun isStreamingUnavailable(ex: Throwable): Boolean =
+    ExceptionUtils.getThrowableList(ex).any { it is StreamingUnavailableException }
+
+  private fun serverBusy(response: HttpServletResponse): ResponseEntity<ErrorResponseBody> {
+    dropStagedStreamingHeaders(response)
+    return ResponseEntity
+      .status(HttpStatus.SERVICE_UNAVAILABLE)
+      .header(HttpHeaders.RETRY_AFTER, RETRY_AFTER_SECONDS)
+      .body(ErrorResponseBody(Message.SERVER_BUSY.code, null))
+  }
+
+  /** A caching proxy would key this 503 against the ETag the streaming handler already staged. */
+  private fun dropStagedStreamingHeaders(response: HttpServletResponse) {
+    if (response.isCommitted) return
+    val preserved =
+      response.headerNames
+        .filterNot { STAGED_STREAMING_HEADERS.contains(it) }
+        .associateWith { response.getHeaders(it).toList() }
+    try {
+      response.reset()
+    } catch (e: IllegalStateException) {
+      // A stream that started just as the timeout fired can commit between the check above and
+      // here. Throwing out of an @ExceptionHandler would replace the 503 with a container 500 page.
+      logger.debug("Response committed while answering a streaming timeout", e)
+      return
+    }
+    preserved.forEach { (name, values) -> values.forEach { response.addHeader(name, it) } }
   }
 
   @ExceptionHandler(NoResourceFoundException::class)
@@ -300,13 +377,16 @@ class ExceptionHandlers : Logging {
   }
 
   @ExceptionHandler
-  fun handleTransactionExceptions(exception: TransactionSystemException): ResponseEntity<ErrorResponseBody> {
+  fun handleTransactionExceptions(
+    exception: TransactionSystemException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
     val rootCause = ExceptionUtils.getRootCause(exception)
     if (rootCause is NotFoundException) {
       return handleNotFound(rootCause)
     }
     if (rootCause is BadRequestException) {
-      return handleServerError(rootCause)
+      return handleServerError(rootCause, request)
     }
     throw exception
   }
@@ -319,5 +399,20 @@ class ExceptionHandlers : Logging {
     val message = "ClientAbortException generated by request {} {} from remote address {} with X-FORWARDED-FOR {}"
     val headerXFF = request.getHeader("X-FORWARDED-FOR")
     logger.warn(message, request.method, request.requestURL, request.remoteAddr, headerXFF)
+  }
+
+  companion object {
+    private const val RETRY_AFTER_SECONDS = "5"
+
+    private val STAGED_STREAMING_HEADERS =
+      sortedSetOf(
+        String.CASE_INSENSITIVE_ORDER,
+        HttpHeaders.CONTENT_DISPOSITION,
+        HttpHeaders.CONTENT_LENGTH,
+        HttpHeaders.CONTENT_TYPE,
+        HttpHeaders.ETAG,
+        HttpHeaders.LAST_MODIFIED,
+        "X-Accel-Buffering",
+      )
   }
 }

@@ -113,7 +113,7 @@ class PublicController(
   fun validateEmail(
     @RequestBody email: StringNode,
   ): Boolean {
-    return userAccountService.findActive(email.asText()) == null
+    return userAccountService.findActive(email.asString()) == null
   }
 
   @GetMapping("/authorize_oauth/{serviceType}")

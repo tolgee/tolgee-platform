@@ -26,7 +26,7 @@ import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
-import org.hibernate.LockOptions
+import org.hibernate.Timeouts
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -285,7 +285,7 @@ class BatchJobActionService(
       .setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
         "jakarta.persistence.lock.timeout",
-        LockOptions.SKIP_LOCKED,
+        Timeouts.SKIP_LOCKED_MILLI,
       ).resultList
       .singleOrNull()
   }

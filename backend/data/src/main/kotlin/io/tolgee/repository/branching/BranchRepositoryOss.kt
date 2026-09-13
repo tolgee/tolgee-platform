@@ -2,6 +2,7 @@ package io.tolgee.repository.branching
 
 import io.tolgee.model.branching.Branch
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -39,6 +40,15 @@ interface BranchRepositoryOss : JpaRepository<Branch, Long> {
     """,
   )
   fun findDefaultByProjectId(projectId: Long): Branch?
+
+  @Modifying
+  @Query(
+    """
+    update Branch b set b.originBranch = null
+    where b.originBranch.id in (select origin.id from Branch origin where origin.project.id = :projectId)
+    """,
+  )
+  fun detachOriginReferencesByProjectId(projectId: Long)
 
   fun deleteAllByProjectId(projectId: Long)
 }

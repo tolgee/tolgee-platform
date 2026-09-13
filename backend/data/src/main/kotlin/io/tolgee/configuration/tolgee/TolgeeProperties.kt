@@ -70,6 +70,7 @@ class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  var oauth2: OAuth2ServerProperties = OAuth2ServerProperties(),
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,
   @DocProperty(hidden = true)
@@ -108,6 +109,7 @@ class TolgeeProperties(
   @DocProperty(description = "Maximum length of translations.")
   var maxTranslationTextLength: Long = 10000,
   var batch: BatchProperties = BatchProperties(),
+  var async: AsyncProperties = AsyncProperties(),
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var languageTool: LanguageToolProperties = LanguageToolProperties(),

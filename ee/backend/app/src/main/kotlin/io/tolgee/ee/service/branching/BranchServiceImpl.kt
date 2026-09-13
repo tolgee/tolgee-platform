@@ -11,6 +11,7 @@ import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.ee.service.TaskService
 import io.tolgee.ee.service.qa.QaRecheckService
 import io.tolgee.events.OnBranchSoftDeleted
@@ -22,6 +23,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.repository.branching.KeyMetaSnapshotRepository
+import io.tolgee.repository.branching.TranslationSnapshotRepository
+import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
@@ -41,6 +45,10 @@ class BranchServiceImpl(
   override val branchRepository: BranchRepository,
   override val branchMergeService: BranchMergeService,
   private val entityManager: EntityManager,
+  override val contentDeliveryConfigRepository: ContentDeliveryConfigRepository,
+  override val keySnapshotRepository: KeySnapshotRepository,
+  override val translationSnapshotRepository: TranslationSnapshotRepository,
+  override val keyMetaSnapshotRepository: KeyMetaSnapshotRepository,
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
   private val taskService: TaskService,
@@ -51,7 +59,14 @@ class BranchServiceImpl(
   private val metrics: Metrics,
   @Lazy
   private val qaRecheckService: QaRecheckService,
-) : AbstractBranchService(branchRepository, branchMergeService) {
+) : AbstractBranchService(
+    branchRepository,
+    branchMergeService,
+    contentDeliveryConfigRepository,
+    keySnapshotRepository,
+    translationSnapshotRepository,
+    keyMetaSnapshotRepository,
+  ) {
   override fun getBranches(
     projectId: Long,
     page: Pageable,

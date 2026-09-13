@@ -24,7 +24,7 @@ class McpProjectToolsTest : AbstractMcpTest() {
     assertThat(json["page"].asInt()).isEqualTo(0)
     assertThat(json["totalPages"].asInt()).isGreaterThanOrEqualTo(1)
     assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
-    val projectNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
+    val projectNames = (0 until json["items"].size()).map { json["items"][it]["name"].asString() }
     assertThat(projectNames).contains("test_project")
   }
 
@@ -33,7 +33,7 @@ class McpProjectToolsTest : AbstractMcpTest() {
     val json = callToolAndGetJson(client, "list_projects", mapOf("search" to "test_project"))
     assertThat(json["items"].isArray).isTrue()
     assertThat(json["items"].size()).isGreaterThanOrEqualTo(1)
-    assertThat(json["items"][0]["name"].asText()).isEqualTo("test_project")
+    assertThat(json["items"][0]["name"].asString()).isEqualTo("test_project")
   }
 
   @Test
@@ -52,7 +52,7 @@ class McpProjectToolsTest : AbstractMcpTest() {
         ),
       )
     assertThat(json["id"]).isNotNull()
-    assertThat(json["name"].asText()).isEqualTo("New MCP Project")
+    assertThat(json["name"].asString()).isEqualTo("New MCP Project")
   }
 
   @Test

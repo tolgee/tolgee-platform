@@ -77,7 +77,7 @@ const StyledTextPre = styled('pre')`
   line-height: 1.1;
   font-family: ${({ theme }) => theme.typography.fontFamily};
   white-space: pre-wrap;
-  word-wrap: break-word;
+  overflow-wrap: anywhere;
 
   &.textUnresolved {
     font-weight: 700;

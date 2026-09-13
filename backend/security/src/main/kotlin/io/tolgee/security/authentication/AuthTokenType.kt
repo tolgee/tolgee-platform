@@ -17,6 +17,7 @@
 package io.tolgee.security.authentication
 
 enum class AuthTokenType {
+  /** Any API credential — PAK, PAT, or OAuth2 access token. */
   ANY,
 
   /** Personal Access Token */

@@ -7,6 +7,7 @@ import {
 } from '@tginternal/editor';
 import { styled, useTheme } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 import { placeholderToElement } from './placeholderToElement';
 import { useProject } from 'tg.hooks/useProject';
 import { useGlossaryTermHighlights } from 'tg.ee';
@@ -169,7 +170,12 @@ export const TranslationWithPlaceholders = ({
   let index = 0;
   for (const modifier of modifiers) {
     if (modifier.position.start !== index) {
-      chunks.push(text.substring(index, modifier.position.start));
+      chunks.push(
+        ...renderWithInvisibleCharacters(
+          text.substring(index, modifier.position.start),
+          `chunk-${index}`
+        )
+      );
     }
     index = modifier.position.end;
     const segmentText = text.substring(
@@ -208,7 +214,9 @@ export const TranslationWithPlaceholders = ({
   }
 
   if (index < text.length) {
-    chunks.push(text.substring(index));
+    chunks.push(
+      ...renderWithInvisibleCharacters(text.substring(index), `chunk-${index}`)
+    );
   }
 
   return (

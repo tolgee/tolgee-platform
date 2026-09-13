@@ -232,9 +232,8 @@ class V2ImportControllerAddFilesTest : ProjectAuthControllerTest("/v2/projects/"
         assertThat(
           it.files[0]
             .issues[0]
-            .params
-            ?.get(0)
-            ?.value,
+            .params[0]
+            .value,
         ).isEqualTo("too_long")
       }
     }

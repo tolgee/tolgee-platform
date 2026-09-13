@@ -402,7 +402,7 @@ abstract class AbstractBatchJobsGeneralTest :
 
     executions
       .last()
-      .successTargets!!
+      .successTargets
       .assert
       .size()
       .isEqualTo(2) // 2 failed items in a chunk are retried successfully

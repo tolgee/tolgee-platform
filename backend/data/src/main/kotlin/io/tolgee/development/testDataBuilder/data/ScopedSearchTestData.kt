@@ -12,9 +12,9 @@ import java.util.Date
  * data controller.
  */
 class ScopedSearchTestData : BaseTestData() {
-  lateinit var germanLanguageBuilder: LanguageBuilder
+  var germanLanguageBuilder: LanguageBuilder
   val germanLanguage: Language get() = germanLanguageBuilder.self
-  lateinit var cartTitleKey: Key
+  var cartTitleKey: Key
 
   init {
     projectBuilder.apply {

@@ -44,7 +44,7 @@ class McpKeyToolsTest : AbstractMcpTest() {
     assertThat(json["totalItems"].asLong()).isEqualTo(3)
     assertThat(json["page"].asInt()).isEqualTo(0)
     assertThat(json["totalPages"].asInt()).isEqualTo(1)
-    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asText() }
+    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asString() }
     assertThat(keyNames).containsExactlyInAnyOrder("first.key", "second.key", "third.key")
   }
 
@@ -88,7 +88,7 @@ class McpKeyToolsTest : AbstractMcpTest() {
         mapOf("projectId" to data.projectId, "query" to "search.target"),
       )
     assertThat(json["items"].isArray).isTrue()
-    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asText() }
+    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asString() }
     assertThat(keyNames).contains("search.target")
   }
 
@@ -110,7 +110,7 @@ class McpKeyToolsTest : AbstractMcpTest() {
         mapOf("projectId" to data.projectId, "keyName" to "detail.key"),
       )
     assertThat(json["keyId"]).isNotNull()
-    assertThat(json["keyName"].asText()).isEqualTo("detail.key")
+    assertThat(json["keyName"].asString()).isEqualTo("detail.key")
   }
 
   @Test
@@ -134,7 +134,7 @@ class McpKeyToolsTest : AbstractMcpTest() {
           "newName" to "new.name",
         ),
       )
-    assertThat(json["name"].asText()).isEqualTo("new.name")
+    assertThat(json["name"].asString()).isEqualTo("new.name")
 
     val key = keyService.find(data.projectId, "new.name", null)
     assertThat(key).isNotNull()

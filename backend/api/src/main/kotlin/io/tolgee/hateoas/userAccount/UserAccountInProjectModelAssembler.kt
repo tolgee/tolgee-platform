@@ -23,14 +23,14 @@ class UserAccountInProjectModelAssembler(
     UserAccountInProjectModel::class.java,
   ) {
   override fun toModel(view: ExtendedUserAccountInProject): UserAccountInProjectModel {
-    // Deliberately ignores whether project is public: the members list shows each member's
-    // configured, editable permissions, not the project-wide community permissions.
+    // The members list shows configured, editable permissions — not the project-wide community floor.
     val computedPermissions =
       permissionService.computeProjectPermission(
         view.organizationRole,
         view.organizationBasePermission,
         view.directPermission,
         UserAccount.Role.USER,
+        asScopedCredential = false,
       )
     val avatar = avatarService.getAvatarLinks(view.avatarHash)
     return UserAccountInProjectModel(

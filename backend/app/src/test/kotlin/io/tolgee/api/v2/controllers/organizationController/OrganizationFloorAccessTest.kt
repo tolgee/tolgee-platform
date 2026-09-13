@@ -125,7 +125,7 @@ class OrganizationFloorAccessTest : AuthorizedControllerTest() {
       .path("_embedded")
       .path("languages")
       .values()
-      .map { it.path("tag").asText() }
+      .map { it.path("tag").asString() }
   }
 
   @Test

@@ -20,7 +20,7 @@ class ImportRepositoryTest : AbstractSpringTest() {
     Import(project = base.project).let {
       it.author = base.userAccount
       importRepository.save(it).let {
-        importRepository.getOne(it.id).let { got ->
+        importRepository.getReferenceById(it.id).let { got ->
           assertThat(got.author).isEqualTo(base.userAccount)
           assertThat(got.project).isEqualTo(base.project)
           assertThat(got.id).isGreaterThan(0L)

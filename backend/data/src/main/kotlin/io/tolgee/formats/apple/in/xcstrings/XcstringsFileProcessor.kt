@@ -17,7 +17,7 @@ class XcstringsFileProcessor(
   override fun process() {
     try {
       val root = objectMapper.readTree(context.file.data.inputStream())
-      sourceLanguage = root.get("sourceLanguage")?.asText()
+      sourceLanguage = root.get("sourceLanguage")?.asString()
         ?: throw ImportCannotParseFileException(context.file.name, "Missing sourceLanguage in xcstrings file")
 
       val strings =
@@ -64,7 +64,7 @@ class XcstringsFileProcessor(
   ) {
     val localizations = value.get("localizations") ?: return
 
-    value.get("comment")?.asText()?.let { comment ->
+    value.get("comment")?.asString()?.let { comment ->
       context.addKeyDescription(key, comment)
     }
 
@@ -91,9 +91,9 @@ class XcstringsFileProcessor(
     localization: JsonNode,
   ) {
     val stringUnit = localization.get("stringUnit")
-    stringUnit?.get("state")?.asText()
+    stringUnit?.get("state")?.asString()
 
-    val translationValue = stringUnit?.get("value")?.asText()
+    val translationValue = stringUnit?.get("value")?.asString()
 
     if (translationValue != null) {
       addConvertedTranslation(key, languageTag, translationValue)
@@ -111,7 +111,7 @@ class XcstringsFileProcessor(
 
     variations.properties().forEach { (form, content) ->
       val stringUnit = content.get("stringUnit")
-      val value = stringUnit?.get("value")?.asText()
+      val value = stringUnit?.get("value")?.asString()
 
       if (value != null) {
         forms[form] = value

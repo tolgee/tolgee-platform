@@ -79,7 +79,7 @@ class OpenaiApiService :
       } catch (e: HttpClientErrorException) {
         if (e.statusCode == HttpStatus.BAD_REQUEST) {
           val body = parseErrorBody(e)
-          if (body?.get("error")?.get("code")?.asText() == "content_filter") {
+          if (body?.get("error")?.get("code")?.asString() == "content_filter") {
             throw LlmContentFilterException()
           }
         }

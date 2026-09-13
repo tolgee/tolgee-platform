@@ -64,7 +64,7 @@ class SsoDelegateEe(
       .build()
 
   override fun getTokenResponse(
-    code: String?,
+    receivedCode: String?,
     invitationCode: String?,
     redirectUri: String?,
     domain: String?,
@@ -80,7 +80,7 @@ class SsoDelegateEe(
     )
 
     val token =
-      fetchToken(tenant, code, redirectUri)
+      fetchToken(tenant, receivedCode, redirectUri)
         ?: throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
     val idToken =
       token.id_token

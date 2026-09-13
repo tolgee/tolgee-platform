@@ -214,12 +214,12 @@ class SharedTranslationMemoryControllerTest : AuthorizedControllerTest() {
     val tms = tree.at("/_embedded/translationMemories")
 
     // Find shared TM by name (array order is not guaranteed)
-    val sharedTm = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Shared Marketing TM" }
+    val sharedTm = (0 until tms.size()).map { tms[it] }.first { it["name"].asString() == "Shared Marketing TM" }
     assertThat(sharedTm["assignedProjectNames"].size()).isEqualTo(1)
-    assertThat(sharedTm["assignedProjectNames"][0].asText()).isEqualTo("Project With TM")
+    assertThat(sharedTm["assignedProjectNames"][0].asString()).isEqualTo("Project With TM")
 
     // Unassigned TM
-    val unassigned = (0 until tms.size()).map { tms[it] }.first { it["name"].asText() == "Unassigned Shared TM" }
+    val unassigned = (0 until tms.size()).map { tms[it] }.first { it["name"].asString() == "Unassigned Shared TM" }
     assertThat(unassigned["assignedProjectNames"].size()).isEqualTo(0)
   }
 

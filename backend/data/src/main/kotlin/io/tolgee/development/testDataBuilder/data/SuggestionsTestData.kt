@@ -32,17 +32,17 @@ class SuggestionsTestData(
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
   val englishSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
-  lateinit var czechReviewerEnglishSuggestion: SuggestionBuilder
+  var czechReviewerEnglishSuggestion: SuggestionBuilder
   val czechTranslations: MutableList<TranslationBuilder> = mutableListOf()
-  lateinit var pluralKey: KeyBuilder
-  lateinit var pluralSuggestion: SuggestionBuilder
+  var pluralKey: KeyBuilder
+  var pluralSuggestion: SuggestionBuilder
   lateinit var czechLanguage: Language
 
   // A separate project (different org) with its own key + suggestion.
   // Used to verify that access to a suggestion by id from another project is rejected.
-  lateinit var unrelatedProject: ProjectBuilder
-  lateinit var unrelatedKey: KeyBuilder
-  lateinit var unrelatedSuggestion: SuggestionBuilder
+  var unrelatedProject: ProjectBuilder
+  var unrelatedKey: KeyBuilder
+  var unrelatedSuggestion: SuggestionBuilder
 
   init {
     user.name = "Tasks test user"

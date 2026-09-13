@@ -112,6 +112,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
     expectedMain.assert.containsAll(apiMain)
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun getRevisionIds(url: String): Set<Long> {
     val response = performProjectAuthGet(url).andIsOk.andReturn()
     val body = response.mapResponseTo<Map<String, Any?>>()
@@ -139,6 +140,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
       .toSet()
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun getModifiedEntitiesFromApi(
     revisionId: Long,
     branchName: String,

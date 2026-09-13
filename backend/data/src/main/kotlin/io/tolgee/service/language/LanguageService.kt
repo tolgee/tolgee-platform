@@ -434,6 +434,7 @@ class LanguageService(
 
   @Cacheable(Caches.LANGUAGES, key = "#projectId")
   @Transactional
+  @Suppress("UNCHECKED_CAST")
   fun getProjectLanguages(projectId: Long): List<LanguageDto> {
     val cache = cacheManager.getCache(Caches.LANGUAGES)
     val list =

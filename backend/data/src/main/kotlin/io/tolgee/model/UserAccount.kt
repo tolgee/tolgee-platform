@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
@@ -25,7 +24,8 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.Date
 
 @Entity
@@ -62,7 +62,7 @@ data class UserAccount(
   @Column(name = "totp_last_used_time_step")
   var totpLastUsedTimeStep: Long? = null
 
-  @Type(ListArrayType::class)
+  @JdbcTypeCode(SqlTypes.ARRAY)
   @Column(name = "mfa_recovery_codes", columnDefinition = "text[]")
   var mfaRecoveryCodes: List<String> = emptyList()
 

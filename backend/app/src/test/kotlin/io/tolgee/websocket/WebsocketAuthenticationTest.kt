@@ -1,7 +1,7 @@
 package io.tolgee.websocket
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.development.testDataBuilder.data.WebsocketAuthenticationTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.model.Pat
@@ -31,7 +31,7 @@ import java.util.Date
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
-  lateinit var testData: BaseTestData
+  lateinit var testData: WebsocketAuthenticationTestData
 
   @Autowired
   lateinit var notificationService: NotificationService
@@ -41,7 +41,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
 
   @BeforeEach
   fun before() {
-    testData = BaseTestData()
+    testData = WebsocketAuthenticationTestData()
   }
 
   @Test
@@ -83,7 +83,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `forbidden with insufficient scopes on user with JWT`() {
-    val user2 = testData.root.addUserAccount { username = "user2" }
+    val user2 = testData.addSecondUser()
     saveTestData()
     testProjectSubscribeForbidden(
       auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id)),
@@ -134,6 +134,42 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     saveTestData()
     testProjectSubscribeForbiddenViaControlSocket(
       auth = WebsocketTestHelper.Auth(apiKey = apiKey.key),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a key bound to another project cannot subscribe to this project's topic`() {
+    saveTestData()
+    // Ample scopes on purpose: anything less and the subscription is refused for the scopes, not the binding.
+    val otherProject = testData.addOtherProject()
+    testDataService.saveTestData(testData.root)
+    val otherProjectKey =
+      apiKeyService.create(
+        userAccount = testData.user,
+        scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW),
+        project = otherProject,
+      )
+
+    testProjectSubscribeForbiddenViaControlSocket(
+      auth = WebsocketTestHelper.Auth(apiKey = otherProjectKey.key),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `an admin's key cannot subscribe to a project the admin has no access to`() {
+    val outsideAdmin = testData.addOutsideAdmin()
+    saveTestData()
+    val adminKey =
+      apiKeyService.create(
+        userAccount = outsideAdmin,
+        scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW),
+        project = testData.projectBuilder.self,
+      )
+
+    testProjectSubscribeForbiddenViaControlSocket(
+      auth = WebsocketTestHelper.Auth(apiKey = adminKey.key),
     )
   }
 
@@ -239,7 +275,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `forbidden with insufficient scopes on user with PAT`() {
-    val user2 = testData.root.addUserAccount { username = "user2" }
+    val user2 = testData.addSecondUser()
     val pat =
       user2
         .addPat {

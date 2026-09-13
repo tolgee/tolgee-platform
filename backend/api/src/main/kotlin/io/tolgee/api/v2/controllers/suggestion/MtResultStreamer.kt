@@ -16,6 +16,7 @@ import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.service.machineTranslation.MtTranslatorResult
 import io.tolgee.util.Logging
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.debug
 import io.tolgee.util.logger
@@ -43,7 +44,7 @@ class MtResultStreamer(
     val info = getInfo()
     val securityContext = SecurityContextHolder.getContext()
 
-    return streamingResponseBodyProvider.createStreamingResponseBody { outputStream ->
+    return streamingResponseBodyProvider.createStreamingResponseBody(StreamType.MT_SUGGEST) { outputStream ->
       SecurityContextHolder.setContext(securityContext)
       try {
         this.outputStream = outputStream

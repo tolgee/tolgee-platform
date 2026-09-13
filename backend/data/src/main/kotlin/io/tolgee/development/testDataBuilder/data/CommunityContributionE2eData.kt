@@ -4,7 +4,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Project
 
 class CommunityContributionE2eData : BaseTestData("communityContributionOwner", "Owner private project") {
-  lateinit var publicProject: Project
+  var publicProject: Project
 
   init {
     root.apply {

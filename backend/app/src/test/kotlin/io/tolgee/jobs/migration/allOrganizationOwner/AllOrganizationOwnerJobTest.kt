@@ -95,7 +95,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   fun `deletes permission`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
-      val firstProject = projectRepository.getById(project1.id)
+      val firstProject = projectRepository.getReferenceById(project1.id)
       assertThat(firstProject.permissions).isEmpty()
     }
   }
@@ -104,7 +104,7 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   fun `reuses existing organization`() {
     allOrganizationOwnerJobRunner.run()
     transactionTemplate.execute {
-      val firstProject = projectRepository.getById(project1.id)
+      val firstProject = projectRepository.getReferenceById(project1.id)
       assertThat(firstProject.permissions).isEmpty()
     }
   }

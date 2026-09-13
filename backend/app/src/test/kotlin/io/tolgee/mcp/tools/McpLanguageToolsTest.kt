@@ -20,7 +20,7 @@ class McpLanguageToolsTest : AbstractMcpTest() {
   fun `list_languages auto-resolves projectId from PAK`() {
     val json = callToolAndGetJson(client, "list_languages")
     assertThat(json["items"].isArray).isTrue()
-    val tags = (0 until json["items"].size()).map { json["items"][it]["tag"].asText() }
+    val tags = (0 until json["items"].size()).map { json["items"][it]["tag"].asString() }
     assertThat(tags).contains("en")
   }
 
@@ -28,7 +28,7 @@ class McpLanguageToolsTest : AbstractMcpTest() {
   fun `list_languages returns project languages`() {
     val json = callToolAndGetJson(client, "list_languages", mapOf("projectId" to data.projectId))
     assertThat(json["items"].isArray).isTrue()
-    val tags = (0 until json["items"].size()).map { json["items"][it]["tag"].asText() }
+    val tags = (0 until json["items"].size()).map { json["items"][it]["tag"].asString() }
     assertThat(tags).contains("en")
   }
 
@@ -41,7 +41,7 @@ class McpLanguageToolsTest : AbstractMcpTest() {
         mapOf("projectId" to data.projectId, "name" to "German", "tag" to "de"),
       )
     assertThat(json["id"]).isNotNull()
-    assertThat(json["tag"].asText()).isEqualTo("de")
+    assertThat(json["tag"].asString()).isEqualTo("de")
 
     val language = languageService.getEntity(json["id"].asLong())
     assertThat(language.tag).isEqualTo("de")
@@ -63,7 +63,7 @@ class McpLanguageToolsTest : AbstractMcpTest() {
 
     val json = callToolAndGetJson(client, "list_namespaces", mapOf("projectId" to data.projectId))
     assertThat(json.isArray).isTrue()
-    val nsNames = (0 until json.size()).mapNotNull { json[it]["name"]?.asText() }
+    val nsNames = (0 until json.size()).mapNotNull { json[it]["name"]?.asString() }
     assertThat(nsNames).contains("my-namespace")
   }
 }

@@ -46,7 +46,7 @@ class McpRequestContext(
     checkTokenType(spec)
     // 3–4. Reuses [ProjectContextService.setup], mirrors [ProjectAuthorizationInterceptor.preHandleInternal]
     if (!spec.isGlobalRoute) {
-      val resolvedProjectId = projectId ?: resolveProjectIdFromPak()
+      val resolvedProjectId = projectId ?: resolveImplicitProjectId()
       projectContextService.setup(
         resolvedProjectId,
         spec.requiredScopes,
@@ -71,9 +71,16 @@ class McpRequestContext(
     }
   }
 
-  /** Mirrors [AuthenticationInterceptor.preHandle] */
+  /**
+   * The MCP endpoint is a RouterFunction, so [AuthenticationInterceptor] never runs for it and its path-keyed OAuth
+   * rule cannot apply — this check is what stands in for it.
+   */
   private fun checkTokenType(spec: ToolEndpointSpec) {
     if (!authenticationFacade.isApiAuthentication) return
+
+    if (authenticationFacade.isOAuthTokenAuth && spec.allowedTokenType != AuthTokenType.ANY) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
 
     when (spec.allowedTokenType) {
       AuthTokenType.ONLY_PAT -> {
@@ -111,6 +118,9 @@ class McpRequestContext(
   /** Mirrors [OrganizationAuthorizationInterceptor.preHandleInternal], reuses [OrganizationRoleService.isUserOfRole] */
   private fun checkOrgRole(spec: ToolEndpointSpec) {
     val requiredRole = spec.requiredOrgRole ?: return
+    if (authenticationFacade.isOAuthTokenAuth) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
     val orgId = organizationHolder.organizationOrNull?.id ?: return
     val userId = authenticationFacade.authenticatedUser.id
 
@@ -138,12 +148,8 @@ class McpRequestContext(
     activityHolder.activity = activityType
   }
 
-  private fun resolveProjectIdFromPak(): Long {
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      return authenticationFacade.projectApiKey.projectId
-    }
-    throw ProjectNotSelectedException()
-  }
+  private fun resolveImplicitProjectId(): Long =
+    authenticationFacade.implicitProjectId ?: throw ProjectNotSelectedException()
 
   private fun emitPostHogEvent(spec: ToolEndpointSpec) {
     activityHolder.businessEventData["mcp"] = "true"

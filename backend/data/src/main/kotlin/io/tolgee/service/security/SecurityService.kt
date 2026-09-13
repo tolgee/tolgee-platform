@@ -3,7 +3,6 @@ package io.tolgee.service.security
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
-import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
@@ -22,12 +21,12 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ScopedCredential
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.ProjectFeatureGuard
-import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -85,12 +84,20 @@ class SecurityService(
   }
 
   fun checkAnyProjectPermission(projectId: Long) {
-    if (
-      getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !activeUser.isSupporterOrAdmin()
-    ) {
+    val hasNoProjectPermission = getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty()
+    val mayFallBackOnAdminReach = !authenticationFacade.isScopedCredential && activeUser.isSupporterOrAdmin()
+    if (hasNoProjectPermission && !mayFallBackOnAdminReach) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
+    authenticationFacade.scopedCredential?.let { requireCoversProject(it, projectId) }
+  }
+
+  private fun requireCoversProject(
+    credential: ScopedCredential,
+    projectId: Long,
+  ) {
+    if (credential.coversProject(projectId)) return
+    throw PermissionException(credential.projectMismatchMessage)
   }
 
   fun currentPermittedScopesContain(scope: Scope): Boolean {
@@ -119,41 +126,39 @@ class SecurityService(
    * Returns current permitted scopes, expanded
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
-    val projectScopes =
+    val scopes =
       Scope
         .expand(
           getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
         ).toSet()
-    val apiKey = activeApiKey ?: return projectScopes
 
-    return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
+    val credential = authenticationFacade.scopedCredential ?: return scopes
+    if (!credential.coversProject(projectId)) return emptySet()
+    return scopes.intersect(Scope.expand(credential.scopes).toSet())
   }
 
   /**
-   * Checks if the user has required permission for the project. If no user or API key is provided,
-   * uses the currently authenticated user and active API key.
-   * Always checks permissions for the current user even when using the API key for security reasons.
+   * Checks the user's own permission on the project, then narrows it by the scoped credential.
    *
+   * [credential] defaults to the one in the security context; pass it explicitly off the request thread, where
+   * there is none (see `WebSocketConfig`).
    */
   fun checkProjectPermission(
     projectId: Long,
     requiredPermission: Scope,
     user: UserAccountDto? = null,
-    apiKey: ApiKeyDto? = null,
+    credential: ScopedCredential? = null,
   ) {
     val user = user ?: activeUser
-    // Always check for the current user even if we're using an API key for security reasons.
-    // This prevents improper preservation of permissions.
+    // Always check for the current user even when a scoped credential is presented: the credential can only narrow
+    // what the user already has, never widen it.
     checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
-    val apiKey = apiKey ?: activeApiKey
-    apiKey ?: return
-
-    if (apiKey.projectId != projectId) {
-      throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
+    val credential = credential ?: authenticationFacade.scopedCredential ?: return
+    requireCoversProject(credential, projectId)
+    if (!Scope.expand(credential.scopes).contains(requiredPermission)) {
+      throw PermissionException(missingScopes = listOf(requiredPermission))
     }
-
-    this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
   }
 
   fun checkTaskEditScopeOrAssigned(
@@ -174,12 +179,18 @@ class SecurityService(
     try {
       checkProjectPermission(projectId, scope)
     } catch (err: PermissionException) {
+      if (!hasTaskAssignedAccess(projectId)) {
+        throw err
+      }
       val assignees = taskService.findAssigneeById(projectId, taskNumber, activeUser.id)
       if (assignees.isEmpty() || assignees[0].id != activeUser.id) {
         throw err
       }
     }
   }
+
+  private fun hasTaskAssignedAccess(projectId: Long): Boolean =
+    getCurrentPermittedScopes(projectId).contains(Scope.TASKS_ASSIGNED_ACCESS)
 
   private fun translationInTask(
     keyId: Long,
@@ -201,12 +212,13 @@ class SecurityService(
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
   ) {
-    if (userAccountDto.isAdmin()) {
+    val asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountDto.id)
+    if (!asScopedCredential && userAccountDto.isAdmin()) {
       return
     }
 
     val isReadonlyAccess = requiredScope.isReadOnly()
-    if (isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
+    if (!asScopedCredential && isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
       return
     }
 
@@ -234,7 +246,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -247,7 +259,7 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermissionByTag(
         projectId,
         languageTags,
@@ -270,7 +282,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
@@ -282,7 +294,7 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
-    runIfUserNotServerAdmin {
+    runUnlessElevatedAsServerAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkSuggestManagePermitted(*languageIds.toLongArray()) }
@@ -294,31 +306,11 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
+    runUnlessElevatedAsSupporterOrAdmin {
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
     }
-  }
-
-  private fun translationsInTask(
-    projectId: Long,
-    taskType: TaskType,
-    languageIds: Collection<Long>,
-    keyId: Long? = null,
-  ): Boolean {
-    checkLanguageViewPermission(projectId, languageIds)
-
-    if (keyId != null && languageIds.isNotEmpty()) {
-      languageIds.forEach {
-        if (!translationInTask(keyId, it, taskType)) {
-          return false
-        }
-      }
-    } else {
-      return false
-    }
-    return true
   }
 
   fun checkLanguageTranslatePermission(
@@ -329,14 +321,15 @@ class SecurityService(
     passIfAnyPermissionCheckSucceeds(
       {
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-        runIfUserNotServerAdmin {
+        runUnlessElevatedAsServerAdmin {
           checkLanguagePermission(
             projectId,
           ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
         }
       },
       {
-        if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+        checkLanguageViewPermission(projectId, languageIds)
+        if (!mayActAsTaskAssignee(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
           throw PermissionException(Message.OPERATION_NOT_PERMITTED)
         }
       },
@@ -366,16 +359,28 @@ class SecurityService(
   ) {
     try {
       checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-      runIfUserNotServerAdmin {
+      runUnlessElevatedAsServerAdmin {
         checkLanguagePermission(
           projectId,
         ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
       }
     } catch (e: PermissionException) {
-      if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
+      checkLanguageViewPermission(projectId, languageIds)
+      if (!mayActAsTaskAssignee(projectId, TaskType.REVIEW, languageIds, keyId)) {
         throw e
       }
     }
+  }
+
+  private fun mayActAsTaskAssignee(
+    projectId: Long,
+    taskType: TaskType,
+    languageIds: Collection<Long>,
+    keyId: Long?,
+  ): Boolean {
+    if (!hasTaskAssignedAccess(projectId)) return false
+    if (keyId == null || languageIds.isEmpty()) return false
+    return languageIds.all { translationInTask(keyId, it, taskType) }
   }
 
   fun checkScopeOrAssignedToTask(
@@ -388,6 +393,9 @@ class SecurityService(
       checkProjectPermission(projectHolder.project.id, scope)
     } catch (e: PermissionException) {
       checkProjectPermission(projectHolder.project.id, Scope.TRANSLATIONS_VIEW)
+      if (!hasTaskAssignedAccess(projectHolder.project.id)) {
+        throw e
+      }
       if (!translationInTask(keyId, languageId, taskType)) {
         throw e
       }
@@ -503,38 +511,7 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
   }
 
-  /**
-   * Checks if API key has required scopes.
-   *
-   * It does not check whether the user has the permission to use all the scope. This needs to be done separately.
-   *
-   * If you need to check both, use [checkProjectPermission] function.
-   */
-  fun checkApiKeyScopes(
-    scopes: Collection<Scope>,
-    apiKey: ApiKeyDto,
-  ) {
-    checkApiKeyScopes(apiKey) { expandedScopes ->
-      val hasRequiredPermission = scopes.all { expandedScopes.contains(it) }
-      if (!hasRequiredPermission) {
-        val missingScopes = scopes.filter { !expandedScopes.contains(it) }
-        throw PermissionException(missingScopes = missingScopes)
-      }
-    }
-  }
-
-  private fun checkApiKeyScopes(
-    apiKey: ApiKeyDto,
-    checkFn: (expandedScopes: Array<Scope>) -> Unit,
-  ) {
-    val expandedScopes = Scope.expand(apiKey.scopes)
-    checkFn(expandedScopes)
-  }
-
   fun checkScreenshotsUploadPermission(projectId: Long) {
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      checkApiKeyScopes(setOf(Scope.SCREENSHOTS_UPLOAD), authenticationFacade.projectApiKey)
-    }
     checkProjectPermission(projectId, Scope.SCREENSHOTS_UPLOAD)
   }
 
@@ -672,23 +649,20 @@ class SecurityService(
     }
   }
 
-  private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
-    if (!activeUser.isAdmin()) {
+  private fun runUnlessElevatedAsServerAdmin(runnable: () -> Unit) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isAdmin()) {
       runnable()
     }
   }
 
-  private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
-    if (!activeUser.isSupporterOrAdmin()) {
+  private fun runUnlessElevatedAsSupporterOrAdmin(runnable: () -> Unit) {
+    if (authenticationFacade.isScopedCredential || !activeUser.isSupporterOrAdmin()) {
       runnable()
     }
   }
 
   private val activeUser: UserAccountDto
     get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
-
-  private val activeApiKey: ApiKeyDto?
-    get() = if (authenticationFacade.isProjectApiKeyAuth) authenticationFacade.projectApiKey else null
 
   companion object {
     private const val KEY_ID_LOOKUP_CHUNK_SIZE = 10_000

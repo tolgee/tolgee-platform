@@ -17,7 +17,7 @@ import io.tolgee.model.enums.TranslationState
  * - 1 branched key (excluded by default branch filter)
  */
 class TranslationsSnapshotTestData : BaseTestData("franta", "Franta's project") {
-  lateinit var germanLanguage: Language
+  var germanLanguage: Language
 
   init {
     projectBuilder.self.useBranching = true

@@ -5,6 +5,7 @@ import { LinkReadMore } from 'tg.component/LinkReadMore';
 import { DOCS_LINKS } from 'tg.constants/docLinks';
 import { generateKeyNameStyle } from '@tginternal/editor';
 
+import { renderWithInvisibleCharacters } from 'tg.component/InvisibleCharacter';
 import { splitKeyName } from 'tg.fixtures/keyName';
 
 const StyledRoot = styled('span')`
@@ -37,7 +38,7 @@ export const KeyName: React.FC<React.PropsWithChildren<Props>> = ({
   if (!msgctxt) {
     return (
       <span className={className} data-cy={dataCy}>
-        {name}
+        {renderWithInvisibleCharacters(name, 'key-name')}
       </span>
     );
   }
@@ -57,10 +58,10 @@ export const KeyName: React.FC<React.PropsWithChildren<Props>> = ({
         leaveDelay={200}
       >
         <span className="keyname-msgctxt-widget" data-cy="key-name-msgctxt">
-          {msgctxt}
+          {renderWithInvisibleCharacters(msgctxt, 'key-msgctxt')}
         </span>
       </Tooltip>
-      {msgid}
+      {renderWithInvisibleCharacters(msgid, 'key-msgid')}
     </Wrapper>
   );
 };

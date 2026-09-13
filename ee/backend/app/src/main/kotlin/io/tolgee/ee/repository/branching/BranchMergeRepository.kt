@@ -2,12 +2,12 @@ package io.tolgee.ee.repository.branching
 
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.repository.branching.BranchMergeRepositoryOss
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
-interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
+interface BranchMergeRepository : BranchMergeRepositoryOss {
   @Query(
     """
       select bm from BranchMerge bm 

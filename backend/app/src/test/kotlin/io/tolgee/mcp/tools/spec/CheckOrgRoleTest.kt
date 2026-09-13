@@ -45,6 +45,17 @@ class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
   }
 
   @Test
+  fun `an OAuth token cannot satisfy an org-role requirement`() {
+    whenever(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+
+    assertThatThrownBy {
+      sut.executeAs(spec(requiredOrgRole = OrganizationRoleType.OWNER)) {}
+    }.isInstanceOf(PermissionException::class.java)
+
+    verify(organizationRoleService, never()).isUserOfRole(any(), any(), any())
+  }
+
+  @Test
   fun `user lacks required role throws PermissionException`() {
     val orgDto = mock<OrganizationDto>()
     whenever(orgDto.id).thenReturn(42L)

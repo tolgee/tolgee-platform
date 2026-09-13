@@ -20,7 +20,7 @@ class ActivityDatabaseInterceptor :
     interceptedEventsManager.onAfterTransactionCompleted(tx)
   }
 
-  override fun onSave(
+  override fun onPersist(
     entity: Any?,
     id: Any?,
     state: Array<out Any>?,
@@ -38,7 +38,7 @@ class ActivityDatabaseInterceptor :
     return true
   }
 
-  override fun onDelete(
+  override fun onRemove(
     entity: Any?,
     id: Any?,
     state: Array<out Any>?,

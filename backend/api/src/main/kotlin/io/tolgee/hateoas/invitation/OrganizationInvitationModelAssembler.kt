@@ -18,7 +18,7 @@ class OrganizationInvitationModelAssembler(
     return OrganizationInvitationModel(
       entity.id!!,
       entity.code,
-      entity.organizationRole!!.type!!,
+      entity.organizationRole!!.type,
       entity.createdAt!!,
       invitedUserName = entity.name,
       invitedUserEmail = entity.email,

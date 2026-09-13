@@ -17,7 +17,7 @@ class SimpleOrganizationModelAssembler(
     SimpleOrganizationModel::class.java,
   ) {
   override fun toModel(entity: Organization): SimpleOrganizationModel {
-    val link = linkTo<OrganizationController> { get(entity.slug ?: "") }.withSelfRel()
+    val link = linkTo<OrganizationController> { get(entity.slug) }.withSelfRel()
     return SimpleOrganizationModel(
       entity.id,
       entity.name,

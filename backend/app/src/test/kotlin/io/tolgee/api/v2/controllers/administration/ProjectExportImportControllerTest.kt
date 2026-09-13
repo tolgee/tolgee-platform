@@ -124,7 +124,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
         entityManager
           .createQuery(
             "select count(kd) from KeysDistance kd where kd.project.id = :p",
-            java.lang.Long::class.java,
+            Long::class.javaObjectType,
           ).setParameter("p", testData.project.id)
           .singleResult
           .toLong()
@@ -135,7 +135,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
           .createQuery(
             "select count(a) from TranslationMemoryProject a " +
               "where a.project.id = :p and a.translationMemory.type = :t",
-            java.lang.Long::class.java,
+            Long::class.javaObjectType,
           ).setParameter("p", testData.project.id)
           .setParameter("t", TranslationMemoryType.PROJECT)
           .singleResult

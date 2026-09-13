@@ -5876,4 +5876,66 @@
             END $$;
         </sql>
     </changeSet>
+    <changeSet author="anty" id="oauth2-grant">
+        <createTable tableName="oauth2_grant">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="oauth2_grantPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="redirect_uri" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_state" type="VARCHAR(2000)"/>
+            <column name="code_challenge" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_scopes" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_granted_scopes" type="VARCHAR(4000)"/>
+            <column name="issued_token_scopes" type="VARCHAR(4000)"/>
+            <column name="project_hint" type="BIGINT"/>
+            <column name="project_selection" type="VARCHAR(2000)"/>
+            <column name="consent_state" type="VARCHAR(255)"/>
+            <column name="consent_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="code_hash" type="VARCHAR(255)"/>
+            <column name="code_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="code_used_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_hash" type="VARCHAR(255)"/>
+            <column name="access_token_issued_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="access_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="refresh_token_hash" type="VARCHAR(255)"/>
+            <column name="previous_refresh_token_hash" type="VARCHAR(255)"/>
+            <column name="refresh_token_expires_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addUniqueConstraint columnNames="consent_state" constraintName="oauth2_grant_consent_state_unique"
+                             tableName="oauth2_grant"/>
+        <addUniqueConstraint columnNames="code_hash" constraintName="oauth2_grant_code_hash_unique"
+                             tableName="oauth2_grant"/>
+        <addUniqueConstraint columnNames="access_token_hash" constraintName="oauth2_grant_access_token_hash_unique"
+                             tableName="oauth2_grant"/>
+        <addUniqueConstraint columnNames="refresh_token_hash" constraintName="oauth2_grant_refresh_token_hash_unique"
+                             tableName="oauth2_grant"/>
+        <createIndex indexName="oauth2_grant_user_account_id_idx" tableName="oauth2_grant">
+            <column name="user_account_id"/>
+        </createIndex>
+        <createIndex indexName="oauth2_grant_previous_refresh_token_hash_idx" tableName="oauth2_grant">
+            <column name="previous_refresh_token_hash"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="oauth2_grant"
+                                 constraintName="oauth2_grant_user_account_fk" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
 </databaseChangeLog>

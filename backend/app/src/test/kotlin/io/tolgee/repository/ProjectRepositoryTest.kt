@@ -60,7 +60,7 @@ class ProjectRepositoryTest {
         filters = ProjectFilters(),
       )
     assertThat(result).hasSize(10)
-    assertThat(result.content[0].organizationOwner?.name).isNotNull
-    assertThat(result.content[8].organizationOwner?.slug).isNotNull
+    assertThat(result.content[0].organizationOwner.name).isNotNull
+    assertThat(result.content[8].organizationOwner.slug).isNotNull
   }
 }

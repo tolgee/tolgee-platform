@@ -9,7 +9,7 @@ import kotlin.math.abs
 
 class BigMetaTestData {
   lateinit var project: Project
-  lateinit var projectBuilder: ProjectBuilder
+  var projectBuilder: ProjectBuilder
   lateinit var userAccount: UserAccount
   lateinit var noNsKey: Key
   lateinit var yepKey: Key

@@ -19,6 +19,7 @@ type Props = {
   label?: React.ReactNode;
   sx?: SxProps;
   className?: string;
+  single?: boolean;
 };
 
 export const ProjectSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
@@ -27,6 +28,7 @@ export const ProjectSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
   label,
   sx,
   className,
+  single,
 }) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -95,6 +97,7 @@ export const ProjectSearchSelect: React.FC<React.PropsWithChildren<Props>> = ({
           open={isOpen}
           onClose={handleClose}
           selected={value}
+          single={single}
           onSelect={handleSelectOrganization}
           anchorEl={anchorEl.current!}
         />

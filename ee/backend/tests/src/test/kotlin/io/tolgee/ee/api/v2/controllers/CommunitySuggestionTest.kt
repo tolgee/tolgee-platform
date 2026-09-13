@@ -149,7 +149,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
     val translationId =
       transactionTemplate.execute {
         translationService.find(testData.keys[0].self, testData.czechLanguage).get().id
-      }!!
+      }
 
     userAccount = testData.communityUser.self
     performProjectAuthGet("activity").andIsOk.andAssertThatJson {
@@ -173,7 +173,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
     val translationId =
       transactionTemplate.execute {
         translationService.find(testData.keys[0].self, testData.czechLanguage).get().id
-      }!!
+      }
 
     userAccount = testData.communityUser.self
     performProjectAuthGet("translations/$translationId/comments").andIsOk.andAssertThatJson {

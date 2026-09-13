@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
@@ -55,7 +56,12 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    if (authenticationFacade.isOAuthTokenAuth) {
+      throw PermissionException(Message.OAUTH_ACCESS_NOT_ALLOWED)
+    }
+
     val userId = authenticationFacade.authenticatedUser.id
+
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.

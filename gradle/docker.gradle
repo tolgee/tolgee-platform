@@ -25,8 +25,7 @@ tasks.register('docker', Exec) {
     workingDir dockerPath
     commandLine "docker", "build", ".",
         "-t", "tolgee/tolgee",
-        "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-        "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
+        "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}"
 }
 
 // Builds the slim Docker image, tagged as tolgee/tolgee:slim.

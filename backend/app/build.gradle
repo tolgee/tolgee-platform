@@ -123,9 +123,9 @@ dependencies {
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
     testImplementation(libs.azureBlob)
-    testImplementation('io.netty:netty-codec-http:4.2.5.Final')
-    testImplementation('io.netty:netty-codec-http2:4.2.5.Final')
-    testImplementation('io.netty:netty-handler:4.2.5.Final')
+    testImplementation(libs.nettyCodecHttp)
+    testImplementation(libs.nettyCodecHttp2)
+    testImplementation(libs.nettyHandler)
     ktlint(project(":ktlint"))
 
 
@@ -139,14 +139,14 @@ dependencies {
     implementation libs.icu4j
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.4'
+    implementation 'org.apache.httpcomponents.client5:httpclient5'
 
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 
     implementation libs.springDocOpenApiCommon
     // Jackson-2 Kotlin module for swagger-core's schema introspection (registered on swagger's mapper
     // in OpenApiConfiguration; schema-gen only). Keep aligned with swagger-core's jackson-databind 2.x.
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.21.5'
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson2Version"
     implementation libs.redissonSpringBootStarter
 
     /**

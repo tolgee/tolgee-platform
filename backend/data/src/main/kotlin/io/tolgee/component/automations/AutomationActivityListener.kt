@@ -18,7 +18,7 @@ class AutomationActivityListener(
   private val activityService: ActivityService,
 ) {
   @EventListener
-  @Async
+  @Async("automationAsyncExecutor")
   fun listen(event: OnProjectActivityStoredEvent) {
     val activityType = event.activityRevision.type ?: return
     val projectId = event.activityRevision.projectId ?: return
@@ -40,7 +40,7 @@ class AutomationActivityListener(
   }
 
   @TransactionalEventListener
-  @Async
+  @Async("automationAsyncExecutor")
   fun listen(event: OnBatchJobFinalized) {
     val activityRevisionId = event.activityRevisionId ?: return
     val revision = activityService.findActivityRevisionInfo(activityRevisionId) ?: return

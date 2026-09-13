@@ -102,6 +102,12 @@ tolgee:
     concurrency: 10
     old-job-cleanup-enabled: false
   front-end-url: https://dummy-url.com
+  oauth2:
+    browser-extension-redirect-uris:
+      - https://extension.test/callback
+      - https://extension.test/alternate
+    cli-redirect-uris:
+      - http://127.0.0.1:9999/callback
   ee:
     scheduled-reporting-enabled: false
 logging:

@@ -30,6 +30,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
+import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
@@ -199,7 +200,7 @@ class JwtService(
 
     val account = validateJwt(jws.body)
 
-    if (account.tokensValidNotBefore != null && jws.body.issuedAt.before(account.tokensValidNotBefore)) {
+    if (account.isTokenInvalidated(jws.body.issuedAt?.toInstant())) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
@@ -277,7 +278,7 @@ class JwtService(
       userAccountService.findDto(claims.subject.toLong())
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
-    if (account.tokensValidNotBefore != null && claims.issuedAt.before(account.tokensValidNotBefore)) {
+    if (account.isTokenInvalidated(claims.issuedAt?.toInstant())) {
       throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
     }
 

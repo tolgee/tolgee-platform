@@ -10,12 +10,14 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.util.StreamType
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.OutputStream
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries/{glossaryId:[0-9]+}")
 @Tag(name = "Glossary Export")
 class GlossaryExportController(
@@ -58,7 +61,7 @@ class GlossaryExportController(
     val stream = glossaryExportService.exportCsv(glossary)
 
     return ResponseEntity.ok().headers(headers).body(
-      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+      streamingResponseBodyProvider.createStreamingResponseBody(StreamType.EXPORT_GLOSSARY) { out: OutputStream ->
         stream.use { IOUtils.copy(stream, out) }
         out.close()
       },

@@ -62,15 +62,15 @@ class ProjectExportImportTestData(
   val trashedKeyMetaDescription = "trashed-key-meta"
   val trashedCodeReferencePath = "src/Trashed.kt"
   val trashedTranslationCommentText = "trashed-translation-comment"
-  lateinit var assignedLabel: Label
-  lateinit var taskOnDeletedLanguage: Task
-  lateinit var liveTask: Task
-  lateinit var keyOnDeletedBranch: Key
-  lateinit var taskOnDeletedBranch: Task
+  var assignedLabel: Label
+  var taskOnDeletedLanguage: Task
+  var liveTask: Task
+  var keyOnDeletedBranch: Key
+  var taskOnDeletedBranch: Task
   lateinit var suggestionAuthor: UserAccount
-  lateinit var greetingKey: Key
-  lateinit var labeledKey: Key
-  lateinit var softDeletedKey: Key
+  var greetingKey: Key
+  var labeledKey: Key
+  var softDeletedKey: Key
 
   val bigMetaDistance = 0.25
   val bigMetaHits = 7L

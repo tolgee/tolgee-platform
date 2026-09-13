@@ -14,7 +14,6 @@ class TolgeeSentryUserProvider(
   override fun provideUser(): User? {
     return authenticationFacade.authenticatedUserOrNull?.let { user ->
       return User().apply {
-        name = user.username
         username = user.username
         email = user.username
         id = user.id.toString()

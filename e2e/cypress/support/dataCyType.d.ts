@@ -359,6 +359,7 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content": true;
         "integrate-select-api-key-step-label": true;
         "integrate-weapon-selector-button": true;
+        "invisible-character": true;
         "invitation-accepted-success-message": true;
         "invitation-dialog-close-button": true;
         "invitation-dialog-input-field": true;
@@ -499,6 +500,17 @@ declare namespace DataCy {
         "notifications-list-item": true;
         "notifications-settings-icon": true;
         "notistack-snackbar": true;
+        "oauth2-consent": true;
+        "oauth2-consent-allow": true;
+        "oauth2-consent-deny": true;
+        "oauth2-consent-error": true;
+        "oauth2-consent-modify": true;
+        "oauth2-consent-project": true;
+        "oauth2-consent-project-all": true;
+        "oauth2-consent-project-inaccessible": true;
+        "oauth2-consent-project-one": true;
+        "oauth2-consent-scope": true;
+        "oauth2-consent-scopes": true;
         "order-translation-confirmation": true;
         "order-translation-confirmation-ok": true;
         "order-translation-invitation-checkbox": true;
@@ -547,6 +559,7 @@ declare namespace DataCy {
         "plan-limit-dialog-close": true;
         "plan-limit-dialog-contact-us": true;
         "plan-limit-dialog-enable-auto-upgrade": true;
+        "plan-limit-dialog-organization-limit-message": true;
         "plan-limit-dialog-self-hosted-words": true;
         "plan-limit-dialog-words-auto-upgrade-hint": true;
         "plan-limit-dialog-words-auto-upgrade-ineffective": true;
@@ -628,6 +641,7 @@ declare namespace DataCy {
         "project-menu-items": true;
         "project-mt-dialog-settings-inherited": true;
         "project-name-field": true;
+        "project-search-select-item": true;
         "project-select": true;
         "project-settings": true;
         "project-settings-branch-item": true;

@@ -232,9 +232,9 @@ dependencies {
      * AZURE
      */
     implementation(libs.azureBlob)
-    implementation('io.netty:netty-codec-http:4.2.15.Final')
-    implementation('io.netty:netty-codec-http2:4.2.15.Final')
-    implementation('io.netty:netty-handler:4.2.15.Final')
+    implementation(libs.nettyCodecHttp)
+    implementation(libs.nettyCodecHttp2)
+    implementation(libs.nettyHandler)
 
     /**
      * SLACK SDK
@@ -246,7 +246,7 @@ dependencies {
     /**
      * HANDLEBARS
      */
-    implementation('com.github.jknack:handlebars:4.4.0')
+    implementation('com.github.jknack:handlebars:4.5.4')
 }
 
 tasks.named('test', Test) {

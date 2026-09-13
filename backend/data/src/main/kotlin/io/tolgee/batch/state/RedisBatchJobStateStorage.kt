@@ -8,6 +8,7 @@ import org.redisson.api.RAtomicLong
 import org.redisson.api.RBatch
 import org.redisson.api.RMap
 import org.redisson.api.RedissonClient
+import org.redisson.api.options.KeysScanOptions
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -209,7 +210,7 @@ open class RedisBatchJobStateStorage(
   }
 
   override fun getCachedJobIds(): MutableSet<Long> {
-    val keys = redissonClient.keys.getKeysByPattern("$REDIS_STATE_KEY_PREFIX*")
+    val keys = redissonClient.keys.getKeys(KeysScanOptions.defaults().pattern("$REDIS_STATE_KEY_PREFIX*"))
     return keys.mapNotNull { it.removePrefix(REDIS_STATE_KEY_PREFIX).toLongOrNull() }.toMutableSet()
   }
 

@@ -44,7 +44,7 @@ class AzureCognitiveApiService(
       )
 
     return response.body
-      ?.first
+      ?.first()
       ?.translations
       ?.first()
       ?.text

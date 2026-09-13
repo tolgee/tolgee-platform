@@ -385,7 +385,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `filters "without tag" specified by empty tag`() {
+  fun `filters 'without tag' specified by empty tag`() {
     testData.addFewKeysWithTags()
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
@@ -418,7 +418,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `filters in combination with "without tag"`() {
+  fun `filters in combination with 'without tag'`() {
     testData.addFewKeysWithTags()
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
@@ -454,7 +454,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `excludes by "Without tag"`() {
+  fun `excludes by 'Without tag'`() {
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -482,7 +482,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `excludes in combination with "Without tag"`() {
+  fun `excludes in combination with 'Without tag'`() {
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

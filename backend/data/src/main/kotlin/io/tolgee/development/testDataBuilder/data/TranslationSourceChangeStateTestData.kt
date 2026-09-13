@@ -3,7 +3,7 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.model.Language
 
 class TranslationSourceChangeStateTestData : BaseTestData() {
-  lateinit var germanLanguage: Language
+  var germanLanguage: Language
 
   init {
     projectBuilder.apply {

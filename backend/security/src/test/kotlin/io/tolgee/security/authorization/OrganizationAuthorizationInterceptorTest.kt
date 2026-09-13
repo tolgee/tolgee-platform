@@ -120,6 +120,26 @@ class OrganizationAuthorizationInterceptorTest {
   }
 
   @Test
+  fun `it refuses an OAuth token before the org role is even consulted, so granting the role cannot open it`() {
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+    Mockito.`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L)).thenReturn(true)
+    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER)).thenReturn(true)
+
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsForbidden
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
+  }
+
+  @Test
+  fun `it refuses an OAuth token on an organization route that resolves no organization`() {
+    Mockito.`when`(requestContextService.getTargetOrganization(any())).thenReturn(null)
+    Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
+    Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(true)
+
+    mockMvc.perform(get("/v2/organizations/current")).andIsForbidden
+  }
+
+  @Test
   fun `it hides the organization if the user cannot see it`() {
     Mockito
       .`when`(organizationRoleService.canUserViewStrictOrPublic(1337L, 1337L))
@@ -228,6 +248,10 @@ class OrganizationAuthorizationInterceptorTest {
     @GetMapping("/v2/organizations")
     @IsGlobalRoute
     fun getAll() = "hello!"
+
+    @GetMapping("/v2/organizations/current")
+    @UseDefaultPermissions
+    fun noOrganizationInPath() = "hello!"
 
     @GetMapping("/v2/organizations/{id}/not-annotated")
     fun notAnnotated(

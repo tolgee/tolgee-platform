@@ -1,12 +1,12 @@
 package io.tolgee.ee.repository.branching
 
 import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.repository.branching.KeySnapshotRepositoryOss
 import org.springframework.data.jpa.repository.EntityGraph
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface KeySnapshotRepository : JpaRepository<KeySnapshot, Long> {
+interface KeySnapshotRepository : KeySnapshotRepositoryOss {
   @EntityGraph(attributePaths = ["translations", "keyMetaSnapshot"])
   fun findAllByBranchId(branchId: Long): List<KeySnapshot>
 

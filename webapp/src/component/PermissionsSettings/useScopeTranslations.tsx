@@ -45,6 +45,7 @@ export const useScopeTranslations = () => {
     'content-delivery.publish': t('permissions_item_content_delivery_publish'),
     'tasks.view': t('permissions_item_tasks_view'),
     'tasks.edit': t('permissions_item_tasks_edit'),
+    'tasks.assigned-access': t('permissions_item_tasks_assigned_access'),
     'prompts.view': t('permissions_item_prompts_view'),
     'prompts.edit': t('permissions_item_prompts_edit'),
     'translation-labels.manage': t(

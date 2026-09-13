@@ -8,7 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 
 class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
-  lateinit var organization: Organization
+  var organization: Organization
   lateinit var mainBranch: Branch
   lateinit var featureBranch: Branch
   lateinit var secondProject: Project

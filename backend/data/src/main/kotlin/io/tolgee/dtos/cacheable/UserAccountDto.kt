@@ -3,6 +3,8 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import java.io.Serializable
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 data class UserAccountDto(
@@ -42,6 +44,14 @@ data class UserAccountDto(
   override fun toString(): String {
     return username
   }
+}
+
+fun UserAccountDto.isTokenInvalidated(issuedAt: Instant?): Boolean {
+  val validNotBefore = tokensValidNotBefore ?: return false
+  if (issuedAt == null) return true
+  // `tokensValidNotBefore` may carry sub-second precision; a JWT `iat` is whole seconds, so an untruncated compare
+  // rejects a token minted in the same second.
+  return issuedAt.isBefore(validNotBefore.toInstant().truncatedTo(ChronoUnit.SECONDS))
 }
 
 fun UserAccountDto.isAdmin(): Boolean {

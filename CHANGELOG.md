@@ -1,3 +1,123 @@
+## [3.221.2](https://github.com/tolgee/tolgee-platform/compare/v3.221.1...v3.221.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* show the plan limit popover to members without an organization role ([#3903](https://github.com/tolgee/tolgee-platform/issues/3903)) ([df1fe21](https://github.com/tolgee/tolgee-platform/commit/df1fe21f35e920e0276d8ead33f3291c132bac20))
+
+## [3.221.1](https://github.com/tolgee/tolgee-platform/compare/v3.221.0...v3.221.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* stop dropping characters typed into the AI prompt editor ([#3892](https://github.com/tolgee/tolgee-platform/issues/3892)) ([c88fc7f](https://github.com/tolgee/tolgee-platform/commit/c88fc7f107e32c56967b3da05e0c2a0260ae0b70))
+* wrap long unbreakable comment text so the resolve action stays reachable ([#3906](https://github.com/tolgee/tolgee-platform/issues/3906)) ([87e178d](https://github.com/tolgee/tolgee-platform/commit/87e178d243e2afb0cd31c03c307390d801950708)), closes [#3905](https://github.com/tolgee/tolgee-platform/issues/3905)
+
+# [3.221.0](https://github.com/tolgee/tolgee-platform/compare/v3.220.0...v3.221.0) (2026-09-07)
+
+
+### Features
+
+* support Azure Blob Storage as main file storage ([91534b2](https://github.com/tolgee/tolgee-platform/commit/91534b2ad1d78101ba80872883d9d4ccbb50c147))
+
+# [3.220.0](https://github.com/tolgee/tolgee-platform/compare/v3.219.7...v3.220.0) (2026-09-05)
+
+
+### Features
+
+* OAuth 2.1 authorization server ([#3893](https://github.com/tolgee/tolgee-platform/issues/3893)) ([6ef6a0f](https://github.com/tolgee/tolgee-platform/commit/6ef6a0f931a69987dce563ceba329032dc3006f5)), closes [#3849](https://github.com/tolgee/tolgee-platform/issues/3849) [#3879](https://github.com/tolgee/tolgee-platform/issues/3879) [#3880](https://github.com/tolgee/tolgee-platform/issues/3880) [#3885](https://github.com/tolgee/tolgee-platform/issues/3885) [#3826](https://github.com/tolgee/tolgee-platform/issues/3826) [tolgee/billing#311](https://github.com/tolgee/billing/issues/311)
+
+## [3.219.7](https://github.com/tolgee/tolgee-platform/compare/v3.219.6...v3.219.7) (2026-09-02)
+
+
+### Bug Fixes
+
+* bump Jackson to 2.21.6 / 3.1.6 to patch CVE-2026-19032 ([#3895](https://github.com/tolgee/tolgee-platform/issues/3895)) ([2ec5372](https://github.com/tolgee/tolgee-platform/commit/2ec537287bd270bf71f15b29d0c3a9bc7f386a8f)), closes [#3866](https://github.com/tolgee/tolgee-platform/issues/3866) [#3840](https://github.com/tolgee/tolgee-platform/issues/3840) [#3857](https://github.com/tolgee/tolgee-platform/issues/3857) [#6115](https://github.com/tolgee/tolgee-platform/issues/6115) [#6156](https://github.com/tolgee/tolgee-platform/issues/6156) [#6101](https://github.com/tolgee/tolgee-platform/issues/6101) [#6133](https://github.com/tolgee/tolgee-platform/issues/6133) [#6165](https://github.com/tolgee/tolgee-platform/issues/6165)
+
+## [3.219.6](https://github.com/tolgee/tolgee-platform/compare/v3.219.5...v3.219.6) (2026-09-02)
+
+
+### Bug Fixes
+
+* hard-delete project fails on branch merge, snapshot and content delivery FKs ([#3853](https://github.com/tolgee/tolgee-platform/issues/3853)) ([857b8e7](https://github.com/tolgee/tolgee-platform/commit/857b8e70da997d181bc8409fc1394498b9bf4943)), closes [#3832](https://github.com/tolgee/tolgee-platform/issues/3832) [#3832](https://github.com/tolgee/tolgee-platform/issues/3832) [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3832](https://github.com/tolgee/tolgee-platform/issues/3832)
+
+## [3.219.5](https://github.com/tolgee/tolgee-platform/compare/v3.219.4...v3.219.5) (2026-09-01)
+
+
+### Bug Fixes
+
+* size the async and streaming thread pools instead of leaving both single-threaded ([#3843](https://github.com/tolgee/tolgee-platform/issues/3843)) ([cf3cb3c](https://github.com/tolgee/tolgee-platform/commit/cf3cb3cd0af09b3e9152e13b7993642cb945424a)), closes [tolgee/deployment#801](https://github.com/tolgee/deployment/issues/801) [tolgee/deployment#801](https://github.com/tolgee/deployment/issues/801) [tolgee/billing#291](https://github.com/tolgee/billing/issues/291)
+
+## [3.219.4](https://github.com/tolgee/tolgee-platform/compare/v3.219.3...v3.219.4) (2026-08-31)
+
+
+### Bug Fixes
+
+* keep re-launched batch chunks cancellable ([#3881](https://github.com/tolgee/tolgee-platform/issues/3881)) ([5c48854](https://github.com/tolgee/tolgee-platform/commit/5c48854b6d31a6ffab7db4576c858a70519d89dc))
+
+## [3.219.3](https://github.com/tolgee/tolgee-platform/compare/v3.219.2...v3.219.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* bump vulnerable dependencies flagged by Snyk ([#3877](https://github.com/tolgee/tolgee-platform/issues/3877)) ([a502bd5](https://github.com/tolgee/tolgee-platform/commit/a502bd568634b962f95cfd01b7ee319734cda53c))
+
+## [3.219.2](https://github.com/tolgee/tolgee-platform/compare/v3.219.1...v3.219.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* bump Spring Boot to 4.1.1 to patch Snyk-reported vulnerabilities ([#3876](https://github.com/tolgee/tolgee-platform/issues/3876)) ([3abfbb5](https://github.com/tolgee/tolgee-platform/commit/3abfbb58b1a4892bc11c5edcf0002df28e432e81)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3866](https://github.com/tolgee/tolgee-platform/issues/3866)
+
+## [3.219.1](https://github.com/tolgee/tolgee-platform/compare/v3.219.0...v3.219.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* Text overflow in keys Search field/[#3852](https://github.com/tolgee/tolgee-platform/issues/3852) ([#3875](https://github.com/tolgee/tolgee-platform/issues/3875)) ([44fa434](https://github.com/tolgee/tolgee-platform/commit/44fa43436469d4c12ea0cf0daede769fb1262c50))
+
+# [3.219.0](https://github.com/tolgee/tolgee-platform/compare/v3.218.6...v3.219.0) (2026-08-26)
+
+
+### Features
+
+* show non-breaking and zero-width characters in the web UI ([#3850](https://github.com/tolgee/tolgee-platform/issues/3850)) ([6f2f89b](https://github.com/tolgee/tolgee-platform/commit/6f2f89b062e9d95567345af75d4501edef7dd9a4)), closes [#3041](https://github.com/tolgee/tolgee-platform/issues/3041)
+
+## [3.218.6](https://github.com/tolgee/tolgee-platform/compare/v3.218.5...v3.218.6) (2026-08-22)
+
+
+### Bug Fixes
+
+* bump netty to 4.2.17 via Spring dependency-management property ([#3866](https://github.com/tolgee/tolgee-platform/issues/3866)) ([0e7563f](https://github.com/tolgee/tolgee-platform/commit/0e7563fbd8e90c86a6043c6de9ed56892cdb1d18)), closes [#3865](https://github.com/tolgee/tolgee-platform/issues/3865)
+
+## [3.218.5](https://github.com/tolgee/tolgee-platform/compare/v3.218.4...v3.218.5) (2026-08-22)
+
+
+### Bug Fixes
+
+* drop httpclient5 5.4.4 pin, use Spring Boot managed version ([#3865](https://github.com/tolgee/tolgee-platform/issues/3865)) ([fcee7a3](https://github.com/tolgee/tolgee-platform/commit/fcee7a3877d78e39c5a1a3f599b9a091244b9073))
+
+## [3.218.4](https://github.com/tolgee/tolgee-platform/compare/v3.218.3...v3.218.4) (2026-08-21)
+
+
+### Bug Fixes
+
+* add tooltip and responsive wrapping for long language names ([#3611](https://github.com/tolgee/tolgee-platform/issues/3611)) ([#3657](https://github.com/tolgee/tolgee-platform/issues/3657)) ([4d3755c](https://github.com/tolgee/tolgee-platform/commit/4d3755c1cec65211d9108b7e5a6871dc9f1da887))
+
+## [3.218.3](https://github.com/tolgee/tolgee-platform/compare/v3.218.2...v3.218.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* Revert "fix: set correct MIME type on content delivery published files ([#3836](https://github.com/tolgee/tolgee-platform/issues/3836))" ([eca6fbe](https://github.com/tolgee/tolgee-platform/commit/eca6fbe0ae83d8f20b1553a024fd28e238db3c25))
+
+## [3.218.2](https://github.com/tolgee/tolgee-platform/compare/v3.218.1...v3.218.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* restore Jackson 2 handling of absent numeric fields ([#3857](https://github.com/tolgee/tolgee-platform/issues/3857)) ([510ca06](https://github.com/tolgee/tolgee-platform/commit/510ca06d8c81a0a06eb14fdb0f20d803ece56eaa)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3856](https://github.com/tolgee/tolgee-platform/issues/3856)
+
 ## [3.218.1](https://github.com/tolgee/tolgee-platform/compare/v3.218.0...v3.218.1) (2026-08-17)
 
 

@@ -108,7 +108,7 @@ export interface paths {
     get: operations["getCurrent_1"];
   };
   "/v2/api-keys/current-permissions": {
-    /** Returns current PAK or PAT permissions for current user, api-key and project */
+    /** Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project */
     get: operations["getCurrentPermissions"];
   };
   "/v2/api-keys/{apiKeyId}": {
@@ -176,6 +176,15 @@ export interface paths {
   };
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
+  };
+  "/v2/oauth2/authorize": {
+    post: operations["authorize"];
+  };
+  "/v2/oauth2/consent": {
+    post: operations["consent"];
+  };
+  "/v2/oauth2/consent-info": {
+    get: operations["consentInfo"];
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
@@ -1444,6 +1453,7 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "tasks.assigned-access"
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
@@ -2163,6 +2173,7 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "tasks.assigned-access"
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
@@ -2223,6 +2234,14 @@ export interface components {
     };
     ConnectToSlackUrlModel: {
       url: string;
+    };
+    ConsentInfoModel: {
+      appName: string;
+      project?: components["schemas"]["OAuth2ProjectModel"];
+      /** Format: int64 */
+      requestedProjectId?: number;
+      requiredScopes: string[];
+      scopes: string[];
     };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
@@ -3036,6 +3055,14 @@ export interface components {
         | "rate_limited"
         | "pat_access_not_allowed"
         | "pak_access_not_allowed"
+        | "oauth_access_not_allowed"
+        | "invalid_oauth_token"
+        | "oauth_token_expired"
+        | "oauth_unknown_client"
+        | "oauth_redirect_uri_not_registered"
+        | "oauth_unknown_state"
+        | "oauth_project_required"
+        | "oauth_project_scope_required"
         | "cannot_modify_disabled_translation"
         | "azure_config_required"
         | "s3_config_required"
@@ -3231,7 +3258,8 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "server_busy";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3493,6 +3521,7 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "tasks.assigned-access"
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
@@ -4575,6 +4604,45 @@ export interface components {
        */
       notificationIds: number[];
     };
+    OAuth2AuthorizeRequest: {
+      /** @description Registered client id from the client's authorize request */
+      clientId: string;
+      codeChallenge?: string;
+      codeChallengeMethod?: string;
+      project?: string;
+      /** @description Redirect URI from the client's authorize request; must be registered for the client */
+      redirectUri: string;
+      responseType?: string;
+      scope?: string;
+      state?: string;
+    };
+    OAuth2AuthorizeResultModel: {
+      consentState?: string;
+      redirectUrl?: string;
+    };
+    OAuth2ConsentRequest: {
+      /**
+       * Format: int64
+       * @description Required when projectScope is SINGLE_PROJECT
+       */
+      projectId?: number;
+      /**
+       * @description Whether the token is bound to one project or to every project the user can reach. Required when approving: the widest grant must be asked for, never fallen into. Ignored on a denial, which grants nothing.
+       * @enum {string}
+       */
+      projectScope?: "SINGLE_PROJECT" | "ALL_PROJECTS";
+      scopes?: string[];
+      /** @description The consent state identifying the pending authorization */
+      state: string;
+    };
+    OAuth2ProjectModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+    };
+    OAuth2RedirectModel: {
+      redirectUrl: string;
+    };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
@@ -5050,6 +5118,7 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "tasks.assigned-access"
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
@@ -5156,6 +5225,7 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "tasks.assigned-access"
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
@@ -6970,6 +7040,14 @@ export interface components {
         | "rate_limited"
         | "pat_access_not_allowed"
         | "pak_access_not_allowed"
+        | "oauth_access_not_allowed"
+        | "invalid_oauth_token"
+        | "oauth_token_expired"
+        | "oauth_unknown_client"
+        | "oauth_redirect_uri_not_registered"
+        | "oauth_unknown_state"
+        | "oauth_project_required"
+        | "oauth_project_scope_required"
         | "cannot_modify_disabled_translation"
         | "azure_config_required"
         | "s3_config_required"
@@ -7165,7 +7243,8 @@ export interface components {
         | "source_and_target_plan_must_be_different"
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
-        | "project_import_corrupt_archive";
+        | "project_import_corrupt_archive"
+        | "server_busy";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -9364,11 +9443,11 @@ export interface operations {
       };
     };
   };
-  /** Returns current PAK or PAT permissions for current user, api-key and project */
+  /** Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project */
   getCurrentPermissions: {
     parameters: {
       query: {
-        /** Required when using with PAT */
+        /** Required with a PAT, and with an OAuth token not bound to exactly one project */
         projectId?: number;
       };
     };
@@ -10489,6 +10568,147 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationsMarkSeenRequest"];
+      };
+    };
+  };
+  authorize: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OAuth2AuthorizeResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuth2AuthorizeRequest"];
+      };
+    };
+  };
+  consent: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OAuth2RedirectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuth2ConsentRequest"];
+      };
+    };
+  };
+  consentInfo: {
+    parameters: {
+      query: {
+        state: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConsentInfoModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -28660,6 +28880,7 @@ export interface operations {
               | "webhooks.manage"
               | "tasks.view"
               | "tasks.edit"
+              | "tasks.assigned-access"
               | "prompts.view"
               | "prompts.edit"
               | "translation-labels.manage"

@@ -5,8 +5,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotEmpty
@@ -32,9 +30,7 @@ class Pat(
   @param:NotEmpty
   @param:NotNull
   var description: String = "",
-  @Temporal(value = TemporalType.TIMESTAMP)
   var expiresAt: Date? = null,
-  @Temporal(value = TemporalType.TIMESTAMP)
   var lastUsedAt: Date? = null,
   @Transient
   var token: String? = null,

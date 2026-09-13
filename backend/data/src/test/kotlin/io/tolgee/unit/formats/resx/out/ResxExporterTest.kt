@@ -277,7 +277,7 @@ class ResxExporterTest {
       pathProvider =
         ExportFilePathProvider(
           template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "resx",
+          extension = params.format.extension,
         ),
     )
   }

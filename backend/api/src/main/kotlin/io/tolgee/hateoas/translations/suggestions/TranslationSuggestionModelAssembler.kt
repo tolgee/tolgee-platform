@@ -18,7 +18,7 @@ class TranslationSuggestionModelAssembler(
     return TranslationSuggestionModel(
       id = entity.id,
       languageId = entity.language!!.id,
-      keyId = entity.key!!.id,
+      keyId = entity.key.id,
       translation = entity.translation,
       author = simpleUserAccountModelAssembler.toModel(entity.author!!),
       state = entity.state,

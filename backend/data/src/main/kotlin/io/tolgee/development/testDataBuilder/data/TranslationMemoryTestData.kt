@@ -27,7 +27,7 @@ import java.util.Date
  *     test needs a "clean slate" project against which to assert default behaviour.
  */
 class TranslationMemoryTestData : BaseTestData() {
-  lateinit var projectWithTm: Project
+  var projectWithTm: Project
   lateinit var projectTm: TranslationMemory
   lateinit var sharedTm: TranslationMemory
 
@@ -58,7 +58,7 @@ class TranslationMemoryTestData : BaseTestData() {
    * tests that need to change the project's base language without tripping the
    * shared-TM-base-mismatch validation.
    */
-  lateinit var projectWithOnlyProjectTm: Project
+  var projectWithOnlyProjectTm: Project
   lateinit var onlyProjectTm: TranslationMemory
 
   /**
@@ -67,7 +67,7 @@ class TranslationMemoryTestData : BaseTestData() {
    * so the same source text on this TM yields two distinct virtual rows from two projects.
    * Drives the multi-candidate-row UI test.
    */
-  lateinit var conflictProject: Project
+  var conflictProject: Project
 
   /**
    * Shared TM with two write-access-assigned projects ([projectWithTm] and [conflictProject])
@@ -82,7 +82,7 @@ class TranslationMemoryTestData : BaseTestData() {
    * rejected.
    */
   lateinit var mismatchedBaseSharedTm: TranslationMemory
-  lateinit var germanLanguageNoTm: Language
+  var germanLanguageNoTm: Language
   lateinit var germanLanguageWithTm: Language
 
   /**
@@ -165,7 +165,7 @@ class TranslationMemoryTestData : BaseTestData() {
    * by org-level TM authorization tests to verify project-only access does NOT grant access
    * to org-scoped TM browsing.
    */
-  lateinit var projectOnlyViewer: UserAccount
+  var projectOnlyViewer: UserAccount
 
   init {
     root.apply {

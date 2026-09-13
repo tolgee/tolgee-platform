@@ -2,23 +2,20 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobConcurrentLauncher
+import io.tolgee.component.fileStorage.AzureBlobFileStorage
 import io.tolgee.component.fileStorage.AzureFileStorageFactory
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.CONTENT_DELIVERY_GENERATED_SLUG_PATTERN
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.assertPrunedSingleDirectory
-import io.tolgee.fixtures.assertStoredSingleFile
-import io.tolgee.fixtures.getPrunedDirectories
 import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.mockCreatedStorage
 import io.tolgee.fixtures.node
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -27,6 +24,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.invocation.Invocation
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
@@ -71,9 +73,8 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   @AfterEach
   fun after() {
     resetServerProperties()
-    enabledFeaturesProvider.forceEnabled = null
-    testDataService.cleanTestData(testData.root)
     batchJobConcurrentLauncher.pause = false
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
@@ -111,7 +112,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `creates content delivery config with auto publish`() {
-    val mock = azureFileStorageFactory.mockCreatedStorage()
+    val mock = mockAzureFileStorage()
     var id: Long? = null
     performProjectAuthPost(
       "content-delivery-configs",
@@ -138,7 +139,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `creates content delivery config without pruning`() {
-    val mock = azureFileStorageFactory.mockCreatedStorage()
+    val mock = mockAzureFileStorage()
     performProjectAuthPost(
       "content-delivery-configs",
       mapOf(
@@ -205,7 +206,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `publishes to s3`() {
-    val mocked = s3FileStorageFactory.mockCreatedStorage()
+    val mocked = mockS3FileStorage()
     performProjectAuthPost("content-delivery-configs/${testData.s3ContentDeliveryConfig.self.id}")
     assertStored(mocked)
     assertPruned(mocked)
@@ -257,7 +258,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
     performProjectAuthPut(
       "content-delivery-configs/${testData.s3ContentDeliveryConfigWithCustomSlug.self.id}",
       mapOf("name" to "S3", "contentStorageId" to testData.s3ContentStorage.self.id),
-    ).andAssertThatJson { node("slug").isString.matches(CONTENT_DELIVERY_GENERATED_SLUG_PATTERN) }
+    ).andAssertThatJson { node("slug").isString.matches("[a-f0-9]{32}") }
   }
 
   @Test
@@ -303,14 +304,30 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
       ),
     )
 
-  private fun assertStored(mocked: FileStorage) =
-    mocked.assertStoredSingleFile("$CONTENT_DELIVERY_GENERATED_SLUG_PATTERN/en\\.json", "application/json")
+  private fun assertStored(mocked: FileStorage) {
+    mocked.getStoreFileInvocations().assert.hasSize(1)
+    (mocked.getStoreFileInvocations().single().arguments[0] as String)
+      .matches("[a-f0-9]{32}/en\\.json".toRegex())
+  }
 
-  private fun assertPruned(mocked: FileStorage) =
-    mocked.assertPrunedSingleDirectory(CONTENT_DELIVERY_GENERATED_SLUG_PATTERN)
+  private fun assertPruned(mocked: FileStorage) {
+    mocked.getPruneDirectoryInvocations().assert.hasSize(1)
+    (mocked.getPruneDirectoryInvocations().single().arguments[0] as String)
+      .matches("[a-f0-9]{32}".toRegex())
+  }
 
   private fun assertNotPruned(mocked: FileStorage) {
-    mocked.getPrunedDirectories().assert.isEmpty()
+    mocked.getPruneDirectoryInvocations().assert.hasSize(0)
+  }
+
+  private fun FileStorage.getInvocations(): List<Invocation> = Mockito.mockingDetails(this).invocations.toList()
+
+  private fun FileStorage.getStoreFileInvocations(): List<Invocation> {
+    return getInvocations().filter { it.method.name == "storeFile" }
+  }
+
+  private fun FileStorage.getPruneDirectoryInvocations(): List<Invocation> {
+    return getInvocations().filter { it.method.name == "pruneDirectory" }
   }
 
   private fun resetServerProperties() {
@@ -318,5 +335,21 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
       .clear()
     tolgeeProperties.contentDelivery.storage.azure
       .clear()
+  }
+
+  private fun mockS3FileStorage(): S3FileStorage {
+    val mockedFileStorage = mock<S3FileStorage>()
+    doAnswer {
+      mockedFileStorage
+    }.whenever(s3FileStorageFactory).create(any())
+    return mockedFileStorage
+  }
+
+  private fun mockAzureFileStorage(): AzureBlobFileStorage {
+    val mockedFileStorage = mock<AzureBlobFileStorage>()
+    doAnswer {
+      mockedFileStorage
+    }.whenever(azureFileStorageFactory).create(any())
+    return mockedFileStorage
   }
 }

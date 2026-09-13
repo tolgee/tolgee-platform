@@ -133,7 +133,7 @@ class KeyTrashPurgeSchedulerTest : AbstractSpringTest() {
     return entityManager
       .createQuery(
         "select count(ts) from TranslationSuggestion ts where ts.key.id = :keyId",
-        java.lang.Long::class.java,
+        Long::class.javaObjectType,
       ).setParameter("keyId", keyId)
       .singleResult
       .toLong()

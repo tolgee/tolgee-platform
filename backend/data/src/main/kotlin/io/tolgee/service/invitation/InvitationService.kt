@@ -217,8 +217,7 @@ class InvitationService(
   }
 
   fun findById(id: Long): Optional<Invitation> {
-    @Suppress("UNCHECKED_CAST")
-    return invitationRepository.findById(id) as Optional<Invitation>
+    return invitationRepository.findById(id)
   }
 
   fun getForProject(project: Project): Set<Invitation> {

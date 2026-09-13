@@ -16,6 +16,7 @@
 
 package io.tolgee.email
 
+import io.tolgee.component.BackendUrlProvider
 import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -29,10 +30,11 @@ class EmailGlobalVariablesProvider(
   private val billingConfigProvider: PublicBillingConfProvider,
   private val tolgeeProperties: TolgeeProperties,
   private val frontendUrlProvider: FrontendUrlProvider,
+  private val backendUrlProvider: BackendUrlProvider,
 ) {
   operator fun invoke(): Map<String, Any?> {
     val isCloud = billingConfigProvider().enabled
-    val backendUrl = tolgeeProperties.backEndUrl ?: frontendUrlProvider.url
+    val backendUrl = backendUrlProvider.stableUrl ?: frontendUrlProvider.requestDerivedUrl
 
     return mapOf(
       "isCloud" to isCloud,

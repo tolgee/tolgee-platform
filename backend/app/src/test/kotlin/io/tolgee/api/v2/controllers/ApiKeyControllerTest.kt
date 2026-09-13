@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -15,6 +16,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -33,6 +35,11 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     testData = ApiKeysTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+  }
+
+  @AfterEach
+  fun clean() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -227,6 +234,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     headers["x-api-key"] = testData.usersKey.key!!
     performGet("/v2/api-keys/current-permissions", headers).andPrettyPrint.andAssertThatJson {
       node("projectId").isNotNull
+      // A scoped credential must not report the role behind it, only the scopes the credential itself carries.
+      node("type").isNull()
       node("scopes").isArray.isNotEmpty
       node("translateLanguageIds").isNull()
       node("viewLanguageIds").isNull()
@@ -235,6 +244,55 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
         node("id").isNumber.isGreaterThan(0.toBigDecimal())
       }
     }
+  }
+
+  @Test
+  fun `a PAT cannot read the details of a project its user has no access to`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+
+    val response =
+      performGet("/v2/api-keys/current-permissions?projectId=${testData.strangersProject.id}", headers)
+        .andIsNotFound
+        .andReturn()
+        .response
+
+    response.contentAsString.assert.doesNotContain(testData.strangersProject.name)
+  }
+
+  @Test
+  fun `a PAK cannot read the details of a project its user has no access to`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = testData.usersKey.key!!
+
+    val response =
+      performGet("/v2/api-keys/current-permissions?projectId=${testData.strangersProject.id}", headers)
+        .andIsNotFound
+        .andReturn()
+        .response
+
+    response.contentAsString.assert.doesNotContain(testData.strangersProject.name)
+  }
+
+  @Test
+  fun `a PAK naming its own project explicitly is answered for that project`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = testData.usersKey.key!!
+
+    performGet(
+      "/v2/api-keys/current-permissions?projectId=${testData.usersKey.project.id}",
+      headers,
+    ).andIsOk.andAssertThatJson { node("scopes").isArray.isNotEmpty }
+  }
+
+  @Test
+  fun `a server admin's PAT keeps its reach on a project they are not a member of`() {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = "tgpat_${testData.adminsPat.token!!}"
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.strangersProject.id}", headers)
+      .andIsOk
+      .andAssertThatJson { node("scopes").isArray.isNotEmpty }
   }
 
   @Test

@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate
 
 class CloudflareContentStorageConfigCachePurgingTest {
   @Test
+  @Suppress("UNCHECKED_CAST")
   fun `correctly purges`() {
     val config =
       ContentDeliveryCloudflareProperties(

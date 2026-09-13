@@ -41,6 +41,7 @@ class ProjectWithStatsModelAssembler(
         view.organizationOwner.basePermission,
         view.directPermission,
         authenticationFacade.authenticatedUserOrNull?.role,
+        asScopedCredential = authenticationFacade.isScopedCredential,
         isProjectPublic = view.public,
       )
 

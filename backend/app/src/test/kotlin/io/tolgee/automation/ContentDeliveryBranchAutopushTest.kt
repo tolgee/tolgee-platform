@@ -9,7 +9,6 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigBranchingTestData
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.getStoreFileCalls
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -50,7 +48,7 @@ class ContentDeliveryBranchAutopushTest : ProjectAuthControllerTest("/v2/project
 
   @BeforeEach
   fun setup() {
-    doReturn(arrayOf(Feature.BRANCHING)).whenever(enabledFeaturesProvider).get(any())
+    doReturn(arrayOf(Feature.BRANCHING)).whenever(enabledFeaturesProvider).get(org.mockito.kotlin.any())
 
     currentDateProvider.forcedDate = currentDateProvider.date
     testData = ContentDeliveryConfigBranchingTestData()
@@ -71,7 +69,6 @@ class ContentDeliveryBranchAutopushTest : ProjectAuthControllerTest("/v2/project
   @AfterEach
   fun after() {
     currentDateProvider.forcedDate = null
-    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -118,7 +115,14 @@ class ContentDeliveryBranchAutopushTest : ProjectAuthControllerTest("/v2/project
 
   private fun waitForStoreFileCalls(expectedCount: Int) {
     waitForNotThrowing(timeout = 3000, pollTime = 200) {
-      fileStorageMock.getStoreFileCalls().assert.hasSize(expectedCount)
+      storeFileInvocations.assert.hasSize(expectedCount)
     }
   }
+
+  private val storeFileInvocations
+    get() =
+      Mockito
+        .mockingDetails(fileStorageMock)
+        .invocations
+        .filter { it.method.name == "storeFile" }
 }

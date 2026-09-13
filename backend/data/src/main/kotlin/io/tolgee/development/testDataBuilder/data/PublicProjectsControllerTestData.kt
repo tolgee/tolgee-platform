@@ -13,43 +13,43 @@ class PublicProjectsControllerTestData : BaseTestData() {
   val privateProject: Project get() = project
 
   lateinit var publicProject: Project
-  lateinit var otherOrg: Organization
+  var otherOrg: Organization
   lateinit var otherOrgPublicProject: Project
-  lateinit var nonMember: UserAccount
+  var nonMember: UserAccount
 
-  lateinit var directPermissionUser: UserAccount
+  var directPermissionUser: UserAccount
 
   lateinit var noBaseLanguageProject: Project
   lateinit var softDeletedBaseProject: Project
   lateinit var orgLessProject: Project
   lateinit var deletedPublicProject: Project
 
-  lateinit var nonMemberPersonalOrg: Organization
-  lateinit var otherOrgMember: UserAccount
-  lateinit var otherOrgOwner: UserAccount
-  lateinit var storedGuest: UserAccount
+  var nonMemberPersonalOrg: Organization
+  var otherOrgMember: UserAccount
+  var otherOrgOwner: UserAccount
+  var storedGuest: UserAccount
   lateinit var otherOrgPrivateProject: Project
-  lateinit var serverAdmin: UserAccount
+  var serverAdmin: UserAccount
 
-  lateinit var guestWithPermission: UserAccount
-  lateinit var granularPermissionUser: UserAccount
-  lateinit var noneOnlyUser: UserAccount
-  lateinit var revokedOnlyUser: UserAccount
+  var guestWithPermission: UserAccount
+  var granularPermissionUser: UserAccount
+  var noneOnlyUser: UserAccount
+  var revokedOnlyUser: UserAccount
 
-  lateinit var noPublicOrg: Organization
-  lateinit var noPublicOrgMember: UserAccount
-  lateinit var noPublicOrgOwner: UserAccount
-  lateinit var privateOrgMember: UserAccount
+  var noPublicOrg: Organization
+  var noPublicOrgMember: UserAccount
+  var noPublicOrgOwner: UserAccount
+  var privateOrgMember: UserAccount
 
-  lateinit var noBaseLangOnlyOrg: Organization
+  var noBaseLangOnlyOrg: Organization
   lateinit var noBaseLangOnlyOrgProject: Project
-  lateinit var softDeletedBaseLangOnlyOrg: Organization
+  var softDeletedBaseLangOnlyOrg: Organization
   lateinit var softDeletedBaseLangOnlyOrgProject: Project
-  lateinit var deletedProjectOnlyOrg: Organization
+  var deletedProjectOnlyOrg: Organization
   lateinit var deletedProjectOnlyOrgProject: Project
-  lateinit var softDeletedOrg: Organization
+  var softDeletedOrg: Organization
   lateinit var softDeletedOrgPublicProject: Project
-  lateinit var softDeletedOrgMember: UserAccount
+  var softDeletedOrgMember: UserAccount
 
   init {
     root.apply {

@@ -4,7 +4,6 @@ import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.lang.Nullable
 import org.springframework.messaging.converter.SimpleMessageConverter
 import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaders
@@ -175,7 +174,7 @@ class WebsocketTestHelper(
 
     override fun handleException(
       session: StompSession,
-      @Nullable command: StompCommand?,
+      command: StompCommand?,
       headers: StompHeaders,
       payload: ByteArray,
       exception: Throwable,

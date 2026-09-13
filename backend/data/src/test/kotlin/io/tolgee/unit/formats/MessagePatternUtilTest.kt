@@ -40,6 +40,22 @@ class MessagePatternUtilTest {
   }
 
   @Test
+  fun `renders arg node without style with no trailing comma`() {
+    MessagePatternUtil
+      .buildMessageNode("Hello, {hello, number}!")
+      .contents[1]
+      .toString()
+      .assert
+      .isEqualTo("{hello,number}")
+    MessagePatternUtil
+      .buildMessageNode("Hello, {hello, number, scientific}!")
+      .contents[1]
+      .toString()
+      .assert
+      .isEqualTo("{hello,number, scientific}")
+  }
+
+  @Test
   fun `returns correct pattern strings with arg node with style`() {
     MessagePatternUtil
       .buildMessageNode("Hello, {hello, number, scientific}!")

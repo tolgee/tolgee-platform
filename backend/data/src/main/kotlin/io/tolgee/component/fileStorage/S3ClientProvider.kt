@@ -37,7 +37,7 @@ class S3ClientProvider(
       s3config.accessKey.isNullOrEmpty() ||
         s3config.secretKey.isNullOrEmpty()
     ) {
-      true -> DefaultCredentialsProvider.create()
+      true -> DefaultCredentialsProvider.builder().build()
       false ->
         StaticCredentialsProvider.create(
           AwsBasicCredentials.create(

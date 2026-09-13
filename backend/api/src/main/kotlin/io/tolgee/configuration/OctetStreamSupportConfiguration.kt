@@ -8,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class OctetStreamSupportConfiguration : WebMvcConfigurer {
+  // The non-deprecated ServerBuilder API bypasses Spring HATEOAS's HAL converter registration.
+  @Suppress("OVERRIDE_DEPRECATION")
   override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
     converters
       .filterIsInstance<JacksonJsonHttpMessageConverter>()

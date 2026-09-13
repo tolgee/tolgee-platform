@@ -12,21 +12,21 @@ import java.util.Date
 class ContributorsTestData(
   withE2eContributions: Boolean = false,
 ) {
-  lateinit var project: Project
-  lateinit var publicProject: Project
-  lateinit var publicEmptyProject: Project
-  lateinit var admin: UserAccount
-  lateinit var contributor: UserAccount
-  lateinit var contributor2: UserAccount
-  lateinit var member: UserAccount
-  lateinit var noneMember: UserAccount
-  lateinit var orgMember: UserAccount
-  lateinit var deletedContributor: UserAccount
-  lateinit var disabledContributor: UserAccount
-  lateinit var staffContributor: UserAccount
-  lateinit var unnamedContributor: UserAccount
-  lateinit var membersViewer: UserAccount
-  lateinit var foreignOrgContributor: UserAccount
+  var project: Project
+  var publicProject: Project
+  var publicEmptyProject: Project
+  var admin: UserAccount
+  var contributor: UserAccount
+  var contributor2: UserAccount
+  var member: UserAccount
+  var noneMember: UserAccount
+  var orgMember: UserAccount
+  var deletedContributor: UserAccount
+  var disabledContributor: UserAccount
+  var staffContributor: UserAccount
+  var unnamedContributor: UserAccount
+  var membersViewer: UserAccount
+  var foreignOrgContributor: UserAccount
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {

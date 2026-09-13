@@ -14,7 +14,7 @@ class BatchJobsTestData : BaseTestData() {
 
   // A separate project owned by another organization. The test user has no access to it.
   // Used to verify a batch job of another project cannot be read/cancelled via this project's URL.
-  lateinit var unrelatedProject: ProjectBuilder
+  var unrelatedProject: ProjectBuilder
 
   init {
     this.projectBuilder.addPermission {

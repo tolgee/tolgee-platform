@@ -59,13 +59,13 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
       val pool = hikariDataSource.hikariPoolMXBean
 
       waitForNotThrowing(pollTime = 50, timeout = 5000) {
-        pool.idleConnections.assert.isGreaterThan(70)
+        pool.activeConnections.assert.isEqualTo(0)
       }
       repeat(50) {
         performProjectAuthGet("export").andIsOk
       }
       waitForNotThrowing(pollTime = 50, timeout = 5000) {
-        pool.idleConnections.assert.isGreaterThan(70)
+        pool.activeConnections.assert.isEqualTo(0)
       }
     }
   }

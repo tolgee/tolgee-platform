@@ -48,12 +48,12 @@ class ProjectLeavingTestData : BaseTestData() {
       addOrganization {
         name = "Owned organization"
         organization = this
-      }.apply {
+      }.apply ownedOrganization@{
         addRole {
           type = OrganizationRoleType.OWNER
           user = this@ProjectLeavingTestData.userWithOrganizationRole
         }
-        addProject(organizationOwner = this@apply.self) {
+        addProject(organizationOwner = this@ownedOrganization.self) {
           name = "Organization owned project"
           organizationOwnedProject = this
         }.build {

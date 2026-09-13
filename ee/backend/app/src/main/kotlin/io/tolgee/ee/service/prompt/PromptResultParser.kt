@@ -14,8 +14,8 @@ class PromptResultParser(
 ) {
   fun parse(): ParsedResult {
     val json = extractJsonFromResponse(promptResult.response)
-    val output = json?.get("output")?.asText() ?: throw LlmProviderNotReturnedJsonException()
-    val contextDescription = json.get("contextDescription")?.asText()
+    val output = json?.get("output")?.asScalarString() ?: throw LlmProviderNotReturnedJsonException()
+    val contextDescription = json.get("contextDescription")?.asScalarString()
 
     return ParsedResult(
       promptResult = promptResult,
@@ -23,6 +23,12 @@ class PromptResultParser(
       parsedJson = json,
       contextDescription = contextDescription,
     )
+  }
+
+  // asString() throws on objects and arrays, so a wrong-shaped field would escape as JsonNodeException
+  private fun JsonNode.asScalarString(): String {
+    if (!isValueNode) throw LlmProviderNotReturnedJsonException()
+    return asString()
   }
 
   private fun extractJsonFromResponse(content: String): JsonNode? {

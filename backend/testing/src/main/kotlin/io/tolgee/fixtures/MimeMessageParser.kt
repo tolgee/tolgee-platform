@@ -89,9 +89,10 @@ open class MimeMessageParser(
      * @throws Exception determining the recipients failed
      */
     get() {
-      val recipients: Array<jakarta.mail.Address> =
+      val recipients: Array<jakarta.mail.Address>? =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.TO)
-      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
+      recipients ?: return emptyList()
+      return listOf(*recipients)
     }
 
   @get:Throws(Exception::class)
@@ -101,9 +102,10 @@ open class MimeMessageParser(
      * @throws Exception determining the recipients failed
      */
     get() {
-      val recipients: Array<jakarta.mail.Address> =
+      val recipients: Array<jakarta.mail.Address>? =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.CC)
-      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
+      recipients ?: return emptyList()
+      return listOf(*recipients)
     }
 
   @get:Throws(Exception::class)
@@ -113,9 +115,10 @@ open class MimeMessageParser(
      * @throws Exception determining the recipients failed
      */
     get() {
-      val recipients: Array<jakarta.mail.Address> =
+      val recipients: Array<jakarta.mail.Address>? =
         mimeMessage.getRecipients(jakarta.mail.Message.RecipientType.BCC)
-      return if (recipients != null) listOf(*recipients) else ArrayList<jakarta.mail.Address>()
+      recipients ?: return emptyList()
+      return listOf(*recipients)
     }
 
   @get:Throws(Exception::class)
@@ -125,12 +128,9 @@ open class MimeMessageParser(
      * @throws Exception parsing the mime message failed
      */
     get() {
-      val addresses: Array<jakarta.mail.Address> = mimeMessage.from
-      return if (addresses == null || addresses.size == 0) {
-        null
-      } else {
-        (addresses[0] as jakarta.mail.internet.InternetAddress).address
-      }
+      val addresses: Array<jakarta.mail.Address>? = mimeMessage.from
+      if (addresses.isNullOrEmpty()) return null
+      return (addresses[0] as jakarta.mail.internet.InternetAddress).address
     }
 
   @get:Throws(Exception::class)
@@ -140,12 +140,9 @@ open class MimeMessageParser(
      * @throws Exception parsing the mime message failed
      */
     get() {
-      val addresses: Array<jakarta.mail.Address> = mimeMessage.replyTo
-      return if (addresses == null || addresses.size == 0) {
-        null
-      } else {
-        (addresses[0] as jakarta.mail.internet.InternetAddress).address
-      }
+      val addresses: Array<jakarta.mail.Address>? = mimeMessage.replyTo
+      if (addresses.isNullOrEmpty()) return null
+      return (addresses[0] as jakarta.mail.internet.InternetAddress).address
     }
 
   @get:Throws(Exception::class)

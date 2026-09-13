@@ -16,7 +16,7 @@ import io.tolgee.model.key.Key
  * calling service lookups.
  */
 class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
-  lateinit var secondUser: UserAccount
+  var secondUser: UserAccount
 
   val germanLanguage =
     projectBuilder
@@ -29,10 +29,10 @@ class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
   /** Numbered keys ("key 01" through "key 10"), indexed 0–9. */
   val numberedKeys = mutableListOf<Key>()
 
-  lateinit var keyWithTag: Key
-  lateinit var anotherKeyWithTag: Key
-  lateinit var keyWithTag2: Key
-  lateinit var keyWithDescription: Key
+  var keyWithTag: Key
+  var anotherKeyWithTag: Key
+  var keyWithTag2: Key
+  var keyWithDescription: Key
 
   init {
     root.apply {

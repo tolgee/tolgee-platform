@@ -54,9 +54,37 @@ class DockerContainerRunner(
   }
 
   private fun startNewContainer() {
+    pullImageIfMissing()
     val startTime = System.currentTimeMillis()
     "docker run $rmString -d $exposeString$envString --name $containerName $image $command".runCommand()
     waitForContainerLoggedOutput(startTime, waitForLogTimesForNewContainer)
+  }
+
+  /**
+   * A cold pull inside `docker run` can exceed the command timeout on a slow CI runner.
+   */
+  private fun pullImageIfMissing() {
+    try {
+      "docker image inspect $image".runCommand()
+      return
+    } catch (_: CommandRunFailedException) {
+      "docker pull -q $image".runCommand(timeoutAmount = 10, timeoutUnit = TimeUnit.MINUTES)
+    }
+  }
+
+  /**
+   * Host port published for [containerPort]; use it with an exposed host port of `0`, which lets Docker pick one.
+   */
+  fun publishedPort(containerPort: String): String {
+    val port =
+      "docker port $containerName $containerPort"
+        .runCommand()
+        .lineSequence()
+        .first()
+        .substringAfterLast(':')
+        .trim()
+    check(port.isNotBlank()) { "Container $containerName publishes no host port for $containerPort" }
+    return port
   }
 
   private fun startExistingContainer() {

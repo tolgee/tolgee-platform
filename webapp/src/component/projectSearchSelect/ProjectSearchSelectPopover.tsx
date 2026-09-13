@@ -62,6 +62,7 @@ type Props = {
   anchorEl: HTMLElement;
   selected: Project[];
   ownedOnly?: boolean;
+  single?: boolean;
   anchorOrigin?: PopoverOrigin;
   transformOrigin?: PopoverOrigin;
 };
@@ -76,6 +77,7 @@ export const ProjectSearchSelectPopover: React.FC<
   anchorEl,
   selected,
   ownedOnly,
+  single,
   anchorOrigin,
   transformOrigin,
 }) => {
@@ -167,11 +169,11 @@ export const ProjectSearchSelectPopover: React.FC<
         <StyledWrapper sx={{ minWidth: (anchorEl?.offsetWidth || 200) + 16 }}>
           <Autocomplete
             open
-            multiple
+            multiple={!single}
             filterOptions={(x) => x}
             loading={usersLoadable.isFetching}
             options={items || []}
-            value={selection}
+            value={single ? selection[0] ?? null : selection}
             inputValue={inputValue}
             onClose={(_, reason) => reason === 'escape' && onClose()}
             clearOnEscape={false}
@@ -193,15 +195,18 @@ export const ProjectSearchSelectPopover: React.FC<
                   <MenuItem
                     {...props}
                     selected={selected}
-                    data-cy="user-switch-item"
+                    data-cy-project-name={option.name}
+                    data-cy="project-search-select-item"
                   >
-                    <Checkbox
-                      checked={selected}
-                      size="small"
-                      edge="start"
-                      disableRipple
-                      sx={{ marginLeft: -1, marginRight: 0.5 }}
-                    />
+                    {!single && (
+                      <Checkbox
+                        checked={selected}
+                        size="small"
+                        edge="start"
+                        disableRipple
+                        sx={{ marginLeft: -1, marginRight: 0.5 }}
+                      />
+                    )}
                     <ProjectSearchSelectItem data={option} />
                   </MenuItem>
                   {usersLoadable.hasNextPage &&
@@ -219,8 +224,15 @@ export const ProjectSearchSelectPopover: React.FC<
               );
             }}
             onChange={(_, newValue) => {
-              onSelectImmediate?.(newValue);
-              setSelection(newValue);
+              const value = single
+                ? ([newValue].filter(Boolean) as Project[])
+                : (newValue as Project[]);
+              onSelectImmediate?.(value);
+              setSelection(value);
+              if (single) {
+                onSelect?.(value);
+                onClose();
+              }
             }}
             renderInput={(params) => (
               <StyledInputWrapper>

@@ -56,7 +56,7 @@ class BaseToCLikePlaceholderConvertor(
   }
 
   private fun getPrecision(node: MessagePatternUtil.ArgNode): Int? {
-    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle ?: "")
+    val precisionMatch = ICU_PRECISION_REGEX.matchEntire(node.simpleStyle)
     precisionMatch ?: return null
     return precisionMatch.groups["precision"]?.value?.length
   }

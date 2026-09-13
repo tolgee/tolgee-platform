@@ -16,7 +16,9 @@
 
 package io.tolgee.util
 
+import io.micrometer.core.instrument.Timer
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ExpectedException
@@ -25,6 +27,8 @@ import jakarta.persistence.EntityManager
 import org.hibernate.Session
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import tools.jackson.databind.ObjectMapper
 import java.io.OutputStream
@@ -34,25 +38,39 @@ import java.io.OutputStreamWriter
 class StreamingResponseBodyProvider(
   private val entityManager: EntityManager,
   private val objectMapper: ObjectMapper,
+  private val metrics: Metrics,
 ) : Logging {
-  fun createStreamingResponseBody(fn: (os: OutputStream) -> Unit): StreamingResponseBody {
+  fun createStreamingResponseBody(
+    streamType: StreamType,
+    fn: (os: OutputStream) -> Unit,
+  ): StreamingResponseBody {
+    val request = (RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes)?.request
     return StreamingResponseBody {
+      request?.setAttribute(STREAM_STARTED_ATTRIBUTE, true)
+      val sample = Timer.start()
       val session = entityManager.unwrap(Session::class.java)
-
-      session.doWork { connection ->
-        fn(it)
-        // Manually dispose the connection because spring has a hard time doing so by itself
-        connection.close()
+      try {
+        session.doWork { connection ->
+          try {
+            fn(it)
+          } finally {
+            // Manually dispose the connection because spring has a hard time doing so by itself
+            connection.close()
+          }
+        }
+      } finally {
+        sample.stop(metrics.streamDurationTimer(streamType))
+        session.close()
       }
-
-      // Manually dispose the connection because spring has a hard time doing so by itself
-      session.close()
     }
   }
 
-  fun streamNdJson(stream: (write: (message: Any?) -> Unit) -> Unit): ResponseEntity<StreamingResponseBody> {
+  fun streamNdJson(
+    streamType: StreamType,
+    stream: (write: (message: Any?) -> Unit) -> Unit,
+  ): ResponseEntity<StreamingResponseBody> {
     return ResponseEntity.ok().disableAccelBuffering().body(
-      this.createStreamingResponseBody { outputStream ->
+      this.createStreamingResponseBody(streamType) { outputStream ->
         OutputStreamWriter(outputStream).use { writer ->
           val write =
             { message: Any? -> writer.writeJson(message) }
@@ -76,6 +94,11 @@ class StreamingResponseBodyProvider(
       (objectMapper.writeValueAsString(message) + "\n"),
     )
     this.flush()
+  }
+
+  companion object {
+    /** Distinguishes a stream that never left the queue from one that ran; see ExceptionHandlers. */
+    const val STREAM_STARTED_ATTRIBUTE = "io.tolgee.streamStarted"
   }
 
   private fun getErrorMessage(e: Throwable) =

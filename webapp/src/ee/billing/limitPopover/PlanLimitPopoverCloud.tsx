@@ -46,12 +46,13 @@ export const PlanLimitPopoverCloud: React.FC<
     );
   };
 
-  return progressData ? (
+  return (
     <GenericPlanLimitPopover
       onClose={onClose}
       open={open}
       isPayAsYouGo={usage?.isPayAsYouGo}
       progressData={progressData}
+      usageUnavailable={!usage}
       additionalContent={
         <>
           {wordsAutoUpgrade.available && (
@@ -131,5 +132,5 @@ export const PlanLimitPopoverCloud: React.FC<
         )
       }
     />
-  ) : null;
+  );
 };

@@ -15,7 +15,7 @@ class ResolvableImportTestData : BaseTestData() {
   lateinit var viewOnlyUser: UserAccount
   lateinit var keyCreateOnlyUser: UserAccount
   lateinit var translateOnlyUser: UserAccount
-  lateinit var secondLanguage: Language
+  var secondLanguage: Language
   lateinit var translatorUser: UserAccount
 
   init {

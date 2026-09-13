@@ -42,7 +42,7 @@ class QaPreviewWsSessionStateTest {
 
   @Test
   fun `tryAcceptMessage rejects messages exceeding rate limit`() {
-    repeat(QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW.toInt()) {
+    repeat(QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW) {
       state.tryAcceptMessage()
     }
 
@@ -51,7 +51,7 @@ class QaPreviewWsSessionStateTest {
 
   @Test
   fun `tryAcceptMessage resets after time window expires`() {
-    repeat(QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW.toInt()) {
+    repeat(QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW) {
       state.tryAcceptMessage()
     }
     assertThat(state.tryAcceptMessage()).isFalse()
@@ -91,7 +91,7 @@ class QaPreviewWsSessionStateTest {
 
     assertThat(acceptedCount.get() + rejectedCount.get()).isEqualTo(threadCount)
     assertThat(acceptedCount.get()).isLessThanOrEqualTo(
-      QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW.toInt(),
+      QaPreviewWsSessionState.MAX_MESSAGES_PER_WINDOW,
     )
     assertThat(rejectedCount.get()).isGreaterThan(0)
   }

@@ -43,6 +43,7 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
 server:
+  # Do not set forward-headers-strategy; behind a reverse proxy set tolgee.back-end-url instead.
   compression:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"

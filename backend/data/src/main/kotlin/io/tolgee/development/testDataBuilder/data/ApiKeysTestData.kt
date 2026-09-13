@@ -18,12 +18,37 @@ class ApiKeysTestData : BaseTestData() {
   lateinit var usersKey: ApiKey
   lateinit var expiredKey: ApiKey
 
+  lateinit var strangersProject: Project
+  lateinit var adminsPat: Pat
+
   lateinit var frantasLocalizationKey: Key
   lateinit var frantasTranslation: Translation
   lateinit var usersKeyFrantasProject: ApiKey
 
   init {
     this.root.apply {
+      addUserAccount {
+        name = "Stranger"
+        username = "stranger"
+      }.build {
+        addProject {
+          organizationOwner = defaultOrganizationBuilder.self
+          name = "Stranger's project"
+          strangersProject = this
+        }
+      }
+
+      addUserAccount {
+        name = "Server Admin"
+        username = "api_keys_server_admin"
+        role = UserAccount.Role.ADMIN
+      }.build {
+        addPat {
+          description = "admin pat"
+          adminsPat = this
+        }
+      }
+
       val userAccountBuilder =
         addUserAccount {
           name = "Franta Dobrota"

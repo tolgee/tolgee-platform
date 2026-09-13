@@ -31,7 +31,7 @@ class SlackTestData {
   lateinit var baseTranslationNotExistKey: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
-  lateinit var secondLanguage: Language
+  var secondLanguage: Language
 
   lateinit var slackUserConnection: SlackUserConnection
 

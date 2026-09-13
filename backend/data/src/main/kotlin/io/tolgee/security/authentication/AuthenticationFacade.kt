@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
+import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -93,15 +94,39 @@ class AuthenticationFacade(
     get() = if (isAuthenticated) authentication.isSuperToken else false
 
   val isApiAuthentication: Boolean
-    get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth
+    get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth || isOAuthTokenAuth
 
   val isProjectApiKeyAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is ApiKeyDto else false
+    get() = credentialsOrNull is ApiKeyDto
 
   val isPersonalAccessTokenAuth: Boolean
-    get() = if (isAuthenticated) authentication.credentials is PatDto else false
+    get() = credentialsOrNull is PatDto
 
-  val projectApiKey: ApiKeyDto
+  val scopedCredential: ScopedCredential?
+    get() = credentialsOrNull as? ScopedCredential
+
+  val isOAuthTokenAuth: Boolean
+    get() = credentialsOrNull is OAuth2TokenCredentials
+
+  val isScopedCredential: Boolean
+    get() = scopedCredential != null
+
+  fun isScopedCredentialFor(userAccountId: Long): Boolean =
+    isScopedCredential && authenticatedUserOrNull?.id == userAccountId
+
+  /** An elevation granted to the user, so a scoped credential must carry the real scope instead. */
+  val canUseAuthorSelfAccess: Boolean
+    get() = !isScopedCredential
+
+  fun isAuthorSelfAccess(authorId: Long?): Boolean {
+    if (!canUseAuthorSelfAccess) return false
+    return authorId != null && authorId == authenticatedUser.id
+  }
+
+  val implicitProjectId: Long?
+    get() = scopedCredential?.singleProjectId
+
+  private val projectApiKey: ApiKeyDto
     get() = authentication.credentials as ApiKeyDto
 
   val projectApiKeyEntity: ApiKey
@@ -125,5 +150,11 @@ class AuthenticationFacade(
 
       // null safety: `.get` returns non-null or throws. non-null assert is safe here.
       return authentication.personalAccessTokenEntity!!
+    }
+
+  private val credentialsOrNull: Any?
+    get() {
+      if (!isAuthenticated) return null
+      return authentication.credentials
     }
 }

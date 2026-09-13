@@ -53,8 +53,9 @@ export const LanguagesSelect: FunctionComponent<
   const menuProps: Partial<MenuProps> = {
     variant: 'menu',
     PaperProps: {
-      style: {
-        width: 250,
+      sx: {
+        minWidth: 200,
+        maxWidth: 250,
       },
     },
     id: `language-select-${props.context}-menu`,

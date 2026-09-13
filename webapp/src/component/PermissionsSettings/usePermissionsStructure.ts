@@ -159,6 +159,9 @@ export const usePermissionsStructure = () => {
           {
             value: 'tasks.edit',
           },
+          {
+            value: 'tasks.assigned-access',
+          },
         ],
       },
       {

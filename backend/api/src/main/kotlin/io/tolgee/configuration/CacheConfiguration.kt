@@ -18,14 +18,14 @@ package io.tolgee.configuration
 
 import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.component.TolgeeCacheErrorHandler
-import org.springframework.cache.annotation.CachingConfigurerSupport
+import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.interceptor.CacheErrorHandler
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class CacheConfiguration(
   private val resilientCacheAccessor: ResilientCacheAccessor,
-) : CachingConfigurerSupport() {
+) : CachingConfigurer {
   override fun errorHandler(): CacheErrorHandler {
     return TolgeeCacheErrorHandler(resilientCacheAccessor)
   }

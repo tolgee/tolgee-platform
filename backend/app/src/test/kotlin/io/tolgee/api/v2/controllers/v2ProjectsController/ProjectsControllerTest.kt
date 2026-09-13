@@ -219,7 +219,7 @@ class ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")
-    organizationRoleService.grantOwnerRoleToUser(user, repo.organizationOwner!!)
+    organizationRoleService.grantOwnerRoleToUser(user, repo.organizationOwner)
 
     loginAsUser(usersAndOrganizations[1].name)
 

@@ -34,7 +34,7 @@ class McpTranslationToolsTest : AbstractMcpTest() {
         "get_translations",
         mapOf("keyName" to "greeting"),
       )
-    assertThat(json["keyName"].asText()).isEqualTo("greeting")
+    assertThat(json["keyName"].asString()).isEqualTo("greeting")
     assertThat(json["translations"].isArray).isTrue()
   }
 
@@ -48,16 +48,16 @@ class McpTranslationToolsTest : AbstractMcpTest() {
       )
     assertThat(json).isNotNull()
     assertThat(json.has("keyName")).isTrue()
-    assertThat(json["keyName"].asText()).isEqualTo("greeting")
+    assertThat(json["keyName"].asString()).isEqualTo("greeting")
     assertThat(json.has("translations")).isTrue()
     val translations = json["translations"]
     assertThat(translations.isArray).isTrue()
     val enTranslation =
       (0 until translations.size())
         .map { translations[it] }
-        .find { it["languageTag"].asText() == "en" }
+        .find { it["languageTag"].asString() == "en" }
     assertThat(enTranslation).isNotNull()
-    assertThat(enTranslation!!["text"].asText()).isEqualTo("Hello")
+    assertThat(enTranslation!!["text"].asString()).isEqualTo("Hello")
   }
 
   @Test
@@ -107,7 +107,7 @@ class McpTranslationToolsTest : AbstractMcpTest() {
     assertThat(json).isNotNull()
     assertThat(json.has("translations")).isTrue()
     val translations = json["translations"]
-    val languageTags = (0 until translations.size()).map { translations[it]["languageTag"].asText() }
+    val languageTags = (0 until translations.size()).map { translations[it]["languageTag"].asString() }
     assertThat(languageTags).contains("de")
     assertThat(languageTags).doesNotContain("en")
   }

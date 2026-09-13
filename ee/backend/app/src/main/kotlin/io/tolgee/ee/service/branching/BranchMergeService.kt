@@ -45,7 +45,7 @@ class BranchMergeService(
   @Lazy
   private val languageService: LanguageService,
   private val metrics: Metrics,
-) : AbstractBranchMergeService(branchMergeChangeRepository),
+) : AbstractBranchMergeService(branchMergeChangeRepository, branchMergeRepository),
   Logging {
   @Transactional
   fun dryRun(branchMerge: BranchMerge) {

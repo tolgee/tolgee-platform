@@ -1,4 +1,11 @@
-import { Checkbox, ListItemText, MenuItem, Divider } from '@mui/material';
+import { useState } from 'react';
+import {
+  Checkbox,
+  ListItemText,
+  MenuItem,
+  Divider,
+  Tooltip,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
@@ -6,6 +13,45 @@ import { components } from 'tg.service/apiSchema.generated';
 import { messageService } from 'tg.service/MessageService';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+
+const LanguageName = ({ name }: { name: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
+    setShowTooltip(
+      event.currentTarget.scrollWidth > event.currentTarget.clientWidth
+    );
+  };
+
+  return (
+    <Tooltip
+      title={name}
+      placement="right"
+      open={showTooltip}
+      onClose={() => setShowTooltip(false)}
+    >
+      <ListItemText
+        primary={name}
+        primaryTypographyProps={{
+          onMouseEnter: handleMouseEnter,
+          onMouseLeave: () => setShowTooltip(false),
+        }}
+        sx={(theme) => ({
+          '& .MuiListItemText-primary': {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            [theme.breakpoints.down('sm')]: {
+              whiteSpace: 'normal',
+              textOverflow: 'unset',
+              overflow: 'visible',
+            },
+          },
+        })}
+      />
+    </Tooltip>
+  );
+};
 
 type Props = {
   onChange: (value: string[]) => void;
@@ -84,7 +130,7 @@ export const getLanguagesContent = ({
       disabled={disabledLanguages?.includes(lang.id)}
     >
       <Checkbox checked={value?.includes(lang.tag)} size="small" />
-      <ListItemText primary={lang.name} />
+      <LanguageName name={lang.name} />
     </MenuItem>
   ));
 

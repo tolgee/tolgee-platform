@@ -136,7 +136,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
           entityManager
             .createQuery(
               "select coalesce(max(t.number), 0) from Task t where t.project.id = :p",
-              java.lang.Long::class.java,
+              Long::class.javaObjectType,
             ).setParameter("p", target.targetProject.id)
             .singleResult
             .toLong()
@@ -605,7 +605,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         entityManager
           .createQuery(
             "select t.promptId from Translation t where t.key.project.id = :p and t.text = 'Hello'",
-            java.lang.Long::class.java,
+            Long::class.javaObjectType,
           ).setParameter("p", target.targetProject.id)
           .resultList
       }
@@ -782,7 +782,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
       entityManager
         .createQuery(
           "select k.id from Key k where k.project.id = :p and k.name = :n and k.branch.name = :b",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("p", projectId)
         .setParameter("n", keyName)
         .setParameter("b", branchName)
@@ -831,7 +831,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   ): Long =
     readInTransaction {
       entityManager
-        .createQuery("select k.id from Key k where k.project.id = :p and k.name = :n", java.lang.Long::class.java)
+        .createQuery("select k.id from Key k where k.project.id = :p and k.name = :n", Long::class.javaObjectType)
         .setParameter("p", projectId)
         .setParameter("n", name)
         .singleResult
@@ -1104,7 +1104,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
       entityManager
         .createQuery(
           "select count(tk) from TaskKey tk where tk.task.project.id = :p and tk.task.name = :n",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("p", projectId)
         .setParameter("n", taskName)
         .singleResult
@@ -1116,7 +1116,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
       entityManager
         .createQuery(
           "select count(distinct r.screenshot) from KeyScreenshotReference r where r.key.project.id = :p",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("p", projectId)
         .singleResult
         .toLong()
@@ -1127,7 +1127,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
       entityManager
         .createQuery(
           "select count(r) from KeyScreenshotReference r where r.key.project.id = :p",
-          java.lang.Long::class.java,
+          Long::class.javaObjectType,
         ).setParameter("p", projectId)
         .singleResult
         .toLong()
@@ -1147,7 +1147,7 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   private fun branchCount(projectId: Long): Long =
     readInTransaction {
       entityManager
-        .createQuery("select count(b) from Branch b where b.project.id = :p", java.lang.Long::class.java)
+        .createQuery("select count(b) from Branch b where b.project.id = :p", Long::class.javaObjectType)
         .setParameter("p", projectId)
         .singleResult
         .toLong()
@@ -1236,11 +1236,10 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
         .createQuery(
           "select t.qaChecksStale from Translation t " +
             "where t.key.project.id = :p and t.key.name = :k and t.language.tag = 'en'",
-          java.lang.Boolean::class.java,
+          Boolean::class.javaObjectType,
         ).setParameter("p", projectId)
         .setParameter("k", keyName)
         .singleResult
-        .booleanValue()
     }
 
   private fun keyBranchName(

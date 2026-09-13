@@ -10,8 +10,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
@@ -63,10 +61,8 @@ class ApiKey(
   @NotNull
   lateinit var project: Project
 
-  @Temporal(TemporalType.TIMESTAMP)
   var expiresAt: Date? = null
 
-  @Temporal(TemporalType.TIMESTAMP)
   var lastUsedAt: Date? = null
 
   constructor(

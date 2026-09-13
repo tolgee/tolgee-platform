@@ -70,6 +70,9 @@ class RequestContextServiceTest {
     Mockito.`when`(organization.slug).thenReturn(TEST_ORGANIZATION_SLUG)
 
     Mockito.`when`(apiKey.projectId).thenReturn(TEST_PROJECT_ID)
+    // No implicit project by default (a mock's numeric getter would otherwise answer 0, not null); the setup* helpers
+    // override this for the PAK / single-project-OAuth cases.
+    Mockito.`when`(authenticationFacade.implicitProjectId).thenReturn(null)
   }
 
   @AfterEach
@@ -80,7 +83,7 @@ class RequestContextServiceTest {
   private fun setupApiKey() {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(true)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
-    Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
+    Mockito.`when`(authenticationFacade.implicitProjectId).thenReturn(TEST_PROJECT_ID)
   }
 
   private fun makeRequest(

@@ -28,8 +28,8 @@ fun updateStringsInJson(
       arrayNode
     }
 
-    node.isTextual -> {
-      StringNode(fn(node.asText()))
+    node.isString -> {
+      StringNode(fn(node.asString()))
     }
 
     else -> node // Return unchanged for non-string nodes (e.g., numbers, booleans, null)

@@ -110,7 +110,7 @@ class CursorPredicateProvider(
 
     return when (javaType) {
       String::class.java -> raw as Comparable<Any>
-      java.lang.Long::class.java -> raw.toLong() as Comparable<Any>
+      Long::class.javaObjectType -> raw.toLong() as Comparable<Any>
       java.sql.Timestamp::class.java -> java.sql.Timestamp(raw.toLong()) as Comparable<Any>
       java.util.Date::class.java -> java.util.Date(raw.toLong()) as Comparable<Any>
       else -> throw IllegalArgumentException("Cannot parse value for type $javaType")

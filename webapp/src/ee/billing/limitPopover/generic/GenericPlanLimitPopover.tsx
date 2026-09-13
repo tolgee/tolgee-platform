@@ -22,6 +22,7 @@ type PlanLimitPopoverProps = PlanLimitPopoverWrapperProps & {
   actionButton?: React.ReactNode;
   additionalContent?: React.ReactNode;
   loading?: boolean;
+  usageUnavailable?: boolean;
 };
 
 const StyledDialogContent = styled(DialogContent)`
@@ -40,6 +41,7 @@ export const GenericPlanLimitPopover: FC<
   actionButton,
   additionalContent,
   loading,
+  usageUnavailable,
 }) => {
   return (
     <PlanLimitPopoverWrapper
@@ -52,7 +54,16 @@ export const GenericPlanLimitPopover: FC<
       </DialogTitle>
       <StyledDialogContent>
         <DialogContentText id="alert-dialog-description">
-          <T keyName="plan_limit_dialog_description" />
+          {usageUnavailable ? (
+            <span data-cy="plan-limit-dialog-organization-limit-message">
+              <T
+                keyName="plan_limit_dialog_organization_limit_description"
+                defaultValue="The organization's plan limit has been reached. Contact the organization owner to upgrade the plan."
+              />
+            </span>
+          ) : (
+            <T keyName="plan_limit_dialog_description" />
+          )}
         </DialogContentText>
         {additionalContent}
         {progressData && isPayAsYouGo !== undefined ? (

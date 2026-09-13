@@ -313,6 +313,7 @@ class ProjectService(
               permission,
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
+              asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccount.id),
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()

@@ -15,6 +15,7 @@ import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.hateoas.apiKey.ApiKeyModel
 import io.tolgee.hateoas.apiKey.ApiKeyModelAssembler
 import io.tolgee.hateoas.apiKey.ApiKeyPermissionsModel
@@ -193,27 +194,31 @@ class ApiKeyController(
   @GetMapping(path = ["/api-keys/current-permissions"])
   @Operation(
     summary = "Get current permission info",
-    description = "Returns current PAK or PAT permissions for current user, api-key and project",
+    description = "Returns the current PAK, PAT or OAuth token permissions for current user, api-key and project",
   )
   @AllowApiAccess()
   fun getCurrentPermissions(
     @RequestParam
-    @Parameter(description = "Required when using with PAT")
+    @Parameter(
+      description = "Required with a PAT, and with an OAuth token not bound to exactly one project",
+    )
     projectId: Long?,
   ): ApiKeyPermissionsModel {
-    val apiKeyAuthentication = authenticationFacade.isProjectApiKeyAuth
-    val personalAccessTokenAuth = authenticationFacade.isPersonalAccessTokenAuth
-
+    // Outside the project-scoped paths: neither RequestContextService nor ProjectContextService runs here, so this
+    // endpoint resolves the project itself and then has to ask whether the caller reaches it. A PAK and a
+    // single-project OAuth token name their own project; a PAT and an all-projects token have to be told.
     val projectIdNotNull =
       when {
-        apiKeyAuthentication ->
-          authenticationFacade.projectApiKey.projectId
-
-        personalAccessTokenAuth ->
-          projectId ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
+        authenticationFacade.isApiAuthentication ->
+          projectId
+            ?: authenticationFacade.implicitProjectId
+            ?: throw BadRequestException(Message.NO_PROJECT_ID_PROVIDED)
 
         else -> throw BadRequestException(Message.INVALID_AUTHENTICATION_METHOD)
       }
+
+    val permittedScopes = securityService.getCurrentPermittedScopes(projectIdNotNull)
+    if (permittedScopes.isEmpty()) throw ProjectNotFoundException(projectIdNotNull)
 
     val permissionData =
       permissionService.getProjectPermissionData(
@@ -225,13 +230,13 @@ class ApiKeyController(
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
-      type = if (apiKeyAuthentication) null else computed.type,
+      type = computed.type.takeIf { !authenticationFacade.isScopedCredential },
       translateLanguageIds = computed.translateLanguageIds.toNormalizedPermittedLanguageSet(),
       viewLanguageIds = computed.viewLanguageIds.toNormalizedPermittedLanguageSet(),
       stateChangeLanguageIds = computed.stateChangeLanguageIds.toNormalizedPermittedLanguageSet(),
       suggestLanguageIds = computed.suggestLanguageIds.toNormalizedPermittedLanguageSet(),
       suggestManageLanguageIds = computed.suggestManageLanguageIds.toNormalizedPermittedLanguageSet(),
-      scopes = securityService.getCurrentPermittedScopes(projectIdNotNull).toTypedArray(),
+      scopes = permittedScopes.toTypedArray(),
       project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
     )
   }

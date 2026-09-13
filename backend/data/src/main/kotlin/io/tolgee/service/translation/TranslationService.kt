@@ -743,7 +743,7 @@ class TranslationService(
       )
     }
 
-    query.multiselect(keyRoot.get(Key_.id), langJoin.get(Language_.id))
+    query.select(cb.tuple(keyRoot.get(Key_.id), langJoin.get(Language_.id)))
     query.where(*predicates.toTypedArray())
 
     return entityManager.createQuery(query).resultList.map { tuple ->
