@@ -138,6 +138,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
                 : undefined
             )
           }
+          copyText={translation?.text}
           commentsCount={translation?.commentCount}
           tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
           onTaskStateChange={setAssignedTaskState}

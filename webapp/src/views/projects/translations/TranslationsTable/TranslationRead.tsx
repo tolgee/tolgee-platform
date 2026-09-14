@@ -162,6 +162,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
                 : undefined
             )
           }
+          copyText={translation?.text}
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}

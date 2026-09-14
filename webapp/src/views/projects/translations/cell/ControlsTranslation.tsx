@@ -12,6 +12,7 @@ import { useTranslate } from '@tolgee/react';
 import { StateInType } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { ControlsButton } from './ControlsButton';
+import { CopyButton } from 'tg.views/projects/translations/cell/CopyButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
@@ -25,9 +26,7 @@ const StyledControlsWrapper = styled(Box)`
   display: grid;
   box-sizing: border-box;
   justify-content: end;
-  padding: 0px 0px 0px 0px;
   gap: 4px;
-  margin: 0px 0px;
 `;
 
 const StyledBadge = styled(Badge)`
@@ -64,6 +63,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   onQaIssues?: () => void;
+  copyText?: string;
   commentsCount: number | undefined;
   tasks: TaskModel[] | undefined;
   onTaskStateChange: (done: boolean) => void;
@@ -87,6 +87,7 @@ export const ControlsTranslation: React.FC<
   onStateChange,
   onComments,
   onQaIssues,
+  copyText = '',
   tasks,
   onTaskStateChange,
   commentsCount,
@@ -104,6 +105,7 @@ export const ControlsTranslation: React.FC<
   const qaChecksEnabled = useQaChecksEnabled();
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
+  const displayCopy = Boolean(copyText);
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
@@ -119,6 +121,9 @@ export const ControlsTranslation: React.FC<
   if (displayTransitionButtons && hasNextState) {
     spots.push('state');
   }
+  if (displayCopy) {
+    spots.push('copy');
+  }
   if (displayEdit) {
     spots.push('edit');
   }
@@ -133,6 +138,7 @@ export const ControlsTranslation: React.FC<
   }
 
   const inDomTransitionButtons = displayTransitionButtons && active;
+  const inDomCopy = displayCopy && active;
   const inDomEdit = displayEdit && active;
   const inDomComments = displayComments || active || lastFocusable;
   const inDomQaIssues = displayQaIssues;
@@ -158,6 +164,14 @@ export const ControlsTranslation: React.FC<
           onStateChange={onStateChange}
           className={CELL_SHOW_ON_HOVER}
           onNextStateExist={setHasNextState}
+        />
+      )}
+      {inDomCopy && (
+        <CopyButton
+          style={{ gridArea: 'copy' }}
+          text={copyText}
+          data-cy="translations-cell-copy-button"
+          className={CELL_SHOW_ON_HOVER}
         />
       )}
       {inDomEdit && (
