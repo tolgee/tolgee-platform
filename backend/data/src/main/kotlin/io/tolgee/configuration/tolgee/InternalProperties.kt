@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee.internal")
 class InternalProperties {
   var controllerEnabled = false
+  var testClockEnabled = false
   var fakeThirdPartyLogin = false
   var showVersion: Boolean = false
   var fakeMtProviders: Boolean = false
