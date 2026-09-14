@@ -127,7 +127,7 @@ export const BaseOrganizationSettingsView: React.FC<
         }),
         label: t('organization_menu_billing', 'Billing'),
       });
-      if (config.internalControllerEnabled) {
+      if (config.testClockEnabled && isAdminOrSupporter) {
         menuItems.push({
           link: LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.build({
             [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
