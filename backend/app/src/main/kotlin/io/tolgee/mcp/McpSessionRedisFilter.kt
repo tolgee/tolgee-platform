@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono
 import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Function
 
 /**
@@ -156,7 +157,7 @@ class McpSessionRedisFilter(
     fieldName: String,
   ): Any? {
     if (fieldValue == null) return null
-    if (fieldValue is java.util.concurrent.atomic.AtomicReference<*>) {
+    if (fieldValue is AtomicReference<*>) {
       return fieldValue.get()
     }
     log.warn(
@@ -185,41 +186,23 @@ class McpSessionRedisFilter(
       )
     }
 
-    val timeoutField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("requestTimeout")
-    timeoutField.isAccessible = true
-    val requestTimeout = timeoutField.get(factory) as Duration
-
-    val handlersField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("requestHandlers")
-    handlersField.isAccessible = true
-
-    @Suppress("UNCHECKED_CAST")
-    val requestHandlers = handlersField.get(factory) as Map<String, Any>
-
-    val notifField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("notificationHandlers")
-    notifField.isAccessible = true
-
-    @Suppress("UNCHECKED_CAST")
-    val notificationHandlers = notifField.get(factory) as Map<String, Any>
-
-    val onCloseField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("onClose")
-    onCloseField.isAccessible = true
-
-    @Suppress("UNCHECKED_CAST")
-    val onClose = onCloseField.get(factory) as Function<String, Mono<Void>>
-
-    val validatorField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("jsonSchemaValidator")
-    validatorField.isAccessible = true
-    val jsonSchemaValidator = validatorField.get(factory) as JsonSchemaValidator?
-
-    return FactoryFields(requestTimeout, requestHandlers, notificationHandlers, onClose, jsonSchemaValidator)
+    val factoryClass = DefaultMcpStreamableServerSessionFactory::class.java
+    return FactoryFields(
+      requestTimeout = getPrivateField(factory, "requestTimeout", factoryClass),
+      requestHandlers = getPrivateField(factory, "requestHandlers", factoryClass),
+      notificationHandlers = getPrivateField(factory, "notificationHandlers", factoryClass),
+      onClose = getPrivateField(factory, "onClose", factoryClass),
+      jsonSchemaValidator = getPrivateField(factory, "jsonSchemaValidator", factoryClass),
+    )
   }
 
   @Suppress("UNCHECKED_CAST")
   private fun <T> getPrivateField(
     obj: Any,
     fieldName: String,
+    declaringClass: Class<*> = obj.javaClass,
   ): T {
-    val field = obj.javaClass.getDeclaredField(fieldName)
+    val field = declaringClass.getDeclaredField(fieldName)
     field.isAccessible = true
     return field.get(obj) as T
   }

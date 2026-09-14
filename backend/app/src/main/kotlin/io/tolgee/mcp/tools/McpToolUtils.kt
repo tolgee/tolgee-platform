@@ -9,6 +9,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import org.springframework.data.domain.Page
 
 fun textResult(text: String): CallToolResult {
@@ -48,8 +49,6 @@ fun McpSyncServer.addTool(
   )
 }
 
-// The SDK builds the JSON-RPC error from exception.message and asserts it is non-null,
-// so a message-less exception (e.g. NotFoundException) would break the response stream.
 private fun <T> withNonNullErrorMessage(block: () -> T): T {
   try {
     return block()
@@ -57,7 +56,7 @@ private fun <T> withNonNullErrorMessage(block: () -> T): T {
     if (e.message != null) throw e
     throw McpError
       .builder(McpSchema.ErrorCodes.INTERNAL_ERROR)
-      .message(e.javaClass.simpleName)
+      .message((e as? NotFoundException)?.msg?.code ?: e.javaClass.name)
       .data(McpError.aggregateExceptionMessages(e))
       .build()
   }
