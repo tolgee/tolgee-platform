@@ -1,8 +1,8 @@
 package io.tolgee.mcp
 
+import io.modelcontextprotocol.json.schema.JsonSchemaValidator
 import io.modelcontextprotocol.server.McpNotificationHandler
 import io.modelcontextprotocol.server.McpRequestHandler
-import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.DefaultMcpStreamableServerSessionFactory
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpStreamableServerSession
@@ -12,10 +12,13 @@ import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpServletResponseWrapper
 import org.redisson.api.RedissonClient
 import org.slf4j.LoggerFactory
+import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStreamableServerTransportProvider
 import org.springframework.web.filter.OncePerRequestFilter
+import reactor.core.publisher.Mono
 import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Function
 
 /**
  * Servlet filter that syncs MCP sessions to Redis for multi-replica deployments.
@@ -109,6 +112,8 @@ class McpSessionRedisFilter(
           factoryFields.requestTimeout,
           factoryFields.requestHandlers as Map<String, McpRequestHandler<*>>,
           factoryFields.notificationHandlers as Map<String, McpNotificationHandler>,
+          { factoryFields.onClose.apply(sessionId) },
+          factoryFields.jsonSchemaValidator,
         )
 
       val existing = sessionsMap.putIfAbsent(sessionId, session)
@@ -196,7 +201,17 @@ class McpSessionRedisFilter(
     @Suppress("UNCHECKED_CAST")
     val notificationHandlers = notifField.get(factory) as Map<String, Any>
 
-    return FactoryFields(requestTimeout, requestHandlers, notificationHandlers)
+    val onCloseField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("onClose")
+    onCloseField.isAccessible = true
+
+    @Suppress("UNCHECKED_CAST")
+    val onClose = onCloseField.get(factory) as Function<String, Mono<Void>>
+
+    val validatorField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("jsonSchemaValidator")
+    validatorField.isAccessible = true
+    val jsonSchemaValidator = validatorField.get(factory) as JsonSchemaValidator?
+
+    return FactoryFields(requestTimeout, requestHandlers, notificationHandlers, onClose, jsonSchemaValidator)
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -240,6 +255,8 @@ class McpSessionRedisFilter(
     val requestTimeout: Duration,
     val requestHandlers: Map<String, Any>,
     val notificationHandlers: Map<String, Any>,
+    val onClose: Function<String, Mono<Void>>,
+    val jsonSchemaValidator: JsonSchemaValidator?,
   )
 
   companion object {

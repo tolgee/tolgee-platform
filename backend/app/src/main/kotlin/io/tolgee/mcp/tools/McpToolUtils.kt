@@ -2,6 +2,7 @@ package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.server.McpServerFeatures
 import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.spec.McpError
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
@@ -41,13 +42,25 @@ fun McpSyncServer.addTool(
       .build()
 
   addTool(
-    McpServerFeatures.SyncToolSpecification(
-      tool,
-      null,
-    ) { exchange, request ->
-      handler(request)
+    McpServerFeatures.SyncToolSpecification(tool) { _, request ->
+      withNonNullErrorMessage { handler(request) }
     },
   )
+}
+
+// The SDK builds the JSON-RPC error from exception.message and asserts it is non-null,
+// so a message-less exception (e.g. NotFoundException) would break the response stream.
+private fun <T> withNonNullErrorMessage(block: () -> T): T {
+  try {
+    return block()
+  } catch (e: Exception) {
+    if (e.message != null) throw e
+    throw McpError
+      .builder(McpSchema.ErrorCodes.INTERNAL_ERROR)
+      .message(e.javaClass.simpleName)
+      .data(McpError.aggregateExceptionMessages(e))
+      .build()
+  }
 }
 
 fun <T : Any> pagedResponse(
