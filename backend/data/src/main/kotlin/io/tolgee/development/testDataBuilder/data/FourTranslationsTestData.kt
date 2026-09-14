@@ -1,9 +1,9 @@
 package io.tolgee.development.testDataBuilder.data
 
-class TranslationViewsTestData :
+class FourTranslationsTestData :
   BaseTestData(
-    userName = "translation-views-user",
-    projectName = "Translation views test",
+    userName = "four-translations-user",
+    projectName = "Four translations test",
   ) {
   val czechLanguage = projectBuilder.addCzech().self
 

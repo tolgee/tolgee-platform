@@ -183,8 +183,8 @@ export const charLimitTestData = generateTestDataObject('char-limit');
 export const copyTranslationTestData =
   generateTestDataObject('copy-translation');
 
-export const translationViewsTestData =
-  generateTestDataObject('translation-views');
+export const fourTranslationsTestData =
+  generateTestDataObject('four-translations');
 
 export const suggestionsTestData = {
   ...generateTestDataObject('suggestions'),

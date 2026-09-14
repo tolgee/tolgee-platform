@@ -7,9 +7,9 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { stubClipboardNow } from '../../common/clipboard';
+import { stubClipboardInCurrentWindow } from '../../common/clipboard';
 
-const NORMALIZED_PLURAL_ICU = '{value, plural,\none {# dog}\nother {# dogs}\n}';
+const PLURAL_ICU_MESSAGE = '{value, plural,\none {# dog}\nother {# dogs}\n}';
 
 describe('Translation copy button', () => {
   let projectId: number;
@@ -34,7 +34,7 @@ describe('Translation copy button', () => {
 
   forEachView(() => {
     it('copies the translation without opening the editor', () => {
-      const copied = stubClipboardNow();
+      const copied = stubClipboardInCurrentWindow();
 
       getTranslationCell('Test key', 'en')
         .trigger('mouseover')
@@ -52,14 +52,14 @@ describe('Translation copy button', () => {
     });
 
     it('copies the raw ICU message of a plural key', () => {
-      const copied = stubClipboardNow();
+      const copied = stubClipboardInCurrentWindow();
 
       getTranslationCell('Plural key', 'en')
         .trigger('mouseover')
         .findDcy('translations-cell-copy-button')
         .click();
 
-      cy.then(() => expect(copied.text).to.equal(NORMALIZED_PLURAL_ICU));
+      cy.then(() => expect(copied.text).to.equal(PLURAL_ICU_MESSAGE));
     });
 
     it('has no copy button on an untranslated cell', () => {

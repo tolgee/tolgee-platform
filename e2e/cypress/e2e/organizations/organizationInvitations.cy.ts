@@ -14,7 +14,7 @@ import {
 } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
-import { Clipboard, stubClipboard } from '../../common/clipboard';
+import { ClipboardStub, stubClipboard } from '../../common/clipboard';
 
 describe('Organization Invitations', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -51,6 +51,24 @@ describe('Organization Invitations', () => {
     gcy('organization-invitation-item')
       .filter(':contains("OWNER")')
       .should('have.length', 2);
+  });
+
+  it('copies invitation link from the invitation list', () => {
+    let clipboard: ClipboardStub;
+
+    generateInvitation('MEMBER');
+    cy.visit(`${HOST}/organizations/${getTolgeeSlug()}/members`, {
+      onBeforeLoad(win) {
+        clipboard = stubClipboard(win);
+      },
+    });
+
+    gcy('organization-invitation-copy-button').first().click();
+
+    assertMessage('Invitation link copied to clipboard');
+    cy.then(() => {
+      expect(clipboard.text).to.contain('/accept_invitation/');
+    });
   });
 
   it('cancels invitation', () => {
@@ -129,7 +147,7 @@ describe('Organization Invitations', () => {
   };
 
   const generateInvitation = (roleType: 'MEMBER' | 'OWNER', email = false) => {
-    let clipboard: Clipboard;
+    let clipboard: ClipboardStub;
     const slug = getTolgeeSlug();
 
     cy.visit(`${HOST}/organizations/${slug}/members`, {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import copy from 'copy-to-clipboard';
 import { Check, Copy06 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
@@ -14,18 +14,12 @@ type Props = Omit<
 
 export const CopyButton = ({ text, ...props }: Props) => {
   const [copied, setCopied] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout>();
   const { t } = useTranslate();
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
-
   const handleClick = () => {
-    if (!copy(text)) {
-      return;
+    if (copy(text)) {
+      setCopied(true);
     }
-    setCopied(true);
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (

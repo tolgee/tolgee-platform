@@ -15,7 +15,7 @@ import {
 } from '../../../common/translations';
 import { gcy } from '../../../common/shared';
 import { enableNamespaces, login } from '../../../common/apiCalls/common';
-import { translationViewsTestData } from '../../../common/apiCalls/testData/testData';
+import { fourTranslationsTestData } from '../../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../../common/loading';
 import { selectNamespace } from '../../../compounds/E2NamespaceSelector';
 
@@ -23,8 +23,8 @@ describe('Views with 5 Translations', () => {
   let projectId: number;
 
   beforeEach(() => {
-    translationViewsTestData.clean({ failOnStatusCode: false });
-    translationViewsTestData
+    fourTranslationsTestData.clean({ failOnStatusCode: false });
+    fourTranslationsTestData
       .generateStandard()
       .then((r) => r.body)
       .then((data) => {
@@ -37,10 +37,9 @@ describe('Views with 5 Translations', () => {
   });
 
   afterEach(() => {
-    translationViewsTestData.clean();
+    fourTranslationsTestData.clean();
   });
 
-  // run same tests for list view and table view
   forEachView(() => {
     it('edits key', () => {
       editKeyName('Cool key 01', 'Cool key edited');

@@ -8,10 +8,10 @@ import {
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { assertMessage, selectInProjectMenu } from '../../common/shared';
-import { Clipboard, stubClipboard } from '../../common/clipboard';
+import { ClipboardStub, stubClipboard } from '../../common/clipboard';
 
 let project: ProjectDTO;
-let clipboard: Clipboard;
+let clipboard: ClipboardStub;
 
 describe('Project Invitation', () => {
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe('Project Invitation', () => {
     cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
     cy.gcy('invitation-dialog-invite-button').click();
     assertMessage('Invitation link copied to clipboard');
-    cy.wrap(() => {
+    cy.then(() => {
       expect(clipboard.text).to.have.length.greaterThan(50);
       expect(clipboard.text).to.contain('/accept_invitation/');
     });

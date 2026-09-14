@@ -1,15 +1,15 @@
-export type Clipboard = { text: string };
+export type ClipboardStub = { text: string };
 
 /**
- * `copy-to-clipboard` copies via `execCommand`, but falls back to `prompt` when that
- * fails — which it does whenever the copy happens outside the user gesture, e.g. after
- * an awaited request. Both paths are stubbed so callers don't have to care which one
- * their component takes.
+ * `copy-to-clipboard` copies the current selection with `execCommand`, falling back to
+ * `window.prompt` when that fails — which it does whenever the copy happens outside the
+ * user gesture, e.g. after an awaited request. Both are captured, and `execCommand` is
+ * called through, so a spec still goes down whichever path its component really takes.
  */
 export function stubClipboard(
   win: Window & Cypress.ApplicationWindow,
-  clipboard: Clipboard = { text: '' }
-): Clipboard {
+  clipboard: ClipboardStub = { text: '' }
+): ClipboardStub {
   cy.stub(win, 'prompt').callsFake((_, input) => {
     clipboard.text = input;
   });
@@ -19,16 +19,25 @@ export function stubClipboard(
     if (command !== 'copy') {
       return execCommand(command, ...args);
     }
-    clipboard.text = win.getSelection()?.toString() ?? '';
-    return true;
+    clipboard.text = selectedText(win);
+    return execCommand(command, ...args);
   });
 
   return clipboard;
 }
 
-/** Same, for a page that is already loaded. */
-export function stubClipboardNow(): Clipboard {
-  const clipboard: Clipboard = { text: '' };
+export function stubClipboardInCurrentWindow(): ClipboardStub {
+  const clipboard: ClipboardStub = { text: '' };
   cy.window().then((win) => stubClipboard(win, clipboard));
   return clipboard;
+}
+
+function selectedText(win: Window): string {
+  const selection = win.getSelection();
+  if (!selection?.rangeCount) {
+    return '';
+  }
+  // Selection.toString() returns the *rendered* text, whose line breaks shift between
+  // Chrome versions; the copied node's textContent is the string copy() was handed.
+  return selection.getRangeAt(0).commonAncestorContainer.textContent ?? '';
 }
