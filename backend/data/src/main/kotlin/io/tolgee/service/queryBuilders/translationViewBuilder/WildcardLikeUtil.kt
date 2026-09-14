@@ -5,6 +5,7 @@ import io.tolgee.exceptions.BadRequestException
 
 object WildcardLikeUtil {
   const val ESCAPE_CHAR = '\\'
+  const val EXACT_PREFIX = "="
 
   // mirrored in webapp buildSearchRequestParams.ts — a change here needs a frontend update
   const val MAX_PATTERN_LENGTH = 500
@@ -12,12 +13,14 @@ object WildcardLikeUtil {
   const val MAX_PATTERNS_PER_PARAM = 20
 
   fun toLikePattern(input: String): String {
+    val exact = input.startsWith(EXACT_PREFIX)
     val escaped =
       input
+        .removePrefix(EXACT_PREFIX)
         .replace("\\", "\\\\")
         .replace("%", "\\%")
         .replace("_", "\\_")
-    if (!escaped.contains('*')) return "%$escaped%"
+    if (!exact && !escaped.contains('*')) return "%$escaped%"
     return escaped.replace('*', '%')
   }
 

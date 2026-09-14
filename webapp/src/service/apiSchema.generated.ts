@@ -19625,6 +19625,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19637,6 +19639,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19650,6 +19654,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19663,6 +19669,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19676,6 +19684,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19689,6 +19699,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19704,6 +19716,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19720,6 +19734,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19880,6 +19896,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19892,6 +19910,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19905,6 +19925,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19918,6 +19940,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19931,6 +19955,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19944,6 +19970,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19959,6 +19987,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -19975,6 +20005,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20179,6 +20211,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20191,6 +20225,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20204,6 +20240,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20217,6 +20255,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20230,6 +20270,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20243,6 +20285,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20258,6 +20302,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -20274,6 +20320,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26225,6 +26273,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26237,6 +26287,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26250,6 +26302,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26263,6 +26317,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26276,6 +26332,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26289,6 +26347,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26304,6 +26364,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26320,6 +26382,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26692,6 +26756,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26704,6 +26770,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26717,6 +26785,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26730,6 +26800,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26743,6 +26815,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26756,6 +26830,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26771,6 +26847,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long
@@ -26787,6 +26865,8 @@ export interface operations {
          *
          * Pattern syntax: `*` matches any sequence of characters
          * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
+         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
+         * To match a value that itself starts with `=`, use `*=…*`.
          * Matching is case-insensitive. `%` and `_` are matched literally.
          * You can use this parameter multiple times; all patterns must match (logical AND).
          * Limits: a pattern must not be empty, may be at most 500 characters long

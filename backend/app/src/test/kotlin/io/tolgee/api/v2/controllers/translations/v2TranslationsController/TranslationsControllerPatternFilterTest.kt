@@ -72,6 +72,66 @@ class TranslationsControllerPatternFilterTest : ProjectAuthControllerTest("/v2/p
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters key by exact pattern`() {
+    performProjectAuthGet("/translations?filterKeyPattern==cart.title")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("cart.title")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `exact pattern keeps wildcards`() {
+    performProjectAuthGet("/translations?filterKeyPattern==cart*")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys").isArray.hasSize(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters description by exact pattern`() {
+    performProjectAuthGet("/translations?filterDescriptionPattern==shopping cart heading")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("cart.title")
+        }
+      }
+    performProjectAuthGet("/translations?filterDescriptionPattern==shopping")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters translation by exact pattern after the language tag`() {
+    performProjectAuthGet(
+      "/translations?languages=en&languages=de&filterTranslationPattern=de,=Warenkorb hinzufügen",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("cart.title")
+        }
+      }
+    performProjectAuthGet("/translations?languages=en&languages=de&filterTranslationPattern=de,=Warenkorb")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `matches locale-special characters case-insensitively`() {
     performProjectAuthGet("/translations?filterKeyPattern=straße")
       .andIsOk
