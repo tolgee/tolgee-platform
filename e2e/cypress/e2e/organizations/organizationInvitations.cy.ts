@@ -14,6 +14,7 @@ import {
 } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
+import { Clipboard, stubClipboard } from '../../common/clipboard';
 
 describe('Organization Invitations', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -128,15 +129,13 @@ describe('Organization Invitations', () => {
   };
 
   const generateInvitation = (roleType: 'MEMBER' | 'OWNER', email = false) => {
-    let clipboard: string;
+    let clipboard: Clipboard;
     const slug = getTolgeeSlug();
 
     cy.visit(`${HOST}/organizations/${slug}/members`, {
       onBeforeLoad(win) {
         if (!email) {
-          cy.stub(win, 'prompt').callsFake((_, input) => {
-            clipboard = input;
-          });
+          clipboard = stubClipboard(win);
         }
       },
     });
@@ -160,7 +159,7 @@ describe('Organization Invitations', () => {
 
     if (!email) {
       return assertMessage('Invitation link copied to clipboard').then(() => {
-        return clipboard;
+        return clipboard.text;
       });
     } else {
       waitForGlobalLoading();

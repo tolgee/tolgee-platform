@@ -8,15 +8,10 @@ import {
 } from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { assertMessage, selectInProjectMenu } from '../../common/shared';
+import { Clipboard, stubClipboard } from '../../common/clipboard';
 
 let project: ProjectDTO;
-let clipboard: string;
-
-function stubCopyToClipboard(win: Window & Cypress.ApplicationWindow) {
-  cy.stub(win, 'prompt').callsFake((_, input) => {
-    clipboard = input;
-  });
-}
+let clipboard: Clipboard;
 
 describe('Project Invitation', () => {
   beforeEach(() => {
@@ -61,7 +56,7 @@ describe('Project Invitation', () => {
   it('copies invitation code to clipboard', () => {
     cy.visit(`${HOST}/projects/${project.id}`, {
       onBeforeLoad(win) {
-        stubCopyToClipboard(win);
+        clipboard = stubClipboard(win);
       },
     });
     selectInProjectMenu('Members');
@@ -71,8 +66,8 @@ describe('Project Invitation', () => {
     cy.gcy('invitation-dialog-invite-button').click();
     assertMessage('Invitation link copied to clipboard');
     cy.wrap(() => {
-      expect(clipboard).to.have.length.greaterThan(50);
-      expect(clipboard).to.contain('/accept_invitation/');
+      expect(clipboard.text).to.have.length.greaterThan(50);
+      expect(clipboard.text).to.contain('/accept_invitation/');
     });
   });
 });

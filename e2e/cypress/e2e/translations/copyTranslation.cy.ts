@@ -7,6 +7,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
+import { stubClipboardNow } from '../../common/clipboard';
 
 const NORMALIZED_PLURAL_ICU = '{value, plural,\none {# dog}\nother {# dogs}\n}';
 
@@ -33,7 +34,7 @@ describe('Translation copy button', () => {
 
   forEachView(() => {
     it('copies the translation without opening the editor', () => {
-      const copied = stubCopyToClipboard();
+      const copied = stubClipboardNow();
 
       getTranslationCell('Test key', 'en')
         .trigger('mouseover')
@@ -51,7 +52,7 @@ describe('Translation copy button', () => {
     });
 
     it('copies the raw ICU message of a plural key', () => {
-      const copied = stubCopyToClipboard();
+      const copied = stubClipboardNow();
 
       getTranslationCell('Plural key', 'en')
         .trigger('mouseover')
@@ -73,21 +74,3 @@ describe('Translation copy button', () => {
     });
   });
 });
-
-/**
- * Unlike the `win.prompt` stub used by invitation.cy.ts, this intercepts execCommand:
- * copy-to-clipboard only falls back to `prompt` when execCommand fails, and here it
- * succeeds, so a prompt stub captures nothing.
- */
-function stubCopyToClipboard() {
-  const copied = { text: '' };
-  cy.window().then((win) => {
-    cy.stub(win.document, 'execCommand').callsFake((command: string) => {
-      if (command === 'copy') {
-        copied.text = win.getSelection()?.toString() ?? '';
-      }
-      return true;
-    });
-  });
-  return copied;
-}
