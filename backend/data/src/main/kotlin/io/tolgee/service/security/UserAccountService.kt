@@ -15,6 +15,7 @@ import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
+import io.tolgee.events.user.OnUserDeleted
 import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
@@ -261,6 +262,7 @@ class UserAccountService(
     aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
+    applicationEventPublisher.publishEvent(OnUserDeleted(this, toDelete))
   }
 
   @Transactional
