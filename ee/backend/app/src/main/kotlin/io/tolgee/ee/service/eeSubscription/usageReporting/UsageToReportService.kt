@@ -8,12 +8,14 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.sql.SQLException
 import java.util.Date
 
 /**
@@ -185,20 +187,35 @@ class UsageToReportService(
   }
 
   /**
-   * Its own transaction, so a caller whose transaction already touched this row blocks on itself.
-   * The eviction condition reads `#result`, which requires beforeInvocation to stay false.
+   * Its own transaction, so a caller whose transaction already wrote this row would block on
+   * itself; the lock timeout turns that hang into an error. The eviction condition reads
+   * `#result`, which requires beforeInvocation to stay false.
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1", condition = "#result")
-  fun takeWordsDirty(): Boolean =
-    entityManager
-      .createQuery(
-        """
-      update UsageToReport lru
-      set lru.wordsDirty = false
-      where lru.wordsDirty = true
-      """,
-      ).executeUpdate() > 0
+  fun takeWordsDirty(): Boolean {
+    entityManager.createNativeQuery("set local lock_timeout = '$TAKE_WORDS_DIRTY_LOCK_TIMEOUT'").executeUpdate()
+    try {
+      return entityManager
+        .createQuery(
+          """
+        update UsageToReport lru
+        set lru.wordsDirty = false
+        where lru.wordsDirty = true
+        """,
+        ).executeUpdate() > 0
+    } catch (e: PersistenceException) {
+      if (!e.isLockTimeout()) throw e
+      throw IllegalStateException(
+        "takeWordsDirty waited $TAKE_WORDS_DIRTY_LOCK_TIMEOUT for the usage row: " +
+          "it must not run inside a transaction that already marked the row dirty",
+        e,
+      )
+    }
+  }
+
+  private fun Throwable.isLockTimeout(): Boolean =
+    generateSequence(this) { it.cause }.any { it is SQLException && it.sqlState == "55P03" }
 
   /** For the reporting path's own failure recovery, which cannot use the writer-path variant. */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -288,5 +305,9 @@ class UsageToReportService(
       ).setParameter("lastReportedWords", words)
       .setParameter("wordsToReport", words)
       .executeUpdate()
+  }
+
+  companion object {
+    private const val TAKE_WORDS_DIRTY_LOCK_TIMEOUT = "30s"
   }
 }

@@ -21,6 +21,7 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -77,6 +78,18 @@ class WordUsageReportingTest : AbstractSpringTest() {
     // The ee_subscription row is a singleton, so a subscription left behind here limits every test
     // class that runs after this one.
     eeSubscriptionRepository.deleteAll()
+  }
+
+  @Test
+  fun `takeWordsDirty fails instead of hanging when its caller holds the row`() {
+    val testData = WordCountLimitTestData(initialWordCount = 2)
+    testDataService.saveTestData(testData.root)
+    executeInNewTransaction { usageToReportService.storeCurrentUsage(words = 0) }
+
+    executeInNewTransaction {
+      usageToReportService.markWordsDirty()
+      assertThrows<IllegalStateException> { usageToReportService.takeWordsDirty() }
+    }
   }
 
   @Test
