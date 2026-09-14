@@ -1,38 +1,39 @@
-import { ProjectDTO } from '../../../../webapp/src/service/response.types';
+import { login } from '../../common/apiCalls/common';
+import { copyTranslationTestData } from '../../common/apiCalls/testData/testData';
 import {
   forEachView,
   getTranslationCell,
-  translationsBeforeEach,
+  selectLangsInLocalstorage,
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
-import { createKey } from '../../common/apiCalls/common';
 
 const NORMALIZED_PLURAL_ICU = '{value, plural,\none {# dog}\nother {# dogs}\n}';
 
 describe('Translation copy button', () => {
-  let project: ProjectDTO = null;
+  let projectId: number;
 
   beforeEach(() => {
-    translationsBeforeEach(['en', 'cs'])
-      .then((p) => (project = p))
-      .then(() =>
-        createKey(project.id, 'Test key', { en: 'Translated test key' })
-      )
-      .then(() =>
-        createKey(
-          project.id,
-          'Plural key',
-          { en: NORMALIZED_PLURAL_ICU },
-          { isPlural: true }
-        )
-      )
-      .then(() => visitTranslations(project.id))
-      .then(() => waitForGlobalLoading());
+    copyTranslationTestData.clean({ failOnStatusCode: false });
+    copyTranslationTestData
+      .generateStandard()
+      .then((r) => r.body)
+      .then((data) => {
+        login(data.users[0].username);
+        projectId = data.projects[0].id;
+        selectLangsInLocalstorage(projectId, ['en', 'cs']);
+        visitTranslations(projectId);
+        waitForGlobalLoading();
+      });
+  });
+
+  afterEach(() => {
+    // forEachView's own afterEach already deleted the generated project
+    copyTranslationTestData.clean({ failOnStatusCode: false });
   });
 
   forEachView(
-    () => project.id,
+    () => projectId,
     () => {
       it('copies the translation without opening the editor', () => {
         const copied = stubCopyToClipboard();
