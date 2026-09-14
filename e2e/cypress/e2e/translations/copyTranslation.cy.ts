@@ -28,54 +28,50 @@ describe('Translation copy button', () => {
   });
 
   afterEach(() => {
-    // forEachView's own afterEach already deleted the generated project
-    copyTranslationTestData.clean({ failOnStatusCode: false });
+    copyTranslationTestData.clean();
   });
 
-  forEachView(
-    () => projectId,
-    () => {
-      it('copies the translation without opening the editor', () => {
-        const copied = stubCopyToClipboard();
+  forEachView(() => {
+    it('copies the translation without opening the editor', () => {
+      const copied = stubCopyToClipboard();
 
-        getTranslationCell('Test key', 'en')
-          .trigger('mouseover')
-          .findDcy('translations-cell-copy-button')
-          .click();
+      getTranslationCell('Test key', 'en')
+        .trigger('mouseover')
+        .findDcy('translations-cell-copy-button')
+        .click();
 
-        cy.gcy('global-editor').should('not.exist');
-        getTranslationCell('Test key', 'en')
-          .findDcyAdvanced({
-            value: 'translations-cell-copy-button',
-            copied: 'true',
-          })
-          .should('be.visible');
-        cy.then(() => expect(copied.text).to.equal('Translated test key'));
-      });
+      cy.gcy('global-editor').should('not.exist');
+      getTranslationCell('Test key', 'en')
+        .findDcyAdvanced({
+          value: 'translations-cell-copy-button',
+          copied: 'true',
+        })
+        .should('be.visible');
+      cy.then(() => expect(copied.text).to.equal('Translated test key'));
+    });
 
-      it('copies the raw ICU message of a plural key', () => {
-        const copied = stubCopyToClipboard();
+    it('copies the raw ICU message of a plural key', () => {
+      const copied = stubCopyToClipboard();
 
-        getTranslationCell('Plural key', 'en')
-          .trigger('mouseover')
-          .findDcy('translations-cell-copy-button')
-          .click();
+      getTranslationCell('Plural key', 'en')
+        .trigger('mouseover')
+        .findDcy('translations-cell-copy-button')
+        .click();
 
-        cy.then(() => expect(copied.text).to.equal(NORMALIZED_PLURAL_ICU));
-      });
+      cy.then(() => expect(copied.text).to.equal(NORMALIZED_PLURAL_ICU));
+    });
 
-      it('has no copy button on an untranslated cell', () => {
-        getTranslationCell('Test key', 'cs')
-          .trigger('mouseover')
-          .findDcy('translations-cell-edit-button')
-          .should('exist');
+    it('has no copy button on an untranslated cell', () => {
+      getTranslationCell('Test key', 'cs')
+        .trigger('mouseover')
+        .findDcy('translations-cell-edit-button')
+        .should('exist');
 
-        getTranslationCell('Test key', 'cs')
-          .findDcy('translations-cell-copy-button')
-          .should('not.exist');
-      });
-    }
-  );
+      getTranslationCell('Test key', 'cs')
+        .findDcy('translations-cell-copy-button')
+        .should('not.exist');
+    });
+  });
 });
 
 /**
