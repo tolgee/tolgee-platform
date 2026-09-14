@@ -2,9 +2,12 @@ export type ClipboardStub = { text: string };
 
 /**
  * `copy-to-clipboard` copies the current selection with `execCommand`, falling back to
- * `window.prompt` when that fails — which it does whenever the copy happens outside the
- * user gesture, e.g. after an awaited request. Both are captured, and `execCommand` is
- * called through, so a spec still goes down whichever path its component really takes.
+ * `window.prompt` when that fails — which it does outside the user gesture, e.g. after an
+ * awaited request. Both are captured, either way the text is the same.
+ *
+ * `execCommand` must be forced to succeed rather than called through: the CI browser
+ * refuses it, and on that path `copy()` returns false (the library never sets `success`
+ * before prompting), so any assertion on the copied state fails there but not locally.
  */
 export function stubClipboard(
   win: Window & Cypress.ApplicationWindow,
@@ -20,7 +23,7 @@ export function stubClipboard(
       return execCommand(command, ...args);
     }
     clipboard.text = selectedText(win);
-    return execCommand(command, ...args);
+    return true;
   });
 
   return clipboard;
