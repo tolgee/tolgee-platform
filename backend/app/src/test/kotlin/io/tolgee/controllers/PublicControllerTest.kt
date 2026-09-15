@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -170,7 +171,7 @@ class PublicControllerTest : AbstractControllerTest() {
     performPost("/api/public/sign_up", dto).andIsOk
 
     val user = userAccountService.findActive("disabled@test.com")!!
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     val dto2 =
       SignUpDto(
@@ -195,7 +196,7 @@ class PublicControllerTest : AbstractControllerTest() {
     performPost("/api/public/sign_up", dto).andIsOk
 
     val user = userAccountService.findActive("login-disabled@test.com")!!
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     doAuthentication("login-disabled@test.com", "aaaaaaaaa")
       .andIsUnauthorized
