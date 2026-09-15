@@ -8,7 +8,10 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { LINKS } from 'tg.constants/links';
-import { useIsEmailVerified } from 'tg.globalContext/helpers';
+import {
+  useHasCommunityContributions,
+  useIsEmailVerified,
+} from 'tg.globalContext/helpers';
 import { ProjectsList } from 'tg.views/projects/ProjectsList';
 import { CommunityTranslationBanner } from 'tg.views/projects/public/CommunityTranslationBanner';
 import { usePublicProjectsList } from 'tg.views/projects/usePublicProjectsList';
@@ -26,6 +29,7 @@ const StyledContent = styled('div')`
 const CommunityProjects = () => {
   const { t } = useTranslate();
   const history = useHistory();
+  const hasCommunityContributions = useHasCommunityContributions();
   const {
     loadable,
     showSearch,
@@ -33,7 +37,9 @@ const CommunityProjects = () => {
     onPageChange,
     myContributionsOnly,
     onToggleMyContributions,
-  } = usePublicProjectsList({ contributionFilter: true });
+  } = usePublicProjectsList({
+    defaultMyContributionsOnly: hasCommunityContributions,
+  });
 
   return (
     <DashboardPage>
