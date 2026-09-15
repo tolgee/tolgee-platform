@@ -26,6 +26,7 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.security.authentication.UserSessionHotCache
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.ImportService
@@ -219,6 +220,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   open lateinit var cacheManager: CacheManager
 
   @Autowired
+  lateinit var userSessionHotCache: UserSessionHotCache
+
+  @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
@@ -235,6 +239,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     cacheManager.cacheNames.forEach { cacheName ->
       cacheManager.getCache(cacheName)?.clear()
     }
+    // lives outside the cache manager, so it survives the loop above
+    userSessionHotCache.invalidateAll()
   }
 
   @Autowired

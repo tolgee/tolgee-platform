@@ -38,6 +38,8 @@ export function getRedirectUrl(userId?: number) {
   }
 }
 
+const LOGOUT_REVOKE_TIMEOUT_MS = 3000;
+
 export const useAuthService = (
   initialData: ReturnType<typeof useInitialDataService>
 ) => {
@@ -71,6 +73,20 @@ export const useAuthService = (
       disableErrorNotification: true,
       disable404Redirect: true,
       disableAutoErrorHandle: true,
+    },
+  });
+
+  const revokeCurrentSessionLoadable = useApiMutation({
+    url: '/v2/user/sessions/current',
+    method: 'delete',
+    fetchOptions: {
+      disableAuthRedirect: true,
+      disableErrorNotification: true,
+      disable404Redirect: true,
+      disableAutoErrorHandle: true,
+    },
+    options: {
+      noGlobalLoading: true,
     },
   });
 
@@ -343,7 +359,21 @@ export const useAuthService = (
     saveAfterLoginLink(url: string) {
       securityService.saveAfterLoginLink({ url, userId });
     },
-    logout() {
+    async logout() {
+      if (tokenService.getToken()) {
+        try {
+          // Revoking needs the token, so it has to happen before the token is dropped - but a
+          // hung request must never leave the user looking signed in. Local sign-out wins the race.
+          await Promise.race([
+            revokeCurrentSessionLoadable.mutateAsync({}),
+            new Promise((resolve) =>
+              setTimeout(resolve, LOGOUT_REVOKE_TIMEOUT_MS)
+            ),
+          ]);
+        } catch (e) {
+          // the session may already be gone, log out regardless
+        }
+      }
       return setJwtToken(undefined);
     },
     waitForSuperToken(afterAction: SuperTokenAction) {

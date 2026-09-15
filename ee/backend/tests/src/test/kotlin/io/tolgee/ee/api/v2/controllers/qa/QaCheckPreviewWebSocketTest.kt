@@ -4,6 +4,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.WebsocketTest
 import org.assertj.core.api.Assertions.assertThat
@@ -44,7 +45,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     qa.testData = testData
     userAccount = testData.user
-    jwtToken = jwtService.emitToken(testData.user.id)
+    jwtToken = jwtService.emitToken(testData.user.id, type = UserSessionType.TEST)
   }
 
   @AfterEach

@@ -12,6 +12,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.security.PAT_PREFIX
@@ -42,6 +43,8 @@ class ApiKeyService(
   private val permissionService: PermissionService,
   private val entityManager: EntityManager,
   private val cacheManager: CacheManager,
+  @Lazy
+  private val authAuditService: AuthAuditService,
 ) : Logging {
   private val cache: Cache? by lazy {
     cacheManager.getCache(Caches.PROJECT_API_KEYS)
@@ -64,7 +67,21 @@ class ApiKeyService(
         this.description = description ?: ""
         this.expiresAt = expiresAt?.let { Date(expiresAt) }
       }
-    return save(apiKey)
+    val saved = save(apiKey)
+    recordAuditEvent(AuthAuditEventType.PAK_CREATED, saved)
+    return saved
+  }
+
+  private fun recordAuditEvent(
+    type: AuthAuditEventType,
+    apiKey: ApiKey,
+  ) {
+    authAuditService.record(
+      type = type,
+      userAccountId = apiKey.userAccount.id,
+      targetId = apiKey.id,
+      data = mutableMapOf("projectId" to apiKey.project.id),
+    )
   }
 
   private fun generateKey() = keyGenerator.generate(130)
@@ -119,6 +136,7 @@ class ApiKeyService(
 
   @CacheEvict(cacheNames = [Caches.PROJECT_API_KEYS], key = "#apiKey.keyHash")
   fun deleteApiKey(apiKey: ApiKey) {
+    recordAuditEvent(AuthAuditEventType.PAK_DELETED, apiKey)
     apiKeyRepository.delete(apiKey)
   }
 
@@ -227,7 +245,9 @@ class ApiKeyService(
 
     apiKey.key = generateKey()
     apiKey.expiresAt = expiresAt?.let { Date(it) }
-    return save(apiKey)
+    val saved = save(apiKey)
+    recordAuditEvent(AuthAuditEventType.PAK_REGENERATED, saved)
+    return saved
   }
 
   /**

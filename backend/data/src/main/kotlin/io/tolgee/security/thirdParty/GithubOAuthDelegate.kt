@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.thirdParty.data.ThirdPartyUserDetails
@@ -90,7 +91,7 @@ class GithubOAuthDelegate(
           ),
         )
 
-      val jwt = jwtService.emitToken(userAccount.id)
+      val jwt = jwtService.emitToken(userAccount.id, type = UserSessionType.LOGIN_GITHUB)
       return JwtAuthenticationResponse(jwt)
     }
     if (response == null) {

@@ -2,6 +2,7 @@ package io.tolgee.service.projectExportImport
 
 import io.tolgee.model.AiPlaygroundResult
 import io.tolgee.model.ApiKey
+import io.tolgee.model.AuthAuditEvent
 import io.tolgee.model.AuthProviderChangeRequest
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.DismissedAnnouncement
@@ -26,6 +27,7 @@ import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
+import io.tolgee.model.UserSession
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
@@ -136,6 +138,8 @@ object ProjectExportImportPolicyRegistry {
         Invitation::class,
         Pat::class,
         OAuth2Grant::class,
+        UserSession::class,
+        AuthAuditEvent::class,
         UserPreferences::class,
         EmailVerification::class,
         SsoTenant::class,

@@ -10,6 +10,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.hateoas.invitation.PublicInvitationModel
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
+import io.tolgee.model.enums.AuthAuditEventType
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -17,6 +19,7 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.invitation.InvitationService
+import io.tolgee.service.security.AuthAuditService
 import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.SignUpService
@@ -53,6 +56,7 @@ class PublicController(
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
   private val invitationService: InvitationService,
   private val authenticationFacade: AuthenticationFacade,
+  private val authAuditService: AuthAuditService,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -65,12 +69,40 @@ class PublicController(
       throw AuthenticationException(Message.NATIVE_AUTHENTICATION_DISABLED)
     }
 
-    val userAccount = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
-    mfaService.checkMfa(userAccount, loginRequest.otp)
+    val userAccount =
+      try {
+        val account = userCredentialsService.checkUserCredentials(loginRequest.username, loginRequest.password)
+        mfaService.checkMfa(account, loginRequest.otp)
+        account
+      } catch (e: AuthenticationException) {
+        recordFailedLogin(loginRequest.username, e)
+        throw e
+      }
 
     // two factor passed, so we can generate super token
-    val jwt = jwtService.emitToken(userAccount.id, isSuper = true)
+    val jwt = jwtService.emitToken(userAccount.id, type = UserSessionType.LOGIN_NATIVE, isSuper = true)
     return JwtAuthenticationResponse(jwt)
+  }
+
+  private fun recordFailedLogin(
+    username: String,
+    exception: AuthenticationException,
+  ) {
+    // Every successful MFA login fails its first leg with MFA_ENABLED - the client only learns to
+    // ask for the OTP from that error - so recording it would mark each of them as a failed login.
+    if (exception.tolgeeMessage == Message.MFA_ENABLED) return
+
+    authAuditService.recordIndependently(
+      type = failedLoginType(exception.tolgeeMessage),
+      userAccountId = userAccountService.findActiveOrDisabled(username)?.id,
+      attemptedUsername = username,
+      data = mutableMapOf("reason" to exception.tolgeeMessage?.name),
+    )
+  }
+
+  private fun failedLoginType(message: Message?): AuthAuditEventType {
+    if (message == Message.INVALID_OTP_CODE) return AuthAuditEventType.LOGIN_FAILED_INVALID_OTP
+    return AuthAuditEventType.LOGIN_FAILED_BAD_CREDENTIALS
   }
 
   @PostMapping("/sign_up")
@@ -104,7 +136,7 @@ class PublicController(
     @PathVariable("code") @NotBlank code: String,
   ): JwtAuthenticationResponse {
     emailVerificationService.verify(userId, code)
-    return JwtAuthenticationResponse(jwtService.emitToken(userId))
+    return JwtAuthenticationResponse(jwtService.emitToken(userId, type = UserSessionType.EMAIL_VERIFICATION))
   }
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])

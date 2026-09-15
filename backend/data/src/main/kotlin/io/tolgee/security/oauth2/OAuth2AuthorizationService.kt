@@ -22,10 +22,12 @@ import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.OAUTH_REFRESH_TOKEN_PREFIX
+import io.tolgee.service.security.AuthAuditService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -47,6 +49,7 @@ class OAuth2AuthorizationService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
+  private val authAuditService: AuthAuditService,
 ) {
   data class AuthorizeParams(
     val responseType: String?,
@@ -256,6 +259,7 @@ class OAuth2AuthorizationService(
         ?: repository.findAndLockByPreviousRefreshTokenHash(hash)
         ?: return
     if (grant.clientId != client.clientId) throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    recordRevocation(grant, "CLIENT")
     repository.delete(grant)
   }
 
@@ -302,6 +306,17 @@ class OAuth2AuthorizationService(
     grant.codeHash = keyGenerator.hash(code)
     grant.codeExpiresAt = nowPlus(Duration.ofSeconds(properties.authorizationCodeValiditySeconds))
     repository.save(grant)
+    authAuditService.record(
+      type = AuthAuditEventType.OAUTH_GRANT_AUTHORIZED,
+      userAccountId = grant.userAccount.id,
+      targetId = grant.id,
+      data =
+        mutableMapOf(
+          "clientId" to grant.clientId,
+          "scopes" to granted,
+          "projectSelection" to grant.projectSelection,
+        ),
+    )
     return code
   }
 
@@ -377,6 +392,18 @@ class OAuth2AuthorizationService(
     a: String,
     b: String,
   ): Boolean = MessageDigest.isEqual(a.toByteArray(Charsets.US_ASCII), b.toByteArray(Charsets.US_ASCII))
+
+  private fun recordRevocation(
+    grant: OAuth2Grant,
+    initiator: String,
+  ) {
+    authAuditService.record(
+      type = AuthAuditEventType.OAUTH_GRANT_REVOKED,
+      userAccountId = grant.userAccount.id,
+      targetId = grant.id,
+      data = mutableMapOf("clientId" to grant.clientId, "initiator" to initiator),
+    )
+  }
 
   // RFC 7636 §4.1: 43-128 characters of unreserved ASCII.
   private fun isValidCodeVerifier(verifier: String): Boolean =

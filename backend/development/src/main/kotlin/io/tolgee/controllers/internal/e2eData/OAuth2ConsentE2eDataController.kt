@@ -3,6 +3,7 @@ package io.tolgee.controllers.internal.e2eData
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.OAuth2ConsentE2eData
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,6 @@ class OAuth2ConsentE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/non-super-jwt"])
   fun nonSuperJwt(): Map<String, String> {
     val user = userAccounts.get(OAuth2ConsentE2eData.USERNAME)
-    return mapOf("jwt" to jwtService.emitToken(user.id, isSuper = false))
+    return mapOf("jwt" to jwtService.emitToken(user.id, isSuper = false, type = UserSessionType.TEST))
   }
 }

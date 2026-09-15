@@ -1,6 +1,7 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.development.testDataBuilder.data.OAuth2ConformanceTestData
+import io.tolgee.model.enums.UserSessionType
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -44,7 +45,7 @@ abstract class AbstractOAuth2ConformanceTest : AbstractControllerTest() {
 
   protected val oauth2 get() = tolgeeProperties.oauth2
 
-  protected fun jwt(): String = jwtService.emitToken(testData.user.id, isSuper = true)
+  protected fun jwt(): String = jwtService.emitToken(testData.user.id, isSuper = true, type = UserSessionType.TEST)
 
   /**
    * [received] is the value the handler gets after the request layer has decoded the query, which is where the two

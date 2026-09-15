@@ -21,6 +21,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.AllTokensInvalidatedTrigger
+import io.tolgee.model.enums.AuthAuditEventType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
@@ -28,6 +30,7 @@ import io.tolgee.model.views.ExtendedUserAccountInProject
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.repository.UserSessionRepository
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
@@ -75,6 +78,10 @@ class UserAccountService(
   private val self: UserAccountService,
   @Lazy
   private val mfaService: MfaService,
+  @Lazy
+  private val authAuditService: AuthAuditService,
+  @Lazy
+  private val userSessionRepository: UserSessionRepository,
 ) : Logging {
   @Autowired
   @Lazy
@@ -228,6 +235,9 @@ class UserAccountService(
 
   private fun deleteWithFetchedData(toDelete: UserAccount) {
     oauth2AuthorizationService.revokeAllForUser(toDelete.id)
+    // The audit trail deliberately outlives the account, but a session row is not audit - it
+    // carries the person's IP, user agent and city, and there is nothing left to revoke.
+    userSessionRepository.deleteAllByUserAccountId(toDelete.id)
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
@@ -309,8 +319,9 @@ class UserAccountService(
   fun setUserPassword(
     userAccount: UserAccount,
     password: String?,
+    trigger: AllTokensInvalidatedTrigger,
   ): UserAccount {
-    revokeSessionsAndOAuthGrants(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount, trigger)
     userAccount.password = passwordEncoder.encode(password)
     return userAccountRepository.save(userAccount)
   }
@@ -344,7 +355,7 @@ class UserAccountService(
         ?: throw ValidationException(Message.INVALID_OTP_CODE)
     userAccount.totpKey = key
     userAccount.totpLastUsedTimeStep = matchedStep
-    revokeSessionsAndOAuthGrants(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount, AllTokensInvalidatedTrigger.MFA_ENABLED)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_ENABLED)
     return savedUser
@@ -357,7 +368,7 @@ class UserAccountService(
     userAccount.totpLastUsedTimeStep = null
     // note: if support for more MFA methods is added, this should be only done if no other MFA method is enabled
     userAccount.mfaRecoveryCodes = emptyList()
-    revokeSessionsAndOAuthGrants(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount, AllTokensInvalidatedTrigger.MFA_DISABLED)
     val savedUser = userAccountRepository.save(userAccount)
     notifySelf(userAccount, NotificationType.MFA_DISABLED)
     return savedUser
@@ -569,7 +580,7 @@ class UserAccountService(
     val matches = passwordEncoder.matches(dto.currentPassword, userAccount.password)
     if (!matches) throw PermissionException(Message.WRONG_CURRENT_PASSWORD)
 
-    revokeSessionsAndOAuthGrants(userAccount)
+    revokeSessionsAndOAuthGrants(userAccount, AllTokensInvalidatedTrigger.PASSWORD_CHANGE)
     userAccount.password = passwordEncoder.encode(dto.password)
     userAccount.passwordChanged = true
     val savedUser = userAccountRepository.save(userAccount)
@@ -602,14 +613,25 @@ class UserAccountService(
   }
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
-  fun invalidateTokens(userAccount: UserAccount): UserAccount {
-    revokeSessionsAndOAuthGrants(userAccount)
+  fun invalidateTokens(
+    userAccount: UserAccount,
+    trigger: AllTokensInvalidatedTrigger,
+  ): UserAccount {
+    revokeSessionsAndOAuthGrants(userAccount, trigger)
     return userAccountRepository.save(userAccount)
   }
 
-  private fun revokeSessionsAndOAuthGrants(userAccount: UserAccount) {
+  private fun revokeSessionsAndOAuthGrants(
+    userAccount: UserAccount,
+    trigger: AllTokensInvalidatedTrigger,
+  ) {
     userAccount.tokensValidNotBefore = DateUtils.truncate(currentDateProvider.date, Calendar.SECOND)
     oauth2AuthorizationService.revokeAllForUser(userAccount.id)
+    authAuditService.record(
+      type = AuthAuditEventType.ALL_TOKENS_INVALIDATED,
+      userAccountId = userAccount.id,
+      data = mutableMapOf("trigger" to trigger.name),
+    )
   }
 
   private fun publishUserInfoUpdatedEvent(

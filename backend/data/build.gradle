@@ -131,6 +131,16 @@ dependencies {
     implementation libs.redissonSpringBootStarter
 
     /**
+     * Caching
+     */
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
+    /**
+     * GeoIP (MaxMind-format .mmdb reader; the database file itself is not bundled)
+     */
+    implementation("com.maxmind.geoip2:geoip2:5.2.0")
+
+    /**
      * Liquibase
      */
     implementation libs.liquibaseCore
