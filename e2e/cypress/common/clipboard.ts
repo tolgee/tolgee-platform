@@ -1,13 +1,9 @@
 export type ClipboardStub = { text: string };
 
 /**
- * `copy-to-clipboard` copies the current selection with `execCommand`, falling back to
- * `window.prompt` when that fails — which it does outside the user gesture, e.g. after an
- * awaited request. Both are captured, either way the text is the same.
- *
- * `execCommand` must be forced to succeed rather than called through: the CI browser
- * refuses it, and on that path `copy()` returns false (the library never sets `success`
- * before prompting), so any assertion on the copied state fails there but not locally.
+ * Stubs both clipboard copy methods used by frontend and captures copied text:
+ * - `window.prompt(text)`
+ * - `document.execCommand('copy')`
  */
 export function stubClipboard(
   win: Window & Cypress.ApplicationWindow,
@@ -40,7 +36,5 @@ function selectedText(win: Window): string {
   if (!selection?.rangeCount) {
     return '';
   }
-  // Selection.toString() returns the *rendered* text, whose line breaks shift between
-  // Chrome versions; the copied node's textContent is the string copy() was handed.
   return selection.getRangeAt(0).commonAncestorContainer.textContent ?? '';
 }

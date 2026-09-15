@@ -63,7 +63,7 @@ type ControlsProps = {
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
   onQaIssues?: () => void;
-  copyText?: string;
+  translationText?: string;
   commentsCount: number | undefined;
   tasks: TaskModel[] | undefined;
   onTaskStateChange: (done: boolean) => void;
@@ -87,7 +87,7 @@ export const ControlsTranslation: React.FC<
   onStateChange,
   onComments,
   onQaIssues,
-  copyText = '',
+  translationText,
   tasks,
   onTaskStateChange,
   commentsCount,
@@ -105,7 +105,7 @@ export const ControlsTranslation: React.FC<
   const qaChecksEnabled = useQaChecksEnabled();
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
-  const displayCopy = Boolean(copyText);
+  const displayCopy = Boolean(translationText);
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
@@ -169,7 +169,7 @@ export const ControlsTranslation: React.FC<
       {inDomCopy && (
         <CopyButton
           style={{ gridArea: 'copy' }}
-          text={copyText}
+          text={translationText || ''}
           data-cy="translations-cell-copy-button"
           className={CELL_SHOW_ON_HOVER}
         />
