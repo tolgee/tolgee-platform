@@ -28,6 +28,35 @@ class UrlSecurity(
   ) {
     if (internalProperties.disableUrlSsrfProtection) return
 
+    val host = requireHttpHost(url)
+    if (allowLocalAddresses) return
+
+    requireNotLocalhostName(host)
+    requireNoBlockedAddress(resolve(host))
+  }
+
+  /**
+   * Resolves the host **once**, validates the resolved addresses, and returns them — so a caller can pin its
+   * connection to exactly these, closing the DNS-rebinding gap [validateUrl] leaves open (it resolves, validates and
+   * then discards the addresses, letting any later re-resolution answer a different IP).
+   *
+   * Unlike [validateUrl] this ignores `disable-url-ssrf-protection`: the fetcher relaxing SSRF for dev localhost is a
+   * decision it makes itself (passing `allowLocalAddresses`), and it always needs the addresses to pin to.
+   */
+  fun validateUrlAndResolve(
+    url: String,
+    allowLocalAddresses: Boolean = false,
+  ): List<InetAddress> {
+    val host = requireHttpHost(url)
+    val addresses = resolve(host)
+    if (!allowLocalAddresses) {
+      requireNotLocalhostName(host)
+      requireNoBlockedAddress(addresses)
+    }
+    return addresses.toList()
+  }
+
+  private fun requireHttpHost(url: String): String {
     val uri =
       try {
         URI(url)
@@ -40,24 +69,27 @@ class UrlSecurity(
       throw BadRequestException(Message.URL_NOT_VALID)
     }
 
-    val host = uri.host ?: throw BadRequestException(Message.URL_NOT_VALID)
+    return uri.host ?: throw BadRequestException(Message.URL_NOT_VALID)
+  }
 
-    if (allowLocalAddresses) return
-
+  private fun requireNotLocalhostName(host: String) {
     val lowerHost = host.lowercase()
     if (lowerHost == "localhost" || lowerHost.endsWith(".localhost")) {
       throw BadRequestException(Message.URL_NOT_VALID)
     }
+  }
 
-    // Resolve all addresses (IP literals are parsed without DNS lookup)
+  // IP literals are parsed without a DNS lookup.
+  private fun resolve(host: String): Array<InetAddress> {
     val rawHost = host.removeSurrounding("[", "]")
-    val addresses =
-      try {
-        InetAddress.getAllByName(rawHost)
-      } catch (_: Exception) {
-        throw BadRequestException(Message.URL_NOT_VALID)
-      }
+    return try {
+      InetAddress.getAllByName(rawHost)
+    } catch (_: Exception) {
+      throw BadRequestException(Message.URL_NOT_VALID)
+    }
+  }
 
+  private fun requireNoBlockedAddress(addresses: Array<InetAddress>) {
     for (address in addresses) {
       if (address.isLoopbackAddress ||
         address.isSiteLocalAddress ||

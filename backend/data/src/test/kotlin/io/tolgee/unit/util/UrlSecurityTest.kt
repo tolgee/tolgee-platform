@@ -100,6 +100,46 @@ class UrlSecurityTest {
     assertUrlNotValid { urlSecurity.validateUrl("http://", allowLocalAddresses = true) }
   }
 
+  @Test
+  fun `validateUrlAndResolve returns the resolved public addresses`() {
+    val addresses = urlSecurity.validateUrlAndResolve("https://example.com/.well-known/client")
+
+    addresses.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `validateUrlAndResolve resolves an IP literal to itself`() {
+    val addresses = urlSecurity.validateUrlAndResolve("https://93.184.216.34/x")
+
+    addresses.map { it.hostAddress }.assert.containsExactly("93.184.216.34")
+  }
+
+  @Test
+  fun `validateUrlAndResolve blocks the same ranges validateUrl does`() {
+    listOf(
+      "http://127.0.0.1/admin",
+      "https://localhost/admin",
+      "http://10.0.0.1/internal",
+      "http://169.254.169.254/latest/meta-data/",
+      "http://[fd00::1]/",
+      "ftp://example.com/x",
+      "http://",
+      "not-a-url",
+    ).forEach { url ->
+      assertUrlNotValid { urlSecurity.validateUrlAndResolve(url) }
+    }
+  }
+
+  @Test
+  fun `validateUrlAndResolve returns loopback addresses when local addresses are allowed`() {
+    val addresses = urlSecurity.validateUrlAndResolve("http://127.0.0.1/x", allowLocalAddresses = true)
+
+    addresses
+      .single()
+      .isLoopbackAddress.assert
+      .isTrue()
+  }
+
   private fun assertUrlNotValid(executable: () -> Unit) {
     val exception = assertThrows<BadRequestException>(executable)
     exception.code.assert.isEqualTo(Message.URL_NOT_VALID.code)
