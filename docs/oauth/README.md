@@ -211,19 +211,32 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | Protocol decisions: request validation, code issuance and exchange, PKCE check, refresh rotation, revocation | `backend/data/.../security/oauth2/OAuth2AuthorizationService.kt` |
 | The grant itself (user, client, scopes, project set, hashed code/tokens, expiries) | `backend/data/.../model/oauth2/OAuth2Grant.kt`, `db/changelog/schema.xml` |
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
+| Websocket accepts the token + narrows the subscribed topic | `WebsocketAuthenticationResolver.kt`, `WebsocketSubscribeAuthorizer.kt` |
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Client registry (from config, not stored) | `OAuth2ClientRegistry.kt` |
 | Issuer | `OAuth2IssuerResolver.kt` |
 | RFC 9728 protected-resource metadata + the RFC 6750 `WWW-Authenticate` challenge that points at it | `ProtectedResourceMetadataController.kt`, `OAuth2BearerChallengeProvider.kt` |
 | Nightly cleanup of spent/abandoned grants | `OAuth2GrantCleanup.kt` |
 
+## Websockets
+
+An OAuth access token authenticates a STOMP connection the way a project API key does. The token is presented as
+`Authorization: Bearer tgoat_…` **on the STOMP CONNECT frame** — a credential on the HTTP handshake is deliberately
+ignored, so presenting it only there yields an unauthenticated socket. (A project API key arrives on the same
+frame, under `X-API-Key`.)
+
+The rest of the model — which credential is read from where, what a refused subscription does, the client `SEND`
+denial, the `/ws/qa-preview` endpoint — is transport-level and applies to JWT, PAT and project API keys equally:
+see [docs/websocket/README.md](../websocket/README.md). The OAuth-specific consequences are in the parity notes
+below.
+
 ## Round-1 limitations (tracked follow-ups)
 
 ### PAK-parity notes
 
 An OAuth grant is deliberately treated as a project API key that may hold several projects, and is not
-special-cased against one. Three consequences of that parity are worth stating outright, because they read
-differently for a token handed to a third party than for a key the user minted for their own tooling. All three
+special-cased against one. Some consequences of that parity are worth stating outright, because they read
+differently for a token handed to a third party than for a key the user minted for their own tooling. All of them
 apply to project API keys today in exactly the same way, so each fix belongs to both credentials at once and to its
 own PR:
 
@@ -240,6 +253,34 @@ own PR:
   "exists" from "does not exist" for any project id the holder cares to probe. It is what a PAK has always
   answered; this round gives an OAuth token the same answer rather than the 404 it used to get. If that oracle is
   unwanted, it should be closed for both credentials at once.
+- **A live subscription is never re-authorized.** The credential is resolved once at CONNECT, and the
+  authorization decision is made once per SUBSCRIBE; nothing revisits either for the life of the subscription.
+  There is no session registry and no teardown hook, so until the client itself disconnects, none of the
+  following stops the stream:
+  - revoking the grant through `/oauth2/revoke` — the thing revocation exists to do;
+  - the access token reaching `accessTokenExpiresAt`;
+  - de-authorizing the client in `OAuth2ClientRegistry`;
+  - removing the user from the project, or dropping their permission below `keys.view` — this last one is not an
+    OAuth matter at all and applies to JWT, PAT and PAK sockets equally.
+
+  A project API key behaves identically, but a PAK is long-lived by design and revoked by deletion, whereas short
+  expiry and revocation are the OAuth model — so the exposure inherited here is materially larger than the one it
+  copies. Re-resolving the token per SUBSCRIBE would *not* fix it: a live subscription sends no further SUBSCRIBE.
+  Closing it needs either a periodic sweep over open subscriptions or an event that closes the affected sessions
+  on revocation and on permission change.
+- **With `tolgee.authentication.enabled: false` the websocket accepts a credential HTTP rejects.**
+  `AuthenticationFilter` reaches its disabled-authentication branch only when no credential was presented at all;
+  one that fails to validate is still a 401. On the socket a credential that fails to resolve falls back to that
+  identity, so an expired PAK, a revoked grant or a malformed token yields a session as the initial user with
+  `isSuperToken = true` and no scope narrowing at all. A credential that *does* resolve keeps its own identity and
+  narrowing — the fallback runs only after resolution returns nothing. It escalates nothing — in that mode the
+  same caller gets the same session by sending no credential at all, over HTTP too — and it is deliberate: a
+  socket cannot report a refusal except by closing, so a stale token would otherwise kill it silently.
+- **An OAuth socket inherits the transport's own gaps.** No SSO liveness check, no IP auth rate limit on CONNECT
+  or SUBSCRIBE, and a scoped-credential session filed in `SimpUserRegistry` under the account's own username. None
+  of those are OAuth-specific; they are listed in
+  [docs/websocket/README.md](../websocket/README.md#gaps-this-transport-shares-with-the-http-path), and an OAuth
+  token now inherits them.
 
 
 These are known gaps, deferred to the client rounds that first exercise them:

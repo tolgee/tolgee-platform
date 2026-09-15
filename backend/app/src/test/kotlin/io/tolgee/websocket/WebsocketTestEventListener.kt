@@ -8,14 +8,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 
 /**
- * Test-only timing probe. Logs when the server's STOMP handler receives a
- * SUBSCRIBE so future CI runs can show how long it actually takes between
- * the client calling `session.subscribe(...)` and the server processing it.
- *
- * Useful for evaluating whether `Thread.sleep(200)` in
- * `WebsocketTestHelper.assertNotified` is well-calibrated. Pair the logged
- * timestamp with `Client SUBSCRIBE sent` and `assertNotified: dispatching`
- * lines from `WebsocketTestHelper`.
+ * Counts down the latch every correlated SUBSCRIBE in the websocket tests waits on, and the one
+ * [WebsocketTestHelper.assertSubscribeNotAcknowledged] reads to prove a subscription was refused.
  */
 @Component
 class WebsocketTestEventListener : Logging {

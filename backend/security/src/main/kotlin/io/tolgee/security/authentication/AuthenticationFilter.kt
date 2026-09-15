@@ -59,10 +59,10 @@ class AuthenticationFilter(
   @Lazy
   private val patService: PatService,
   @Lazy
+  private val disabledAuthenticationResolver: DisabledAuthenticationResolver,
+  @Lazy
   private val ssoDelegate: SsoDelegate,
 ) : OncePerRequestFilter() {
-  private val authenticationProperties
-    get() = tolgeeProperties.authentication
   private val internalProperties
     get() = tolgeeProperties.internal
 
@@ -129,18 +129,8 @@ class AuthenticationFilter(
     }
 
     // even if the authentication is disabled, they still might be using PAK for in-context editing,
-    // so we still need to try tho authenticate using API key, to have API key authentication in the security context
-    if (!authenticationProperties.enabled) {
-      SecurityContextHolder.getContext().authentication =
-        TolgeeAuthentication(
-          credentials = null,
-          deviceId = null,
-          userAccount = initialUser,
-          actingAsUserAccount = null,
-          isReadOnly = false,
-          isSuperToken = true,
-        )
-    }
+    // so we still need to try to authenticate using API key, to have API key authentication in the security context
+    disabledAuthenticationResolver.resolve()?.let { SecurityContextHolder.getContext().authentication = it }
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {
@@ -221,13 +211,6 @@ class AuthenticationFilter(
         isReadOnly = false,
         isSuperToken = false,
       )
-  }
-
-  private val initialUser by lazy {
-    val account =
-      userAccountService.findInitialUser()
-        ?: throw IllegalStateException("Initial user does not exists")
-    UserAccountDto.fromEntity(account)
   }
 
   companion object {

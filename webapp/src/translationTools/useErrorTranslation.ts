@@ -297,6 +297,8 @@ export function useErrorTranslation() {
         return t('user_not_found');
       case 'cannot_delete_your_own_account':
         return t('cannot_delete_your_own_account');
+      case 'cannot_delete_initial_user':
+        return t('cannot_delete_initial_user');
       case 'cannot_disable_your_own_account':
         return t('cannot_disable_your_own_account');
       case 'current_password_required':

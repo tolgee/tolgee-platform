@@ -20,7 +20,7 @@ import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.security.authentication.JwtService
-import io.tolgee.security.authentication.ScopedCredential
+import io.tolgee.security.authentication.withSecurityContext
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -174,12 +174,13 @@ class QaCheckPreviewWebSocketHandler(
     projectId: Long,
   ) {
     val auth = jwtService.validateToken(token)
-    securityService.checkProjectPermission(
-      projectId = projectId,
-      requiredPermission = Scope.TRANSLATIONS_VIEW,
-      user = auth.principal,
-      credential = auth.credentials as? ScopedCredential,
-    )
+    withSecurityContext(auth) {
+      securityService.checkProjectPermission(
+        projectId = projectId,
+        requiredPermission = Scope.TRANSLATIONS_VIEW,
+        user = auth.principal,
+      )
+    }
   }
 
   private fun checkFeatureEnabled(projectId: Long) {
