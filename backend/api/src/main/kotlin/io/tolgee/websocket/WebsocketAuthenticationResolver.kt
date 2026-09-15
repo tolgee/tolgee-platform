@@ -62,9 +62,12 @@ class WebsocketAuthenticationResolver(
     credentialKind: String,
     resolve: () -> TolgeeAuthentication?,
   ): TolgeeAuthentication? =
-    runCatching(resolve)
-      .onFailure { logger.debug("{} authentication failed", credentialKind, it) }
-      .getOrNull()
+    try {
+      resolve()
+    } catch (e: AuthenticationException) {
+      logger.debug("{} authentication failed", credentialKind, e)
+      null
+    }
 
   private fun extractBearer(value: String?): String? {
     if (value == null) return null
