@@ -23,4 +23,6 @@ data class OAuth2AuthorizeRequest(
   val codeChallenge: String? = null,
   val codeChallengeMethod: String? = null,
   val project: String? = null,
+  @field:Size(max = 2000)
+  val resource: String? = null,
 )

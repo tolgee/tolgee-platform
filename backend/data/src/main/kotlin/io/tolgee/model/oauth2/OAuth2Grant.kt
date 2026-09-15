@@ -3,6 +3,7 @@ package io.tolgee.model.oauth2
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Scopes
 import jakarta.persistence.Column
@@ -58,6 +59,9 @@ class OAuth2Grant : StandardAuditModel() {
   @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
 
+  @Column(length = 16, nullable = false)
+  var audience: String = OAuth2Audience.API.name
+
   @Column(length = 4000)
   var maxGrantedScopes: String? = null
 
@@ -101,6 +105,17 @@ class OAuth2Grant : StandardAuditModel() {
 
   @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
+
+  /**
+   * The audience the grant is bound to, or null when the stored value resolves to no known audience — such a grant
+   * matches no resource server at all, so a value written by a newer version can never widen into a usable token
+   * after a rollback.
+   */
+  fun boundAudience(): OAuth2Audience? = OAuth2Audience.entries.firstOrNull { it.name == audience }
+
+  fun bindAudience(value: OAuth2Audience) {
+    audience = value.name
+  }
 
   var requestedScopeValues: List<String>
     get() = wireValuesOf(requestedScopes)

@@ -71,6 +71,7 @@ class OAuth2FlowController(
         state = request.state.nullIfBlank,
         codeChallenge = request.codeChallenge.nullIfBlank,
         codeChallengeMethod = request.codeChallengeMethod.nullIfBlank,
+        resource = request.resource.nullIfBlank,
       )
     val grant =
       try {

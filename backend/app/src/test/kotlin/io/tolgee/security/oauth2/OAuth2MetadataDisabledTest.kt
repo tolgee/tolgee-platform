@@ -5,6 +5,7 @@ import io.tolgee.api.v2.controllers.oauth2.ProtectedResourceMetadataController
 import io.tolgee.exceptions.NotFoundException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -16,7 +17,7 @@ class OAuth2MetadataDisabledTest {
 
   @Test
   fun `the RFC 8414 document is not served, and the issuer is never read`() {
-    val controller = OAuth2AuthorizationServerController(mock(), disabledRegistry, issuerResolver, mock())
+    val controller = OAuth2AuthorizationServerController(mock(), disabledRegistry, issuerResolver, mock(), mock())
 
     assertThatThrownBy { controller.metadata() }.isInstanceOf(NotFoundException::class.java)
 
@@ -25,7 +26,7 @@ class OAuth2MetadataDisabledTest {
 
   @Test
   fun `the RFC 9728 document is not served, and the issuer is never read`() {
-    val controller = ProtectedResourceMetadataController(issuerResolver, disabledRegistry)
+    val controller = ProtectedResourceMetadataController(issuerResolver, disabledRegistry, OAuth2Resources(issuerResolver))
 
     assertThatThrownBy { controller.mcpDeveloperMetadata() }.isInstanceOf(NotFoundException::class.java)
 
@@ -37,8 +38,8 @@ class OAuth2MetadataDisabledTest {
     val enabledRegistry: OAuth2ClientRegistry = mock { on { isEnabled } doReturn true }
     val resolver: OAuth2IssuerResolver = mock { on { issuerUrl } doReturn "https://tolgee.example.com" }
 
-    ProtectedResourceMetadataController(resolver, enabledRegistry).mcpDeveloperMetadata()
+    ProtectedResourceMetadataController(resolver, enabledRegistry, OAuth2Resources(resolver)).mcpDeveloperMetadata()
 
-    verify(resolver).issuerUrl
+    verify(resolver, atLeastOnce()).issuerUrl
   }
 }

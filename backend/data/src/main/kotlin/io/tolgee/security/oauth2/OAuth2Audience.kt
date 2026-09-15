@@ -16,18 +16,11 @@
 
 package io.tolgee.security.oauth2
 
-class OAuth2Error(
-  val error: String,
-  val description: String? = null,
-) : RuntimeException(description?.let { "$error: $it" } ?: error) {
-  companion object {
-    const val INVALID_REQUEST = "invalid_request"
-    const val INVALID_CLIENT = "invalid_client"
-    const val INVALID_GRANT = "invalid_grant"
-    const val INVALID_SCOPE = "invalid_scope"
-    const val INVALID_TARGET = "invalid_target"
-    const val ACCESS_DENIED = "access_denied"
-    const val UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type"
-    const val UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type"
-  }
+/**
+ * The one resource server a grant's tokens may be presented to (RFC 8707). One audience per grant, deliberately no
+ * sets: a token valid on both surfaces is exactly the interchangeability audience binding exists to remove.
+ */
+enum class OAuth2Audience {
+  API,
+  MCP,
 }

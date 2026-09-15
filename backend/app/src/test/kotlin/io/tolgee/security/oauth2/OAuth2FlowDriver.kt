@@ -75,6 +75,7 @@ class OAuth2FlowDriver(
     clientState: String? = "client-state",
     hintProjectId: Long? = null,
     verifier: String = randomVerifier(),
+    resource: String? = null,
   ): PendingConsent {
     val response =
       startAuthorization(
@@ -88,6 +89,7 @@ class OAuth2FlowDriver(
           "code_challenge" to s256Challenge(verifier),
           "code_challenge_method" to "S256",
           "project" to hintProjectId?.toString(),
+          "resource" to resource,
         ),
       ).andReturn().response.contentAsString
     val state = mapper.readTree(response).get("consentState")?.asString()
@@ -149,21 +151,25 @@ class OAuth2FlowDriver(
     clientId: String,
     redirect: String,
     verifier: String,
-  ): ResultActions =
-    mvc.perform(
+    resource: String? = null,
+  ): ResultActions {
+    val request =
       post(OAuth2Constants.TOKEN_PATH)
         .param("grant_type", "authorization_code")
         .param("code", code)
         .param("redirect_uri", redirect)
         .param("client_id", clientId)
         .param("code_verifier", verifier)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED),
-    )
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    resource?.let { request.param("resource", it) }
+    return mvc.perform(request)
+  }
 
   fun refresh(
     refreshToken: String,
     clientId: String,
     scope: String? = null,
+    resource: String? = null,
   ): ResultActions {
     val request =
       post(OAuth2Constants.TOKEN_PATH)
@@ -172,6 +178,7 @@ class OAuth2FlowDriver(
         .param("client_id", clientId)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
     scope?.let { request.param("scope", it) }
+    resource?.let { request.param("resource", it) }
     return mvc.perform(request)
   }
 

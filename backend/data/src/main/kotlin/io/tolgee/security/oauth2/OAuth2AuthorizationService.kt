@@ -47,6 +47,7 @@ class OAuth2AuthorizationService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
+  private val resources: OAuth2Resources,
 ) {
   data class AuthorizeParams(
     val responseType: String?,
@@ -54,11 +55,13 @@ class OAuth2AuthorizationService(
     val state: String?,
     val codeChallenge: String?,
     val codeChallengeMethod: String?,
+    val resource: String?,
   )
 
   data class ValidatedAuthorizeRequest(
     val scopes: List<String>,
     val codeChallenge: String,
+    val audience: OAuth2Audience,
   )
 
   data class IssuedTokens(
@@ -82,7 +85,7 @@ class OAuth2AuthorizationService(
     val challenge =
       params.codeChallenge?.takeIf { isValidCodeChallenge(it) }
         ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_challenge is not a valid S256 challenge")
-    return ValidatedAuthorizeRequest(scopes, challenge)
+    return ValidatedAuthorizeRequest(scopes, challenge, resources.audienceFor(params.resource))
   }
 
   @Transactional
@@ -93,7 +96,7 @@ class OAuth2AuthorizationService(
     params: AuthorizeParams,
     projectHint: String?,
   ): OAuth2Grant {
-    val (scopes, challenge) = validateAuthorizeRequest(params)
+    val validated = validateAuthorizeRequest(params)
 
     val grant =
       OAuth2Grant().apply {
@@ -101,8 +104,9 @@ class OAuth2AuthorizationService(
         clientId = client.clientId
         this.redirectUri = redirectUri
         clientState = params.state
-        codeChallenge = challenge
-        requestedScopeValues = scopes
+        codeChallenge = validated.codeChallenge
+        requestedScopeValues = validated.scopes
+        bindAudience(validated.audience)
         this.projectHint = projectHint?.toLongOrNull()
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
@@ -178,6 +182,7 @@ class OAuth2AuthorizationService(
     code: String?,
     redirectUri: String?,
     codeVerifier: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (code.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code is required")
     val verifier =
@@ -206,6 +211,7 @@ class OAuth2AuthorizationService(
     if (grant.projectSelection.isNullOrBlank()) {
       throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "the consent did not bind a project set")
     }
+    requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
 
     grant.codeUsedAt = currentDateProvider.date
@@ -217,6 +223,7 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
     refreshToken: String?,
     requestedScope: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
@@ -231,6 +238,7 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "refresh token expired")
     }
+    requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
     grant.issuedTokenScopeValues = narrowedScopes(grant, requestedScope)
     return issueTokens(grant)
@@ -303,6 +311,19 @@ class OAuth2AuthorizationService(
     grant.codeExpiresAt = nowPlus(Duration.ofSeconds(properties.authorizationCodeValiditySeconds))
     repository.save(grant)
     return code
+  }
+
+  /**
+   * A client's config error, not a compromise signal: the request fails, but the grant — and, on refresh, the
+   * still-unrotated refresh token — stays usable with the right (or no) resource.
+   */
+  private fun requireMatchingAudience(
+    grant: OAuth2Grant,
+    requested: OAuth2Audience?,
+  ) {
+    if (requested != null && requested != grant.boundAudience()) {
+      throw OAuth2Error(OAuth2Error.INVALID_TARGET, "the grant was not authorized for this resource")
+    }
   }
 
   /**

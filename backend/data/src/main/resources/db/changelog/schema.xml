@@ -5938,4 +5938,11 @@
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="bdshadow" id="oauth2-grant-audience">
+        <addColumn tableName="oauth2_grant">
+            <column name="audience" type="VARCHAR(16)" defaultValue="API">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
