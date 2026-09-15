@@ -245,6 +245,22 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
+          and (
+            COALESCE(:#{#filters.filterNeverInTask}, false) = false
+            or not exists (
+              select 1 from task_key hist_tk
+                  join task hist_t on (hist_tk.task_id = hist_t.id)
+              where hist_tk.key_id = key.id and hist_t.language_id = :languageId
+            )
+          )
+          and (
+            COALESCE(:#{#filters.filterHasBeenInTask}, false) = false
+            or exists (
+              select 1 from task_key hist_tk
+                  join task hist_t on (hist_tk.task_id = hist_t.id)
+              where hist_tk.key_id = key.id and hist_t.language_id = :languageId
+            )
+          )
     """,
   )
   fun getKeysIncludingConflicts(
@@ -288,6 +304,22 @@ interface TaskRepository : JpaRepository<Task, Long> {
               -- no filter is applied
               COALESCE(:#{#filters.filterOutdated}, false) = false
               and :#{#filters.filterState} is null
+            )
+          )
+          and (
+            COALESCE(:#{#filters.filterNeverInTask}, false) = false
+            or not exists (
+              select 1 from task_key hist_tk
+                  join task hist_t on (hist_tk.task_id = hist_t.id)
+              where hist_tk.key_id = key.id and hist_t.language_id = :languageId
+            )
+          )
+          and (
+            COALESCE(:#{#filters.filterHasBeenInTask}, false) = false
+            or exists (
+              select 1 from task_key hist_tk
+                  join task hist_t on (hist_tk.task_id = hist_t.id)
+              where hist_tk.key_id = key.id and hist_t.language_id = :languageId
             )
           )
     """,
