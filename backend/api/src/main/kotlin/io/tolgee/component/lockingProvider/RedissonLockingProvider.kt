@@ -31,6 +31,24 @@ open class RedissonLockingProvider(
     }
   }
 
+  override fun <T> tryWithLocking(
+    name: String,
+    waitTime: Duration,
+    fn: () -> T,
+  ): T? {
+    val lock = this.getLock(name)
+    if (!lock.tryLock(waitTime.toMillis(), TimeUnit.MILLISECONDS)) {
+      return null
+    }
+    try {
+      return fn()
+    } finally {
+      if (lock.isHeldByCurrentThread) {
+        lock.unlock()
+      }
+    }
+  }
+
   override fun <T> withLockingIfFree(
     name: String,
     leaseTime: Duration,

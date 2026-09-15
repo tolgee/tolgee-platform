@@ -1,6 +1,7 @@
 package io.tolgee.component
 
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.Lock
 
 interface LockingProvider {
@@ -10,6 +11,30 @@ interface LockingProvider {
     name: String,
     fn: () -> T,
   ): T
+
+  /**
+   * Executes the given function if the lock can be acquired within [waitTime].
+   * If the lock cannot be acquired in time, returns null without executing the function.
+   *
+   * @param name The name of the lock
+   * @param waitTime The maximum time to wait for the lock
+   * @param fn The function to execute while holding the lock
+   */
+  fun <T> tryWithLocking(
+    name: String,
+    waitTime: Duration,
+    fn: () -> T,
+  ): T? {
+    val lock = getLock(name)
+    if (!lock.tryLock(waitTime.toMillis(), TimeUnit.MILLISECONDS)) {
+      return null
+    }
+    try {
+      return fn()
+    } finally {
+      lock.unlock()
+    }
+  }
 
   /**
    * Executes the given function if the lock is free.
