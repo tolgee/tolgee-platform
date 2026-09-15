@@ -96,6 +96,9 @@ class AdministrationController(
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
     }
+    if (!userAccountService.get(userId).isAdminDeletable) {
+      throw BadRequestException(Message.CANNOT_DELETE_INITIAL_USER)
+    }
     userAccountService.delete(userId)
   }
 

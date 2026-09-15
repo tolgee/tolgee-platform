@@ -3236,7 +3236,8 @@ export interface components {
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
         | "project_import_corrupt_archive"
-        | "server_busy";
+        | "server_busy"
+        | "cannot_delete_initial_user";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7175,7 +7176,8 @@ export interface components {
         | "project_import_version_mismatch"
         | "project_import_missing_project_json"
         | "project_import_corrupt_archive"
-        | "server_busy";
+        | "server_busy"
+        | "cannot_delete_initial_user";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
