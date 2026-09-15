@@ -12,6 +12,7 @@ import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/Lang
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { usePermissionTranslation } from 'tg.translationTools/usePermissionTranslation';
 import { messageService } from 'tg.service/MessageService';
+import copy from 'copy-to-clipboard';
 
 type UserAccountInProjectModel =
   components['schemas']['ProjectInvitationModel'];
@@ -82,11 +83,15 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
   };
 
   const handleGetLink = () => {
-    navigator.clipboard.writeText(
+    const success = copy(
       LINKS.ACCEPT_INVITATION.buildWithOrigin({
         [PARAMS.INVITATION_CODE]: invitation.code!,
       })
     );
+    if (!success) {
+      messageService.error(<T keyName="invite_user_invitation_copy_error" />);
+      return;
+    }
     messageService.success(<T keyName="invite_user_invitation_copy_success" />);
   };
 
