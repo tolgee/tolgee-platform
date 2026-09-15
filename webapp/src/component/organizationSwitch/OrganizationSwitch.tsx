@@ -62,11 +62,6 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
     onSelect?.(organization);
   };
 
-  const handleCreateNewOrg = () => {
-    handleClose();
-    history.push(LINKS.ORGANIZATIONS_ADD.build());
-  };
-
   const isCommunitySurface = selectedSurface === 'community';
 
   const switchLabel = isCommunitySurface ? (
@@ -89,7 +84,6 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
         selected={preferredOrganization}
         onSelect={handleSelectOrganization}
         anchorEl={anchorEl.current!}
-        onAddNew={handleCreateNewOrg}
         communitySelected={isCommunitySurface}
         onCommunityNavigate={
           hasCommunityContributions

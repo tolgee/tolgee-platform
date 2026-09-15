@@ -138,7 +138,8 @@ describe('Organization List', () => {
   });
 
   const goToNewOrganizationForm = () => {
-    gcy('organization-switch').click();
+    gcy('global-user-menu-button').click();
+    gcy('user-menu-organization-switch').click();
     gcy('switch-popover-new').click();
   };
 
