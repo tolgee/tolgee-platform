@@ -1,3 +1,10 @@
+## [3.221.3](https://github.com/tolgee/tolgee-platform/compare/v3.221.2...v3.221.3) (2026-09-15)
+
+
+### Bug Fixes
+
+* bump MCP Java SDK to 2.0.1 to accept newer client capabilities ([#3918](https://github.com/tolgee/tolgee-platform/issues/3918)) ([4efbc0f](https://github.com/tolgee/tolgee-platform/commit/4efbc0f796064ed8151e60958f5bb3303611402f))
+
 ## [3.221.2](https://github.com/tolgee/tolgee-platform/compare/v3.221.1...v3.221.2) (2026-09-08)
 
 
