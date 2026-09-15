@@ -28,6 +28,11 @@ object AuthorizedRequestFactory {
   }
 
   @JvmStatic
+  fun loggedPatch(url: String): MockHttpServletRequestBuilder {
+    return addToken(MockMvcRequestBuilders.patch(url))
+  }
+
+  @JvmStatic
   fun loggedDelete(url: String): MockHttpServletRequestBuilder {
     return addToken(MockMvcRequestBuilders.delete(url))
   }

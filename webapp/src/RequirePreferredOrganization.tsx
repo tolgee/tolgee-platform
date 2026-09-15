@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import {
   useIsEmailVerified,
   usePreferredOrganization,
@@ -7,6 +7,7 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
 import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { OnboardingSurveyGate } from 'tg.ee';
 
 export const RequirePreferredOrganization: FC<
   React.PropsWithChildren<unknown>
@@ -18,15 +19,17 @@ export const RequirePreferredOrganization: FC<
   const { preferredOrganization, isFetching } = usePreferredOrganization();
 
   const isEmailVerified = useIsEmailVerified();
-  if (!isEmailVerified) {
-    return <>{props.children}</>;
-  }
-  if (allowPrivate && !preferredOrganization && isFetching) {
-    return null;
-  }
 
-  if (allowPrivate && !preferredOrganization && !isFetching) {
-    return (
+  let content: ReactNode = props.children;
+  if (isEmailVerified && allowPrivate && !preferredOrganization && isFetching) {
+    content = null;
+  } else if (
+    isEmailVerified &&
+    allowPrivate &&
+    !preferredOrganization &&
+    !isFetching
+  ) {
+    content = (
       <DashboardPage>
         <CompactView
           primaryContent={
@@ -41,5 +44,5 @@ export const RequirePreferredOrganization: FC<
     );
   }
 
-  return <>{props.children}</>;
+  return <OnboardingSurveyGate>{content}</OnboardingSurveyGate>;
 };

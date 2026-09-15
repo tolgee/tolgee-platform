@@ -498,3 +498,5 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
     return tabs;
   };
 };
+
+export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';

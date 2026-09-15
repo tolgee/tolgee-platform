@@ -47,7 +47,8 @@ class PostHogBusinessEventReporter(
       "${'$'}identify",
       mapOf(
         "${'$'}anon_distinct_id" to data.anonymousUserId,
-      ) + getSetMapOfUserData(dto),
+        "${'$'}set" to getUserDataMap(dto),
+      ),
     )
   }
 
@@ -76,34 +77,22 @@ class PostHogBusinessEventReporter(
     postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)
   }
 
-  /**
-   * PostHog accepts user information in $set property.
-   *
-   * This method returns map with $set property if user information is present
-   * or if instanceId is sent by self-hosted instance.
-   */
+  // PostHog accepts user information in the $set property.
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
-    val setEntry =
-      data.userAccountDto?.let { userAccountDto ->
-        getSetMapOfUserData(userAccountDto)
-      } ?: data.instanceId?.let {
-        mapOf(
-          "${'$'}set" to
-            mapOf(
-              "instanceId" to it,
-            ),
-        )
-      } ?: emptyMap()
-    return setEntry + getAnonIdMap(data)
+    val userSet = data.userAccountDto?.let { getUserDataMap(it) }
+    val instanceSet = data.instanceId?.let { mapOf("instanceId" to it) }
+    val baseSet = userSet ?: instanceSet ?: emptyMap()
+
+    val merged = baseSet + (data.personProperties?.filterValueNotNull() ?: emptyMap())
+    if (merged.isEmpty()) return getAnonIdMap(data)
+
+    return mapOf("${'$'}set" to merged) + getAnonIdMap(data)
   }
 
-  private fun getSetMapOfUserData(userAccountDto: UserAccountDto) =
+  private fun getUserDataMap(userAccountDto: UserAccountDto): Map<String, Any?> =
     mapOf(
-      "${'$'}set" to
-        mapOf(
-          "email" to userAccountDto.username,
-          "name" to userAccountDto.name,
-        ),
+      "email" to userAccountDto.username,
+      "name" to userAccountDto.name,
     )
 
   fun getAnonIdMap(data: OnBusinessEventToCaptureEvent): Map<String, String> {

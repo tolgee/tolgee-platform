@@ -870,6 +870,7 @@ declare namespace DataCy {
         "top-banner": true;
         "top-banner-content": true;
         "top-banner-dismiss-button": true;
+        "top-bar-logo": true;
         "topbap-trial-popover-content": true;
         "topbar-trial-announcement": true;
         "topbar-trial-chip": true;

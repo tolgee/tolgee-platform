@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
@@ -8,6 +8,7 @@ import {
   QaBadgeProps,
   QaIssueHighlightProps,
   SubfilterQaChecksProps,
+  OnboardingSurveyGateProps,
 } from './EeModuleType';
 import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 
@@ -99,3 +100,7 @@ export const ProjectSettingsTranslationMemory = Empty;
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
     existingItems;
+
+export const OnboardingSurveyGate = ({
+  children,
+}: OnboardingSurveyGateProps): ReactElement | null => <>{children}</>;
