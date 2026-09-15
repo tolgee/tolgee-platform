@@ -92,6 +92,25 @@ describe('OAuth2 consent', () => {
     cy.url().should('include', 'state=e2e-state');
   });
 
+  // The resource crosses four hands (authorize query, consent-page URL, this re-POST, the grant); dropping it in the
+  // SPA hop fails nothing visibly — tokens just silently mint for the API audience — so the POST body is pinned here.
+  it('forwards the resource indicator into the authorize call', () => {
+    const mcpResource = `${HOST}/mcp/developer`;
+    cy.intercept('POST', '/v2/oauth2/authorize').as('authorize');
+
+    cy.visit(
+      authorizeUrl('keys.view translations.view') +
+        `&resource=${encodeURIComponent(mcpResource)}`
+    );
+
+    cy.wait('@authorize', { timeout: NAVIGATION_TIMEOUT })
+      .its('request.body.resource')
+      .should('eq', mcpResource);
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+  });
+
   it('redirects with access_denied when the user denies', () => {
     cy.visit(authorizeUrl('keys.view translations.view'));
 

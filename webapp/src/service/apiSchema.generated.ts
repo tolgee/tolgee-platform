@@ -4588,6 +4588,7 @@ export interface components {
       project?: string;
       /** @description Redirect URI from the client's authorize request; must be registered for the client */
       redirectUri: string;
+      resource?: string;
       responseType?: string;
       scope?: string;
       state?: string;
