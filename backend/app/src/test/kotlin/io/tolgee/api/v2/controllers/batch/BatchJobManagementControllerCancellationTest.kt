@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -92,7 +93,8 @@ class BatchJobManagementControllerCancellationTest :
           val currentJob = util.getSingleJob()
           currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
 
-          verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+          verify(batchJobActivityFinalizer, times(1))
+            .finalizeActivityWhenJobCompleted(argThat { id == job.id })
 
           // assert activity stored
           val activityRevisions =

@@ -7,6 +7,28 @@ import io.tolgee.events.OnEntityPreUpdate
 import io.tolgee.model.SoftDeletable
 import io.tolgee.model.translation.Translation
 
+fun EntityPreCommitEvent<*>.getWordUsageIncreaseAmount(): Long {
+  val translation = entity as? Translation ?: return 0
+  val wordCount = (translation.wordCount ?: 0).toLong()
+  return when (this) {
+    is OnEntityPrePersist<*> -> wordCount
+
+    is OnEntityPreDelete<*> -> -wordCount
+
+    is OnEntityPreUpdate<*> -> getWordCountDelta(wordCount)
+
+    else -> 0
+  }
+}
+
+private fun OnEntityPreUpdate<*>.getWordCountDelta(newWordCount: Long): Long {
+  if (previousState == null) return 0
+  val wordCountIndex = propertyNames?.indexOf("wordCount") ?: -1
+  if (wordCountIndex < 0) return 0
+  val oldWordCount = (previousState?.getOrNull(wordCountIndex) as? Int)?.toLong() ?: 0L
+  return newWordCount - oldWordCount
+}
+
 fun EntityPreCommitEvent<*>.getUsageIncreaseAmount(): Long {
   return when (this) {
     is OnEntityPrePersist<*> -> {

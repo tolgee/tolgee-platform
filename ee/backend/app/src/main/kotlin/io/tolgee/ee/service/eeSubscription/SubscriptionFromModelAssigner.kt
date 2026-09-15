@@ -19,6 +19,10 @@ class SubscriptionFromModelAssigner(
     subscription.isPayAsYouGo = model.plan.isPayAsYouGo
     subscription.keysLimit = model.limits.keys.limit
     subscription.seatsLimit = model.limits.seats.limit
+    subscription.includedWords = model.limits.words.included
+    subscription.wordsLimit = model.limits.words.limit
+    subscription.autoUpgradeEffective = model.limits.autoUpgradeEffective ?: false
+    subscription.metricType = model.plan.metricType
     subscription.status = model.status
     subscription.lastValidCheck = currentDate
   }
