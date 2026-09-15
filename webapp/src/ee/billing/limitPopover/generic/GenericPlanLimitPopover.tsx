@@ -75,7 +75,6 @@ export const GenericPlanLimitPopover: FC<
           data-cy="plan-limit-dialog-close"
           onClick={onClose}
           type="button"
-          color="secondary"
         >
           <T keyName="plan_limit_dialog_close" />
         </Button>
