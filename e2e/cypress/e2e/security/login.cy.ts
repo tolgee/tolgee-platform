@@ -17,6 +17,7 @@ import {
   userDisableMfa,
   userEnableMfa,
   deleteUserSql,
+  setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import { assertMessage, getPopover } from '../../common/shared';
 import {
@@ -151,12 +152,14 @@ context('Login', () => {
 
 context('Login third party', () => {
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     deleteUserSql(TEST_USERNAME);
     disableEmailVerification();
     cy.visit(HOST);
   });
 
   afterEach(() => {
+    setBypassSeatCountCheck(false);
     deleteUserSql(TEST_USERNAME);
   });
 
@@ -186,6 +189,7 @@ context('Login third party', () => {
 
 context('SSO Organizations Login', () => {
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     deleteUserSql(TEST_USERNAME_SSO);
     disableEmailVerification();
     ssoOrganizationsLoginTestData.clean();
@@ -203,6 +207,7 @@ context('SSO Organizations Login', () => {
   });
 
   afterEach(() => {
+    setBypassSeatCountCheck(false);
     logout();
     disableOrganizationsSsoProvider();
     ssoOrganizationsLoginTestData.clean();
@@ -212,6 +217,7 @@ context('SSO Organizations Login', () => {
 
 context('SSO Global Login', () => {
   beforeEach(() => {
+    setBypassSeatCountCheck(true);
     deleteUserSql(TEST_USERNAME_SSO);
     disableEmailVerification();
     enableGlobalSsoProvider();
@@ -224,6 +230,7 @@ context('SSO Global Login', () => {
   });
 
   afterEach(() => {
+    setBypassSeatCountCheck(false);
     logout();
     disableGlobalSsoProvider();
     deleteUserSql(TEST_USERNAME_SSO);
