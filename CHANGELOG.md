@@ -1,3 +1,10 @@
+# [3.222.0](https://github.com/tolgee/tolgee-platform/compare/v3.221.3...v3.222.0) (2026-09-15)
+
+
+### Features
+
+* exact match in scoped search (key:=name) ([#3915](https://github.com/tolgee/tolgee-platform/issues/3915)) ([614b1b4](https://github.com/tolgee/tolgee-platform/commit/614b1b4eb7acdfcbc9ba2c339f035d1e744bd072)), closes [#3914](https://github.com/tolgee/tolgee-platform/issues/3914)
+
 ## [3.221.3](https://github.com/tolgee/tolgee-platform/compare/v3.221.2...v3.221.3) (2026-09-15)
 
 
