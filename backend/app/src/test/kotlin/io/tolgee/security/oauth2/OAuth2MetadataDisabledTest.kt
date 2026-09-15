@@ -26,7 +26,8 @@ class OAuth2MetadataDisabledTest {
 
   @Test
   fun `the RFC 9728 document is not served, and the issuer is never read`() {
-    val controller = ProtectedResourceMetadataController(issuerResolver, disabledRegistry, OAuth2Resources(issuerResolver))
+    val controller =
+      ProtectedResourceMetadataController(issuerResolver, disabledRegistry, OAuth2Resources(issuerResolver))
 
     assertThatThrownBy { controller.mcpDeveloperMetadata() }.isInstanceOf(NotFoundException::class.java)
 

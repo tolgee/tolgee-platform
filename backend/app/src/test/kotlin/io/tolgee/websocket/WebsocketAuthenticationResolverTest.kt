@@ -30,7 +30,7 @@ class WebsocketAuthenticationResolverTest {
 
   @Test
   fun `a rejected credential resolves to no authentication`() {
-    whenever(oauth2AccessTokenResolver.tryResolve(any()))
+    whenever(oauth2AccessTokenResolver.tryResolve(any(), any()))
       .thenThrow(AuthenticationException(Message.INVALID_OAUTH_TOKEN))
 
     resolver.resolve(connectWithBearer()).assert.isNull()
@@ -38,7 +38,7 @@ class WebsocketAuthenticationResolverTest {
 
   @Test
   fun `a server-side failure is not mistaken for a rejected credential`() {
-    whenever(oauth2AccessTokenResolver.tryResolve(any())).thenThrow(IllegalStateException("database is down"))
+    whenever(oauth2AccessTokenResolver.tryResolve(any(), any())).thenThrow(IllegalStateException("database is down"))
 
     assertThrows<IllegalStateException> { resolver.resolve(connectWithBearer()) }
   }

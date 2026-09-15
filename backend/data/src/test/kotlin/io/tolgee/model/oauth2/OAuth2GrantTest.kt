@@ -48,7 +48,7 @@ class OAuth2GrantTest {
 
   @Test
   fun `a stored audience that no longer resolves matches no resource server`() {
-    val grant = OAuth2Grant().apply { audience = "AUDIENCE_FROM_THE_FUTURE" }
+    val grant = OAuth2Grant().apply { audience = "FUTURE" }
 
     grant.boundAudience().assert.isNull()
   }

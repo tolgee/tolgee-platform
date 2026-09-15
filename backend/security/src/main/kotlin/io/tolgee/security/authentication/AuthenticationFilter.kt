@@ -22,9 +22,11 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.mcp.McpConstants
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
@@ -101,7 +103,9 @@ class AuthenticationFilter(
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
-        val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
+        val auth =
+          oauth2AccessTokenResolver.tryResolve(token, expectedAudience(request))
+            ?: jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -131,6 +135,17 @@ class AuthenticationFilter(
     // even if the authentication is disabled, they still might be using PAK for in-context editing,
     // so we still need to try to authenticate using API key, to have API key authentication in the security context
     disabledAuthenticationResolver.resolve()?.let { SecurityContextHolder.getContext().authentication = it }
+  }
+
+  /**
+   * Path-prefix matched the same way [io.tolgee.security.oauth2.OAuth2BearerChallengeProvider] decides it is
+   * challenging for the MCP resource: the audience enforced here must be the one a 401 from the same path told the
+   * client to obtain.
+   */
+  private fun expectedAudience(request: HttpServletRequest): OAuth2Audience {
+    val path = UrlPathHelper.defaultInstance.getPathWithinApplication(request)
+    if (path.startsWith(McpConstants.DEVELOPER_ENDPOINT_PATH)) return OAuth2Audience.MCP
+    return OAuth2Audience.API
   }
 
   private fun checkIfSsoUserStillValid(userDto: UserAccountDto) {

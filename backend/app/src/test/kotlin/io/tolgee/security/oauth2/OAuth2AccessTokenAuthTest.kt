@@ -85,6 +85,34 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `an MCP-audience token is refused by the REST API with invalid_token`() {
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf("translations.view"),
+        projectIds = listOf(testData.project.id),
+        audience = OAuth2Audience.MCP,
+      )
+
+    val response = performGet(translationsUrl(), bearerHeaders(token)).andReturn().response
+
+    response.status.assert.isEqualTo(401)
+    response
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("invalid_token")
+  }
+
+  @Test
+  fun `a token whose grant audience no longer resolves is refused everywhere`() {
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    tokens.corruptAudience(token, "FUTURE")
+
+    performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
+  }
+
+  @Test
   fun `accepts a valid scoped token`() {
     val token = mintForAllProjects(scopes = listOf("translations.view"))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
