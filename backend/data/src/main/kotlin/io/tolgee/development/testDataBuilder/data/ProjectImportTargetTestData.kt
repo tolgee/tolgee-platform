@@ -8,15 +8,15 @@ import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
+import java.util.Date
 
 /**
  * A wipe target for the project import tests: the main project pre-populated with content that must be
- * gone after a mirror import (a key + translation, a label, a task, a default + feature branch, and the
- * branch merge/snapshot rows hanging off them), plus a separate sibling project in the same organization
- * whose content must stay completely untouched (blast-radius isolation). The merge/snapshot rows exist so
- * the clear-in-place FK ordering is exercised — they FK key/branch with no DB cascade, so the wipe must
- * delete them before keys/branches or it FK-violates. ProjectHardDeletingServiceTest covers the same
- * ordering with these rows, so dropping them silently guts that test too.
+ * gone after a mirror import, plus a separate sibling project in the same organization whose content must
+ * stay completely untouched (blast-radius isolation). The merge/snapshot rows FK key and branch; the
+ * soft-deleted import's import_language row FKs language. None of those cascade, so the wipe must delete
+ * them ahead of keys/branches/languages or it FK-violates. ProjectHardDeletingServiceTest exercises the
+ * same merge/snapshot ordering with these rows, so dropping those silently guts that test too.
  */
 class ProjectImportTargetTestData :
   BaseTestData(userName = "import-target-owner", projectName = "import-target-project") {
@@ -80,6 +80,22 @@ class ProjectImportTargetTestData :
         number = 1
         language = englishLanguage
         project = projectBuilder.self
+      }
+
+      addImport { author = user }
+
+      addImport {
+        author = user
+        deletedAt = Date()
+      }.build {
+        addImportFile {
+          name = "en.json"
+        }.build {
+          addImportLanguage {
+            name = "en"
+            existingLanguage = englishLanguage
+          }
+        }
       }
 
       addBranchMerge {

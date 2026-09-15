@@ -119,7 +119,7 @@ class ProjectContentClearer(
 
   private fun clearImports(projectId: Long) {
     // Imports FK both branch and language (no cascade) and are transient upload state, never transferred.
-    importService.getAllByProject(projectId).forEach { importService.hardDeleteImport(it) }
+    importService.deleteAllByProject(projectId)
     importSettingsService.deleteAllByProject(projectId)
   }
 
@@ -189,7 +189,7 @@ class ProjectContentClearer(
         ProjectQaConfig::class,
         LanguageQaConfig::class,
         TranslationQaIssue::class,
-        // Deleted by deleteBranchMergesAndSnapshots (before the branch wipe).
+        // Deleted by branchService.deleteAllByProjectId.
         KeySnapshot::class,
         TranslationSnapshot::class,
         KeyMetaSnapshot::class,
