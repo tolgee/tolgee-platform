@@ -24,7 +24,7 @@ import java.util.function.Function
 /**
  * Servlet filter that syncs MCP sessions to Redis for multi-replica deployments.
  *
- * The MCP Java SDK's [WebMvcStreamableServerTransportProvider] stores sessions in an in-memory
+ * Spring AI's [WebMvcStreamableServerTransportProvider] (mcp-spring-webmvc) stores sessions in an in-memory
  * `ConcurrentHashMap`. When running multiple replicas behind a load balancer, requests with an
  * `Mcp-Session-Id` header may land on a replica that doesn't have the session, resulting in
  * 404 "Session not found" errors.
@@ -104,15 +104,14 @@ class McpSessionRedisFilter(
           objectMapper.readValue(it, McpSchema.Implementation::class.java)
         }
 
-      @Suppress("UNCHECKED_CAST")
       val session =
         McpStreamableServerSession(
           sessionId,
           clientCapabilities,
           clientInfo,
           factoryFields.requestTimeout,
-          factoryFields.requestHandlers as Map<String, McpRequestHandler<*>>,
-          factoryFields.notificationHandlers as Map<String, McpNotificationHandler>,
+          factoryFields.requestHandlers,
+          factoryFields.notificationHandlers,
           { factoryFields.onClose.apply(sessionId) },
           factoryFields.jsonSchemaValidator,
         )
@@ -236,8 +235,8 @@ class McpSessionRedisFilter(
 
   private data class FactoryFields(
     val requestTimeout: Duration,
-    val requestHandlers: Map<String, Any>,
-    val notificationHandlers: Map<String, Any>,
+    val requestHandlers: Map<String, McpRequestHandler<*>>,
+    val notificationHandlers: Map<String, McpNotificationHandler>,
     val onClose: Function<String, Mono<Void>>,
     val jsonSchemaValidator: JsonSchemaValidator?,
   )
