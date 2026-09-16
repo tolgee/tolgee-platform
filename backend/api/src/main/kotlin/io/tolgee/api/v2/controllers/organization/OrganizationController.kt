@@ -230,12 +230,11 @@ class OrganizationController(
   fun leaveOrganization(
     @PathVariable("id") id: Long,
   ) {
-    organizationService.find(id)?.let {
-      if (!organizationService.isThereAnotherOwner(id)) {
-        throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
-      }
-      organizationRoleService.leave(id)
-    } ?: throw NotFoundException()
+    organizationService.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    if (organizationRoleService.isLastEnabledOwner(id, authenticationFacade.authenticatedUser.id)) {
+      throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+    }
+    organizationRoleService.leave(id)
   }
 
   @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
@@ -256,10 +255,9 @@ class OrganizationController(
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
   @Operation(
     summary = "Remove user from organization",
-    description = (
-      "Remove user from organization. " +
-        "If user is managed by the organization, their account is disabled instead."
-    ),
+    description =
+      "Removes the user from the organization. Users managed by the organization cannot be removed; " +
+        "disable them instead.",
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
@@ -267,7 +265,38 @@ class OrganizationController(
     @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    organizationRoleService.removeOrDeactivateUser(userId, organizationHolder.organization.id)
+    organizationRoleService.removeUser(userId, organizationHolder.organization.id)
+  }
+
+  @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/disable")
+  @Operation(
+    summary = "Disable a managed user",
+    description = "Disables the account of a user managed by this organization.",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
+  fun disableManagedUser(
+    @PathVariable organizationId: Long,
+    @PathVariable("userId") userId: Long,
+  ) {
+    if (authenticationFacade.authenticatedUser.id == userId) {
+      throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
+    }
+    organizationRoleService.disableUser(userId, organizationHolder.organization.id)
+  }
+
+  @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/enable")
+  @Operation(
+    summary = "Enable a managed user",
+    description = "Re-enables the disabled account of a user managed by this organization.",
+  )
+  @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @RequiresSuperAuthentication
+  fun enableManagedUser(
+    @PathVariable organizationId: Long,
+    @PathVariable("userId") userId: Long,
+  ) {
+    organizationRoleService.enableUser(userId, organizationHolder.organization.id)
   }
 
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

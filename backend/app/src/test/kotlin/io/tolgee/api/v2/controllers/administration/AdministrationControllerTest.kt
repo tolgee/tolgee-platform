@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -180,5 +181,37 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/administration/users/${testData.user.id}/set-role/ADMIN", null).andIsForbidden
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsForbidden
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsForbidden
+  }
+
+  @Test
+  fun `disable and enable are idempotent`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    userAccountService.findActive(testData.user.id).assert.isNull()
+
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    userAccountService.findActive(testData.user.id).assert.isNotNull
+  }
+
+  @Test
+  fun `admin disable records the admin as the origin`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+    assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy)
+      .isEqualTo(UserDisabledBy.ADMIN)
+  }
+
+  @Test
+  fun `admin enable clears the disable origin`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
+
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
+    assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy).isNull()
   }
 }

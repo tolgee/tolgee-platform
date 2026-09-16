@@ -8,6 +8,7 @@ import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.OnBeforeOrganizationSeatIncrease
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Invitation
@@ -15,6 +16,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.UserDisabledBy
+import io.tolgee.model.isSupporterOrAdmin
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -25,6 +28,7 @@ import io.tolgee.service.security.UserPreferencesService
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,6 +50,7 @@ class OrganizationRoleService(
   @param:Lazy
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   fun canUserViewStrict(
     userId: Long,
@@ -275,60 +280,63 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    if (!canRemoveUser(userId, organizationId)) {
+    if (isManagedBy(userId, organizationId)) {
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
+    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException()
+    if (isHiddenFromOrganizationByDisable(user, organizationId)) {
+      throw NotFoundException()
+    }
 
-    removeUserForReal(userId, organizationId)
+    removeFromOrganization(userId, organizationId)
   }
 
   @Transactional
-  fun removeOrDeactivateUser(
+  fun disableUser(
     userId: Long,
     organizationId: Long,
   ) {
-    if (!canRemoveUser(userId, organizationId)) {
-      userAccountService.disable(userId)
-      return
-    }
+    checkManagedBy(userId, organizationId)
 
-    removeUserForReal(userId, organizationId)
+    userAccountService.disable(userId, UserDisabledBy.ORGANIZATION)
   }
 
-  /**
-   * Checks if a user is managed by the organization.
-   * We can't remove managed users from their organization.
-   */
-  private fun canRemoveUser(
-    userId: Long,
-    organizationId: Long,
-  ): Boolean {
-    val managedBy = getManagedBy(userId)
-    val isManaged = managedBy != null
-
-    if (!isManaged) {
-      // Not managed by any organization
-      return true
-    }
-
-    if (managedBy.id != organizationId) {
-      // Managed by another organization
-      return true
-    }
-
-    // User is managed by the organization - we can't remove them
-    return false
-  }
-
-  private fun removeUserForReal(
+  @Transactional
+  fun enableUser(
     userId: Long,
     organizationId: Long,
   ) {
-    val role =
-      organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
-        organizationRoleRepository.delete(it)
-        it
-      }
+    checkManagedBy(userId, organizationId)
+
+    val becameEnabled = userAccountService.enable(userId, UserDisabledBy.ORGANIZATION)
+
+    // Published after the enable but before commit, so the listener's own transaction still counts the
+    // organization without this user and has to add the seat being taken.
+    if (becameEnabled) {
+      applicationEventPublisher.publishEvent(OnBeforeOrganizationSeatIncrease(this, organizationId))
+    }
+  }
+
+  private fun isManagedBy(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean = getManagedBy(userId)?.id == organizationId
+
+  private fun checkManagedBy(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    if (!isManagedBy(userId, organizationId)) {
+      throw ValidationException(Message.USER_IS_NOT_MANAGED_BY_ORGANIZATION)
+    }
+  }
+
+  private fun removeFromOrganization(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+    role?.let { organizationRoleRepository.delete(it) }
     val permissions = permissionService.removeAllProjectInOrganization(organizationId, userId)
 
     if (role == null && permissions.isEmpty()) {
@@ -369,12 +377,25 @@ class OrganizationRoleService(
     userId: Long,
     dto: SetOrganizationRoleDto,
   ) {
-    val user = userAccountService.findActive(userId) ?: throw NotFoundException()
+    val user = userAccountService.findActiveOrDisabled(userId) ?: throw NotFoundException()
+    if (isHiddenFromOrganizationByDisable(user, organizationId)) {
+      throw NotFoundException()
+    }
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)
     } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
     evictCache(organizationId, userId)
+  }
+
+  /** Keep in step with the disabled-member arm of [io.tolgee.repository.UserAccountRepository.getAllInOrganization]. */
+  private fun isHiddenFromOrganizationByDisable(
+    user: UserAccount,
+    organizationId: Long,
+  ): Boolean {
+    if (user.disabledAt == null) return false
+    if (user.isSupporterOrAdmin()) return true
+    return user.disabledBy != UserDisabledBy.ORGANIZATION || !isManagedBy(user.id, organizationId)
   }
 
   fun createForInvitation(
@@ -401,13 +422,12 @@ class OrganizationRoleService(
     }
   }
 
-  fun isAnotherOwnerInOrganization(id: Long): Boolean {
-    return this.organizationRoleRepository
-      .countAllByOrganizationIdAndTypeAndUserIdNot(
-        id,
-        OrganizationRoleType.OWNER,
-        authenticationFacade.authenticatedUser.id,
-      ) > 0
+  fun isLastEnabledOwner(
+    organizationId: Long,
+    userId: Long,
+  ): Boolean {
+    if (!isUserOwner(userId, organizationId)) return false
+    return organizationRoleRepository.countEnabledOwnersExcludingUser(organizationId, userId) == 0L
   }
 
   fun saveAll(organizationRoles: List<OrganizationRole>) {

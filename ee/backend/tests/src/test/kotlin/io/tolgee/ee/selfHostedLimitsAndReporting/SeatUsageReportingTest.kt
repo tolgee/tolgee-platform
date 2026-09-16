@@ -8,6 +8,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.stubs.TolgeeCloudLicencingClientStub
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,7 +70,7 @@ class SeatUsageReportingTest : AbstractSpringTest() {
         captor.assertSeats(1)
 
         currentDateProvider.move(Duration.ofDays(1))
-        userAccountService.disable(user2.id)
+        userAccountService.disable(user2.id, UserDisabledBy.ADMIN)
         captor.assertSeats(0)
       }
     }
