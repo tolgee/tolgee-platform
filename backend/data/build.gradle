@@ -113,6 +113,7 @@ dependencies {
     // Explicit: the CIMD metadata fetcher pins its Apache HttpClient5 connection to pre-resolved addresses; relying on
     // the transitive copy would break silently if a starter dropped it.
     implementation 'org.apache.httpcomponents.client5:httpclient5'
+    implementation libs.caffeine
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation('com.github.transferwise:spring-icu:0.3.0') {
