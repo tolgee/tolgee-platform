@@ -271,6 +271,14 @@ class ProjectExportImportImporterTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `wipes a target's soft-deleted import without an FK violation`() {
+    importSourceOntoTarget()
+
+    assertThat(nativeCount("import_language", "existing_language_id", target.englishLanguage.id)).isZero()
+    assertThat(nativeCount("import", "project_id", target.targetProject.id)).isZero()
+  }
+
+  @Test
   fun `preserves a matched author rather than attributing to the admin`() {
     importSourceOntoTarget()
     assertThat(commentAuthorUsername(target.targetProject.id, source.commentText))
