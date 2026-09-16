@@ -1798,6 +1798,7 @@
   "oauth2_consent_single_project_option": "Eén enkel project",
   "oauth2_consent_subtitle": "{appName} wil toegang tot een project. Bekijk wat het kan doen.",
   "oauth2_consent_title": "Applicatie autoriseren",
+  "oauth2_consent_unverified_warning": "Tolgee heeft deze app niet geverifieerd. Ga alleen door als je dit verzoek hebt geopend vanuit een app die je vertrouwt.",
   "oauth_access_not_allowed": "OAuth-applicatietoegang is niet toegestaan voor dit eindpunt",
   "onboarding_survey_back": "Terug",
   "onboarding_survey_continue": "Doorgaan",

@@ -1791,6 +1791,7 @@
   "oauth2_consent_single_project_option": "Um único projeto",
   "oauth2_consent_subtitle": "{appName} deseja acessar um projeto. Revise o que ele poderá fazer.",
   "oauth2_consent_title": "Autorizar aplicação",
+  "oauth2_consent_unverified_warning": "O Tolgee não verificou esta aplicação. Só continue se abriu este pedido a partir de uma aplicação em que confia.",
   "oauth_access_not_allowed": "O acesso à aplicação OAuth não é permitido para este endpoint",
   "onboarding_survey_back": "Voltar",
   "onboarding_survey_continue": "Continuar",

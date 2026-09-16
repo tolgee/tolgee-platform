@@ -1795,6 +1795,7 @@
   "oauth2_consent_single_project_option": "单个项目",
   "oauth2_consent_subtitle": "{appName} 想要访问一个项目。请查看它将能够执行的操作。",
   "oauth2_consent_title": "授权应用",
+  "oauth2_consent_unverified_warning": "Tolgee 尚未验证此应用。只有在您从信任的应用打开此请求时才继续。",
   "oauth_access_not_allowed": "此端点不允许使用 OAuth 应用程序访问",
   "onboarding_survey_back": "返回",
   "onboarding_survey_continue": "继续",

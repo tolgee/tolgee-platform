@@ -1797,6 +1797,7 @@
   "oauth2_consent_single_project_option": "Et enkelt projekt",
   "oauth2_consent_subtitle": "{appName} vil have adgang til et projekt. Se hvad det vil kunne gøre.",
   "oauth2_consent_title": "Godkend applikation",
+  "oauth2_consent_unverified_warning": "Tolgee har ikke verificeret denne app. Fortsæt kun, hvis du åbnede denne anmodning fra en app, du har tillid til.",
   "oauth_access_not_allowed": "OAuth-applikationsadgang er ikke tilladt for dette endpoint",
   "onboarding_survey_back": "Tilbage",
   "onboarding_survey_continue": "Fortsæt",

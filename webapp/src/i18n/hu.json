@@ -1791,6 +1791,7 @@
   "oauth2_consent_single_project_option": "Egyetlen projekt",
   "oauth2_consent_subtitle": "A(z) {appName} hozzáférést kér egy projekthez. Nézze át, mit lesz képes tenni.",
   "oauth2_consent_title": "Alkalmazás engedélyezése",
+  "oauth2_consent_unverified_warning": "A Tolgee nem ellenőrizte ezt az appot. Csak akkor folytassa, ha ezt a kérést egy megbízható appból nyitotta meg.",
   "oauth_access_not_allowed": "OAuth alkalmazás hozzáférés nem engedélyezett ehhez a végponthoz",
   "onboarding_survey_back": "Vissza",
   "onboarding_survey_continue": "Folytatás",

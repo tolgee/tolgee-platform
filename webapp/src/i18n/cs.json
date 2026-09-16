@@ -1800,6 +1800,7 @@
   "oauth2_consent_single_project_option": "Jeden projekt",
   "oauth2_consent_subtitle": "{appName} chce získat přístup k projektu. Zkontrolujte, co bude moci dělat.",
   "oauth2_consent_title": "Autorizovat aplikaci",
+  "oauth2_consent_unverified_warning": "Tolgee tuto aplikaci neověřilo. Pokračujte pouze v případě, že jste tento požadavek otevřeli z aplikace, které důvěřujete.",
   "oauth_access_not_allowed": "Přístup pomocí OAuth aplikace není pro tento endpoint povolen",
   "onboarding_survey_back": "Zpět",
   "onboarding_survey_continue": "Pokračovat",

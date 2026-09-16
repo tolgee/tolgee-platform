@@ -1,3 +1,10 @@
+## [3.223.1](https://github.com/tolgee/tolgee-platform/compare/v3.223.0...v3.223.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* mirror import fails on soft-deleted imports' import_language rows ([#3916](https://github.com/tolgee/tolgee-platform/issues/3916)) ([3517faf](https://github.com/tolgee/tolgee-platform/commit/3517faf00f76cd752e0fe3aa9f96ab94e28656c6)), closes [#3804](https://github.com/tolgee/tolgee-platform/issues/3804) [#3853](https://github.com/tolgee/tolgee-platform/issues/3853)
+
 # [3.223.0](https://github.com/tolgee/tolgee-platform/compare/v3.222.1...v3.223.0) (2026-09-16)
 
 

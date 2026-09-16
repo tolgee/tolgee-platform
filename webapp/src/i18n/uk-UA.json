@@ -1598,6 +1598,7 @@
   "oauth2_consent_single_project_option": "Один проєкт",
   "oauth2_consent_subtitle": "{appName} хоче отримати доступ до проєкту. Перегляньте, що йому буде дозволено робити.",
   "oauth2_consent_title": "Авторизувати застосунок",
+  "oauth2_consent_unverified_warning": "Tolgee не перевірила цей додаток. Продовжуйте, лише якщо ви відкрили цей запит із додатка, якому довіряєте.",
   "oauth_access_not_allowed": "Доступ за допомогою застосунку OAuth не дозволено для цієї кінцевої точки",
   "onboarding_survey_back": "Назад",
   "onboarding_survey_continue": "Продовжити",
