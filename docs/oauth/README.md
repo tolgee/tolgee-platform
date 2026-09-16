@@ -21,8 +21,9 @@ access token**. The token is an opaque string the existing API already understan
 **Two halves:**
 - **Authorization server** (new) — mints tokens: the `/oauth2/authorize` and `/oauth2/token`
   endpoints.
-- **Resource server** (already existed) — the REST API that accepts the token. We only had to teach
-  it to recognize these new tokens next to the old ones.
+- **Resource servers** — there are now two, the REST API and the MCP endpoint (`/mcp/developer`),
+  and each token is bound to exactly one of them (RFC 8707 audience binding): a token minted for MCP
+  is rejected by the REST API and vice versa.
 
 ## 2. How To (the flow)
 
@@ -113,8 +114,11 @@ we deliberately did not take it:
 - **It matches the rest of Tolgee.** Project API keys and PATs are opaque strings looked up (and cached)
   the same way. OAuth tokens are not a special case.
 
-What is given up is offline validation by a *third-party* resource server. Tolgee's own API is the only
-resource server, so nothing needs it. If that ever changes, that is the moment to reconsider — not before.
+What is given up is offline validation by a *third-party* resource server, which none of Tolgee's own
+resource servers (the REST API and the MCP endpoint) needs. Each token is bound to exactly one of them
+by an `audience` on the grant (RFC 8707): `OAuth2AccessTokenResolver` checks it against the resource the
+request arrived at, so a token minted for one surface is `invalid_token` on the other. Existing tokens
+predating this read as `api` (the column defaults to it), so nothing re-consents.
 
 One consequence worth knowing: refresh rotation replaces the grant's single access token, so refreshing
 supersedes the previous access token immediately rather than leaving it usable until it expires.
@@ -130,10 +134,12 @@ relative to it. It must therefore be the URL where the OAuth endpoints (`/oauth2
 `OAuth2IssuerResolver` owns it. `issuerUrl` is `backEndUrl ?: frontEndUrl`, with a blank treated as unset and
 any trailing slash stripped, and it is what every caller uses — the discovery documents and the `iss` on
 authorization responses. It is never derived from the request, so a caller cannot choose the issuer this server
-publishes about itself; it must be a bare origin. Once any OAuth client is configured, startup fails unless one
-of the two is set and names a bare origin — a path-carrying value is rejected too, because RFC 8414 §3 would put
-the metadata document at a location Tolgee does not serve. A deployment with no client configured is left alone
-— it issues no tokens, so nothing reads the issuer. The `frontEndUrl` fallback is **not** "use the web app as
+publishes about itself; it must be a bare origin. The issuer is also the server's on/off switch: the OAuth
+endpoints (and CIMD) are live whenever the issuer resolves — a self-hosted instance therefore accepts unknown
+MCP clients before any client is pre-registered, which is standard authorization-server behaviour. A value that
+is *set but malformed* (a path, query or fragment) fails startup, because RFC 8414 §3 would put the metadata
+document at a location Tolgee does not serve; an unset issuer just leaves the server off. A pre-registered client
+cannot function without an issuer, so configuring one while the issuer is unset still fails startup. The `frontEndUrl` fallback is **not** "use the web app as
 the issuer": it only exists for deployments that serve the API and the web app from **one origin** (the backend
 also serves the built SPA), where `back-end-url` is often left unset and `front-end-url` *is* that single
 origin. Whenever the API has its own origin, `back-end-url` is the one you must set: nothing checks that the
@@ -178,22 +184,26 @@ takes whatever port the OS gives it at request time. RFC 8252 §7.3 requires tha
 but Tolgee matches a `localhost` registration the same way because refusing it would accept a configuration at
 startup and then reject the callback it produces. Simple and safe, but it only works for apps *we* control.
 
-Onboarding third-party clients (the MCP round) needs one of two mechanisms, neither of which is built:
+A third-party client we have never seen — an MCP client such as Claude Code, VS Code or Cursor — registers
+itself with **CIMD (Client ID Metadata Document)**: its `client_id` *is* an HTTPS URL serving a small JSON
+document describing it. `OAuth2ClientRegistry.find` falls through to this path for a URL-form `client_id`
+(a pre-registered id always wins first), fetches the document, validates it, and caches the resolved client
+per pod. Such a client is **unverified**: the consent screen shows its self-asserted name and logo, the
+`client_id` origin, and a warning, so the user can tell it from a client Tolgee vouches for.
 
-- **CIMD — Client ID Metadata Document.** The `client_id` *is* an HTTPS URL serving a small JSON document
-  describing the client. Tolgee would fetch and validate it on first use, so there is nothing to store or
-  expire. The catch is that it makes an outbound request to a URL an untrusted client chose, which is the
-  most security-sensitive surface in the whole feature — it needs an https-only, no-redirect, size- and
-  timeout-capped fetch behind an SSRF guard *and* a host allow-list, because a CIMD host controls the
-  redirect URIs of the client it registers.
-- **DCR — Dynamic Client Registration (RFC 7591).** The client POSTs its metadata to a public `/register`
-  endpoint and the server stores it. Widely specified and stable across metadata changes, but it is an
-  open, unauthenticated write endpoint: a spam, abuse and storage-growth surface that has to be rate
-  limited and pruned.
+The outbound fetch is the most security-sensitive surface in the feature — it reaches a URL an untrusted
+client chose — so it is https-only, follows no redirects, is size- and deadline-capped, and is **DNS-pinned**:
+`UrlSecurity.validateUrlAndResolve` resolves and vets the host once and the connection is pinned to exactly
+those addresses, closing the DNS-rebinding hole a re-resolving client would otherwise open. It never throws,
+so a hostile document cannot 500 `/oauth2/authorize`. Validation is fail-closed: the document's `client_id`
+must equal the fetched URL, the auth method must be `none`, and every `redirect_uri` must be same-origin
+HTTPS or loopback. The grant records a hash of the document, so a document that later changes its redirect
+set invalidates the grants issued against the old one at the next exchange or refresh. `tolgee.oauth2.cimd-allowed-hosts`
+restricts which hosts may present a document (empty = any public host).
 
-An implementation of CIMD was written and then removed from this round, because nothing consumes it until
-the MCP client work lands and it is not the kind of code to carry unused. If it is wanted later, it is a
-small, well-specified piece of work: resolve the client id as a URL, fetch the document, and cache it.
+**DCR — Dynamic Client Registration (RFC 7591)** — the other onboarding mechanism, where a client POSTs its
+metadata to a public `/register` endpoint the server stores — remains a deliberate no-go: CIMD covers the
+targeted clients without an open, unauthenticated write endpoint to rate-limit and prune.
 
 ## Where it lives in the code
 
@@ -213,8 +223,12 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Websocket accepts the token + narrows the subscribed topic | `WebsocketAuthenticationResolver.kt`, `WebsocketSubscribeAuthorizer.kt` |
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
-| Client registry (from config, not stored) | `OAuth2ClientRegistry.kt` |
-| Issuer | `OAuth2IssuerResolver.kt` |
+| Client registry (pre-registered from config, plus the CIMD fallthrough) | `OAuth2ClientRegistry.kt` |
+| CIMD: SSRF-hardened DNS-pinned fetch, fail-closed validation, per-pod cache, candidate policy | `security/oauth2/cimd/CimdDocumentFetcher.kt`, `CimdMetadataFetcher.kt`, `CimdClientCache.kt`, `CimdClientPolicy.kt`, `util/UrlSecurity.kt` |
+| RFC 8707 audience binding: which resource server a token is for, enforced on every request | `security/oauth2/OAuth2Resources.kt`, `OAuth2Audience.kt`, `OAuth2AccessTokenResolver.kt`, `AuthenticationFilter.kt` |
+| MCP cold-start: a credential-less `tools/call` gets a 401 challenge a client can act on | `mcp/McpAuthChallengeFilter.kt` |
+| Refresh-token replay: soft grace window + multi-generation theft history | `OAuth2AuthorizationService.kt`, `model/oauth2/OAuth2SupersededRefreshToken.kt` |
+| Issuer (also the on/off switch: the server is enabled when the issuer resolves) | `OAuth2IssuerResolver.kt` |
 | RFC 9728 protected-resource metadata + the RFC 6750 `WWW-Authenticate` challenge that points at it | `ProtectedResourceMetadataController.kt`, `OAuth2BearerChallengeProvider.kt` |
 | Nightly cleanup of spent/abandoned grants | `OAuth2GrantCleanup.kt` |
 
@@ -351,17 +365,15 @@ These are known gaps, deferred to the client rounds that first exercise them:
   listing a user's grants by client, and a delete that revokes one — `OAuth2GrantRepository` already indexes
   `user_account_id` for it.
 
-- **Refresh replay detection reaches one generation back.** Every refresh replaces both tokens on the grant, and
-  presenting the token the current one replaced revokes the whole grant (RFC 9700 §4.14.2). The refresh token is one
-  opaque secret, looked up by hash exactly as the access token is: the current hash finds a live grant, and the
-  previously-issued hash finds the grant a just-superseded token belonged to, which is what makes a replay
-  detectable. A secret the grant never issued matches neither and reaches no row, so it can only fail — it cannot
-  destroy anything.
-
-  The depth is one generation, deliberately. Retaining the whole chain of superseded hashes would detect a replay
-  from any generation; what is uncovered today is an attacker who steals a token and rotates it twice before the
-  legitimate client refreshes. That is the follow-up if it ever matters, and it is the point at which the grant
-  would need a rotation-chain table rather than a single previous-hash column.
+- **Refresh replay handling: soft grace, then theft.** Every refresh replaces both tokens on the grant. Replaying
+  the token that was *just* rotated away, within `tolgee.oauth2.refresh-token-grace-seconds` (default 60s), fails
+  the request but keeps the grant — an innocent collision (two tabs, a lost response, a proactive/reactive race)
+  costs the loser one failed request instead of signing the user out everywhere. The same token after the window,
+  or a token from two or more rotations back, is treated as theft and revokes the whole grant (RFC 9700 §4.14.2).
+  The grant carries its current and immediately-previous hash for the grace check; older superseded hashes live in
+  `oauth2_superseded_refresh_token` so a replay from any generation is still recognised. A secret the grant never
+  issued matches nothing and can only fail — it cannot destroy anything. Not done: *idempotent* grace (returning the
+  same token pair to a within-grace replay) — hash-only storage has no plaintext pair to re-return.
 
   There is also no grace window: a client that refreshes twice in quick succession — two tabs,
   a retried request — trips the replay defence and loses the grant instead of getting the same token pair back.
@@ -435,14 +447,6 @@ These are known gaps, deferred to the client rounds that first exercise them:
   follow the `redirectUrl` it returns carrying `error=access_denied` (RFC 6749 §4.1.2.1). That is new control flow in
   the consent screen, including what to do when the second authorize call fails too, so it waits for the round that
   owns the screen's own design.
-
-- **A tokenless MCP client does not get the RFC 9728 challenge.** `/mcp/**` is deliberately unauthenticated at
-  the filter chain so `initialize` and `tools/list` answer a health check without credentials, so a client that has
-  no token yet gets a successful `initialize` and is only refused once it calls a tool — from inside the handler,
-  not as a 401 carrying `WWW-Authenticate`. The challenge does fire for a client that presents a bad or revoked
-  token (`OAuth2BearerChallengeTest`), which is the path a client that already authenticated once takes. Making
-  discovery work from a cold start means emitting the challenge from a filter on `/mcp/**` while keeping the
-  unauthenticated `tools/list` health check intact — a follow-up for the MCP round.
 
 - **A grant resolves on every request.** Opaque tokens are looked up in `oauth2_grant` per
   request, which is what makes revocation immediate — but it is also an uncached database read on the API
