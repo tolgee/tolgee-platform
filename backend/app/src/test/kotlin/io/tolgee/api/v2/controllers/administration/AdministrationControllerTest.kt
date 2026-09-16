@@ -39,11 +39,6 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     testDataService.cleanTestData(testData.root)
   }
 
-  @AfterEach
-  fun cleanData() {
-    testDataService.cleanTestData(testData.root)
-  }
-
   @Test
   fun `returns organizations`() {
     testDataService.saveTestData(testData.root)
@@ -190,6 +185,8 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `disable and enable are idempotent`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     userAccountService.findActive(testData.user.id).assert.isNull()
@@ -201,6 +198,8 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `admin disable records the admin as the origin`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
     assertThat(userAccountService.findActiveOrDisabled(testData.user.id)!!.disabledBy)
       .isEqualTo(UserDisabledBy.ADMIN)
@@ -208,6 +207,8 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `admin enable clears the disable origin`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
     performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsOk
 
     performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsOk
