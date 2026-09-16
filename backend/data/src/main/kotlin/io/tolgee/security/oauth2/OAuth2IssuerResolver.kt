@@ -37,19 +37,30 @@ import java.net.URI
 class OAuth2IssuerResolver(
   private val backendUrlProvider: BackendUrlProvider,
   private val frontendUrlProvider: FrontendUrlProvider,
-  private val clientRegistry: OAuth2ClientRegistry,
 ) {
+  /**
+   * Fail loudly when the issuer is *set but malformed* (a path, query or fragment): the authorization server would
+   * publish an unreachable endpoint. A simply-unset issuer is not an error — it just means the server is off.
+   */
   @PostConstruct
-  fun requireConfiguredIssuer() {
-    if (clientRegistry.isEnabled) issuerUrl
+  fun validateConfiguredIssuer() {
+    configuredBaseUrl
   }
+
+  /**
+   * Whether this instance is configured to act as an OAuth authorization server. Enabling is issuer-based, not
+   * client-based: the endpoints and CIMD go live on any instance with a usable issuer, so a fresh self-hosted
+   * instance can accept unknown MCP clients before any client is pre-registered.
+   */
+  val isConfigured: Boolean
+    get() = runCatching { configuredBaseUrl }.getOrNull() != null
 
   val issuerUrl: String
     get() =
       checkNotNull(configuredBaseUrl) {
-        "tolgee.back-end-url (or tolgee.front-end-url) must be set when a tolgee.oauth2 client is configured: the " +
-          "issuer is published in every discovery document and on every authorization response, and it is never " +
-          "derived from the request"
+        "tolgee.back-end-url (or tolgee.front-end-url) must be set for Tolgee to act as an OAuth 2.1 authorization " +
+          "server: the issuer is published in every discovery document and on every authorization response, and it " +
+          "is never derived from the request"
       }
 
   private val configuredBaseUrl: String?

@@ -82,11 +82,9 @@ class OAuth2IssuerResolverTest {
   private fun resolverFor(
     backEnd: String?,
     frontEnd: String?,
-    clients: List<OAuth2Client> = listOf(),
   ) = OAuth2IssuerResolver(
     BackendUrlProvider(propertiesWith(backEnd, frontEnd)),
     FrontendUrlProvider(propertiesWith(backEnd, frontEnd)),
-    mock<OAuth2ClientRegistry> { on { isEnabled } doReturn clients.isNotEmpty() },
   )
 
   private fun propertiesWith(
@@ -97,27 +95,23 @@ class OAuth2IssuerResolverTest {
     on { frontEndUrl } doReturn frontEnd
   }
 
-  private fun anyClient() =
-    listOf(OAuth2Client(clientId = "c", name = "c", redirectUris = listOf("https://ext.example/cb")))
-
   @Test
-  fun `an unusable issuer fails startup once a client is configured`() {
+  fun `a malformed issuer fails startup, whether or not a client is configured`() {
     assertThatThrownBy {
-      resolverFor("https://tolgee.example.com/tolgee", null, anyClient()).requireConfiguredIssuer()
+      resolverFor("https://tolgee.example.com/tolgee", null).validateConfiguredIssuer()
     }.isInstanceOf(IllegalStateException::class.java)
   }
 
   @Test
-  fun `an unset issuer fails startup once a client is configured`() {
-    assertThatThrownBy {
-      resolverFor(null, null, anyClient()).requireConfiguredIssuer()
-    }.isInstanceOf(IllegalStateException::class.java)
+  fun `an unset issuer does not fail startup - the server is simply off`() {
+    assertThatCode { resolverFor(null, null).validateConfiguredIssuer() }.doesNotThrowAnyException()
   }
 
   @Test
-  fun `an unusable issuer does not fail startup for a deployment that issues no tokens`() {
-    assertThatCode {
-      resolverFor("https://tolgee.example.com/tolgee", null).requireConfiguredIssuer()
-    }.doesNotThrowAnyException()
+  fun `isConfigured reflects a usable issuer`() {
+    resolverFor("https://tolgee.example.com", null).isConfigured.assert.isTrue()
+    resolverFor(null, "https://front.example.com").isConfigured.assert.isTrue()
+    resolverFor(null, null).isConfigured.assert.isFalse()
+    resolverFor("https://tolgee.example.com/path", null).isConfigured.assert.isFalse()
   }
 }

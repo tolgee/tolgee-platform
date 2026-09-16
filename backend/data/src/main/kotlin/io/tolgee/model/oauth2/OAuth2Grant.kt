@@ -61,6 +61,9 @@ class OAuth2Grant : StandardAuditModel() {
 
   @Column(length = 16, nullable = false)
   var audience: String = OAuth2Audience.API.name
+  
+  @Column(length = 255)
+  var clientMetadataHash: String? = null
 
   @Column(length = 4000)
   var maxGrantedScopes: String? = null

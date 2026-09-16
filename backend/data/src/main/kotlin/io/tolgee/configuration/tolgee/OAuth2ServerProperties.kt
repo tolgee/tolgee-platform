@@ -33,6 +33,15 @@ class OAuth2ServerProperties {
   )
   var cliRedirectUris: List<String> = listOf()
 
+  @DocProperty(
+    description =
+      "Hosts allowed to present a Client ID Metadata Document (an HTTPS URL as `client_id`) so an unknown MCP " +
+        "client can register itself. Empty (the default) allows any public host; set it to restrict CIMD to a " +
+        "specific list, e.g. `claude.ai`. Loopback and private hosts are always refused regardless.",
+    defaultValue = "",
+  )
+  var cimdAllowedHosts: List<String> = listOf()
+
   @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
   var accessTokenValidityMinutes: Long = 30
 

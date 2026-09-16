@@ -18,22 +18,55 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.cimd.CimdClient
+import io.tolgee.security.oauth2.cimd.CimdClientCache
+import io.tolgee.security.oauth2.cimd.CimdClientPolicy
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.net.URI
 
-/** The clients Tolgee ships, built from configuration. */
+/**
+ * The OAuth clients Tolgee will issue tokens to: the pre-registered ones it ships (the browser extension and CLI,
+ * from configuration) plus any unknown client that presents a valid Client ID Metadata Document (CIMD) at an HTTPS
+ * `client_id` URL. A pre-registered id always wins, so a seeded client can never be shadowed by the CIMD path.
+ */
 @Component
 class OAuth2ClientRegistry(
   private val properties: OAuth2ServerProperties,
+  private val cimdClientCache: CimdClientCache,
+  private val cimdClientPolicy: CimdClientPolicy,
+  private val issuerResolver: OAuth2IssuerResolver,
 ) {
   val clients: List<OAuth2Client> = listOfNotNull(browserExtension(), cli())
 
+  /** Issuer-based, so an instance with a usable issuer accepts CIMD clients even before any client is pre-registered. */
   val isEnabled: Boolean
-    get() = clients.isNotEmpty()
+    get() = issuerResolver.isConfigured
 
-  fun find(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
+  // A pre-registered client cannot function without an issuer, so its presence makes the issuer mandatory even though
+  // enabling is otherwise issuer-based.
+  @PostConstruct
+  fun requireIssuerForPreRegisteredClients() {
+    if (clients.isNotEmpty()) issuerResolver.issuerUrl
+  }
 
-  fun isStillAuthorized(clientId: String): Boolean = find(clientId) != null
+  fun find(clientId: String): OAuth2Client? = findPreRegistered(clientId) ?: findCimd(clientId)?.client
+
+  /** The CIMD path only: null for a pre-registered id or a non-URL id. Used by the consent screen for the logo. */
+  fun findCimd(clientId: String): CimdClient? {
+    if (findPreRegistered(clientId) != null) return null
+    if (!cimdClientPolicy.isCandidate(clientId)) return null
+    return cimdClientCache.get(clientId)
+  }
+
+  fun isStillAuthorized(clientId: String): Boolean {
+    if (findPreRegistered(clientId) != null) return true
+    // A CIMD grant must not depend on re-fetching the third-party document (its uptime), so this never fetches; only
+    // the local candidate policy is re-checked. Metadata drift is caught by the hash at code exchange and refresh.
+    return cimdClientPolicy.isCandidate(clientId)
+  }
+
+  private fun findPreRegistered(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
 
   private fun browserExtension(): OAuth2Client? {
     if (properties.browserExtensionRedirectUris.isEmpty()) return null

@@ -201,6 +201,7 @@ class OAuth2AuthorizationServerController(
         scopesSupported = OAuth2Scopes.SUPPORTED,
         revocationEndpoint = issuer + OAuth2Constants.REVOKE_PATH,
         revocationEndpointAuthMethodsSupported = listOf("none"),
+        clientIdMetadataDocumentSupported = true,
       )
     return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store").body(model)
   }
@@ -264,9 +265,21 @@ class OAuth2AuthorizationServerController(
   /**
    * RFC 6749 §5.2: every client here is public, and there is no token endpoint auth method to issue a challenge with,
    * so an unknown client is `invalid_client` with 400 rather than 401.
+   *
+   * A CIMD client whose document does not resolve *right now* (its host is briefly down) is not unknown: a grant for
+   * it may well exist, and killing an exchange or refresh on the third party's uptime is exactly what the design
+   * forbids. So a URL-form client_id that is still a candidate (allowed host) but does not resolve falls back to a
+   * hashless client — the grant lookup remains the authority, and a genuine metadata change is still caught whenever
+   * the document *does* resolve with a new hash.
    */
-  private fun requireRegisteredClient(clientId: String?): OAuth2Client =
-    clientId.nullIfBlank?.let { clientRegistry.find(it) } ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+  private fun requireRegisteredClient(clientId: String?): OAuth2Client {
+    val id = clientId.nullIfBlank ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+    clientRegistry.find(id)?.let { return it }
+    if (clientRegistry.isStillAuthorized(id)) {
+      return OAuth2Client(clientId = id, name = id, redirectUris = emptyList(), verified = false)
+    }
+    throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+  }
 
   /** RFC 8707: no `resource` means no audience restriction on the request; the grant's own audience still applies. */
   private fun requestedAudience(resource: String?): OAuth2Audience? =

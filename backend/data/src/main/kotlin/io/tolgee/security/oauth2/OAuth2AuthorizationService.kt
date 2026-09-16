@@ -107,6 +107,7 @@ class OAuth2AuthorizationService(
         codeChallenge = validated.codeChallenge
         requestedScopeValues = validated.scopes
         bindAudience(validated.audience)
+        clientMetadataHash = client.metadataHash
         this.projectHint = projectHint?.toLongOrNull()
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
@@ -191,7 +192,7 @@ class OAuth2AuthorizationService(
     val grant =
       repository.findAndLockByCodeHash(keyGenerator.hash(code)) ?: throw OAuth2Error(OAuth2Error.INVALID_GRANT)
 
-    if (grant.codeUsedAt != null || grant.clientId != client.clientId) {
+    if (grant.codeUsedAt != null || grant.clientId != client.clientId || metadataDrifted(grant, client)) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
@@ -230,7 +231,7 @@ class OAuth2AuthorizationService(
     val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeSupersededAndFail(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
-    if (grant.clientId != client.clientId) {
+    if (grant.clientId != client.clientId || metadataDrifted(grant, client)) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
@@ -312,6 +313,21 @@ class OAuth2AuthorizationService(
     repository.save(grant)
     return code
   }
+
+  /**
+   * The CIMD document the grant was authorized against has changed (its `client_id` URL now serves a different
+   * metadata hash), so a redirect set or auth method the user never consented to could be in force — the grant is
+   * treated as stolen rather than silently inheriting the new document.
+   *
+   * Drift is only asserted when the client was actually resolved (carries a hash). A client with no hash is either
+   * pre-registered (no CIMD document to drift) or a CIMD client whose document could not be resolved on this request
+   * (its host is down): in neither case can we prove a change, so the grant is left alone rather than killed on the
+   * third party's uptime.
+   */
+  private fun metadataDrifted(
+    grant: OAuth2Grant,
+    client: OAuth2Client,
+  ): Boolean = client.metadataHash != null && grant.clientMetadataHash != client.metadataHash
 
   /**
    * A client's config error, not a compromise signal: the request fails, but the grant — and, on refresh, the

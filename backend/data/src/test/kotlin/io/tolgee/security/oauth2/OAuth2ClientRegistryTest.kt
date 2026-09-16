@@ -1,10 +1,20 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.cimd.CimdClient
+import io.tolgee.security.oauth2.cimd.CimdClientCache
+import io.tolgee.security.oauth2.cimd.CimdClientPolicy
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 class OAuth2ClientRegistryTest {
   @Test
@@ -117,13 +127,113 @@ class OAuth2ClientRegistryTest {
     client.allowsRedirectUri("https://ext.example:8443/callback").assert.isFalse()
   }
 
+  @Test
+  fun `an unknown URL-form client id falls through to the CIMD cache`() {
+    val cimd = cimdClient(CIMD_URL)
+    val cache = mock<CimdClientCache> { on { get(CIMD_URL) } doReturn cimd }
+    val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.find(CIMD_URL).assert.isEqualTo(cimd.client)
+    registry.findCimd(CIMD_URL).assert.isEqualTo(cimd)
+  }
+
+  @Test
+  fun `a pre-registered id never enters the CIMD path`() {
+    val cache = mock<CimdClientCache>()
+    val registry =
+      registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.findCimd(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID).assert.isNull()
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `isStillAuthorized accepts a URL-form client without ever fetching it`() {
+    val cache = mock<CimdClientCache>()
+    val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.isStillAuthorized(CIMD_URL).assert.isTrue()
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `a non-empty allowed-hosts list restricts which hosts may present a document`() {
+    val cache = mock<CimdClientCache> { on { get(any()) } doReturn cimdClient(CIMD_URL) }
+    val properties =
+      OAuth2ServerProperties().apply {
+        browserExtensionRedirectUris = listOf("https://ext.example/callback")
+        cimdAllowedHosts = listOf("app.example.com")
+      }
+    val registry =
+      OAuth2ClientRegistry(
+        properties,
+        cache,
+        CimdClientPolicy(properties, InternalProperties()),
+        mock<OAuth2IssuerResolver> {
+          on { isConfigured } doReturn true
+          on { issuerUrl } doReturn "https://tolgee.example.com"
+        },
+      )
+
+    registry.find(CIMD_URL).assert.isNotNull
+    registry.find("https://evil.example/.well-known/client").assert.isNull()
+    registry.isStillAuthorized("https://evil.example/.well-known/client").assert.isFalse()
+    verify(cache, never()).get("https://evil.example/.well-known/client")
+  }
+
+  @Test
+  fun `enabling is issuer-based, so no pre-registered client is required`() {
+    val registry = registry(extensionUris = listOf(), cliUris = listOf(), issuerConfigured = true)
+
+    registry.clients.assert.isEmpty()
+    registry.isEnabled.assert.isTrue()
+  }
+
+  @Test
+  fun `an instance with no usable issuer is disabled`() {
+    registry(extensionUris = listOf(), cliUris = listOf(), issuerConfigured = false).isEnabled.assert.isFalse()
+  }
+
+  @Test
+  fun `a pre-registered client still requires an issuer at startup`() {
+    val resolver = mock<OAuth2IssuerResolver> { on { issuerUrl } doThrow IllegalStateException("no issuer") }
+    val properties =
+      OAuth2ServerProperties().apply { browserExtensionRedirectUris = listOf("https://ext.example/callback") }
+    val registry =
+      OAuth2ClientRegistry(properties, mock(), CimdClientPolicy(properties, InternalProperties()), resolver)
+
+    assertThrows<IllegalStateException> { registry.requireIssuerForPreRegisteredClients() }
+  }
+
+  private fun cimdClient(url: String) =
+    CimdClient(
+      OAuth2Client(clientId = url, name = url, redirectUris = listOf("$url/cb"), verified = false, metadataHash = "h"),
+      logoUri = null,
+    )
+
   private fun registry(
     extensionUris: List<String>,
     cliUris: List<String>,
-  ) = OAuth2ClientRegistry(
-    OAuth2ServerProperties().apply {
-      browserExtensionRedirectUris = extensionUris
-      cliRedirectUris = cliUris
-    },
-  )
+    cache: CimdClientCache = mock(),
+    issuerConfigured: Boolean = true,
+  ): OAuth2ClientRegistry {
+    val properties =
+      OAuth2ServerProperties().apply {
+        browserExtensionRedirectUris = extensionUris
+        cliRedirectUris = cliUris
+      }
+    return OAuth2ClientRegistry(
+      properties,
+      cache,
+      CimdClientPolicy(properties, InternalProperties()),
+      mock<OAuth2IssuerResolver> {
+        on { isConfigured } doReturn issuerConfigured
+        on { issuerUrl } doReturn "https://tolgee.example.com"
+      },
+    )
+  }
+
+  companion object {
+    private const val CIMD_URL = "https://app.example.com/.well-known/oauth-client"
+  }
 }

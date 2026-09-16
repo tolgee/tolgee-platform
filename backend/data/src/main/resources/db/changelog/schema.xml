@@ -5945,4 +5945,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="bdshadow" id="oauth2-grant-client-metadata-hash">
+        <addColumn tableName="oauth2_grant">
+            <column name="client_metadata_hash" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

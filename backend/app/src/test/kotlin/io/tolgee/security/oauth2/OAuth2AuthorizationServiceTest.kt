@@ -78,6 +78,66 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     repository.existsById(grant.id).assert.isFalse()
   }
 
+  @Test
+  fun `a code minted against a since-changed CIMD document is refused and the grant killed`() {
+    val verifier = "a".repeat(43)
+    val cimdUrl = "https://app.example.com/.well-known/oauth-client"
+    val grant =
+      newOAuth2Grant(testData.userA, clientId = cimdUrl).apply {
+        redirectUri = "https://app.example.com/callback"
+        codeHash = keyGenerator.hash(CODE)
+        codeChallenge = s256(verifier)
+        codeExpiresAt = Date.from(currentDateProvider.date.toInstant().plusSeconds(300))
+        clientMetadataHash = "hash-at-authorize-time"
+        bindProjects(null)
+        maxGrantedScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+        issuedTokenScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+      }
+    repository.save(grant)
+
+    val changedClient =
+      OAuth2Client(
+        clientId = cimdUrl,
+        name = cimdUrl,
+        redirectUris = listOf("https://app.example.com/callback"),
+        verified = false,
+        metadataHash = "hash-after-the-document-changed",
+      )
+    assertThrows<OAuth2Error> {
+      authorizationService.exchangeCode(changedClient, CODE, grant.redirectUri, verifier, null)
+    }
+    repository.existsById(grant.id).assert.isFalse()
+  }
+
+  @Test
+  fun `a code exchange with the unchanged CIMD document succeeds`() {
+    val verifier = "a".repeat(43)
+    val cimdUrl = "https://app.example.com/.well-known/oauth-client"
+    val grant =
+      newOAuth2Grant(testData.userA, clientId = cimdUrl).apply {
+        redirectUri = "https://app.example.com/callback"
+        codeHash = keyGenerator.hash(CODE)
+        codeChallenge = s256(verifier)
+        codeExpiresAt = Date.from(currentDateProvider.date.toInstant().plusSeconds(300))
+        clientMetadataHash = "stable-hash"
+        bindProjects(null)
+        maxGrantedScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+        issuedTokenScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+      }
+    repository.save(grant)
+
+    val sameClient =
+      OAuth2Client(
+        clientId = cimdUrl,
+        name = cimdUrl,
+        redirectUris = listOf("https://app.example.com/callback"),
+        verified = false,
+        metadataHash = "stable-hash",
+      )
+    val tokens = authorizationService.exchangeCode(sameClient, CODE, grant.redirectUri, verifier, null)
+    tokens.accessToken.assert.isNotBlank()
+  }
+
   private val client =
     OAuth2Client(
       clientId = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,

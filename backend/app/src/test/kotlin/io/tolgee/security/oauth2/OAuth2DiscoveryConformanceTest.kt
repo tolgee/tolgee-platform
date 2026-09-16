@@ -34,6 +34,11 @@ class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
           .assert
           .isTrue()
         doc
+          .get("client_id_metadata_document_supported")
+          .asBoolean()
+          .assert
+          .isTrue()
+        doc
           .get("authorization_endpoint")
           .asString()
           .assert
