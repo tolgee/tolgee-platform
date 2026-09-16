@@ -52,6 +52,8 @@ describe('OAuth2 consent', () => {
     cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
       'be.visible'
     );
+    // A pre-registered client is verified, so the unverified-app warning must not appear.
+    cy.gcy('oauth2-consent-unverified').should('not.exist');
     ['keys.view', 'translations.view', 'translations.edit'].forEach((scope) =>
       gcyAdvanced({ value: 'oauth2-consent-scope', scope }).should('exist')
     );
@@ -90,6 +92,45 @@ describe('OAuth2 consent', () => {
 
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
     cy.url().should('include', 'state=e2e-state');
+  });
+
+  // A CIMD client is resolved from a document we cannot serve in Cypress, so the two consent APIs are stubbed to render
+  // the unverified treatment the frontend owns: logo + self-asserted name + client_id origin + the warning.
+  it('renders the unverified-app treatment for a CIMD client', () => {
+    cy.intercept('POST', '**/v2/oauth2/authorize', {
+      statusCode: 200,
+      body: { consentState: 'stub-consent-state', redirectUrl: null },
+    }).as('authorize');
+    cy.intercept('GET', '**/v2/oauth2/consent-info*', {
+      statusCode: 200,
+      body: {
+        appName: 'Claude Code',
+        scopes: ['translations.view'],
+        requiredScopes: [],
+        project: null,
+        requestedProjectId: null,
+        verified: false,
+        clientOrigin: 'https://claude.ai',
+        logoUri: 'https://claude.ai/logo.png',
+      },
+    }).as('consentInfo');
+
+    cy.visit(
+      `${HOST}/oauth2/consent?client_id=${encodeURIComponent(
+        'https://claude.ai/client'
+      )}&redirect_uri=${encodeURIComponent(
+        'https://claude.ai/cb'
+      )}&response_type=code&scope=translations.view` +
+        `&code_challenge=${CODE_CHALLENGE}&code_challenge_method=S256`
+    );
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-unverified-warning').should('be.visible');
+    cy.gcy('oauth2-consent-app-name').should('contain', 'Claude Code');
+    cy.gcy('oauth2-consent-origin').should('contain', 'https://claude.ai');
+    cy.gcy('oauth2-consent-logo').should('exist');
   });
 
   // The resource crosses four hands (authorize query, consent-page URL, this re-POST, the grant); dropping it in the

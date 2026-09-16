@@ -2235,11 +2235,14 @@ export interface components {
     };
     ConsentInfoModel: {
       appName: string;
+      clientOrigin?: string;
+      logoUri?: string;
       project?: components["schemas"]["OAuth2ProjectModel"];
       /** Format: int64 */
       requestedProjectId?: number;
       requiredScopes: string[];
       scopes: string[];
+      verified: boolean;
     };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;

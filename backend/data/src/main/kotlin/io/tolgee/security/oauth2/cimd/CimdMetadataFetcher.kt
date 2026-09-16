@@ -69,7 +69,7 @@ class CimdMetadataFetcher(
         verified = false,
         metadataHash = sha256(document),
       )
-    return CimdClient(client, logoUri)
+    return CimdClient(client, displayOrigin(clientIdUrl), logoUri)
   }
 
   private fun grantTypesAllowAuthCode(root: JsonNode): Boolean {

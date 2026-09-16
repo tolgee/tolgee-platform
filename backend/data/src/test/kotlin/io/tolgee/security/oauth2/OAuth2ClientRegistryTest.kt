@@ -208,6 +208,7 @@ class OAuth2ClientRegistryTest {
   private fun cimdClient(url: String) =
     CimdClient(
       OAuth2Client(clientId = url, name = url, redirectUris = listOf("$url/cb"), verified = false, metadataHash = "h"),
+      clientOrigin = url,
       logoUri = null,
     )
 

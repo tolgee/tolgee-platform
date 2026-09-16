@@ -51,6 +51,8 @@ class OAuth2AuthorizationServerController(
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
+  // Unauthenticated, and a URL-form client_id triggers an outbound CIMD fetch, so cap attempts per IP.
+  @RateLimited(limit = 40, refillDurationInMs = 60_000, isAuthentication = true)
   fun authorize(
     request: HttpServletRequest,
     @RequestParam("client_id", required = false) clientId: String?,

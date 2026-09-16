@@ -28,6 +28,25 @@ const StyledButtons = styled(Box)`
   margin-top: ${({ theme }) => theme.spacing(3)};
 `;
 
+const StyledUnverifiedHeader = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledLogo = styled('img')`
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: contain;
+`;
+
+const StyledOrigin = styled('div')`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 14px;
+`;
+
 const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { t } = useTranslate();
   const [state, setState] = useState<string>();
@@ -153,6 +172,36 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
         }
         primaryContent={
           <Box data-cy="oauth2-consent">
+            {info.verified === false && (
+              <Box data-cy="oauth2-consent-unverified" sx={{ mb: 2 }}>
+                <StyledUnverifiedHeader>
+                  {info.logoUri && (
+                    <StyledLogo
+                      src={info.logoUri}
+                      alt=""
+                      data-cy="oauth2-consent-logo"
+                    />
+                  )}
+                  <Box>
+                    <Box data-cy="oauth2-consent-app-name">{info.appName}</Box>
+                    {info.clientOrigin && (
+                      <StyledOrigin data-cy="oauth2-consent-origin">
+                        {info.clientOrigin}
+                      </StyledOrigin>
+                    )}
+                  </Box>
+                </StyledUnverifiedHeader>
+                <Alert
+                  severity="warning"
+                  data-cy="oauth2-consent-unverified-warning"
+                >
+                  <T
+                    keyName="oauth2_consent_unverified_warning"
+                    defaultValue="Tolgee hasn't verified this app. Only continue if you opened this request from an app you trust."
+                  />
+                </Alert>
+              </Box>
+            )}
             {isRequestedProjectInaccessible(info) && (
               <Alert
                 severity="warning"

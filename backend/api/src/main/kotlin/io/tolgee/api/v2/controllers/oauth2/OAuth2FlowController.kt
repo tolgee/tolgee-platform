@@ -97,7 +97,9 @@ class OAuth2FlowController(
     @RequestParam state: String,
   ): ConsentInfoModel {
     val grant = authorizationService.findOwnPendingByConsentState(state, authenticationFacade.authenticatedUser.id)
-    val client = clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val cimd = clientRegistry.findCimd(grant.clientId)
+    val client =
+      cimd?.client ?: clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
     val scopes = grant.requestedScopeValues
     val requestedProjectId = grant.projectHint
     return ConsentInfoModel(
@@ -106,6 +108,9 @@ class OAuth2FlowController(
       requiredScopes = client.requiredScopes.map { it.value }.filter { it in scopes },
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
+      verified = client.verified,
+      clientOrigin = cimd?.clientOrigin,
+      logoUri = cimd?.logoUri,
     )
   }
 

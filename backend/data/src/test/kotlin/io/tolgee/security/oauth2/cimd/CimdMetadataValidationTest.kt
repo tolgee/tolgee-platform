@@ -29,6 +29,7 @@ class CimdMetadataValidationTest {
       .isEqualTo("Example App")
     result.client.redirectUris.assert
       .containsExactly("https://app.example.com/callback")
+    result.clientOrigin.assert.isEqualTo("https://app.example.com")
     result.logoUri.assert.isEqualTo("https://app.example.com/logo.png")
   }
 

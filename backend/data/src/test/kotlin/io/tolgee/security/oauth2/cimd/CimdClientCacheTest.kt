@@ -82,6 +82,7 @@ class CimdClientCacheTest {
   private fun client(url: String) =
     CimdClient(
       OAuth2Client(clientId = url, name = url, redirectUris = listOf("$url/cb"), verified = false, metadataHash = "h"),
+      clientOrigin = url,
       logoUri = null,
     )
 

@@ -19,10 +19,12 @@ package io.tolgee.security.oauth2.cimd
 import io.tolgee.security.oauth2.OAuth2Client
 
 /**
- * The result of resolving a Client ID Metadata Document: the unverified [OAuth2Client] it describes plus the logo the
- * document self-asserted (kept only when same-origin, else null). The consent screen renders the unverified treatment.
+ * The result of resolving a Client ID Metadata Document: the unverified [OAuth2Client] it describes, the origin of its
+ * `client_id` URL (the non-negotiable part of the consent-screen identity), and the logo the document self-asserted
+ * (kept only when same-origin, else null). The consent screen renders the unverified treatment from these.
  */
 data class CimdClient(
   val client: OAuth2Client,
+  val clientOrigin: String,
   val logoUri: String?,
 )
