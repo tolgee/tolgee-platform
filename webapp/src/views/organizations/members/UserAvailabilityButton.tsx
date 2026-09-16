@@ -1,6 +1,4 @@
 import { IconButton, Tooltip } from '@mui/material';
-import { PauseCircle, PlayCircle } from '@untitled-ui/icons-react';
-import { T, useTranslate } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -19,7 +17,7 @@ type Props = {
     | '/v2/organizations/{organizationId}/users/{userId}/enable';
 };
 
-const UserAvailabilityButton = (props: Props) => {
+export const UserAvailabilityButton = (props: Props) => {
   const organization = useOrganization();
   const submitLoadable = useApiMutation({
     url: props.url,
@@ -57,63 +55,5 @@ const UserAvailabilityButton = (props: Props) => {
         {props.icon}
       </IconButton>
     </Tooltip>
-  );
-};
-
-export const DisableUserButton = (props: {
-  userId: number;
-  userName: string;
-}) => {
-  const { t } = useTranslate();
-  return (
-    <UserAvailabilityButton
-      userId={props.userId}
-      dataCy="organization-members-disable-user-button"
-      url="/v2/organizations/{organizationId}/users/{userId}/disable"
-      icon={<PauseCircle />}
-      tooltip={t('organization_users_disable_user', 'Disable')}
-      confirmMessage={
-        <T
-          keyName="really_disable_user_confirmation"
-          defaultValue="Do you really want to disable user {userName}? They will lose access to the organization until you re-enable them."
-          params={{ userName: props.userName }}
-        />
-      }
-      successMessage={
-        <T
-          keyName="organization_user_disabled_message"
-          defaultValue="User disabled"
-        />
-      }
-    />
-  );
-};
-
-export const EnableUserButton = (props: {
-  userId: number;
-  userName: string;
-}) => {
-  const { t } = useTranslate();
-  return (
-    <UserAvailabilityButton
-      userId={props.userId}
-      dataCy="organization-members-enable-user-button"
-      url="/v2/organizations/{organizationId}/users/{userId}/enable"
-      icon={<PlayCircle />}
-      tooltip={t('organization_users_enable_user', 'Re-enable')}
-      confirmMessage={
-        <T
-          keyName="really_enable_user_confirmation"
-          defaultValue="Do you really want to re-enable user {userName}? They will regain access to the organization."
-          params={{ userName: props.userName }}
-        />
-      }
-      successMessage={
-        <T
-          keyName="organization_user_enabled_message"
-          defaultValue="User re-enabled"
-        />
-      }
-    />
   );
 };

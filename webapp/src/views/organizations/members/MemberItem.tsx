@@ -17,10 +17,8 @@ import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from 'tg.views/organizations/members/RemoveUserButton';
-import {
-  DisableUserButton,
-  EnableUserButton,
-} from 'tg.views/organizations/members/UserAvailabilityButton';
+import { DisableUserButton } from 'tg.views/organizations/members/DisableUserButton';
+import { EnableUserButton } from 'tg.views/organizations/members/EnableUserButton';
 import { UpdateRoleButton } from 'tg.views/organizations/members/UpdateRoleButton';
 import { useLeaveOrganization } from 'tg.views/organizations/useLeaveOrganization';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
