@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
@@ -22,6 +23,7 @@ import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,10 +46,18 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil
 
+  private var testDataToClean: TestDataBuilder? = null
+
   @BeforeEach
   fun init() {
     emailTestUtil.initMocks()
     notificationUtil.init()
+  }
+
+  @AfterEach
+  fun cleanUp() {
+    testDataToClean?.let { testDataService.cleanTestData(it) }
+    testDataToClean = null
   }
 
   @Test
@@ -237,6 +247,17 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     val deleted = userAccountService.getAllByIdsIncludingDeleted(setOf(testData.franta.id)).single()
     deleted.name.assert.isEqualTo("Former user")
     deleted.username.assert.isEqualTo("former")
+  }
+
+  @Test
+  fun `initial user cannot delete itself`() {
+    val testData = UserDeletionTestData()
+    testData.makeFrantaInitial()
+    testDataService.saveTestData(testData.root)
+    testDataToClean = testData.root
+    userAccount = testData.franta
+    performAuthDelete("/v2/user").andIsForbidden
+    userAccountService.findActive(testData.franta.id).assert.isNotNull
   }
 
   @Test

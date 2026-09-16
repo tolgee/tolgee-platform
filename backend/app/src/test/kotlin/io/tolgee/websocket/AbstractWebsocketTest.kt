@@ -62,6 +62,7 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
   fun after() {
     currentUserWebsocket.stop()
     anotherUserWebsocket.stop()
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -241,9 +242,10 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     currentUserWebsocket.listenForNotificationsChanged()
     anotherUserWebsocket.listenForNotificationsChanged()
     val spiedInbox =
-      anotherUserWebsocket.subscribeAdditional(
-        "/users/${testData.user.id}/${WebsocketEventType.NOTIFICATIONS_CHANGED.typeName}",
-      )
+      anotherUserWebsocket
+        .subscribeAdditional(
+          WebsocketEventType.NOTIFICATIONS_CHANGED.userDestinationFor(testData.user.id),
+        ).inbox
 
     saveNotificationFor(testData.user)
     saveNotificationFor(anotherUser)

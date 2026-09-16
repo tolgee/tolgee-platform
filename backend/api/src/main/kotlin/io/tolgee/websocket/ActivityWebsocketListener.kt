@@ -83,7 +83,7 @@ class ActivityWebsocketListener(
       }
 
     websocketEventPublisher(
-      "/projects/${activityRevision.projectId!!}/${WebsocketEventType.TRANSLATION_DATA_MODIFIED.typeName}",
+      WebsocketEventType.TRANSLATION_DATA_MODIFIED.projectDestinationFor(activityRevision.projectId!!),
       WebsocketEvent(
         actor = getActorInfo(activityRevision.authorId),
         data = data,
@@ -98,6 +98,7 @@ class ActivityWebsocketListener(
   @EventListener(OnBatchJobProgress::class)
   fun onBatchJobProgress(event: OnBatchJobProgress) {
     if (event.job.hidden) return
+    val projectId = event.job.projectId ?: return
 
     val realStatus =
       if (event.job.status == BatchJobStatus.PENDING) {
@@ -107,7 +108,7 @@ class ActivityWebsocketListener(
       }
 
     websocketEventPublisher(
-      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
+      WebsocketEventType.BATCH_JOB_PROGRESS.projectDestinationFor(projectId),
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, event.processed, event.total, realStatus),
@@ -122,8 +123,9 @@ class ActivityWebsocketListener(
   @EventListener(OnBatchJobStarted::class)
   fun onBatchJobStarted(event: OnBatchJobStarted) {
     if (event.job.hidden) return
+    val projectId = event.job.projectId ?: return
     websocketEventPublisher(
-      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
+      WebsocketEventType.BATCH_JOB_PROGRESS.projectDestinationFor(projectId),
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, 0L, event.job.totalItems.toLong(), BatchJobStatus.RUNNING),
@@ -155,9 +157,10 @@ class ActivityWebsocketListener(
     errorMessage: Message? = null,
   ) {
     if (event.job.hidden && event.job.status != BatchJobStatus.FAILED) return
+    val projectId = event.job.projectId ?: return
 
     websocketEventPublisher(
-      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
+      WebsocketEventType.BATCH_JOB_PROGRESS.projectDestinationFor(projectId),
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, null, null, event.job.status, errorMessage?.code),

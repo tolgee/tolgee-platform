@@ -1,4 +1,4 @@
-import { CompatClient, Stomp } from '@stomp/stompjs'; // @ts-ignore
+import { CompatClient, IFrame, Stomp } from '@stomp/stompjs'; // @ts-ignore
 import SockJS from 'sockjs-client/dist/sockjs';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -7,10 +7,10 @@ type BatchJobModelStatus = components['schemas']['BatchJobModel']['status'];
 type WebsocketClientOptions = {
   serverUrl?: string;
   authentication: {
-    jwtToken: string;
+    jwtToken: string | undefined;
   };
   onConnected?: () => void;
-  onError?: () => void;
+  onError?: (unauthenticated: boolean) => void;
   onConnectionClose?: () => void;
 };
 
@@ -97,15 +97,17 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
       options.onConnectionClose?.();
     };
 
-    const onError = () => {
+    const onError = (frame?: IFrame | string) => {
       connecting = false;
-      options.onError?.();
+      const messageHeader =
+        typeof frame === 'object' ? frame?.headers?.['message'] : undefined;
+      options.onError?.(messageHeader === 'Unauthenticated');
     };
 
-    const headers: Record<string, string> | null = {
-      jwtToken: options.authentication.jwtToken,
-      Authorization: `Bearer ${options.authentication.jwtToken}`,
-    };
+    const { jwtToken } = options.authentication;
+    const headers: Record<string, string> = jwtToken
+      ? { Authorization: `Bearer ${jwtToken}` }
+      : {};
 
     stompClient.connect(headers, onConnected, onError, onDisconnect);
   }

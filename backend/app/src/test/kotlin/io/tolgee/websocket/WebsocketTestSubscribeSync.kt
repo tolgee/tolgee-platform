@@ -100,6 +100,18 @@ object WebsocketTestSubscribeSync : Logging {
     return waited
   }
 
+  fun awaitSubscribedOrFail(
+    correlationId: String,
+    timeoutMs: Long,
+  ) {
+    awaitSubscribed(correlationId, timeoutMs)
+    if (wasNotified(correlationId)) return
+    throw AssertionError("The server never acknowledged the barrier SUBSCRIBE (correlationId=$correlationId)")
+  }
+
+  /** False once the latch has been cleaned up, so this cannot tell "never notified" from "gone". */
+  fun wasNotified(correlationId: String): Boolean = latches[correlationId]?.count == 0L
+
   fun cleanup(correlationId: String) {
     val removed = latches.remove(correlationId)
     registeredAt.remove(correlationId)

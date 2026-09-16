@@ -21,6 +21,45 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
   lateinit var dbPopulatorReal: DbPopulatorReal
 
   @Test
+  fun `a deleted account is not resolved as the initial user, and loses the flag`() {
+    val user = dbPopulatorReal.createUserIfNotExists("initial-user-under-test")
+    user.isInitialUser = true
+    userAccountRepository.save(user)
+
+    userAccountService.delete(user)
+    // softDeleteUser is a bulk update, so the persistence context still holds the pre-delete entity.
+    entityManager.clear()
+
+    assertThat(userAccountRepository.findInitialUser()).isNull()
+    assertThat(userAccountRepository.findById(user.id).get().isInitialUser).isFalse()
+  }
+
+  /** The state existing databases are already in: soft-deleted before `softDeleteUser` cleared the flag. */
+  @Test
+  fun `a legacy deleted row that still carries the initial-user flag is not resolved`() {
+    val user = dbPopulatorReal.createUserIfNotExists("legacy-initial-user")
+    userAccountService.delete(user)
+    entityManager.clear()
+    val deleted = userAccountRepository.findById(user.id).get()
+    deleted.isInitialUser = true
+    userAccountRepository.save(deleted)
+    entityManager.flush()
+
+    assertThat(userAccountRepository.findInitialUser()).isNull()
+  }
+
+  @Test
+  fun `a deleted account is not found by username`() {
+    val user = dbPopulatorReal.createUserIfNotExists("soon-to-be-deleted")
+    userAccountService.delete(user)
+    entityManager.clear()
+
+    // Whatever softDeleteUser renamed it to is the only name the row is still reachable under.
+    val renamed = userAccountRepository.findById(user.id).get().username
+    assertThat(userAccountRepository.findActiveOrDisabled(renamed)).isNull()
+  }
+
+  @Test
   fun getAllInOrganizationHasMemberRole() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val org = usersAndOrganizations[1].organizationRoles[0].organization

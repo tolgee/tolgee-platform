@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 
 /**
  * The default project a socket subscribes to. Each subscription refusal needs a different second party, so they are
@@ -11,6 +12,18 @@ import io.tolgee.model.UserAccount
 class WebsocketAuthenticationTestData : BaseTestData() {
   /** A second account, to be refused a subscription to a project it holds no permission on. */
   fun addSecondUser(): UserAccountBuilder = root.addUserAccount { username = "user2" }
+
+  fun makeUserInitial() {
+    user.isInitialUser = true
+  }
+
+  fun addProjectApiKey(key: String) {
+    projectBuilder.addApiKey {
+      this.key = key
+      scopesEnum = mutableSetOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+      userAccount = this@WebsocketAuthenticationTestData.user
+    }
+  }
 
   /** A second project in the same organization, so a key bound to it can be aimed at the first one. */
   fun addOtherProject(): Project =
