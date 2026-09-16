@@ -80,12 +80,18 @@ class OAuth2ClientRegistry(
 /**
  * A client Tolgee issues tokens to. Every client is public (no secret), must use PKCE, and always goes through the
  * consent screen; the only per-client facts are its redirect URIs and which scopes the screen locks as required.
+ *
+ * A pre-registered client is [verified] and carries no [metadataHash]. A client resolved from a Client ID Metadata
+ * Document (CIMD) is not verified — the consent screen warns the user — and carries the hash of the document it was
+ * built from, so a later change to that document can invalidate grants issued against the old one.
  */
 data class OAuth2Client(
   val clientId: String,
   val name: String,
   val redirectUris: List<String>,
   val requiredScopes: List<Scope> = emptyList(),
+  val verified: Boolean = true,
+  val metadataHash: String? = null,
 ) {
   fun allowsRedirectUri(redirectUri: String): Boolean {
     if (parse(redirectUri) == null) return false
