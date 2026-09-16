@@ -1,3 +1,10 @@
+# [3.223.0](https://github.com/tolgee/tolgee-platform/compare/v3.222.1...v3.223.0) (2026-09-16)
+
+
+### Features
+
+* word-based pricing ([#3831](https://github.com/tolgee/tolgee-platform/issues/3831)) ([c753d9f](https://github.com/tolgee/tolgee-platform/commit/c753d9f58c375882304a29bf7d8e496734a069e1))
+
 ## [3.222.1](https://github.com/tolgee/tolgee-platform/compare/v3.222.0...v3.222.1) (2026-09-16)
 
 
