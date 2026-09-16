@@ -65,6 +65,11 @@ class GlossaryGuestAccessTestData : BaseTestData() {
       }.build {
         publicProject = self
         addBaseLanguage()
+        addLanguage {
+          name = "French"
+          tag = "fr"
+          originalName = "Français"
+        }
       }
 
       addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
