@@ -1,3 +1,10 @@
+# [3.224.0](https://github.com/tolgee/tolgee-platform/compare/v3.223.1...v3.224.0) (2026-09-16)
+
+
+### Features
+
+* allow organization owners to disable and re-enable managed users (SSO users) ([#3759](https://github.com/tolgee/tolgee-platform/issues/3759)) ([87a69f1](https://github.com/tolgee/tolgee-platform/commit/87a69f153d7108d1e14689f68b6796a81097f54d)), closes [#3275](https://github.com/tolgee/tolgee-platform/issues/3275) [tolgee/billing#305](https://github.com/tolgee/billing/issues/305) [tolgee/billing#305](https://github.com/tolgee/billing/issues/305)
+
 ## [3.223.1](https://github.com/tolgee/tolgee-platform/compare/v3.223.0...v3.223.1) (2026-09-16)
 
 
