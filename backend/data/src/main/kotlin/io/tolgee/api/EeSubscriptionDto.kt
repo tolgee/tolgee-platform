@@ -23,4 +23,12 @@ data class EeSubscriptionDto(
   var isPayAsYouGo: Boolean,
   var keysLimit: Long,
   var seatsLimit: Long,
+  var includedWords: Long = 0L,
+  var wordsLimit: Long = -1L,
+  var autoUpgradeEffective: Boolean = false,
+  /**
+   * Carried as a flag rather than the plan's MetricType, which lives in a module this one cannot
+   * see. Metering is the only thing the self-hosted side asks the metric about.
+   */
+  var metersWords: Boolean = false,
 )

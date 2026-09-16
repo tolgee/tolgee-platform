@@ -18,6 +18,7 @@ export const useOrganizationUsageService = ({
     organization?.currentUserRole
   );
   const [planLimitErrors, setPlanLimitErrors] = useState(0);
+  const [planLimitErrorCode, setPlanLimitErrorCode] = useState<string>();
   const [spendingLimitErrors, setSpendingLimitErrors] = useState(0);
 
   const usageEnabled =
@@ -43,7 +44,8 @@ export const useOrganizationUsageService = ({
 
   const usage = usageEnabled ? usageLoadable.data : undefined;
 
-  const incrementPlanLimitErrors = () => {
+  const incrementPlanLimitErrors = (code?: string) => {
+    setPlanLimitErrorCode(code);
     setPlanLimitErrors((v) => v + 1);
   };
 
@@ -56,6 +58,9 @@ export const useOrganizationUsageService = ({
    * We don't want to disturb the translators that much with the error.
    */
   const increaseCreditPlanLimitErrors = () => {
+    // Not a word limit: PlanLimitPopoverCloud reads this code to decide whether to offer the
+    // word auto-upgrade, and it is never reset on its own.
+    setPlanLimitErrorCode(undefined);
     setPlanLimitErrors((v) => {
       if (v > 0) {
         return v;
@@ -93,6 +98,7 @@ export const useOrganizationUsageService = ({
     state: {
       usage,
       planLimitErrors,
+      planLimitErrorCode,
       spendingLimitErrors,
     },
     actions: {

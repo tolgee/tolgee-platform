@@ -11,5 +11,6 @@ open class PlanIncludedUsageModel(
   var translations: Long = -1L,
   var mtCredits: Long = -1L,
   var keys: Long = -1L,
+  var words: Long = -1L,
 ) : RepresentationModel<PlanIncludedUsageModel>(),
   Serializable

@@ -83,6 +83,22 @@ open class PublicUsageModel(
         "(For pay us you go, the top limit is the spending limit)",
   )
   val seatsLimit: Long,
+  @Schema(
+    description =
+      "How many hosted words are included in current subscription plan " +
+        "(for word-based plans). How many words the organization can host without additional costs.",
+  )
+  val includedWords: Long,
+  @Schema(
+    description = """How many hosted words are currently stored by organization""",
+  )
+  val currentWords: Long,
+  @Schema(
+    description =
+      "Total number of hosted words the organization can store (-1 for unlimited). " +
+        "For pay-as-you-go, the top limit is the spending limit.",
+  )
+  val wordsLimit: Long,
 ) : RepresentationModel<PublicUsageModel>(),
   Serializable {
   @Schema(

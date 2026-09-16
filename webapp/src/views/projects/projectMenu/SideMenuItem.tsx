@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, Tooltip } from '@mui/material';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { isMenuItemSelected } from 'tg.fixtures/menuSelection';
 
 const StyledItem = styled('li')`
   display: flex;
@@ -62,11 +63,11 @@ export function SideMenuItem({
 }: Props) {
   const match = useLocation();
 
-  const isSelected = matchAsPrefix
-    ? match.pathname.startsWith(
-        typeof matchAsPrefix === 'string' ? matchAsPrefix : String(linkTo)
-      )
-    : match.pathname === linkTo;
+  const isSelected = isMenuItemSelected(
+    match.pathname,
+    typeof matchAsPrefix === 'string' ? matchAsPrefix : String(linkTo),
+    Boolean(matchAsPrefix)
+  );
 
   const matchesExactly = match.pathname === linkTo;
 

@@ -28,6 +28,7 @@ import { useOperationCancel } from './useOperationCancel';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { errorAction } from 'tg.service/http/errorAction';
 
 type Props = {
   operation: BatchJobModel;
@@ -90,12 +91,21 @@ export const BatchOperationDialog = ({
   }, [isFinished]);
 
   useEffect(() => {
+    if (!data.errorMessage) {
+      return;
+    }
+    // Without a code, so a later word-limit failure cannot leave the dialog offering auto-upgrade
+    // for a credit exhaustion.
     if (data.errorMessage === 'out_of_credits') {
       incrementPlanLimitErrors();
+      return;
     }
     if (data.errorMessage === 'credit_spending_limit_exceeded') {
       incrementSpendingLimitErrors();
+      return;
     }
+    // A batch job fails asynchronously, so its limit errors never pass through the HTTP handler.
+    errorAction(data.errorMessage);
   }, [data.errorMessage]);
 
   return (
