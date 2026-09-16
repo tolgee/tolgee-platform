@@ -69,10 +69,32 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
-  fun `replaying the superseded refresh token revokes the grant`() {
+  fun `replaying the just-rotated token within the grace window fails but keeps the grant`() {
     val issued = json(tokenResult())
     val superseded = issued.get("refresh_token").asString()
     val rotated = json(driver.refresh(superseded, CLIENT_ID).andReturn())
+
+    // An innocent collision (two tabs, a lost response): the replay fails its own request...
+    json(driver.refresh(superseded, CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+    // ...but the winner's fresh token still works — the user is not signed out everywhere.
+    json(driver.refresh(rotated.get("refresh_token").asString(), CLIENT_ID).andReturn())
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+  }
+
+  @Test
+  fun `replaying the just-rotated token after the grace window revokes the grant`() {
+    val issued = json(tokenResult())
+    val superseded = issued.get("refresh_token").asString()
+    val rotated = json(driver.refresh(superseded, CLIENT_ID).andReturn())
+
+    currentDateProvider.move(Duration.ofSeconds(oauth2.refreshTokenGraceSeconds + 5))
 
     json(driver.refresh(superseded, CLIENT_ID).andReturn())
       .get("error")
@@ -87,7 +109,7 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
-  fun `a token older than the last rotation fails without destroying the grant`() {
+  fun `a replay from two rotations back is treated as theft and kills the grant`() {
     val issued = json(tokenResult())
     val oldest = issued.get("refresh_token").asString()
     val second = json(driver.refresh(oldest, CLIENT_ID).andReturn()).get("refresh_token").asString()
@@ -99,10 +121,10 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
       .assert
       .isEqualTo("invalid_grant")
     json(driver.refresh(third, CLIENT_ID).andReturn())
-      .get("access_token")
+      .get("error")
       .asString()
       .assert
-      .isNotBlank()
+      .isEqualTo("invalid_grant")
   }
 
   @Test

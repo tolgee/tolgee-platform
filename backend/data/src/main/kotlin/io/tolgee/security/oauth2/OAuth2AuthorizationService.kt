@@ -23,7 +23,9 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
+import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.OAUTH_REFRESH_TOKEN_PREFIX
 import io.tolgee.service.security.UserAccountService
@@ -43,6 +45,7 @@ import java.util.Date
 @Service
 class OAuth2AuthorizationService(
   private val repository: OAuth2GrantRepository,
+  private val supersededRefreshTokenRepository: OAuth2SupersededRefreshTokenRepository,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
@@ -228,7 +231,7 @@ class OAuth2AuthorizationService(
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
-    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeSupersededAndFail(hash)
+    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: handleSupersededReplay(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
     if (grant.clientId != client.clientId || metadataDrifted(grant, client)) {
@@ -272,7 +275,16 @@ class OAuth2AuthorizationService(
   fun revokeAllForUser(userId: Long): Int = repository.deleteAllByUserAccountId(userId)
 
   @Transactional
-  fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(Date.from(cutoff))
+  fun deleteExpiredBefore(cutoff: Instant): Int {
+    val deleted = repository.deleteExpiredBefore(Date.from(cutoff))
+    // A deleted grant takes its history with it (DB cascade); this also prunes rows of still-live grants whose token
+    // is now past the refresh window and so could never be replayed anyway.
+    val refreshWindow = Duration.ofDays(properties.refreshTokenValidityDays)
+    supersededRefreshTokenRepository.deleteSupersededBefore(
+      Date.from(currentDateProvider.date.toInstant().minus(refreshWindow)),
+    )
+    return deleted
+  }
 
   @Transactional
   fun deleteExpiredPendingConsents(): Int = repository.deleteExpiredPendingConsents(currentDateProvider.date)
@@ -343,12 +355,33 @@ class OAuth2AuthorizationService(
   }
 
   /**
-   * RFC 9700 §4.14.2: the token the current one replaced turning up means it was captured — the legitimate client
-   * and the attacker cannot both hold the current one — so the grant dies rather than the replay merely failing.
+   * A refresh token that is not the current one was presented. RFC 9700 §4.14.2 treats the token the current one
+   * replaced turning up as capture — the legitimate client and the attacker cannot both hold the current one — so the
+   * grant normally dies. Two exceptions and one escalation:
+   *
+   * - The *immediately*-previous token replayed within [OAuth2ServerProperties.refreshTokenGraceSeconds] is an innocent
+   *   collision (two tabs, a lost response, a proactive/reactive race): the request fails but the grant is kept, so the
+   *   loser can re-read the store and use the winner's fresh pair instead of being signed out everywhere.
+   * - The same token after the grace window is theft: the grant dies.
+   * - A token from *two or more* rotations back is never innocent, so it is recognised from the superseded-token
+   *   history and kills the grant rather than failing generically while a thief keeps probing.
    */
-  private fun revokeSupersededAndFail(hash: String): Nothing {
-    repository.findAndLockByPreviousRefreshTokenHash(hash)?.let { repository.delete(it) }
+  private fun handleSupersededReplay(hash: String): Nothing {
+    val recentlyRotated = repository.findAndLockByPreviousRefreshTokenHash(hash)
+    if (recentlyRotated != null) {
+      if (isWithinRefreshGrace(recentlyRotated.refreshTokenRotatedAt)) {
+        throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+      }
+      repository.delete(recentlyRotated)
+      throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+    }
+    supersededRefreshTokenRepository.findAndLockByTokenHash(hash)?.let { repository.delete(it.grant) }
     throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+  }
+
+  private fun isWithinRefreshGrace(rotatedAt: Date?): Boolean {
+    val rotated = rotatedAt?.toInstant() ?: return false
+    return !rotated.plusSeconds(properties.refreshTokenGraceSeconds).isBefore(currentDateProvider.date.toInstant())
   }
 
   /**
@@ -387,15 +420,35 @@ class OAuth2AuthorizationService(
     grant.accessTokenHash = keyGenerator.hash(accessToken)
     grant.accessTokenIssuedAt = currentDateProvider.date
     grant.accessTokenExpiresAt = nowPlus(validity)
+    // The token that was one generation back is now two back; keep it so its replay is still recognisable as theft.
+    val demotedHash = grant.previousRefreshTokenHash
+    val demotedAt = grant.refreshTokenRotatedAt
     grant.previousRefreshTokenHash = grant.refreshTokenHash
+    grant.refreshTokenRotatedAt = currentDateProvider.date
     grant.refreshTokenHash = keyGenerator.hash(refreshToken)
     grant.refreshTokenExpiresAt = nowPlus(Duration.ofDays(properties.refreshTokenValidityDays))
+    demoteToSupersededHistory(grant, demotedHash, demotedAt)
     repository.save(grant)
     return IssuedTokens(
       accessToken = OAUTH_ACCESS_TOKEN_PREFIX + accessToken,
       refreshToken = OAUTH_REFRESH_TOKEN_PREFIX + refreshToken,
       expiresInSeconds = validity.seconds,
       scopes = grant.issuedTokenScopeValues,
+    )
+  }
+
+  private fun demoteToSupersededHistory(
+    grant: OAuth2Grant,
+    demotedHash: String?,
+    supersededAt: Date?,
+  ) {
+    if (demotedHash == null) return
+    grant.supersededRefreshTokens.add(
+      OAuth2SupersededRefreshToken().apply {
+        this.grant = grant
+        tokenHash = demotedHash
+        this.supersededAt = supersededAt ?: currentDateProvider.date
+      },
     )
   }
 

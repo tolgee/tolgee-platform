@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.OAuth2AuthorizationServiceTest
 import io.tolgee.development.testDataBuilder.newOAuth2Grant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -76,6 +77,28 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
 
     assertThrows<OAuth2Error> { authorizationService.exchangeCode(client, CODE, grant.redirectUri, verifier, null) }
     repository.existsById(grant.id).assert.isFalse()
+  }
+
+  @Test
+  fun `a refresh from two generations back kills the grant via the history`() {
+    val grant = grantWithRefreshChain()
+    val first = authorizationService.refresh(client, "tgort_$OLDEST", null, null)
+    authorizationService.refresh(client, first.refreshToken, null, null)
+
+    assertThrows<OAuth2Error> { authorizationService.refresh(client, "tgort_$OLDEST", null, null) }
+    repository.existsById(grant.id).assert.isFalse()
+  }
+
+  private fun grantWithRefreshChain(): OAuth2Grant {
+    val grant =
+      newOAuth2Grant(testData.userA).apply {
+        refreshTokenHash = keyGenerator.hash(OLDEST)
+        refreshTokenExpiresAt = Date.from(currentDateProvider.date.toInstant().plusSeconds(3600))
+        maxGrantedScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+        issuedTokenScopeValues = listOf(Scope.TRANSLATIONS_VIEW.value)
+        bindProjects(null)
+      }
+    return repository.save(grant)
   }
 
   @Test
@@ -162,5 +185,6 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
 
   companion object {
     private const val CODE = "test-authorization-code"
+    private const val OLDEST = "oldest-refresh-token-secret"
   }
 }

@@ -53,6 +53,14 @@ class OAuth2ServerProperties {
   var refreshTokenValidityDays: Long = 30
 
   @DocProperty(
+    description =
+      "Grace window, in seconds, during which replaying the refresh token that was just rotated away fails the " +
+        "request without revoking the grant. It absorbs innocent collisions (two tabs, a lost response) instead of " +
+        "signing the user out everywhere; a replay after the window, or of an older token, is still treated as theft.",
+  )
+  var refreshTokenGraceSeconds: Long = 60
+
+  @DocProperty(
     description = "How long an authorization code can be exchanged for tokens after it was issued, in seconds.",
   )
   var authorizationCodeValiditySeconds: Long = 300

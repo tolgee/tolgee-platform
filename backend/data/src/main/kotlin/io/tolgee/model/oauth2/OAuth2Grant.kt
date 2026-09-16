@@ -6,11 +6,13 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Scopes
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -106,8 +108,16 @@ class OAuth2Grant : StandardAuditModel() {
   /** The refresh token this grant's current one replaced, so a replay can be told from a guess. */
   var previousRefreshTokenHash: String? = null
 
+  /** When the current refresh token was issued (the previous one superseded), so the soft-grace window can be measured. */
+  @Temporal(TemporalType.TIMESTAMP)
+  var refreshTokenRotatedAt: Date? = null
+
   @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
+
+  /** Refresh tokens rotated away more than one generation ago; a replay of any of these is theft (RFC 9700 §4.14.2). */
+  @OneToMany(mappedBy = "grant", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var supersededRefreshTokens: MutableList<OAuth2SupersededRefreshToken> = mutableListOf()
 
   /**
    * The audience the grant is bound to, or null when the stored value resolves to no known audience — such a grant
