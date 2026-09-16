@@ -98,7 +98,7 @@ class TmAutoTranslateProviderEeImpl(
     val sql =
       """
       select target_text, kind from (
-        select e.target_text, 'stored' as kind
+        select e.target_text, 'stored' as kind, true as reviewed, e.updated_at
         from translation_memory_entry e
         join translation_memory tm on tm.id = e.translation_memory_id
         left join translation_memory_project tmp_recv
@@ -112,7 +112,7 @@ class TmAutoTranslateProviderEeImpl(
 
         union all
 
-        select target_t.text as target_text, 'virtual' as kind
+        select target_t.text as target_text, 'virtual' as kind, target_t.state = 2 as reviewed, target_t.updated_at
         from translation base_t
         join key k on k.id = base_t.key_id and k.deleted_at is null
         join project p
@@ -140,7 +140,7 @@ class TmAutoTranslateProviderEeImpl(
           and k.id <> :selfKeyId
           and coalesce(tmp_recv.penalty, tm_virt.default_penalty) = 0
       ) candidates
-      order by case kind when 'stored' then 0 else 1 end
+      order by case kind when 'stored' then 0 else 1 end, reviewed desc, updated_at desc, target_text
       limit 1
       """.trimIndent()
 
