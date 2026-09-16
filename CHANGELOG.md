@@ -1,3 +1,10 @@
+## [3.222.1](https://github.com/tolgee/tolgee-platform/compare/v3.222.0...v3.222.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* close websocket authentication holes and authenticate OAuth2 tokens on the socket ([#3900](https://github.com/tolgee/tolgee-platform/issues/3900)) ([200572d](https://github.com/tolgee/tolgee-platform/commit/200572df795c80d591cf1af5bf493c0e5a56a5a6)), closes [#3893](https://github.com/tolgee/tolgee-platform/issues/3893)
+
 # [3.222.0](https://github.com/tolgee/tolgee-platform/compare/v3.221.3...v3.222.0) (2026-09-15)
 
 
