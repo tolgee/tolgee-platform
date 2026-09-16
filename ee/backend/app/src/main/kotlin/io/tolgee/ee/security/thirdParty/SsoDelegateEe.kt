@@ -26,6 +26,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -47,6 +48,7 @@ import java.util.Date
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class SsoDelegateEe(
   private val jwtService: JwtService,
+  @Qualifier("ssoRestTemplate")
   private val restTemplate: RestTemplate,
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,

@@ -90,6 +90,7 @@ class LlmProviderFallbackTest {
         googleAiApiService = mock<GoogleAiApiService>(),
         llmProviderResolver = resolver,
         urlSecurity = mock<UrlSecurity>(),
+        ssrfSafeRequestFactoryProvider = mock(),
         adminMtServiceFilter = adminMtServiceFilter,
         resilientCacheAccessor = ResilientCacheAccessor(),
       )

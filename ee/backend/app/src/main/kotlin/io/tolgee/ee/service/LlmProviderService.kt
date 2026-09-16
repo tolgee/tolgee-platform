@@ -28,6 +28,7 @@ import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.cache.Cache
@@ -58,6 +59,7 @@ class LlmProviderService(
   private val googleAiApiService: GoogleAiApiService,
   private val llmProviderResolver: LlmProviderResolver,
   private val urlSecurity: UrlSecurity,
+  private val ssrfSafeRequestFactoryProvider: SsrfSafeRequestFactoryProvider,
   private val adminMtServiceFilter: AdminMtServiceFilter,
   private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
@@ -84,7 +86,7 @@ class LlmProviderService(
       repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
         val providerService = getProviderService(providerConfig.type)
         val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
-        repeatWithTimeouts(resolvedAttempts) { restTemplate ->
+        repeatWithTimeouts(resolvedAttempts, providerConfig.apiUrl) { restTemplate ->
           val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
           result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
           result
@@ -192,11 +194,12 @@ class LlmProviderService(
 
   fun <T> repeatWithTimeouts(
     attempts: List<Int>,
+    apiUrl: String?,
     callback: (restTemplate: RestTemplate) -> T,
   ): T {
     var lastError: Exception? = null
     for (timeout in attempts) {
-      val restTemplate = restTemplateBuilder.readTimeout(Duration.ofSeconds(timeout.toLong())).build()
+      val restTemplate = buildRestTemplate(apiUrl, Duration.ofSeconds(timeout.toLong()))
       try {
         return callback(restTemplate)
       } catch (e: ResourceAccessException) {
@@ -204,6 +207,28 @@ class LlmProviderService(
       }
     }
     throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
+  }
+
+  /**
+   * A custom provider's apiUrl is user-supplied, so its connection validates and pins DNS (and, like the create-time
+   * check, forbids local addresses). A built-in provider has a blank apiUrl and a trusted default endpoint, so it
+   * keeps the ordinary template.
+   */
+  private fun buildRestTemplate(
+    apiUrl: String?,
+    timeout: Duration,
+  ): RestTemplate {
+    if (apiUrl.isNullOrBlank()) {
+      return restTemplateBuilder.readTimeout(timeout).build()
+    }
+    return restTemplateBuilder.build().apply {
+      requestFactory =
+        ssrfSafeRequestFactoryProvider.create(
+          allowLocalAddresses = false,
+          connectTimeout = timeout,
+          responseTimeout = timeout,
+        )
+    }
   }
 
   fun getProviderByName(

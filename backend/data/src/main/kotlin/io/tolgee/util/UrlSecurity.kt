@@ -46,8 +46,17 @@ class UrlSecurity(
   fun validateUrlAndResolve(
     url: String,
     allowLocalAddresses: Boolean = false,
+  ): List<InetAddress> = resolveAndValidateHost(requireHttpHost(url), allowLocalAddresses)
+
+  /**
+   * Resolves a bare host, validates the addresses, and returns them — the host-only half of [validateUrlAndResolve],
+   * for a DNS resolver that must both resolve and vet at connect time so a re-resolving HTTP client cannot be pointed
+   * at an internal address after the URL passed validation.
+   */
+  fun resolveAndValidateHost(
+    host: String,
+    allowLocalAddresses: Boolean = false,
   ): List<InetAddress> {
-    val host = requireHttpHost(url)
     val addresses = resolve(host)
     if (!allowLocalAddresses) {
       requireNotLocalhostName(host)
