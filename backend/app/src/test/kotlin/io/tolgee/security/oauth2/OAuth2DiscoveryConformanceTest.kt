@@ -1,9 +1,12 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -14,13 +17,28 @@ import java.nio.charset.StandardCharsets
  * The RFC 8414 discovery document, and the query encoding both legs of the flow depend on.
  */
 class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
+  @Autowired
+  private lateinit var oauth2Properties: OAuth2ServerProperties
+
+  @AfterEach
+  fun restoreCimd() {
+    oauth2Properties.cimdEnabled = OAuth2ServerProperties().cimdEnabled
+  }
+
+  @Test
+  fun `the discovery document stops advertising CIMD once the operator turns it off`() {
+    oauth2Properties.cimdEnabled = false
+
+    metadataDocument()
+      .get("client_id_metadata_document_supported")
+      .asBoolean()
+      .assert
+      .isFalse()
+  }
+
   @Test
   fun `the discovery document describes what the server actually supports`() {
-    mvc
-      .perform(get("/.well-known/oauth-authorization-server"))
-      .andIsOk
-      .andReturn()
-      .let { json(it) }
+    metadataDocument()
       .let { doc ->
         assertThat(values(doc, "response_types_supported")).containsExactly("code")
         assertThat(values(doc, "grant_types_supported"))
@@ -30,6 +48,11 @@ class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
         assertThat(values(doc, "scopes_supported")).contains("translations.view")
         doc
           .get("authorization_response_iss_parameter_supported")
+          .asBoolean()
+          .assert
+          .isTrue()
+        doc
+          .get("client_id_metadata_document_supported")
           .asBoolean()
           .assert
           .isTrue()
@@ -137,7 +160,7 @@ class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
               "&redirect_uri=$REDIRECT" +
               "&scope=translations.view&scope=admin" +
               "&state=s1" +
-              "&code_challenge=${OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier())}" +
+              "&code_challenge=${OAuth2FlowDriver.randomChallenge()}" +
               "&code_challenge_method=S256",
           ),
         ).andReturn()
@@ -148,4 +171,11 @@ class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
     location.assert.contains("error=invalid_request")
     location.assert.contains("state=s1")
   }
+
+  private fun metadataDocument() =
+    mvc
+      .perform(get("/.well-known/oauth-authorization-server"))
+      .andIsOk
+      .andReturn()
+      .let { json(it) }
 }

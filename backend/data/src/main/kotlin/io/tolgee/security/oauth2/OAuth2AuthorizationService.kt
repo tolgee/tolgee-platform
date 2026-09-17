@@ -16,6 +16,7 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
@@ -23,16 +24,19 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
+import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.OAUTH_REFRESH_TOKEN_PREFIX
+import io.tolgee.security.oauth2.cimd.CimdMetadataFetcher
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.security.MessageDigest
 import java.time.Duration
 import java.time.Instant
-import java.util.Base64
 import java.util.Date
 
 /**
@@ -43,22 +47,27 @@ import java.util.Date
 @Service
 class OAuth2AuthorizationService(
   private val repository: OAuth2GrantRepository,
+  private val supersededRefreshTokenRepository: OAuth2SupersededRefreshTokenRepository,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
-) {
+  private val metrics: Metrics,
+  private val resources: OAuth2Resources,
+) : Logging {
   data class AuthorizeParams(
     val responseType: String?,
     val scope: String?,
     val state: String?,
     val codeChallenge: String?,
     val codeChallengeMethod: String?,
+    val resource: String?,
   )
 
   data class ValidatedAuthorizeRequest(
     val scopes: List<String>,
     val codeChallenge: String,
+    val audience: OAuth2Audience,
   )
 
   data class IssuedTokens(
@@ -80,9 +89,9 @@ class OAuth2AuthorizationService(
       throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_challenge_method must be S256")
     }
     val challenge =
-      params.codeChallenge?.takeIf { isValidCodeChallenge(it) }
+      params.codeChallenge?.takeIf { OAuth2Pkce.isValidCodeChallenge(it) }
         ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_challenge is not a valid S256 challenge")
-    return ValidatedAuthorizeRequest(scopes, challenge)
+    return ValidatedAuthorizeRequest(scopes, challenge, resources.audienceFor(params.resource))
   }
 
   @Transactional
@@ -93,7 +102,7 @@ class OAuth2AuthorizationService(
     params: AuthorizeParams,
     projectHint: String?,
   ): OAuth2Grant {
-    val (scopes, challenge) = validateAuthorizeRequest(params)
+    val validated = validateAuthorizeRequest(params)
 
     val grant =
       OAuth2Grant().apply {
@@ -101,8 +110,10 @@ class OAuth2AuthorizationService(
         clientId = client.clientId
         this.redirectUri = redirectUri
         clientState = params.state
-        codeChallenge = challenge
-        requestedScopeValues = scopes
+        codeChallenge = validated.codeChallenge
+        requestedScopeValues = validated.scopes
+        bindAudience(validated.audience)
+        clientMetadataHash = client.metadataHash
         this.projectHint = projectHint?.toLongOrNull()
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
@@ -178,15 +189,16 @@ class OAuth2AuthorizationService(
     code: String?,
     redirectUri: String?,
     codeVerifier: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (code.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code is required")
     val verifier =
-      codeVerifier?.takeIf { isValidCodeVerifier(it) }
+      codeVerifier?.takeIf { OAuth2Pkce.isValidCodeVerifier(it) }
         ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_verifier is missing or malformed")
     val grant =
       repository.findAndLockByCodeHash(keyGenerator.hash(code)) ?: throw OAuth2Error(OAuth2Error.INVALID_GRANT)
 
-    if (grant.codeUsedAt != null || grant.clientId != client.clientId) {
+    if (grant.codeUsedAt != null || grant.clientId != client.clientId || metadataDrifted(grant, client)) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
@@ -196,7 +208,7 @@ class OAuth2AuthorizationService(
     }
     // RFC 9700 4.5.3.1: a mismatching redirect_uri or code_verifier is the authorization-code-injection signal, so
     // the code is spent rather than left redeemable for the rest of its validity across unlimited attempts.
-    if (grant.redirectUri != redirectUri || !constantTimeEquals(s256(verifier), grant.codeChallenge)) {
+    if (grant.redirectUri != redirectUri || !OAuth2Pkce.matchesChallenge(verifier, grant.codeChallenge)) {
       grant.codeUsedAt = currentDateProvider.date
       repository.save(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
@@ -206,6 +218,7 @@ class OAuth2AuthorizationService(
     if (grant.projectSelection.isNullOrBlank()) {
       throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "the consent did not bind a project set")
     }
+    requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
 
     grant.codeUsedAt = currentDateProvider.date
@@ -217,13 +230,14 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
     refreshToken: String?,
     requestedScope: String?,
+    requestedAudience: OAuth2Audience?,
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
-    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeSupersededAndFail(hash)
+    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeIfStolenAndFail(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
-    if (grant.clientId != client.clientId) {
+    if (grant.clientId != client.clientId || metadataDrifted(grant, client)) {
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     }
@@ -231,6 +245,7 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "refresh token expired")
     }
+    requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
     grant.issuedTokenScopeValues = narrowedScopes(grant, requestedScope)
     return issueTokens(grant)
@@ -254,6 +269,7 @@ class OAuth2AuthorizationService(
       repository.findAndLockByAccessTokenHash(hash)
         ?: repository.findAndLockByRefreshTokenHash(hash)
         ?: repository.findAndLockByPreviousRefreshTokenHash(hash)
+        ?: supersededRefreshTokenRepository.findAndLockByTokenHash(hash)?.grant
         ?: return
     if (grant.clientId != client.clientId) throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     repository.delete(grant)
@@ -264,6 +280,13 @@ class OAuth2AuthorizationService(
 
   @Transactional
   fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(Date.from(cutoff))
+
+  @Transactional
+  fun pruneRefreshHistoryBeyondDepth(): Int =
+    supersededRefreshTokenRepository.deleteBeyondNewestPerGrant(
+      properties.refreshTokenHistoryGenerations,
+      historyFloor(),
+    )
 
   @Transactional
   fun deleteExpiredPendingConsents(): Int = repository.deleteExpiredPendingConsents(currentDateProvider.date)
@@ -305,13 +328,79 @@ class OAuth2AuthorizationService(
     return code
   }
 
-  /**
-   * RFC 9700 §4.14.2: the token the current one replaced turning up means it was captured — the legitimate client
-   * and the attacker cannot both hold the current one — so the grant dies rather than the replay merely failing.
-   */
-  private fun revokeSupersededAndFail(hash: String): Nothing {
-    repository.findAndLockByPreviousRefreshTokenHash(hash)?.let { repository.delete(it) }
+  /** The CIMD client's document now describes different terms than the user consented to. */
+  private fun metadataDrifted(
+    grant: OAuth2Grant,
+    client: OAuth2Client,
+  ): Boolean {
+    if (client.metadataHash == null) return false
+    if (grant.clientMetadataHash == client.metadataHash) return false
+    // A hash this build cannot reproduce proves nothing; reading it as drift would revoke every grant issued by
+    // every earlier release on the first refresh after deploy.
+    if (grant.clientMetadataHash?.startsWith(CimdMetadataFetcher.HASH_SCHEME_PREFIX) != true) return false
+    logger.warn(
+      "Revoking OAuth2 grant {} for client {}: its metadata document no longer matches the consented terms",
+      grant.id,
+      client.clientId,
+    )
+    return true
+  }
+
+  /** A client's config error, not a compromise signal. */
+  private fun requireMatchingAudience(
+    grant: OAuth2Grant,
+    requested: OAuth2Audience?,
+  ) {
+    if (requested != null && requested != grant.boundAudience()) {
+      throw OAuth2Error(OAuth2Error.INVALID_TARGET, "the grant was not authorized for this resource")
+    }
+  }
+
+  /** RFC 9700 §4.14.2. */
+  private fun revokeIfStolenAndFail(hash: String): Nothing {
+    revokeGrantForReplayedToken(hash)
     throw OAuth2Error(OAuth2Error.INVALID_GRANT)
+  }
+
+  private fun revokeGrantForReplayedToken(hash: String) {
+    val justRotated = repository.findAndLockByPreviousRefreshTokenHash(hash)
+    if (justRotated != null) {
+      if (isWithinRefreshGrace(justRotated.refreshTokenRotatedAt)) {
+        recordGraceHit(justRotated.id, "the just-rotated refresh token was replayed within the grace window")
+        return
+      }
+      logger.warn(
+        "Revoking OAuth2 grant {}: its previous refresh token was replayed after the grace window",
+        justRotated.id,
+      )
+      repository.delete(justRotated)
+      return
+    }
+    val superseded = supersededRefreshTokenRepository.findAndLockByTokenHash(hash) ?: return
+    if (isWithinRefreshGrace(superseded.supersededAt)) {
+      recordGraceHit(superseded.grant.id, "a token superseded within the grace window was replayed")
+      return
+    }
+    logger.warn("Revoking OAuth2 grant {}: a refresh token from an earlier rotation was replayed", superseded.grant.id)
+    repository.delete(superseded.grant)
+  }
+
+  /**
+   * Keeping the grant is the whole point of the window, so the replay leaves no other trace. The counter is what an
+   * operator can alert on: an innocent race produces these in ones, a stolen credential raced against its owner
+   * produces them repeatedly, and only a metric can tell those apart over time.
+   */
+  private fun recordGraceHit(
+    grantId: Long,
+    reason: String,
+  ) {
+    metrics.oauth2RefreshGraceHitsCounter.increment()
+    logger.warn("OAuth2 grant {} kept: {}", grantId, reason)
+  }
+
+  private fun isWithinRefreshGrace(stoppedBeingCurrentAt: Date?): Boolean {
+    val stopped = stoppedBeingCurrentAt?.toInstant() ?: return false
+    return !stopped.plusSeconds(properties.refreshTokenGraceSeconds).isBefore(currentDateProvider.date.toInstant())
   }
 
   /**
@@ -350,9 +439,13 @@ class OAuth2AuthorizationService(
     grant.accessTokenHash = keyGenerator.hash(accessToken)
     grant.accessTokenIssuedAt = currentDateProvider.date
     grant.accessTokenExpiresAt = nowPlus(validity)
+    val demotedHash = grant.previousRefreshTokenHash
+    val demotedAt = grant.refreshTokenRotatedAt
     grant.previousRefreshTokenHash = grant.refreshTokenHash
+    grant.refreshTokenRotatedAt = currentDateProvider.date
     grant.refreshTokenHash = keyGenerator.hash(refreshToken)
     grant.refreshTokenExpiresAt = nowPlus(Duration.ofDays(properties.refreshTokenValidityDays))
+    demoteToSupersededHistory(grant, demotedHash, demotedAt)
     repository.save(grant)
     return IssuedTokens(
       accessToken = OAUTH_ACCESS_TOKEN_PREFIX + accessToken,
@@ -362,35 +455,68 @@ class OAuth2AuthorizationService(
     )
   }
 
+  /**
+   * The ceiling lives here rather than in the prune, because the prune can only choose by age or by rank and both
+   * are things a thief drives: they hold a token and can rotate it in a loop. Refusing to record *new* rows keeps
+   * the table bounded without ever dropping the row that would convict them — the victim's stolen token is already
+   * recorded, and the rows declined here are the thief's own later rotations, whose replay proves nothing.
+   */
+  private fun demoteToSupersededHistory(
+    grant: OAuth2Grant,
+    demotedHash: String?,
+    supersededAt: Date?,
+  ) {
+    if (demotedHash == null) return
+    if (isAtHistoryCeiling(grant) && !freedHistorySlot(grant)) {
+      logger.warn(
+        "OAuth2 grant {} is at its refresh-token history ceiling ({} rows), all of them younger than the retention " +
+          "floor; not recording further rotations. A client rotating this fast is a runaway or a hostile one.",
+        grant.id,
+        MAX_HISTORY_ROWS_PER_GRANT,
+      )
+      return
+    }
+    // Saved directly rather than added to grant.supersededRefreshTokens: touching that collection initialises it,
+    // and on a grant sitting at the ceiling that is up to MAX_HISTORY_ROWS_PER_GRANT entities loaded on a path that
+    // only ever writes one row. The count and the eviction above stay in the database for the same reason.
+    supersededRefreshTokenRepository.save(
+      OAuth2SupersededRefreshToken().apply {
+        this.grant = grant
+        tokenHash = demotedHash
+        this.supersededAt = supersededAt ?: currentDateProvider.date
+      },
+    )
+  }
+
+  /**
+   * A grant that reached the ceiling on its own — several processes sharing one grant do rotate this often — still
+   * has to record, or its theft detection is off from then on. Making room takes the oldest row already past the
+   * retention floor, which is the row the prune would have taken anyway, and never one a burst could have produced.
+   */
+  private fun freedHistorySlot(grant: OAuth2Grant): Boolean =
+    supersededRefreshTokenRepository.deleteOldestPastFloor(grant.id, historyFloor()) > 0
+
+  private fun historyFloor(): Date =
+    Date.from(currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.refreshTokenHistoryMinDays)))
+
+  /** A grant with no id has no rows yet; counting in the database keeps the check off the lazy collection. */
+  private fun isAtHistoryCeiling(grant: OAuth2Grant): Boolean {
+    val id = grant.id
+    if (id == 0L) return false
+    return supersededRefreshTokenRepository.countByGrantId(id) >= MAX_HISTORY_ROWS_PER_GRANT
+  }
+
   private fun parseScopes(raw: String?): List<String> = OAuth2Scopes.splitScopeString(raw).distinct()
 
   private fun nowPlus(duration: Duration): Date = Date.from(currentDateProvider.date.toInstant().plus(duration))
 
   private fun isExpiredOrUnset(deadline: Date?): Boolean = deadline == null || !deadline.after(currentDateProvider.date)
 
-  private fun s256(verifier: String): String {
-    val digest = MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.US_ASCII))
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
-  }
-
-  private fun constantTimeEquals(
-    a: String,
-    b: String,
-  ): Boolean = MessageDigest.isEqual(a.toByteArray(Charsets.US_ASCII), b.toByteArray(Charsets.US_ASCII))
-
-  // RFC 7636 §4.1: 43-128 characters of unreserved ASCII.
-  private fun isValidCodeVerifier(verifier: String): Boolean =
-    verifier.length in 43..128 && verifier.all { it in PKCE_UNRESERVED }
-
-  // RFC 7636 §4.2: an S256 challenge is the base64url-without-padding SHA-256 digest, i.e. exactly 43 such characters.
-  private fun isValidCodeChallenge(challenge: String): Boolean =
-    challenge.length == 43 && challenge.all { it in PKCE_UNRESERVED }
-
   companion object {
     /** Matches the `client_state` column width; a longer state cannot be stored, so it must be refused up front. */
     const val MAX_STATE_LENGTH = 2000
 
-    private val PKCE_UNRESERVED =
-      (('A'..'Z') + ('a'..'z') + ('0'..'9') + listOf('-', '.', '_', '~')).toSet()
+    /** Bounds rows per grant regardless of rotation rate; the age floor cannot raise it. */
+    const val MAX_HISTORY_ROWS_PER_GRANT = 2000
   }
 }

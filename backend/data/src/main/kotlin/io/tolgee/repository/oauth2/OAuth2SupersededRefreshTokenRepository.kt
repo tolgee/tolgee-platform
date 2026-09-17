@@ -21,8 +21,12 @@ interface OAuth2SupersededRefreshTokenRepository : JpaRepository<OAuth2Supersede
   ): OAuth2SupersededRefreshToken?
 
   /**
-   * Keeps the newest [keep] rotations of every grant, plus anything younger than [floor] whatever its rank, up to a
-   * hard ceiling of [hardMax] rows per grant.
+   * Keeps the newest [keep] rotations of every grant, plus anything younger than [floor] whatever its rank.
+   *
+   * Age is the floor on **every** eviction, with no rank-only escape: rank is a function of how many rotations
+   * followed a row, and a thief holding a stolen token produces those in minutes, so any branch that evicts by rank
+   * alone is a lever for switching theft detection off. What bounds the table instead is the write side, which stops
+   * recording once a grant is at its ceiling — see `OAuth2AuthorizationService.demoteToSupersededHistory`.
    */
   @Modifying
   @Query(
@@ -35,16 +39,38 @@ interface OAuth2SupersededRefreshTokenRepository : JpaRepository<OAuth2Supersede
         FROM oauth2_superseded_refresh_token
       ) ranked
       WHERE t.id = ranked.id
-        AND (
-          ranked.rn > :hardMax
-          OR (ranked.rn > :keep AND (t.superseded_at IS NULL OR t.superseded_at < :floor))
-        )
+        AND ranked.rn > :keep
+        AND (t.superseded_at IS NULL OR t.superseded_at < :floor)
     """,
     nativeQuery = true,
   )
   fun deleteBeyondNewestPerGrant(
     @Param("keep") keep: Int,
     @Param("floor") floor: Date,
-    @Param("hardMax") hardMax: Int,
+  ): Int
+
+  fun countByGrantId(grantId: Long): Long
+
+  /**
+   * Frees one slot on a grant at its ceiling, taking the oldest row already past [floor] - the row the prune
+   * would take next. A query rather than the mapped collection, which would load every row of a grant that is at
+   * its ceiling on a path that only ever writes one.
+   */
+  @Modifying
+  @Query(
+    value = """
+      DELETE FROM oauth2_superseded_refresh_token t
+      WHERE t.id = (
+        SELECT id FROM oauth2_superseded_refresh_token
+        WHERE grant_id = :grantId AND (superseded_at IS NULL OR superseded_at < :floor)
+        ORDER BY superseded_at ASC NULLS FIRST, id ASC
+        LIMIT 1
+      )
+    """,
+    nativeQuery = true,
+  )
+  fun deleteOldestPastFloor(
+    @Param("grantId") grantId: Long,
+    @Param("floor") floor: Date,
   ): Int
 }

@@ -3,13 +3,16 @@ package io.tolgee.model.oauth2
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Scopes
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -58,6 +61,12 @@ class OAuth2Grant : StandardAuditModel() {
   @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
 
+  @Column(length = 16, nullable = false)
+  var audience: String = OAuth2Audience.API.name
+
+  @Column(length = 255)
+  var clientMetadataHash: String? = null
+
   @Column(length = 4000)
   var maxGrantedScopes: String? = null
 
@@ -100,7 +109,20 @@ class OAuth2Grant : StandardAuditModel() {
   var previousRefreshTokenHash: String? = null
 
   @Temporal(TemporalType.TIMESTAMP)
+  var refreshTokenRotatedAt: Date? = null
+
+  @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
+
+  /** Removing the cascade breaks the theft path's flush; the FK's own cascade covers the bulk JPQL reaper instead. */
+  @OneToMany(mappedBy = "grant", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var supersededRefreshTokens: MutableList<OAuth2SupersededRefreshToken> = mutableListOf()
+
+  fun boundAudience(): OAuth2Audience? = OAuth2Audience.entries.firstOrNull { it.name == audience }
+
+  fun bindAudience(value: OAuth2Audience) {
+    audience = value.name
+  }
 
   var requestedScopeValues: List<String>
     get() = wireValuesOf(requestedScopes)

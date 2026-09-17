@@ -78,7 +78,7 @@ class OAuth2AuthorizeConformanceTest : AbstractOAuth2ConformanceTest() {
             "response_type" to "code",
             "scope" to "translations.view",
             "state" to "client-state",
-            "code_challenge" to OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier()),
+            "code_challenge" to OAuth2FlowDriver.randomChallenge(),
             "code_challenge_method" to "S256",
             "project" to "7",
           ),

@@ -7,4 +7,7 @@ data class ConsentInfoModel(
   val project: OAuth2ProjectModel?,
   // The client's authorize-time project hint, regardless of access; set with a null [project] = a project the user can't edit here.
   val requestedProjectId: Long?,
+  val verified: Boolean,
+  val clientOrigin: String?,
+  val logoUri: String?,
 )
