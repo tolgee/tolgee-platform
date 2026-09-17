@@ -114,7 +114,7 @@ class OrganizationService(
     userAccount: UserAccount,
     name: String = userAccount.name,
   ): Organization {
-    val safeName = preferredName(name.trim(), userAccount).take(Organization.NAME_MAX_LENGTH).trimEnd()
+    val safeName = preferredName(name.trim(), userAccount).takeCodePointSafe(Organization.NAME_MAX_LENGTH).trimEnd()
     return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
   }
 
@@ -124,6 +124,12 @@ class OrganizationService(
   ): String {
     if (name.length >= 3) return name
     return "${name.ifEmpty { userAccount.username.take(3) }} Organization"
+  }
+
+  private fun String.takeCodePointSafe(n: Int): String {
+    val cut = take(n)
+    if (cut.isNotEmpty() && cut.last().isHighSurrogate()) return cut.dropLast(1)
+    return cut
   }
 
   private fun generateSlug(name: String) =
