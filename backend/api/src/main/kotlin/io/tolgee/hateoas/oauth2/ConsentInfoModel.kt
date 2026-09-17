@@ -9,5 +9,4 @@ data class ConsentInfoModel(
   val requestedProjectId: Long?,
   val verified: Boolean,
   val clientOrigin: String?,
-  val logoUri: String?,
 )

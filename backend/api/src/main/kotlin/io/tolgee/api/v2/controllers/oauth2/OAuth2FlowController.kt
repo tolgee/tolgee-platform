@@ -115,7 +115,6 @@ class OAuth2FlowController(
       requestedProjectId = requestedProjectId,
       verified = client.verified,
       clientOrigin = cimd?.clientOrigin,
-      logoUri = cimd?.logoUri,
     )
   }
 
