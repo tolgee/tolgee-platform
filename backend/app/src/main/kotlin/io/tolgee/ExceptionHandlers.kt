@@ -26,7 +26,6 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.QueryException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -253,17 +252,6 @@ class ExceptionHandlers(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
         HttpStatus.BAD_REQUEST,
       )
-    }
-    throw ex
-  }
-
-  @ExceptionHandler(QueryException::class)
-  fun handleQueryException(
-    ex: QueryException,
-    request: HttpServletRequest,
-  ): ResponseEntity<ErrorResponseBody> {
-    if (ex.message!!.contains("could not resolve property")) {
-      return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY), request)
     }
     throw ex
   }
