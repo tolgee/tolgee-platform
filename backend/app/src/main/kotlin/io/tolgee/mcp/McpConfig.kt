@@ -3,12 +3,14 @@ package io.tolgee.mcp
 import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
 import org.redisson.api.RedissonClient
 import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStreamableServerTransportProvider
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.web.servlet.function.RouterFunction
 import org.springframework.web.servlet.function.ServerResponse
 import tools.jackson.databind.ObjectMapper
@@ -52,6 +54,18 @@ class McpConfig {
     @Suppress("unused") mcpServer: McpSyncServer,
   ): RouterFunction<ServerResponse> {
     return transportProvider.routerFunction
+  }
+
+  @Bean
+  fun mcpAuthChallengeFilter(
+    challengeProvider: OAuth2BearerChallengeProvider,
+    objectMapper: ObjectMapper,
+  ): FilterRegistrationBean<McpAuthChallengeFilter> {
+    val registration = FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper))
+    registration.addUrlPatterns("/mcp/*")
+    // Ahead of the session filter: a credential-less tools/call is answered before any session side effect runs.
+    registration.order = Ordered.LOWEST_PRECEDENCE - 10
+    return registration
   }
 
   @Bean
