@@ -1,3 +1,10 @@
+## [3.224.1](https://github.com/tolgee/tolgee-platform/compare/v3.224.0...v3.224.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* let users without an organization open public projects ([#3883](https://github.com/tolgee/tolgee-platform/issues/3883)) ([ed3dcac](https://github.com/tolgee/tolgee-platform/commit/ed3dcaca86c2d2e7ab2c6d9f8b50f67a80702d32)), closes [#3816](https://github.com/tolgee/tolgee-platform/issues/3816) [#3816](https://github.com/tolgee/tolgee-platform/issues/3816)
+
 # [3.224.0](https://github.com/tolgee/tolgee-platform/compare/v3.223.1...v3.224.0) (2026-09-16)
 
 
