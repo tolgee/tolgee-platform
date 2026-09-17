@@ -4,14 +4,16 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useLatchedSearchVisibility } from 'tg.views/projects/useLatchedSearchVisibility';
 
 type Options = {
-  contributionFilter?: boolean;
+  defaultMyContributionsOnly?: boolean;
 };
 
-export const usePublicProjectsList = ({ contributionFilter }: Options = {}) => {
+export const usePublicProjectsList = ({
+  defaultMyContributionsOnly,
+}: Options = {}) => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [myContributionsOnly, setMyContributionsOnly] = useState(
-    Boolean(contributionFilter)
+    Boolean(defaultMyContributionsOnly)
   );
 
   const loadable = useApiQuery({
@@ -22,7 +24,7 @@ export const usePublicProjectsList = ({ contributionFilter }: Options = {}) => {
       size: 20,
       search,
       sort: ['name,asc'],
-      filterContributed: contributionFilter ? myContributionsOnly : undefined,
+      filterContributed: myContributionsOnly,
     },
     options: {
       keepPreviousData: true,
