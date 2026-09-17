@@ -18,22 +18,68 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.cimd.CimdClient
+import io.tolgee.security.oauth2.cimd.CimdClientCache
+import io.tolgee.security.oauth2.cimd.CimdClientPolicy
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.net.URI
 
-/** The clients Tolgee ships, built from configuration. */
+/**
+ * The OAuth clients Tolgee will issue tokens to: the pre-registered ones it ships (the browser extension and CLI,
+ * from configuration) plus any unknown client that presents a valid Client ID Metadata Document (CIMD) at an HTTPS
+ * `client_id` URL.
+ */
 @Component
 class OAuth2ClientRegistry(
   private val properties: OAuth2ServerProperties,
+  private val cimdClientCache: CimdClientCache,
+  private val cimdClientPolicy: CimdClientPolicy,
+  private val issuerResolver: OAuth2IssuerResolver,
 ) {
   val clients: List<OAuth2Client> = listOfNotNull(browserExtension(), cli())
 
-  val isEnabled: Boolean
-    get() = clients.isNotEmpty()
+  @PostConstruct
+  fun requireIssuerForPreRegisteredClients() {
+    if (clients.isEmpty()) return
+    runCatching { issuerResolver.issuerUrl }.onFailure {
+      throw IllegalStateException(
+        "tolgee.back-end-url (or tolgee.front-end-url) must be a usable issuer when a tolgee.oauth2 client is " +
+          "configured: ${it.message}",
+        it,
+      )
+    }
+  }
 
-  fun find(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
+  fun find(clientId: String): OAuth2Client? = findPreRegistered(clientId) ?: findCimd(clientId)?.client
 
-  fun isStillAuthorized(clientId: String): Boolean = find(clientId) != null
+  /** The CIMD path only: null for a pre-registered id or a non-URL id. Used by the consent screen for the logo. */
+  fun findCimd(clientId: String): CimdClient? {
+    if (!isCimdCandidate(clientId)) return null
+    return cimdClientCache.get(clientId)
+  }
+
+  /**
+   * The client a token request, or a consent screen for an already-created grant, claims to be. A CIMD client whose
+   * document does not resolve on this particular hop still gets one — bare, unverified, with no redirect URIs — so a
+   * third party's blip cannot kill a grant, or strand a browser on a consent screen that 404s.
+   */
+  fun findForExistingGrant(clientId: String): OAuth2Client? {
+    find(clientId)?.let { return it }
+    if (!isStillAuthorized(clientId)) return null
+    return unresolvableCimdClient(clientId)
+  }
+
+  fun isStillAuthorized(clientId: String): Boolean = findPreRegistered(clientId) != null || isCimdCandidate(clientId)
+
+  /** A client_id only the CIMD path could serve: not pre-registered, and past the local candidate policy. */
+  private fun isCimdCandidate(clientId: String): Boolean =
+    issuerResolver.isConfigured && findPreRegistered(clientId) == null && cimdClientPolicy.isCandidate(clientId)
+
+  private fun unresolvableCimdClient(clientId: String) =
+    OAuth2Client(clientId = clientId, name = clientId, redirectUris = emptyList(), verified = false)
+
+  private fun findPreRegistered(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
 
   private fun browserExtension(): OAuth2Client? {
     if (properties.browserExtensionRedirectUris.isEmpty()) return null
@@ -62,7 +108,7 @@ class OAuth2ClientRegistry(
   private fun requireValidRedirectUris(uris: List<String>): List<String> {
     uris.forEach { uri ->
       val parsed =
-        runCatching { URI(uri) }.getOrNull()?.takeIf { it.isAbsolute }
+        UrlOrigins.parse(uri)?.takeIf { it.isAbsolute }
           ?: throw IllegalStateException("tolgee.oauth2 redirect URI must be an absolute URL, got: $uri")
       if (parsed.fragment != null) {
         throw IllegalStateException("tolgee.oauth2 redirect URI must not carry a fragment, got: $uri")
@@ -86,9 +132,17 @@ data class OAuth2Client(
   val name: String,
   val redirectUris: List<String>,
   val requiredScopes: List<Scope> = emptyList(),
+  val verified: Boolean = true,
+  val metadataHash: String? = null,
+  /**
+   * Whether this client identifies itself with a metadata document, which is what its grants are kept alive by.
+   * Deliberately separate from [verified]: that one is the consent screen's trust badge, and an operator marking a
+   * publisher as trusted must not also switch off the checks that let that publisher retire the client.
+   */
+  val hasMetadataDocument: Boolean = false,
 ) {
   fun allowsRedirectUri(redirectUri: String): Boolean {
-    if (parse(redirectUri) == null) return false
+    if (UrlOrigins.parse(redirectUri) == null) return false
     if (redirectUri in redirectUris) return true
     return redirectUris.any { matchesLoopback(it, redirectUri) }
   }
@@ -102,9 +156,9 @@ data class OAuth2Client(
     registered: String,
     presented: String,
   ): Boolean {
-    val registeredUri = parse(registered) ?: return false
+    val registeredUri = UrlOrigins.parse(registered) ?: return false
     if (!isLoopbackHost(registeredUri.host)) return false
-    val presentedUri = parse(presented) ?: return false
+    val presentedUri = UrlOrigins.parse(presented) ?: return false
     return presentedUri.scheme == registeredUri.scheme &&
       presentedUri.host == registeredUri.host &&
       presentedUri.path.orEmpty() == registeredUri.path.orEmpty() &&
@@ -113,12 +167,27 @@ data class OAuth2Client(
       presentedUri.fragment == null
   }
 
-  private fun parse(uri: String): URI? = runCatching { URI(uri) }.getOrNull()
-
   companion object {
     // URI.getHost() renders an IPv6 literal with its brackets.
     private val LOOPBACK_HOSTS = setOf("127.0.0.1", "[::1]", "localhost")
 
     internal fun isLoopbackHost(host: String?): Boolean = host in LOOPBACK_HOSTS
+
+    /**
+     * The spelling two registered redirects share exactly when they accept the same presented URIs, so a projection
+     * of the consented terms can be built on the equivalence [allowsRedirectUri] actually honours instead of guessing
+     * at it.
+     *
+     * A loopback entry is accepted through two lanes: an exact string match, and [matchesLoopback], which ignores the
+     * port — and the entry's own query, which it never reads. The port therefore only ever matters through the exact
+     * lane, and that lane accepts nothing the loopback lane does not already accept unless the entry carries a query.
+     */
+    internal fun redirectEquivalenceKey(uri: String): String {
+      val parsed = UrlOrigins.parse(uri) ?: return uri
+      if (!isLoopbackHost(parsed.host)) return uri
+      if (parsed.query != null || parsed.port == -1) return uri
+      val userInfo = parsed.userInfo?.let { "$it@" }.orEmpty()
+      return "${parsed.scheme}://$userInfo${parsed.host}${parsed.path.orEmpty()}"
+    }
   }
 }

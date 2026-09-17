@@ -31,6 +31,19 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  /**
+   * A CIMD resolution nobody could even attempt: the fetch budget, the per-origin caps or the resolver pool had no
+   * room. Each one is a client whose metadata document was not read on that hop, which for an existing grant means
+   * a publisher's withdrawal was not observed. Ones are ordinary; a sustained stream is someone holding the
+   * resolvers, and worth an alert.
+   */
+  val oauth2CimdCapacityRefusalsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.oauth2.cimd.capacity_refusals")
+      .description("CIMD resolutions refused for lack of capacity, so no metadata document was read")
+      .register(meterRegistry)
+  }
+
   // ==========================================================================
   // Batch Job Metrics
   // ==========================================================================
