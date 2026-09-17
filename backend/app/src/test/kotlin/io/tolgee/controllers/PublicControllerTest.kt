@@ -75,6 +75,21 @@ class PublicControllerTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `cuts the auto-created organization name to 50 characters and drops the trailing space`() {
+    val name = "a".repeat(49) + " " + "b".repeat(10)
+    val dto = SignUpDto(name = name, password = "aaaaaaaaa", email = "aaaa@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+    assertThat(organizationRepository.findAllByName("a".repeat(49))).hasSize(1)
+  }
+
+  @Test
+  fun `suffixes a short name when auto-creating the organization`() {
+    val dto = SignUpDto(name = " Al ", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+    assertThat(organizationRepository.findAllByName("Al Organization")).hasSize(1)
+  }
+
+  @Test
   fun `stores the username lowercased on sign up`() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "Pavel.Novak@Example.COM")
     performPost("/api/public/sign_up", dto).andIsOk

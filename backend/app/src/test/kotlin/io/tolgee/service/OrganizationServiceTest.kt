@@ -38,6 +38,36 @@ class OrganizationServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `names the preferred organization after the username when the user has no name`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    val organization = organizationService.createPreferred(testData.jirina, name = "")
+
+    organization.name.assert.isEqualTo("jir Organization")
+  }
+
+  @Test
+  fun `never cuts the preferred organization name inside a surrogate pair`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    val organization = organizationService.createPreferred(testData.jirina, name = "a".repeat(49) + "😀")
+
+    organization.name.assert.isEqualTo("a".repeat(49))
+  }
+
+  @Test
+  fun `keeps a preferred organization name of exactly 50 characters`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    val organization = organizationService.createPreferred(testData.jirina, name = "a".repeat(50))
+
+    organization.name.assert.isEqualTo("a".repeat(50))
+  }
+
+  @Test
   fun `fetches organization without mt bucket (tests the one-to-one lazy initialization)`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
