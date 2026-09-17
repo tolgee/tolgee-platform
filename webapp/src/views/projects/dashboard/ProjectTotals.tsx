@@ -178,7 +178,7 @@ export const ProjectTotals: React.FC<
   const redirectToBilling = () => {
     history.push(
       LINKS.ORGANIZATION_BILLING.build({
-        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.id || '',
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
       })
     );
   };
