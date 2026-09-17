@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.tolgee.constants.ValidationConstants
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import jakarta.persistence.CascadeType
@@ -32,7 +33,7 @@ class Organization(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
   @field:NotBlank
-  @field:Size(min = 1, max = NAME_MAX_LENGTH) var name: String = "",
+  @field:Size(min = 1, max = ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH) var name: String = "",
   var description: String? = null,
   @Column(name = "address_part")
   @field:NotBlank
@@ -80,8 +81,4 @@ class Organization(
 
   @Transient
   override var disableActivityLogging: Boolean = false
-
-  companion object {
-    const val NAME_MAX_LENGTH = 50
-  }
 }

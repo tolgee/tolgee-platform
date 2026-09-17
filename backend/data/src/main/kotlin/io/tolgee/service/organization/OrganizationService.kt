@@ -4,6 +4,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.constants.ValidationConstants
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
@@ -114,7 +115,11 @@ class OrganizationService(
     userAccount: UserAccount,
     name: String = userAccount.name,
   ): Organization {
-    val safeName = preferredName(name.trim(), userAccount).takeCodePointSafe(Organization.NAME_MAX_LENGTH).trimEnd()
+    val safeName =
+      preferredName(
+        name.trim(),
+        userAccount,
+      ).takeCodePointSafe(ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH).trimEnd()
     return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
   }
 
@@ -126,8 +131,8 @@ class OrganizationService(
     return "${name.ifEmpty { userAccount.username.take(3) }} Organization"
   }
 
-  private fun String.takeCodePointSafe(n: Int): String {
-    val cut = take(n)
+  private fun String.takeCodePointSafe(codeUnits: Int): String {
+    val cut = take(codeUnits)
     if (cut.isNotEmpty() && cut.last().isHighSurrogate()) return cut.dropLast(1)
     return cut
   }
