@@ -68,7 +68,7 @@ dependencies {
     implementation libs.jjwtApi
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
-    implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
+    implementation libs.caffeine
     implementation libs.kotlinReflect
     implementation libs.jacksonModuleKotlin
     api libs.postHog
