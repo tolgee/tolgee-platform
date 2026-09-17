@@ -33,6 +33,15 @@ class OAuth2ServerProperties {
   )
   var cliRedirectUris: List<String> = listOf()
 
+  @DocProperty(
+    description =
+      "Hosts allowed to present a Client ID Metadata Document (an HTTPS URL as `client_id`) so an unknown MCP " +
+        "client can register itself. Empty (the default) allows any public host; set it to restrict CIMD to a " +
+        "specific list, e.g. `claude.ai`. Loopback and private hosts are always refused regardless.",
+    defaultValue = "",
+  )
+  var cimdAllowedHosts: List<String> = listOf()
+
   @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
   var accessTokenValidityMinutes: Long = 30
 
@@ -42,6 +51,33 @@ class OAuth2ServerProperties {
         "this window, so it bounds how long a grant may sit unused — not how long it may live.",
   )
   var refreshTokenValidityDays: Long = 30
+
+  @DocProperty(
+    description =
+      "Grace window, in seconds, during which replaying the refresh token that was just rotated away fails the " +
+        "request without revoking the grant. It absorbs innocent collisions (two tabs, a lost response) instead of " +
+        "signing the user out everywhere; a replay after the window, or of an older token, is still treated as theft.",
+  )
+  var refreshTokenGraceSeconds: Long = 60
+
+  @DocProperty(
+    description =
+      "How many already-rotated refresh tokens are remembered per grant, so that replaying one is recognised as " +
+        "theft and revokes the grant. This is the bound that binds for a *slow* client — a CLI used once a week " +
+        "reaches this many weeks back. For a client rotating faster than this many times within " +
+        "`refresh-token-history-min-days`, that window is what decides instead. Beyond both, a replay is still " +
+        "refused, it just no longer revokes.",
+  )
+  var refreshTokenHistoryGenerations: Int = 50
+
+  @DocProperty(
+    description =
+      "Minimum age, in days, before a rotated refresh token can be dropped from that history. This is the bound " +
+        "that binds for a *fast* client, and the one to reach for if the table is growing. It also keeps the depth " +
+        "above from being something a thief can force: rank depends only on how many rotations followed a row, and " +
+        "a thief holding a stolen token can produce those in minutes — this makes eviction cost wall-clock time.",
+  )
+  var refreshTokenHistoryMinDays: Long = 7
 
   @DocProperty(
     description = "How long an authorization code can be exchanged for tokens after it was issued, in seconds.",

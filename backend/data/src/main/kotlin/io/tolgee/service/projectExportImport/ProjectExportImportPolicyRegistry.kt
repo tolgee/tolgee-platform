@@ -68,6 +68,7 @@ import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationSetting
 import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
 import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.qa.TranslationQaIssue
@@ -136,6 +137,7 @@ object ProjectExportImportPolicyRegistry {
         Invitation::class,
         Pat::class,
         OAuth2Grant::class,
+        OAuth2SupersededRefreshToken::class,
         UserPreferences::class,
         EmailVerification::class,
         SsoTenant::class,
