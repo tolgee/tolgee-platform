@@ -53,6 +53,41 @@ class UrlSecurityTest {
   }
 
   @Test
+  fun `blocks carrier-grade NAT and other reserved IPv4 ranges`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.64.0.1/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://100.127.255.254/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.0.0.1/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://198.18.0.1/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://192.88.99.1/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://240.0.0.1/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://255.255.255.255/internal") }
+  }
+
+  @Test
+  fun `blocks an IPv4 address wearing IPv6 clothes`() {
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::127.0.0.1]/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::169.254.169.254]/latest/meta-data/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::ffff:10.0.0.1]/internal") }
+    // NAT64: a gateway translates 64:ff9b::/96 back to the IPv4 address in the last 32 bits.
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[64:ff9b::127.0.0.1]/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[64:ff9b::a00:1]/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[64:ff9b:1:7f00:0:100:1:1]/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[64:ff9b:1:a00:0:100::]/internal") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[2002:7f00:1::]/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[2002:a00:1::]/internal") }
+    // RFC 2765 IPv4-translated: the ffff sits two bytes earlier than in the mapped form.
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::ffff:0:127.0.0.1]/admin") }
+  }
+
+  @Test
+  fun `still allows public addresses that merely look unusual`() {
+    assertDoesNotThrow { urlSecurity.validateUrl("http://100.63.255.255/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://100.128.0.1/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://198.20.0.1/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://[64:ff9b::8.8.8.8]/") }
+  }
+
+  @Test
   fun `blocks wildcard addresses`() {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://0.0.0.0/") }
   }
@@ -98,6 +133,46 @@ class UrlSecurityTest {
     assertUrlNotValid { urlSecurity.validateUrl("file:///etc/passwd", allowLocalAddresses = true) }
     assertUrlNotValid { urlSecurity.validateUrl("not-a-url", allowLocalAddresses = true) }
     assertUrlNotValid { urlSecurity.validateUrl("http://", allowLocalAddresses = true) }
+  }
+
+  @Test
+  fun `validateUrlAndResolve returns the resolved public addresses`() {
+    val addresses = urlSecurity.validateUrlAndResolve("https://example.com/.well-known/client")
+
+    addresses.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `validateUrlAndResolve resolves an IP literal to itself`() {
+    val addresses = urlSecurity.validateUrlAndResolve("https://93.184.216.34/x")
+
+    addresses.map { it.hostAddress }.assert.containsExactly("93.184.216.34")
+  }
+
+  @Test
+  fun `validateUrlAndResolve blocks the same ranges validateUrl does`() {
+    listOf(
+      "http://127.0.0.1/admin",
+      "https://localhost/admin",
+      "http://10.0.0.1/internal",
+      "http://169.254.169.254/latest/meta-data/",
+      "http://[fd00::1]/",
+      "ftp://example.com/x",
+      "http://",
+      "not-a-url",
+    ).forEach { url ->
+      assertUrlNotValid { urlSecurity.validateUrlAndResolve(url) }
+    }
+  }
+
+  @Test
+  fun `validateUrlAndResolve returns loopback addresses when local addresses are allowed`() {
+    val addresses = urlSecurity.validateUrlAndResolve("http://127.0.0.1/x", allowLocalAddresses = true)
+
+    addresses
+      .single()
+      .isLoopbackAddress.assert
+      .isTrue()
   }
 
   private fun assertUrlNotValid(executable: () -> Unit) {
