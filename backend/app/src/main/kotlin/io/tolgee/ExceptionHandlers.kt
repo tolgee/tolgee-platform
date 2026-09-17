@@ -26,7 +26,8 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.catalina.connector.ClientAbortException
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.hibernate.QueryException
+import org.hibernate.query.PathException
+import org.hibernate.query.sqm.PathElementException
 import org.springframework.dao.InvalidDataAccessApiUsageException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -222,7 +223,7 @@ class ExceptionHandlers(
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)
-  fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
+  fun handleMaxUploadSizeExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
       ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
       HttpStatus.BAD_REQUEST,
@@ -239,34 +240,29 @@ class ExceptionHandlers(
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-  fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+  fun handleHttpRequestMethodNotSupported(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
     logger.debug(ex.message, ex)
     return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
   }
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
-  fun handleFileSizeLimitExceeded(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
-    Sentry.captureException(ex)
-    val contains = ex.message?.contains("could not resolve property", true) ?: false
-    if (contains) {
+  fun handleInvalidDataAccessApiUsage(
+    ex: InvalidDataAccessApiUsageException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponseBody> {
+    val sortedByClient = request.getParameter("sort") != null
+    if (sortedByClient && ExceptionUtils.getThrowableList(ex).any { it.isUnresolvablePath() }) {
+      logger.debug("Unresolvable property in a query", ex)
       return ResponseEntity(
         ErrorResponseBody(Message.UNKNOWN_SORT_PROPERTY.code, null),
         HttpStatus.BAD_REQUEST,
       )
     }
+    Sentry.captureException(ex)
     throw ex
   }
 
-  @ExceptionHandler(QueryException::class)
-  fun handleQueryException(
-    ex: QueryException,
-    request: HttpServletRequest,
-  ): ResponseEntity<ErrorResponseBody> {
-    if (ex.message!!.contains("could not resolve property")) {
-      return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY), request)
-    }
-    throw ex
-  }
+  private fun Throwable.isUnresolvablePath() = this is PathElementException || this is PathException
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
