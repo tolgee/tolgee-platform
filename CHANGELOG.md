@@ -1,3 +1,10 @@
+## [3.224.2](https://github.com/tolgee/tolgee-platform/compare/v3.224.1...v3.224.2) (2026-09-17)
+
+
+### Bug Fixes
+
+* audit existing exception handling done by matching error message ([#3829](https://github.com/tolgee/tolgee-platform/issues/3829)) ([551a2a1](https://github.com/tolgee/tolgee-platform/commit/551a2a14f60b5ea7af28a06cb749fe1d8f341705)), closes [tolgee/billing#285](https://github.com/tolgee/billing/issues/285) [tolgee/billing#285](https://github.com/tolgee/billing/issues/285)
+
 ## [3.224.1](https://github.com/tolgee/tolgee-platform/compare/v3.224.0...v3.224.1) (2026-09-17)
 
 

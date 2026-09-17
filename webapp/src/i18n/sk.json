@@ -1,0 +1,6 @@
+{
+  "accept_auth_provider_change_accept": "Rozumiem",
+  "accept_auth_provider_change_accept_non_managed": "Zmeniť",
+  "accept_auth_provider_change_description": "Naozaj chcete nahradiť <b>{authTypeOld}</b> za <b>{authType}</b>?<br></br>Prihlásiť sa budete môcť iba pomocou <b>{authType}</b>.",
+  "accept_auth_provider_change_description_managed_sso_optional": "Vaša organizácia ({ssoDomain}) vám umožňuje používať SSO.<br></br>\nVáš účet prejde na prihlásenie výhradne prostredníctvom SSO."
+}
