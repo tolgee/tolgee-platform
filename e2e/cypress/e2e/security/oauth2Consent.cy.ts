@@ -15,9 +15,11 @@ const CODE_CHALLENGE = '9fa4Kxg-kvmCollzytmpG-4BeAy0obZey5rQMBKBXVc';
 // budget rather than relying on retries — PR runs have none.
 const NAVIGATION_TIMEOUT = 60000;
 
-const authorizeUrl = (scope: string) =>
+const CIMD_CLIENT_ID = `${API_URL}/internal/e2e-data/oauth2-consent/cimd-client`;
+
+const authorizeUrl = (scope: string, clientId: string = CLIENT_ID) =>
   `${API_URL}/oauth2/authorize?response_type=code` +
-  `&client_id=${CLIENT_ID}` +
+  `&client_id=${encodeURIComponent(clientId)}` +
   `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
   `&scope=${encodeURIComponent(scope)}` +
   `&state=e2e-state` +
@@ -52,6 +54,8 @@ describe('OAuth2 consent', () => {
     cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
       'be.visible'
     );
+    cy.gcy('oauth2-consent-unverified').should('not.exist');
+    cy.gcy('oauth2-consent-subtitle').should('be.visible');
     ['keys.view', 'translations.view', 'translations.edit'].forEach((scope) =>
       gcyAdvanced({ value: 'oauth2-consent-scope', scope }).should('exist')
     );
@@ -90,6 +94,38 @@ describe('OAuth2 consent', () => {
 
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
     cy.url().should('include', 'state=e2e-state');
+  });
+
+  it('renders the unverified-app treatment for a CIMD client', () => {
+    cy.visit(authorizeUrl('translations.view', CIMD_CLIENT_ID));
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-unverified-warning').should('be.visible');
+    // The app's self-asserted name must not reach the subtitle, which renders above the warning.
+    cy.gcy('oauth2-consent-subtitle').should('not.exist');
+    cy.gcy('oauth2-consent-app-name').should('contain', 'E2E Unverified App');
+    cy.gcy('oauth2-consent-origin').should('contain', API_URL);
+    // No logo element exists at all: loading one from the app's own server would tell it who opened this screen.
+    cy.get('[data-cy=oauth2-consent-unverified] img').should('not.exist');
+  });
+
+  it('forwards the resource indicator into the authorize call', () => {
+    const mcpResource = `${HOST}/mcp/developer`;
+    cy.intercept('POST', '/v2/oauth2/authorize').as('authorize');
+
+    cy.visit(
+      authorizeUrl('keys.view translations.view') +
+        `&resource=${encodeURIComponent(mcpResource)}`
+    );
+
+    cy.wait('@authorize', { timeout: NAVIGATION_TIMEOUT })
+      .its('request.body.resource')
+      .should('eq', mcpResource);
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
   });
 
   it('redirects with access_denied when the user denies', () => {
