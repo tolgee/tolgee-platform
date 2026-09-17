@@ -35,6 +35,17 @@ class OAuth2ServerProperties {
 
   @DocProperty(
     description =
+      "Whether an unknown client may identify itself with a Client ID Metadata Document (an HTTPS URL as " +
+        "`client_id`). This is what lets an MCP client an operator never registered ask for access, and it is the " +
+        "one path on which an unauthenticated caller makes this server fetch a URL of their choosing — bounded by " +
+        "the address checks, the fetch budget and the rate limit on the authorization endpoint. Turn it off on an " +
+        "instance that should only ever serve clients it registered itself.",
+    defaultValue = "true",
+  )
+  var cimdEnabled: Boolean = true
+
+  @DocProperty(
+    description =
       "Hosts allowed to present a Client ID Metadata Document (an HTTPS URL as `client_id`) so an unknown MCP " +
         "client can register itself. Empty (the default) allows any public host; set it to restrict CIMD to a " +
         "specific list, e.g. `claude.ai`. Loopback and private hosts are always refused regardless.",

@@ -1,10 +1,21 @@
 package io.tolgee.security.oauth2
 
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.cimd.CimdClient
+import io.tolgee.security.oauth2.cimd.CimdClientCache
+import io.tolgee.security.oauth2.cimd.CimdClientPolicy
 import io.tolgee.testing.assert
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 class OAuth2ClientRegistryTest {
   @Test
@@ -117,13 +128,159 @@ class OAuth2ClientRegistryTest {
     client.allowsRedirectUri("https://ext.example:8443/callback").assert.isFalse()
   }
 
+  @Test
+  fun `two redirect spellings share an equivalence key exactly when they accept the same presented URIs`() {
+    // The consented-terms hash projects registered redirects through redirectEquivalenceKey, so if the key and the
+    // matcher ever disagree the hash either mass-revokes on a neutral edit or misses one that moved the goalposts.
+    val spellings =
+      listOf(
+        "http://127.0.0.1:1234/cb",
+        "http://127.0.0.1:9999/cb",
+        "http://127.0.0.1:1234/other",
+        "http://alice@127.0.0.1:1234/cb",
+        "http://127.0.0.1:1234/cb?x=1",
+        "http://127.0.0.1:9999/cb?x=1",
+        "http://[::1]:1234/cb",
+        "https://ext.example/cb",
+      )
+    val presented = spellings + "http://127.0.0.1:5555/cb" + "http://alice@127.0.0.1:5555/cb"
+
+    for (a in spellings) {
+      for (b in spellings) {
+        val sameKey =
+          OAuth2Client.redirectEquivalenceKey(a) == OAuth2Client.redirectEquivalenceKey(b)
+        val accepts = { uri: String -> presented.filter { clientRegistering(uri).allowsRedirectUri(it) } }
+
+        sameKey.assert
+          .withFailMessage("%s and %s: same key %s, but same accepted set %s", a, b, sameKey, accepts(a) == accepts(b))
+          .isEqualTo(accepts(a) == accepts(b))
+      }
+    }
+  }
+
+  @Test
+  fun `a registered loopback entry's own query is not consulted, so it narrows nothing`() {
+    val client = clientRegistering("http://127.0.0.1:1234/cb?x=1")
+
+    client.allowsRedirectUri("http://127.0.0.1:1234/cb?x=1").assert.isTrue()
+    client.allowsRedirectUri("http://127.0.0.1:9999/cb").assert.isTrue()
+    client.allowsRedirectUri("http://127.0.0.1:9999/cb?x=1").assert.isFalse()
+  }
+
+  @Test
+  fun `an unknown URL-form client id falls through to the CIMD cache`() {
+    val cimd = cimdClient(CIMD_URL)
+    val cache = mock<CimdClientCache> { on { get(CIMD_URL) } doReturn cimd }
+    val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.find(CIMD_URL).assert.isEqualTo(cimd.client)
+    registry.findCimd(CIMD_URL).assert.isEqualTo(cimd)
+  }
+
+  @Test
+  fun `a pre-registered id never enters the CIMD path`() {
+    val cache = mock<CimdClientCache>()
+    val registry =
+      registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.findCimd(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID).assert.isNull()
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `isStillAuthorized accepts a URL-form client without ever fetching it`() {
+    val cache = mock<CimdClientCache>()
+    val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
+
+    registry.isStillAuthorized(CIMD_URL).assert.isTrue()
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `a non-empty allowed-hosts list restricts which hosts may present a document`() {
+    val cache = mock<CimdClientCache> { on { get(any()) } doReturn cimdClient(CIMD_URL) }
+    val registry =
+      registry(
+        extensionUris = listOf("https://ext.example/callback"),
+        cimdAllowedHosts = listOf("app.example.com"),
+        cache = cache,
+      )
+
+    registry.find(CIMD_URL).assert.isNotNull
+    registry.find("https://evil.example/.well-known/client").assert.isNull()
+    registry.isStillAuthorized("https://evil.example/.well-known/client").assert.isFalse()
+    verify(cache, never()).get("https://evil.example/.well-known/client")
+  }
+
+  @Test
+  fun `enabling is issuer-based, so no pre-registered client is required`() {
+    val registry = registry()
+
+    registry.clients.assert.isEmpty()
+    registry.isStillAuthorized(CIMD_URL).assert.isTrue()
+  }
+
+  @Test
+  fun `an instance with no usable issuer resolves no CIMD client and authorizes no CIMD grant`() {
+    val registry = registry(resolver = resolver(isConfigured = false))
+
+    registry.find(CIMD_URL).assert.isNull()
+    registry.isStillAuthorized(CIMD_URL).assert.isFalse()
+  }
+
+  @Test
+  fun `a pre-registered client still requires a usable issuer at startup`() {
+    val registry = registry(extensionUris = listOf("https://ext.example/callback"), resolver = throwingResolver())
+
+    val failure = assertThrows<IllegalStateException> { registry.requireIssuerForPreRegisteredClients() }
+    failure.message.assert.contains(UNUSABLE_ISSUER)
+  }
+
+  @Test
+  fun `an instance that configured no client boots even when the issuer is unusable`() {
+    val registry = registry(resolver = throwingResolver())
+
+    assertThatCode { registry.requireIssuerForPreRegisteredClients() }.doesNotThrowAnyException()
+  }
+
+  private fun throwingResolver(): OAuth2IssuerResolver =
+    mock {
+      on { issuerUrl } doThrow IllegalStateException("must be a bare origin, got: $UNUSABLE_ISSUER")
+    }
+
+  private fun clientRegistering(redirectUri: String) =
+    OAuth2Client(clientId = "c", name = "c", redirectUris = listOf(redirectUri))
+
+  private fun cimdClient(url: String) =
+    CimdClient(
+      OAuth2Client(clientId = url, name = url, redirectUris = listOf("$url/cb"), verified = false, metadataHash = "h"),
+      clientOrigin = url,
+    )
+
   private fun registry(
-    extensionUris: List<String>,
-    cliUris: List<String>,
-  ) = OAuth2ClientRegistry(
-    OAuth2ServerProperties().apply {
-      browserExtensionRedirectUris = extensionUris
-      cliRedirectUris = cliUris
-    },
-  )
+    extensionUris: List<String> = listOf(),
+    cliUris: List<String> = listOf(),
+    cimdAllowedHosts: List<String> = listOf(),
+    cache: CimdClientCache = mock(),
+    resolver: OAuth2IssuerResolver = resolver(),
+  ): OAuth2ClientRegistry {
+    val properties =
+      OAuth2ServerProperties().apply {
+        browserExtensionRedirectUris = extensionUris
+        cliRedirectUris = cliUris
+        this.cimdAllowedHosts = cimdAllowedHosts
+      }
+    return OAuth2ClientRegistry(properties, cache, CimdClientPolicy(properties, InternalProperties()), resolver)
+  }
+
+  private fun resolver(isConfigured: Boolean = true): OAuth2IssuerResolver =
+    mock {
+      on { this.isConfigured } doReturn isConfigured
+      on { issuerUrl } doReturn "https://tolgee.example.com"
+    }
+
+  companion object {
+    private const val CIMD_URL = "https://app.example.com/.well-known/oauth-client"
+    private const val UNUSABLE_ISSUER = "https://tools.acme.com/tolgee"
+  }
 }
