@@ -222,7 +222,7 @@ class ExceptionHandlers(
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)
-  fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
+  fun handleMaxUploadSizeExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
       ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
       HttpStatus.BAD_REQUEST,
@@ -239,13 +239,13 @@ class ExceptionHandlers(
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-  fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+  fun handleHttpRequestMethodNotSupported(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
     logger.debug(ex.message, ex)
     return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
   }
 
   @ExceptionHandler(InvalidDataAccessApiUsageException::class)
-  fun handleFileSizeLimitExceeded(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
+  fun handleInvalidDataAccessApiUsage(ex: InvalidDataAccessApiUsageException): ResponseEntity<ErrorResponseBody> {
     Sentry.captureException(ex)
     val contains = ex.message?.contains("could not resolve property", true) ?: false
     if (contains) {
