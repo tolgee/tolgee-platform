@@ -114,13 +114,16 @@ class OrganizationService(
     userAccount: UserAccount,
     name: String = userAccount.name,
   ): Organization {
-    val safeName =
-      if (name.isNotEmpty() || name.length >= 3) {
-        name
-      } else {
-        "${userAccount.username.take(3)} Organization"
-      }
+    val safeName = preferredName(name.trim(), userAccount).take(Organization.NAME_MAX_LENGTH).trimEnd()
     return this.create(OrganizationDto(name = safeName), userAccount = userAccount)
+  }
+
+  private fun preferredName(
+    name: String,
+    userAccount: UserAccount,
+  ): String {
+    if (name.length >= 3) return name
+    return "${name.ifEmpty { userAccount.username.take(3) }} Organization"
   }
 
   private fun generateSlug(name: String) =

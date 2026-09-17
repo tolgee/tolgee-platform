@@ -38,6 +38,16 @@ class OrganizationServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `names the preferred organization after the username when the user has no name`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    val organization = organizationService.createPreferred(testData.jirina, name = "")
+
+    organization.name.assert.isEqualTo("jir Organization")
+  }
+
+  @Test
   fun `fetches organization without mt bucket (tests the one-to-one lazy initialization)`() {
     val testData = OrganizationTestData()
     testDataService.saveTestData(testData.root)
