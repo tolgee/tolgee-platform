@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
@@ -10,25 +9,22 @@ type Props = {
 };
 
 export const OrganizationBillingRedirect = ({ selfHosted }: Props) => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const history = useHistory();
+  const { preferredOrganization, isFetching } = usePreferredOrganization();
 
-  useEffect(() => {
-    if (preferredOrganization) {
-      if (selfHosted) {
-        history.replace(
-          LINKS.ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE.build({
-            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-          })
-        );
-      } else {
-        history.replace(
-          LINKS.ORGANIZATION_BILLING.build({
-            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
-          })
-        );
-      }
-    }
-  }, [preferredOrganization, selfHosted]);
-  return <FullPageLoading />;
+  if (isFetching) {
+    return <FullPageLoading />;
+  }
+  if (!preferredOrganization) {
+    return <Redirect to={LINKS.COMMUNITY_PROJECTS.build()} />;
+  }
+  const target = selfHosted
+    ? LINKS.ORGANIZATION_SUBSCRIPTIONS_SELF_HOSTED_EE
+    : LINKS.ORGANIZATION_BILLING;
+  return (
+    <Redirect
+      to={target.build({
+        [PARAMS.ORGANIZATION_SLUG]: preferredOrganization.slug,
+      })}
+    />
+  );
 };
