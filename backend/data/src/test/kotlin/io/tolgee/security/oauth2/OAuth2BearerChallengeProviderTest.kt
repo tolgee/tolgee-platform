@@ -14,8 +14,10 @@ class OAuth2BearerChallengeProviderTest {
   fun `an unusable issuer costs the challenge its metadata pointer, not the response`() {
     val provider =
       OAuth2BearerChallengeProvider(
-        mock { on { issuerUrl } doThrow IllegalStateException("bad issuer") },
-        registryWith(anyClient()),
+        mock {
+          on { isConfigured } doReturn true
+          on { issuerUrl } doThrow IllegalStateException("bad issuer")
+        },
       )
 
     val challenge = provider.challengeFor(mcpRequest(), HttpStatus.UNAUTHORIZED)
@@ -27,8 +29,10 @@ class OAuth2BearerChallengeProviderTest {
   fun `a usable issuer points at the protected-resource document`() {
     val provider =
       OAuth2BearerChallengeProvider(
-        mock { on { issuerUrl } doReturn "https://tolgee.example.com" },
-        registryWith(anyClient()),
+        mock {
+          on { isConfigured } doReturn true
+          on { issuerUrl } doReturn "https://tolgee.example.com"
+        },
       )
 
     val challenge = provider.challengeFor(mcpRequest(), HttpStatus.UNAUTHORIZED)
@@ -40,20 +44,10 @@ class OAuth2BearerChallengeProviderTest {
 
   @Test
   fun `a deployment that publishes no protected-resource document is not pointed at one`() {
-    val provider =
-      OAuth2BearerChallengeProvider(
-        mock { on { issuerUrl } doReturn "https://tolgee.example.com" },
-        registryWith(listOf()),
-      )
+    val provider = OAuth2BearerChallengeProvider(mock { on { isConfigured } doReturn false })
 
     provider.challengeFor(mcpRequest(), HttpStatus.UNAUTHORIZED).assert.isEqualTo("Bearer")
   }
 
   private fun mcpRequest() = MockHttpServletRequest("POST", McpConstants.DEVELOPER_ENDPOINT_PATH)
-
-  private fun anyClient() =
-    listOf(OAuth2Client(clientId = "c", name = "c", redirectUris = listOf("https://ext.example/cb")))
-
-  private fun registryWith(clients: List<OAuth2Client>): OAuth2ClientRegistry =
-    mock { on { isEnabled } doReturn clients.isNotEmpty() }
 }

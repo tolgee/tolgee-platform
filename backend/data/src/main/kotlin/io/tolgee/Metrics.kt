@@ -31,6 +31,10 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  // ==========================================================================
+  // OAuth2 Metrics
+  // ==========================================================================
+
   /**
    * Requests rejected without consuming the bucket because of contention on a single rate limit
    * bucket. Reasons: "concurrency_cap" (too many concurrent requests for the bucket),
@@ -49,6 +53,19 @@ class Metrics(
    * a publisher's withdrawal was not observed. Ones are ordinary; a sustained stream is someone holding the
    * resolvers, and worth an alert.
    */
+
+  /**
+   * A refresh token replayed inside the grace window: the grant is kept rather than revoked, so this is the only
+   * lasting trace that one was presented twice. An innocent race produces these in ones; a stolen credential being
+   * raced against its owner produces them repeatedly on the same grant.
+   */
+  val oauth2RefreshGraceHitsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.oauth2.refresh.grace_hits")
+      .description("Refresh tokens replayed within the grace window, where the grant was kept instead of revoked")
+      .register(meterRegistry)
+  }
+
   val oauth2CimdCapacityRefusalsCounter: Counter by lazy {
     Counter
       .builder("tolgee.oauth2.cimd.capacity_refusals")

@@ -154,6 +154,27 @@ class OAuth2RevocationConformanceTest : AbstractOAuth2ConformanceTest() {
       .isEqualTo("invalid_grant")
   }
 
+  /**
+   * Two rotations back the token is no longer on the grant row, only in the rotation history - which the token
+   * endpoint already treats as authoritative enough to revoke a grant on replay. Answering 200 here without
+   * revoking would be the RFC 7009 answer for a token that is not live, given for one that is.
+   */
+  @Test
+  fun `revoking a refresh token from two rotations back still ends the grant`() {
+    val issued = json(tokenResult())
+    val oldest = issued.get("refresh_token").asString()
+    val middle = json(driver.refresh(oldest, CLIENT_ID).andReturn()).get("refresh_token").asString()
+    val current = json(driver.refresh(middle, CLIENT_ID).andReturn()).get("refresh_token").asString()
+
+    driver.revoke(oldest, CLIENT_ID).andIsOk
+
+    json(driver.refresh(current, CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+  }
+
   @Test
   fun `a revocation naming no registered client is refused rather than silently doing nothing`() {
     val issued = json(tokenResult())
