@@ -6,7 +6,9 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
 import io.tolgee.util.filterValueNotNull
+import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -22,13 +24,17 @@ class PostHogBusinessEventReporter(
   private val userAccountService: UserAccountService,
   private val entityManager: EntityManager,
   private var postHogGroupIdentifier: PostHogGroupIdentifier?,
-) {
+) : Logging {
   @Lazy
   @Autowired
   private lateinit var selfProxied: PostHogBusinessEventReporter
 
   @Async
   fun captureAsync(data: OnBusinessEventToCaptureEvent) {
+    if (data.eventName.startsWith(RESERVED_PREFIX)) {
+      logger.debug("Refusing to report business event with reserved name: {}", data.eventName)
+      return
+    }
     val filledData = fillOtherData(data)
     captureWithPostHog(filledData)
   }
@@ -54,8 +60,7 @@ class PostHogBusinessEventReporter(
   private fun captureWithPostHog(data: OnBusinessEventToCaptureEvent) {
     val id = data.userAccountDto?.id ?: data.instanceId ?: data.anonymousUserId
     val setEntry = getIdentificationMapForPostHog(data)
-
-    val map =
+    val serverAttribution =
       mapOf(
         "${'$'}groups" to
           mapOf(
@@ -65,7 +70,12 @@ class PostHogBusinessEventReporter(
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
         "glossaryId" to data.glossaryId,
-      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+      )
+    val clientSupplied =
+      ((data.utmData ?: emptyMap()) + (data.data ?: emptyMap()))
+        .filterKeys { !it.startsWith(RESERVED_PREFIX) && it !in RESERVED_KEYS && it !in serverAttribution.keys }
+
+    val map = clientSupplied + serverAttribution + setEntry
 
     postHog?.capture(
       id.toString(),
@@ -145,5 +155,12 @@ class PostHogBusinessEventReporter(
       ).setParameter("organizationId", organizationId)
       .resultList
       .firstOrNull()
+  }
+
+  companion object {
+    private const val RESERVED_PREFIX = '$'
+
+    // PostHog ingestion also reads these non-$ keys out of `properties` (distinct id / project token fallback)
+    private val RESERVED_KEYS = setOf("distinct_id", "token")
   }
 }
