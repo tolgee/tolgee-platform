@@ -1,9 +1,21 @@
-import { createUser, deleteUserSql } from '../common/apiCalls/common';
+import {
+  createUser,
+  deleteUserSql,
+  setBypassSeatCountCheck,
+} from '../common/apiCalls/common';
 import 'cypress-file-upload';
 import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
 
 describe('User Limit', { retries: 5 }, () => {
   const generatedUserNames = [];
+
+  before(() => {
+    setBypassSeatCountCheck(false);
+  });
+
+  after(() => {
+    setBypassSeatCountCheck(true);
+  });
 
   beforeEach(() => {
     for (let i = 1; i <= 11; i++) {

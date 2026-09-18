@@ -118,9 +118,9 @@ jobs:
       - name: Trigger Billing repo tests & testing deploy
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
-          curl \
+          curl --fail-with-body \
             -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
-            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
+            https://api.github.com/repos/tolgee/billing/actions/workflows/test-and-release.yml/dispatches \
             -d '{"ref":"main","inputs":{"release-version":"${{ steps.version.outputs.VERSION }}"}}'
