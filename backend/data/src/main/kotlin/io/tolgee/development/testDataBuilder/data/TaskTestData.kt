@@ -301,6 +301,38 @@ class TaskTestData : BaseTestData("tasksTestUser", "Project with tasks") {
     }
   }
 
+  fun addKeyWithOwnTask(
+    keyName: String,
+    number: Long,
+    taskLanguage: Language = englishLanguage,
+    type: TaskType = TaskType.TRANSLATE,
+    state: TaskState = TaskState.NEW,
+  ): KeyBuilder {
+    lateinit var createdKey: KeyBuilder
+    projectBuilder.apply {
+      createdKey =
+        addKey(null, keyName) {
+          addTranslation("en", "Translation of $keyName")
+          addTranslation("cs", "Překlad $keyName")
+        }
+      val ownTask =
+        addTask {
+          this.number = number
+          this.name = "Task of $keyName"
+          this.type = type
+          this.state = state
+          project = projectBuilder.self
+          language = taskLanguage
+          author = projectUser.self
+        }
+      addTaskKey {
+        task = ownTask.self
+        key = createdKey.self
+      }
+    }
+    return createdKey
+  }
+
   fun createManyOutOfTaskKeys(): List<KeyBuilder> {
     val keys =
       (1 until 200).map {

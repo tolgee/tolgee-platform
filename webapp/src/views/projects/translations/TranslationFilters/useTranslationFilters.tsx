@@ -10,6 +10,12 @@ function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
 
+const LANGUAGE_SCOPES = [
+  'filterTranslationLanguage',
+  'filterSuggestionLanguage',
+  'filterTaskLanguage',
+] as const satisfies readonly (keyof FiltersInternal)[];
+
 type Props = {
   filters: FiltersInternal;
   setFilters: (value: FiltersInternal) => void;
@@ -26,13 +32,21 @@ export const useTranslationFilters = ({
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
   function updateSelectedLanguages(newLanguages: string[] | undefined) {
-    if (
-      typeof filters.filterTranslationLanguage === 'string' &&
-      newLanguages &&
-      newLanguages.includes(filters.filterTranslationLanguage)
-    ) {
-      setFilters({ filterTranslationLanguage: undefined });
+    if (!newLanguages) {
+      return;
     }
+    const dangling = LANGUAGE_SCOPES.filter((scope) => {
+      const value = filters[scope];
+      return typeof value === 'string' && !newLanguages.includes(value);
+    });
+    if (!dangling.length) {
+      return;
+    }
+    const updated = { ...filters };
+    dangling.forEach((scope) => {
+      updated[scope] = undefined;
+    });
+    setFilters(updated);
   }
 
   function addFilter(...params: AddParams) {
@@ -130,6 +144,18 @@ export const useTranslationFilters = ({
           filterHasNoSuggestions: true,
           filterHasSuggestions: undefined,
         });
+      case 'filterHasTask':
+        return setFilters({
+          ...filters,
+          filterHasTask: true,
+          filterHasNoTask: undefined,
+        });
+      case 'filterHasNoTask':
+        return setFilters({
+          ...filters,
+          filterHasNoTask: true,
+          filterHasTask: undefined,
+        });
       case 'filterDeletedByUserId':
         return setFilters({
           ...filters,
@@ -222,6 +248,16 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasNoSuggestions: undefined,
+        });
+      case 'filterHasTask':
+        return setFilters({
+          ...filters,
+          filterHasTask: undefined,
+        });
+      case 'filterHasNoTask':
+        return setFilters({
+          ...filters,
+          filterHasNoTask: undefined,
         });
       case 'filterDeletedByUserId':
         return setFilters({
@@ -346,6 +382,32 @@ export const useTranslationFilters = ({
         if (filters.filterHasNoSuggestions) {
           filtersQuery.filterHasNoSuggestionsInLang = add(
             filtersQuery.filterHasNoSuggestionsInLang,
+            tag
+          );
+        }
+      });
+
+    selectedLanguages
+      .filter((tag) => {
+        switch (filters.filterTaskLanguage) {
+          case undefined:
+            return tag !== baseLang;
+          case true:
+            return true;
+          default:
+            return tag === filters.filterTaskLanguage;
+        }
+      })
+      .forEach((tag) => {
+        if (filters.filterHasTask) {
+          filtersQuery.filterHasTaskInLang = add(
+            filtersQuery.filterHasTaskInLang,
+            tag
+          );
+        }
+        if (filters.filterHasNoTask) {
+          filtersQuery.filterHasNoTaskInLang = add(
+            filtersQuery.filterHasNoTaskInLang,
             tag
           );
         }
