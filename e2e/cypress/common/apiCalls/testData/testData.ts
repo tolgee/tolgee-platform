@@ -180,6 +180,12 @@ export const softDeleteKeysTestData =
 
 export const charLimitTestData = generateTestDataObject('char-limit');
 
+export const copyTranslationTestData =
+  generateTestDataObject('copy-translation');
+
+export const fourTranslationsTestData =
+  generateTestDataObject('four-translations');
+
 export const suggestionsTestData = {
   ...generateTestDataObject('suggestions'),
   generate: (props?: {
