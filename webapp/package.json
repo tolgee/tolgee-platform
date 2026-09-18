@@ -31,7 +31,7 @@
     "@tginternal/editor": "1.20.0",
     "@tginternal/library": "file:../library",
     "@tolgee/format-icu": "^7.2.0",
-    "@tolgee/react": "^7.2.0",
+    "@tolgee/react": "^7.2.1",
     "@untitled-ui/icons-react": "^0.1.3",
     "@vitejs/plugin-react": "^5.1.1",
     "@xiechao/codemirror-lang-handlebars": "^1.0.4",
