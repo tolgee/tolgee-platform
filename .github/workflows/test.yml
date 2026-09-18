@@ -6,6 +6,11 @@ on:
     branches: [main, release]
   pull_request:
 
+# A new push to a PR cancels its previous run; pushes to main and release keep running.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   backend-build:
     name: Build backend 🏗️
