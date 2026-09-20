@@ -66,10 +66,6 @@ export const EmailNotVerifiedView = () => {
 
   const email = useEmailAwaitingVerification();
 
-  if (email == undefined) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
-  }
-
   const { t } = useTranslate();
 
   const resendEmail = useApiMutation({
@@ -116,6 +112,10 @@ export const EmailNotVerifiedView = () => {
     enabled,
   });
   const remainingSeconds = Math.floor(remainingTime / 1000);
+
+  if (email == undefined) {
+    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  }
 
   return (
     <StyledWrapper>

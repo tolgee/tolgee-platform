@@ -60,9 +60,10 @@ export const KeySingle: React.FC<React.PropsWithChildren<Props>> = ({
   );
 
   const translation = translations?.[0];
+  const urlSearch = useUrlSearch();
 
   if (keyId && translation?.branch) {
-    const { id: _id, ...searchWithoutId } = useUrlSearch();
+    const { id: _id, ...searchWithoutId } = urlSearch;
 
     history.replace(
       LINKS.PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH.build({

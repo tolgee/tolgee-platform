@@ -37,6 +37,19 @@ type Props = {
   autofocus?: boolean;
 };
 
+const DirtyChangeReporter = ({
+  dirty,
+  onDirtyChange,
+}: {
+  dirty: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+}) => {
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty]);
+  return null;
+};
+
 export const KeyCreateForm: React.FC<React.PropsWithChildren<Props>> = ({
   baseLanguage,
   onSuccess,
@@ -126,12 +139,15 @@ export const KeyCreateForm: React.FC<React.PropsWithChildren<Props>> = ({
       onSubmit={handleSubmit}
       validationSchema={Validation.NEW_KEY_FORM(t)}
     >
-      {(formik) => {
-        useEffect(() => {
-          onDirtyChange?.(formik.dirty);
-        }, [formik.dirty]);
-        return <FormBody onCancel={onCancel} autofocus={autofocus} />;
-      }}
+      {(formik) => (
+        <>
+          <DirtyChangeReporter
+            dirty={formik.dirty}
+            onDirtyChange={onDirtyChange}
+          />
+          <FormBody onCancel={onCancel} autofocus={autofocus} />
+        </>
+      )}
     </Formik>
   ) : null;
 };

@@ -3,7 +3,7 @@ import { useDebounce } from 'use-debounce';
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import clsx from 'clsx';
@@ -47,7 +47,8 @@ export const RowList: React.FC<React.PropsWithChildren<Props>> = React.memo(
     bannerBefore,
     bannerAfter,
   }) {
-    const { satisfiesPermissionWithBranching } = useProjectPermissions();
+    const satisfiesPermissionWithBranching =
+      useSatisfiesPermissionWithBranching();
     const [hover, setHover] = useState(false);
     const [focus, setFocus] = useState(false);
     const active = hover || focus;

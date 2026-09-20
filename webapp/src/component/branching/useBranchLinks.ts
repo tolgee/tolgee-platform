@@ -18,9 +18,10 @@ export const useBranchLinks = (selectedBranch?: string) => {
   const project = useProject();
   const { isEnabled } = useEnabledFeatures();
   const isBranchingEnabled = isEnabled('BRANCHING') && project.useBranching;
+  const branchFromUrlPath = useBranchFromUrlPath();
   const branch =
     isBranchingEnabled &&
-    (selectedBranch || useBranchFromUrlPath() || getCachedBranch(project.id));
+    (selectedBranch || branchFromUrlPath || getCachedBranch(project.id));
 
   const withBranchLink = (
     link: Link,

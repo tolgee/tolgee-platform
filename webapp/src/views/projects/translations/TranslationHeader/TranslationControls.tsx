@@ -15,7 +15,7 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
@@ -60,7 +60,8 @@ type Props = {
 export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
   onDialogOpen,
 }) => {
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const satisfiesPermissionWithBranching =
+    useSatisfiesPermissionWithBranching();
   const project = useProject();
   const history = useHistory();
   const canCreateKeys = satisfiesPermissionWithBranching('keys.create');

@@ -12,7 +12,7 @@ import { useTranslationsActions } from '../context/TranslationsContext';
 import { TranslationTaskIndicator } from 'tg.ee';
 import { CloseButton } from 'tg.component/common/buttons/CloseButton';
 import React from 'react';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -60,7 +60,8 @@ export const TranslationFlags: React.FC<React.PropsWithChildren<Props>> = ({
   className,
 }) => {
   const project = useProject();
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const satisfiesPermissionWithBranching =
+    useSatisfiesPermissionWithBranching();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];
   const task = keyData.tasks?.find((t) => t.languageTag === lang);
