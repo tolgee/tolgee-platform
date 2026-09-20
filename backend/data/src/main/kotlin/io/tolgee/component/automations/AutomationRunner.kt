@@ -12,9 +12,9 @@ class AutomationRunner(
 ) : Logging {
   fun run(
     actionId: Long,
-    activityRevisionId: Long?,
+    context: AutomationTriggerContext,
   ) {
     val action = automationService.getAction(actionId)
-    applicationContext.getBean(action.type.processor.java).process(action, activityRevisionId)
+    applicationContext.getBean(action.type.processor.java).process(action, context)
   }
 }

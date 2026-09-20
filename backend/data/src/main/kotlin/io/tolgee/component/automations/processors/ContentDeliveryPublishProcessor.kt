@@ -3,6 +3,7 @@ package io.tolgee.component.automations.processors
 import io.tolgee.activity.ActivityService
 import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.automations.AutomationProcessor
+import io.tolgee.component.automations.AutomationTriggerContext
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.FileStoreException
@@ -16,14 +17,14 @@ class ContentDeliveryPublishProcessor(
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
-    activityRevisionId: Long?,
+    context: AutomationTriggerContext,
   ) {
     try {
       val config =
         action.contentDeliveryConfig
           ?: throw IllegalStateException("Wrong params passed to content delivery publish processor")
 
-      if (!isOnConfigBranch(activityRevisionId, config.branch?.id)) {
+      if (!isOnConfigBranch(context.activityRevisionId, config.branch?.id)) {
         return
       }
 

@@ -1,10 +1,8 @@
-package io.tolgee.batch.data
+package io.tolgee.component.automations
 
 import io.tolgee.component.automations.processors.ContentDeliveryPublishWebhookData
 
-data class AutomationTargetItem(
-  val triggerId: Long,
-  val actionId: Long,
-  val activityRevisionId: Long?,
+data class AutomationTriggerContext(
+  val activityRevisionId: Long? = null,
   val contentDeliveryPublish: ContentDeliveryPublishWebhookData? = null,
 )

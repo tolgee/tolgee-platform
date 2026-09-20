@@ -1,6 +1,7 @@
 package io.tolgee.service.automations
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.component.automations.processors.WebhookEventType
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.automations.AutomationDto
 import io.tolgee.exceptions.NotFoundException
@@ -101,6 +102,9 @@ class AutomationService(
   }
 
   private fun deleteTriggersAndActions(automation: Automation) {
+    automation.triggers.forEach {
+      getCache().evict(arrayListOf(automation.project.id, it.type, it.activityType))
+    }
     automation.actions.removeAll {
       entityManager.remove(it)
       true
@@ -150,23 +154,40 @@ class AutomationService(
   }
 
   @Transactional
-  fun createForWebhookConfig(webhookConfig: WebhookConfig): Automation {
+  fun createForWebhookConfig(
+    webhookConfig: WebhookConfig,
+    eventTypes: Set<WebhookEventType>,
+  ): Automation {
     val automation = Automation(webhookConfig.project)
-    addWebhookTriggersAndActions(webhookConfig, automation)
+    addWebhookTriggersAndActions(webhookConfig, automation, eventTypes)
     webhookConfig.automationActions.addAll(automation.actions)
     return save(automation)
   }
 
   @Transactional
-  fun updateForWebhookConfig(webhookConfig: WebhookConfig): Automation {
-    val automation = getAutomationForExistingWebhookConfig(webhookConfig)
-    updateWebhookTriggersAndActions(webhookConfig, automation)
+  fun updateForWebhookConfig(
+    webhookConfig: WebhookConfig,
+    eventTypes: Set<WebhookEventType>?,
+  ): Automation {
+    val subscribedTypes =
+      eventTypes ?: getWebhookEventTypes(webhookConfig).ifEmpty { setOf(WebhookEventType.PROJECT_ACTIVITY) }
+    val automation = getAutomationForExistingWebhookConfig(webhookConfig, subscribedTypes)
+    updateWebhookTriggersAndActions(webhookConfig, automation, subscribedTypes)
     webhookConfig.automationActions.clear()
     webhookConfig.automationActions.addAll(automation.actions)
     return save(automation)
   }
 
-  private fun getAutomationForExistingWebhookConfig(webhookConfig: WebhookConfig): Automation {
+  fun getWebhookEventTypes(webhookConfig: WebhookConfig): Set<WebhookEventType> =
+    webhookConfig.automationActions
+      .flatMap { it.automation.triggers }
+      .mapNotNull { WebhookEventType.fromTriggerType(it.type) }
+      .toSet()
+
+  private fun getAutomationForExistingWebhookConfig(
+    webhookConfig: WebhookConfig,
+    eventTypes: Set<WebhookEventType>,
+  ): Automation {
     val automations = webhookConfig.automationActions.map { it.automation }
     if (automations.size == 1) {
       return automations[0]
@@ -174,20 +195,23 @@ class AutomationService(
     automations.forEach {
       delete(it)
     }
-    return createForWebhookConfig(webhookConfig)
+    return createForWebhookConfig(webhookConfig, eventTypes)
   }
 
   private fun addWebhookTriggersAndActions(
     webhookConfig: WebhookConfig,
     automation: Automation,
+    eventTypes: Set<WebhookEventType>,
   ) {
-    automation.triggers.add(
-      AutomationTrigger(automation).apply {
-        this.type = AutomationTriggerType.ACTIVITY
-        this.activityType = null
-        this.debounceDurationInMs = 0
-      },
-    )
+    eventTypes.mapNotNull { it.triggerType }.forEach { triggerType ->
+      automation.triggers.add(
+        AutomationTrigger(automation).apply {
+          this.type = triggerType
+          this.activityType = null
+          this.debounceDurationInMs = 0
+        },
+      )
+    }
 
     automation.actions.add(
       AutomationAction(automation).apply {
@@ -220,9 +244,10 @@ class AutomationService(
   private fun updateWebhookTriggersAndActions(
     webhookConfig: WebhookConfig,
     automation: Automation,
+    eventTypes: Set<WebhookEventType>,
   ) {
     deleteTriggersAndActions(automation)
-    addWebhookTriggersAndActions(webhookConfig, automation)
+    addWebhookTriggersAndActions(webhookConfig, automation, eventTypes)
   }
 
   private fun updateSlackTriggersAndActions(

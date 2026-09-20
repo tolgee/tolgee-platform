@@ -3,6 +3,7 @@ package io.tolgee.ee.component.slackIntegration
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
 import io.tolgee.api.IProjectActivityModelAssembler
+import io.tolgee.component.automations.AutomationTriggerContext
 import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.component.slackIntegration.notification.SlackAutomationMessageSender
@@ -18,9 +19,9 @@ class SlackSubscriptionProcessorImpl(
 ) : SlackSubscriptionProcessor {
   override fun process(
     action: AutomationAction,
-    activityRevisionId: Long?,
+    context: AutomationTriggerContext,
   ) {
-    if (activityRevisionId == null) return
+    val activityRevisionId = context.activityRevisionId ?: return
 
     val view =
       ProjectActivityViewByRevisionProvider(

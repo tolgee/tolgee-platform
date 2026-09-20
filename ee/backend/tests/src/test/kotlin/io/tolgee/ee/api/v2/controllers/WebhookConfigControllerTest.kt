@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -204,4 +205,98 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("url").isEqualTo("https://new-url.com")
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `subscribes new webhook to project activity by default`() {
+    createWebhook().andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactly("PROJECT_ACTIVITY")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates webhook subscribed to given event types`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com", "eventTypes" to listOf("CONTENT_DELIVERY_PUBLISH")),
+    ).andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactly("CONTENT_DELIVERY_PUBLISH")
+      node("id").isValidId.satisfies(
+        Consumer {
+          triggerTypesOf(it.toLong()).assert.containsExactly(AutomationTriggerType.CONTENT_DELIVERY_PUBLISH)
+        },
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `rejects webhook without any event type`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com", "eventTypes" to listOf<String>()),
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `rejects webhook subscribed only to the test event`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com", "eventTypes" to listOf("TEST")),
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `rejects webhook mixing the test event with real event types`() {
+    performProjectAuthPost(
+      "webhook-configs",
+      mapOf("url" to "https://hello.com", "eventTypes" to listOf("PROJECT_ACTIVITY", "TEST")),
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `updates event types`() {
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf(
+        "url" to testData.webhookConfig.self.url,
+        "eventTypes" to listOf("PROJECT_ACTIVITY", "CONTENT_DELIVERY_PUBLISH"),
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactlyInAnyOrder("PROJECT_ACTIVITY", "CONTENT_DELIVERY_PUBLISH")
+    }
+    triggerTypesOf(testData.webhookConfig.self.id).assert.containsExactlyInAnyOrder(
+      AutomationTriggerType.ACTIVITY,
+      AutomationTriggerType.CONTENT_DELIVERY_PUBLISH,
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `update without event types keeps subscription`() {
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf("url" to testData.webhookConfig.self.url, "eventTypes" to listOf("CONTENT_DELIVERY_PUBLISH")),
+    ).andIsOk
+
+    performProjectAuthPut(
+      "webhook-configs/${testData.webhookConfig.self.id}",
+      mapOf("url" to testData.webhookConfig.self.url, "enabled" to false),
+    ).andIsOk.andAssertThatJson {
+      node("eventTypes").isArray.containsExactly("CONTENT_DELIVERY_PUBLISH")
+    }
+  }
+
+  private fun triggerTypesOf(webhookConfigId: Long): List<AutomationTriggerType> =
+    entityManager
+      .createQuery(
+        """select t.type from AutomationTrigger t
+           where t.automation in (select aa.automation from AutomationAction aa where aa.webhookConfig.id = :id)""",
+        AutomationTriggerType::class.java,
+      ).setParameter("id", webhookConfigId)
+      .resultList
 }

@@ -5,6 +5,6 @@ import io.tolgee.model.automations.AutomationAction
 interface AutomationProcessor {
   fun process(
     action: AutomationAction,
-    activityRevisionId: Long?,
+    context: AutomationTriggerContext,
   )
 }
