@@ -136,7 +136,8 @@ class SuggestionController(
     suggestion: TranslationSuggestion,
     languageId: Long,
   ) {
-    if (authenticationFacade.isAuthorSelfAccess(suggestion.author?.id)) {
+    if (suggestion.author?.id == authenticationFacade.authenticatedUser.id) {
+      securityService.checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
       return
     }
     try {

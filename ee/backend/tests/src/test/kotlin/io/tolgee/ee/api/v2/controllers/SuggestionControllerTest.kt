@@ -13,8 +13,10 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -329,6 +331,92 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `can delete his own suggestion`() {
     initTestData()
+    userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
+  fun `a key without suggestions own-access cannot delete its owner's suggestion`() {
+    initTestData()
+    userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsForbidden.andAssertThatJson {
+      node("code").isEqualTo(Message.OPERATION_NOT_PERMITTED.code)
+      node("params[0]").isEqualTo(Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS.value)
+    }
+    assertSuggestionExists(suggestionId)
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS])
+  fun `a key carrying suggestions own-access can delete its owner's suggestion`() {
+    initTestData()
+    userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[0].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS])
+  fun `suggestions own-access does not reach another user's suggestion`() {
+    initTestData()
+    userAccount = testData.projectTranslator.self
+    val suggestionId = testData.czechSuggestions[1].self.id
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/$suggestionId",
+    ).andIsForbidden.andHasErrorMessage(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
+    assertSuggestionExists(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `suggestions-manage covers the holder's own suggestion without own-access being granted`() {
+    initTestData()
+    userAccount = testData.projectEditor.self
+    val suggestionPath = "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion"
+    val suggestionId =
+      performProjectAuthPost(suggestionPath, CreateTranslationSuggestionRequest(translation = "Editor's suggestion"))
+        .andIsOk
+        .getIdFromResponse()
+
+    performProjectAuthDelete("$suggestionPath/$suggestionId").andIsOk
+    assertSuggestionDeleted(suggestionId)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `refuses to create a suggestion when suggestions are disabled`() {
+    initTestData(SuggestionsMode.DISABLED)
+    performProjectAuthPost(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+      CreateTranslationSuggestionRequest(translation = "New suggestion"),
+    ).andIsBadRequest.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `pending suggestions can still be listed, declined and accepted when suggestions are disabled`() {
+    initTestData(SuggestionsMode.DISABLED)
+    val suggestionPath = "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion"
+    performProjectAuthGet(suggestionPath).andIsOk
+    performProjectAuthPut("$suggestionPath/${testData.czechSuggestions[1].self.id}/decline").andIsOk
+    performProjectAuthPut("$suggestionPath/${testData.czechSuggestions[0].self.id}/accept").andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `can still delete his own suggestion when suggestions are disabled`() {
+    initTestData(SuggestionsMode.DISABLED)
     userAccount = testData.projectTranslator.self
     val suggestionId = testData.czechSuggestions[0].self.id
     performProjectAuthDelete(

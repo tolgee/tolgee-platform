@@ -227,6 +227,7 @@ class ApiKeyController(
       )
 
     val computed = permissionData.computedPermissions
+    val project = projectService.get(projectIdNotNull)
 
     return ApiKeyPermissionsModel(
       projectIdNotNull,
@@ -237,7 +238,9 @@ class ApiKeyController(
       suggestLanguageIds = computed.suggestLanguageIds.toNormalizedPermittedLanguageSet(),
       suggestManageLanguageIds = computed.suggestManageLanguageIds.toNormalizedPermittedLanguageSet(),
       scopes = permittedScopes.toTypedArray(),
-      project = simpleProjectModelAssembler.toModel(projectService.get(projectIdNotNull)),
+      project = simpleProjectModelAssembler.toModel(project),
+      suggestionsMode = project.suggestionsMode,
+      translationProtection = project.translationProtection,
     )
   }
 

@@ -400,10 +400,11 @@ These are known gaps, deferred to the client rounds that first exercise them:
 
 - **Project API keys lose the author self-access bypass** (released behaviour, changed by
   `fix: stop a project API key inheriting the account's elevations`). Several endpoints let you act on something because you
-  created it — viewing and cancelling your own batch job, deleting your own suggestion, editing and deleting your own
-  comment. That bypass applied to project API keys too, so a key could act on those resources while carrying none of
-  `batch-jobs.view`, `batch-jobs.cancel`, `translation-suggestions.manage` or `translation-comments.edit`. A key is a
-  scoped capability, so it now has to carry the real scope; a webapp JWT and a PAT still carry the user's full
+  created it — viewing and cancelling your own batch job, editing and deleting your own comment (deleting your own
+  suggestion was one of them until `translation-suggestions.own-access` replaced it, see below). That bypass applied
+  to project API keys too, so a key could act on those resources while carrying none of `batch-jobs.view`,
+  `batch-jobs.cancel` or `translation-comments.edit`. A key is a scoped capability, so it now has to carry the real
+  scope; a webapp JWT and a PAT still carry the user's full
   authority and are unaffected. Existing keys are not backfilled: the scopes here already exist, and adding them to
   every key would grant more than the bypass did. A key that relied on it needs the scope added, and
   `GET /v2/projects/{id}/batch-jobs/{jobId}` is the likeliest one to notice: `translations.batch-machine` does not
@@ -416,6 +417,13 @@ These are known gaps, deferred to the client rounds that first exercise them:
   it. There is deliberately no backfill: granting a new scope to every existing permission that holds any scope
   would widen a lot of grants at once to restore a bypass, and losing an elevation fails closed where granting one
   does not. Anyone who relied on it adds `tasks.assigned-access` explicitly.
+
+- **Deleting your own suggestion is gated on `translation-suggestions.own-access`.** The author bypass is gone for
+  every credential, a webapp JWT and a PAT included: the author needs the scope, and a project API key or OAuth token that carries it can now delete its owner's
+  suggestions, which no scoped credential could before. Roles pick it up at runtime, VIEW through REVIEW explicitly
+  and EDIT / MANAGE because `translation-suggestions.manage` expands to it; the community floor grants it too.
+  Granular permissions store their scope list literally, so they need a backfill, which must ship in the same
+  release as this change.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client

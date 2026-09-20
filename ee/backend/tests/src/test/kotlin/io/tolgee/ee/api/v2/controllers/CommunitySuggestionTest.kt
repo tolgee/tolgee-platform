@@ -1,16 +1,20 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -19,10 +23,15 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
-    testData = SuggestionsTestData()
+    testData = SuggestionsTestData(SuggestionsMode.ENABLED)
     projectSupplier = { testData.relatedProject.self }
     testDataService.saveTestData(testData.root)
     projectService.setPublic(testData.relatedProject.self.id, true)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -69,6 +78,30 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
         text = "Community comment",
       ),
     ).andIsCreated
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `community user can delete their own suggestion`() {
+    userAccount = testData.communityUser.self
+    val suggestionPath = "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion"
+    val suggestionId =
+      performProjectAuthPost(
+        suggestionPath,
+        CreateTranslationSuggestionRequest(translation = "Community suggested translation"),
+      ).andIsOk.getIdFromResponse()
+
+    performProjectAuthDelete("$suggestionPath/$suggestionId").andIsOk
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `community user cannot delete someone else's suggestion`() {
+    userAccount = testData.communityUser.self
+    performProjectAuthDelete(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}" +
+        "/suggestion/${testData.czechSuggestions[0].self.id}",
+    ).andIsForbidden.andHasErrorMessage(Message.USER_CAN_ONLY_DELETE_HIS_SUGGESTIONS)
   }
 
   @Test

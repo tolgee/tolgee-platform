@@ -247,6 +247,24 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `current permissions report the project's suggestion settings`() {
+    val pakHeaders = HttpHeaders()
+    pakHeaders["x-api-key"] = testData.usersKey.key!!
+    performGet("/v2/api-keys/current-permissions", pakHeaders).andAssertThatJson {
+      node("suggestionsMode").isEqualTo("DISABLED")
+      node("translationProtection").isEqualTo("NONE")
+    }
+
+    val patHeaders = HttpHeaders()
+    patHeaders["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders)
+      .andAssertThatJson {
+        node("suggestionsMode").isEqualTo("ENABLED")
+        node("translationProtection").isEqualTo("PROTECT_REVIEWED")
+      }
+  }
+
+  @Test
   fun `a PAT cannot read the details of a project its user has no access to`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"

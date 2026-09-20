@@ -5,6 +5,8 @@ import io.tolgee.hateoas.permission.IPermissionModel
 import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -26,5 +28,7 @@ class ApiKeyPermissionsModel(
   )
   override val type: ProjectPermissionType?,
   var project: SimpleProjectModel,
+  val suggestionsMode: SuggestionsMode,
+  val translationProtection: TranslationProtection,
 ) : RepresentationModel<ApiKeyPermissionsModel>(),
   IPermissionModel
