@@ -18,6 +18,13 @@ export class E2WebhookItem {
     return this;
   }
 
+  shouldHaveEventTypes(types: string[]) {
+    this.root
+      .findDcy('webhook-item-event-types')
+      .should('have.attr', 'data-cy-event-types', [...types].sort().join(','));
+    return this;
+  }
+
   openEdit() {
     this.root.findDcy('webhooks-item-edit').click();
     return new E2WebhookEditDialog();
