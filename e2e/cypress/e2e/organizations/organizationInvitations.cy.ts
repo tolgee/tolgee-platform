@@ -10,7 +10,6 @@ import {
   getParsedEmailInvitationLink,
   login,
   logout,
-  setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
@@ -19,7 +18,6 @@ describe('Organization Invitations', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData.generate().then((res) => {
@@ -29,12 +27,7 @@ describe('Organization Invitations', () => {
   });
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     deleteAllEmails();
-  });
-
-  afterEach(() => {
-    setBypassSeatCountCheck(false);
   });
 
   it('generates invitations', () => {

@@ -7,7 +7,7 @@ import {
   goToPage,
 } from '../../common/shared';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
-import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import { E2OrganizationMembersView } from '../../compounds/organizationMembers/E2OrganizationMembersView';
 
 const MANAGED_MEMBER = 'LonelyDev@tolgee.io';
@@ -19,7 +19,6 @@ describe('Organization Members', () => {
   const membersView = new E2OrganizationMembersView();
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData
@@ -34,10 +33,6 @@ describe('Organization Members', () => {
 
   afterEach(() => {
     organizationTestData.clean();
-  });
-
-  afterEach(() => {
-    setBypassSeatCountCheck(false);
   });
 
   it('contains organization users', () => {

@@ -1,7 +1,7 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { gcy } from '../../common/shared';
-import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 import {
   permissionsMenuSelectAdvanced,
@@ -12,17 +12,12 @@ describe('Organization Base permissions', () => {
   let organizationData: Record<string, { slug: string }>;
 
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     login();
     organizationTestData.clean();
     organizationTestData.generate().then((res) => {
       organizationData = res.body as any;
       visitProfile('Tolgee');
     });
-  });
-
-  afterEach(() => {
-    setBypassSeatCountCheck(false);
   });
 
   it('changes member privileges', () => {
