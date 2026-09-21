@@ -119,12 +119,11 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
       verify {
         val baseSize = captor.allValues.size
         usageToReportService.delete()
+        var reportedBefore = storedReportedAt()
         // scheduled only now, once the request mock is in place: a tick before it would report
         // outside the captor and defer the next report by a minute
         scheduledReportingManager.scheduleReporting()
-        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(baseSize + 1)
-        }
+        waitForReportStored(reportedBefore) { captor.allValues.assert.hasSize(baseSize + 1) }
 
         keyService.create(testData.project, "key1", null)
 
@@ -132,10 +131,9 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
         Thread.sleep(200)
         captor.allValues.assert.hasSize(baseSize + 1)
 
+        reportedBefore = storedReportedAt()
         currentDateProvider.move(Duration.ofDays(1))
-        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(baseSize + 2)
-        }
+        waitForReportStored(reportedBefore) { captor.allValues.assert.hasSize(baseSize + 2) }
 
         createUser(1)
 
@@ -143,13 +141,32 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
         Thread.sleep(200)
         captor.allValues.assert.hasSize(baseSize + 2)
 
+        reportedBefore = storedReportedAt()
         currentDateProvider.move(Duration.ofDays(1))
-        waitForNotThrowing(timeout = 30_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(baseSize + 3)
-        }
+        waitForReportStored(reportedBefore) { captor.allValues.assert.hasSize(baseSize + 3) }
       }
     }
   }
+
+  // The captor sees the POST before the scheduler stores reportedAt; a key or user created in
+  // that gap reads the stale timestamp and reports at once instead of deferring. The baseline
+  // is taken before the step that triggers the report, since a tick can store it within 100 ms.
+  private fun waitForReportStored(
+    reportedBefore: Date,
+    reportSent: () -> Unit,
+  ) {
+    waitForNotThrowing(timeout = 30_000, pollTime = 100) {
+      reportSent()
+      storedReportedAt().assert.isAfter(reportedBefore)
+    }
+  }
+
+  // straight from the table: the service's read is cached and would serve a stale timestamp
+  private fun storedReportedAt(): Date =
+    entityManager
+      .createQuery("select lru.reportedAt from UsageToReport lru", Date::class.java)
+      .resultList
+      .singleOrNull() ?: Date(0)
 
   private fun createUser(idx: Long): UserAccount =
     userAccountService.createUserWithPassword(
