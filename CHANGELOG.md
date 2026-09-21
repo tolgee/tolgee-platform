@@ -1,3 +1,10 @@
+## [3.224.5](https://github.com/tolgee/tolgee-platform/compare/v3.224.4...v3.224.5) (2026-09-21)
+
+
+### Bug Fixes
+
+* release Redisson locks when the holding thread is interrupted ([#3932](https://github.com/tolgee/tolgee-platform/issues/3932)) ([922feb6](https://github.com/tolgee/tolgee-platform/commit/922feb6461a84e21e98348c2896b6eb282e13c87)), closes [#3899](https://github.com/tolgee/tolgee-platform/issues/3899) [#3899](https://github.com/tolgee/tolgee-platform/issues/3899)
+
 ## [3.224.4](https://github.com/tolgee/tolgee-platform/compare/v3.224.3...v3.224.4) (2026-09-21)
 
 
