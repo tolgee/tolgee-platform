@@ -25,9 +25,7 @@ open class RedissonLockingProvider(
     try {
       return fn()
     } finally {
-      if (lock.isHeldByCurrentThread) {
-        lock.unlock()
-      }
+      lock.releaseEvenIfInterrupted()
     }
   }
 
@@ -45,9 +43,7 @@ open class RedissonLockingProvider(
     try {
       return fn()
     } finally {
-      if (lock.isHeldByCurrentThread) {
-        lock.unlock()
-      }
+      lock.releaseEvenIfInterrupted()
     }
   }
 }

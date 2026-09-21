@@ -1,6 +1,7 @@
 package io.tolgee.component.atomicLong
 
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.component.lockingProvider.releaseEvenIfInterrupted
 import io.tolgee.util.Logging
 import io.tolgee.util.TolgeeAtomicLong
 import io.tolgee.util.logger
@@ -30,9 +31,7 @@ class AtomicLongProvider(
         }
         RedisTolgeeAtomicLong(atomicLong)
       } finally {
-        if (lock.isHeldByCurrentThread) {
-          lock.unlock()
-        }
+        lock.releaseEvenIfInterrupted()
       }
     } else {
       MemoryTolgeeAtomicLong(name, defaultProvider)
