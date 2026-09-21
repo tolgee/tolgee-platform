@@ -2,5 +2,20 @@
   "accept_auth_provider_change_accept": "Rozumiem",
   "accept_auth_provider_change_accept_non_managed": "Zmeniť",
   "accept_auth_provider_change_description": "Naozaj chcete nahradiť <b>{authTypeOld}</b> za <b>{authType}</b>?<br></br>Prihlásiť sa budete môcť iba pomocou <b>{authType}</b>.",
-  "accept_auth_provider_change_description_managed_sso_optional": "Vaša organizácia ({ssoDomain}) vám umožňuje používať SSO.<br></br>\nVáš účet prejde na prihlásenie výhradne prostredníctvom SSO."
+  "accept_auth_provider_change_description_managed_sso_optional": "Vaša organizácia ({ssoDomain}) vám umožňuje používať SSO.<br></br>\nVáš účet prejde na prihlásenie výhradne prostredníctvom SSO.",
+  "onboarding_survey_o_source_article": "Blogový príspevok alebo článok",
+  "onboarding_survey_o_source_colleague": "Kolega alebo priateľ",
+  "onboarding_survey_o_source_event": "Konferencia alebo stretnutie",
+  "onboarding_survey_o_source_github": "GitHub",
+  "onboarding_survey_o_source_other": "Niečo iné",
+  "onboarding_survey_o_source_search": "Google alebo iný vyhľadávač",
+  "onboarding_survey_o_source_social": "Sociálne siete",
+  "onboarding_survey_q_source": "Kde ste sa o nás dozvedeli?",
+  "onboarding_survey_q_source_other_placeholder": "Kde ste sa dozvedeli o Tolgee?",
+  "permissions_item_translations_suggestions_own_access": "Odstrániť vlastné",
+  "suggestions_disabled": "Návrhy sú pre tento projekt vypnuté",
+  "validation_array_min": "{min, plural, one {Vyberte aspoň # položku} few {Vyberte aspoň # položky} many {Vyberte aspoň # položky} other {Vyberte aspoň # položiek}}",
+  "webhook_event_type_content_delivery_publish": "Doručenie obsahu publikované",
+  "webhook_event_type_project_activity": "Aktivita projektu",
+  "webhook_form_event_types_label": "Udalosti"
 }

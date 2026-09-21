@@ -1,3 +1,10 @@
+## [3.224.3](https://github.com/tolgee/tolgee-platform/compare/v3.224.2...v3.224.3) (2026-09-21)
+
+
+### Bug Fixes
+
+* build the project dashboard billing link from the organization slug ([#3921](https://github.com/tolgee/tolgee-platform/issues/3921)) ([d6f55ee](https://github.com/tolgee/tolgee-platform/commit/d6f55ee2195ea0d7026ac68f23fc9c4955bb315c)), closes [#3816](https://github.com/tolgee/tolgee-platform/issues/3816)
+
 ## [3.224.2](https://github.com/tolgee/tolgee-platform/compare/v3.224.1...v3.224.2) (2026-09-17)
 
 
