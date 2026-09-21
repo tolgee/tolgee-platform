@@ -102,8 +102,6 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @Test
   @Order(2)
   fun `it reports usage periodically`() {
-    // since we canceled all tasks, we need to reschedule
-    scheduledReportingManager.scheduleReporting()
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
     saveSubscription()
@@ -119,10 +117,11 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
       }
 
       verify {
-        // Record baseline captor size to avoid race condition: the scheduler (100ms interval)
-        // may fire between mock setup and this point, producing extra captures.
         val baseSize = captor.allValues.size
         usageToReportService.delete()
+        // scheduled only now, once the request mock is in place: a tick before it would report
+        // outside the captor and defer the next report by a minute
+        scheduledReportingManager.scheduleReporting()
         waitForNotThrowing(timeout = 30_000, pollTime = 100) {
           captor.allValues.assert.hasSize(baseSize + 1)
         }
