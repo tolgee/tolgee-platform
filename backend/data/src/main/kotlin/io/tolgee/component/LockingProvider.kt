@@ -13,6 +13,14 @@ interface LockingProvider {
   ): T
 
   /**
+   * Releases a lock obtained from [getLock]. Providers whose locks need a
+   * special release protocol override this instead of each locking method.
+   */
+  fun releaseLock(lock: Lock) {
+    lock.unlock()
+  }
+
+  /**
    * Executes the given function if the lock can be acquired within [waitTime].
    * If the lock cannot be acquired in time, returns null without executing the function.
    *
@@ -32,7 +40,7 @@ interface LockingProvider {
     try {
       return fn()
     } finally {
-      lock.unlock()
+      releaseLock(lock)
     }
   }
 
