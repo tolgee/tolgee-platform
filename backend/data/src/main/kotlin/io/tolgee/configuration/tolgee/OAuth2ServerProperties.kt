@@ -19,17 +19,29 @@ class OAuth2ServerProperties {
 
   @DocProperty(
     description =
-      "Loopback redirect URIs of the Tolgee CLI (RFC 8252), e.g. `http://127.0.0.1:9876/callback`. Prefer the " +
-        "loopback IP literal over `localhost`, which RFC 8252 section 7.3 marks NOT RECOMMENDED: a client " +
-        "resolving `localhost` may end up listening on interfaces other than the loopback one. The CLI " +
-        "OAuth client is only registered when this is set.\n" +
+      "Whether `tolgee login` can sign users in against this instance. The CLI is registered wherever the " +
+        "authorization server is live, so nothing has to be configured for browser login to work.\n" +
         "\n" +
         ":::info\n" +
-        "A loopback redirect cannot be tied to one local application, so any process on the machine that knows " +
-        "the client id can start an authorization for it. The user still has to approve the consent screen, " +
-        "but leave this unset unless the CLI is actually in use.\n" +
+        "A loopback redirect cannot be tied to one local application, so any process on the machine can start an " +
+        "authorization as the CLI. The user still has to approve the consent screen, and the token can never " +
+        "exceed what they are allowed to do, but an instance that will never see the CLI can turn it off here.\n" +
         ":::\n\n",
-    defaultValue = "",
+    defaultValue = "true",
+    defaultExplanation =
+      "The client is registered only where the issuer resolves: without `tolgee.back-end-url` (or " +
+        "`tolgee.front-end-url`) the authorization server is off entirely and browser login cannot work.",
+  )
+  var cliEnabled: Boolean = true
+
+  @DocProperty(
+    description =
+      "Loopback redirect URIs of the Tolgee CLI (RFC 8252), accepted instead of the `http://127.0.0.1/callback` " +
+        "the CLI uses by default. The port is ignored either way, since a CLI takes whatever port the OS gives " +
+        "it, so this is only needed for a build that listens elsewhere. Prefer the loopback IP literal over " +
+        "`localhost`, which RFC 8252 section 8.3 marks NOT RECOMMENDED: a client resolving `localhost` may end " +
+        "up listening on interfaces other than the loopback one.",
+    defaultValue = "http://127.0.0.1/callback",
   )
   var cliRedirectUris: List<String> = listOf()
 

@@ -26,9 +26,16 @@ import org.springframework.stereotype.Component
 import java.net.URI
 
 /**
- * The OAuth clients Tolgee will issue tokens to: the pre-registered ones it ships (the browser extension and CLI,
- * from configuration) plus any unknown client that presents a valid Client ID Metadata Document (CIMD) at an HTTPS
- * `client_id` URL.
+ * Must stay byte-identical, in scheme host and path, to what `tolgee login` listens on in the tolgee-cli repo:
+ * [OAuth2Client.allowsRedirectUri] compares all three literally, so a CLI that moved to `localhost` or another path
+ * would stop being able to log in against every instance that never configured a redirect of its own.
+ */
+private const val DEFAULT_CLI_REDIRECT_URI = "http://127.0.0.1/callback"
+
+/**
+ * The OAuth clients Tolgee will issue tokens to: the CLI, which is registered wherever the authorization server is
+ * live, the browser extension where an operator configured its redirect URI, and any unknown client that presents a
+ * valid Client ID Metadata Document (CIMD) at an HTTPS `client_id` URL.
  */
 @Component
 class OAuth2ClientRegistry(
@@ -37,11 +44,13 @@ class OAuth2ClientRegistry(
   private val cimdClientPolicy: CimdClientPolicy,
   private val issuerResolver: OAuth2IssuerResolver,
 ) {
-  val clients: List<OAuth2Client> = listOfNotNull(browserExtension(), cli())
+  private val configuredClients: List<OAuth2Client> = listOfNotNull(browserExtension(), configuredCli())
+
+  val clients: List<OAuth2Client> = configuredClients + listOfNotNull(defaultCli())
 
   @PostConstruct
   fun requireIssuerForPreRegisteredClients() {
-    if (clients.isEmpty()) return
+    if (configuredClients.isEmpty()) return
     runCatching { issuerResolver.issuerUrl }.onFailure {
       throw IllegalStateException(
         "tolgee.back-end-url (or tolgee.front-end-url) must be a usable issuer when a tolgee.oauth2 client is " +
@@ -91,14 +100,30 @@ class OAuth2ClientRegistry(
     )
   }
 
-  private fun cli(): OAuth2Client? {
+  private fun configuredCli(): OAuth2Client? {
+    if (!properties.cliEnabled) return null
     if (properties.cliRedirectUris.isEmpty()) return null
-    return OAuth2Client(
+    return cliClient(requireValidRedirectUris(properties.cliRedirectUris))
+  }
+
+  /**
+   * `tolgee login` has to work against an instance nobody configured for it, so the CLI is registered wherever the
+   * authorization server is live at all. It is left out where the issuer does not resolve, because then no OAuth
+   * endpoint answers anyway.
+   */
+  private fun defaultCli(): OAuth2Client? {
+    if (!properties.cliEnabled) return null
+    if (properties.cliRedirectUris.isNotEmpty()) return null
+    if (!issuerResolver.isConfigured) return null
+    return cliClient(listOf(DEFAULT_CLI_REDIRECT_URI))
+  }
+
+  private fun cliClient(redirectUris: List<String>) =
+    OAuth2Client(
       clientId = OAuth2Constants.CLI_CLIENT_ID,
       name = "Tolgee CLI",
-      redirectUris = requireValidRedirectUris(properties.cliRedirectUris),
+      redirectUris = redirectUris,
     )
-  }
 
   /**
    * OAuth 2.1 §2.3 and §1.5: a registered redirect URI must be absolute, carry no fragment, and use https unless it

@@ -19,8 +19,8 @@ import org.mockito.kotlin.verify
 
 class OAuth2ClientRegistryTest {
   @Test
-  fun `configures no clients when no redirect URIs are set`() {
-    val registry = registry(extensionUris = listOf(), cliUris = listOf())
+  fun `configures no clients when nothing is set and the CLI is turned off`() {
+    val registry = registry(extensionUris = listOf(), cliEnabled = false)
 
     registry.clients.assert.isEmpty()
     registry.find(OAuth2Constants.CLI_CLIENT_ID).assert.isNull()
@@ -47,7 +47,7 @@ class OAuth2ClientRegistryTest {
 
   @Test
   fun `a redirect URI must match a registered one exactly`() {
-    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf()).clients.single()
+    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliEnabled = false).clients.single()
 
     client.allowsRedirectUri("https://ext.example/callback").assert.isTrue()
     client.allowsRedirectUri("https://ext.example/callback/").assert.isFalse()
@@ -116,14 +116,14 @@ class OAuth2ClientRegistryTest {
 
   @Test
   fun `a presented redirect URI that does not parse never matches`() {
-    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf()).clients.single()
+    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliEnabled = false).clients.single()
 
     client.allowsRedirectUri("https://ext.example/call back").assert.isFalse()
   }
 
   @Test
   fun `a non-loopback redirect is still matched exactly`() {
-    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf()).clients.single()
+    val client = registry(extensionUris = listOf("https://ext.example/callback"), cliEnabled = false).clients.single()
 
     client.allowsRedirectUri("https://ext.example:8443/callback").assert.isFalse()
   }
@@ -216,7 +216,11 @@ class OAuth2ClientRegistryTest {
   fun `enabling is issuer-based, so no pre-registered client is required`() {
     val registry = registry()
 
-    registry.clients.assert.isEmpty()
+    // Nothing is configured here: the CLI is seeded on every instance with an issuer, and CIMD is live regardless.
+    registry.clients
+      .map { it.clientId }
+      .assert
+      .containsExactly(OAuth2Constants.CLI_CLIENT_ID)
     registry.isStillAuthorized(CIMD_URL).assert.isTrue()
   }
 
@@ -226,6 +230,48 @@ class OAuth2ClientRegistryTest {
 
     registry.find(CIMD_URL).assert.isNull()
     registry.isStillAuthorized(CIMD_URL).assert.isFalse()
+  }
+
+  @Test
+  fun `the CLI is registered without anyone configuring it`() {
+    val registry = registry()
+
+    val cli = registry.find(OAuth2Constants.CLI_CLIENT_ID)
+
+    cli.assert.isNotNull()
+    // The CLI takes whatever port the OS gives it, so the registered one cannot be part of the comparison.
+    cli!!.allowsRedirectUri("http://127.0.0.1:53211/callback").assert.isTrue()
+  }
+
+  @Test
+  fun `an instance that will never see the CLI can turn it off`() {
+    val registry = registry(cliEnabled = false)
+
+    registry.find(OAuth2Constants.CLI_CLIENT_ID).assert.isNull()
+  }
+
+  @Test
+  fun `turning the CLI off also refuses redirect URIs configured for it`() {
+    val registry = registry(cliUris = listOf("https://cli.example/callback"), cliEnabled = false)
+
+    registry.find(OAuth2Constants.CLI_CLIENT_ID).assert.isNull()
+  }
+
+  @Test
+  fun `configured redirect URIs replace the default rather than adding to it`() {
+    val registry = registry(cliUris = listOf("https://cli.example/callback"))
+
+    val cli = registry.find(OAuth2Constants.CLI_CLIENT_ID)!!
+
+    cli.allowsRedirectUri("https://cli.example/callback").assert.isTrue()
+    cli.allowsRedirectUri("http://127.0.0.1:53211/callback").assert.isFalse()
+  }
+
+  @Test
+  fun `the CLI is left out where the issuer does not resolve`() {
+    val registry = registry(resolver = resolver(isConfigured = false))
+
+    registry.find(OAuth2Constants.CLI_CLIENT_ID).assert.isNull()
   }
 
   @Test
@@ -260,6 +306,7 @@ class OAuth2ClientRegistryTest {
   private fun registry(
     extensionUris: List<String> = listOf(),
     cliUris: List<String> = listOf(),
+    cliEnabled: Boolean = true,
     cimdAllowedHosts: List<String> = listOf(),
     cache: CimdClientCache = mock(),
     resolver: OAuth2IssuerResolver = resolver(),
@@ -268,6 +315,7 @@ class OAuth2ClientRegistryTest {
       OAuth2ServerProperties().apply {
         browserExtensionRedirectUris = extensionUris
         cliRedirectUris = cliUris
+        this.cliEnabled = cliEnabled
         this.cimdAllowedHosts = cimdAllowedHosts
       }
     return OAuth2ClientRegistry(properties, cache, CimdClientPolicy(properties, InternalProperties()), resolver)

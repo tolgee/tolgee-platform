@@ -182,10 +182,17 @@ means, which is why it is a deliberate decision rather than an additive one.
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
-**pre-registration**: the browser extension and CLI are built from configuration with a known `client_id`
-(`OAuth2ClientRegistry.kt`). Every client is public, must use PKCE (S256 only), and always goes through
-the consent screen. Redirect URIs are matched exactly, except that a loopback URI is accepted on any port — a CLI
-takes whatever port the OS gives it at request time. RFC 8252 §7.3 requires that for the IP literals (`127.0.0.1`,
+**pre-registration** (`OAuth2ClientRegistry.kt`): the client ships with a known `client_id`. The browser extension
+is registered only where an operator configured its redirect URI, because that URI carries the published
+extension's id, which this repo does not know and so cannot seed. The **CLI is registered on every instance whose
+issuer resolves**, with a default `http://127.0.0.1/callback`: `tolgee login` has to work against an instance
+nobody configured for it, and a loopback redirect is not an operator's to know. `tolgee.oauth2.cli-enabled: false`
+is how an instance that will never see the CLI refuses it, and `cli-redirect-uris` accepts a different redirect
+instead of the default, for a CLI build that listens elsewhere. Every client is public, must use PKCE (S256 only),
+and always goes through the consent screen.
+
+Redirect URIs are matched exactly, except that a loopback URI is accepted on any port — a CLI takes whatever port
+the OS gives it at request time. RFC 8252 §7.3 requires that for the IP literals (`127.0.0.1`,
 `[::1]`); §8.3 steers clients towards those rather than `localhost`, which depends on the host's name resolution,
 but Tolgee matches a `localhost` registration the same way because refusing it would accept a configuration at
 startup and then reject the callback it produces. Simple and safe, but it only works for apps *we* control.
