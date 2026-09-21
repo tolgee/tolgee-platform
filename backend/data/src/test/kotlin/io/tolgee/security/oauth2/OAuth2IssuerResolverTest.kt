@@ -54,8 +54,6 @@ class OAuth2IssuerResolverTest {
 
   @Test
   fun `refuses an issuer with a path, naming the property to fix`() {
-    // RFC 8414 §3 would put the metadata document at a path Tolgee does not serve, so this must fail loudly at the
-    // first read rather than dead-ending the flow in the browser.
     assertThatThrownBy { resolverFor("https://tolgee.example.com/tolgee", null).issuerUrl }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessageContaining("tolgee.back-end-url")
@@ -66,7 +64,6 @@ class OAuth2IssuerResolverTest {
 
   @Test
   fun `refuses an issuer carrying a query or a fragment`() {
-    // RFC 8414 §2: the issuer identifier has no query or fragment components.
     assertThatThrownBy { resolverFor("https://tolgee.example.com?tenant=a", null).issuerUrl }
       .isInstanceOf(IllegalStateException::class.java)
     assertThatThrownBy { resolverFor("https://tolgee.example.com#f", null).issuerUrl }
@@ -81,8 +78,6 @@ class OAuth2IssuerResolverTest {
 
   @Test
   fun `a malformed issuer does not stop an instance booting - it only turns the OAuth server off`() {
-    // front-end-url carrying a path is valid for every other thing that property does, so an instance that never
-    // wanted OAuth must not be bricked by it. The hard failure belongs where a client was actually configured.
     val resolver = resolverFor("https://tolgee.example.com/tolgee", null)
 
     assertThatCode { resolver.warnOnUnusableIssuer() }.doesNotThrowAnyException()
@@ -100,6 +95,24 @@ class OAuth2IssuerResolverTest {
     resolverFor(null, "https://front.example.com").isConfigured.assert.isTrue()
     resolverFor(null, null).isConfigured.assert.isFalse()
     resolverFor("https://tolgee.example.com/path", null).isConfigured.assert.isFalse()
+  }
+
+  @Test
+  fun `isConfigured says exactly whether the issuer can be read`() {
+    // OAuth2ClientRegistry seeds the CLI client on isConfigured alone, and skips the startup check that a configured
+    // client gets. That is only safe while these two cannot disagree: a resolver that claimed to be configured while
+    // issuerUrl throws would register a client on an instance whose OAuth endpoints cannot answer.
+    listOf(
+      resolverFor("https://tolgee.example.com", null),
+      resolverFor(null, "https://front.example.com"),
+      resolverFor(null, null),
+      resolverFor("", null),
+      resolverFor("https://tolgee.example.com/path", null),
+      resolverFor(null, "https://front.example.com/x?q=1"),
+    ).forEach { resolver ->
+      resolver.isConfigured.assert
+        .isEqualTo(runCatching { resolver.issuerUrl }.isSuccess)
+    }
   }
 
   private fun resolverFor(
