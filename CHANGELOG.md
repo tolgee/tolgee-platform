@@ -1,3 +1,10 @@
+## [3.224.4](https://github.com/tolgee/tolgee-platform/compare/v3.224.3...v3.224.4) (2026-09-21)
+
+
+### Bug Fixes
+
+* bump Spring Cloud Azure to 7.4.0 to patch CVE-2026-69854 ([#3933](https://github.com/tolgee/tolgee-platform/issues/3933)) ([6f9086c](https://github.com/tolgee/tolgee-platform/commit/6f9086c16663d9e262c3274adfda505df2379703))
+
 ## [3.224.3](https://github.com/tolgee/tolgee-platform/compare/v3.224.2...v3.224.3) (2026-09-21)
 
 
