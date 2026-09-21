@@ -199,6 +199,13 @@ data class OAuth2Client(
     internal fun isLoopbackHost(host: String?): Boolean = host in LOOPBACK_HOSTS
 
     /**
+     * Whether the code will be delivered to something listening on the user's own machine rather than to a website.
+     * The consent screen says so: a loopback `client_id` is not proof of which local program is listening, so the
+     * user is the only one who can tell the CLI they just started apart from anything else that bound a port.
+     */
+    fun redirectsToLocalApp(redirectUri: String): Boolean = isLoopbackHost(UrlOrigins.parse(redirectUri)?.host)
+
+    /**
      * The spelling two registered redirects share exactly when they accept the same presented URIs, so a projection
      * of the consented terms can be built on the equivalence [allowsRedirectUri] actually honours instead of guessing
      * at it.

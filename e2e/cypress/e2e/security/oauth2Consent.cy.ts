@@ -16,11 +16,19 @@ const CODE_CHALLENGE = '9fa4Kxg-kvmCollzytmpG-4BeAy0obZey5rQMBKBXVc';
 const NAVIGATION_TIMEOUT = 60000;
 
 const CIMD_CLIENT_ID = `${API_URL}/internal/e2e-data/oauth2-consent/cimd-client`;
+// The CLI is registered on every instance whose issuer resolves, with no redirect URI configured for it. The port is
+// ignored on a loopback redirect, so this one is accepted without anything listening behind it.
+const CLI_CLIENT_ID = 'tolgee-cli';
+const CLI_REDIRECT_URI = 'http://127.0.0.1:53211/callback';
 
-const authorizeUrl = (scope: string, clientId: string = CLIENT_ID) =>
+const authorizeUrl = (
+  scope: string,
+  clientId: string = CLIENT_ID,
+  redirectUri: string = REDIRECT_URI
+) =>
   `${API_URL}/oauth2/authorize?response_type=code` +
   `&client_id=${encodeURIComponent(clientId)}` +
-  `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+  `&redirect_uri=${encodeURIComponent(redirectUri)}` +
   `&scope=${encodeURIComponent(scope)}` +
   `&state=e2e-state` +
   `&code_challenge=${CODE_CHALLENGE}` +
@@ -94,6 +102,28 @@ describe('OAuth2 consent', () => {
 
     cy.url({ timeout: NAVIGATION_TIMEOUT }).should('include', 'code=');
     cy.url().should('include', 'state=e2e-state');
+  });
+
+  it('says so when the code goes to an application on the user machine', () => {
+    cy.visit(
+      authorizeUrl('translations.view', CLI_CLIENT_ID, CLI_REDIRECT_URI)
+    );
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-local-app').should('be.visible');
+    // The CLI is one of ours, so it is not presented as an app nobody vetted.
+    cy.gcy('oauth2-consent-unverified').should('not.exist');
+  });
+
+  it('does not claim a local application when the code goes to a site', () => {
+    cy.visit(authorizeUrl('translations.view'));
+
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.gcy('oauth2-consent-local-app').should('not.exist');
   });
 
   it('renders the unverified-app treatment for a CIMD client', () => {

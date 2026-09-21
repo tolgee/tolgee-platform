@@ -18,6 +18,7 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
+import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
@@ -114,6 +115,7 @@ class OAuth2FlowController(
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
       verified = client.verified,
+      redirectsToLocalApp = OAuth2Client.redirectsToLocalApp(grant.redirectUri),
       clientOrigin = cimd?.clientOrigin,
     )
   }

@@ -129,6 +129,20 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
+  fun `a redirect to the user's own machine is reported as one`() {
+    OAuth2Client.redirectsToLocalApp("http://127.0.0.1:53211/callback").assert.isTrue()
+    OAuth2Client.redirectsToLocalApp("http://localhost:53211/callback").assert.isTrue()
+    OAuth2Client.redirectsToLocalApp("http://[::1]:53211/callback").assert.isTrue()
+  }
+
+  @Test
+  fun `a redirect to a website is not`() {
+    OAuth2Client.redirectsToLocalApp("https://app.example/callback").assert.isFalse()
+    OAuth2Client.redirectsToLocalApp("https://127.0.0.1.evil.example/callback").assert.isFalse()
+    OAuth2Client.redirectsToLocalApp("not a uri").assert.isFalse()
+  }
+
+  @Test
   fun `two redirect spellings share an equivalence key exactly when they accept the same presented URIs`() {
     // The consented-terms hash projects registered redirects through redirectEquivalenceKey, so if the key and the
     // matcher ever disagree the hash either mass-revokes on a neutral edit or misses one that moved the goalposts.

@@ -2302,6 +2302,7 @@ export interface components {
       appName: string;
       clientOrigin?: string;
       project?: components["schemas"]["OAuth2ProjectModel"];
+      redirectsToLocalApp: boolean;
       /** Format: int64 */
       requestedProjectId?: number;
       requiredScopes: string[];

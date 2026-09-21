@@ -20,6 +20,7 @@ import {
 } from './consentProjectChoice';
 import { ConsentProjectPicker } from './ConsentProjectPicker';
 import { ConsentPermissions } from './ConsentPermissions';
+import { ConsentLocalAppNotice } from 'tg.component/security/oauth2/ConsentLocalAppNotice';
 import { ConsentUnverifiedClient } from 'tg.component/security/oauth2/ConsentUnverifiedClient';
 
 const StyledButtons = styled(Box)`
@@ -168,6 +169,7 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
                 clientOrigin={info.clientOrigin}
               />
             )}
+            {info.redirectsToLocalApp && <ConsentLocalAppNotice />}
             {isRequestedProjectInaccessible(info) && (
               <Alert
                 severity="warning"

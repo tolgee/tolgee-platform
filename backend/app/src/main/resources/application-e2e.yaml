@@ -17,6 +17,9 @@ tolgee:
     # The callback is served by OAuth2ConsentE2eDataController.
     browser-extension-redirect-uris:
       - http://localhost:${TOLGEE_E2E_PORT:8201}/internal/e2e-data/oauth2-consent/callback
+      # Nothing listens here. It is the only redirect in this environment that is not a loopback host, which is what
+      # the consent screen needs to decide it is not handing the code to a local application.
+      - https://e2e-site.test/callback
   authentication:
     enabled: true
     needs-email-verification: true
