@@ -130,7 +130,7 @@ export const useTranslationsService = (props: Props) => {
     addFilter,
     removeFilter,
     setFilters,
-    updateSelectedLanguages,
+    clearFiltersForRemovedLanguages,
   } = useTranslationFiltersService({
     selectedLanguages: query.languages,
     baseLang: props.baseLang,
@@ -344,7 +344,7 @@ export const useTranslationsService = (props: Props) => {
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
       const combined = { ...query, ...q };
-      updateSelectedLanguages(combined.languages);
+      clearFiltersForRemovedLanguages(combined.languages);
       setQuery(combined);
     });
   };
