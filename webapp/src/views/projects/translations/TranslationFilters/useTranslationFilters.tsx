@@ -1,12 +1,6 @@
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { AddParams, FiltersInternal, FiltersType } from './tools';
 
-const LANGUAGE_SCOPES = [
-  'filterTranslationLanguage',
-  'filterSuggestionLanguage',
-  'filterQaCheckTypeLanguage',
-] as const satisfies readonly (keyof FiltersInternal)[];
-
 function remove<T extends string | number>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];
   return result.length ? result : undefined;
@@ -15,6 +9,13 @@ function remove<T extends string | number>(list: T[] | undefined, value: T) {
 function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
+
+const LANGUAGE_SCOPES = [
+  'filterTranslationLanguage',
+  'filterSuggestionLanguage',
+  'filterTaskLanguage',
+  'filterQaCheckTypeLanguage',
+] as const satisfies readonly (keyof FiltersInternal)[];
 
 type Props = {
   filters: FiltersInternal;
@@ -359,6 +360,19 @@ export const useTranslationFilters = ({
           );
         }
       });
+
+    const taskLanguages = selectedLanguages.filter(
+      inLanguageScope(filters.filterTaskLanguage)
+    );
+    const taskStatuses = Object.entries(filters.filterTaskStatus ?? {});
+    taskLanguages.forEach((tag) => {
+      taskStatuses.forEach(([type, status]) => {
+        filtersQuery.filterTaskInLang = add(
+          filtersQuery.filterTaskInLang,
+          `${tag},${type},${status}`
+        );
+      });
+    });
   }
 
   return {
