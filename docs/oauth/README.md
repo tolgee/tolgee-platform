@@ -245,6 +245,13 @@ own PR:
   consent screen presented as "translations.view on project X". Neither resolves a project, so neither the token's
   scopes nor its project set is consulted. The follow-up is a scope covering account-level reads, or narrowing the
   non-project `@AllowApiAccess(ANY)` set for scoped credentials generally.
+- **`current-permissions` tells the client what the *user* may do, not only what the token may do.**
+  `GET /v2/api-keys/current-permissions` returns `userScopes`, the expanded scope set of the user's own project
+  permission, alongside `scopes`, which is narrowed by the credential. A third-party client therefore learns the
+  user's full project scope set whatever its own grant asked for. That is deliberate and is what makes "your
+  account can do this, this sign-in cannot" expressible — a client can offer to ask for more only when asking would
+  actually help — but it is more than the grant requested, and it applies to project API keys in exactly the same
+  way.
 - **`@IsGlobalRoute` skips every project narrowing.** `AbstractAuthorizationInterceptor.preHandle` returns before
   `preHandleInternal` for a global route, so `coversProject` and the scope intersection are not consulted there. No
   `@AllowApiAccess @IsGlobalRoute` handler reads project-shaped data today; the structural fix is to refuse a

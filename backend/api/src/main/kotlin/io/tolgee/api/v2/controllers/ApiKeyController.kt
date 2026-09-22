@@ -238,6 +238,7 @@ class ApiKeyController(
       suggestLanguageIds = computed.suggestLanguageIds.toNormalizedPermittedLanguageSet(),
       suggestManageLanguageIds = computed.suggestManageLanguageIds.toNormalizedPermittedLanguageSet(),
       scopes = permittedScopes.toTypedArray(),
+      userScopes = computed.expandedScopes,
       project = simpleProjectModelAssembler.toModel(project),
       suggestionsMode = project.suggestionsMode,
       translationProtection = project.translationProtection,
