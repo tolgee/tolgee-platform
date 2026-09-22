@@ -366,6 +366,49 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_complex_tag_operation" params={params} />;
     },
   },
+  API_KEY_CREATE: {
+    label() {
+      return (
+        <T keyName="activity_api_key_create" defaultValue="API key created" />
+      );
+    },
+    entities: {
+      ApiKey: [],
+    },
+  },
+  API_KEY_UPDATE: {
+    label() {
+      return (
+        <T keyName="activity_api_key_update" defaultValue="API key updated" />
+      );
+    },
+    entities: {
+      ApiKey: [],
+    },
+  },
+  API_KEY_DELETE: {
+    label() {
+      return (
+        <T keyName="activity_api_key_delete" defaultValue="API key deleted" />
+      );
+    },
+    entities: {
+      ApiKey: [],
+    },
+  },
+  API_KEY_REGENERATE: {
+    label() {
+      return (
+        <T
+          keyName="activity_api_key_regenerate"
+          defaultValue="API key regenerated"
+        />
+      );
+    },
+    entities: {
+      ApiKey: [],
+    },
+  },
   TASK_CREATE: {
     label() {
       return <T keyName="activity_task_create" />;
