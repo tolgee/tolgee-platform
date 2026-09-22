@@ -179,6 +179,14 @@ means, which is why it is a deliberate decision rather than an additive one.
 - **project set** = *where* it may do it: the `project_selection` column on the grant — specific project ids, or the
   `*` sentinel meaning "don't narrow by project" (still bounded by the user's live permissions).
 
+A grant bound to exactly one project reports it to the client: the token response carries `project_id` alongside
+`access_token`, on the code exchange and on every refresh. RFC 6749 §5.1 allows extra parameters, and without one a
+client would have to ask the user for a project id the authorization has already fixed — there is no endpoint it
+could read it from (`/v2/api-keys/current` is PAK-only, `/v2/projects` is PAT-only). A grant covering every project
+sends no `project_id`, because there is no single answer. Inside the API the same fact is
+`OAuth2TokenCredentials.singleProjectId`, which feeds `AuthenticationFacade.implicitProjectId` so that a
+single-project token resolves the project-implicit endpoints exactly as a project API key does.
+
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by

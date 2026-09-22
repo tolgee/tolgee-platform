@@ -75,6 +75,8 @@ class OAuth2AuthorizationService(
     val refreshToken: String,
     val expiresInSeconds: Long,
     val scopes: List<String>,
+    /** The project this grant is bound to, when it is bound to exactly one; null when a client must name one. */
+    val projectId: Long?,
   )
 
   fun validateAuthorizeRequest(params: AuthorizeParams): ValidatedAuthorizeRequest {
@@ -452,6 +454,7 @@ class OAuth2AuthorizationService(
       refreshToken = OAUTH_REFRESH_TOKEN_PREFIX + refreshToken,
       expiresInSeconds = validity.seconds,
       scopes = grant.issuedTokenScopeValues,
+      projectId = grant.boundProjectIds()?.singleOrNull(),
     )
   }
 

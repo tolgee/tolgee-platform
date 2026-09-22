@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.FrontendUrlProvider
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.oauth2.AuthorizationServerMetadataModel
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -48,6 +49,7 @@ class OAuth2AuthorizationServerController(
   private val issuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
   private val resources: OAuth2Resources,
+  private val oauth2Properties: OAuth2ServerProperties,
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
@@ -145,16 +147,18 @@ class OAuth2AuthorizationServerController(
           null -> throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "grant_type is required")
           else -> throw OAuth2Error(OAuth2Error.UNSUPPORTED_GRANT_TYPE)
         }
-      return tokenResponse(HttpStatus.OK)
-        .body(
-          mapOf(
-            "access_token" to tokens.accessToken,
-            "token_type" to "Bearer",
-            "expires_in" to tokens.expiresInSeconds,
-            "refresh_token" to tokens.refreshToken,
-            "scope" to tokens.scopes.joinToString(" "),
-          ),
+      val body =
+        mutableMapOf<String, Any>(
+          "access_token" to tokens.accessToken,
+          "token_type" to "Bearer",
+          "expires_in" to tokens.expiresInSeconds,
+          "refresh_token" to tokens.refreshToken,
+          "scope" to tokens.scopes.joinToString(" "),
         )
+      // RFC 6749 §5.1 allows extra parameters. A client holding a single-project grant would otherwise have to ask
+      // the user for a project id the authorization already fixed, and has no endpoint to read it from.
+      tokens.projectId?.let { body["project_id"] = it }
+      return tokenResponse(HttpStatus.OK).body(body)
     } catch (e: OAuth2Error) {
       return errorResponse(e)
     }
@@ -202,7 +206,7 @@ class OAuth2AuthorizationServerController(
         scopesSupported = OAuth2Scopes.SUPPORTED,
         revocationEndpoint = issuer + OAuth2Constants.REVOKE_PATH,
         revocationEndpointAuthMethodsSupported = listOf("none"),
-        clientIdMetadataDocumentSupported = true,
+        clientIdMetadataDocumentSupported = oauth2Properties.cimdEnabled,
       )
     return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store").body(model)
   }

@@ -1,9 +1,12 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.time.Duration
@@ -16,8 +19,8 @@ import java.util.Date
  * then reaches lives in [OAuth2AccessTokenFlowTest].
  */
 class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
-  @org.springframework.beans.factory.annotation.Autowired
-  private lateinit var supersededRepository: io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
+  @Autowired
+  private lateinit var supersededRepository: OAuth2SupersededRefreshTokenRepository
 
   @Test
   fun `refresh grant is rejected after the user invalidates their tokens`() {
@@ -60,18 +63,13 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
     grantsForUser(userId).assert.isZero()
   }
 
-  /**
-   * The ceiling binds where rows are written, because a thief holding a stolen token can rotate in a loop and any
-   * eviction that loop can drive would take the victim's row with it. A grant that reaches the ceiling on its own —
-   * several processes sharing one do — still has to record, so the slot comes from a row the prune would have taken.
-   */
   @Test
   fun `a grant at its ceiling makes room from rows past the floor rather than stopping`() {
     // The second rotation is the first with a predecessor to demote; the first has none.
     val (grant, refreshToken) = rotatedOnce()
     val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
     val ancient = Instant.now().minus(Duration.ofDays(400))
-    val oldest = supersededRepository.saveAll(historyRows(grant, ceiling, ancient)).last()
+    val oldest = supersededRepository.saveAll(testData.refreshHistoryFor(grant, ceiling, ancient)).last()
 
     json(driver.refresh(refreshToken, CLIENT_ID))
 
@@ -83,7 +81,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   fun `a grant whose whole history is younger than the floor stops recording rather than evicting`() {
     val (grant, refreshToken) = rotatedOnce()
     val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
-    val young = supersededRepository.saveAll(historyRows(grant, ceiling)).toList()
+    val young = supersededRepository.saveAll(testData.refreshHistoryFor(grant, ceiling)).toList()
 
     val refreshed = json(driver.refresh(refreshToken, CLIENT_ID))
 
@@ -97,22 +95,41 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   }
 
   /** A grant that has rotated once, so the next rotation has a predecessor to demote into the history. */
-  private fun rotatedOnce(): Pair<io.tolgee.model.oauth2.OAuth2Grant, String> {
+  private fun rotatedOnce(): Pair<OAuth2Grant, String> {
     val first = completeFlow(projectId = testData.project.id)
     val second = json(driver.refresh(first.get("refresh_token").asString(), CLIENT_ID))
     return stored(second.get("access_token").asString()) to second.get("refresh_token").asString()
   }
 
-  private fun historyRows(
-    grant: io.tolgee.model.oauth2.OAuth2Grant,
-    count: Int,
-    from: Instant = Instant.now(),
-  ) = (1..count).map { index ->
-    io.tolgee.model.oauth2.OAuth2SupersededRefreshToken().apply {
-      this.grant = grant
-      tokenHash = "filler-$index"
-      supersededAt = Date.from(from.minusSeconds(index.toLong()))
-    }
+  @Test
+  fun `the token response names the project a single-project consent bound`() {
+    val tokens = completeFlow(projectId = testData.project.id)
+
+    tokens
+      .get("project_id")
+      .asLong()
+      .assert
+      .isEqualTo(testData.project.id)
+  }
+
+  @Test
+  fun `the token response names no project when the consent covered all of them`() {
+    val tokens = completeFlow(projectId = null)
+
+    tokens.has("project_id").assert.isFalse()
+  }
+
+  @Test
+  fun `a refresh keeps naming the project the consent bound`() {
+    val refreshToken = completeFlow(projectId = testData.project.id).get("refresh_token").asString()
+
+    val refreshed = json(driver.refresh(refreshToken, CLIENT_ID))
+
+    refreshed
+      .get("project_id")
+      .asLong()
+      .assert
+      .isEqualTo(testData.project.id)
   }
 
   @Test
