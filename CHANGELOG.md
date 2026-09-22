@@ -1,3 +1,13 @@
+## [3.224.6](https://github.com/tolgee/tolgee-platform/compare/v3.224.5...v3.224.6) (2026-09-22)
+
+
+### Bug Fixes
+
+* call React hooks unconditionally (React error [#310](https://github.com/tolgee/tolgee-platform/issues/310) on opening a public project) ([#3929](https://github.com/tolgee/tolgee-platform/issues/3929)) ([3f4e207](https://github.com/tolgee/tolgee-platform/commit/3f4e207d835bca1867eb167ed9ebc8c1c05a3554)), closes [tolgee/billing#319](https://github.com/tolgee/billing/issues/319)
+* redirect users without an organization to community projects instead of spinning forever ([#3922](https://github.com/tolgee/tolgee-platform/issues/3922)) ([474d82b](https://github.com/tolgee/tolgee-platform/commit/474d82b6ca8a7b62fcd4e1f0af5da5226ad8b909)), closes [#3883](https://github.com/tolgee/tolgee-platform/issues/3883) [#3816](https://github.com/tolgee/tolgee-platform/issues/3816)
+* sign-up fails when the auto-created organization name exceeds 50 characters ([#3925](https://github.com/tolgee/tolgee-platform/issues/3925)) ([0c4c463](https://github.com/tolgee/tolgee-platform/commit/0c4c463fee8cd472fdd40d3bcc6067508f6cfd89)), closes [#3816](https://github.com/tolgee/tolgee-platform/issues/3816) [#3816](https://github.com/tolgee/tolgee-platform/issues/3816)
+* stop reporting business events from public-project viewers as errors ([#3927](https://github.com/tolgee/tolgee-platform/issues/3927)) ([b96f474](https://github.com/tolgee/tolgee-platform/commit/b96f47487d8ed5ac3e4e6c87703c1f0b1c5df3b8)), closes [#3883](https://github.com/tolgee/tolgee-platform/issues/3883) [#3816](https://github.com/tolgee/tolgee-platform/issues/3816)
+
 ## [3.224.5](https://github.com/tolgee/tolgee-platform/compare/v3.224.4...v3.224.5) (2026-09-21)
 
 
