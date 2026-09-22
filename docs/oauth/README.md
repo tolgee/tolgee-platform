@@ -233,11 +233,15 @@ is what the cap is there to bound. Unlike the webhook and SSO paths, this fetch 
 system properties: a proxy would resolve the host itself and the pin would never run, and here the URL is chosen by
 an unauthenticated caller.
 
-A failed resolution is remembered, but not as one thing: a document that was served and refused is a verdict about
-the client and is cached for a minute, while "no answer right now" — a blip or a slow host — is cached for seconds,
-so a third party's hiccup does not cost a legitimate client a full minute of refusals. A refusal by Tolgee's own
-fetch budget is not cached at all: it says nothing about the client, and remembering it would let one burst suppress
-a legitimate client for the whole negative TTL.
+A failed resolution is remembered, but not as one thing. The host answering 404 or 410 means the document is
+**gone**, which is the publisher retiring the client; a document that was served but did not validate is
+**refused**; and "no answer right now" is **unavailable**. Gone and refused are cached as long as a positive
+answer, five minutes, because a caller who can fill the fetch budget must not be able to age a retirement out.
+Unavailable is cached for seconds, so a third party's hiccup does not cost a legitimate client five minutes of
+refusals. Every other outcome — a 5xx, a 429, a WAF page, a redirect, a body over the size cap, a read that passes
+the deadline — is unavailable, not refused: only the host saying the document is not there is read as a decision by
+the publisher. A refusal by Tolgee's own fetch budget is not cached at all: it says nothing about the client, and
+remembering it would let one burst suppress a legitimate client for the whole negative TTL.
 
 The grant records a hash of the terms the user consented to — the `client_id` and the redirect set — not of the
 document bytes, so a publisher reformatting their JSON or fixing a typo in `client_name` changes nothing, while a
@@ -248,28 +252,199 @@ changed nothing), and so is every `grant_types` entry other than `authorization_
 Where a respelling *is* load-bearing the hash keeps it: host case and an explicit `:443` on a non-loopback entry,
 because there matching is an exact string comparison; and the port of a loopback entry that carries a query,
 because that entry is the one presented URI the loopback lane — which ignores both the port and the entry's own
-query — does not already accept. What does *not* revoke is taking the document down: a 404 is a refusal like any
-other, so the client falls back to the bare unverified form that carries no hash, and `metadataDrifted` cannot
-prove a change it cannot see. A publisher whose app is compromised has to change the consented terms — narrow or
-replace `redirect_uris` — rather than delete the document. The stored value carries the projection's version
-(`v1:`), and a version the running build cannot reproduce reads as "cannot tell" rather than as drift — otherwise
+query — does not already accept. A document that is served but no longer validates does *not* revoke: the client
+falls back to the bare unverified form that carries no hash, and `metadataDrifted` cannot prove a change it cannot
+see. Taking the document down does revoke — see "Retiring a client" below. The two signals a publisher can send
+are both durable, and differ only in how fast: a changed redirect set deletes the grant at once, because the terms
+the user agreed to no longer exist; a document taken down ends the grant after a short grace window, because a
+mis-deploy looks the same for the first few minutes. The stored value carries the projection's version (`v1:`),
+and a version the running build cannot reproduce reads as "cannot tell" rather than as drift — otherwise
 the release that first changes what the hash covers would delete every grant every earlier release issued, at its
 next refresh, logging each one as theft.
 
-`tolgee.oauth2.cimd-allowed-hosts` restricts which hosts may present a document (empty = any public host).
+### The short version: what each rule stops
 
-There is deliberately no switch that turns CIMD off, and the reason is what CIMD is *for*: it is the general
-third-party onboarding path, not an MCP feature. The CLI and anything else built against Tolgee are the same
-population, so a CIMD-scoped flag would turn off more than its name implies. The authorization server has no off
-switch of its own either — its endpoints are live wherever the issuer resolves — so a CIMD flag would be the only
-partial one.
+The sections below explain this in detail. The table says the same thing in plain words: each rule, and what
+someone could do if it were missing.
 
-That is an accepted risk, not an absence of one. Before CIMD the set of parties that could obtain a grant was
-exactly the set an operator had pre-registered, and an operator who registered none had a complete off state
-reached by configuration. CIMD removes that state: an unauthenticated caller can now cause an outbound HTTPS
-request to a host it chose and be admitted as a client. `cimd-allowed-hosts` narrows which hosts may do so but
-**cannot deny all** — an empty list means any public host — so an operator who needs CIMD off has no property
-today.
+| Rule | What it stops |
+|---|---|
+| The withdrawal mark is written to the grant rows, not kept in memory | Only the instance that read the document knows the client is retired, and a restart forgets it. The publisher pulls the one lever they have and nothing happens. |
+| A document that comes back lifts the mark only inside the grace window | Someone who takes over the `client_id` URL publishes a file again and gets back every grant the retirement ended. |
+| The request path never fetches a document | An anonymous caller picks both the host Tolgee connects to and how often. Tolgee becomes the tool that floods someone else's server, and its own threads sit waiting on a slow host. |
+| The work list is ordered by last **attempt**, not by last success | A document that can never be read stays at the front of every round. One account and one afternoon are enough to make sure no healthy publisher is read again. |
+| `cimd-max-clients-per-user` caps how many clients one account can add | One scripted account makes the queue so long that nobody's retirement is noticed in time. |
+| Building the work list, and reading the backlog gauge, each have their own error handling | One bad client, or the gauge itself, kills every round from then on. |
+| The freshness bound counts only the time this server spent trying | Any outage that stops the job signs out every third-party user on the instance at once. |
+| Refresh history is dropped by age, never by rank alone | A thief who holds a stolen token refreshes it fast, pushes its record out of the history, and the theft is never seen. See "Refresh replay handling" below. |
+
+### Who reads the document, and when
+
+For a client that already has a grant, exactly one thing reads its document: `OAuth2CimdDocumentCheck`, a
+scheduled job (`tolgee.oauth2.cimd-check-cron`, every five minutes by default, `cimd-check-batch-size` documents a
+round). One instance runs each round under a lock. What it learns it writes to the grant rows: the withdrawal
+mark, the freshness stamp, and the revocation of grants whose consented terms the document no longer matches.
+
+Its work list is one statement: every `client_id` URL that has at least one usable grant, minus the clients
+already retired for good (every grant marked, and the mark has already survived a later check — re-reading those
+could change no outcome, and would keep sending requests to a publisher who has already answered "gone"), minus
+the ones read within `cimd-check-interval-minutes` (default 15), **least recently attempted first**, `LIMIT
+cimd-check-batch-size`. A client nobody has attempted yet sorts by when its oldest grant was made, not to the
+front: it was read at consent time, and sorting "never attempted" first would let anyone preempt every round by
+onboarding a fresh client — the one lever the ordering exists to take away. Ordering and limiting in the database rather than in memory is deliberate: the number of
+rows is something a caller grows by consenting to clients of their own, and an earlier version loaded all of them
+and passed every id to one `IN` clause, which puts an attacker in front of the driver's bind-parameter ceiling.
+Building the list is inside the round's error handling for the same reason — a round that dies there is not one
+client skipped, it is every round from then on.
+
+The check keeps no resolution cache at all: it reads the publisher on every round, and what it reads is never
+written to the cache `/oauth2/authorize` answers from. Sharing one cache meant the clients somebody held a grant
+for were exactly the ones kept warm, so `/oauth2/authorize` answered *faster* for them — the same "does anyone
+here use app X" bit the rate exemption was removed to close, arriving by latency instead of by status. A hit on
+the request path now means only that somebody asked about that id recently, which the caller can arrange for
+themselves. What the check learns reaches a request through the grant rows, never through the cache.
+
+`tolgee.oauth2.cimd.check_backlog` is how many clients are waiting. It is the number to alert on: this job is the
+only thing that notices a retirement and the only thing that keeps third-party grants inside their age bound, so a
+backlog that keeps growing means both are slipping. It is measured after the round's work and guarded separately —
+a gauge must never be able to stop the thing it measures.
+
+Ordering the queue fairly says nothing about its **length**, and the length is what everybody's wait is made of: a
+client is re-read every `population / cimd-check-batch-size` rounds, and a publisher's retirement goes unnoticed
+for exactly that long. So the population needs a bound too, and the cheapest one to give is per account:
+`tolgee.oauth2.cimd-max-clients-per-user` (default 25) refuses a new document-backed authorization to an account
+that already holds that many. Someone with two dozen third-party apps is not a person, and without the cap one
+scripted account decides how quickly *anyone's* retirement is noticed.
+
+That bounds what one account contributes, not what the whole instance holds. Nothing here refuses a new client
+because the instance as a whole is busy: doing that would hand an attacker a way to stop all third-party
+onboarding, which is a worse trade than a longer queue. What an operator has instead is the backlog gauge, control
+over who may sign up at all, `cimd-allowed-hosts`, and `cimd-enabled`.
+
+Attempted, not last read successfully. The two look interchangeable and are not: an attempt that fails — DNS gone,
+a 503, a body that does not validate — changes nothing about the client, so if the queue were ordered by the last
+*success* that client would never move. A hundred grants for documents that never answer, which costs an attacker
+one account and one afternoon, would then sit at the head of every round forever and no healthy publisher would
+ever be read again — which at the freshness bound signs out every third-party user on the instance. The attempt
+time lives in `oauth2_client_document_check`, one row per client, because it is a fact about the `client_id` and
+writing it to every grant of a busy client every round would rewrite the grant table for nothing.
+
+The interval is set by how fast a retirement should take effect, not by the freshness bound, which would be happy
+with a read every few days. It must stay well under `cimd-withdrawal-grace-minutes`, or a document that comes back
+after a mis-deploy is not read again before the window closes.
+
+It is a job and not a step of the token endpoint on purpose, and this was the hardest thing in the feature to get
+right. While the token endpoint did the reading, the fetch was driven by an unauthenticated request that chose
+both the host and the moment — `POST /oauth2/token` runs before any credential is read — and every bound put on
+that fetch turned out to be something the caller could spend on somebody else: a fetch budget, a per-origin cap, a
+per-host thread cap, a minute quota, each keyed on something an attacker mints one level up (ports, then
+hostnames from a wildcard zone). The job removes the premise. Nobody outside decides what is fetched or how often,
+so the caps on it are ordinary fairness rather than a partition against an adversary, and a saturation attempt has
+nothing to saturate. `/oauth2/authorize` still reads a document for a client nobody has consented to yet — it has
+to, to show the consent screen — but that lane is per-IP rate limited and its worst case is that a *new* client
+cannot be onboarded for as long as the attack is paid for.
+
+### Retiring a client
+
+Taking the document down is how a publisher retires a client they no longer control. A **gone** answer at the next
+check is written to every grant of that `client_id` (`oauth2_grant.client_withdrawn_at`). From then on every
+access token of those grants is refused, on every instance, and so is every refresh: `invalid_client` on an
+instance whose cache holds the refusal, `invalid_grant` where the mark is read off the grant row. The mark is in
+the database rather than in memory, so it outlives the process that read it and reaches the instances that never
+fetched anything.
+
+A document that answers again clears the mark, so a publisher who took a document down by mistake can put it
+back. Two rules decide whether it is still liftable, and either is enough: the mark is younger than
+`tolgee.oauth2.cimd-withdrawal-grace-minutes` (default 60), or no check has happened since it was made. The second
+is the one that survives a long work list — how soon a client is read again is a queue position, not a duration,
+so on a busy instance the clock alone would run out before the publisher's turn came round and an honest
+mis-deploy would become a permanent revocation of every grant that publisher holds.
+
+Past both, the retirement is permanent for those grants. That bound exists because `client_id` is the app's
+identity and is baked into every installed copy: a publisher who retires a compromised client and later ships a
+fix republishes at the *same* URL, and without it that ordinary act would hand back every grant the retirement
+ended — the thief's among them. Users of the fixed build simply consent again. So a publisher who wants a
+retirement to stick just leaves the URL answering 404 until the check has read it twice.
+
+This is also why the gone/unreadable split matters so much: if a 503 or a slow read counted as gone, one bad
+minute at a publisher's origin would log out every user of that client everywhere. And it is why the check never
+answers from a cache — a stored positive answer is up to five minutes old and local to one instance, and lifting
+a mark on the strength of one would undo what another instance had just learned. What it reads it keeps to
+itself: it neither fills the request lane's entry for that `client_id` nor drops one, because either would let an
+anonymous caller polling `/oauth2/authorize` time the check and learn that somebody here holds a grant for that
+client. So a consent screen can be served from a document up to five minutes old. That is safe on its own terms:
+the grant records the document's hash at consent time, and the next check revokes every grant whose document has
+drifted.
+
+The mirror of the mark is a **freshness bound**. An unreadable document is forgiven, so a blip cannot end a grant
+— but only up to `tolgee.oauth2.cimd-verification-max-age-days` (default 7). Each successful check stamps
+`oauth2_grant.cimd_verified_at` on **every** grant of that client, because the fact recorded — "this document was
+readable at time T" — belongs to the `client_id` and not to any one grant or request. A grant whose document has
+not been readable for longer than the bound is refused and the user consents again. Without the bound, "we could
+not read it" would be an indefinite free pass and anyone able to keep this server from reading a document could
+keep a retired client alive for the full life of its refresh tokens; with it, that becomes a delay.
+
+The bound counts only time this server spent **trying**. The refusal compares the last successful read with the
+last *attempt* (`oauth2_client_document_check.checked_at`): a client we have been failing to read for longer than
+the bound is the publisher's answer, while one nothing has attempted is our own gap — a stopped job, a mistyped
+cron, a backlog the job cannot clear — and ending a grant over that would sign out every third-party user on the
+instance at once, with no signal and no recovery but mass re-consent. That is why the attempt time is a fact about
+the client and not only the scheduler's cursor.
+
+Stamping per client rather than per grant is not a detail. An earlier version stamped only the grant of whichever
+request happened to read the document, which on a busy client is one request in hundreds — so most users of a
+perfectly healthy client would have aged out and been signed out at day 7. The rule to keep: a fact about a
+`client_id` is written to every grant of that `client_id`, the same way the withdrawal mark is.
+
+What the per-request path checks is split on purpose. The **retirement** is read from the grant row, which the
+check writes. Whether the client is one this instance serves at all is `servesClient`, and it reads no
+resolution cache: that lane is filled by `/oauth2/authorize`, so a caller who samples a publisher through a deploy
+or a CDN purge could otherwise have every token of a client nobody retired refused until the entry expired.
+
+### Turning it off and narrowing it
+
+`tolgee.oauth2.cimd-allowed-hosts` restricts which hosts may present a document (empty = any public host), and
+`tolgee.oauth2.cimd-enabled` (default `true`) turns the whole path off. Neither of this instance's *own* origins
+may present one, whatever those lists say: the consent screen prints the client's origin as its identity, and for
+an unverified client that line is the whole anti-phishing signal — so both the issuer (`back-end-url`) and the
+origin the screen is served from (`front-end-url`) are refused, which on a split deployment are two different
+hosts. With it unset no `client_id` is a CIMD
+candidate at all, which also refuses existing CIMD grants rather than leaving them unchecked.
+
+The flag is blunt on purpose, and an operator should know what it costs. CIMD is the general third-party
+onboarding path, not an MCP feature: with it off, the only parties that can obtain a grant are the ones the
+operator pre-registered. That is the pre-CIMD state, and it is the reason the default is on — an unauthenticated
+caller causing an outbound HTTPS request to a host it chose is the price of letting anyone build against Tolgee
+without asking the operator first.
+
+What bounds that outbound traffic: at most 32 resolutions in flight at once and 3 per origin, at most 120 fetches
+per origin per minute, a 2-second resolve deadline, a 256KB body cap, no redirects, and a `client_id` that must be
+an https URL with no fragment and no query string. A separate lane with its own resolver pool belongs to the background
+check alone — no request path enters it, so nothing a caller does to the lane above can stop a retirement from
+being read. That lane carries no per-origin or per-host caps of its own: the check reads one document at a time
+under a cluster lock, so there is no second caller for such a cap to hold back, and a bound that cannot bind is
+one more thing to keep correct for nothing. Its stuck-host memo is its own for the same reason — sharing one with
+the request lane would leave a way for an arriving request to decide what the check may read.
+
+Two of those need their reason stated, because each is a bound one party can spend on another.
+
+The minute quota is per origin and shared by every `client_id` there, and paths are free — so junk ids minted at a
+publisher's origin can spend the quota that publisher's own clients need, and a new login for one of them is
+refused while the attack is paid for. An earlier version exempted a `client_id` somebody already held a grant for,
+which fixed that and introduced something worse: the endpoint then answered differently depending on a fact about
+*other people*, so spending a victim origin's quota and asking for one of its clients told an anonymous caller
+whether anyone on this instance uses that app. The exemption is gone. Every caller is charged the same, and the
+residual is the one named above — new logins, while somebody pays for it, visible in
+`tolgee.oauth2.cimd.capacity_refusals`.
+
+The resolver pools are the other. `InetAddress.getAllByName` cannot be interrupted, so a name whose nameserver
+drops queries keeps its thread for as long as the platform resolver retries — tens of seconds — while the caller
+gives up after two. A cap counted on the caller's wait would therefore bound nothing, so the per-host cap (4 of
+16, and 2 of the 8 grant resolvers) is counted for the thread's real life. Ports are free, so it is keyed on the
+host and not the origin, and a host whose lookup just ran past the deadline is refused without a thread for the
+next 30 seconds — otherwise one host strands a fresh thread every couple of seconds. Every refusal for lack of
+capacity increments `tolgee.oauth2.cimd.capacity_refusals`: ones are ordinary, a sustained stream is somebody
+holding the resolvers and is worth an alert.
 
 **`logo_uri` is not read at all.** The CIMD draft defines it and this server ignores it: it is not parsed, not
 stored, and not in the consent API, so a document may carry any value without being refused over it. The consent
@@ -299,6 +474,27 @@ Two ways to bring a logo back, if it is ever wanted:
 metadata to a public `/register` endpoint the server stores — remains a deliberate no-go: CIMD covers the
 targeted clients without an open, unauthenticated write endpoint to rate-limit and prune.
 
+### What an MCP client may call before it logs in
+
+The MCP endpoint is a RouterFunction, so a call with no credential fails inside the tool handler as an in-band
+JSON-RPC error. A client's OAuth machinery never reads that, so it cannot learn it needs to log in.
+`McpAuthChallengeFilter` turns it into an HTTP 401 with a `WWW-Authenticate` challenge, which a client does act on.
+
+The filter names the methods that may run **without** a credential and challenges everything else:
+
+| Method | Why it is open |
+|---|---|
+| `initialize` | The handshake. A client has to finish it before it can know a token is needed. |
+| `tools/list` | Discovery. The same: a client reads the tool list to decide what to ask for. |
+| `ping` | Liveness. External monitors such as glama.ai call it, and they hold no account. |
+| `notifications/*` | A notification carries no id and expects no response, so a 401 would only confuse the client. |
+
+Naming the open set rather than the challenged set is the part that matters. The set that must be challenged grows
+with every capability MCP adds - `resources/read` and `prompts/get` already exist - so listing *that* side would let
+each new method through unchallenged until somebody noticed. A body the filter cannot classify is challenged too:
+over the peek cap, unparseable, or a JSON-RPC batch. None of those can be one of the four above, whose bodies are
+tiny single objects, so the cost to an honest caller is one retry with a credential.
+
 ## Where it lives in the code
 
 The authorization server is Tolgee's own code, not a library: the authorization-code grant with PKCE for public
@@ -320,7 +516,7 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | Client registry (pre-registered from config, plus the CIMD fallthrough) | `OAuth2ClientRegistry.kt` |
 | CIMD: SSRF-hardened DNS-pinned fetch, fail-closed validation, per-pod cache, fetch budget, candidate policy | `security/oauth2/cimd/CimdDocumentFetcher.kt`, `CimdMetadataFetcher.kt`, `CimdClientCache.kt`, `CimdFetchBudget.kt`, `CimdClientPolicy.kt`, `util/UrlSecurity.kt` |
 | RFC 8707 audience binding: which resource server a token is for, enforced on every request | `security/oauth2/OAuth2Resources.kt`, `OAuth2Audience.kt`, `OAuth2AccessTokenResolver.kt`, `AuthenticationFilter.kt` |
-| MCP cold-start: a credential-less `tools/call` gets a 401 challenge a client can act on | `mcp/McpAuthChallengeFilter.kt` |
+| MCP cold-start: a credential-less call to anything but the open set gets a 401 challenge a client can act on | `mcp/McpAuthChallengeFilter.kt` |
 | Refresh-token replay: soft grace window + multi-generation theft history | `OAuth2AuthorizationService.kt`, `model/oauth2/OAuth2SupersededRefreshToken.kt` |
 | Issuer (also the on/off switch: the server is enabled when the issuer resolves) | `OAuth2IssuerResolver.kt` |
 | RFC 9728 protected-resource metadata + the RFC 6750 `WWW-Authenticate` challenge that points at it | `ProtectedResourceMetadataController.kt`, `OAuth2BearerChallengeProvider.kt` |
@@ -339,6 +535,23 @@ see [docs/websocket/README.md](../websocket/README.md). The OAuth-specific conse
 below.
 
 ## Round-1 limitations (tracked follow-ups)
+
+### Structure the review conceded and this round deferred
+
+Three changes were agreed to be right and left out of this round on one shared ground: each is a pure
+relocation inside the CIMD state machine, and this round already changed that machine's behaviour in three
+places. Moving the rule in the same change that alters the rule would stop a reviewer telling the two apart.
+
+- **The CIMD client lifecycle belongs out of `OAuth2AuthorizationService`.** Eleven methods there serve the
+  scheduled job and the cleanup job, never the grant flow, and they own the `oauth2_client_document_check`
+  table that exists only for them. The class is two objects sharing a name.
+- **`forExistingGrant: Boolean` should be a lane type.** One concept - which fetch lane - is spelled as a flag
+  in `CimdMetadataFetcher` and `CimdDocumentFetcher`, and it picks a pool and a stuck-host memo at separate
+  points.
+- **`CimdDocumentFetcher` should split.** Resolver admission and the HTTP fetch share no field and no deadline:
+  `fetch` starts the fetch on a fresh `DEFAULT_DEADLINE` rather than on what is left of `RESOLVE_DEADLINE`.
+  `fetchPinned` is already `internal` and already takes its deadline as a parameter, so the seam exists. Do it
+  with the lane type, since both are about making a lane an object.
 
 ### PAK-parity notes
 
@@ -452,7 +665,10 @@ These are known gaps, deferred to the client rounds that first exercise them:
   Session management feature will own that surface for OAuth apps and sessions together, and shipping a separate
   Connected apps page first would mean replacing it immediately. What that surface needs is a query
   listing a user's grants by client, and a delete that revokes one — `OAuth2GrantRepository` already indexes
-  `user_account_id` for it.
+  `user_account_id` for it. CIMD raises what this costs: before it, the parties that could hold a grant were the
+  ones the operator had pre-registered, and now any host with a valid document can. Until that surface ships, the
+  levers are the client's own `POST /oauth2/revoke`, the publisher taking the document down, `cimd-allowed-hosts`,
+  `cimd-enabled`, and signing out everywhere.
 
 - **Refresh replay handling: soft grace, then theft.** Every refresh replaces both tokens on the grant. Replaying
   the token that was *just* rotated away, within `tolgee.oauth2.refresh-token-grace-seconds` (default 60s), fails
@@ -469,7 +685,9 @@ These are known gaps, deferred to the client rounds that first exercise them:
   stolen token can mint those in minutes; the ceiling in turn stops the minimum age from handing that same thief an
   unbounded table. Past all three a replay is still refused, it just no longer revokes. A secret the grant never
   issued matches nothing and can only fail — it cannot destroy anything. Every one of these outcomes is logged with
-  the grant id, so a burst against one grant is visible. Not done: *idempotent* grace (returning the same token pair
+  the grant id, so a burst against one grant is visible. `tolgee.oauth2.refresh.grace_hits` counts the within-grace
+  replays: ones are an innocent race, a repeated stream on one grant is a stolen token raced against its owner.
+  Not done: *idempotent* grace (returning the same token pair
   to a within-grace replay) — hash-only storage has no plaintext pair to re-return.
 
 - **A scoped credential's lack of elevation is enforced per consumer, not at the principal.** An OAuth token's
@@ -491,10 +709,14 @@ These are known gaps, deferred to the client rounds that first exercise them:
   `/v2/notification-settings`, `/v2/notifications-mark-seen`, `/v2/user-tasks` and `/v2/image-upload`. None of
   these resolves a project, so `SecurityService.getCurrentPermittedScopes` never runs and neither the token's
   scopes nor its project set is consulted — a project API key reads them today for the same reason. `/v2/user`
-  is the one worth weighing: it returns the account's email and server role to a token the consent screen presented
-  as "translations.view on project X". Making these `ONLY_PAT` is the likely answer; a scope covering account-level
-  reads, or narrowing the non-project `@AllowApiAccess(ANY)` set for scoped credentials generally, are the other
-  two. Either way it is a question about every API credential rather than about OAuth, so it belongs in its own PR.
+  is the one worth weighing: it returns the account's email and server role to any API credential. Making these
+  `ONLY_PAT` is the likely answer, but it is a question about every API credential rather than about OAuth, so it
+  belongs in its own PR.
+
+  A security review of this branch narrowed these for OAuth alone, with a per-endpoint `allowOAuth` flag, and that
+  was backed out again: it would have special-cased an OAuth grant against the project API key this design
+  deliberately keeps it level with, and it narrowed one of the two credentials that reach these endpoints. The
+  next reader gets the same gap and the same two options above, for both credentials at once.
 
 - **The "may an OAuth token reach this endpoint" rule still has two implementations.**
   `AuthenticationInterceptor` answers it for servlet dispatch and `McpRequestContext` answers it again for the MCP
