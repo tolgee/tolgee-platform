@@ -174,6 +174,11 @@ export const useTranslationsService = (props: Props) => {
     filterFailedKeysOfJob: props.prefilter?.failedJob,
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
+    // the task filter is hidden while prefiltered by a task, so it must not apply unseen
+    filterTaskInLang:
+      props.prefilter?.task !== undefined
+        ? undefined
+        : filtersQuery.filterTaskInLang,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
     branch: props.branchName,
     sort: ['keyNamespace', order, 'keyId'],

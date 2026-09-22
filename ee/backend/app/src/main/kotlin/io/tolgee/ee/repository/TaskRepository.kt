@@ -86,6 +86,54 @@ private const val TASK_FILTERS = """
     )
 """
 
+/**
+ * Per-task-type membership conditions. The two positive statuses count DISTINCT matched types and
+ * compare against the requested count, so several types combine with AND; the negative ones are a
+ * single NOT EXISTS over the type list, which already means "none of them". Each clause is switched
+ * off by its `…Count` being zero — Postgres rejects an empty `in (...)`, so the unused lists still
+ * render one dummy element.
+ */
+private const val TASK_STATUS_FILTERS = """
+          and (
+            :#{#filters.inOpenTaskTypesCount} = 0
+            or (
+              select count(distinct iot.type) from task_key iotk
+                  join task iot on (iotk.task_id = iot.id)
+              where iotk.key_id = key.id and iot.language_id = :languageId
+                and iot.type in :#{#filters.inOpenTaskTypes}
+                and iot.state in :#{T(io.tolgee.model.enums.TaskState).OPEN_STATE_NAMES}
+            ) = :#{#filters.inOpenTaskTypesCount}
+          )
+          and (
+            :#{#filters.hasBeenInTaskTypesCount} = 0
+            or (
+              select count(distinct hbt.type) from task_key hbtk
+                  join task hbt on (hbtk.task_id = hbt.id)
+              where hbtk.key_id = key.id and hbt.language_id = :languageId
+                and hbt.type in :#{#filters.hasBeenInTaskTypes}
+            ) = :#{#filters.hasBeenInTaskTypesCount}
+          )
+          and (
+            :#{#filters.notInOpenTaskTypesCount} = 0
+            or not exists (
+              select 1 from task_key niotk
+                  join task niot on (niotk.task_id = niot.id)
+              where niotk.key_id = key.id and niot.language_id = :languageId
+                and niot.type in :#{#filters.notInOpenTaskTypes}
+                and niot.state in :#{T(io.tolgee.model.enums.TaskState).OPEN_STATE_NAMES}
+            )
+          )
+          and (
+            :#{#filters.neverInTaskTypesCount} = 0
+            or not exists (
+              select 1 from task_key nitk
+                  join task nit on (nitk.task_id = nit.id)
+              where nitk.key_id = key.id and nit.language_id = :languageId
+                and nit.type in :#{#filters.neverInTaskTypes}
+            )
+          )
+"""
+
 @Repository
 interface TaskRepository : JpaRepository<Task, Long> {
   @Query(
@@ -224,7 +272,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
 
   @Query(
     nativeQuery = true,
-    value = """
+    value =
+      """
       select key.id
       from key
           left join translation t on t.key_id = key.id and t.language_id = :languageId
@@ -245,6 +294,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
+$TASK_STATUS_FILTERS
     """,
   )
   fun getKeysIncludingConflicts(
@@ -257,7 +307,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
 
   @Query(
     nativeQuery = true,
-    value = """
+    value =
+      """
       select key.id
       from key
           left join (
@@ -267,7 +318,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
                 left join language l on (task.language_id = l.id)
             where task.type = :taskType
                 and task.language_id = :languageId
-                and (task.state = 'IN_PROGRESS' or task.state = 'NEW')
+                and task.state in :#{T(io.tolgee.model.enums.TaskState).OPEN_STATE_NAMES}
                 and l.deleted_at is null
                 and key.deleted_at is null
           ) as task on task.key_id = key.id
@@ -290,6 +341,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
+$TASK_STATUS_FILTERS
     """,
   )
   fun getKeysWithoutConflicts(
