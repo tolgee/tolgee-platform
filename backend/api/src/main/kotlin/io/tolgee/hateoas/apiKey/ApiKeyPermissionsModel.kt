@@ -21,6 +21,12 @@ class ApiKeyPermissionsModel(
   override val suggestLanguageIds: Collection<Long>?,
   override val suggestManageLanguageIds: Collection<Long>?,
   override var scopes: Array<Scope> = arrayOf(),
+  @Schema(
+    description =
+      "The user's own scopes on the project, not narrowed by the API key or OAuth grant. " +
+        "A scope here but not in `scopes` is one the credential lacks, not the user.",
+  )
+  val userScopes: Array<Scope>,
   @get:Schema(
     description =
       "The user's permission type. This field is null if user has assigned " +

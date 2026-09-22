@@ -273,6 +273,19 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `current permissions report the user's own scopes unnarrowed by the credential`() {
+    performGet("/v2/api-keys/current-permissions", apiKeyHeaders(testData.frantasKey.key!!)).andAssertThatJson {
+      node("scopes").isArray.contains("translations.view").doesNotContain("translations.edit")
+      node("userScopes").isArray.contains("translations.view", "translations.edit").doesNotContain("admin")
+    }
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders())
+      .andAssertThatJson {
+        node("userScopes").isArray.contains("admin")
+      }
+  }
+
+  @Test
   fun `a PAT cannot read the details of a project its user has no access to`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
