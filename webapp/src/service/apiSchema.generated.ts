@@ -1518,6 +1518,49 @@ export interface components {
        * @description Id of the user the credential belongs to
        */
       userId: number;
+      /** @description The user's own scopes on the project, not narrowed by the API key or OAuth grant. A scope here but not in `scopes` is one the credential lacks, not the user. */
+      userScopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "translations.suggest"
+        | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+        | "tasks.assigned-access"
+        | "prompts.view"
+        | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
+        | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
+        | "organization-quotas.view"
+      )[];
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example [

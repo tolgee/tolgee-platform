@@ -149,6 +149,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
         node("userId").isEqualTo(testData.user.id)
         node("type").isNull()
         node("scopes").isArray.contains("translations.view").doesNotContain("keys.edit", "admin")
+        node("userScopes").isArray.contains("translations.view", "keys.edit", "admin")
       }
   }
 
