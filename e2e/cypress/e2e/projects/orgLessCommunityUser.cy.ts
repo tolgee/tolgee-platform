@@ -68,6 +68,15 @@ describe('Org-less community user', () => {
     cy.url().should('include', '/community-projects');
   });
 
+  ['/billing', '/preferred-organization'].forEach((route) => {
+    it(`sends the ${route} shortcut to the community projects`, () => {
+      cy.visit(`${HOST}${route}`);
+      waitForGlobalLoading();
+      cy.url().should('include', '/community-projects');
+      gcy('community-projects-view').should('be.visible');
+    });
+  });
+
   it('offers a way back to the community projects after adopting', () => {
     openPublicProject('Community Alpha');
     assertSwitchedToOrganization('publicProjectsUser');

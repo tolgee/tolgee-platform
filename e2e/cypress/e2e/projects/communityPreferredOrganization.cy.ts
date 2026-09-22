@@ -61,6 +61,15 @@ describe('Community preferred organization', () => {
     gcy('project-list-more-button').should('exist');
   });
 
+  it('sends the preferred-organization shortcut into the preferred organization', () => {
+    cy.visit(`${HOST}/preferred-organization?path=members`);
+    waitForGlobalLoading();
+    cy.url().should(
+      'include',
+      `/organizations/${organizations['Community User'].slug}/members`
+    );
+  });
+
   it('keeps the project page usable when the preferred-organization switch fails', () => {
     cy.intercept('PUT', '**/v2/user-preferences/set-preferred-organization/*', {
       statusCode: 403,
