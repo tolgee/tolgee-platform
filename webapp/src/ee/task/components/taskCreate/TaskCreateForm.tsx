@@ -9,6 +9,8 @@ import {
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { TASK_TYPES } from 'tg.service/apiSchemaTypes';
+import { taskScopeFiltersQuery } from 'tg.ee.module/task/hooks/useTaskCreationFilters';
 import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -18,7 +20,7 @@ import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
 import {
   FilterActions,
-  FiltersType,
+  FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
@@ -28,11 +30,8 @@ import { stringHash } from 'tg.fixtures/stringHash';
 import { StateType } from 'tg.constants/translationStates';
 import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 
-type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeysScopeView = components['schemas']['KeysScopeView'];
-
-const TASK_TYPES: TaskType[] = ['TRANSLATE', 'REVIEW'];
 
 export const DEFAULT_STATE_FILTERS_TRANSLATE: StateType[] = ['UNTRANSLATED'];
 export const DEFAULT_STATE_FILTERS_REVIEW: StateType[] = ['TRANSLATED'];
@@ -63,8 +62,9 @@ type Props = {
   languages: number[];
   setLanguages: (languages: number[]) => void;
   allLanguages: LanguageModel[];
-  filters: FiltersType;
+  filters: FiltersInternal;
   filterActions?: FilterActions;
+  defaultFilters?: FiltersInternal;
   stateFilters: TranslationStateType[];
   setStateFilters: (filters: TranslationStateType[]) => void;
   projectId: number;
@@ -82,6 +82,7 @@ export const TaskCreateForm = ({
   allLanguages,
   filters,
   filterActions,
+  defaultFilters,
   stateFilters,
   setStateFilters,
   projectId,
@@ -115,6 +116,7 @@ export const TaskCreateForm = ({
             (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
           ),
           filterOutdated: stateFilters.includes('OUTDATED'),
+          ...taskScopeFiltersQuery(filters, values.type),
         },
       };
     })
@@ -241,10 +243,17 @@ export const TaskCreateForm = ({
               <TranslationFilters
                 value={filters}
                 actions={filterActions}
-                selectedLanguages={[]}
+                selectedLanguages={allLanguages.filter((l) =>
+                  languages.includes(l.id)
+                )}
                 projectId={projectId}
                 placeholder={t('create_task_filter_keys_placeholder')}
-                filterOptions={{ keyRelatedOnly: true }}
+                filterOptions={{
+                  keyRelatedOnly: true,
+                  taskCreation: true,
+                  pinnedTaskType: values.type,
+                  clearedFilters: defaultFilters,
+                }}
                 sx={{ width: '100%', maxWidth: '270px' }}
               />
             )}
@@ -264,7 +273,6 @@ export const TaskCreateForm = ({
                 <TaskPreview
                   key={language}
                   language={allLanguages.find((l) => l.id === language)!}
-                  type={values.type}
                   projectId={projectId}
                   assignees={values.assignees[language] ?? []}
                   onUpdateAssignees={(users) => {
@@ -272,6 +280,7 @@ export const TaskCreateForm = ({
                   }}
                   hideAssignees={hideAssignees}
                   scope={taskScopes[i]?.data}
+                  type={values.type}
                 />
               ))}
             </Box>

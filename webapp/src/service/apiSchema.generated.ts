@@ -19939,6 +19939,14 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Select only keys linked to a task in any of the provided languages. */
+        filterHasBeenInTaskInLang?: string[];
+        /** Select only keys linked to no task in any of the provided languages. */
+        filterNeverInTaskInLang?: string[];
+        /** Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages. */
+        filterNotInOpenTaskInLang?: string[];
+        /** Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to tasks of these types. Omitted or empty means every type counts. Does not affect filterTaskNumber. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -20210,6 +20218,14 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Select only keys linked to a task in any of the provided languages. */
+        filterHasBeenInTaskInLang?: string[];
+        /** Select only keys linked to no task in any of the provided languages. */
+        filterNeverInTaskInLang?: string[];
+        /** Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages. */
+        filterNotInOpenTaskInLang?: string[];
+        /** Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to tasks of these types. Omitted or empty means every type counts. Does not affect filterTaskNumber. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -20525,6 +20541,14 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Select only keys linked to a task in any of the provided languages. */
+        filterHasBeenInTaskInLang?: string[];
+        /** Select only keys linked to no task in any of the provided languages. */
+        filterNeverInTaskInLang?: string[];
+        /** Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages. */
+        filterNotInOpenTaskInLang?: string[];
+        /** Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to tasks of these types. Omitted or empty means every type counts. Does not affect filterTaskNumber. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -25214,6 +25238,14 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Include only keys whose translation into the task language was never part of any task. Evaluated per task language, so a key already tasked for one language is still included for the others. */
+        filterNeverInTask?: boolean;
+        /** Include only keys whose translation into the task language is or was part of some task. Evaluated per task language. */
+        filterHasBeenInTask?: boolean;
+        /** Include only keys whose translation into the task language is not part of an open task. A task counts as open while it is in the NEW or IN_PROGRESS state. */
+        filterNotInOpenTask?: boolean;
+        /** Restrict filterNeverInTask, filterHasBeenInTask and filterNotInOpenTask to tasks of these types. Omitted or empty means every type counts. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
       };
       path: {
         projectId: number;
@@ -25277,6 +25309,14 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Include only keys whose translation into the task language was never part of any task. Evaluated per task language, so a key already tasked for one language is still included for the others. */
+        filterNeverInTask?: boolean;
+        /** Include only keys whose translation into the task language is or was part of some task. Evaluated per task language. */
+        filterHasBeenInTask?: boolean;
+        /** Include only keys whose translation into the task language is not part of an open task. A task counts as open while it is in the NEW or IN_PROGRESS state. */
+        filterNotInOpenTask?: boolean;
+        /** Restrict filterNeverInTask, filterHasBeenInTask and filterNotInOpenTask to tasks of these types. Omitted or empty means every type counts. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
       };
       path: {
         projectId: number;
@@ -25340,6 +25380,14 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Include only keys whose translation into the task language was never part of any task. Evaluated per task language, so a key already tasked for one language is still included for the others. */
+        filterNeverInTask?: boolean;
+        /** Include only keys whose translation into the task language is or was part of some task. Evaluated per task language. */
+        filterHasBeenInTask?: boolean;
+        /** Include only keys whose translation into the task language is not part of an open task. A task counts as open while it is in the NEW or IN_PROGRESS state. */
+        filterNotInOpenTask?: boolean;
+        /** Restrict filterNeverInTask, filterHasBeenInTask and filterNotInOpenTask to tasks of these types. Omitted or empty means every type counts. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
       };
       path: {
         projectId: number;
@@ -26587,6 +26635,14 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Select only keys linked to a task in any of the provided languages. */
+        filterHasBeenInTaskInLang?: string[];
+        /** Select only keys linked to no task in any of the provided languages. */
+        filterNeverInTaskInLang?: string[];
+        /** Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages. */
+        filterNotInOpenTaskInLang?: string[];
+        /** Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to tasks of these types. Omitted or empty means every type counts. Does not affect filterTaskNumber. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -27070,6 +27126,14 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Select only keys linked to a task in any of the provided languages. */
+        filterHasBeenInTaskInLang?: string[];
+        /** Select only keys linked to no task in any of the provided languages. */
+        filterNeverInTaskInLang?: string[];
+        /** Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages. */
+        filterNotInOpenTaskInLang?: string[];
+        /** Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to tasks of these types. Omitted or empty means every type counts. Does not affect filterTaskNumber. */
+        filterTaskType?: ("TRANSLATE" | "REVIEW")[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */

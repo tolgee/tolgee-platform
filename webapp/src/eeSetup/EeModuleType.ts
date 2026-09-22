@@ -8,6 +8,7 @@ import {
   FilterActions,
   FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { TaskType } from 'tg.service/apiSchemaTypes';
 
 export type PermissionsAdvancedEeProps = {
   dependencies: HierarchyItem;
@@ -90,4 +91,12 @@ export type SubfilterQaChecksProps = {
   value: FiltersInternal;
   actions: FilterActions;
   selectedLanguages: LanguageModel[];
+};
+
+export type SubfilterTasksProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+  taskCreation?: boolean;
+  pinnedTaskType?: TaskType;
 };

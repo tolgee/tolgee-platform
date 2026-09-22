@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { tasks } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage, dismissMenu } from '../../common/shared';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import {
   checkTaskPreview,
   getTaskPreview,
@@ -9,6 +10,7 @@ import {
 } from '../../common/tasks';
 
 describe('project tasks', () => {
+  const translationsView = new E2TranslationsView();
   beforeEach(() => {
     tasks.clean({ failOnStatusCode: false });
     tasks
@@ -143,7 +145,7 @@ describe('project tasks', () => {
     checkTaskPreview({
       language: 'Czech',
       keys: 2,
-      alert: true,
+      alert: false,
       words: 4,
       characters: 26,
     });
@@ -172,6 +174,88 @@ describe('project tasks', () => {
       words: 8,
       characters: 52,
     });
+  });
+
+  function openTaskCreateFilters() {
+    cy.gcy('tasks-header-add-task').click();
+    cy.gcy('create-task-field-languages').click();
+    cy.gcy('create-task-field-languages-item').contains('Czech').click();
+    dismissMenu();
+    cy.waitForDom();
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Tasks').click();
+  }
+
+  it('task create offers only the statuses that cannot drop keys', () => {
+    openTaskCreateFilters();
+
+    translationsView.assertTaskStatusFilterChecked('NOT_IN_OPEN_TASK');
+    translationsView.getTaskStatusFilter('NEVER_IN_TASK').should('exist');
+    translationsView
+      .getTaskStatusFilter('HAS_BEEN_IN_TASK')
+      .should('not.exist');
+  });
+
+  it('task create offers no clear control until something is filtered', () => {
+    openTaskCreateFilters();
+
+    dismissMenu();
+    dismissMenu();
+    cy.gcy('translations-filter-select-clear').should('not.exist');
+  });
+
+  it('task create keeps a status selected when re-clicked or cleared', () => {
+    openTaskCreateFilters();
+
+    translationsView.getTaskStatusFilter('NOT_IN_OPEN_TASK').click();
+    translationsView.assertTaskStatusFilterChecked('NOT_IN_OPEN_TASK');
+    translationsView.getTaskTypeFilter('REVIEW').click();
+
+    dismissMenu();
+    dismissMenu();
+    cy.gcy('translations-filter-select-clear').click();
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Tasks').click();
+    translationsView.assertTaskStatusFilterChecked('NOT_IN_OPEN_TASK');
+    translationsView.assertTaskTypeFilterChecked('TRANSLATE');
+    translationsView.assertTaskTypeFilterChecked('REVIEW', false);
+  });
+
+  it('task create pins the type being created', () => {
+    openTaskCreateFilters();
+
+    translationsView
+      .getTaskTypeFilter('TRANSLATE')
+      .should('have.attr', 'aria-disabled', 'true');
+    translationsView.assertTaskTypeFilterChecked('TRANSLATE');
+    translationsView.assertTaskTypeFilterChecked('REVIEW', false);
+  });
+
+  it('task create leaves the type that is not being created free', () => {
+    openTaskCreateFilters();
+
+    translationsView.getTaskTypeFilter('REVIEW').click();
+    translationsView.assertTaskTypeFilterChecked('REVIEW');
+    translationsView.assertTaskTypeFilterChecked('TRANSLATE');
+  });
+
+  it('task create rescopes the type filter when the form type changes', () => {
+    openTaskCreateFilters();
+    translationsView.assertTaskTypeFilterChecked('REVIEW', false);
+
+    dismissMenu();
+    dismissMenu();
+    cy.gcy('create-task-field-type').click();
+    cy.gcy('create-task-field-type-item').contains('Review').click();
+    cy.waitForDom();
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Tasks').click();
+
+    translationsView.assertTaskTypeFilterChecked('REVIEW');
+    translationsView.assertTaskTypeFilterChecked('TRANSLATE', false);
+    translationsView
+      .getTaskTypeFilter('REVIEW')
+      .should('have.attr', 'aria-disabled', 'true');
   });
 
   it('task create displays correct numbers for key filter', () => {

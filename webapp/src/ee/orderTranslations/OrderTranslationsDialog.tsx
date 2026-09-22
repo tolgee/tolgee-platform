@@ -30,12 +30,15 @@ import {
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
+import {
+  omitTaskScopeQuery,
+  taskScopeFiltersQuery,
+  useTaskCreationFilters,
+} from 'tg.ee.module/task/hooks/useTaskCreationFilters';
 import { User } from 'tg.component/UserAccount';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useEnabledFeatures, useUser } from 'tg.globalContext/helpers';
 import { TranslationAgency } from './TranslationAgency';
-import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import {
   DEFAULT_STATE_FILTERS_REVIEW,
@@ -43,7 +46,6 @@ import {
   TaskCreateForm,
 } from 'tg.ee.module/task/components/taskCreate/TaskCreateForm';
 import { EmptyScopeDialog } from 'tg.ee.module/task/components/taskCreate/EmptyScopeDialog';
-import { useTranslationFilters } from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
 type CreateTaskRequest = components['schemas']['CreateTaskRequest'];
 type TaskType = CreateTaskRequest['type'];
@@ -130,13 +132,23 @@ export const OrderTranslationsDialog: React.FC<
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
-  const [filters, setFilters] = useState<FiltersInternal>({});
-  const { filtersQuery, ...actions } = useTranslationFilters({
+  const keysPreselected = Boolean(initialValues?.selection);
+
+  const {
     filters,
-    setFilters,
+    defaultFilters,
+    actions,
+    filtersQuery,
+    languages,
+    setLanguages,
+    stateFilters: stateFiltersOverride,
+    setStateFilters,
+  } = useTaskCreationFilters({
+    allLanguages,
+    initialLanguages: initialValues?.languages,
+    keysPreselected,
   });
-  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
-  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
+
   const [successMessage, setSuccessMessage] = useState(false);
 
   const [_step, setStep] = useState<number | undefined>(undefined);
@@ -172,7 +184,7 @@ export const OrderTranslationsDialog: React.FC<
     method: 'get',
     path: { projectId },
     query: {
-      ...filtersQuery,
+      ...omitTaskScopeQuery(filtersQuery),
       languages: allLanguages.map((l) => l.tag),
       branch,
     },
@@ -190,8 +202,8 @@ export const OrderTranslationsDialog: React.FC<
   const canBeSubmitted = scope.every(Boolean);
 
   function getStateFilters(taskType: TaskType) {
-    if (_stateFilters) {
-      return _stateFilters;
+    if (stateFiltersOverride) {
+      return stateFiltersOverride;
     }
     return taskType === 'TRANSLATE'
       ? DEFAULT_STATE_FILTERS_TRANSLATE
@@ -301,6 +313,7 @@ export const OrderTranslationsDialog: React.FC<
                     (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
                   ),
                   filterOutdated: stateFilters.includes('OUTDATED'),
+                  ...taskScopeFiltersQuery(filters, values.type),
                 },
                 content: {
                   'application/json': {
@@ -398,6 +411,7 @@ export const OrderTranslationsDialog: React.FC<
                           allLanguages={allLanguages}
                           filters={filters}
                           filterActions={actions}
+                          defaultFilters={defaultFilters}
                           stateFilters={getStateFilters(values.type)}
                           setStateFilters={setStateFilters}
                           projectId={projectId}

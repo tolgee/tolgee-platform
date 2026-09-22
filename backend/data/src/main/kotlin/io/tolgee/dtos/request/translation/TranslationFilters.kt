@@ -2,6 +2,7 @@ package io.tolgee.dtos.request.translation
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.tolgee.model.enums.TaskType
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 
 open class TranslationFilters(
@@ -207,6 +208,30 @@ $PATTERN_GRAMMAR_DOC""",
     description = "Filter task keys which are `done`",
   )
   var filterTaskKeysDone: Boolean? = null
+
+  @field:Parameter(
+    description = "Select only keys linked to a task in any of the provided languages.",
+  )
+  var filterHasBeenInTaskInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Select only keys linked to no task in any of the provided languages.",
+  )
+  var filterNeverInTaskInLang: List<String>? = null
+
+  @field:Parameter(
+    description =
+      "Select only keys linked to no open task (NEW or IN_PROGRESS) in any of the provided languages.",
+  )
+  var filterNotInOpenTaskInLang: List<String>? = null
+
+  @field:Parameter(
+    description =
+      "Restrict filterHasBeenInTaskInLang, filterNeverInTaskInLang and filterNotInOpenTaskInLang to " +
+        "tasks of these types. Omitted or empty means every type counts. Does not affect " +
+        "filterTaskNumber.",
+  )
+  var filterTaskType: List<TaskType>? = null
 
   @field:Parameter(
     description = "Filter keys with unresolved comments in lang",
