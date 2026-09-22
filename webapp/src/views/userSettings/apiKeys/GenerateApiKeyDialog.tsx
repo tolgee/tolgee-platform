@@ -43,6 +43,31 @@ interface Props {
 const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
+const ProjectFieldsSync = ({
+  formikProps,
+  project,
+  availableScopes,
+}: {
+  formikProps: FormikProps<Value>;
+  project: ProjectModel | undefined;
+  availableScopes: Set<Scope>;
+}) => {
+  useEffect(() => {
+    formikProps.setFieldValue(
+      'scopes',
+      setsIntersection(availableScopes, new Set(formikProps.values.scopes))
+    );
+  }, [project]);
+
+  useEffect(() => {
+    if (project && formikProps.values.projectId !== project.id) {
+      formikProps.setFieldValue('projectId', project.id);
+    }
+  }, [project?.id]);
+
+  return null;
+};
+
 export const GenerateApiKeyDialog: FunctionComponent<
   React.PropsWithChildren<Props>
 > = (props) => {
@@ -197,31 +222,21 @@ export const GenerateApiKeyDialog: FunctionComponent<
                     project?.computedPermission?.scopes ?? []
                   );
 
-                  useEffect(() => {
-                    formikProps.setFieldValue(
-                      'scopes',
-                      setsIntersection(
-                        availableScopes,
-                        new Set(formikProps.values.scopes)
-                      )
-                    );
-                  }, [project]);
-
-                  useEffect(() => {
-                    if (
-                      project &&
-                      formikProps.values.projectId !== project.id
-                    ) {
-                      formikProps.setFieldValue('projectId', project.id);
-                    }
-                  }, [project?.id]);
+                  const projectFieldsSync = (
+                    <ProjectFieldsSync
+                      formikProps={formikProps}
+                      project={project}
+                      availableScopes={availableScopes}
+                    />
+                  );
 
                   if (!project) {
-                    return null;
+                    return projectFieldsSync;
                   }
 
                   return (
                     <>
+                      {projectFieldsSync}
                       {!props.project && (
                         <Select
                           fullWidth

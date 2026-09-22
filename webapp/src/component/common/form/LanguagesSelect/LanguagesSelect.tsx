@@ -9,7 +9,7 @@ import {
 import FormControl from '@mui/material/FormControl';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { getLanguagesContent } from './getLanguagesContent';
+import { useLanguagesContent } from 'tg.component/common/form/LanguagesSelect/useLanguagesContent';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -50,6 +50,15 @@ export type Props = {
 export const LanguagesSelect: FunctionComponent<
   React.PropsWithChildren<Props>
 > = (props) => {
+  const languagesContent = useLanguagesContent({
+    onChange: props.onChange,
+    languages: props.languages,
+    value: props.value,
+    disabledLanguages: props.disabledLanguages,
+    enableEmpty: props.enableEmpty,
+    context: props.context,
+  });
+
   const menuProps: Partial<MenuProps> = {
     variant: 'menu',
     PaperProps: {
@@ -94,14 +103,7 @@ export const LanguagesSelect: FunctionComponent<
         MenuProps={menuProps}
         margin="dense"
       >
-        {getLanguagesContent({
-          onChange: props.onChange,
-          languages: props.languages,
-          value: props.value,
-          disabledLanguages: props.disabledLanguages,
-          enableEmpty: props.enableEmpty,
-          context: props.context,
-        })}
+        {languagesContent}
       </StyledSelect>
     </FormControl>
   );

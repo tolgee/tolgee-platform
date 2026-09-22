@@ -13,6 +13,8 @@ import {
   useTranslationsSelector,
 } from '../TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useProject } from 'tg.hooks/useProject';
+import { satisfiesPermissionWithBranching } from 'tg.fixtures/permissions';
 import { CellPosition } from '../types';
 import { getMeta } from 'tg.fixtures/isMac';
 import { isElementInput } from 'tg.fixtures/isElementInput';
@@ -38,8 +40,8 @@ export const useTranslationsShortcuts = () => {
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
-  const { satisfiesLanguageAccess, satisfiesPermissionWithBranching } =
-    useProjectPermissions();
+  const project = useProject();
+  const { satisfiesLanguageAccess } = useProjectPermissions();
   const canEditProtectedBranch = useBranchEditAccess();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
   const fixedTranslations = useTranslationsSelector((c) => c.translations);
@@ -50,7 +52,11 @@ export const useTranslationsShortcuts = () => {
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);
 
-  const canEditKey = satisfiesPermissionWithBranching('keys.edit');
+  const canEditKey = satisfiesPermissionWithBranching(
+    project.computedPermission.scopes,
+    'keys.edit',
+    canEditProtectedBranch
+  );
 
   const isTranslation = (position: CellPosition | undefined) =>
     position?.language;

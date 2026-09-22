@@ -13,7 +13,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 import clsx from 'clsx';
 import { CELL_SHOW_ON_HOVER } from 'tg.views/projects/translations/cell/styles';
 import { useTranslate } from '@tolgee/react';
@@ -77,7 +77,8 @@ export const TranslationLabels = ({
   onSelect,
   onDelete,
 }: Props) => {
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const satisfiesPermissionWithBranching =
+    useSatisfiesPermissionWithBranching();
   const canAssignLabels = satisfiesPermissionWithBranching(
     'translation-labels.assign'
   );

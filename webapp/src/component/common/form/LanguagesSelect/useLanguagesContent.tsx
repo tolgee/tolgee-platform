@@ -62,7 +62,7 @@ type Props = {
   context?: string;
 };
 
-export const getLanguagesContent = ({
+export const useLanguagesContent = ({
   languages,
   value,
   onChange,

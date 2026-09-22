@@ -22,9 +22,6 @@ export const GlobalBranchSelector = () => {
   const { isEnabled } = useEnabledFeatures();
 
   const isBranchingEnabled = isEnabled('BRANCHING') && project.useBranching;
-  if (!isBranchingEnabled) {
-    return null;
-  }
   const {
     selected,
     loadable,
@@ -32,7 +29,12 @@ export const GlobalBranchSelector = () => {
   } = useBranchesService({
     projectId: project.id,
     branchName: branchInUrl,
+    enabled: isBranchingEnabled,
   });
+
+  if (!isBranchingEnabled) {
+    return null;
+  }
 
   if (!loadable.isFetching && !selected) {
     history.replace(applyBranchToLocation(location, defaultBranch?.name));

@@ -8,15 +8,15 @@ type Props = {
 };
 
 export const DisconnectButton = ({ workspaceId }: Props) => {
-  const organization = useOrganization()!;
-
-  if (!organization) return null;
+  const organization = useOrganization();
 
   const disconnectMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/slack/workspaces/{workspaceId}',
     method: 'delete',
     invalidatePrefix: '/v2/organizations/{organizationId}/slack/workspaces',
   });
+
+  if (!organization) return null;
 
   const onDisconnect = () => {
     disconnectMutation.mutate({

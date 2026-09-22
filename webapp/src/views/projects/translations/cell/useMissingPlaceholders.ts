@@ -16,27 +16,32 @@ export const useMissingPlaceholders = ({
   enabled,
 }: Props) => {
   const project = useProject();
-
-  if (!project.icuPlaceholders) {
-    return [];
-  }
+  const icuPlaceholdersEnabled = Boolean(project.icuPlaceholders);
 
   const basePlaceholders = useMemo(() => {
-    return (enabled && getPlaceholders(baseTranslation || '', nested)) || [];
-  }, [baseTranslation, nested, enabled]);
+    return (
+      (icuPlaceholdersEnabled &&
+        enabled &&
+        getPlaceholders(baseTranslation || '', nested)) ||
+      []
+    );
+  }, [baseTranslation, nested, enabled, icuPlaceholdersEnabled]);
 
   const lastValidPlaceholders = useRef<Placeholder[]>();
 
   lastValidPlaceholders.current = useMemo(() => {
+    if (!icuPlaceholdersEnabled) {
+      return lastValidPlaceholders.current;
+    }
     const newPlaceholders = getPlaceholders(currentTranslation || '', nested);
     if (newPlaceholders === null) {
       return lastValidPlaceholders.current;
     } else {
       return newPlaceholders;
     }
-  }, [currentTranslation, nested]);
+  }, [currentTranslation, nested, icuPlaceholdersEnabled]);
 
-  return useMemo(() => {
+  const missingPlaceholders = useMemo(() => {
     const placeholdersMap = new Map();
     lastValidPlaceholders.current?.forEach((i) => {
       const id = i.normalizedValue;
@@ -50,4 +55,6 @@ export const useMissingPlaceholders = ({
       return !value;
     });
   }, [basePlaceholders, lastValidPlaceholders.current]);
+
+  return icuPlaceholdersEnabled ? missingPlaceholders : [];
 };

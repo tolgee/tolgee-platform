@@ -52,13 +52,21 @@ export const googleService = (clientId: string): OAuthService => {
   };
 };
 
-export const oauth2Service = (
-  clientId: string,
-  authorizationUrl: string,
-  scopes: string[] = []
-): OAuthService => {
+export type OAuth2ServiceConfig = {
+  clientId: string;
+  authorizationUrl: string;
+  scopes?: string[];
+};
+
+export const useOAuth2Service = (
+  config: OAuth2ServiceConfig | undefined
+): OAuthService | undefined => {
   const { generateOAuthStateKey } = useGlobalActions();
   const [authenticationUrl] = useState(() => {
+    if (!config) {
+      return undefined;
+    }
+    const { clientId, authorizationUrl, scopes = [] } = config;
     const state = generateOAuthStateKey();
     const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
       [PARAMS.SERVICE_TYPE]: 'oauth2',
@@ -71,6 +79,10 @@ export const oauth2Service = (
     authUrl.searchParams.set('state', state);
     return authUrl.toString();
   });
+
+  if (!authenticationUrl) {
+    return undefined;
+  }
 
   return {
     id: 'oauth2',
