@@ -2,6 +2,7 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.translation.TranslationFilterByPattern
+import io.tolgee.dtos.request.translation.TranslationFilterByTask
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language_
@@ -12,6 +13,9 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.branching.Branch_
+import io.tolgee.model.enums.TaskFilterStatus
+import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.KeyMeta_
@@ -31,6 +35,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import jakarta.persistence.criteria.Subquery
 import org.hibernate.query.criteria.JpaCteContainer
 import org.hibernate.query.criteria.JpaCteCriteria
@@ -65,6 +70,28 @@ class QueryGlobalFiltering(
     filterTask()
     filterBranch()
     filterDeletedByUserId()
+  }
+
+  fun applyTaskHistoryFilters() {
+    val filters = params.filterTaskInLang?.takeIf { it.isNotEmpty() } ?: return
+    TranslationFilterByTask
+      .parseList(filters)
+      .groupBy({ it.taskType to it.status }, { it.languageTag })
+      .forEach { (typeAndStatus, tags) ->
+        val (taskType, status) = typeAndStatus
+        val languageIds = queryBase.queryTranslationFiltering.languageIdsForTags(tags) ?: return@forEach
+        queryBase.whereConditions.add(taskStatusPredicate(taskType, status, languageIds))
+      }
+  }
+
+  private fun taskStatusPredicate(
+    taskType: TaskType,
+    status: TaskFilterStatus,
+    languageIds: List<Long>,
+  ): Predicate {
+    val conditions = taskInLanguageConditions(taskType, languageIds, status.openOnly)
+    if (status.negated) return taskKeyNotExists(conditions)
+    return taskKeyExists(conditions)
   }
 
   private fun filterFailedTargets() {
@@ -453,27 +480,63 @@ class QueryGlobalFiltering(
 
   private fun filterTask() {
     val taskNumbers = params.filterTaskNumber ?: return
+    queryBase.whereConditions.add(
+      taskKeyExists { tkRoot ->
+        val conditions = mutableListOf<Predicate>()
+        conditions.add(tkRoot.get(TaskKey_.task).get(Task_.number).`in`(taskNumbers))
+        if (params.filterTaskKeysNotDone == true) {
+          conditions.add(cb.equal(tkRoot.get(TaskKey_.done), false))
+        }
+        if (params.filterTaskKeysDone == true) {
+          conditions.add(cb.equal(tkRoot.get(TaskKey_.done), true))
+        }
+        conditions
+      },
+    )
+  }
 
+  private fun taskInLanguageConditions(
+    taskType: TaskType,
+    languageIds: List<Long>,
+    openOnly: Boolean,
+  ): (Root<TaskKey>) -> List<Predicate> =
+    { tkRoot ->
+      val conditions =
+        mutableListOf(
+          queryBase.queryTranslationFiltering.languagePredicate(
+            tkRoot.get(TaskKey_.task).get(Task_.language).get(Language_.id),
+            languageIds,
+          ),
+          cb.equal(tkRoot.get(TaskKey_.task).get(Task_.type), taskType),
+        )
+      if (openOnly) {
+        conditions.add(tkRoot.get(TaskKey_.task).get(Task_.state).`in`(TaskState.OPEN_STATES))
+      }
+      conditions
+    }
+
+  private fun taskKeyExists(extraConditions: (Root<TaskKey>) -> List<Predicate>): Predicate =
+    taskKeySubquery(correlated = !isCountQuery, extraConditions)
+
+  private fun taskKeyNotExists(extraConditions: (Root<TaskKey>) -> List<Predicate>): Predicate =
+    cb.not(taskKeySubquery(correlated = true, extraConditions))
+
+  private fun taskKeySubquery(
+    correlated: Boolean,
+    extraConditions: (Root<TaskKey>) -> List<Predicate>,
+  ): Predicate {
     val subquery = queryBase.query.subquery(Long::class.java)
     val tkRoot = subquery.from(TaskKey::class.java)
+    val keyIdPath = tkRoot.get(TaskKey_.key).get(Key_.id)
     val conditions = mutableListOf<Predicate>()
-    if (isCountQuery) {
-      subquery.select(tkRoot.get(TaskKey_.key).get(Key_.id))
-    } else {
-      subquery.select(cb.literal(1L))
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.key).get(Key_.id), queryBase.root.get(Key_.id)))
+    conditions.addAll(extraConditions(tkRoot))
+    if (correlated) {
+      conditions.add(cb.equal(keyIdPath, queryBase.root.get(Key_.id)))
     }
-    conditions.add(tkRoot.get(TaskKey_.task).get(Task_.number).`in`(taskNumbers))
-    if (params.filterTaskKeysNotDone == true) {
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), false))
-    }
-    if (params.filterTaskKeysDone == true) {
-      conditions.add(cb.equal(tkRoot.get(TaskKey_.done), true))
-    }
+    subquery.select(if (correlated) cb.literal(1L) else keyIdPath)
     subquery.where(cb.and(*conditions.toTypedArray()))
-    queryBase.whereConditions.add(
-      if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery),
-    )
+    if (correlated) return cb.exists(subquery)
+    return queryBase.root.get(Key_.id).`in`(subquery)
   }
 
   private fun filterRevisionId() {
