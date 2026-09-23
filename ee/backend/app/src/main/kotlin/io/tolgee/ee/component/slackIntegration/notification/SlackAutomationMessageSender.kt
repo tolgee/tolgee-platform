@@ -11,6 +11,7 @@ import io.tolgee.ee.component.slackIntegration.notification.messageFactory.Slack
 import io.tolgee.ee.service.slackIntegration.SavedSlackMessageService
 import io.tolgee.model.slackIntegration.SavedSlackMessage
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.service.language.LanguageService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,6 +49,13 @@ class SlackAutomationMessageSender(
   ) {
     val context = createContext(slackConfig, data)
     if (context.isBigOperation) {
+      // The big-operation summary skips the per-message factory, so it must apply its own
+      // subscription gate here; otherwise it notifies channels that never subscribed to a
+      // translation-change event. Big operations carry only aggregate counts (no per-language
+      // detail is loaded), so the gate is coarse: event type only, not per-language.
+      if (!wantsTranslationChangeEvents(slackConfig)) {
+        return
+      }
       logger.debug("Too many translations to send message, sending only one message")
       val messageDto = slackTooManyTranslationsMessageFactory.createMessageIfTooManyTranslations(context)
       sendRegularMessageWithSaving(messageDto, context)
@@ -90,6 +98,15 @@ class SlackAutomationMessageSender(
         }
       }
     }
+  }
+
+  private fun wantsTranslationChangeEvents(slackConfig: SlackConfig): Boolean {
+    val relevantEvents =
+      setOf(SlackEventType.ALL, SlackEventType.TRANSLATION_CHANGED, SlackEventType.BASE_CHANGED)
+    if (slackConfig.isGlobalSubscription && slackConfig.events.any { it in relevantEvents }) {
+      return true
+    }
+    return slackConfig.preferences.any { preference -> preference.events.any { it in relevantEvents } }
   }
 
   private fun processSavedMessage(

@@ -9,6 +9,7 @@ import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -111,6 +112,32 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       // currently is 6 due to suboptimal implementations
       newUpdates.assert.isEqualTo(3)
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not send the big-operation summary to a new_key-only subscription`() {
+    testData.slackConfig.isGlobalSubscription = true
+    testData.slackConfig.events = mutableSetOf(SlackEventType.NEW_KEY)
+    val keys = testData.add10Keys()
+    saveTestData()
+    val keyIds = keys.map { it.id }
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+
+    waitFor(pollTime = 5) {
+      applicationBatchJobRunner.settled
+    }
+    mockedSlackClient.clearInvocations()
+
+    performBatchOperation(keyIds)
+
+    // The batch machine-translate is a big operation. A new_key-only subscription is not interested
+    // in translation changes, so the big-operation summary must be gated out — before the fix it
+    // was sent unconditionally, bypassing the subscription filter.
+    waitFor(pollTime = 5) {
+      applicationBatchJobRunner.settled
+    }
+    mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
   }
 
   private fun performBatchOperation(keyIds: List<Long>) {
