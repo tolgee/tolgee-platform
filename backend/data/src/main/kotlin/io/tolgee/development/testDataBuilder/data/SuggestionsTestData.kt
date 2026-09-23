@@ -277,17 +277,14 @@ class SuggestionsTestData(
           self.isPlural = true
           addTranslation("en", "{value, plural, one {# key} other {# keys}}")
           addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
+          pluralSuggestion =
+            addSuggestion {
+              this.language = czechLanguage
+              this.author = projectTranslator.self
+              this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
+              this.isPlural = true
+            }
         }
-
-      pluralKey.apply {
-        pluralSuggestion =
-          addSuggestion {
-            this.language = czechLanguage
-            this.author = projectTranslator.self
-            this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
-            this.isPlural = true
-          }
-      }
     }
 
     val unrelatedUser =
