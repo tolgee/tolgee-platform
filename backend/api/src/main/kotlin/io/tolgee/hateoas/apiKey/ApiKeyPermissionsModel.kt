@@ -30,5 +30,7 @@ class ApiKeyPermissionsModel(
   var project: SimpleProjectModel,
   val suggestionsMode: SuggestionsMode,
   val translationProtection: TranslationProtection,
+  @Schema(description = "Id of the user the credential belongs to")
+  val userId: Long,
 ) : RepresentationModel<ApiKeyPermissionsModel>(),
   IPermissionModel
