@@ -59,7 +59,13 @@ class SlackMessageContext(
     if (translations.isNullOrEmpty()) {
       return@lazy null
     }
-    translations.mapNotNull { it.relations?.get("key")?.entityId }.distinct().size
+    val keyIds = translations.mapNotNull { it.relations?.get("key")?.entityId }
+    // A translation without a resolvable key relation would be dropped silently and could deflate
+    // the count below the threshold; fall back to the aggregate path instead of undercounting.
+    if (keyIds.size != translations.size) {
+      return@lazy null
+    }
+    keyIds.distinct().size
   }
 
   val modifiedTranslationsCount: Long by lazy {
