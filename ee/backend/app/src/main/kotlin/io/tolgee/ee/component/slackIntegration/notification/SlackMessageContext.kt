@@ -35,16 +35,31 @@ class SlackMessageContext(
   }
 
   val isBigOperation: Boolean by lazy {
-    val count = modifiedTranslationsCount
-
-    if (count > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND) {
-      return@lazy true
+    // A Slack message is posted per key, so the flood guard counts distinct keys, not raw
+    // translations. One key changed across many languages (e.g. a base edit that auto-translates
+    // into every target language) is a single message, not a flood, and must not collapse into the
+    // generic "too many translations" summary.
+    val keyCount = modifiedKeyCount
+    if (keyCount != null) {
+      return@lazy keyCount > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
     }
 
-    // This happens in case that the data are considered big in the view provider and so it is not loaded
-    // In that case we just also consider it big
-    // However, we still need to check whether there are any translations changed
-    return@lazy activityData?.let { translationChangeSizeFromModifiedEntities } == null && count > 0
+    // Bulk activity types (AUTO_TRANSLATE, batch operations) expose only aggregate counts in the
+    // activity view provider — the per-entity detail is not loaded, so distinct keys cannot be
+    // counted. Treat such an activity as big whenever anything was changed.
+    return@lazy modifiedTranslationsCount > 0
+  }
+
+  /**
+   * Number of distinct keys touched by this activity, or null when per-entity detail is not loaded
+   * (bulk activity types), in which case only aggregate counts are available.
+   */
+  private val modifiedKeyCount: Int? by lazy {
+    val translations = activityData?.modifiedEntities?.get("Translation")
+    if (translations.isNullOrEmpty()) {
+      return@lazy null
+    }
+    translations.mapNotNull { it.relations?.get("key")?.entityId }.distinct().size
   }
 
   val modifiedTranslationsCount: Long by lazy {
