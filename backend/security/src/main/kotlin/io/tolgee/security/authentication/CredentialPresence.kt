@@ -18,6 +18,8 @@ package io.tolgee.security.authentication
 
 import io.tolgee.API_KEY_HEADER_NAME
 import jakarta.servlet.http.HttpServletRequest
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 /** Where [AuthenticationFilter] looks for a credential. */
 object CredentialPresence {
@@ -37,6 +39,14 @@ object CredentialPresence {
 
   private fun hasQueryApiKey(queryString: String?): Boolean {
     val query = queryString ?: return false
-    return query.split("&").any { it == API_KEY_QUERY_PARAM || it.startsWith("$API_KEY_QUERY_PARAM=") }
+    return query.split("&").any { decodedName(it.substringBefore('=')) == API_KEY_QUERY_PARAM }
   }
+
+  /**
+   * The servlet container percent-decodes parameter names before `getParameter` matches them, so `?%61k=` is a
+   * credential to [AuthenticationFilter]. Reading the raw query string here without decoding would make the two
+   * disagree about whether a request carried one.
+   */
+  private fun decodedName(raw: String): String =
+    runCatching { URLDecoder.decode(raw, StandardCharsets.UTF_8) }.getOrDefault(raw)
 }
