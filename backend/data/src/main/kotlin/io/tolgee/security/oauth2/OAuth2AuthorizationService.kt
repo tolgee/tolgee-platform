@@ -23,8 +23,10 @@ import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
+import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
@@ -33,11 +35,13 @@ import io.tolgee.security.oauth2.cimd.CimdMetadataFetcher
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.Instant
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 /**
  * The OAuth 2.1 authorization-code grant with PKCE, for public clients only: every step of the protocol that touches
@@ -52,8 +56,9 @@ class OAuth2AuthorizationService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
-  private val metrics: Metrics,
+  private val documentCheckRepository: OAuth2ClientDocumentCheckRepository,
   private val resources: OAuth2Resources,
+  private val metrics: Metrics,
 ) : Logging {
   data class AuthorizeParams(
     val responseType: String?,
@@ -105,6 +110,7 @@ class OAuth2AuthorizationService(
     projectHint: String?,
   ): OAuth2Grant {
     val validated = validateAuthorizeRequest(params)
+    refuseIfTooManyDocumentBackedClients(userId, client)
 
     val grant =
       OAuth2Grant().apply {
@@ -208,6 +214,7 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "code expired")
     }
+    refuseIfClientWithdrawn(grant)
     // RFC 9700 4.5.3.1: a mismatching redirect_uri or code_verifier is the authorization-code-injection signal, so
     // the code is spent rather than left redeemable for the rest of its validity across unlimited attempts.
     if (grant.redirectUri != redirectUri || !OAuth2Pkce.matchesChallenge(verifier, grant.codeChallenge)) {
@@ -236,7 +243,7 @@ class OAuth2AuthorizationService(
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
-    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeIfStolenAndFail(hash)
+    val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeReplayedGrantAndFail(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
     if (grant.clientId != client.clientId || metadataDrifted(grant, client)) {
@@ -247,6 +254,8 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "refresh token expired")
     }
+    refuseIfClientWithdrawn(grant)
+    refuseIfDocumentUnreadForTooLong(grant, client)
     requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
     grant.issuedTokenScopeValues = narrowedScopes(grant, requestedScope)
@@ -264,9 +273,9 @@ class OAuth2AuthorizationService(
     token: String,
   ) {
     val hash = keyGenerator.hash(token.removePrefix(OAUTH_ACCESS_TOKEN_PREFIX).removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
-    // The superseded *refresh* token counts too: a client that rotated and then logs out with the token it replaced
-    // would otherwise be told the grant is dead while it stays live for the whole refresh window. A superseded
-    // access token is overwritten in place and cannot be looked up.
+    // Every refresh token the grant ever issued counts: a client that rotated twice and then logs out with an
+    // older one would otherwise get the RFC 7009 answer for a dead token while its grant stayed live. A superseded
+    // access token is overwritten in place and cannot be looked up at all.
     val grant =
       repository.findAndLockByAccessTokenHash(hash)
         ?: repository.findAndLockByRefreshTokenHash(hash)
@@ -275,6 +284,158 @@ class OAuth2AuthorizationService(
         ?: return
     if (grant.clientId != client.clientId) throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     repository.delete(grant)
+  }
+
+  @Transactional
+  fun recordDocumentRead(clientId: String) {
+    val now = currentDateProvider.date
+    val refreshBefore = Date(now.time - TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays) / 2)
+    repository.markClientDocumentRead(clientId, now, refreshBefore)
+  }
+
+  /** The document no longer matches what its users agreed to, so those grants end. */
+  @Transactional
+  fun revokeDriftedFromDocument(
+    clientId: String,
+    currentHash: String?,
+  ): Int {
+    if (currentHash == null) return 0
+    val revoked =
+      repository.deleteDriftedFromDocument(
+        clientId,
+        currentHash,
+        CimdMetadataFetcher.HASH_SCHEME_PREFIX + "%",
+      )
+    if (revoked > 0) {
+      logger.warn(
+        "Revoked {} OAuth2 grant(s) of client {}: its metadata document no longer matches the consented terms",
+        revoked,
+        clientId,
+      )
+    }
+    return revoked
+  }
+
+  /**
+   * Bounds how many document-backed clients one account adds to the background check's work list. See
+   * `docs/oauth/README.md` for what that queue's length costs everybody else.
+   */
+  private fun refuseIfTooManyDocumentBackedClients(
+    userId: Long,
+    client: OAuth2Client,
+  ) {
+    if (!client.hasMetadataDocument) return
+    val held = repository.countDocumentBackedClientsOfUser(userId, client.clientId, currentDateProvider.date)
+    if (held < properties.cimdMaxClientsPerUser) return
+    logger.warn("Refusing a new CIMD authorization for user {}: it already holds {} such clients", userId, held)
+    throw OAuth2Error(
+      OAuth2Error.ACCESS_DENIED,
+      "this account already holds authorizations for too many clients that identify themselves with a document",
+    )
+  }
+
+  fun clientIdsDueForCheck(limit: Int): List<String> =
+    repository.findCimdClientIdsDueForCheck(
+      currentDateProvider.date,
+      dueBefore(),
+      graceStart(),
+      NEVER_CHECKED,
+      PageRequest.of(0, limit),
+    )
+
+  fun clientsDueForCheckCount(): Long =
+    repository.countCimdClientIdsDueForCheck(currentDateProvider.date, dueBefore(), graceStart(), NEVER_CHECKED)
+
+  private fun dueBefore(): Date =
+    Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdCheckIntervalMinutes))
+
+  private fun graceStart(): Date =
+    Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdWithdrawalGraceMinutes))
+
+  @Transactional
+  fun recordCheckAttempt(clientId: String) {
+    val existing = documentCheckRepository.findByClientId(clientId)
+    val row = existing ?: OAuth2ClientDocumentCheck().also { it.clientId = clientId }
+    row.previousCheckedAt = existing?.checkedAt
+    row.checkedAt = currentDateProvider.date
+    documentCheckRepository.save(row)
+  }
+
+  @Transactional
+  fun deleteCheckRowsWithoutGrants(): Int = documentCheckRepository.deleteWithoutGrants()
+
+  /** A publisher's refusal, made durable on the grant rows so every instance reads it. */
+  @Transactional
+  fun recordClientWithdrawn(clientId: String) {
+    val marked = repository.markClientWithdrawn(clientId, currentDateProvider.date)
+    if (marked > 0) {
+      logger.warn(
+        "Marked {} OAuth2 grant(s) of client {} as withdrawn: its metadata document refuses",
+        marked,
+        clientId,
+      )
+    }
+  }
+
+  /**
+   * A grant of a client that identifies itself with a metadata document lives on that document being readable.
+   * Not having been read is forgiven until [OAuth2ServerProperties.cimdVerificationMaxAgeDays].
+   */
+  private fun refuseIfDocumentUnreadForTooLong(
+    grant: OAuth2Grant,
+    client: OAuth2Client,
+  ) {
+    if (!client.hasMetadataDocument) return
+    val lastRead = grant.cimdVerifiedAt ?: grant.createdAt ?: return
+    val maxAgeMs = TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays)
+    if (currentDateProvider.date.time - lastRead.time <= maxAgeMs) return
+    // Past the bound, the next question is whose doing that is: a client we kept *trying* to read is the
+    // publisher's answer, while one we never got round to is our own downtime and must not end a grant.
+    val lastAttempt = documentCheckRepository.findByClientId(grant.clientId)?.checkedAt
+    if (lastAttempt == null || lastAttempt.time - lastRead.time <= maxAgeMs) {
+      logger.warn(
+        "Keeping grant {} of client {}: its document has not been read since {}, but neither has it been tried",
+        grant.id,
+        grant.clientId,
+        lastRead,
+      )
+      return
+    }
+    logger.info(
+      "Refusing a refresh of grant {}: its client's metadata document has not been readable since {}",
+      grant.id,
+      lastRead,
+    )
+    throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document could not be read")
+  }
+
+  /**
+   * The mark another instance may have written, read from the row and not from this instance's resolution cache.
+   * The grant is kept, not deleted, so a document that answers again inside the grace window can clear the mark.
+   */
+  private fun refuseIfClientWithdrawn(grant: OAuth2Grant) {
+    if (grant.clientWithdrawnAt == null) return
+    throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document is gone")
+  }
+
+  /**
+   * The document resolves again. A mark younger than the grace window was a mis-deploy and is lifted; an older one
+   * is the publisher retiring the client and stays.
+   */
+  @Transactional
+  fun clearClientWithdrawn(clientId: String) {
+    // This round's attempt is recorded after the work, so the row still holds the previous round's and
+    // `previousCheckedAt` reaches two attempts back. Comparing against the latest one instead would make every
+    // mark look "already read" on the very next round.
+    val previousAttempt = documentCheckRepository.findByClientId(clientId)?.previousCheckedAt ?: NEVER_CHECKED
+    val cleared = repository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
+    if (cleared > 0) {
+      logger.info(
+        "Lifted the withdrawal mark on {} OAuth2 grant(s) of client {}: its document answers again",
+        cleared,
+        clientId,
+      )
+    }
   }
 
   @Transactional
@@ -358,13 +519,17 @@ class OAuth2AuthorizationService(
     }
   }
 
-  /** RFC 9700 §4.14.2. */
-  private fun revokeIfStolenAndFail(hash: String): Nothing {
-    revokeGrantForReplayedToken(hash)
+  /** RFC 9700 §4.14.2: the token is always refused, and the grant behind it may or may not survive. */
+  private fun revokeReplayedGrantAndFail(hash: String): Nothing {
+    revokeGrantIfReplayedOutsideGrace(hash)
     throw OAuth2Error(OAuth2Error.INVALID_GRANT)
   }
 
-  private fun revokeGrantForReplayedToken(hash: String) {
+  /**
+   * Deletes the grant the hash belonged to when a rotated-away refresh token is replayed after the grace window.
+   * A replay inside the window, and a hash matching nothing at all, leave the grant as it is.
+   */
+  private fun revokeGrantIfReplayedOutsideGrace(hash: String) {
     val justRotated = repository.findAndLockByPreviousRefreshTokenHash(hash)
     if (justRotated != null) {
       if (isWithinRefreshGrace(justRotated.refreshTokenRotatedAt)) {
@@ -387,11 +552,7 @@ class OAuth2AuthorizationService(
     repository.delete(superseded.grant)
   }
 
-  /**
-   * Keeping the grant is the whole point of the window, so the replay leaves no other trace. The counter is what an
-   * operator can alert on: an innocent race produces these in ones, a stolen credential raced against its owner
-   * produces them repeatedly, and only a metric can tell those apart over time.
-   */
+  /** Keeping the grant is the whole point of the window, so the counter is the replay's only lasting trace. */
   private fun recordGraceHit(
     grantId: Long,
     reason: String,
@@ -458,19 +619,13 @@ class OAuth2AuthorizationService(
     )
   }
 
-  /**
-   * The ceiling lives here rather than in the prune, because the prune can only choose by age or by rank and both
-   * are things a thief drives: they hold a token and can rotate it in a loop. Refusing to record *new* rows keeps
-   * the table bounded without ever dropping the row that would convict them — the victim's stolen token is already
-   * recorded, and the rows declined here are the thief's own later rotations, whose replay proves nothing.
-   */
   private fun demoteToSupersededHistory(
     grant: OAuth2Grant,
     demotedHash: String?,
     supersededAt: Date?,
   ) {
     if (demotedHash == null) return
-    if (isAtHistoryCeiling(grant) && !freedHistorySlot(grant)) {
+    if (!makeRoomInHistory(grant)) {
       logger.warn(
         "OAuth2 grant {} is at its refresh-token history ceiling ({} rows), all of them younger than the retention " +
           "floor; not recording further rotations. A client rotating this fast is a runaway or a hostile one.",
@@ -479,9 +634,8 @@ class OAuth2AuthorizationService(
       )
       return
     }
-    // Saved directly rather than added to grant.supersededRefreshTokens: touching that collection initialises it,
-    // and on a grant sitting at the ceiling that is up to MAX_HISTORY_ROWS_PER_GRANT entities loaded on a path that
-    // only ever writes one row. The count and the eviction above stay in the database for the same reason.
+    // Touching grant.supersededRefreshTokens would initialise it: up to MAX_HISTORY_ROWS_PER_GRANT entities loaded
+    // on a path that writes one row.
     supersededRefreshTokenRepository.save(
       OAuth2SupersededRefreshToken().apply {
         this.grant = grant
@@ -492,17 +646,17 @@ class OAuth2AuthorizationService(
   }
 
   /**
-   * A grant that reached the ceiling on its own — several processes sharing one grant do rotate this often — still
-   * has to record, or its theft detection is off from then on. Making room takes the oldest row already past the
-   * retention floor, which is the row the prune would have taken anyway, and never one a burst could have produced.
+   * Returns whether one more history row may be written, deleting the oldest row past the retention floor to get
+   * there. The ceiling check has to guard the delete: called unguarded it would drop a row on every rotation.
    */
-  private fun freedHistorySlot(grant: OAuth2Grant): Boolean =
-    supersededRefreshTokenRepository.deleteOldestPastFloor(grant.id, historyFloor()) > 0
+  private fun makeRoomInHistory(grant: OAuth2Grant): Boolean {
+    if (!isAtHistoryCeiling(grant)) return true
+    return supersededRefreshTokenRepository.deleteOldestPastFloor(grant.id, historyFloor()) > 0
+  }
 
   private fun historyFloor(): Date =
     Date.from(currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.refreshTokenHistoryMinDays)))
 
-  /** A grant with no id has no rows yet; counting in the database keeps the check off the lazy collection. */
   private fun isAtHistoryCeiling(grant: OAuth2Grant): Boolean {
     val id = grant.id
     if (id == 0L) return false
@@ -516,10 +670,11 @@ class OAuth2AuthorizationService(
   private fun isExpiredOrUnset(deadline: Date?): Boolean = deadline == null || !deadline.after(currentDateProvider.date)
 
   companion object {
+    private val NEVER_CHECKED = Date(0)
+
     /** Matches the `client_state` column width; a longer state cannot be stored, so it must be refused up front. */
     const val MAX_STATE_LENGTH = 2000
 
-    /** Bounds rows per grant regardless of rotation rate; the age floor cannot raise it. */
     const val MAX_HISTORY_ROWS_PER_GRANT = 2000
   }
 }

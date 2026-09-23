@@ -6,6 +6,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.oauth2.cimd.CimdClient
 import io.tolgee.security.oauth2.cimd.CimdClientCache
 import io.tolgee.security.oauth2.cimd.CimdClientPolicy
+import io.tolgee.security.oauth2.cimd.CimdResolution
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -184,11 +186,20 @@ class OAuth2ClientRegistryTest {
   @Test
   fun `an unknown URL-form client id falls through to the CIMD cache`() {
     val cimd = cimdClient(CIMD_URL)
-    val cache = mock<CimdClientCache> { on { get(CIMD_URL) } doReturn cimd }
+    val cache = mock<CimdClientCache> { on { get(eq(CIMD_URL)) } doReturn cimd }
     val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
 
     registry.find(CIMD_URL).assert.isEqualTo(cimd.client)
     registry.findCimd(CIMD_URL).assert.isEqualTo(cimd)
+  }
+
+  @Test
+  fun `resolving a client on the authorize path asks nothing about who holds grants`() {
+    val cache = mock<CimdClientCache> { on { get(any()) } doReturn null }
+
+    registry(cache = cache).find(CIMD_URL)
+
+    verify(cache).get(CIMD_URL)
   }
 
   @Test
@@ -202,12 +213,94 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
-  fun `isStillAuthorized accepts a URL-form client without ever fetching it`() {
-    val cache = mock<CimdClientCache>()
+  fun `a client whose document cannot be reached keeps its grant, so a blip cannot kill one`() {
+    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Unavailable }
     val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
 
-    registry.isStillAuthorized(CIMD_URL).assert.isTrue()
+    registry.findForExistingGrant(CIMD_URL).assert.isNotNull
+  }
+
+  @Test
+  fun `a withdrawal seen only in the authorize lane does not end a grant`() {
+    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Withdrawn }
+    val registry = registry(cache = cache)
+
+    registry.findForExistingGrant(CIMD_URL).assert.isNotNull
+    registry.servesClient(CIMD_URL).assert.isTrue()
+  }
+
+  @Test
+  fun `only a client this instance still serves passes`() {
+    val registry = registry(cimdAllowedHosts = listOf("allowed.example"))
+
+    registry.servesClient("not-a-url-and-not-registered").assert.isFalse()
+    registry.servesClient(CIMD_URL).assert.isFalse()
+    registry.servesClient(OAuth2Constants.CLI_CLIENT_ID).assert.isTrue()
+  }
+
+  /**
+   * It runs in AuthenticationFilter, on every request carrying an OAuth token and ahead of every rate limiter.
+   * Reading a document here would put a DNS lookup and an HTTPS GET to a host the token holder chose on that path.
+   */
+  @Test
+  fun `the per-request check reads no cache and never fetches`() {
+    val cache = mock<CimdClientCache>()
+    val registry = registry(cache = cache)
+
+    registry.servesClient(CIMD_URL).assert.isTrue()
+
+    verify(cache, never()).cachedResolution(any())
+    verify(cache, never()).fetchOnGrantLane(any())
     verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `the token path never reads a document`() {
+    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn null }
+
+    registry(cache = cache)
+      .findForExistingGrant(CIMD_URL)!!
+      .verified.assert
+      .isFalse()
+
+    verify(cache, never()).fetchOnGrantLane(any())
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `the background check reads the document and leaves the request lane untouched`() {
+    val cache = mock<CimdClientCache> { on { fetchOnGrantLane(any()) } doReturn CimdResolution.Withdrawn }
+    val registry = registry(cache = cache)
+
+    registry.resolveForCheck(CIMD_URL).assert.isEqualTo(CimdResolution.Withdrawn)
+
+    verify(cache).fetchOnGrantLane(CIMD_URL)
+    // Evicting would make the next `/oauth2/authorize` poll for this client slow, which says a grant for it exists.
+    verify(cache, never()).invalidate(any())
+    verify(cache, never()).get(any())
+  }
+
+  @Test
+  fun `the background check leaves a client_id the CIMD path does not serve alone`() {
+    val cache = mock<CimdClientCache>()
+    val registry = registry(cache = cache, cimdAllowedHosts = listOf("allowed.example"))
+
+    registry.resolveForCheck(CIMD_URL).assert.isNull()
+
+    verify(cache, never()).fetchOnGrantLane(any())
+  }
+
+  @Test
+  fun `a document that served but did not validate is not a withdrawal`() {
+    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Rejected }
+    val registry = registry(cache = cache)
+
+    val client = registry.findForExistingGrant(CIMD_URL)
+
+    client!!
+      .clientId.assert
+      .isEqualTo(CIMD_URL)
+    client.verified.assert.isFalse()
   }
 
   @Test
@@ -222,7 +315,6 @@ class OAuth2ClientRegistryTest {
 
     registry.find(CIMD_URL).assert.isNotNull
     registry.find("https://evil.example/.well-known/client").assert.isNull()
-    registry.isStillAuthorized("https://evil.example/.well-known/client").assert.isFalse()
     verify(cache, never()).get("https://evil.example/.well-known/client")
   }
 
@@ -230,12 +322,10 @@ class OAuth2ClientRegistryTest {
   fun `enabling is issuer-based, so no pre-registered client is required`() {
     val registry = registry()
 
-    // Nothing is configured here: the CLI is seeded on every instance with an issuer, and CIMD is live regardless.
     registry.clients
       .map { it.clientId }
       .assert
       .containsExactly(OAuth2Constants.CLI_CLIENT_ID)
-    registry.isStillAuthorized(CIMD_URL).assert.isTrue()
   }
 
   @Test
@@ -243,7 +333,6 @@ class OAuth2ClientRegistryTest {
     val registry = registry(resolver = resolver(isConfigured = false))
 
     registry.find(CIMD_URL).assert.isNull()
-    registry.isStillAuthorized(CIMD_URL).assert.isFalse()
   }
 
   @Test
@@ -253,7 +342,6 @@ class OAuth2ClientRegistryTest {
     val cli = registry.find(OAuth2Constants.CLI_CLIENT_ID)
 
     cli.assert.isNotNull()
-    // The CLI takes whatever port the OS gives it, so the registered one cannot be part of the comparison.
     cli!!.allowsRedirectUri("http://127.0.0.1:53211/callback").assert.isTrue()
   }
 
@@ -322,7 +410,7 @@ class OAuth2ClientRegistryTest {
     cliUris: List<String> = listOf(),
     cliEnabled: Boolean = true,
     cimdAllowedHosts: List<String> = listOf(),
-    cache: CimdClientCache = mock(),
+    cache: CimdClientCache = mock { on { fetchOnGrantLane(any()) } doReturn CimdResolution.Unavailable },
     resolver: OAuth2IssuerResolver = resolver(),
   ): OAuth2ClientRegistry {
     val properties =
@@ -332,7 +420,12 @@ class OAuth2ClientRegistryTest {
         this.cliEnabled = cliEnabled
         this.cimdAllowedHosts = cimdAllowedHosts
       }
-    return OAuth2ClientRegistry(properties, cache, CimdClientPolicy(properties, InternalProperties()), resolver)
+    return OAuth2ClientRegistry(
+      properties,
+      cache,
+      CimdClientPolicy(properties, InternalProperties(), resolver, mock { on { stableUrl } doReturn null }),
+      resolver,
+    )
   }
 
   private fun resolver(isConfigured: Boolean = true): OAuth2IssuerResolver =

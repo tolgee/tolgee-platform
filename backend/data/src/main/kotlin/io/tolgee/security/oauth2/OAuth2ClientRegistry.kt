@@ -21,6 +21,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.security.oauth2.cimd.CimdClient
 import io.tolgee.security.oauth2.cimd.CimdClientCache
 import io.tolgee.security.oauth2.cimd.CimdClientPolicy
+import io.tolgee.security.oauth2.cimd.CimdResolution
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -62,31 +63,65 @@ class OAuth2ClientRegistry(
 
   fun find(clientId: String): OAuth2Client? = findPreRegistered(clientId) ?: findCimd(clientId)?.client
 
-  /** The CIMD path only: null for a pre-registered id or a non-URL id. Used by the consent screen for the logo. */
+  /** The CIMD path only: null for a pre-registered id or a non-URL id. May fetch the document. */
   fun findCimd(clientId: String): CimdClient? {
     if (!isCimdCandidate(clientId)) return null
     return cimdClientCache.get(clientId)
   }
 
   /**
-   * The client a token request, or a consent screen for an already-created grant, claims to be. A CIMD client whose
-   * document does not resolve on this particular hop still gets one — bare, unverified, with no redirect URIs — so a
-   * third party's blip cannot kill a grant, or strand a browser on a consent screen that 404s.
+   * The client a token request, or a consent screen for an already-created grant, claims to be. A CIMD client
+   * nothing has read yet still gets one — bare, unverified, with no redirect URIs.
+   *
+   * This must never fetch: only [OAuth2CimdDocumentCheck] reads a document for a client that already holds a
+   * grant. See `docs/oauth/README.md`.
    */
   fun findForExistingGrant(clientId: String): OAuth2Client? {
-    find(clientId)?.let { return it }
-    if (!isStillAuthorized(clientId)) return null
+    findPreRegistered(clientId)?.let { return it }
+    if (!isCimdCandidate(clientId)) return null
+    val cached = cimdClientCache.cachedResolution(clientId)
+    if (cached is CimdResolution.Resolved) return cached.client.client
+    // A cached refusal is never read here: /oauth2/authorize fills this lane, so a caller could otherwise pin
+    // "gone" for a client nobody retired. Only what the check writes to the grant row ends a grant.
     return unresolvableCimdClient(clientId)
   }
 
-  fun isStillAuthorized(clientId: String): Boolean = findPreRegistered(clientId) != null || isCimdCandidate(clientId)
+  /**
+   * Reads the document now, through the lane kept for clients that already have a grant. Only
+   * [OAuth2CimdDocumentCheck] may call it. Null when the id is not one the CIMD path serves at all.
+   *
+   * It must leave the lane `/oauth2/authorize` answers from exactly as it found it. Writing to that lane and
+   * evicting from it both let an anonymous caller who polls the endpoint see that the check ran for this
+   * `client_id`, and the check runs only for clients somebody on this instance holds a grant for.
+   */
+  fun resolveForCheck(clientIdUrl: String): CimdResolution? {
+    if (!isCimdCandidate(clientIdUrl)) return null
+    return cimdClientCache.fetchOnGrantLane(clientIdUrl)
+  }
+
+  /**
+   * Whether this instance serves the client at all: a pre-registered id, or an id the CIMD path would still accept
+   * today. It answers nothing about grants, consent or withdrawal. The paths that run on **every** request ask it
+   * because a pre-registered id an operator has since removed, or an id the policy no longer accepts, leaves
+   * nothing to honour a grant against.
+   */
+  fun servesClient(clientId: String): Boolean {
+    findPreRegistered(clientId)?.let { return true }
+    return isCimdCandidate(clientId)
+  }
 
   /** A client_id only the CIMD path could serve: not pre-registered, and past the local candidate policy. */
   private fun isCimdCandidate(clientId: String): Boolean =
     issuerResolver.isConfigured && findPreRegistered(clientId) == null && cimdClientPolicy.isCandidate(clientId)
 
   private fun unresolvableCimdClient(clientId: String) =
-    OAuth2Client(clientId = clientId, name = clientId, redirectUris = emptyList(), verified = false)
+    OAuth2Client(
+      clientId = clientId,
+      name = clientId,
+      redirectUris = emptyList(),
+      verified = false,
+      hasMetadataDocument = true,
+    )
 
   private fun findPreRegistered(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
 
@@ -106,11 +141,7 @@ class OAuth2ClientRegistry(
     return cliClient(requireValidRedirectUris(properties.cliRedirectUris))
   }
 
-  /**
-   * `tolgee login` has to work against an instance nobody configured for it, so the CLI is registered wherever the
-   * authorization server is live at all. It is left out where the issuer does not resolve, because then no OAuth
-   * endpoint answers anyway.
-   */
+  /** Registered wherever the authorization server is live: `tolgee login` must work on an unconfigured instance. */
   private fun defaultCli(): OAuth2Client? {
     if (!properties.cliEnabled) return null
     if (properties.cliRedirectUris.isNotEmpty()) return null
@@ -148,10 +179,7 @@ class OAuth2ClientRegistry(
   }
 }
 
-/**
- * A client Tolgee issues tokens to. Every client is public (no secret), must use PKCE, and always goes through the
- * consent screen; the only per-client facts are its redirect URIs and which scopes the screen locks as required.
- */
+/** A client Tolgee issues tokens to. Every client is public, must use PKCE, and always goes through consent. */
 data class OAuth2Client(
   val clientId: String,
   val name: String,
@@ -161,8 +189,7 @@ data class OAuth2Client(
   val metadataHash: String? = null,
   /**
    * Whether this client identifies itself with a metadata document, which is what its grants are kept alive by.
-   * Deliberately separate from [verified]: that one is the consent screen's trust badge, and an operator marking a
-   * publisher as trusted must not also switch off the checks that let that publisher retire the client.
+   * Not the same as [verified], which is only the consent screen's trust badge.
    */
   val hasMetadataDocument: Boolean = false,
 ) {
@@ -198,21 +225,13 @@ data class OAuth2Client(
 
     internal fun isLoopbackHost(host: String?): Boolean = host in LOOPBACK_HOSTS
 
-    /**
-     * Whether the code will be delivered to something listening on the user's own machine rather than to a website.
-     * The consent screen says so: a loopback `client_id` is not proof of which local program is listening, so the
-     * user is the only one who can tell the CLI they just started apart from anything else that bound a port.
-     */
+    /** Whether the code goes to something listening on the user's own machine rather than to a website. */
     fun redirectsToLocalApp(redirectUri: String): Boolean = isLoopbackHost(UrlOrigins.parse(redirectUri)?.host)
 
     /**
-     * The spelling two registered redirects share exactly when they accept the same presented URIs, so a projection
-     * of the consented terms can be built on the equivalence [allowsRedirectUri] actually honours instead of guessing
-     * at it.
-     *
-     * A loopback entry is accepted through two lanes: an exact string match, and [matchesLoopback], which ignores the
-     * port — and the entry's own query, which it never reads. The port therefore only ever matters through the exact
-     * lane, and that lane accepts nothing the loopback lane does not already accept unless the entry carries a query.
+     * The spelling two registered redirects share exactly when [allowsRedirectUri] accepts the same presented URIs
+     * for both. A loopback entry's port only matters when that entry also carries a query: [matchesLoopback] ignores
+     * both, so the exact-match lane is then the only one that can accept it.
      */
     internal fun redirectEquivalenceKey(uri: String): String {
       val parsed = UrlOrigins.parse(uri) ?: return uri

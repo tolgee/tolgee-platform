@@ -65,6 +65,65 @@ class OAuth2ServerProperties {
   )
   var cimdAllowedHosts: List<String> = listOf()
 
+  @DocProperty(
+    description =
+      "How long, in minutes, a recorded client withdrawal stays reversible. Taking the metadata document down " +
+        "ends every grant of that client; if the document answers again within this window the mark is lifted, " +
+        "which covers a mis-deploy. After it, the retirement is permanent for those grants, so a publisher who " +
+        "republishes a fixed build at the same `client_id` does not hand back a grant they retired on purpose. " +
+        "Users of that client simply consent again. A mark is also liftable while no check has happened since it " +
+        "was made, whatever this window says: how soon a client is read again is a queue position, not a " +
+        "duration, so on a busy instance the window alone would close before the publisher's turn came round.",
+  )
+  var cimdWithdrawalGraceMinutes: Long = 60
+
+  @DocProperty(
+    description =
+      "How long, in days, a grant of a client that identifies itself with a metadata document may keep working " +
+        "while that document cannot be read. A short outage at the publisher must not sign every user out, so an " +
+        "unreadable document is tolerated - but not forever, because then anyone able to keep this server from " +
+        "reading it could keep a retired client alive. It counts only time this server spent *trying*: a grant " +
+        "whose document nothing has attempted to read is never refused, so a job that stops running cannot sign " +
+        "out every third-party user. Lower it on an instance that wants third-party grants checked more strictly.",
+  )
+  var cimdVerificationMaxAgeDays: Long = 7
+
+  @DocProperty(
+    description =
+      "Cron expression for the job that re-reads the metadata documents of clients holding grants. It is what " +
+        "notices that a publisher retired a client, and what keeps that client's grants inside " +
+        "`cimd-verification-max-age-days`. One instance runs each round.",
+    defaultValue = DEFAULT_CIMD_CHECK_CRON,
+  )
+  var cimdCheckCron: String = DEFAULT_CIMD_CHECK_CRON
+
+  @DocProperty(
+    description =
+      "How many client documents one round of that job reads. The round takes the ones checked longest ago, so " +
+        "this and the cron together set how long a full pass takes - which must stay well inside " +
+        "`cimd-verification-max-age-days`.",
+  )
+  var cimdCheckBatchSize: Int = 100
+
+  @DocProperty(
+    description =
+      "How long, in minutes, before the same client's document is read again. It is set by how quickly a " +
+        "publisher taking their document down should take effect, not by `cimd-verification-max-age-days`, which " +
+        "would be satisfied by reading a document once every few days. The cost of a short interval is outbound " +
+        "traffic to third-party hosts; the cost of a long one is a retired client staying usable for longer.",
+  )
+  var cimdCheckIntervalMinutes: Long = 15
+
+  @DocProperty(
+    description =
+      "How many different clients identifying themselves with a metadata document one account may hold " +
+        "authorizations for. Each one joins the work list of the job that re-reads those documents, and that job " +
+        "has a fixed rate, so without a cap a single scripted account decides how quickly a publisher's " +
+        "retirement is noticed for everyone else. Raise it only if real users legitimately connect more " +
+        "third-party apps than this.",
+  )
+  var cimdMaxClientsPerUser: Long = 25
+
   @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
   var accessTokenValidityMinutes: Long = 30
 
@@ -130,5 +189,6 @@ class OAuth2ServerProperties {
 
   companion object {
     const val DEFAULT_GRANT_CLEANUP_CRON = "0 0 3 * * *"
+    const val DEFAULT_CIMD_CHECK_CRON = "0 */5 * * * *"
   }
 }
