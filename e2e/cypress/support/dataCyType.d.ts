@@ -505,6 +505,7 @@ declare namespace DataCy {
         "oauth2-consent-allow": true;
         "oauth2-consent-app-name": true;
         "oauth2-consent-deny": true;
+        "oauth2-consent-deselect-all": true;
         "oauth2-consent-error": true;
         "oauth2-consent-local-app": true;
         "oauth2-consent-modify": true;

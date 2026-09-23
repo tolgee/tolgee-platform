@@ -14,8 +14,11 @@ import {
   PermissionModelScope,
 } from 'tg.component/PermissionsSettings/types';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { groupConsentScopes } from './consentScopeGroups';
-import { clampApprovedScopes } from './consentScopeSelection';
+import {
+  groupConsentScopes,
+  showsAsOneChip,
+} from 'tg.component/security/oauth2/consentScopeGroups';
+import { clampApprovedScopes } from 'tg.component/security/oauth2/consentScopeSelection';
 
 const StyledPermissionsHeader = styled(Box)`
   display: flex;
@@ -75,14 +78,13 @@ export const ConsentPermissions: React.FC<Props> = ({
     requestedScopes as PermissionModelScope[]
   );
 
-  const handleChange = (data: PermissionAdvancedState) =>
+  const selectScopes = (scopes: string[]) =>
     onSelectedScopesChange(
-      clampApprovedScopes(
-        data.scopes as string[],
-        requestedScopes,
-        requiredScopes
-      )
+      clampApprovedScopes(scopes, requestedScopes, requiredScopes)
     );
+
+  const handleChange = (data: PermissionAdvancedState) =>
+    selectScopes(data.scopes as string[]);
 
   return (
     <>
@@ -93,39 +95,59 @@ export const ConsentPermissions: React.FC<Props> = ({
             defaultValue="Permissions"
           />
         </StyledSectionTitle>
-        <Link
-          component="button"
-          type="button"
-          data-cy="oauth2-consent-modify"
-          onClick={() => setEditing((prev) => !prev)}
-        >
-          {editing
-            ? t('oauth2_consent_modify_done', 'Done')
-            : t('oauth2_consent_modify', 'Modify')}
-        </Link>
+        {editing ? (
+          <Link
+            component="button"
+            type="button"
+            data-cy="oauth2-consent-deselect-all"
+            onClick={() => selectScopes([])}
+          >
+            {t('oauth2_consent_deselect_all', 'Deselect all')}
+          </Link>
+        ) : (
+          <Link
+            component="button"
+            type="button"
+            data-cy="oauth2-consent-modify"
+            onClick={() => setEditing(true)}
+          >
+            {t('oauth2_consent_modify', 'Modify')}
+          </Link>
+        )}
       </StyledPermissionsHeader>
 
       {!editing &&
         grantedGroups.map((group, i) => (
           <StyledGroup key={group.label ?? `_${i}`}>
-            {group.label && (
-              <StyledGroupLabel>
-                <T
-                  keyName="oauth2_consent_scope_group_label"
-                  defaultValue="{group}:"
-                  params={{ group: group.label }}
-                />
-              </StyledGroupLabel>
-            )}
-            {group.scopes.map((s) => (
+            <StyledGroupLabel>
+              <T
+                keyName="oauth2_consent_scope_group_label"
+                defaultValue="{group}:"
+                params={{
+                  group:
+                    group.label ??
+                    t('oauth2_consent_scope_group_global', 'Global'),
+                }}
+              />
+            </StyledGroupLabel>
+            {showsAsOneChip(group) ? (
               <Chip
-                key={s}
                 size="small"
                 data-cy="oauth2-consent-scope"
-                data-cy-scope={s}
-                label={getScopeTranslation(s as PermissionModelScope)}
+                data-cy-scope="_all"
+                label={t('oauth2_consent_scope_all', 'All permissions')}
               />
-            ))}
+            ) : (
+              group.scopes.map((s) => (
+                <Chip
+                  key={s}
+                  size="small"
+                  data-cy="oauth2-consent-scope"
+                  data-cy-scope={s}
+                  label={getScopeTranslation(s as PermissionModelScope)}
+                />
+              ))
+            )}
           </StyledGroup>
         ))}
 
