@@ -28,6 +28,7 @@ class SuggestionsTestData(
   var serverAdmin: UserAccountBuilder
   var projectEditor: UserAccountBuilder
   var viewOnlyUser: UserAccountBuilder
+  var granularSuggester: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
@@ -119,6 +120,12 @@ class SuggestionsTestData(
         name = "View only user"
       }
 
+    granularSuggester =
+      root.addUserAccount {
+        username = "granular.suggester@test.com"
+        name = "Granular suggester"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = orgMember.self
@@ -190,6 +197,12 @@ class SuggestionsTestData(
         type = null
         scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
         suggestManageLanguages = mutableSetOf(czechLanguage)
+      }
+
+      addPermission {
+        user = granularSuggester.self
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST)
       }
 
       (0 until 4).forEach {

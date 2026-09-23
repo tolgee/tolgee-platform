@@ -5960,4 +5960,14 @@
         </sql>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1789914853000-1">
+        <sqlFile path="classpath:db/changelog/translationSuggestionsOwnAccessBackfill.sql" splitStatements="false"/>
+        <!-- A release without this scope cannot read a permission row that stores it, so a rollback has to
+             strip every occurrence, including the ones granted after the backfill. -->
+        <rollback>
+            UPDATE permission
+            SET scopes = array_remove(scopes, 'TRANSLATION_SUGGESTIONS_OWN_ACCESS')
+            WHERE scopes @> ARRAY['TRANSLATION_SUGGESTIONS_OWN_ACCESS']::varchar[];
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

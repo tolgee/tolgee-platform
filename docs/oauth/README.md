@@ -422,8 +422,11 @@ These are known gaps, deferred to the client rounds that first exercise them:
   every credential, a webapp JWT and a PAT included: the author needs the scope, and a project API key or OAuth token that carries it can now delete its owner's
   suggestions, which no scoped credential could before. Roles pick it up at runtime, VIEW through REVIEW explicitly
   and EDIT / MANAGE because `translation-suggestions.manage` expands to it; the community floor grants it too.
-  Granular permissions store their scope list literally, so they need a backfill, which must ship in the same
-  release as this change.
+  Granular permissions store their scope list literally, so changeSet `1789914853000-1` backfills the scope into
+  every granular permission (members, invitations, organization base permissions) in the same release. Unlike
+  `tasks.assigned-access` above, this is not an elevation being restored: every author could delete their own
+  suggestion, so the backfill grants nobody more than they had, while skipping it would take an everyday action
+  away from every granular member. API keys and OAuth grants are not backfilled, as above.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client
