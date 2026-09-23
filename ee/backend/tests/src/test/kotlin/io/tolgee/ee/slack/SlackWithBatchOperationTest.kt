@@ -6,6 +6,7 @@ import io.tolgee.batch.ApplicationBatchJobRunner
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.MachineTranslationTest
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
@@ -129,15 +130,31 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     }
     mockedSlackClient.clearInvocations()
 
-    performBatchOperation(keyIds)
-
     // The batch machine-translate is a big operation. A new_key-only subscription is not interested
     // in translation changes, so the big-operation summary must be gated out — before the fix it
     // was sent unconditionally, bypassing the subscription filter.
-    waitFor(pollTime = 5) {
-      applicationBatchJobRunner.settled
+    performBatchOperation(keyIds)
+
+    // Positive control: creating a key is a new_key event this subscription does want. Waiting for
+    // its message guarantees the (async) notification pipeline has flushed, so a leaked translation
+    // summary would already be present — otherwise a bare "assert zero" could pass while a summary
+    // is still pending.
+    performCreateKey("controlKey")
+
+    waitForNotThrowing(timeout = 20_000) {
+      val requests = mockedSlackClient.chatPostMessageRequests
+      requests.assert.hasSize(1)
+      val sectionBlock = requests.single().blocks.first() as SectionBlock
+      sectionBlock.text.text.assert
+        .doesNotContain("has updated")
     }
-    mockedSlackClient.chatPostMessageRequests.assert.hasSize(0)
+  }
+
+  private fun performCreateKey(name: String) {
+    performProjectAuthPost(
+      "keys/create",
+      mapOf("name" to name, "translations" to mapOf("en" to "Hello")),
+    ).andIsCreated
   }
 
   private fun performBatchOperation(keyIds: List<Long>) {
