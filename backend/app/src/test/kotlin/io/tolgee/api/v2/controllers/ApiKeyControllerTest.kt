@@ -261,6 +261,18 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `current permissions name the user behind a PAK and behind a PAT`() {
+    performGet("/v2/api-keys/current-permissions", apiKeyHeaders(testData.usersKey.key!!)).andAssertThatJson {
+      node("userId").isEqualTo(testData.usersKey.userAccount.id)
+    }
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders())
+      .andAssertThatJson {
+        node("userId").isEqualTo(testData.frantisekDobrota.id)
+      }
+  }
+
+  @Test
   fun `a PAT cannot read the details of a project its user has no access to`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"

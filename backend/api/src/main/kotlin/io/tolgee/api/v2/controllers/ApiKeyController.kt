@@ -241,6 +241,7 @@ class ApiKeyController(
       project = simpleProjectModelAssembler.toModel(project),
       suggestionsMode = project.suggestionsMode,
       translationProtection = project.translationProtection,
+      userId = authenticationFacade.authenticatedUser.id,
     )
   }
 

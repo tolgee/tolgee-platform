@@ -1514,6 +1514,11 @@ export interface components {
        */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
+       * Format: int64
+       * @description Id of the user the credential belongs to
+       */
+      userId: number;
+      /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example [
        *   200001,
