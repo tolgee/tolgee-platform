@@ -1,12 +1,15 @@
 package io.tolgee.service.key
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.SEQUENCE_NAME
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
 import io.tolgee.service.security.SecurityService
@@ -29,36 +32,20 @@ class TagService(
   private val applicationContext: ApplicationContext,
   @Lazy
   private val securityService: SecurityService,
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   @Transactional
   fun tagKey(
     key: Key,
     tagName: String,
   ): Tag {
-    val keyMeta = keyMetaService.getOrCreateForKey(key)
-    val tag =
-      find(key.project, tagName)?.let {
-        if (!keyMeta.tags.contains(it)) {
-          // Don't access it.keyMetas - triggers lazy load of all KeyMeta for this tag
-          // Only update owning side (keyMeta.tags) - JPA will sync the join table
-          keyMeta.tags.add(it)
-        }
-        it
-      } ?: let {
-        Tag().apply {
-          project = key.project
-          keyMetas.add(keyMeta)
-          name = tagName
-          keyMeta.tags.add(this)
-        }
-      }
-
-    if (tag.name.length > 100) {
+    if (tagName.length > 100) {
       throw BadRequestException(Message.TAG_TOO_LOG)
     }
 
-    tagRepository.save(tag)
-    keyMetaService.save(keyMeta)
+    val keyMeta = keyMetaService.getOrCreateForKey(key)
+    val tag = findOrCreate(key.project.id, setOf(tagName)).getValue(tagName)
+    addTag(keyMeta, tag)
     return tag
   }
 
@@ -98,8 +85,7 @@ class TagService(
     val keysByIdMap = keysWithFetchedTags.associateBy { it.id }
     val projectId = getSingleProjectId(keysByIdMap)
 
-    val existingTags =
-      this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
+    val tagsByName = findOrCreate(projectId, map.values.flatten().toSet())
 
     return map
       .map { (keyId, tagsToAdd) ->
@@ -107,28 +93,46 @@ class TagService(
           tagsToAdd.map { tagToAdd ->
             val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
             val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
-            val tag =
-              existingTags[tagToAdd]?.let {
-                if (!keyMeta.tags.contains(it)) {
-                  // Don't access it.keyMetas directly - it triggers massive query for all KeyMeta on this tag
-                  // Instead, just update the owning side (keyMeta.tags)
-                  keyMeta.tags.add(it)
-                }
-                it
-              } ?: let {
-                Tag().apply {
-                  project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-                  keyMetas.add(keyMeta)
-                  name = tagToAdd
-                  keyMeta.tags.add(this)
-                  existingTags[tagToAdd] = this
-                }
-              }
-            tagRepository.save(tag)
-            keyMetaService.save(keyMeta)
+            val tag = tagsByName.getValue(tagToAdd)
+            addTag(keyMeta, tag)
             tag
           }
       }.toMap()
+  }
+
+  private fun findOrCreate(
+    projectId: Long,
+    tagNames: Set<String>,
+  ): Map<String, Tag> {
+    val existing = getFromProject(projectId, tagNames).associateBy { it.name }
+    val missing = tagNames - existing.keys
+    if (missing.isEmpty()) {
+      return existing
+    }
+
+    // Sorted: concurrent inserts of overlapping tag sets then lock names in the same order and cannot deadlock
+    entityManager
+      .createNativeQuery(
+        """
+        insert into tag (id, name, project_id, created_at, updated_at)
+        select nextval('$SEQUENCE_NAME'), name, :projectId, :now, :now from unnest(:names) as name
+        on conflict (project_id, name) do nothing
+        """,
+      ).setParameter("names", missing.sorted().toTypedArray())
+      .setParameter("projectId", projectId)
+      .setParameter("now", currentDateProvider.date)
+      .executeUpdate()
+
+    return getFromProject(projectId, tagNames).associateBy { it.name }
+  }
+
+  private fun addTag(
+    keyMeta: KeyMeta,
+    tag: Tag,
+  ) {
+    // Don't touch tag.keyMetas - it lazy-loads every KeyMeta carrying the tag
+    keyMeta.tags.add(tag)
+    keyMetaService.save(keyMeta)
   }
 
   @Transactional
