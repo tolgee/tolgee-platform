@@ -52,8 +52,9 @@ class OAuth2AccessTokenResolver(
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
-    // A grant outlives the client it was issued to, so this is checked per request rather than at issue time.
-    if (!clientRegistry.isStillAuthorized(grant.clientId)) {
+    // A grant outlives the client it was issued to, so both are checked per request rather than at issue time: the
+    // withdrawal mark on the row, and whether this instance still serves the client at all.
+    if (grant.clientWithdrawnAt != null || !clientRegistry.servesClient(grant.clientId)) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 

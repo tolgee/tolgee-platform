@@ -46,11 +46,13 @@ class OAuth2GrantCleanup(
     val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.grantRetentionDays))
     val deleted = authorizationService.deleteExpiredBefore(cutoff) + authorizationService.deleteExpiredPendingConsents()
     val prunedTokens = authorizationService.pruneRefreshHistoryBeyondDepth()
-    if (deleted > 0 || prunedTokens > 0) {
+    val deletedCheckRows = authorizationService.deleteCheckRowsWithoutGrants()
+    if (deleted > 0 || prunedTokens > 0 || deletedCheckRows > 0) {
       logger.info(
-        "OAuth2 grant cleanup removed {} expired grant(s) and {} superseded refresh token(s)",
+        "OAuth2 grant cleanup removed {} expired grant(s), {} superseded refresh token(s) and {} document check row(s)",
         deleted,
         prunedTokens,
+        deletedCheckRows,
       )
     }
   }
