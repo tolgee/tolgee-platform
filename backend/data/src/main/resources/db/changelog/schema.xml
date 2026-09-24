@@ -5962,10 +5962,12 @@
     </changeSet>
     <changeSet author="jirikuchynka" id="1789914853000-1">
         <sqlFile path="classpath:db/changelog/translationSuggestionsOwnAccessBackfill.sql" splitStatements="false"/>
-        <!-- A release without this scope cannot read a permission row or an API-key scope row that stores the
-             name, so the rollback strips it from both, whether the backfill or a user put it there. It leaves
-             oauth2_grant alone although those columns hold names too: a grant tolerates a name it cannot resolve
-             (OAuth2Grant.storedScopesOf owns that), and rewriting them would narrow live grants.
+        <!-- A release without this scope cannot read a permission row (Permission._scopes) or an API-key scope
+             row (ApiKey.scopesEnum) that stores the name, so the rollback strips it from both, whether the
+             backfill or a user put it there. It leaves oauth2_grant alone although those columns hold names too:
+             a grant tolerates a name it cannot resolve (OAuth2Grant.storedScopesOf owns that), and rewriting them
+             would narrow live grants. Those three are what decides the asymmetry, so check them there before
+             making this symmetric.
 
              Rolling forward again is not symmetric, and this is by design rather than a gap to repair. The
              backfill grants the scope to granular permissions only: API keys and OAuth grants never had the
