@@ -167,6 +167,26 @@ means, which is why it is a deliberate decision rather than an additive one.
 - **project set** = *where* it may do it: the `project_selection` column on the grant — specific project ids, or the
   `*` sentinel meaning "don't narrow by project" (still bounded by the user's live permissions).
 
+**A scope this server does not know is dropped, not refused.** `validateAuthorizeRequest` keeps the supported
+scopes and carries on with those; only a request left with nothing at all is `invalid_scope`. Clients ship on their
+own schedule, so a client that learns a scope added in a later release would otherwise fail to sign in against
+every server older than that release — a whole-authorization failure for one optional capability. RFC 6749 §3.3
+permits this exactly because the token response states the scopes actually granted, which Tolgee sends on both the
+code exchange and the refresh. What the user never saw on the consent screen cannot be approved either: consent is
+checked against the filtered list. A refresh drops an unknown scope the same way, so a client may echo one
+configured scope string for the life of its grant and pick scopes up as servers learn them. Two consequences a
+client author should know:
+- **"Not granted" still means refused.** A scope this server *knows* but never granted is the client asking for
+  more than it holds, which RFC 6749 §6 forbids and §5.2 answers with `invalid_scope`; only the unknown ones are
+  dropped. Sending no `scope` on a refresh (the grant's scopes are then used) or echoing the `scope` the token
+  response returned is still the better practice, because it says what the client actually holds.
+- **A misspelled scope is indistinguishable from a future one**, so it is dropped rather than refused, and the
+  client ends up with a working token that quietly lacks the capability; it surfaces as 403s from the API instead
+  of `invalid_scope` at the door. The server cannot tell the two apart, so this is the price of the guarantee.
+
+`OAuth2Grant.requested_scope_values` holds the filtered list, not the client's raw request: nothing records a scope
+that was dropped.
+
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by

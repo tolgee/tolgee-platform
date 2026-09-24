@@ -3,6 +3,7 @@ package io.tolgee.security.oauth2
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import tools.jackson.databind.JsonNode
 import java.time.Duration
 
 /**
@@ -31,7 +32,7 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
-  fun `a refresh cannot widen the scope beyond what was granted`() {
+  fun `a refresh cannot widen the scope to one this server knows but never granted`() {
     val issued = json(tokenResult())
     val result = driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID, scope = "keys.edit").andReturn()
     json(result)
@@ -42,15 +43,49 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
+  fun `a refresh naming a scope the server does not know drops it and narrows to the rest`() {
+    val issued = twoScopeGrant()
+
+    json(
+      driver
+        .refresh(issued.get("refresh_token").asString(), CLIENT_ID, scope = "translations.view not.a.tolgee.scope")
+        .andReturn(),
+    ).get("scope")
+      .asString()
+      .assert
+      .isEqualTo("translations.view")
+  }
+
+  @Test
+  fun `a refresh mixing a granted scope with a known but ungranted one is refused, not quietly narrowed`() {
+    val issued = json(tokenResult())
+
+    json(
+      driver
+        .refresh(issued.get("refresh_token").asString(), CLIENT_ID, scope = "translations.view keys.edit")
+        .andReturn(),
+    ).get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_scope")
+  }
+
+  @Test
+  fun `a refresh left with no scope this server knows is refused rather than silently widened`() {
+    val issued = json(tokenResult())
+    val result =
+      driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID, scope = "not.a.tolgee.scope").andReturn()
+
+    json(result)
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_scope")
+  }
+
+  @Test
   fun `a narrowing refresh issues the narrower token without shrinking the grant`() {
-    val issued =
-      driver.completeFlow(
-        jwt(),
-        CLIENT_ID,
-        REDIRECT,
-        scope = "translations.view keys.view",
-        approvedScopes = listOf("translations.view", "keys.view"),
-      )
+    val issued = twoScopeGrant()
     val narrowed =
       json(driver.refresh(issued.get("refresh_token").asString(), CLIENT_ID, scope = "keys.view").andReturn())
     narrowed
@@ -149,4 +184,14 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
       .assert
       .isEqualTo("invalid_grant")
   }
+
+  /** A grant holding two scopes, so a narrowing assertion can tell "the rest" from "the whole grant". */
+  private fun twoScopeGrant(): JsonNode =
+    driver.completeFlow(
+      jwt(),
+      CLIENT_ID,
+      REDIRECT,
+      scope = "translations.view keys.view",
+      approvedScopes = listOf("translations.view", "keys.view"),
+    )
 }
