@@ -17,6 +17,7 @@ import {
 } from '@tginternal/editor';
 
 import { Direction } from 'tg.fixtures/getLanguageDirection';
+import { isExternalValue } from 'tg.component/editor/utils/externalValueSync';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 import { visibleKeyNameSpacesPlugin } from './utils/codemirrorVisibleWhitespace';
 import { useInvisibleCharacterLabel } from 'tg.component/InvisibleCharacter';
@@ -109,6 +110,7 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const editor = useRef<EditorView>();
+  const emittedValues = useRef(new Set<string>());
   const placeholders = useRef<Compartment>(new Compartment());
   const editorTheme = useRef<Compartment>(new Compartment());
   const isolates = useRef<Compartment>(new Compartment());
@@ -178,7 +180,12 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
               }
             }
             if (v.docChanged) {
-              callbacksRef.current?.onChange?.(v.state.doc.toString());
+              const doc = v.state.doc.toString();
+              // The value before the edit was never emitted on the first edit,
+              // and the parent can still re-render carrying it.
+              emittedValues.current.add(v.startState.doc.toString());
+              emittedValues.current.add(doc);
+              callbacksRef.current?.onChange?.(doc);
             }
           }),
           EditorView.contentAttributes.of({
@@ -233,12 +240,18 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
 
   useEffect(() => {
     const state = editor.current?.state;
-    const editorValue = state?.doc.toString();
-    if (state && editorValue !== value) {
+    if (!state) {
+      return;
+    }
+    const editorValue = state.doc.toString();
+    if (isExternalValue(value, editorValue, emittedValues.current)) {
+      emittedValues.current.clear();
       const transaction = state.update({
         changes: { from: 0, to: state.doc.length, insert: value || '' },
       });
       editor.current?.update([transaction]);
+    } else if (editorValue === value) {
+      emittedValues.current.clear();
     }
   }, [value]);
 
