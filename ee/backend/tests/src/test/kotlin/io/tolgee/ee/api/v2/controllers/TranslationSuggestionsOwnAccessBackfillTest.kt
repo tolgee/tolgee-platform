@@ -3,8 +3,10 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -17,6 +19,9 @@ import org.springframework.jdbc.core.JdbcTemplate
 
 class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionsTestData
+
+  /** The key the rollback empties out: it is minted holding the new scope and nothing else. */
+  private var inertKeyId: Long = 0
 
   @Autowired
   lateinit var jdbcTemplate: JdbcTemplate
@@ -80,7 +85,7 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     val granularMember = projectPermissionOf(testData.granularSuggester.self.id)
     val roleBasedMember = projectPermissionOf(testData.projectReviewer.self.id)
     storedScopes(granularMember).assert.contains("TRANSLATION_SUGGESTIONS_OWN_ACCESS")
-    apiKeyScopeRows("TRANSLATION_SUGGESTIONS_OWN_ACCESS").assert.isEqualTo(1)
+    apiKeyScopeRows("TRANSLATION_SUGGESTIONS_OWN_ACCESS").assert.isEqualTo(2)
 
     runRollback()
 
@@ -90,6 +95,31 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     apiKeyScopeRows("TRANSLATIONS_VIEW").assert.isEqualTo(1)
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a key left with no scopes by the rollback survives and is still readable`() {
+    saveTestData()
+    runBackfill()
+    scopeNamesOf(inertKeyId).assert.containsExactly("TRANSLATION_SUGGESTIONS_OWN_ACCESS")
+
+    runRollback()
+
+    // The rollback removes scope rows, it does not repair the key, so this one comes back with none. That is
+    // deliberate: deleting a user's key on a rollback is worse. Nothing restores it on a roll-forward either —
+    // the backfill only touches `permission`.
+    apiKeyRowExists(inertKeyId).assert.isTrue()
+    scopeNamesOf(inertKeyId).assert.isEmpty()
+
+    // A scopeless key must fail closed, not break the endpoints that list it: those read `scopesEnum` leniently,
+    // unlike the enum array a permission row stores.
+    userAccount = testData.projectReviewer.self
+    performAuthGet("/v2/api-keys?filterProjectId=${testData.relatedProject.self.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.apiKeys").isArray.isNotEmpty
+      }
+  }
+
   private fun saveTestData() {
     testData = SuggestionsTestData(SuggestionsMode.ENABLED)
     testData.relatedProject.addApiKey {
@@ -97,8 +127,15 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
       scopesEnum = mutableSetOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
       userAccount = testData.projectReviewer.self
     }
+    val inertKey =
+      testData.relatedProject.addApiKey {
+        key = "own-access-only-api-key"
+        scopesEnum = mutableSetOf(Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
+        userAccount = testData.projectReviewer.self
+      }
     projectSupplier = { testData.relatedProject.self }
     testDataService.saveTestData(testData.root)
+    inertKeyId = inertKey.self.id
   }
 
   private fun createOwnSuggestionAndGetItsPath(): String {
@@ -133,6 +170,16 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
       Long::class.java,
       testData.project.organizationOwner.id,
     )!!
+
+  private fun apiKeyRowExists(apiKeyId: Long): Boolean =
+    jdbcTemplate.queryForObject("select exists(select 1 from api_key where id = ?)", Boolean::class.java, apiKeyId)!!
+
+  private fun scopeNamesOf(apiKeyId: Long): List<String?> =
+    jdbcTemplate.queryForList(
+      "select scopes_enum from api_key_scopes_enum where api_key_id = ?",
+      String::class.java,
+      apiKeyId,
+    )
 
   private fun makeGranularWithEmptyScopes(permissionId: Long): Long {
     jdbcTemplate.update("update permission set type = null, scopes = '{}' where id = ?", permissionId)

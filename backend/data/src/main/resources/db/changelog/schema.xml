@@ -5966,7 +5966,13 @@
              (both map through Enum.valueOf), so the rollback strips it from both, whether the backfill or a user
              put it there. It deliberately leaves oauth2_grant alone: those columns hold names too, but
              OAuth2Grant reads them with findByName and drops what it cannot resolve, so an old binary degrades
-             instead of failing — and rewriting them would narrow live grants. -->
+             instead of failing — and rewriting them would narrow live grants.
+
+             Rolling forward again is not symmetric: this changeSet re-appends the scope to every granular
+             permission, so permissions heal themselves, but nothing re-adds it to api_key_scopes_enum. An API key
+             whose owner had ticked the scope comes back without it, silently, and its owner meets that as a 403 on
+             deleting their own suggestion. After a rollback/roll-forward cycle those keys have to be edited by
+             hand. -->
         <rollback>
             <sql>
                 UPDATE permission
