@@ -71,4 +71,32 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     """,
   )
   fun findByRevisionId(revisionId: Long): List<ActivityModifiedEntity>
+
+  @Query(
+    """
+    select count(distinct t.key.id)
+    from ActivityModifiedEntity ame
+      join Translation t on t.id = ame.entityId
+      left join Branch b on ame.branchId = b.id
+    where ame.activityRevision.id = :revisionId
+      and ame.entityClass = 'Translation'
+      and cast(empty_json(ame.modifications) as boolean) = false
+      and (b is null or b.isDefault)
+    """,
+  )
+  fun countModifiedTranslationKeys(revisionId: Long): Long
+
+  @Query(
+    """
+    select distinct t.language.tag
+    from ActivityModifiedEntity ame
+      join Translation t on t.id = ame.entityId
+      left join Branch b on ame.branchId = b.id
+    where ame.activityRevision.id = :revisionId
+      and ame.entityClass = 'Translation'
+      and cast(empty_json(ame.modifications) as boolean) = false
+      and (b is null or b.isDefault)
+    """,
+  )
+  fun findModifiedTranslationLanguageTags(revisionId: Long): List<String>
 }

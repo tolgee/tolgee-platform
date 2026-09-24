@@ -6,8 +6,8 @@ import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.component.slackIntegration.notification.SlackAutomationMessageSender
-import io.tolgee.ee.component.slackIntegration.notification.SlackIntegrationDataProvider
 import io.tolgee.model.automations.AutomationAction
+import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -16,6 +16,7 @@ class SlackSubscriptionProcessorImpl(
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackAutomationMessageSender: SlackAutomationMessageSender,
   private val applicationContext: ApplicationContext,
+  private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
 ) : SlackSubscriptionProcessor {
   override fun process(
     action: AutomationAction,
@@ -25,7 +26,7 @@ class SlackSubscriptionProcessorImpl(
     val config = action.slackConfig ?: return
     val maxMessages = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
     val isBigOperation =
-      SlackIntegrationDataProvider(applicationContext).getModifiedKeyCount(activityRevisionId) > maxMessages
+      activityModifiedEntityRepository.countModifiedTranslationKeys(activityRevisionId) > maxMessages
 
     val view =
       ProjectActivityViewByRevisionProvider(

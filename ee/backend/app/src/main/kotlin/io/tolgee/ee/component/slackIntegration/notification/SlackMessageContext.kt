@@ -8,6 +8,7 @@ import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.service.language.LanguageService
 import org.springframework.context.ApplicationContext
 
@@ -38,7 +39,8 @@ class SlackMessageContext(
     get() = data.isBigOperation || (modifiedTranslationsCount > 0 && translationChangeSizeFromModifiedEntities == 0L)
 
   val modifiedLanguageTags: List<String> by lazy {
-    activityData?.revisionId?.let { dataProvider.getModifiedLanguageTags(it) } ?: emptyList()
+    activityData?.revisionId?.let { activityModifiedEntityRepository.findModifiedTranslationLanguageTags(it) }
+      ?: emptyList()
   }
 
   val modifiedTranslationsCount: Long by lazy {
@@ -84,6 +86,10 @@ class SlackMessageContext(
 
   private val tolgeeProperties by lazy {
     applicationContext.getBean(TolgeeProperties::class.java)
+  }
+
+  private val activityModifiedEntityRepository by lazy {
+    applicationContext.getBean(ActivityModifiedEntityRepository::class.java)
   }
 
   private val languageService by lazy {
