@@ -15,14 +15,12 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageHeaderAccessor
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 import java.security.Principal
 
 /** Websocket authentication and per-topic authorization model: docs/websocket/README.md. */
 @Configuration
-@EnableWebSocketMessageBroker
 class WebSocketConfig(
   @Lazy
   private val websocketAuthenticationResolver: WebsocketAuthenticationResolver,
