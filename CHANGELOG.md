@@ -1,3 +1,10 @@
+## [3.224.7](https://github.com/tolgee/tolgee-platform/compare/v3.224.6...v3.224.7) (2026-09-24)
+
+
+### Bug Fixes
+
+* deliver the STOMP ERROR frame before closing the websocket ([#3940](https://github.com/tolgee/tolgee-platform/issues/3940)) ([0f6863c](https://github.com/tolgee/tolgee-platform/commit/0f6863c2ea6319c4aab04a60603920e509314b19)), closes [tolgee/billing#321](https://github.com/tolgee/billing/issues/321) [#3900](https://github.com/tolgee/tolgee-platform/issues/3900) [#3900](https://github.com/tolgee/tolgee-platform/issues/3900) [tolgee/billing#321](https://github.com/tolgee/billing/issues/321) [spring-projects/spring-framework#37328](https://github.com/spring-projects/spring-framework/issues/37328)
+
 ## [3.224.6](https://github.com/tolgee/tolgee-platform/compare/v3.224.5...v3.224.6) (2026-09-22)
 
 
