@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
@@ -14,6 +15,7 @@ import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -218,6 +220,23 @@ class SlackTestData {
     }
     return keys
   }
+
+  fun add6KeysWithOutdatedMachineTranslations(): List<Key> =
+    (1..6).map { index ->
+      projectBuilder
+        .addKey("outdatedKey$index")
+        .build {
+          addTranslation("en", "Hello")
+          addTranslation {
+            language = secondLanguage
+            text = "Translated with Google"
+            state = TranslationState.TRANSLATED
+            auto = true
+            mtProvider = MtServiceType.GOOGLE
+            outdated = true
+          }
+        }.self
+    }
 
   fun add10Keys(): List<Key> {
     return (1..10).map {

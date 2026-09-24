@@ -80,7 +80,10 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
       left join Branch b on ame.branchId = b.id
     where ame.activityRevision.id = :revisionId
       and ame.entityClass = 'Translation'
-      and cast(empty_json(ame.modifications) as boolean) = false
+      and (
+        cast(jsonb_exists(ame.modifications, 'text') as boolean) = true
+        or cast(jsonb_exists(ame.modifications, 'state') as boolean) = true
+      )
       and (b is null or b.isDefault)
     """,
   )
@@ -94,7 +97,10 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
       left join Branch b on ame.branchId = b.id
     where ame.activityRevision.id = :revisionId
       and ame.entityClass = 'Translation'
-      and cast(empty_json(ame.modifications) as boolean) = false
+      and (
+        cast(jsonb_exists(ame.modifications, 'text') as boolean) = true
+        or cast(jsonb_exists(ame.modifications, 'state') as boolean) = true
+      )
       and (b is null or b.isDefault)
     """,
   )

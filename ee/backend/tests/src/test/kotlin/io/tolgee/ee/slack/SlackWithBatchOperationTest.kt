@@ -197,9 +197,6 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       .hasSize(1)
   }
 
-  private fun List<ChatPostMessageRequest>.headerTexts(): List<String> =
-    map { (it.blocks.first() as SectionBlock).text.text }
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `does not send a summary for a batch on a non-default branch`() {
@@ -225,6 +222,35 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       .assert
       .hasSize(1)
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not send a summary when a batch changes only translation metadata`() {
+    val metadataOnlyKeys = testData.add6KeysWithOutdatedMachineTranslations()
+    val changedKeys = testData.add10Keys().take(7)
+    saveTestData()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    waitForBatchJobsToSettle()
+    mockedSlackClient.clearInvocations()
+
+    performBatchOperation(metadataOnlyKeys.map { it.id })
+    performBatchOperation(changedKeys.map { it.id })
+
+    waitForNotThrowing(timeout = 20_000) {
+      mockedSlackClient.chatPostMessageRequests
+        .headerTexts()
+        .assert
+        .anyMatch { it.contains("has updated 7") }
+    }
+    waitForBatchJobsToSettle()
+    mockedSlackClient.chatPostMessageRequests
+      .headerTexts()
+      .assert
+      .hasSize(1)
+  }
+
+  private fun List<ChatPostMessageRequest>.headerTexts(): List<String> =
+    map { (it.blocks.first() as SectionBlock).text.text }
 
   private fun waitForBatchJobsToSettle() {
     waitFor(pollTime = 5) {
