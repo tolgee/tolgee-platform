@@ -63,10 +63,9 @@ class SlackConfigManageService(
         channelId = dto.channelId,
       ).apply {
         events =
-          if (dto.events.isEmpty()) {
-            mutableSetOf(SlackEventType.ALL)
-          } else {
-            dto.events
+          when {
+            dto.events.isEmpty() || !dto.languageTag.isNullOrBlank() -> mutableSetOf(SlackEventType.ALL)
+            else -> dto.events
           }
         isGlobalSubscription = dto.isGlobal ?: dto.languageTag.isNullOrBlank()
         this.organizationSlackWorkspace = workspace
@@ -74,9 +73,7 @@ class SlackConfigManageService(
     slackConfigRepository.save(slackConfig)
     workspace?.slackSubscriptions?.add(slackConfig)
 
-    if (!slackConfig.isGlobalSubscription) {
-      addPreferenceToConfig(slackConfig, dto.languageTag!!, events = dto.events)
-    }
+    dto.languageTag?.takeIf { it.isNotBlank() }?.let { addPreferenceToConfig(slackConfig, it, events = dto.events) }
     automationService.createForSlackIntegration(slackConfig)
     return slackConfig
   }

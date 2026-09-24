@@ -76,12 +76,8 @@ class SlackSlashCommandController(
         throw SlackErrorException(slackErrorProvider.getBotNotInChannelError())
       }
 
-      val matchResult =
-        commandRegex.matchEntire(payload.text) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
-
-      val (command, projectId, languageTag, optionsString) = matchResult.destructured
-
-      val optionsMap = parseOptions(optionsString)
+      val (command, projectId, languageTag, optionsString) =
+        parseCommand(payload.text) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError())
 
       when (command) {
         "login" -> login(payload).asSlackResponseString
@@ -91,7 +87,7 @@ class SlackSlashCommandController(
             payload,
             projectId.toLongOrThrowInvalidCommand(),
             languageTag,
-            optionsMap,
+            parseOptions(optionsString) ?: throw SlackErrorException(slackErrorProvider.getInvalidCommandError()),
           ).asSlackResponseString
 
         "unsubscribe" ->
@@ -319,20 +315,29 @@ class SlackSlashCommandController(
     return slackUserConnection.userAccount
   }
 
-  fun parseOptions(optionsString: String): Map<String, String> {
-    val optionsMap = mutableMapOf<String, String>()
+  companion object {
+    private val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+((?!--)[^\s,]+))?\s*(.*)$""".toRegex()
 
-    optionsRegex.findAll(optionsString).forEach { match ->
-      val (key, value) = match.destructured
-      optionsMap[key] = value
+    fun parseCommand(text: String): MatchResult.Destructured? {
+      val arguments = commandRegex.matchEntire(text)?.destructured ?: return null
+      val (command, _, _, optionsString) = arguments
+      if (command == "unsubscribe" && optionsString.isNotBlank()) return null
+      return arguments
     }
 
-    return optionsMap
-  }
+    private val optionSeparatorRegex = """\s+(?=--)""".toRegex()
 
-  companion object {
-    val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+([\p{L}][\p{L}\d-]*))?\s*(.*)$""".toRegex()
+    private val whitespaceRegex = """\s+""".toRegex()
 
-    val optionsRegex = """(--[\w-]+)\s+([\w-,\s]+)""".toRegex()
+    fun parseOptions(optionsString: String): Map<String, String>? {
+      if (optionsString.isBlank()) return emptyMap()
+      val options =
+        optionsString.trim().split(optionSeparatorRegex).map { option ->
+          val parts = option.split(whitespaceRegex, limit = 2)
+          if (parts.size < 2 || !parts[0].startsWith("--")) return null
+          parts[0] to parts[1]
+        }
+      return options.toMap().takeIf { it.size == options.size }
+    }
   }
 }
