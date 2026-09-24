@@ -269,6 +269,13 @@ own PR:
   consent screen presented as "translations.view on project X". Neither resolves a project, so neither the token's
   scopes nor its project set is consulted. The follow-up is a scope covering account-level reads, or narrowing the
   non-project `@AllowApiAccess(ANY)` set for scoped credentials generally.
+- **`current-permissions` tells the client what the *user* may do, not only what the token may do.**
+  `GET /v2/api-keys/current-permissions` returns `userScopes`, the expanded scope set of the user's own project
+  permission, alongside `scopes`, which is narrowed by the credential. A third-party client therefore learns the
+  user's full project scope set whatever its own grant asked for. That is deliberate and is what makes "your
+  account can do this, this sign-in cannot" expressible — a client can offer to ask for more only when asking would
+  actually help — but it is more than the grant requested, and it applies to project API keys in exactly the same
+  way.
 - **`@IsGlobalRoute` skips every project narrowing.** `AbstractAuthorizationInterceptor.preHandle` returns before
   `preHandleInternal` for a global route, so `coversProject` and the scope intersection are not consulted there. No
   `@AllowApiAccess @IsGlobalRoute` handler reads project-shaped data today; the structural fix is to refuse a
@@ -451,6 +458,10 @@ These are known gaps, deferred to the client rounds that first exercise them:
   `tasks.assigned-access` above, this is not an elevation being restored: every author could delete their own
   suggestion, so the backfill grants nobody more than they had, while skipping it would take an everyday action
   away from every granular member. API keys and OAuth grants are not backfilled, as above.
+  The scope carries **no language dimension**, deliberately: an author acting on their own item is not a
+  per-language operation, and the author bypass it replaces was not one either. So a credential holding it may
+  delete its holder's own suggestion in any language, while deleting *someone else's* still goes through
+  `translation-suggestions.manage` and its language set.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client
