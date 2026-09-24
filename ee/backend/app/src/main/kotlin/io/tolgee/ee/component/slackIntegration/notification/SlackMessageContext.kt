@@ -35,7 +35,7 @@ class SlackMessageContext(
   }
 
   val isBigOperation: Boolean
-    get() = data.isBigOperation
+    get() = data.isBigOperation || (modifiedTranslationsCount > 0 && translationChangeSizeFromModifiedEntities == 0L)
 
   val modifiedLanguageTags: List<String> by lazy {
     activityData?.revisionId?.let { dataProvider.getModifiedLanguageTags(it) } ?: emptyList()
