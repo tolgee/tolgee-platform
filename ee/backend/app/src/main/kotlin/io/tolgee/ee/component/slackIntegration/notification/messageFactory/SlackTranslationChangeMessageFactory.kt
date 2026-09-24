@@ -22,16 +22,25 @@ class SlackTranslationChangeMessageFactory(
 ) {
   fun createTranslationChangeMessages(context: SlackMessageContext): List<SlackMessageDto> {
     val activityData = context.activityData ?: return emptyList()
-    val modifiedTranslations = activityData.modifiedEntities?.get("Translation") ?: return emptyList()
+    val eventsByTranslationId =
+      activityData.modifiedEntities
+        ?.get("Translation")
+        ?.mapNotNull { modifiedEntity -> getEvent(modifiedEntity)?.let { modifiedEntity.entityId to it } }
+        ?.toMap() ?: return emptyList()
 
-    val event = getEvent(modifiedTranslations.firstOrNull() ?: return emptyList())
-    val modificationAuthor = getModificationAuthorContext(context, event, activityData.timestamp)
-
-    return modifiedTranslations
-      .mapNotNull { context.dataProvider.getTranslationById(it.entityId) }
+    return eventsByTranslationId.keys
+      .mapNotNull { context.dataProvider.getTranslationById(it) }
       .filter { isSubscribedToChange(context, it.languageTag) }
       .groupBy { it.keyId }
-      .mapNotNull { (_, keyTranslations) -> processKeyChange(context, keyTranslations, modificationAuthor, event) }
+      .mapNotNull { (_, keyTranslations) ->
+        val event = getKeyEvent(keyTranslations.map { eventsByTranslationId.getValue(it.translationId) })
+        processKeyChange(
+          context,
+          keyTranslations,
+          getModificationAuthorContext(context, event, activityData.timestamp),
+          event,
+        )
+      }
   }
 
   fun isSubscribedToChange(
@@ -44,11 +53,17 @@ class SlackTranslationChangeMessageFactory(
     return shouldProcessEventTranslationChanged(context, languageTag, baseLanguageTag, languageTag)
   }
 
-  private fun getEvent(modifiedEntity: IModifiedEntityModel): String =
+  private fun getEvent(modifiedEntity: IModifiedEntityModel): String? =
     when {
       modifiedEntity.modifications?.contains("text") == true -> "translation"
       modifiedEntity.modifications?.contains("state") == true -> "state"
-      else -> ""
+      else -> null
+    }
+
+  private fun getKeyEvent(events: List<String>): String =
+    when {
+      "translation" in events -> "translation"
+      else -> "state"
     }
 
   private fun processKeyChange(
@@ -60,29 +75,23 @@ class SlackTranslationChangeMessageFactory(
     val baseLanguageTag =
       context.slackConfig.project.baseLanguage
         ?.tag ?: return null
-    val translations = changedTranslations.filter { it.languageTag == baseLanguageTag }.ifEmpty { changedTranslations }
-    val modifiedLangTag = translations.first().languageTag
-    val isBaseChanged = modifiedLangTag == baseLanguageTag
-
-    val langName =
+    val isBaseChanged = changedTranslations.any { it.languageTag == baseLanguageTag }
+    val modifiedLangTag =
       when {
-        isBaseChanged -> "base language"
-        else -> translations.joinToString { it.languageName }
+        isBaseChanged -> baseLanguageTag
+        else -> changedTranslations.first().languageTag
       }
 
-    val key = context.dataProvider.getKeyInfo(translations.first().keyId)
+    val key = context.dataProvider.getKeyInfo(changedTranslations.first().keyId)
 
     val headerBlock =
-      blocksProvider.getKeyInfoBlock(
-        context,
-        key,
-        i18n.translate("slack.common.message.new-translation").format(langName, event),
-      )
+      blocksProvider.getKeyInfoBlock(context, key, getHeaderText(changedTranslations, isBaseChanged, event))
     val attachments =
-      translations
-        .map { blocksProvider.createAttachmentForLanguage(context, it, modificationAuthor) ?: return null }
+      changedTranslations
+        .mapNotNull { blocksProvider.createAttachmentForLanguage(context, it, modificationAuthor) }
         .toMutableList()
-    val langTags = translations.map { it.languageTag }.toMutableSet()
+    if (attachments.isEmpty()) return null
+    val langTags = changedTranslations.map { it.languageTag }.toMutableSet()
 
     addLanguagesIfNeed(context, attachments, langTags, key.id, modifiedLangTag, baseLanguageTag)
     attachments.add(
@@ -101,8 +110,32 @@ class SlackTranslationChangeMessageFactory(
       languageTags = langTags,
       false,
       isBaseChanged,
-      authorContext = translations.associate { it.languageTag to (modificationAuthor ?: "") },
+      authorContext = changedTranslations.associate { it.languageTag to (modificationAuthor ?: "") },
     )
+  }
+
+  private fun getHeaderText(
+    changedTranslations: List<SlackTranslationInfoDto>,
+    isBaseChanged: Boolean,
+    event: String,
+  ): String {
+    if (isBaseChanged) {
+      return i18n.translate("slack.common.message.new-translation").format("base language", event)
+    }
+    if (changedTranslations.size == 1) {
+      return i18n
+        .translate(
+          "slack.common.message.new-translation",
+        ).format(changedTranslations.single().languageName, event)
+    }
+    val pluralEvent =
+      when (event) {
+        "state" -> "states"
+        else -> "translations"
+      }
+    return i18n
+      .translate("slack.common.message.new-translations")
+      .format(pluralEvent, changedTranslations.joinToString { it.languageName })
   }
 
   private fun getModificationAuthorContext(

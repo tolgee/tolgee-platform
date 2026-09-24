@@ -34,10 +34,8 @@ class SlackMessageContext(
     author ?: activityData?.author?.name
   }
 
-  val isBigOperation: Boolean by lazy {
-    val revisionId = activityData?.revisionId ?: return@lazy false
-    dataProvider.getModifiedKeyCount(revisionId) > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
-  }
+  val isBigOperation: Boolean
+    get() = data.isBigOperation
 
   val modifiedLanguageTags: List<String> by lazy {
     activityData?.revisionId?.let { dataProvider.getModifiedLanguageTags(it) } ?: emptyList()
@@ -57,9 +55,6 @@ class SlackMessageContext(
     return@lazy translationChangeSizeFromModifiedEntities
   }
 
-  /**
-   * If this is empty, it means that the operation is probably big
-   */
   private val translationChangeSizeFromModifiedEntities: Long by lazy {
     activityData
       ?.modifiedEntities

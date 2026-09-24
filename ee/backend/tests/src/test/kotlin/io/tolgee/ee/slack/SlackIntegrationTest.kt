@@ -2,6 +2,7 @@ package io.tolgee.ee.slack
 
 import com.slack.api.Slack
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.model.block.ContextBlock
 import com.slack.api.model.block.SectionBlock
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
@@ -157,6 +158,7 @@ class SlackIntegrationTest :
 
     waitForNotThrowing(timeout = 5000) {
       val request = mockedSlackClient.chatPostMessageRequests.single()
+      request.headerText().assert.contains("has changed translations in")
       request.languageLabels().assert.contains(
         "*French*",
         "*Czech*",
@@ -205,6 +207,54 @@ class SlackIntegrationTest :
       request.languageLabels().assert.doesNotContain("*Czech*")
     }
   }
+
+  @Test
+  fun `describes base text change as a translation change when a sibling translation has lower id`() {
+    testData = SlackTestData()
+    lateinit var frenchTranslation: Translation
+    lateinit var englishTranslation: Translation
+    val siblingKey =
+      testData.projectBuilder
+        .addKey("siblingKey")
+        .build {
+          frenchTranslation = addTranslation("fr", "Salut").self
+          englishTranslation = addTranslation("en", "Hello").self
+        }.self
+    testDataService.saveTestData(testData.root)
+    frenchTranslation.id.assert.isLessThan(englishTranslation.id)
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    loginAsUser(testData.user.username)
+
+    setTranslations(testData.projectBuilder.self.id, siblingKey.name, mapOf("en" to "Hi"))
+
+    waitForNotThrowing(timeout = 5000) {
+      mockedSlackClient.chatPostMessageRequests
+        .single()
+        .headerText()
+        .assert
+        .contains("has changed a base language translation")
+    }
+  }
+
+  @Test
+  fun `shows author on non-base language saved together with base language`() {
+    testData = SlackTestData()
+    testDataService.saveTestData(testData.root)
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    loginAsUser(testData.user.username)
+
+    setTranslations(testData.projectBuilder.self.id, testData.key2.name, mapOf("en" to "Hi", "fr" to "Salut"))
+
+    waitForNotThrowing(timeout = 5000) {
+      val frenchAttachment =
+        mockedSlackClient.chatPostMessageRequests.single().attachments.single {
+          (it.blocks.firstOrNull() as? SectionBlock)?.text?.text?.contains("*French*") == true
+        }
+      frenchAttachment.blocks.assert.anyMatch { it is ContextBlock }
+    }
+  }
+
+  private fun ChatPostMessageRequest.headerText(): String = (blocks.first() as SectionBlock).text.text
 
   private fun ChatPostMessageRequest.languageLabels(): List<String> =
     attachments.mapNotNull {

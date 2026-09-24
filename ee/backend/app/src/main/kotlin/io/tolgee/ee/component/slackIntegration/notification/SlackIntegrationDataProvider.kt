@@ -91,10 +91,7 @@ class SlackIntegrationDataProvider(
   fun getModifiedKeyCount(revisionId: Long): Long =
     entityManager
       .createQuery(
-        """SELECT count(distinct t.key.id)
-          |FROM ActivityModifiedEntity me, Translation t
-          |WHERE me.activityRevision.id = :revisionId and me.entityClass = 'Translation' and me.entityId = t.id
-        """.trimMargin(),
+        "SELECT count(distinct t.key.id) $MODIFIED_DEFAULT_BRANCH_TRANSLATIONS",
         Long::class.javaObjectType,
       ).setParameter("revisionId", revisionId)
       .singleResult
@@ -102,10 +99,7 @@ class SlackIntegrationDataProvider(
   fun getModifiedLanguageTags(revisionId: Long): List<String> =
     entityManager
       .createQuery(
-        """SELECT distinct t.language.tag
-          |FROM ActivityModifiedEntity me, Translation t
-          |WHERE me.activityRevision.id = :revisionId and me.entityClass = 'Translation' and me.entityId = t.id
-        """.trimMargin(),
+        "SELECT distinct t.language.tag $MODIFIED_DEFAULT_BRANCH_TRANSLATIONS",
         String::class.java,
       ).setParameter("revisionId", revisionId)
       .resultList
@@ -158,5 +152,17 @@ class SlackIntegrationDataProvider(
 
   private val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
+  }
+
+  companion object {
+    // Mirrors the default-branch filter of ActivityViewByRevisionsProvider, so the counts match the loaded activity.
+    private const val MODIFIED_DEFAULT_BRANCH_TRANSLATIONS = """
+      FROM ActivityModifiedEntity me, Translation t
+      WHERE me.activityRevision.id = :revisionId and me.entityClass = 'Translation' and me.entityId = t.id
+        and (me.branchId is null or me.branchId in (
+          select b.id from Branch b
+          where b.project.id = me.activityRevision.projectId and b.isDefault = true and b.deletedAt is null
+        ))
+    """
   }
 }

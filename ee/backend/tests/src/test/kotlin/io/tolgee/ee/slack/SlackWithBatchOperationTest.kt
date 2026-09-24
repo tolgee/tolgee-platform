@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -204,6 +205,44 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
 
   private fun List<ChatPostMessageRequest>.headerTexts(): List<String> =
     map { (it.blocks.first() as SectionBlock).text.text }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not send a summary for a batch on a non-default branch`() {
+    val branchedKeys = mutableListOf<Key>()
+    testData.projectBuilder
+      .addBranch { name = "feature-branch" }
+      .build {
+        (1..6).forEach { index ->
+          testData.projectBuilder
+            .addKey {
+              name = "branched$index"
+              branch = self
+            }.build { addTranslation("en", "Hello") }
+            .also { branchedKeys.add(it.self) }
+        }
+      }
+    val defaultBranchKeys = testData.add10Keys().take(6)
+    saveTestData()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    waitForBatchJobsToSettle()
+    mockedSlackClient.clearInvocations()
+
+    performBatchOperation(branchedKeys.map { it.id })
+    performBatchOperation(defaultBranchKeys.map { it.id })
+
+    waitForNotThrowing(timeout = 20_000) {
+      mockedSlackClient.chatPostMessageRequests
+        .headerTexts()
+        .assert
+        .anyMatch { it.contains("has updated 6") }
+    }
+    waitForBatchJobsToSettle()
+    mockedSlackClient.chatPostMessageRequests
+      .headerTexts()
+      .assert
+      .hasSize(1)
+  }
 
   private fun subscribeToFrenchTranslationChangesOnly() {
     slackConfigManageService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId, "")
