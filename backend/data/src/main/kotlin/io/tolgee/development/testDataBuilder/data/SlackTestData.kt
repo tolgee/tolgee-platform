@@ -159,6 +159,17 @@ class SlackTestData {
           }.self
     }
 
+  fun addMoreLanguages() {
+    projectBuilder.addGerman()
+    listOf("es" to "Spanish", "it" to "Italian", "pl" to "Polish").forEach { (languageTag, languageName) ->
+      projectBuilder.addLanguage {
+        tag = languageTag
+        name = languageName
+        originalName = languageName
+      }
+    }
+  }
+
   fun add10Keys(): List<Key> {
     return (1..10).map {
       projectBuilder

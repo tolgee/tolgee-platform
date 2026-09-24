@@ -35,37 +35,12 @@ class SlackMessageContext(
   }
 
   val isBigOperation: Boolean by lazy {
-    // A Slack message is posted per key, so the flood guard counts distinct keys, not raw
-    // translations. One key changed across many languages (e.g. a base edit that auto-translates
-    // into every target language) is a single message, not a flood, and must not collapse into the
-    // generic "too many translations" summary.
-    val keyCount = modifiedKeyCount
-    if (keyCount != null) {
-      return@lazy keyCount > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
-    }
-
-    // Bulk activity types (AUTO_TRANSLATE, batch operations) expose only aggregate counts in the
-    // activity view provider — the per-entity detail is not loaded, so distinct keys cannot be
-    // counted. Treat such an activity as big whenever anything was changed.
-    return@lazy modifiedTranslationsCount > 0
+    val revisionId = activityData?.revisionId ?: return@lazy false
+    dataProvider.getModifiedKeyCount(revisionId) > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
   }
 
-  /**
-   * Number of distinct keys touched by this activity, or null when per-entity detail is not loaded
-   * (bulk activity types), in which case only aggregate counts are available.
-   */
-  private val modifiedKeyCount: Int? by lazy {
-    val translations = activityData?.modifiedEntities?.get("Translation")
-    if (translations.isNullOrEmpty()) {
-      return@lazy null
-    }
-    val keyIds = translations.mapNotNull { it.relations?.get("key")?.entityId }
-    // A translation without a resolvable key relation would be dropped silently and could deflate
-    // the count below the threshold; fall back to the aggregate path instead of undercounting.
-    if (keyIds.size != translations.size) {
-      return@lazy null
-    }
-    keyIds.distinct().size
+  val modifiedLanguageTags: List<String> by lazy {
+    activityData?.revisionId?.let { dataProvider.getModifiedLanguageTags(it) } ?: emptyList()
   }
 
   val modifiedTranslationsCount: Long by lazy {

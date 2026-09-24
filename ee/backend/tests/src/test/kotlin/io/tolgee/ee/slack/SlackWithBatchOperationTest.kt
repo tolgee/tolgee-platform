@@ -1,10 +1,13 @@
 package io.tolgee.ee.slack
 
 import com.slack.api.Slack
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.model.block.SectionBlock
 import io.tolgee.batch.ApplicationBatchJobRunner
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
@@ -13,6 +16,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +33,9 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
 
   @Autowired
   lateinit var applicationBatchJobRunner: ApplicationBatchJobRunner
+
+  @Autowired
+  lateinit var slackConfigManageService: SlackConfigManageService
 
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
@@ -48,6 +55,11 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
     this.projectSupplier = { testData.projectBuilder.self }
     tolgeeProperties.slack.token = "token"
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   fun saveTestData() {
@@ -130,15 +142,8 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     }
     mockedSlackClient.clearInvocations()
 
-    // The batch machine-translate is a big operation. A new_key-only subscription is not interested
-    // in translation changes, so the big-operation summary must be gated out — before the fix it
-    // was sent unconditionally, bypassing the subscription filter.
     performBatchOperation(keyIds)
-
-    // Positive control: creating a key is a new_key event this subscription does want. Waiting for
-    // its message guarantees the (async) notification pipeline has flushed, so a leaked translation
-    // summary would already be present — otherwise a bare "assert zero" could pass while a summary
-    // is still pending.
+    waitForBatchJobsToSettle()
     performCreateKey("controlKey")
 
     waitForNotThrowing(timeout = 20_000) {
@@ -150,6 +155,88 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `sends a detailed message instead of the summary when a batch changes one key in many languages`() {
+    testData.addMoreLanguages()
+    saveTestData()
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    waitForBatchJobsToSettle()
+    mockedSlackClient.clearInvocations()
+
+    performBatchOperation(listOf(testData.key.id), nonBaseLanguageIds())
+
+    waitForNotThrowing(timeout = 20_000) {
+      val request = mockedSlackClient.chatPostMessageRequests.single()
+      (request.blocks.first() as SectionBlock)
+        .text.text.assert
+        .doesNotContain("has updated")
+      request.attachments.assert.hasSize(nonBaseLanguageIds().size + 2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `sends the summary only to a subscription for a language the batch changed`() {
+    val keys = testData.add10Keys()
+    saveTestData()
+    subscribeToFrenchTranslationChangesOnly()
+    val keyIds = keys.map { it.id }
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    waitForBatchJobsToSettle()
+    mockedSlackClient.clearInvocations()
+
+    performBatchOperation(keyIds, listOf(languageId("cs")))
+    performBatchOperation(keyIds.take(6), listOf(testData.secondLanguage.id))
+
+    waitForNotThrowing(timeout = 20_000) {
+      mockedSlackClient.chatPostMessageRequests
+        .headerTexts()
+        .assert
+        .anyMatch { it.contains("has updated 6") }
+    }
+    waitForBatchJobsToSettle()
+    mockedSlackClient.chatPostMessageRequests
+      .headerTexts()
+      .assert
+      .hasSize(1)
+  }
+
+  private fun List<ChatPostMessageRequest>.headerTexts(): List<String> =
+    map { (it.blocks.first() as SectionBlock).text.text }
+
+  private fun subscribeToFrenchTranslationChangesOnly() {
+    slackConfigManageService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId, "")
+    slackConfigManageService.createOrUpdate(
+      SlackConfigDto(
+        project = testData.projectBuilder.self,
+        slackId = "testSlackId",
+        channelId = testData.slackConfig.channelId,
+        userAccount = testData.user,
+        languageTag = "fr",
+        events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
+        slackTeamId = "slackTeamId",
+      ),
+    )
+  }
+
+  private fun waitForBatchJobsToSettle() {
+    waitFor(pollTime = 5) {
+      applicationBatchJobRunner.settled
+    }
+  }
+
+  private fun nonBaseLanguageIds(): List<Long> =
+    testData.projectBuilder.data.languages
+      .map { it.self }
+      .filter { it.tag != "en" }
+      .map { it.id }
+
+  private fun languageId(tag: String): Long =
+    testData.projectBuilder.data.languages
+      .single { it.self.tag == tag }
+      .self.id
+
   private fun performCreateKey(name: String) {
     performProjectAuthPost(
       "keys/create",
@@ -157,10 +244,13 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
     ).andIsCreated
   }
 
-  private fun performBatchOperation(keyIds: List<Long>) {
+  private fun performBatchOperation(
+    keyIds: List<Long>,
+    targetLanguageIds: List<Long> = listOf(testData.secondLanguage.id),
+  ) {
     performProjectAuthPost(
       "start-batch-job/machine-translate",
-      mapOf("keyIds" to keyIds, "targetLanguageIds" to listOf(testData.secondLanguage.id)),
+      mapOf("keyIds" to keyIds, "targetLanguageIds" to targetLanguageIds),
     ).andIsOk
   }
 

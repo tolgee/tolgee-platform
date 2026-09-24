@@ -1,6 +1,7 @@
 package io.tolgee.ee.component.slackIntegration.notification.messageFactory
 
 import com.slack.api.model.Attachment
+import io.tolgee.api.IModifiedEntityModel
 import io.tolgee.ee.component.slackIntegration.data.SlackMessageDto
 import io.tolgee.ee.component.slackIntegration.data.SlackTranslationInfoDto
 import io.tolgee.ee.component.slackIntegration.notification.SlackMessageContext
@@ -20,65 +21,56 @@ class SlackTranslationChangeMessageFactory(
   private val blocksProvider: SlackNotificationBlocksProvider,
 ) {
   fun createTranslationChangeMessages(context: SlackMessageContext): List<SlackMessageDto> {
-    val result = mutableListOf<SlackMessageDto>()
+    val activityData = context.activityData ?: return emptyList()
+    val modifiedTranslations = activityData.modifiedEntities?.get("Translation") ?: return emptyList()
 
-    val activityData = context.activityData
-    activityData?.modifiedEntities?.forEach modifiedEntities@{ (_, modifiedEntityList) ->
-      modifiedEntityList.forEach { modifiedEntity ->
-        val event =
-          when {
-            modifiedEntity.modifications?.contains("text") == true -> "translation"
-            modifiedEntity.modifications?.contains("state") == true -> "state"
-            else -> ""
-          }
+    val event = getEvent(modifiedTranslations.firstOrNull() ?: return emptyList())
+    val modificationAuthor = getModificationAuthorContext(context, event, activityData.timestamp)
 
-        val translationId = modifiedEntity.entityId
-        val translation = context.dataProvider.getTranslationById(translationId) ?: return@modifiedEntities
-
-        val message =
-          processTranslationChange(
-            context,
-            translation,
-            getModificationAuthorContext(context, event, activityData.timestamp),
-            event,
-          ) ?: return@modifiedEntities
-
-        result.add(message)
-
-        val baseLanguageTag =
-          context.slackConfig.project.baseLanguage
-            ?.tag ?: return@modifiedEntities
-        if (baseLanguageTag == translation.languageTag) {
-          return@modifiedEntities
-        }
-      }
-    }
-
-    return result
+    return modifiedTranslations
+      .mapNotNull { context.dataProvider.getTranslationById(it.entityId) }
+      .filter { isSubscribedToChange(context, it.languageTag) }
+      .groupBy { it.keyId }
+      .mapNotNull { (_, keyTranslations) -> processKeyChange(context, keyTranslations, modificationAuthor, event) }
   }
 
-  private fun processTranslationChange(
+  fun isSubscribedToChange(
     context: SlackMessageContext,
-    translation: SlackTranslationInfoDto,
+    languageTag: String,
+  ): Boolean {
+    val baseLanguageTag =
+      context.slackConfig.project.baseLanguage
+        ?.tag ?: return false
+    return shouldProcessEventTranslationChanged(context, languageTag, baseLanguageTag, languageTag)
+  }
+
+  private fun getEvent(modifiedEntity: IModifiedEntityModel): String =
+    when {
+      modifiedEntity.modifications?.contains("text") == true -> "translation"
+      modifiedEntity.modifications?.contains("state") == true -> "state"
+      else -> ""
+    }
+
+  private fun processKeyChange(
+    context: SlackMessageContext,
+    changedTranslations: List<SlackTranslationInfoDto>,
     modificationAuthor: String?,
     event: String,
   ): SlackMessageDto? {
     val baseLanguageTag =
       context.slackConfig.project.baseLanguage
         ?.tag ?: return null
-    val modifiedLangTag = translation.languageTag
+    val translations = changedTranslations.filter { it.languageTag == baseLanguageTag }.ifEmpty { changedTranslations }
+    val modifiedLangTag = translations.first().languageTag
     val isBaseChanged = modifiedLangTag == baseLanguageTag
 
-    if (!shouldProcessEventTranslationChanged(context, modifiedLangTag, baseLanguageTag, modifiedLangTag)) return null
-
     val langName =
-      if (isBaseChanged) {
-        "base language"
-      } else {
-        translation.languageName
+      when {
+        isBaseChanged -> "base language"
+        else -> translations.joinToString { it.languageName }
       }
 
-    val key = context.dataProvider.getKeyInfo(translation.keyId)
+    val key = context.dataProvider.getKeyInfo(translations.first().keyId)
 
     val headerBlock =
       blocksProvider.getKeyInfoBlock(
@@ -87,8 +79,10 @@ class SlackTranslationChangeMessageFactory(
         i18n.translate("slack.common.message.new-translation").format(langName, event),
       )
     val attachments =
-      mutableListOf(blocksProvider.createAttachmentForLanguage(context, translation, modificationAuthor) ?: return null)
-    val langTags = mutableSetOf(modifiedLangTag)
+      translations
+        .map { blocksProvider.createAttachmentForLanguage(context, it, modificationAuthor) ?: return null }
+        .toMutableList()
+    val langTags = translations.map { it.languageTag }.toMutableSet()
 
     addLanguagesIfNeed(context, attachments, langTags, key.id, modifiedLangTag, baseLanguageTag)
     attachments.add(
@@ -100,19 +94,15 @@ class SlackTranslationChangeMessageFactory(
       ),
     )
 
-    return if (langTags.isEmpty()) {
-      null
-    } else {
-      SlackMessageDto(
-        blocks = headerBlock,
-        attachments = attachments,
-        keyId = key.id,
-        languageTags = langTags,
-        false,
-        isBaseChanged,
-        authorContext = mapOf(modifiedLangTag to (modificationAuthor ?: "")),
-      )
-    }
+    return SlackMessageDto(
+      blocks = headerBlock,
+      attachments = attachments,
+      keyId = key.id,
+      languageTags = langTags,
+      false,
+      isBaseChanged,
+      authorContext = translations.associate { it.languageTag to (modificationAuthor ?: "") },
+    )
   }
 
   private fun getModificationAuthorContext(

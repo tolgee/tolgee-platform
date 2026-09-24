@@ -1,6 +1,8 @@
 package io.tolgee.ee.slack
 
 import com.slack.api.Slack
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.model.block.SectionBlock
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
@@ -10,9 +12,11 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.slackIntegration.SlackEventType
+import io.tolgee.model.translation.Translation
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.util.Logging
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -33,6 +37,8 @@ class SlackIntegrationTest :
   @Autowired
   lateinit var slackConfigManageService: SlackConfigManageService
 
+  lateinit var testData: SlackTestData
+
   @BeforeAll
   fun setup() {
     tolgeeProperties.internal.fakeMtProviders = false
@@ -41,9 +47,14 @@ class SlackIntegrationTest :
     tolgeeProperties.slack.token = "token"
   }
 
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @Test
   fun `sends message to correct channel after translation changed`() {
-    val testData = SlackTestData()
+    testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
     val langTag =
@@ -61,7 +72,7 @@ class SlackIntegrationTest :
 
   @Test
   fun `sends message to correct channel after key added`() {
-    val testData = SlackTestData()
+    testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
@@ -76,7 +87,7 @@ class SlackIntegrationTest :
 
   @Test
   fun `doesn't send a message if the subscription isn't global and modified language isn't in preferred languages`() {
-    val testData = SlackTestData()
+    testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
@@ -104,7 +115,7 @@ class SlackIntegrationTest :
 
   @Test
   fun `doesn't send a message if the event isn't in subscribed by user`() {
-    val testData = SlackTestData()
+    testData = SlackTestData()
     testDataService.saveTestData(testData.root)
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
@@ -130,19 +141,96 @@ class SlackIntegrationTest :
     }
   }
 
+  @Test
+  fun `sends one message with all changed languages when one key changes in many languages`() {
+    testData = SlackTestData()
+    testData.addMoreLanguages()
+    testDataService.saveTestData(testData.root)
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    loginAsUser(testData.user.username)
+
+    setTranslations(
+      testData.projectBuilder.self.id,
+      testData.key.name,
+      mapOf("fr" to "a", "cs" to "b", "de" to "c", "es" to "d", "it" to "e", "pl" to "f"),
+    )
+
+    waitForNotThrowing(timeout = 5000) {
+      val request = mockedSlackClient.chatPostMessageRequests.single()
+      request.languageLabels().assert.contains(
+        "*French*",
+        "*Czech*",
+        "*German*",
+        "*Spanish*",
+        "*Italian*",
+        "*Polish*",
+      )
+    }
+  }
+
+  @Test
+  fun `sends message for subscribed language saved together with unsubscribed language of lower id`() {
+    testData = SlackTestData()
+    lateinit var czechTranslation: Translation
+    lateinit var frenchTranslation: Translation
+    val orderKey =
+      testData.projectBuilder
+        .addKey("orderKey")
+        .build {
+          czechTranslation = addTranslation("cs", "Ahoj").self
+          frenchTranslation = addTranslation("fr", "Salut").self
+        }.self
+    testDataService.saveTestData(testData.root)
+    czechTranslation.id.assert.isLessThan(frenchTranslation.id)
+    slackConfigManageService.delete(testData.slackConfig.project.id, "testChannel", "")
+    slackConfigManageService.createOrUpdate(
+      SlackConfigDto(
+        project = testData.projectBuilder.self,
+        slackId = "testSlackId",
+        channelId = "testChannel",
+        userAccount = testData.user,
+        languageTag = "fr",
+        events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
+        slackTeamId = "slackTeamId",
+      ),
+    )
+    val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
+    loginAsUser(testData.user.username)
+
+    setTranslations(testData.projectBuilder.self.id, orderKey.name, mapOf("cs" to "Nazdar", "fr" to "Bonjour"))
+
+    waitForNotThrowing(timeout = 5000) {
+      val request = mockedSlackClient.chatPostMessageRequests.single()
+      request.languageLabels().assert.contains("*French*")
+      request.languageLabels().assert.doesNotContain("*Czech*")
+    }
+  }
+
+  private fun ChatPostMessageRequest.languageLabels(): List<String> =
+    attachments.mapNotNull {
+      (it.blocks.firstOrNull() as? SectionBlock)
+        ?.text
+        ?.text
+        ?.removePrefix("null ")
+        ?.trim()
+    }
+
+  private fun setTranslations(
+    projectId: Long,
+    keyName: String,
+    translations: Map<String, String>,
+  ) {
+    performAuthPost(
+      "/v2/projects/$projectId/translations",
+      mapOf("key" to keyName, "translations" to translations),
+    ).andIsOk
+  }
+
   private fun modifyTranslationData(
     projectId: Long,
     landTag: String,
     keyName: String,
-  ) {
-    performAuthPost(
-      "/v2/projects/$projectId/translations",
-      mapOf(
-        "key" to keyName,
-        "translations" to mapOf(landTag to UUID.randomUUID().toString()),
-      ),
-    ).andIsOk
-  }
+  ) = setTranslations(projectId, keyName, mapOf(landTag to UUID.randomUUID().toString()))
 
   private fun addKeyToProject(projectId: Long) {
     performAuthPost(

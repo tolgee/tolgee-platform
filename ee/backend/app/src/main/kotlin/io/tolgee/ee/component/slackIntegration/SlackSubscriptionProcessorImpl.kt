@@ -21,18 +21,18 @@ class SlackSubscriptionProcessorImpl(
     activityRevisionId: Long?,
   ) {
     if (activityRevisionId == null) return
+    val config = action.slackConfig ?: return
 
     val view =
       ProjectActivityViewByRevisionProvider(
         applicationContext = applicationContext,
         activityRevisionId,
-        onlyCountInListAbove = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND,
+        onlyCountInListAbove = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND * config.project.languages.size,
       ).get() ?: return
 
     val activityModel = activityModelAssembler.toModel(view)
 
     val data = SlackRequest(activityData = activityModel)
-    val config = action.slackConfig ?: return
 
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackAutomationMessageSender.sendMessageOnKeyAdded(config, data)

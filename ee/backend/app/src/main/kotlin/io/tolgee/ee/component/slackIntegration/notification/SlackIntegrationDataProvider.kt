@@ -88,6 +88,28 @@ class SlackIntegrationDataProvider(
       }.single()
   }
 
+  fun getModifiedKeyCount(revisionId: Long): Long =
+    entityManager
+      .createQuery(
+        """SELECT count(distinct t.key.id)
+          |FROM ActivityModifiedEntity me, Translation t
+          |WHERE me.activityRevision.id = :revisionId and me.entityClass = 'Translation' and me.entityId = t.id
+        """.trimMargin(),
+        Long::class.javaObjectType,
+      ).setParameter("revisionId", revisionId)
+      .singleResult
+
+  fun getModifiedLanguageTags(revisionId: Long): List<String> =
+    entityManager
+      .createQuery(
+        """SELECT distinct t.language.tag
+          |FROM ActivityModifiedEntity me, Translation t
+          |WHERE me.activityRevision.id = :revisionId and me.entityClass = 'Translation' and me.entityId = t.id
+        """.trimMargin(),
+        String::class.java,
+      ).setParameter("revisionId", revisionId)
+      .resultList
+
   fun getTranslation(
     keyId: Long,
     languageTag: String,
