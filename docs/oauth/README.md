@@ -174,8 +174,12 @@ every server older than that release — a whole-authorization failure for one o
 permits this exactly because the token response states the scopes actually granted, which Tolgee sends on both the
 code exchange and the refresh. What the user never saw on the consent screen cannot be approved either: consent is
 checked against the filtered list. A refresh drops an unknown scope the same way, so a client may echo one
-configured scope string for the life of its grant and pick scopes up as servers learn them. Two consequences a
-client author should know:
+configured scope string for as long as the server does not know the scope. It does **not** let the client pick
+the scope up later: the grant's ceiling is fixed at authorize time, so a scope dropped then is not in the grant,
+and once the server learns that scope the same string starts being refused (the first consequence below) — which
+arrives late, looks to the client's author like the server upgrade breaking them, and is the strongest reason to
+follow the advice there and send no `scope` on a refresh at all. A client that wants a scope it was never granted
+has to authorize again. Two consequences a client author should know:
 - **"Not granted" still means refused.** A scope this server *knows* but never granted is the client asking for
   more than it holds, which RFC 6749 §6 forbids and §5.2 answers with `invalid_scope`; only the unknown ones are
   dropped. Sending no `scope` on a refresh (the grant's scopes are then used) or echoing the `scope` the token
