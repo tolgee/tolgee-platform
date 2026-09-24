@@ -15,9 +15,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
- * Deleting a suggestion is bounded by the token, not by who wrote it: an OAuth token needs
- * translation-suggestions.own-access for its holder's own suggestion and translation-suggestions.manage for
- * anyone else's, whatever permissions the user behind it holds.
+ * A token's scopes narrow what its holder may do, so what the user behind it is allowed on the project does not
+ * decide any of these cases.
  */
 class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
@@ -44,8 +43,7 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
 
   @Test
   fun `a token without suggestions own-access cannot delete its holder's own suggestion`() {
-    // projectTranslator authored czechSuggestions[0] and may delete it in the webapp, so this is the case where
-    // being the author is not what decides.
+    // projectTranslator authored czechSuggestions[0] and may delete it in the webapp.
     val token =
       tokens.issue(
         subject = testData.projectTranslator.self.id,
@@ -53,6 +51,18 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
         projectIds = null,
       )
     performDelete(suggestionUrl(testData.czechSuggestions[0].self.id), null, bearerHeaders(token)).andIsForbidden
+  }
+
+  @Test
+  fun `a token carrying suggestions own-access can delete its holder's own suggestion`() {
+    val token =
+      tokens.issue(
+        subject = testData.projectTranslator.self.id,
+        scopes = listOf("translations.view", "translation-suggestions.own-access"),
+        projectIds = null,
+      )
+
+    performDelete(suggestionUrl(testData.czechSuggestions[0].self.id), null, bearerHeaders(token)).andIsOk
   }
 
   @Test
