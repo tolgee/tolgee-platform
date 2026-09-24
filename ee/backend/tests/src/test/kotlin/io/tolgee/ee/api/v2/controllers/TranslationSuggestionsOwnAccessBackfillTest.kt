@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -71,8 +72,31 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `the rollback takes the scope back out of permissions and API keys alike`() {
+    saveTestData()
+    runBackfill()
+    val granularMember = projectPermissionOf(testData.granularSuggester.self.id)
+    val roleBasedMember = projectPermissionOf(testData.projectReviewer.self.id)
+    storedScopes(granularMember).assert.contains("TRANSLATION_SUGGESTIONS_OWN_ACCESS")
+    apiKeyScopeRows("TRANSLATION_SUGGESTIONS_OWN_ACCESS").assert.isEqualTo(1)
+
+    runRollback()
+
+    storedScopes(granularMember).assert.containsExactly("TRANSLATIONS_VIEW", "TRANSLATIONS_SUGGEST")
+    storedScopes(roleBasedMember).assert.isNull()
+    apiKeyScopeRows("TRANSLATION_SUGGESTIONS_OWN_ACCESS").assert.isEqualTo(0)
+    apiKeyScopeRows("TRANSLATIONS_VIEW").assert.isEqualTo(1)
+  }
+
   private fun saveTestData() {
     testData = SuggestionsTestData(SuggestionsMode.ENABLED)
+    testData.relatedProject.addApiKey {
+      key = "own-access-api-key"
+      scopesEnum = mutableSetOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
+      userAccount = testData.projectReviewer.self
+    }
     projectSupplier = { testData.relatedProject.self }
     testDataService.saveTestData(testData.root)
   }
@@ -123,6 +147,38 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     return permissionId
   }
 
+  /** The rollback is inline in the changeSet, so the test reads the shipped XML rather than a copy of it. */
+  private fun runRollback() {
+    val xml =
+      ClassPathResource("db/changelog/schema.xml")
+        .inputStream
+        .reader()
+        .readText()
+    val rollback =
+      xml
+        .substringAfter("""id="$BACKFILL_CHANGESET_ID"""")
+        .substringBefore("</changeSet>")
+        .substringAfter("<rollback>")
+        .substringBefore("</rollback>")
+    val statements =
+      Regex("<sql>(.*?)</sql>", RegexOption.DOT_MATCHES_ALL)
+        .findAll(rollback)
+        .map { it.groupValues[1].trim() }
+        .toList()
+
+    statements.assert.hasSize(2)
+    statements.forEach { jdbcTemplate.execute(it) }
+  }
+
+  private fun apiKeyScopeRows(scopeName: String): Int =
+    jdbcTemplate.queryForObject(
+      "select count(*) from api_key_scopes_enum k " +
+        "join api_key a on a.id = k.api_key_id where a.project_id = ? and k.scopes_enum = ?",
+      Int::class.java,
+      testData.relatedProject.self.id,
+      scopeName,
+    )!!
+
   @Suppress("UNCHECKED_CAST")
   private fun storedScopes(permissionId: Long): List<String>? =
     jdbcTemplate.queryForObject(
@@ -130,4 +186,8 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
       { rs, _ -> (rs.getArray(1)?.array as Array<String>?)?.toList() },
       permissionId,
     )
+
+  companion object {
+    private const val BACKFILL_CHANGESET_ID = "1789914853000-1"
+  }
 }

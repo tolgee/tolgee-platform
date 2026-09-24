@@ -5962,12 +5962,20 @@
     </changeSet>
     <changeSet author="jirikuchynka" id="1789914853000-1">
         <sqlFile path="classpath:db/changelog/translationSuggestionsOwnAccessBackfill.sql" splitStatements="false"/>
-        <!-- A release without this scope cannot read a permission row that stores it, so a rollback has to
-             strip every occurrence, including the ones granted after the backfill. -->
+        <!-- A release without this scope throws on any permission row or API-key scope row that stores the name
+             (both map through Enum.valueOf), so the rollback strips it from both, whether the backfill or a user
+             put it there. It deliberately leaves oauth2_grant alone: those columns hold names too, but
+             OAuth2Grant reads them with findByName and drops what it cannot resolve, so an old binary degrades
+             instead of failing — and rewriting them would narrow live grants. -->
         <rollback>
-            UPDATE permission
-            SET scopes = array_remove(scopes, 'TRANSLATION_SUGGESTIONS_OWN_ACCESS')
-            WHERE scopes @> ARRAY['TRANSLATION_SUGGESTIONS_OWN_ACCESS']::varchar[];
+            <sql>
+                UPDATE permission
+                SET scopes = array_remove(scopes, 'TRANSLATION_SUGGESTIONS_OWN_ACCESS')
+                WHERE scopes @> ARRAY['TRANSLATION_SUGGESTIONS_OWN_ACCESS']::varchar[];
+            </sql>
+            <sql>
+                DELETE FROM api_key_scopes_enum WHERE scopes_enum = 'TRANSLATION_SUGGESTIONS_OWN_ACCESS';
+            </sql>
         </rollback>
     </changeSet>
 </databaseChangeLog>
