@@ -87,7 +87,7 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     storedScopes(granularMember).assert.contains("TRANSLATION_SUGGESTIONS_OWN_ACCESS")
     apiKeyScopeRows("TRANSLATION_SUGGESTIONS_OWN_ACCESS").assert.isEqualTo(2)
 
-    runRollback()
+    runRollbackFromSchemaXml()
 
     storedScopes(granularMember).assert.containsExactly("TRANSLATIONS_VIEW", "TRANSLATIONS_SUGGEST")
     storedScopes(roleBasedMember).assert.isNull()
@@ -102,7 +102,7 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     runBackfill()
     scopeNamesOf(inertKeyId).assert.containsExactly("TRANSLATION_SUGGESTIONS_OWN_ACCESS")
 
-    runRollback()
+    runRollbackFromSchemaXml()
 
     // The rollback removes scope rows, it does not repair the key, so this one comes back with none. That is
     // deliberate: deleting a user's key on a rollback is worse. Nothing restores it on a roll-forward either —
@@ -186,8 +186,7 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     return permissionId
   }
 
-  /** The rollback is inline in the changeSet, so the test reads the shipped XML rather than a copy of it. */
-  private fun runRollback() {
+  private fun runRollbackFromSchemaXml() {
     val xml =
       ClassPathResource("db/changelog/schema.xml")
         .inputStream
