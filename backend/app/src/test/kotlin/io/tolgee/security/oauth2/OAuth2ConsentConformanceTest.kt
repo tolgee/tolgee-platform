@@ -38,6 +38,16 @@ class OAuth2ConsentConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
+  fun `consent cannot approve a scope the server dropped as unknown`() {
+    val pending =
+      driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+    driver
+      .consentRedirect(pending, approvedScopes = listOf("translations.view", "not.a.tolgee.scope"))
+      .assert
+      .contains("error=invalid_scope")
+  }
+
+  @Test
   fun `consent for a state that matches no pending authorization is refused`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT).copy(state = "not-a-real-state")
     driver
