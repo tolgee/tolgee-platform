@@ -127,6 +127,9 @@ class SuggestionsTestData(
       }
 
     userAccountBuilder.defaultOrganizationBuilder.apply {
+      self.basePermission.type = null
+      self.basePermission.scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+
       addRole {
         user = orgMember.self
         type = OrganizationRoleType.MEMBER

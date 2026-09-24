@@ -47,7 +47,7 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
     val granularMember = projectPermissionOf(testData.granularSuggester.self.id)
     val granularMemberImplyingTheScope = projectPermissionOf(testData.suggestionModerator.self.id)
     val roleBasedMember = projectPermissionOf(testData.projectReviewer.self.id)
-    val granularOrganizationBase = makeOrganizationBasePermissionGranularWith("TRANSLATIONS_VIEW")
+    val granularOrganizationBase = organizationBasePermissionId()
     val granularRowWithEmptyScopes = makeGranularWithEmptyScopes(projectPermissionOf(testData.viewOnlyUser.self.id))
 
     repeat(2) {
@@ -127,20 +127,12 @@ class TranslationSuggestionsOwnAccessBackfillTest : ProjectAuthControllerTest("/
       testData.relatedProject.self.id,
     )!!
 
-  private fun makeOrganizationBasePermissionGranularWith(scope: String): Long {
-    val permissionId =
-      jdbcTemplate.queryForObject(
-        "select id from permission where organization_id = ?",
-        Long::class.java,
-        testData.project.organizationOwner.id,
-      )!!
-    jdbcTemplate.update(
-      "update permission set type = null, scopes = array[?]::varchar[] where id = ?",
-      scope,
-      permissionId,
-    )
-    return permissionId
-  }
+  private fun organizationBasePermissionId(): Long =
+    jdbcTemplate.queryForObject(
+      "select id from permission where organization_id = ?",
+      Long::class.java,
+      testData.project.organizationOwner.id,
+    )!!
 
   private fun makeGranularWithEmptyScopes(permissionId: Long): Long {
     jdbcTemplate.update("update permission set type = null, scopes = '{}' where id = ?", permissionId)

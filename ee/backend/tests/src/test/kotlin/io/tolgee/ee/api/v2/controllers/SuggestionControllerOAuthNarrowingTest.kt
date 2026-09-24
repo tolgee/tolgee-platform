@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
- * An OAuth token must not delete a suggestion through the own-author shortcut in
- * SuggestionController.checkCanDeleteSuggestion: a token whose scope∩project set excludes
- * translation-suggestions.manage stays bound by that scope even on suggestions its holder authored.
+ * Deleting a suggestion is bounded by the token, not by who wrote it: an OAuth token needs
+ * translation-suggestions.own-access for its holder's own suggestion and translation-suggestions.manage for
+ * anyone else's, whatever permissions the user behind it holds.
  */
 class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   @Autowired
@@ -43,9 +43,9 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `the own-suggestion fallback cannot widen a token that lacks suggestions-manage`() {
-    // projectTranslator authored czechSuggestions[0], so the own-author shortcut is what would otherwise let it
-    // through.
+  fun `a token without suggestions own-access cannot delete its holder's own suggestion`() {
+    // projectTranslator authored czechSuggestions[0] and may delete it in the webapp, so this is the case where
+    // being the author is not what decides.
     val token =
       tokens.issue(
         subject = testData.projectTranslator.self.id,

@@ -404,6 +404,16 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST])
+  fun `refuses to create a suggestion when suggestions are disabled, for an API key too`() {
+    initTestData(SuggestionsMode.DISABLED)
+    performProjectAuthPost(
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
+      CreateTranslationSuggestionRequest(translation = "New suggestion"),
+    ).andIsBadRequest.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
+  }
+
+  @Test
   @ProjectJWTAuthTestMethod
   fun `pending suggestions can still be listed, declined and accepted when suggestions are disabled`() {
     initTestData(SuggestionsMode.DISABLED)
