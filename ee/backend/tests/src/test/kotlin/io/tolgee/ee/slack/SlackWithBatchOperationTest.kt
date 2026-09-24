@@ -6,14 +6,11 @@ import com.slack.api.model.block.SectionBlock
 import io.tolgee.batch.ApplicationBatchJobRunner
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
 import io.tolgee.fixtures.MachineTranslationTest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -34,9 +31,6 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
 
   @Autowired
   lateinit var applicationBatchJobRunner: ApplicationBatchJobRunner
-
-  @Autowired
-  lateinit var slackConfigManageService: SlackConfigManageService
 
   companion object {
     private const val INITIAL_BUCKET_CREDITS = 150000L
@@ -180,8 +174,8 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @ProjectJWTAuthTestMethod
   fun `sends the summary only to a subscription for a language the batch changed`() {
     val keys = testData.add10Keys()
+    testData.subscribeToFrenchTranslationChangesOnly()
     saveTestData()
-    subscribeToFrenchTranslationChangesOnly()
     val keyIds = keys.map { it.id }
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
     waitForBatchJobsToSettle()
@@ -209,19 +203,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `does not send a summary for a batch on a non-default branch`() {
-    val branchedKeys = mutableListOf<Key>()
-    testData.projectBuilder
-      .addBranch { name = "feature-branch" }
-      .build {
-        (1..6).forEach { index ->
-          testData.projectBuilder
-            .addKey {
-              name = "branched$index"
-              branch = self
-            }.build { addTranslation("en", "Hello") }
-            .also { branchedKeys.add(it.self) }
-        }
-      }
+    val branchedKeys = testData.addKeysInFeatureBranch()
     val defaultBranchKeys = testData.add10Keys().take(6)
     saveTestData()
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
@@ -242,21 +224,6 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       .headerTexts()
       .assert
       .hasSize(1)
-  }
-
-  private fun subscribeToFrenchTranslationChangesOnly() {
-    slackConfigManageService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId, "")
-    slackConfigManageService.createOrUpdate(
-      SlackConfigDto(
-        project = testData.projectBuilder.self,
-        slackId = "testSlackId",
-        channelId = testData.slackConfig.channelId,
-        userAccount = testData.user,
-        languageTag = "fr",
-        events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED),
-        slackTeamId = "slackTeamId",
-      ),
-    )
   }
 
   private fun waitForBatchJobsToSettle() {
