@@ -45,6 +45,7 @@
     "formik": "^2.4.6",
     "intl-messageformat": "^9.8.1",
     "jszip": "^3.10.1",
+    "mui-tel-input": "^6.0.1",
     "notistack": "^3.0.2",
     "posthog-js": "^1.261.0",
     "prism-react-renderer": "1.2.1",
