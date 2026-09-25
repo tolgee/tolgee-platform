@@ -297,7 +297,7 @@ class CimdClientCacheTest {
     val fetcher =
       mock<CimdMetadataFetcher> {
         on { fetchAndValidate(any(), any()) } doAnswer {
-          if (it.getArgument<Boolean>(1)) return@doAnswer CimdResolution.Withdrawn
+          if (it.getArgument<CimdFetchLane>(1) == CimdFetchLane.GRANT_CHECK) return@doAnswer CimdResolution.Withdrawn
           started.countDown()
           release.await()
           resolved(URL)

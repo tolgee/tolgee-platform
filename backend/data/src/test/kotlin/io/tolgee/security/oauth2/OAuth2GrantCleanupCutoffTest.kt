@@ -2,6 +2,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argumentCaptor
@@ -26,6 +27,7 @@ class OAuth2GrantCleanupCutoffTest {
 
     OAuth2GrantCleanup(
       authorizationService,
+      mock<CimdClientLifecycleService>(),
       properties,
       dateProvider,
       AlwaysFreeLockingProvider(),
@@ -42,21 +44,31 @@ class OAuth2GrantCleanupCutoffTest {
     val dateProvider =
       mock<CurrentDateProvider> { on { date } doReturn Date.from(Instant.parse("2026-08-07T00:00:00Z")) }
 
-    OAuth2GrantCleanup(authorizationService, OAuth2ServerProperties(), dateProvider, AlwaysFreeLockingProvider())
-      .cleanUpExpiredGrants()
+    OAuth2GrantCleanup(
+      authorizationService,
+      mock<CimdClientLifecycleService>(),
+      OAuth2ServerProperties(),
+      dateProvider,
+      AlwaysFreeLockingProvider(),
+    ).cleanUpExpiredGrants()
 
     verify(authorizationService).pruneRefreshHistoryBeyondDepth()
   }
 
   @Test
   fun `the scheduled job also drops the document check rows of clients nobody holds a grant for`() {
-    val authorizationService = mock<OAuth2AuthorizationService>()
+    val lifecycle = mock<CimdClientLifecycleService>()
     val dateProvider =
       mock<CurrentDateProvider> { on { date } doReturn Date.from(Instant.parse("2026-08-07T00:00:00Z")) }
 
-    OAuth2GrantCleanup(authorizationService, OAuth2ServerProperties(), dateProvider, AlwaysFreeLockingProvider())
-      .cleanUpExpiredGrants()
+    OAuth2GrantCleanup(
+      mock<OAuth2AuthorizationService>(),
+      lifecycle,
+      OAuth2ServerProperties(),
+      dateProvider,
+      AlwaysFreeLockingProvider(),
+    ).cleanUpExpiredGrants()
 
-    verify(authorizationService).deleteCheckRowsWithoutGrants()
+    verify(lifecycle).deleteCheckRowsWithoutGrants()
   }
 }

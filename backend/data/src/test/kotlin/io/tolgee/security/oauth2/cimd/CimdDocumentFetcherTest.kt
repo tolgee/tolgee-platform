@@ -261,7 +261,7 @@ class CimdDocumentFetcherTest {
     val fetcher = CimdDocumentFetcher(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
 
     fetcher.fetch("https://stuck.invalid/client").assert.isEqualTo(CimdDocument.Unavailable)
-    fetcher.fetch("https://stuck.invalid/client", forExistingGrant = true).assert.isEqualTo(CimdDocument.Unavailable)
+    fetcher.fetch("https://stuck.invalid/client", CimdFetchLane.GRANT_CHECK).assert.isEqualTo(CimdDocument.Unavailable)
 
     verify(urlSecurity, times(2)).validateUrlAndResolve(any(), any())
   }

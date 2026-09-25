@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.security.oauth2.cimd.CimdResolution
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -73,7 +74,7 @@ class OAuth2CimdDocumentCheckTest {
   @Test
   fun `a round that cannot build its work list ends quietly instead of killing the schedule`() {
     val service =
-      mock<OAuth2AuthorizationService> {
+      mock<CimdClientLifecycleService> {
         on { clientIdsDueForCheck(any()) } doAnswer { throw IllegalStateException("too many parameters") }
       }
 
@@ -139,10 +140,10 @@ class OAuth2CimdDocumentCheckTest {
   }
 
   private fun serviceWith(vararg clientIds: String) =
-    mock<OAuth2AuthorizationService> { on { clientIdsDueForCheck(any()) } doReturn clientIds.toList() }
+    mock<CimdClientLifecycleService> { on { clientIdsDueForCheck(any()) } doReturn clientIds.toList() }
 
   private fun check(
-    service: OAuth2AuthorizationService,
+    service: CimdClientLifecycleService,
     registry: OAuth2ClientRegistry,
     properties: OAuth2ServerProperties = OAuth2ServerProperties(),
     locking: LockingProvider = mock<LockingProvider>(),

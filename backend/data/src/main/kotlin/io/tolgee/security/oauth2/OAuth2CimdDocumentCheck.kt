@@ -19,6 +19,7 @@ package io.tolgee.security.oauth2
 import io.tolgee.Metrics
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.security.oauth2.cimd.CimdResolution
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong
  */
 @Component
 class OAuth2CimdDocumentCheck(
-  private val authorizationService: OAuth2AuthorizationService,
+  private val lifecycle: CimdClientLifecycleService,
   private val clientRegistry: OAuth2ClientRegistry,
   private val properties: OAuth2ServerProperties,
   private val lockingProvider: LockingProvider,
@@ -64,7 +65,7 @@ class OAuth2CimdDocumentCheck(
   fun checkBatch(): Int {
     val due =
       try {
-        authorizationService.clientIdsDueForCheck(properties.cimdCheckBatchSize)
+        lifecycle.clientIdsDueForCheck(properties.cimdCheckBatchSize)
       } catch (e: Exception) {
         logger.error("CIMD check could not build its work list", e)
         return 0
@@ -84,7 +85,7 @@ class OAuth2CimdDocumentCheck(
   }
 
   private fun measureBacklog() {
-    val waiting = authorizationService.clientsDueForCheckCount()
+    val waiting = lifecycle.clientsDueForCheckCount()
     backlog.set(waiting)
     if (waiting <= properties.cimdCheckBatchSize.toLong() * BACKLOG_ROUNDS_BEFORE_WARNING) return
     logger.warn(
@@ -103,7 +104,7 @@ class OAuth2CimdDocumentCheck(
       logger.error("CIMD check failed for {}", clientId, e)
       return false
     } finally {
-      runCatching { authorizationService.recordCheckAttempt(clientId) }
+      runCatching { lifecycle.recordCheckAttempt(clientId) }
         .onFailure { logger.error("Could not record the CIMD check attempt for {}", clientId, it) }
     }
   }
@@ -114,13 +115,13 @@ class OAuth2CimdDocumentCheck(
     resolution: CimdResolution,
   ): Boolean {
     if (resolution is CimdResolution.Resolved) {
-      authorizationService.revokeDriftedFromDocument(clientId, resolution.client.client.metadataHash)
-      authorizationService.recordDocumentRead(clientId)
-      authorizationService.clearClientWithdrawn(clientId)
+      lifecycle.revokeDriftedFromDocument(clientId, resolution.client.client.metadataHash)
+      lifecycle.recordDocumentRead(clientId)
+      lifecycle.clearClientWithdrawn(clientId)
       return true
     }
     if (resolution == CimdResolution.Withdrawn) {
-      authorizationService.recordClientWithdrawn(clientId)
+      lifecycle.recordClientWithdrawn(clientId)
       return true
     }
     logger.info("CIMD check could not read the document of {}: {}", clientId, resolution)

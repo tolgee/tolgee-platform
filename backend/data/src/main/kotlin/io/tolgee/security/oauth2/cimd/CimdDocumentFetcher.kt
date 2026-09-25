@@ -107,7 +107,7 @@ class CimdDocumentFetcher(
 
   fun fetch(
     clientIdUrl: String,
-    forExistingGrant: Boolean = false,
+    lane: CimdFetchLane = CimdFetchLane.REQUEST,
   ): CimdDocument {
     val allowLocalAddresses = internalProperties.disableUrlSsrfProtection
     if (!CimdUrls.isAcceptableClientId(clientIdUrl, allowHttp = allowLocalAddresses)) {
@@ -115,7 +115,7 @@ class CimdDocumentFetcher(
       return CimdDocument.Rejected
     }
 
-    val addresses = resolvePinned(clientIdUrl, allowLocalAddresses, forExistingGrant) ?: return CimdDocument.Unavailable
+    val addresses = resolvePinned(clientIdUrl, allowLocalAddresses, lane) ?: return CimdDocument.Unavailable
     return fetchPinned(clientIdUrl, addresses)
   }
 
@@ -127,18 +127,30 @@ class CimdDocumentFetcher(
   private fun resolvePinned(
     url: String,
     allowLocalAddresses: Boolean,
-    forExistingGrant: Boolean,
+    lane: CimdFetchLane,
   ): List<InetAddress>? {
     val host = UrlOrigins.parse(url)?.host?.lowercase() ?: return null
-    val stuckHosts = if (forExistingGrant) recentlyStuckHostsForCheck else recentlyStuckHosts
+    val stuckHosts =
+      when (lane) {
+        CimdFetchLane.REQUEST -> recentlyStuckHosts
+        CimdFetchLane.GRANT_CHECK -> recentlyStuckHostsForCheck
+      }
     if (stuckHosts.getIfPresent(host) != null) {
       logger.info("CIMD fetch refused for {}: this host's last lookup ran past the deadline", url)
       metrics.oauth2CimdCapacityRefusalsCounter.increment()
       return null
     }
-    val pool = if (forExistingGrant) grantResolvers else resolvers
+    val pool =
+      when (lane) {
+        CimdFetchLane.REQUEST -> resolvers
+        CimdFetchLane.GRANT_CHECK -> grantResolvers
+      }
     // The check reads one document at a time, so its lane needs no per-host cap.
-    val live = if (forExistingGrant) null else liveResolutions
+    val live =
+      when (lane) {
+        CimdFetchLane.REQUEST -> liveResolutions
+        CimdFetchLane.GRANT_CHECK -> null
+      }
     if (live != null && !live.take(host)) {
       logger.info("CIMD fetch refused for {}: this host already holds its share of the resolvers", url)
       throw CimdNoCapacityException(url)

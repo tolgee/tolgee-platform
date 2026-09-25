@@ -41,9 +41,9 @@ class CimdMetadataFetcher(
 
   fun fetchAndValidate(
     clientIdUrl: String,
-    forExistingGrant: Boolean = false,
+    lane: CimdFetchLane = CimdFetchLane.REQUEST,
   ): CimdResolution {
-    return when (val document = documentFetcher.fetch(clientIdUrl, forExistingGrant)) {
+    return when (val document = documentFetcher.fetch(clientIdUrl, lane)) {
       is CimdDocument.Body ->
         buildClient(clientIdUrl, document.content)?.let { CimdResolution.Resolved(it) } ?: CimdResolution.Rejected
       CimdDocument.Gone -> CimdResolution.Withdrawn

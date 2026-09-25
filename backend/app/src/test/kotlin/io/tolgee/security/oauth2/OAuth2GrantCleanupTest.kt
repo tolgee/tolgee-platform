@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.OAuth2GrantCleanupTestData
 import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -30,6 +31,9 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   @Autowired
   private lateinit var authorizationService: OAuth2AuthorizationService
 
+  @Autowired
+  private lateinit var cimdClientLifecycle: CimdClientLifecycleService
+
   private lateinit var testData: OAuth2GrantCleanupTestData
 
   @BeforeEach
@@ -51,10 +55,10 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   fun `only the check rows of clients nobody holds a grant for are deleted`() {
     testData.addGrant(refreshExpiresAt = Instant.now().plus(Duration.ofDays(20)), clientId = LIVE_CLIENT)
     testDataService.saveTestData(testData.root)
-    authorizationService.recordCheckAttempt(LIVE_CLIENT)
-    authorizationService.recordCheckAttempt(ORPHAN_CLIENT)
+    cimdClientLifecycle.recordCheckAttempt(LIVE_CLIENT)
+    cimdClientLifecycle.recordCheckAttempt(ORPHAN_CLIENT)
 
-    authorizationService.deleteCheckRowsWithoutGrants()
+    cimdClientLifecycle.deleteCheckRowsWithoutGrants()
 
     documentCheckRepository.findByClientId(LIVE_CLIENT).assert.isNotNull()
     documentCheckRepository.findByClientId(ORPHAN_CLIENT).assert.isNull()
