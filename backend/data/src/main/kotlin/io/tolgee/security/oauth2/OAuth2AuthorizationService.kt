@@ -23,19 +23,17 @@ import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
-import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.OAUTH_REFRESH_TOKEN_PREFIX
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.security.oauth2.cimd.CimdMetadataFetcher
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -56,7 +54,7 @@ class OAuth2AuthorizationService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
-  private val documentCheckRepository: OAuth2ClientDocumentCheckRepository,
+  private val cimdClientLifecycle: CimdClientLifecycleService,
   private val resources: OAuth2Resources,
   private val metrics: Metrics,
 ) : Logging {
@@ -286,36 +284,6 @@ class OAuth2AuthorizationService(
     repository.delete(grant)
   }
 
-  @Transactional
-  fun recordDocumentRead(clientId: String) {
-    val now = currentDateProvider.date
-    val refreshBefore = Date(now.time - TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays) / 2)
-    repository.markClientDocumentRead(clientId, now, refreshBefore)
-  }
-
-  /** The document no longer matches what its users agreed to, so those grants end. */
-  @Transactional
-  fun revokeDriftedFromDocument(
-    clientId: String,
-    currentHash: String?,
-  ): Int {
-    if (currentHash == null) return 0
-    val revoked =
-      repository.deleteDriftedFromDocument(
-        clientId,
-        currentHash,
-        CimdMetadataFetcher.HASH_SCHEME_PREFIX + "%",
-      )
-    if (revoked > 0) {
-      logger.warn(
-        "Revoked {} OAuth2 grant(s) of client {}: its metadata document no longer matches the consented terms",
-        revoked,
-        clientId,
-      )
-    }
-    return revoked
-  }
-
   /**
    * Bounds how many document-backed clients one account adds to the background check's work list. See
    * `docs/oauth/README.md` for what that queue's length costs everybody else.
@@ -334,49 +302,6 @@ class OAuth2AuthorizationService(
     )
   }
 
-  fun clientIdsDueForCheck(limit: Int): List<String> =
-    repository.findCimdClientIdsDueForCheck(
-      currentDateProvider.date,
-      dueBefore(),
-      graceStart(),
-      NEVER_CHECKED,
-      PageRequest.of(0, limit),
-    )
-
-  fun clientsDueForCheckCount(): Long =
-    repository.countCimdClientIdsDueForCheck(currentDateProvider.date, dueBefore(), graceStart(), NEVER_CHECKED)
-
-  private fun dueBefore(): Date =
-    Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdCheckIntervalMinutes))
-
-  private fun graceStart(): Date =
-    Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdWithdrawalGraceMinutes))
-
-  @Transactional
-  fun recordCheckAttempt(clientId: String) {
-    val existing = documentCheckRepository.findByClientId(clientId)
-    val row = existing ?: OAuth2ClientDocumentCheck().also { it.clientId = clientId }
-    row.previousCheckedAt = existing?.checkedAt
-    row.checkedAt = currentDateProvider.date
-    documentCheckRepository.save(row)
-  }
-
-  @Transactional
-  fun deleteCheckRowsWithoutGrants(): Int = documentCheckRepository.deleteWithoutGrants()
-
-  /** A publisher's refusal, made durable on the grant rows so every instance reads it. */
-  @Transactional
-  fun recordClientWithdrawn(clientId: String) {
-    val marked = repository.markClientWithdrawn(clientId, currentDateProvider.date)
-    if (marked > 0) {
-      logger.warn(
-        "Marked {} OAuth2 grant(s) of client {} as withdrawn: its metadata document refuses",
-        marked,
-        clientId,
-      )
-    }
-  }
-
   /**
    * A grant of a client that identifies itself with a metadata document lives on that document being readable.
    * Not having been read is forgiven until [OAuth2ServerProperties.cimdVerificationMaxAgeDays].
@@ -391,7 +316,7 @@ class OAuth2AuthorizationService(
     if (currentDateProvider.date.time - lastRead.time <= maxAgeMs) return
     // Past the bound, the next question is whose doing that is: a client we kept *trying* to read is the
     // publisher's answer, while one we never got round to is our own downtime and must not end a grant.
-    val lastAttempt = documentCheckRepository.findByClientId(grant.clientId)?.checkedAt
+    val lastAttempt = cimdClientLifecycle.lastCheckAttempt(grant.clientId)
     if (lastAttempt == null || lastAttempt.time - lastRead.time <= maxAgeMs) {
       logger.warn(
         "Keeping grant {} of client {}: its document has not been read since {}, but neither has it been tried",
@@ -416,26 +341,6 @@ class OAuth2AuthorizationService(
   private fun refuseIfClientWithdrawn(grant: OAuth2Grant) {
     if (grant.clientWithdrawnAt == null) return
     throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document is gone")
-  }
-
-  /**
-   * The document resolves again. A mark younger than the grace window was a mis-deploy and is lifted; an older one
-   * is the publisher retiring the client and stays.
-   */
-  @Transactional
-  fun clearClientWithdrawn(clientId: String) {
-    // This round's attempt is recorded after the work, so the row still holds the previous round's and
-    // `previousCheckedAt` reaches two attempts back. Comparing against the latest one instead would make every
-    // mark look "already read" on the very next round.
-    val previousAttempt = documentCheckRepository.findByClientId(clientId)?.previousCheckedAt ?: NEVER_CHECKED
-    val cleared = repository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
-    if (cleared > 0) {
-      logger.info(
-        "Lifted the withdrawal mark on {} OAuth2 grant(s) of client {}: its document answers again",
-        cleared,
-        clientId,
-      )
-    }
   }
 
   @Transactional
@@ -670,8 +575,6 @@ class OAuth2AuthorizationService(
   private fun isExpiredOrUnset(deadline: Date?): Boolean = deadline == null || !deadline.after(currentDateProvider.date)
 
   companion object {
-    private val NEVER_CHECKED = Date(0)
-
     /** Matches the `client_state` column width; a longer state cannot be stored, so it must be refused up front. */
     const val MAX_STATE_LENGTH = 2000
 

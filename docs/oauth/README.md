@@ -515,6 +515,7 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Client registry (pre-registered from config, plus the CIMD fallthrough) | `OAuth2ClientRegistry.kt` |
 | CIMD: SSRF-hardened DNS-pinned fetch, fail-closed validation, per-pod cache, fetch budget, candidate policy | `security/oauth2/cimd/CimdDocumentFetcher.kt`, `CimdMetadataFetcher.kt`, `CimdClientCache.kt`, `CimdFetchBudget.kt`, `CimdClientPolicy.kt`, `util/UrlSecurity.kt` |
+| CIMD client lifecycle: what the background check learns, written to the grant rows and the document-check table | `security/oauth2/cimd/CimdClientLifecycleService.kt`, `OAuth2CimdDocumentCheck.kt` |
 | RFC 8707 audience binding: which resource server a token is for, enforced on every request | `security/oauth2/OAuth2Resources.kt`, `OAuth2Audience.kt`, `OAuth2AccessTokenResolver.kt`, `AuthenticationFilter.kt` |
 | MCP cold-start: a credential-less call to anything but the open set gets a 401 challenge a client can act on | `mcp/McpAuthChallengeFilter.kt` |
 | Refresh-token replay: soft grace window + multi-generation theft history | `OAuth2AuthorizationService.kt`, `model/oauth2/OAuth2SupersededRefreshToken.kt` |
@@ -538,20 +539,16 @@ below.
 
 ### Structure the review conceded and this round deferred
 
-Three changes were agreed to be right and left out of this round on one shared ground: each is a pure
-relocation inside the CIMD state machine, and this round already changed that machine's behaviour in three
-places. Moving the rule in the same change that alters the rule would stop a reviewer telling the two apart.
+One change was agreed to be right and left out of this round: **`CimdDocumentFetcher` should split.** Resolver
+admission and the HTTP fetch share no field and no deadline: `fetch` starts the fetch on a fresh `DEFAULT_DEADLINE`
+rather than on what is left of `RESOLVE_DEADLINE`. `fetchPinned` is already `internal` and already takes its deadline
+as a parameter, so the seam exists, and the lane is already a type (`CimdFetchLane`), so what is left is making a
+lane an object that owns one budget across both steps. That changes when a slow publisher is given up on, which is
+why it is a decision for its own change rather than a move inside this one.
 
-- **The CIMD client lifecycle belongs out of `OAuth2AuthorizationService`.** Eleven methods there serve the
-  scheduled job and the cleanup job, never the grant flow, and they own the `oauth2_client_document_check`
-  table that exists only for them. The class is two objects sharing a name.
-- **`forExistingGrant: Boolean` should be a lane type.** One concept - which fetch lane - is spelled as a flag
-  in `CimdMetadataFetcher` and `CimdDocumentFetcher`, and it picks a pool and a stuck-host memo at separate
-  points.
-- **`CimdDocumentFetcher` should split.** Resolver admission and the HTTP fetch share no field and no deadline:
-  `fetch` starts the fetch on a fresh `DEFAULT_DEADLINE` rather than on what is left of `RESOLVE_DEADLINE`.
-  `fetchPinned` is already `internal` and already takes its deadline as a parameter, so the seam exists. Do it
-  with the lane type, since both are about making a lane an object.
+Two relocations the review also asked for are done in this round: the CIMD client lifecycle lives in
+`CimdClientLifecycleService`, which owns the `oauth2_client_document_check` table and is called only by the
+scheduled check and the cleanup job, and the fetch lane is `CimdFetchLane` rather than a boolean.
 
 ### PAK-parity notes
 

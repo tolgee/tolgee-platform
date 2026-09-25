@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.bearerHeaders
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.oauth2.cimd.CimdClientCache
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -36,6 +37,9 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
   @Autowired
   private lateinit var documentCheck: OAuth2CimdDocumentCheck
+
+  @Autowired
+  private lateinit var cimdClientLifecycle: CimdClientLifecycleService
 
   @Autowired
   private lateinit var oauth2Properties: OAuth2ServerProperties
@@ -267,7 +271,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issued = json(driver.exchangeCode(code, clientId, redirect, pending.verifier))
     val grantId = stored(issued.get("access_token").asString()).id
 
-    oauth2AuthorizationService.recordClientWithdrawn(clientId)
+    cimdClientLifecycle.recordClientWithdrawn(clientId)
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("error")
@@ -353,7 +357,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     otherDocumentBroken = true
     oauth2Properties.cimdCheckBatchSize = 1
 
-    repeat(oauth2AuthorizationService.clientIdsDueForCheck(1000).size) { documentCheck.checkBatch() }
+    repeat(cimdClientLifecycle.clientIdsDueForCheck(1000).size) { documentCheck.checkBatch() }
 
     grantRepository
       .findAll()
@@ -371,7 +375,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
     documentCheck.checkBatch()
 
-    oauth2AuthorizationService.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
+    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
   }
 
   @Test
@@ -388,7 +392,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     documentCheck.checkBatch()
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
 
-    oauth2AuthorizationService.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
+    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
   }
 
   @Test
@@ -512,7 +516,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val second = driver.startPendingConsent(jwt(), fresh, redirectAt(port))
     driver.exchangeCode(driver.code(second, projectId = null), fresh, redirectAt(port), second.verifier)
 
-    oauth2AuthorizationService.clientIdsDueForCheck(1).assert.containsExactly(waiting)
+    cimdClientLifecycle.clientIdsDueForCheck(1).assert.containsExactly(waiting)
   }
 
   /**
@@ -523,8 +527,8 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   @Test
   fun `the backlog gauge counts exactly the clients the work list would return`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val listed = { oauth2AuthorizationService.clientIdsDueForCheck(1000).size.toLong() }
-    val counted = { oauth2AuthorizationService.clientsDueForCheckCount() }
+    val listed = { cimdClientLifecycle.clientIdsDueForCheck(1000).size.toLong() }
+    val counted = { cimdClientLifecycle.clientsDueForCheckCount() }
 
     counted().assert.isEqualTo(listed())
 
@@ -548,13 +552,13 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     documentCheck.checkBatch()
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
     counted().assert.isEqualTo(listed())
-    oauth2AuthorizationService.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
+    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
 
     // Past the wall-clock window, but the mark is still newer than the attempt before it. Only the third measure
     // keeps the client now, and that is the one the two queries spell differently.
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(4))
     counted().assert.isEqualTo(listed())
-    oauth2AuthorizationService.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
+    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
     counted().assert.isEqualTo(2L)
 
     // A second attempt with the document still gone, then past the window again: retired for good, and only the
@@ -562,7 +566,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     documentCheck.checkBatch()
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
     counted().assert.isEqualTo(listed())
-    oauth2AuthorizationService.clientIdsDueForCheck(1000).assert.doesNotContain(clientIdAt(port))
+    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientIdAt(port))
     counted().assert.isEqualTo(1L)
   }
 
@@ -574,7 +578,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
     }
 
-    oauth2AuthorizationService.clientIdsDueForCheck(1).assert.hasSize(1)
+    cimdClientLifecycle.clientIdsDueForCheck(1).assert.hasSize(1)
   }
 
   @Test

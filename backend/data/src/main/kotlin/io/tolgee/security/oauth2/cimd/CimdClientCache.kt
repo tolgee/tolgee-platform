@@ -49,7 +49,7 @@ class CimdClientCache(
   fun fetchOnGrantLane(clientIdUrl: String): CimdResolution {
     val resolution =
       try {
-        metadataFetcher.fetchAndValidate(clientIdUrl, forExistingGrant = true)
+        metadataFetcher.fetchAndValidate(clientIdUrl, CimdFetchLane.GRANT_CHECK)
       } catch (_: CimdNoCapacityException) {
         null
       }
