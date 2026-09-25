@@ -5,7 +5,9 @@ import io.tolgee.component.automations.processors.WebhookException
 import io.tolgee.component.automations.processors.WebhookExecutor
 import io.tolgee.component.automations.processors.WebhookRequest
 import io.tolgee.configuration.tolgee.WebhookProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.WebhookConfigRequest
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
@@ -49,11 +51,12 @@ class WebhookConfigService(
     dto: WebhookConfigRequest,
   ): WebhookConfig {
     urlSecurity.validateUrl(dto.url, webhookProperties.allowLocalAddresses)
+    validateEventTypes(dto)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
     webhookConfigRepository.save(webhookConfig)
-    automationService.createForWebhookConfig(webhookConfig)
+    automationService.createForWebhookConfig(webhookConfig, dto.eventTypes ?: setOf(WebhookEventType.PROJECT_ACTIVITY))
     return webhookConfig
   }
 
@@ -81,6 +84,7 @@ class WebhookConfigService(
   ): WebhookConfig {
     val webhookConfig = get(projectId, id)
     urlSecurity.validateUrl(dto.url, webhookProperties.allowLocalAddresses)
+    validateEventTypes(dto)
     webhookConfig.url = dto.url
     dto.enabled?.let { newEnabled ->
       webhookConfig.enabled = newEnabled
@@ -90,7 +94,7 @@ class WebhookConfigService(
         webhookConfig.autoDisabled = false
       }
     }
-    automationService.updateForWebhookConfig(webhookConfig)
+    automationService.updateForWebhookConfig(webhookConfig, dto.eventTypes)
     return webhookConfigRepository.save(webhookConfig)
   }
 
@@ -102,6 +106,13 @@ class WebhookConfigService(
     val webhookConfig = get(projectId, id)
     automationService.deleteForWebhookConfig(webhookConfig)
     webhookConfigRepository.delete(webhookConfig)
+  }
+
+  private fun validateEventTypes(dto: WebhookConfigRequest) {
+    val eventTypes = dto.eventTypes ?: return
+    if (eventTypes.isEmpty() || eventTypes.any { it.triggerType == null }) {
+      throw BadRequestException(Message.REQUEST_VALIDATION_ERROR)
+    }
   }
 
   private fun generateRandomWebhookSecret(): String {

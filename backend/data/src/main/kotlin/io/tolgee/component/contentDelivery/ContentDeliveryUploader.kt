@@ -1,6 +1,8 @@
 package io.tolgee.component.contentDelivery
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.automations.AutomationsBatchJobCreator
+import io.tolgee.component.automations.processors.ContentDeliveryPublishWebhookData
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.constants.Message
@@ -23,6 +25,7 @@ class ContentDeliveryUploader(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider,
   private val currentDateProvider: CurrentDateProvider,
+  private val automationsBatchJobCreator: AutomationsBatchJobCreator,
 ) : Logging {
   fun upload(contentDeliveryConfigId: Long) {
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
@@ -39,9 +42,15 @@ class ContentDeliveryUploader(
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
 
-    config.lastPublished = currentDateProvider.date
-    config.lastPublishedFiles = files.map { it.key }.toList()
+    val publishedAt = currentDateProvider.date
+    val publishedFiles = files.map { it.key }.toList()
+    config.lastPublished = publishedAt
+    config.lastPublishedFiles = publishedFiles
     contentDeliveryConfigService.save(config)
+    automationsBatchJobCreator.executeContentDeliveryPublishAutomation(
+      config.project.id,
+      ContentDeliveryPublishWebhookData(config.id, config.name, config.slug, publishedAt.time, publishedFiles),
+    )
   }
 
   private fun createZipArchive(files: Map<String, InputStream>): Map<String, InputStream> {

@@ -1032,8 +1032,11 @@ declare namespace DataCy {
         "webhook-auto-disabled-label": true;
         "webhook-form-cancel": true;
         "webhook-form-delete": true;
+        "webhook-form-event-type-option": true;
+        "webhook-form-event-types": true;
         "webhook-form-save": true;
         "webhook-form-url": true;
+        "webhook-item-event-types": true;
         "webhook-item-toggle": true;
         "webhooks-add-item-button": true;
         "webhooks-item-edit": true;

@@ -3,12 +3,14 @@ package io.tolgee.ee.api.v2.hateoas.assemblers
 import io.tolgee.ee.api.v2.controllers.WebhookConfigController
 import io.tolgee.hateoas.ee.webhooks.WebhookConfigModel
 import io.tolgee.model.webhook.WebhookConfig
+import io.tolgee.service.automations.AutomationService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
-class WebhookConfigModelAssembler :
-  RepresentationModelAssemblerSupport<WebhookConfig, WebhookConfigModel>(
+class WebhookConfigModelAssembler(
+  private val automationService: AutomationService,
+) : RepresentationModelAssemblerSupport<WebhookConfig, WebhookConfigModel>(
     WebhookConfigController::class.java,
     WebhookConfigModel::class.java,
   ) {
@@ -21,6 +23,7 @@ class WebhookConfigModelAssembler :
       autoDisabled = entity.autoDisabled,
       firstFailed = entity.firstFailed?.time,
       lastExecuted = entity.lastExecuted?.time,
+      eventTypes = automationService.getWebhookEventTypes(entity),
     )
   }
 }

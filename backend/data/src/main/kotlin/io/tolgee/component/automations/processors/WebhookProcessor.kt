@@ -5,6 +5,7 @@ import io.tolgee.api.IProjectActivityModelAssembler
 import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.automations.AutomationProcessor
+import io.tolgee.component.automations.AutomationTriggerContext
 import io.tolgee.constants.Message
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.webhook.WebhookConfig
@@ -24,21 +25,11 @@ class WebhookProcessor(
 ) : AutomationProcessor {
   override fun process(
     action: AutomationAction,
-    activityRevisionId: Long?,
+    context: AutomationTriggerContext,
   ) {
-    activityRevisionId ?: return
-    val view = activityService.findProjectActivity(activityRevisionId) ?: return
-    val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
     if (!config.enabled) return
-
-    val data =
-      WebhookRequest(
-        webhookConfigId = config.id,
-        projectId = config.project.id,
-        eventType = WebhookEventType.PROJECT_ACTIVITY,
-        activityData = activityModel,
-      )
+    val data = buildRequest(config, context) ?: return
 
     try {
       webhookExecutor.signAndExecute(config, data)
@@ -60,6 +51,29 @@ class WebhookProcessor(
         )
       }
     }
+  }
+
+  private fun buildRequest(
+    config: WebhookConfig,
+    context: AutomationTriggerContext,
+  ): WebhookRequest? {
+    if (context.contentDeliveryPublish != null) {
+      return WebhookRequest(
+        webhookConfigId = config.id,
+        projectId = config.project.id,
+        eventType = WebhookEventType.CONTENT_DELIVERY_PUBLISH,
+        activityData = null,
+        contentDeliveryConfig = context.contentDeliveryPublish,
+      )
+    }
+    val activityRevisionId = context.activityRevisionId ?: return null
+    val view = activityService.findProjectActivity(activityRevisionId) ?: return null
+    return WebhookRequest(
+      webhookConfigId = config.id,
+      projectId = config.project.id,
+      eventType = WebhookEventType.PROJECT_ACTIVITY,
+      activityData = activityModelAssembler.toModel(view),
+    )
   }
 
   fun updateEntity(

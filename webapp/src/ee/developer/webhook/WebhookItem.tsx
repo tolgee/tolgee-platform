@@ -23,6 +23,7 @@ import { CopyUrlItem } from 'tg.views/projects/developer/CopyUrlItem';
 import { WebhookEditDialog } from './WebhookEditDialog';
 import { WebhookToggle } from './WebhookToggle';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { useWebhookEventTypeLabel } from './webhookEventTypes';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
 
@@ -55,6 +56,8 @@ export const WebhookItem = ({ data }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+  const eventTypeLabel = useWebhookEventTypeLabel();
+  const eventTypes = [...data.eventTypes].sort();
   const [formOpen, setFormOpen] = useState(false);
   const [keyOpen, setKeyOpen] = useState(false);
 
@@ -88,7 +91,16 @@ export const WebhookItem = ({ data }: Props) => {
     >
       <Box display="flex" gap={2} alignItems="center">
         <WebhookToggle data={data} />
-        <Box>{data.url}</Box>
+        <Box>
+          <Box>{data.url}</Box>
+          <Box
+            sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}
+            data-cy="webhook-item-event-types"
+            data-cy-event-types={eventTypes.join(',')}
+          >
+            {eventTypes.map(eventTypeLabel).join(', ')}
+          </Box>
+        </Box>
         {Boolean(data.lastExecuted) && (
           <Tooltip title={t('webhooks_last_run_hint')}>
             <StyledTime>

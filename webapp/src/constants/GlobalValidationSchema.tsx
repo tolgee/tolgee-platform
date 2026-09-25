@@ -56,6 +56,15 @@ Yup.setLocale({
       />
     ),
   },
+  array: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_array_min"
+        defaultValue="Select at least {min, plural, one {# item} other {# items}}"
+        params={{ min }}
+      />
+    ),
+  },
 });
 
 const isValidBranchName = (name: string | undefined): boolean => {
@@ -526,6 +535,7 @@ export class Validation {
 
   static readonly WEBHOOK_FORM = Yup.object().shape({
     url: Yup.string().required().max(255),
+    eventTypes: Yup.array().min(1).required(),
   });
 
   static readonly NEW_KEY_FORM = (t: TranslateFunction) =>

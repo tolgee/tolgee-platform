@@ -2,10 +2,13 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  ListItemText,
+  MenuItem,
   styled,
 } from '@mui/material';
 
@@ -18,6 +21,12 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { Select } from 'tg.component/common/form/fields/Select';
+import {
+  WEBHOOK_EVENT_TYPES,
+  WebhookEventType,
+  useWebhookEventTypeLabel,
+} from './webhookEventTypes';
 
 type WebhookConfigModel = components['schemas']['WebhookConfigModel'];
 
@@ -39,6 +48,7 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
   const messaging = useMessage();
+  const eventTypeLabel = useWebhookEventTypeLabel();
 
   const createWebhook = useApiMutation({
     url: '/v2/projects/{projectId}/webhook-configs',
@@ -84,6 +94,8 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
       <Formik
         initialValues={{
           url: data?.url ?? '',
+          eventTypes:
+            data?.eventTypes ?? (['PROJECT_ACTIVITY'] as WebhookEventType[]),
         }}
         validationSchema={Validation.WEBHOOK_FORM}
         validateOnBlur={false}
@@ -128,7 +140,7 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
           }
         }}
       >
-        {({ handleSubmit }) => (
+        {({ handleSubmit, values }) => (
           <>
             <DialogTitle>
               {data ? t('webhook_update_title') : t('webhook_create_title')}
@@ -141,6 +153,36 @@ export const WebhookEditDialog = ({ onClose, data }: Props) => {
                   variant="standard"
                   data-cy="webhook-form-url"
                 />
+              </Box>
+              <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                <Select
+                  name="eventTypes"
+                  label={t('webhook_form_event_types_label', 'Events')}
+                  multiple
+                  minHeight={false}
+                  variant="standard"
+                  data-cy="webhook-form-event-types"
+                  renderValue={(selected) =>
+                    (selected as WebhookEventType[])
+                      .map(eventTypeLabel)
+                      .join(', ')
+                  }
+                >
+                  {WEBHOOK_EVENT_TYPES.map((type) => (
+                    <MenuItem
+                      key={type}
+                      value={type}
+                      data-cy="webhook-form-event-type-option"
+                      data-cy-type={type}
+                    >
+                      <Checkbox
+                        size="small"
+                        checked={values.eventTypes.includes(type)}
+                      />
+                      <ListItemText primary={eventTypeLabel(type)} />
+                    </MenuItem>
+                  ))}
+                </Select>
               </Box>
             </StyledDialogContent>
             <DialogActions sx={{ justifyContent: 'space-between' }}>

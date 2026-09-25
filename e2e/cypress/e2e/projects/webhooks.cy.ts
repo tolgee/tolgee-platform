@@ -43,6 +43,17 @@ describe('Webhooks', () => {
     createWebhook();
   });
 
+  it('creates webhook subscribed to content delivery publish', () => {
+    const dialog = view.openAddDialog();
+    dialog.setUrl(testUrl);
+    dialog.toggleEventType('CONTENT_DELIVERY_PUBLISH');
+    dialog.save();
+    waitForGlobalLoading();
+    view
+      .item(testUrl)
+      .shouldHaveEventTypes(['PROJECT_ACTIVITY', 'CONTENT_DELIVERY_PUBLISH']);
+  });
+
   it('updates webhook', () => {
     const editDialog = view.item(preCreatedUrl).openEdit();
     editDialog.setUrl('testurl');
