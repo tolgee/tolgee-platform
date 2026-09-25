@@ -1,11 +1,20 @@
 import { useMemo, useRef } from 'react';
-import { getTolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
+import {
+  getTolgeeFormat,
+  TolgeeFormat,
+  tolgeeFormatGenerateIcu,
+} from '@tginternal/editor';
 import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { useQaCheckPreview } from './useQaCheckPreview';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 import { useProject } from 'tg.hooks/useProject';
 import { offsetQaIssue } from 'tg.fixtures/qaUtils';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+
+const variantOffsetOf = (
+  variantOffsets: TolgeeFormat['variantOffsets'],
+  issue: QaPreviewIssue
+) => variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule] ?? 0;
 
 export const useQaChecksForPanel = (data: PanelContentData) => {
   const { keyData, language, editingText, activeVariant, isModified } = data;
@@ -52,13 +61,13 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   });
 
   // Adjust positions from full-ICU to variant-relative for the panel
-  const adjustedIssues = useMemo(() => {
-    return result?.issues?.map((issue) => {
-      const offset =
-        variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule];
-      return offsetQaIssue(issue, offset ?? 0);
-    });
-  }, [result.issues, variantOffsets]);
+  const adjustedIssues = useMemo(
+    () =>
+      result.issues.map((issue) =>
+        offsetQaIssue(issue, variantOffsetOf(variantOffsets, issue))
+      ),
+    [result.issues, variantOffsets]
+  );
 
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
@@ -74,11 +83,13 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
     const translationId = translation?.id;
     if (translationId == null) return;
 
-    const offset = variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule];
-    const fullTextIssue = offsetQaIssue(issue, -(offset ?? 0));
-    const newState = issue.state === 'IGNORED' ? 'OPEN' : 'IGNORED';
-    const mutation =
-      issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
+    const fullTextIssue = offsetQaIssue(
+      issue,
+      -variantOffsetOf(variantOffsets, issue)
+    );
+    const isIgnored = issue.state === 'IGNORED';
+    const newState = isIgnored ? 'OPEN' : 'IGNORED';
+    const mutation = isIgnored ? unignoreMutation : ignoreMutation;
     const { state: _, ...issueRequest } = fullTextIssue;
     mutation.mutate(
       {

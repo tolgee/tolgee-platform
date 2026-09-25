@@ -172,7 +172,7 @@ class QaE2eTestData : BaseTestData() {
         }
       }
 
-      // key_plural_issue: missing . in the "one" variant of a plural FR translation
+      // key_plural_issue: issue positions index the full ICU string, not the "one" variant
       addKey {
         name = "key_plural_issue"
         isPlural = true

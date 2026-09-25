@@ -44,14 +44,14 @@ describe('QA inline highlighting', () => {
   it('ignores a plural variant issue from the highlight tooltip', () => {
     view.visit(projectId);
 
-    cy.contains('key_plural_issue')
-      .closestDcy('translations-row')
+    view
+      .getTranslationCell('key_plural_issue', 'fr')
       .findDcy('qa-issue-marker')
       .trigger('mouseover');
     gcy('qa-action-ignore').click();
 
-    cy.contains('key_plural_issue')
-      .closestDcy('translations-row')
+    view
+      .getTranslationCell('key_plural_issue', 'fr')
       .findDcy('qa-issue-marker')
       .should('not.exist');
   });

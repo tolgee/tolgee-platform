@@ -38,6 +38,7 @@ describe('QA filtering', () => {
         'key_case_issue',
         'key_multiple_issues',
         'key_correctable',
+        'key_plural_issue',
       ],
     });
   });
