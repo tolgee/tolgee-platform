@@ -27,6 +27,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     testData = SlackTestData()
+    testData.addLanguageOnlySlackConfigWithChannelEvents()
     testDataService.saveTestData(testData.root)
   }
 
@@ -38,7 +39,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes configs`() {
     slackConfigManageService.delete(testData.projectBuilder.self.id, testData.slackConfig.channelId, "")
-    Assertions.assertThat(slackConfigReadService.findAll()).isEmpty()
+    Assertions.assertThat(slackConfigReadService.find(testData.projectBuilder.self.id, "testChannel")).isNull()
   }
 
   @Test
@@ -53,25 +54,15 @@ class SlackConfigServiceTest : AbstractSpringTest() {
         slackTeamId = "slackTeamId",
       )
     slackConfigManageService.createOrUpdate(slackConfigDto)
-    Assertions.assertThat(slackConfigReadService.findAll()).hasSize(2)
+    Assertions.assertThat(slackConfigReadService.find(testData.projectBuilder.self.id, "testChannel2")).isNotNull()
   }
 
   @Test
-  fun `keeps all events on the channel when switching a language subscription to global`() {
-    val languageSubscription =
-      SlackConfigDto(
-        project = testData.projectBuilder.self,
-        channelId = "testChannel2",
-        userAccount = testData.user,
-        languageTag = "fr",
-        events = mutableSetOf(SlackEventType.NEW_KEY),
-        slackTeamId = "slackTeamId",
-      )
-    slackConfigManageService.createOrUpdate(languageSubscription)
+  fun `sets all events on the channel when switching a language subscription to global`() {
     slackConfigManageService.createOrUpdate(
       SlackConfigDto(
         project = testData.projectBuilder.self,
-        channelId = "testChannel2",
+        channelId = testData.languageOnlySlackConfig.channelId,
         userAccount = testData.user,
         isGlobal = true,
         slackTeamId = "slackTeamId",
@@ -79,7 +70,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
     )
 
     executeInNewTransaction {
-      val config = slackConfigReadService.find(testData.projectBuilder.self.id, "testChannel2")!!
+      val config = slackConfigReadService.find(testData.projectBuilder.self.id, "languageOnlyChannel")!!
       config.isGlobalSubscription.assert.isTrue()
       config.events.assert.containsExactly(SlackEventType.ALL)
     }

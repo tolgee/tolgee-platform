@@ -7,6 +7,27 @@ import org.junit.jupiter.api.Test
 
 class SlackSlashCommandParsingTest {
   @Test
+  fun `treats non-breaking space as whitespace`() {
+    parseCommandParts("subscribe 1\u00A0fr\u00A0--on\u00A0new_key").assert.isEqualTo(
+      listOf("subscribe", "1", "fr", "--on new_key"),
+    )
+    parseOptions(parseCommandParts("subscribe 1 --on\u00A0new_key\u00A0--global false")!![3]).assert.isEqualTo(
+      mapOf("--on" to "new_key", "--global" to "false"),
+    )
+    parseCommandParts("unsubscribe 1 fr\u00A0").assert.isEqualTo(listOf("unsubscribe", "1", "fr", ""))
+  }
+
+  @Test
+  fun `treats newlines as whitespace`() {
+    parseCommandParts("subscribe 1 fr --on new_key\n").assert.isEqualTo(
+      listOf("subscribe", "1", "fr", "--on new_key"),
+    )
+    parseOptions(parseCommandParts("subscribe 1 --on new_key\n--global false")!![3]).assert.isEqualTo(
+      mapOf("--on" to "new_key", "--global" to "false"),
+    )
+  }
+
+  @Test
   fun `parses unsubscribe arguments`() {
     parseCommandParts("unsubscribe 1").assert.isEqualTo(listOf("unsubscribe", "1", "", ""))
     parseCommandParts("unsubscribe 1 fr").assert.isEqualTo(listOf("unsubscribe", "1", "fr", ""))
