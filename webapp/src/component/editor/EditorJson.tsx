@@ -6,6 +6,7 @@ import { GlobalStyles, css, styled, useTheme } from '@mui/material';
 import { json, jsonLanguage, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
 import { TolgeeHighlight } from '@tginternal/editor';
+import { isExternalValue } from 'tg.component/editor/utils/externalValueSync';
 
 const StyledEditor = styled('div')`
   font-size: 14px;
@@ -66,6 +67,7 @@ export const EditorJson: React.FC<React.PropsWithChildren<EditorProps>> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const editor = useRef<EditorView>();
+  const emittedValues = useRef(new Set<string>());
   const keyBindings = useRef(shortcuts);
   const editorTheme = useRef<Compartment>(new Compartment());
   const theme = useTheme();
@@ -104,7 +106,12 @@ export const EditorJson: React.FC<React.PropsWithChildren<EditorProps>> = ({
               }
             }
             if (v.docChanged) {
-              callbacksRef.current?.onChange?.(v.state.doc.toString());
+              const doc = v.state.doc.toString();
+              // The value before the edit was never emitted on the first edit,
+              // and the parent can still re-render carrying it.
+              emittedValues.current.add(v.startState.doc.toString());
+              emittedValues.current.add(doc);
+              callbacksRef.current?.onChange?.(doc);
             }
           }),
           editorTheme.current.of([]),
@@ -124,12 +131,18 @@ export const EditorJson: React.FC<React.PropsWithChildren<EditorProps>> = ({
 
   useEffect(() => {
     const state = editor.current?.state;
-    const editorValue = state?.doc.toString();
-    if (state && editorValue !== value) {
+    if (!state) {
+      return;
+    }
+    const editorValue = state.doc.toString();
+    if (isExternalValue(value, editorValue, emittedValues.current)) {
+      emittedValues.current.clear();
       const transaction = state.update({
         changes: { from: 0, to: state.doc.length, insert: value || '' },
       });
       editor.current?.update([transaction]);
+    } else if (editorValue === value) {
+      emittedValues.current.clear();
     }
   }, [value]);
 
