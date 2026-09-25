@@ -28,6 +28,7 @@ class SlackTestData {
   var automation: Automation
   var key: Key
   var key2: Key
+  lateinit var keyWithAllLanguages: Key
   lateinit var baseTranslationNotExistKey: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
@@ -108,6 +109,15 @@ class SlackTestData {
       secondLanguage = projectBuilder.addFrench().self
 
       projectBuilder.addCzech()
+
+      keyWithAllLanguages =
+        projectBuilder
+          .addKey("keyWithAllLanguages")
+          .build {
+            addTranslation("en", "Dashboard")
+            addTranslation("fr", "Tableau de bord")
+            addTranslation("cs", "Nástěnka")
+          }.self
 
       slackConfig =
         projectBuilder
