@@ -57,11 +57,15 @@ describe('QA issue actions', () => {
     function reloadAndExpectSinglePluralIssue() {
       view.visit(projectId);
       view.getTranslationCell('key_plural_issue', 'fr').click();
-      openQaPanel();
+      // useOpenPanels keeps the QA panel open across reloads; toggling it again would close it
+      gcy('qa-panel-container').should('exist');
       gcy('qa-check-item').should('have.length', 1);
     }
 
-    reloadAndExpectSinglePluralIssue();
+    view.visit(projectId);
+    view.getTranslationCell('key_plural_issue', 'fr').click();
+    openQaPanel();
+    gcy('qa-check-item').should('have.length', 1);
     gcy('qa-check-item')
       .first()
       .findDcy('qa-action-ignore')
