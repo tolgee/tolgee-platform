@@ -6,8 +6,11 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
@@ -76,11 +79,13 @@ class ApiKeyController(
   @Operation(summary = "Create API key", description = "Creates new API key with provided scopes")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(1)
+  @RequestActivity(ActivityType.API_KEY_CREATE)
   fun create(
     @RequestBody @Valid
     dto: CreateApiKeyDto,
   ): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
+    projectHolder.project = ProjectDto.fromEntity(project)
     if (!authenticationFacade.authenticatedUser.isAdmin()) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
@@ -167,6 +172,7 @@ class ApiKeyController(
   @Operation(summary = "Update API key")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(6)
+  @RequestActivity(ActivityType.API_KEY_UPDATE)
   fun update(
     @RequestBody @Valid
     dto: V2EditApiKeyDto,
@@ -174,8 +180,8 @@ class ApiKeyController(
   ): ApiKeyModel {
     val apiKey = apiKeyService.get(apiKeyId)
     checkOwner(apiKey)
+    projectHolder.project = ProjectDto.fromEntity(apiKey.project)
     securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
-    apiKey.scopesEnum = dto.scopes.toMutableSet()
     return apiKeyService.editApiKey(apiKey, dto).let { apiKeyModelAssembler.toModel(it) }
   }
 
@@ -183,11 +189,13 @@ class ApiKeyController(
   @Operation(summary = "Delete API key")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(7)
+  @RequestActivity(ActivityType.API_KEY_DELETE)
   fun delete(
     @PathVariable apiKeyId: Long,
   ) {
     val apiKey = apiKeyService.findOptional(apiKeyId).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
     checkOwner(apiKey)
+    projectHolder.project = ProjectDto.fromEntity(apiKey.project)
     apiKeyService.deleteApiKey(apiKey)
   }
 
@@ -253,18 +261,17 @@ class ApiKeyController(
     summary = "Regenerates API key. It generates new API key value and updates its time of expiration.",
   )
   @RequiresSuperAuthentication
+  @RequestActivity(ActivityType.API_KEY_REGENERATE)
   fun regenerate(
     @RequestBody @Valid
     dto: RegenerateApiKeyDto,
     @PathVariable apiKeyId: Long,
   ): RevealedApiKeyModel {
-    checkOwner(apiKeyId)
+    val apiKey = apiKeyService.get(apiKeyId)
+    checkOwner(apiKey)
+    projectHolder.project = ProjectDto.fromEntity(apiKey.project)
     val regenerated = apiKeyService.regenerate(apiKeyId, dto.expiresAt)
     return revealedApiKeyModelAssembler.toModel(regenerated)
-  }
-
-  private fun checkOwner(id: Long) {
-    checkOwner(apiKeyService.get(id))
   }
 
   private fun checkOwner(apiKey: ApiKey) {

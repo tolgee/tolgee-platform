@@ -1,5 +1,9 @@
 package io.tolgee.model
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.propChangesProvider.ValueCollectionPropChangesProvider
 import io.tolgee.model.enums.Scope
 import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
@@ -18,6 +22,7 @@ import jakarta.validation.constraints.NotNull
 import java.util.Date
 
 @Entity
+@ActivityLoggedEntity
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["keyHash"], name = "api_key_hash_unique"),
@@ -39,9 +44,12 @@ class ApiKey(
   @param:NotEmpty
   @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  @ActivityLoggedProp(ValueCollectionPropChangesProvider::class)
   var scopesEnum: MutableSet<Scope?>,
 ) : StandardAuditModel() {
   @NotBlank
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var description: String = ""
 
   @NotBlank
@@ -61,6 +69,7 @@ class ApiKey(
   @NotNull
   lateinit var project: Project
 
+  @ActivityLoggedProp
   var expiresAt: Date? = null
 
   var lastUsedAt: Date? = null

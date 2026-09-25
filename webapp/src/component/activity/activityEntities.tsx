@@ -7,6 +7,7 @@ import {
   KeyReferenceData,
   Reference,
   WebhookConfigReferenceData,
+  ApiKeyReferenceData,
 } from './types';
 import { BranchReferenceData } from '../../eeSetup/EeModuleType';
 
@@ -419,6 +420,51 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         type: 'text',
         label() {
           return <T keyName="activity_entity_content_delivery_config.name" />;
+        },
+      },
+    },
+  },
+  ApiKey: {
+    label() {
+      return <T keyName="activity_entity_api_key" defaultValue="API key" />;
+    },
+    references: ({ modifications, description }) => {
+      const name = (modifications?.['description']?.new ||
+        modifications?.['description']?.old ||
+        description?.['description']) as unknown as string | null | undefined;
+      return name
+        ? ([{ type: 'api_key', description: name }] as ApiKeyReferenceData[])
+        : undefined;
+    },
+    fields: {
+      description: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_api_key.description"
+              defaultValue="Description"
+            />
+          );
+        },
+      },
+      scopesEnum: {
+        type: 'key_tags',
+        label() {
+          return (
+            <T keyName="activity_entity_api_key.scopes" defaultValue="Scopes" />
+          );
+        },
+      },
+      expiresAt: {
+        type: 'date',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_api_key.expires_at"
+              defaultValue="Expires at"
+            />
+          );
         },
       },
     },
