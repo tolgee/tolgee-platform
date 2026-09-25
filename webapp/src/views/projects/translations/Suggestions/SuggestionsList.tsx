@@ -85,7 +85,8 @@ export const SuggestionsList = ({
   const { updateTranslation, setEditForce } = useTranslationsActions();
   const [showAll, setShowAll] = useState(false);
   const [hidden, setHidden] = useState(translation.activeSuggestionCount === 0);
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
   const canReview = satisfiesLanguageAccess(
     'translations.state-edit',
     languageId
@@ -94,7 +95,15 @@ export const SuggestionsList = ({
     'translation-suggestions.manage',
     languageId
   );
+  const canDeleteOwnSuggestion = satisfiesPermission(
+    'translation-suggestions.own-access'
+  );
   const user = useUser();
+
+  function canDelete(authorId: number) {
+    const isOwn = user?.id === authorId;
+    return (isOwn && canDeleteOwnSuggestion) || canModerateSuggestions;
+  }
 
   const projectId = project.id;
 
@@ -340,7 +349,7 @@ export const SuggestionsList = ({
                       canReview ? () => handleReverse(item.id) : undefined
                     }
                     onDelete={
-                      user?.id === item.author.id || canModerateSuggestions
+                      canDelete(item.author.id)
                         ? () => handleDelete(item.id)
                         : undefined
                     }

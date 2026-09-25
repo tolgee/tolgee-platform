@@ -65,6 +65,19 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
+  fun `a token from a request that named an unknown scope carries only the known one`() {
+    val pending =
+      driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+
+    json(driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier).andReturn())
+      .get("scope")
+      .asString()
+      .assert
+      .isEqualTo("translations.view")
+  }
+
+  @Test
   fun `a code issued to one client cannot be exchanged by another client`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
     val code = driver.queryParam(driver.consentRedirect(pending), "code")!!

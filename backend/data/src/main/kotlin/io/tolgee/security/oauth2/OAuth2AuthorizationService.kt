@@ -57,7 +57,8 @@ class OAuth2AuthorizationService(
   )
 
   data class ValidatedAuthorizeRequest(
-    val scopes: List<String>,
+    /** The requested scopes this server knows; the rest were dropped. */
+    val knownRequestedScopes: List<String>,
     val codeChallenge: String,
   )
 
@@ -71,8 +72,8 @@ class OAuth2AuthorizationService(
   fun validateAuthorizeRequest(params: AuthorizeParams): ValidatedAuthorizeRequest {
     if (params.responseType == null) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "response_type is required")
     if (params.responseType != "code") throw OAuth2Error(OAuth2Error.UNSUPPORTED_RESPONSE_TYPE)
-    val scopes = parseScopes(params.scope)
-    if (scopes.isEmpty() || scopes.any { !OAuth2Scopes.isSupported(it) }) throw OAuth2Error(OAuth2Error.INVALID_SCOPE)
+    val knownRequestedScopes = parseKnownRequestedScopes(params.scope)
+    if (knownRequestedScopes.isEmpty()) throw OAuth2Error(OAuth2Error.INVALID_SCOPE)
     if ((params.state?.length ?: 0) > MAX_STATE_LENGTH) {
       throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "state is too long")
     }
@@ -82,7 +83,7 @@ class OAuth2AuthorizationService(
     val challenge =
       params.codeChallenge?.takeIf { isValidCodeChallenge(it) }
         ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_challenge is not a valid S256 challenge")
-    return ValidatedAuthorizeRequest(scopes, challenge)
+    return ValidatedAuthorizeRequest(knownRequestedScopes, challenge)
   }
 
   @Transactional
@@ -93,7 +94,7 @@ class OAuth2AuthorizationService(
     params: AuthorizeParams,
     projectHint: String?,
   ): OAuth2Grant {
-    val (scopes, challenge) = validateAuthorizeRequest(params)
+    val (knownRequestedScopes, challenge) = validateAuthorizeRequest(params)
 
     val grant =
       OAuth2Grant().apply {
@@ -102,7 +103,7 @@ class OAuth2AuthorizationService(
         this.redirectUri = redirectUri
         clientState = params.state
         codeChallenge = challenge
-        requestedScopeValues = scopes
+        requestedScopeValues = knownRequestedScopes
         this.projectHint = projectHint?.toLongOrNull()
         consentState = keyGenerator.generate()
         consentExpiresAt = nowPlus(Duration.ofSeconds(properties.consentValiditySeconds))
@@ -330,7 +331,8 @@ class OAuth2AuthorizationService(
   /**
    * RFC 6749 §6: a refresh may ask for less than was granted, never more. The narrowing applies to the token being
    * issued — [OAuth2Grant.maxGrantedScopeValues] stays the ceiling, so a later refresh can ask for the full set
-   * back.
+   * back. A scope this server knows but never granted is the client asking for more than it holds, and is
+   * refused; [parseKnownRequestedScopes] has already dropped the ones this server does not know.
    */
   private fun narrowedScopes(
     grant: OAuth2Grant,
@@ -338,9 +340,11 @@ class OAuth2AuthorizationService(
   ): List<String> {
     val granted = grant.maxGrantedScopeValues
     if (requestedScope == null) return granted
-    val requested = parseScopes(requestedScope)
-    if (requested.isEmpty() || requested.any { it !in granted }) throw OAuth2Error(OAuth2Error.INVALID_SCOPE)
-    return granted.filter { it in requested }
+    val knownRequestedScopes = parseKnownRequestedScopes(requestedScope)
+    if (knownRequestedScopes.isEmpty() || knownRequestedScopes.any { it !in granted }) {
+      throw OAuth2Error(OAuth2Error.INVALID_SCOPE)
+    }
+    return granted.filter { it in knownRequestedScopes }
   }
 
   private fun issueTokens(grant: OAuth2Grant): IssuedTokens {
@@ -362,7 +366,9 @@ class OAuth2AuthorizationService(
     )
   }
 
-  private fun parseScopes(raw: String?): List<String> = OAuth2Scopes.splitScopeString(raw).distinct()
+  /** Unknown scopes are dropped rather than refused; docs/oauth/README.md ("scope vs. project set") has why. */
+  private fun parseKnownRequestedScopes(raw: String?): List<String> =
+    OAuth2Scopes.splitScopeString(raw).distinct().filter { OAuth2Scopes.isSupported(it) }
 
   private fun nowPlus(duration: Duration): Date = Date.from(currentDateProvider.date.toInstant().plus(duration))
 

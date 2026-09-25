@@ -28,6 +28,7 @@ class SuggestionsTestData(
   var serverAdmin: UserAccountBuilder
   var projectEditor: UserAccountBuilder
   var viewOnlyUser: UserAccountBuilder
+  var granularSuggester: UserAccountBuilder
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
@@ -119,7 +120,16 @@ class SuggestionsTestData(
         name = "View only user"
       }
 
+    granularSuggester =
+      root.addUserAccount {
+        username = "granular.suggester@test.com"
+        name = "Granular suggester"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
+      self.basePermission.type = null
+      self.basePermission.scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+
       addRole {
         user = orgMember.self
         type = OrganizationRoleType.MEMBER
@@ -190,6 +200,12 @@ class SuggestionsTestData(
         type = null
         scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
         suggestManageLanguages = mutableSetOf(czechLanguage)
+      }
+
+      addPermission {
+        user = granularSuggester.self
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST)
       }
 
       (0 until 4).forEach {
@@ -277,17 +293,14 @@ class SuggestionsTestData(
           self.isPlural = true
           addTranslation("en", "{value, plural, one {# key} other {# keys}}")
           addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
+          pluralSuggestion =
+            addSuggestion {
+              this.language = czechLanguage
+              this.author = projectTranslator.self
+              this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
+              this.isPlural = true
+            }
         }
-
-      pluralKey.apply {
-        pluralSuggestion =
-          addSuggestion {
-            this.language = czechLanguage
-            this.author = projectTranslator.self
-            this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
-            this.isPlural = true
-          }
-      }
     }
 
     val unrelatedUser =

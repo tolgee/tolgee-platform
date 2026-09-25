@@ -117,8 +117,25 @@ class OAuth2AuthorizeConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
-  fun `opening an authorization with a scope the server does not support yields invalid_scope`() {
+  fun `an authorization asking for nothing this server knows yields invalid_scope`() {
     errorRedirect(mapOf("scope" to "not.a.tolgee.scope")).assert.contains("error=invalid_scope")
+  }
+
+  @Test
+  fun `a scope this server does not know is dropped and the rest of the request stands`() {
+    val mixed = validParams() + ("scope" to "translations.view not.a.tolgee.scope")
+
+    driver
+      .authorize(CLIENT_ID, REDIRECT, mixed)
+      .andReturn()
+      .response
+      .getHeader("Location")!!
+      .assert
+      .contains(OAuth2Constants.CONSENT_PAGE_PATH)
+
+    val pending =
+      driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+    driver.consentRedirect(pending).assert.contains("code=")
   }
 
   @Test

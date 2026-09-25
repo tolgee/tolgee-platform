@@ -235,6 +235,20 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
+  fun `consent-info leaves out a scope the server does not know`() {
+    val jwt = jwt()
+    val pending =
+      driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+
+    consentInfo(jwt, pending.state)
+      .get("scopes")
+      .toString()
+      .assert
+      .contains("translations.view")
+      .doesNotContain("not.a.tolgee.scope")
+  }
+
+  @Test
   fun `consent-info describes the pending authorization it is keyed by`() {
     val jwt = jwt()
     val pending = driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, scope = "translations.view")

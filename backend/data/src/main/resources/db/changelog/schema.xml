@@ -5960,4 +5960,31 @@
         </sql>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1789914853000-1">
+        <sqlFile path="classpath:db/changelog/translationSuggestionsOwnAccessBackfill.sql" splitStatements="false"/>
+        <!-- A release without this scope cannot read a permission row (Permission._scopes) or an API-key scope
+             row (ApiKey.scopesEnum) that stores the name, so the rollback strips it from both, whether the
+             backfill or a user put it there. It leaves oauth2_grant alone although those columns hold names too:
+             a grant tolerates a name it cannot resolve (OAuth2Grant.storedScopesOf owns that), and rewriting them
+             would narrow live grants. Those three are what decides the asymmetry, so check them there before
+             making this symmetric.
+
+             Rolling forward again is not symmetric, and this is by design rather than a gap to repair. The
+             backfill grants the scope to granular permissions only: API keys and OAuth grants never had the
+             author bypass it replaces, so giving it to them would widen them beyond what they had. A re-apply
+             therefore heals permissions, while API-key scopes stay as the rollback left them — an owner who had
+             ticked the scope on a key meets that later as a 403 on deleting their own suggestion. After a
+             rollback/roll-forward cycle those keys have to be edited by hand; widening the backfill to cover
+             them is the one repair that would be wrong. -->
+        <rollback>
+            <sql>
+                UPDATE permission
+                SET scopes = array_remove(scopes, 'TRANSLATION_SUGGESTIONS_OWN_ACCESS')
+                WHERE scopes @> ARRAY['TRANSLATION_SUGGESTIONS_OWN_ACCESS']::varchar[];
+            </sql>
+            <sql>
+                DELETE FROM api_key_scopes_enum WHERE scopes_enum = 'TRANSLATION_SUGGESTIONS_OWN_ACCESS';
+            </sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

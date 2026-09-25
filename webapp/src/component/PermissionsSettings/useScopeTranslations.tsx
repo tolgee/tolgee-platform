@@ -12,6 +12,10 @@ export const useScopeTranslations = () => {
     'translation-suggestions.manage': t(
       'permissions_item_translations_suggestions_manage'
     ),
+    'translation-suggestions.own-access': t(
+      'permissions_item_translations_suggestions_own_access',
+      'Delete own'
+    ),
     'translation-comments.add': t('permissions_item_translations_comments_add'),
     'translation-comments.edit': t(
       'permissions_item_translations_comments_edit'

@@ -88,6 +88,37 @@ describe('Suggestions translator', () => {
       .should('not.exist');
   });
 
+  it("translator is not offered delete on a colleague's suggestion", () => {
+    visitTranslations(projectId);
+    getTranslationCell('key 0', 'cs').click();
+    waitForGlobalLoading();
+    cy.gcy('translation-suggestion')
+      .contains('Navržený překlad 0-2')
+      .closest('[data-cy="translation-suggestion"]')
+      .within(() => {
+        gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).should(
+          'not.exist'
+        );
+      });
+  });
+
+  it('author without the own-access scope is not offered delete', () => {
+    login('granular.suggester@test.com');
+    visitTranslations(projectId);
+    getTranslationCell('key 1', 'cs').click();
+    cy.gcy('global-editor').clear().type('Návrh bez mazání');
+    cy.gcy('translations-cell-main-action-button').click();
+    waitForGlobalLoading();
+    getTranslationCell('key 1', 'cs').click();
+    waitForGlobalLoading();
+    cy.gcy('suggestions-list')
+      .findDcy('translation-suggestion')
+      .should('have.length', 1);
+    gcyAdvanced({ value: 'suggestion-action', action: 'menu' }).should(
+      'not.exist'
+    );
+  });
+
   it('read cell shows the newest 3 suggestions + a "Show all" line, and keeps them after the editor opens and closes', () => {
     visitTranslations(projectId);
     assertReadCellSuggestions(['2-4', '2-3', '2-2']);

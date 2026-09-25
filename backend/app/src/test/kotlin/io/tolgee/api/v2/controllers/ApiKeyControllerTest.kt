@@ -247,6 +247,57 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `current permissions report the project's suggestion settings`() {
+    val pakHeaders = HttpHeaders()
+    pakHeaders["x-api-key"] = testData.usersKey.key!!
+    performGet("/v2/api-keys/current-permissions", pakHeaders).andAssertThatJson {
+      node("suggestionsMode").isEqualTo("DISABLED")
+      node("translationProtection").isEqualTo("NONE")
+    }
+
+    val patHeaders = HttpHeaders()
+    patHeaders["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders)
+      .andAssertThatJson {
+        node("suggestionsMode").isEqualTo("ENABLED")
+        node("translationProtection").isEqualTo("PROTECT_REVIEWED")
+      }
+  }
+
+  @Test
+  fun `current permissions name the user behind a PAK and behind a PAT`() {
+    val pakHeaders = HttpHeaders()
+    pakHeaders["x-api-key"] = testData.usersKey.key!!
+    performGet("/v2/api-keys/current-permissions", pakHeaders).andAssertThatJson {
+      node("userId").isEqualTo(testData.usersKey.userAccount.id)
+    }
+
+    val patHeaders = HttpHeaders()
+    patHeaders["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders)
+      .andAssertThatJson {
+        node("userId").isEqualTo(testData.frantisekDobrota.id)
+      }
+  }
+
+  @Test
+  fun `current permissions report the user's own scopes unnarrowed by the credential`() {
+    val pakHeaders = HttpHeaders()
+    pakHeaders["x-api-key"] = testData.frantasKey.key!!
+    performGet("/v2/api-keys/current-permissions", pakHeaders).andAssertThatJson {
+      node("scopes").isArray.contains("translations.view").doesNotContain("translations.edit")
+      node("userScopes").isArray.contains("translations.view", "translations.edit").doesNotContain("admin")
+    }
+
+    val patHeaders = HttpHeaders()
+    patHeaders["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders)
+      .andAssertThatJson {
+        node("userScopes").isArray.contains("admin")
+      }
+  }
+
+  @Test
   fun `a PAT cannot read the details of a project its user has no access to`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"

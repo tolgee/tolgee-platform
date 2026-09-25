@@ -167,6 +167,30 @@ means, which is why it is a deliberate decision rather than an additive one.
 - **project set** = *where* it may do it: the `project_selection` column on the grant — specific project ids, or the
   `*` sentinel meaning "don't narrow by project" (still bounded by the user's live permissions).
 
+**A scope this server does not know is dropped, not refused.** `validateAuthorizeRequest` keeps the supported
+scopes and carries on with those; only a request left with nothing at all is `invalid_scope`. Clients ship on their
+own schedule, so a client that learns a scope added in a later release would otherwise fail to sign in against
+every server older than that release — a whole-authorization failure for one optional capability. RFC 6749 §3.3
+permits this exactly because the token response states the scopes actually granted, which Tolgee sends on both the
+code exchange and the refresh. What the user never saw on the consent screen cannot be approved either: consent is
+checked against the filtered list. A refresh drops an unknown scope the same way, so a client may echo one
+configured scope string for as long as the server does not know the scope. It does **not** let the client pick
+the scope up later: the grant's ceiling is fixed at authorize time, so a scope dropped then is not in the grant,
+and once the server learns that scope the same string starts being refused (the first consequence below) — which
+arrives late, looks to the client's author like the server upgrade breaking them, and is the strongest reason to
+follow the advice there and send no `scope` on a refresh at all. A client that wants a scope it was never granted
+has to authorize again. Two consequences a client author should know:
+- **"Not granted" still means refused.** A scope this server *knows* but never granted is the client asking for
+  more than it holds, which RFC 6749 §6 forbids and §5.2 answers with `invalid_scope`; only the unknown ones are
+  dropped. Sending no `scope` on a refresh (the grant's scopes are then used) or echoing the `scope` the token
+  response returned is still the better practice, because it says what the client actually holds.
+- **A misspelled scope is indistinguishable from a future one**, so it is dropped rather than refused, and the
+  client ends up with a working token that quietly lacks the capability; it surfaces as 403s from the API instead
+  of `invalid_scope` at the door. The server cannot tell the two apart, so this is the price of the guarantee.
+
+`OAuth2Grant.requested_scope_values` holds the filtered list, not the client's raw request: nothing records a scope
+that was dropped.
+
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
@@ -245,6 +269,13 @@ own PR:
   consent screen presented as "translations.view on project X". Neither resolves a project, so neither the token's
   scopes nor its project set is consulted. The follow-up is a scope covering account-level reads, or narrowing the
   non-project `@AllowApiAccess(ANY)` set for scoped credentials generally.
+- **`current-permissions` tells the client what the *user* may do, not only what the token may do.**
+  `GET /v2/api-keys/current-permissions` returns `userScopes`, the expanded scope set of the user's own project
+  permission, alongside `scopes`, which is narrowed by the credential. A third-party client therefore learns the
+  user's full project scope set whatever its own grant asked for. That is deliberate and is what makes "your
+  account can do this, this sign-in cannot" expressible — a client can offer to ask for more only when asking would
+  actually help — but it is more than the grant requested, and it applies to project API keys in exactly the same
+  way.
 - **`@IsGlobalRoute` skips every project narrowing.** `AbstractAuthorizationInterceptor.preHandle` returns before
   `preHandleInternal` for a global route, so `coversProject` and the scope intersection are not consulted there. No
   `@AllowApiAccess @IsGlobalRoute` handler reads project-shaped data today; the structural fix is to refuse a
@@ -400,10 +431,11 @@ These are known gaps, deferred to the client rounds that first exercise them:
 
 - **Project API keys lose the author self-access bypass** (released behaviour, changed by
   `fix: stop a project API key inheriting the account's elevations`). Several endpoints let you act on something because you
-  created it — viewing and cancelling your own batch job, deleting your own suggestion, editing and deleting your own
-  comment. That bypass applied to project API keys too, so a key could act on those resources while carrying none of
-  `batch-jobs.view`, `batch-jobs.cancel`, `translation-suggestions.manage` or `translation-comments.edit`. A key is a
-  scoped capability, so it now has to carry the real scope; a webapp JWT and a PAT still carry the user's full
+  created it — viewing and cancelling your own batch job, editing and deleting your own comment (deleting your own
+  suggestion was one of them until `translation-suggestions.own-access` replaced it, see below). That bypass applied
+  to project API keys too, so a key could act on those resources while carrying none of `batch-jobs.view`,
+  `batch-jobs.cancel` or `translation-comments.edit`. A key is a scoped capability, so it now has to carry the real
+  scope; a webapp JWT and a PAT still carry the user's full
   authority and are unaffected. Existing keys are not backfilled: the scopes here already exist, and adding them to
   every key would grant more than the bypass did. A key that relied on it needs the scope added, and
   `GET /v2/projects/{id}/batch-jobs/{jobId}` is the likeliest one to notice: `translations.batch-machine` does not
@@ -416,6 +448,20 @@ These are known gaps, deferred to the client rounds that first exercise them:
   it. There is deliberately no backfill: granting a new scope to every existing permission that holds any scope
   would widen a lot of grants at once to restore a bypass, and losing an elevation fails closed where granting one
   does not. Anyone who relied on it adds `tasks.assigned-access` explicitly.
+
+- **Deleting your own suggestion is gated on `translation-suggestions.own-access`.** The author bypass is gone for
+  every credential, a webapp JWT and a PAT included: the author needs the scope, and a project API key or OAuth token that carries it can now delete its owner's
+  suggestions, which no scoped credential could before. Roles pick it up at runtime, VIEW through REVIEW explicitly
+  and EDIT / MANAGE because `translation-suggestions.manage` expands to it; the community floor grants it too.
+  Granular permissions store their scope list literally, so changeSet `1789914853000-1` backfills the scope into
+  every granular permission (members, invitations, organization base permissions) in the same release. Unlike
+  `tasks.assigned-access` above, this is not an elevation being restored: every author could delete their own
+  suggestion, so the backfill grants nobody more than they had, while skipping it would take an everyday action
+  away from every granular member. API keys and OAuth grants are not backfilled, as above.
+  The scope carries **no language dimension**, deliberately: an author acting on their own item is not a
+  per-language operation, and the author bypass it replaces was not one either. So a credential holding it may
+  delete its holder's own suggestion in any language, while deleting *someone else's* still goes through
+  `translation-suggestions.manage` and its language set.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client
