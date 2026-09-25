@@ -7,25 +7,18 @@ import io.tolgee.Metrics
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.time.Duration
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class CimdDocumentFetcherTest {
   private val fetcher =
-    CimdDocumentFetcher(UrlSecurity(InternalProperties()), InternalProperties(), Metrics(SimpleMeterRegistry()))
+    CimdDocumentFetcher(
+      CimdHostResolver(UrlSecurity(InternalProperties()), InternalProperties(), Metrics(SimpleMeterRegistry())),
+      InternalProperties(),
+    )
   private var server: HttpServer? = null
 
   @AfterEach
@@ -193,135 +186,7 @@ class CimdDocumentFetcherTest {
 
   private fun url(port: Int) = "http://cimd.invalid:$port/.well-known/client"
 
-  @Test
-  fun `one host may only strand its share of the resolver threads`() {
-    val release = CountDownLatch(1)
-    val parked = CountDownLatch(CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST)
-    val urlSecurity =
-      mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
-          parked.countDown()
-          release.await()
-          listOf(loopback())
-        }
-      }
-    val fetcher = CimdDocumentFetcher(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
-    val pool = Executors.newFixedThreadPool(CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST)
-    repeat(CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST) { i ->
-      pool.submit { fetcher.fetch("https://one-host.invalid:${8000 + i}/client-$i") }
-    }
-    parked.await(10, TimeUnit.SECONDS).assert.isTrue()
-
-    try {
-      assertThatThrownBy { fetcher.fetch("https://one-host.invalid/another") }
-        .isInstanceOf(CimdNoCapacityException::class.java)
-      // Another host still gets in: the cap is per host, not a global one this host just spent.
-      fetcher.fetch("https://other-host.invalid/client")
-      verify(urlSecurity).validateUrlAndResolve(eq("https://other-host.invalid/client"), any())
-    } finally {
-      release.countDown()
-      pool.shutdown()
-      pool.awaitTermination(10, TimeUnit.SECONDS)
-    }
-  }
-
-  @Test
-  fun `a host whose lookup ran past the deadline is not given another thread straight away`() {
-    val urlSecurity =
-      mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
-          Thread.sleep(10_000)
-          listOf(loopback())
-        }
-      }
-    val metrics = Metrics(SimpleMeterRegistry())
-    val fetcher = CimdDocumentFetcher(urlSecurity, InternalProperties(), metrics)
-
-    fetcher.fetch("https://stuck.invalid/client").assert.isEqualTo(CimdDocument.Unavailable)
-    fetcher.fetch("https://stuck.invalid/other").assert.isEqualTo(CimdDocument.Unavailable)
-
-    verify(urlSecurity, times(1)).validateUrlAndResolve(any(), any())
-    // Both the lookup that ran past the deadline and the one refused because of it: a host whose lookups keep
-    // hanging is exactly what an operator alerting on this counter needs to see.
-    metrics.oauth2CimdCapacityRefusalsCounter
-      .count()
-      .assert
-      .isEqualTo(2.0)
-  }
-
-  @Test
-  fun `a host stuck on the request lane is still read for the background check`() {
-    val urlSecurity =
-      mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
-          Thread.sleep(10_000)
-          listOf(loopback())
-        }
-      }
-    val fetcher = CimdDocumentFetcher(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
-
-    fetcher.fetch("https://stuck.invalid/client").assert.isEqualTo(CimdDocument.Unavailable)
-    fetcher.fetch("https://stuck.invalid/client", CimdFetchLane.GRANT_CHECK).assert.isEqualTo(CimdDocument.Unavailable)
-
-    verify(urlSecurity, times(2)).validateUrlAndResolve(any(), any())
-  }
-
-  /**
-   * The request lane's resolver pool is smaller than the number of fetches the budget admits, so a rejection by it
-   * happens in ordinary traffic. If the rejection kept the host's slot, the counter would ratchet up until the
-   * host was refused for good and a legitimate publisher went offline.
-   */
-  @Test
-  fun `a rejection by the resolver pool gives the host slot back`() {
-    val release = CountDownLatch(1)
-    val parked = CountDownLatch(CimdDocumentFetcher.MAX_CONCURRENT_RESOLUTIONS)
-    val urlSecurity =
-      mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
-          parked.countDown()
-          release.await()
-          listOf(loopback())
-        }
-      }
-    val fetcher = CimdDocumentFetcher(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
-    val hosts = CimdDocumentFetcher.MAX_CONCURRENT_RESOLUTIONS / CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST
-    val pool = Executors.newFixedThreadPool(CimdDocumentFetcher.MAX_CONCURRENT_RESOLUTIONS)
-    repeat(hosts) { host ->
-      repeat(CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST) { i ->
-        pool.submit { fetcher.fetch("https://parked-$host.invalid/client-$i") }
-      }
-    }
-    parked.await(20, TimeUnit.SECONDS).assert.isTrue()
-
-    try {
-      // Every one of these is refused because no resolver thread is free, not because of the victim's own share.
-      repeat(CimdDocumentFetcher.MAX_RESOLUTIONS_PER_HOST + 1) {
-        assertThatThrownBy { fetcher.fetch(VICTIM) }.isInstanceOf(CimdNoCapacityException::class.java)
-      }
-    } finally {
-      release.countDown()
-      pool.shutdown()
-      pool.awaitTermination(20, TimeUnit.SECONDS)
-    }
-
-    fetchUntilAThreadIsFree(fetcher)
-
-    verify(urlSecurity).validateUrlAndResolve(eq(VICTIM), any())
-  }
-
-  /** The parked threads go back to the pool a moment after they are released, not before. */
-  private fun fetchUntilAThreadIsFree(fetcher: CimdDocumentFetcher) {
-    val giveUpAt = System.nanoTime() + TimeUnit.SECONDS.toNanos(20)
-    while (System.nanoTime() < giveUpAt) {
-      val refused = runCatching { fetcher.fetch(VICTIM) }.exceptionOrNull()
-      if (refused == null) return
-      if (refused !is CimdNoCapacityException) throw refused
-      Thread.sleep(50)
-    }
-  }
-
   companion object {
     private val DEADLINE = Duration.ofSeconds(5)
-    private const val VICTIM = "https://victim.invalid/client"
   }
 }
