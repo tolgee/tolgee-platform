@@ -11,11 +11,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { offsetQaIssue } from 'tg.fixtures/qaUtils';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-const variantOffsetOf = (
-  variantOffsets: TolgeeFormat['variantOffsets'],
-  issue: QaPreviewIssue
-) => variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule] ?? 0;
-
 export const useQaChecksForPanel = (data: PanelContentData) => {
   const { keyData, language, editingText, activeVariant, isModified } = data;
   const project = useProject();
@@ -109,3 +104,8 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
     toggleIgnore,
   };
 };
+
+const variantOffsetOf = (
+  variantOffsets: TolgeeFormat['variantOffsets'],
+  issue: QaPreviewIssue
+) => variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule] ?? 0;
