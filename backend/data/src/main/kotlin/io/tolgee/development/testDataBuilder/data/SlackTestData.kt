@@ -34,6 +34,7 @@ class SlackTestData {
   var secondLanguage: Language
 
   lateinit var slackUserConnection: SlackUserConnection
+  lateinit var languageOnlySlackConfig: SlackConfig
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -158,6 +159,18 @@ class SlackTestData {
             )
           }.self
     }
+
+  fun addLanguageOnlySlackConfigWithChannelEvents() {
+    languageOnlySlackConfig =
+      projectBuilder
+        .addSlackConfig {
+          channelId = "languageOnlyChannel"
+          project = projectBuilder.self
+          userAccount = userAccountBuilder.self
+          isGlobalSubscription = false
+          events = mutableSetOf(SlackEventType.NEW_KEY)
+        }.self
+  }
 
   fun add10Keys(): List<Key> {
     return (1..10).map {

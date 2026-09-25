@@ -83,6 +83,7 @@ class SlackConfigManageService(
     dto: SlackConfigDto,
   ): SlackConfig {
     val workspace = slackConfigReadService.findWorkspace(dto.slackTeamId)
+    val wasGlobalSubscription = slackConfig.isGlobalSubscription
 
     if (dto.events.isNotEmpty()) {
       if (dto.languageTag.isNullOrEmpty()) {
@@ -113,6 +114,10 @@ class SlackConfigManageService(
       } else {
         updatePreferenceInConfig(slackConfig, dto.languageTag!!, events = dto.events)
       }
+    }
+
+    if (!wasGlobalSubscription && slackConfig.isGlobalSubscription && dto.events.isEmpty()) {
+      slackConfig.events = mutableSetOf(SlackEventType.ALL)
     }
 
     slackConfig.organizationSlackWorkspace = workspace

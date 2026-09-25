@@ -318,8 +318,11 @@ class SlackSlashCommandController(
   companion object {
     private val commandRegex = """^(\w+)(?:\s+(\d+))?(?:\s+((?!--)[^\s,]+))?\s*(.*)$""".toRegex()
 
+    private val anyWhitespaceRegex = """[\s\u00A0]""".toRegex()
+
     fun parseCommand(text: String): MatchResult.Destructured? {
-      val arguments = commandRegex.matchEntire(text)?.destructured ?: return null
+      val arguments =
+        commandRegex.matchEntire(text.replace(anyWhitespaceRegex, " ").trim())?.destructured ?: return null
       val (command, _, _, optionsString) = arguments
       if (command == "unsubscribe" && optionsString.isNotBlank()) return null
       return arguments
