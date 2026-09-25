@@ -1,3 +1,10 @@
+## [3.224.8](https://github.com/tolgee/tolgee-platform/compare/v3.224.7...v3.224.8) (2026-09-25)
+
+
+### Bug Fixes
+
+* Slack notifications — gate big-operation summary and count keys not translations ([#3945](https://github.com/tolgee/tolgee-platform/issues/3945)) ([e90c485](https://github.com/tolgee/tolgee-platform/commit/e90c4857b45063bdc8b5994e0a64e909ff30e2d8))
+
 ## [3.224.7](https://github.com/tolgee/tolgee-platform/compare/v3.224.6...v3.224.7) (2026-09-24)
 
 
