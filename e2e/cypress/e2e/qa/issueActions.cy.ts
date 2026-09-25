@@ -53,6 +53,26 @@ describe('QA issue actions', () => {
       .should('have.attr', 'data-cy-state', 'IGNORED');
   });
 
+  it('ignores a QA issue in a plural variant', () => {
+    view.visit(projectId);
+
+    view.getTranslationCell('key_plural_issue', 'fr').click();
+    openQaPanel();
+
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'OPEN')
+      .click();
+    waitForGlobalLoading();
+
+    gcy('qa-check-item').should('have.length', 1);
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'IGNORED');
+  });
+
   it('unignores a previously ignored issue', () => {
     view.visit(projectId);
 
