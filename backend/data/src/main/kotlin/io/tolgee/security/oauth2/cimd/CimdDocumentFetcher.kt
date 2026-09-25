@@ -16,14 +16,9 @@
 
 package io.tolgee.security.oauth2.cimd
 
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.Caffeine
-import io.tolgee.Metrics
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.security.oauth2.UrlOrigins
 import io.tolgee.util.Logging
 import io.tolgee.util.SsrfSafeRequestFactoryProvider
-import io.tolgee.util.UrlSecurity
 import io.tolgee.util.logger
 import jakarta.annotation.PreDestroy
 import org.apache.hc.client5.http.DnsResolver
@@ -35,26 +30,20 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.InetAddress
 import java.time.Duration
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 /**
- * Fetches a Client ID Metadata Document (a client presenting an HTTPS URL as its `client_id`) through
- * [UrlSecurity.validateUrlAndResolve], returning the raw body. Nothing the document or its host can do produces an
- * exception — hostile input cannot 500 `/oauth2/authorize`. The one exception it does raise is about us, not them:
- * [CimdNoCapacityException] when no resolver slot is free, which every caller must catch. Validating the body is
- * the caller's job, and so is admission: a request-lane fetch assumes [CimdFetchBudget] already granted a slot.
+ * Fetches a Client ID Metadata Document (a client presenting an HTTPS URL as its `client_id`) from the addresses
+ * [CimdHostResolver] pinned it to, returning the raw body. Nothing the document or its host can do produces an
+ * exception — hostile input cannot 500 `/oauth2/authorize`. The one exception that does come out is the resolver's
+ * [CimdNoCapacityException], which every caller must catch. Validating the body is the caller's job, and so is
+ * admission: a request-lane fetch assumes [CimdFetchBudget] already granted a slot.
  */
 @Component
 class CimdDocumentFetcher(
-  private val urlSecurity: UrlSecurity,
+  private val hostResolver: CimdHostResolver,
   private val internalProperties: InternalProperties,
-  private val metrics: Metrics,
 ) : Logging {
   // A drip-feeding host resets the per-read socket timeout on every byte, so only a total deadline bounds a fetch.
   private val watchdog =
@@ -62,127 +51,22 @@ class CimdDocumentFetcher(
       Thread(runnable, "cimd-fetch-watchdog").apply { isDaemon = true }
     }
 
-  private val resolvers = resolverPool(MAX_CONCURRENT_RESOLUTIONS, "cimd-resolve")
-
-  /** Threads only a lookup for an existing grant may use. */
-  private val grantResolvers = resolverPool(MAX_GRANT_RESOLUTIONS, "cimd-resolve-grant")
-
-  /**
-   * Resolver threads alive per host, counted for the thread's real life and not for the caller's wait, which ends
-   * much sooner. Keyed on the host and not the origin, because ports are free.
-   */
-  private val liveResolutions = CountingSlots(MAX_RESOLUTIONS_PER_HOST)
-
-  /**
-   * Hosts whose lookup just ran past the deadline, refused for a while without a thread. One memo per lane: a
-   * shared one would let a request decide what the background check may read.
-   */
-  private val recentlyStuckHosts: Cache<String, Boolean> = stuckHostMemo()
-  private val recentlyStuckHostsForCheck: Cache<String, Boolean> = stuckHostMemo()
-
-  private fun stuckHostMemo(): Cache<String, Boolean> =
-    Caffeine
-      .newBuilder()
-      .maximumSize(STUCK_HOST_MEMO_ENTRIES)
-      .expireAfterWrite(STUCK_HOST_MEMO_TTL)
-      .build()
-
-  private fun resolverPool(
-    size: Int,
-    name: String,
-  ) = ThreadPoolExecutor(
-    0,
-    size,
-    30L,
-    TimeUnit.SECONDS,
-    SynchronousQueue(),
-  ) { runnable -> Thread(runnable, name).apply { isDaemon = true } }
-
   @PreDestroy
   fun shutdown() {
     watchdog.shutdownNow()
-    resolvers.shutdownNow()
-    grantResolvers.shutdownNow()
   }
 
   fun fetch(
     clientIdUrl: String,
     lane: CimdFetchLane = CimdFetchLane.REQUEST,
   ): CimdDocument {
-    val allowLocalAddresses = internalProperties.disableUrlSsrfProtection
-    if (!CimdUrls.isAcceptableClientId(clientIdUrl, allowHttp = allowLocalAddresses)) {
+    if (!CimdUrls.isAcceptableClientId(clientIdUrl, allowHttp = internalProperties.disableUrlSsrfProtection)) {
       logger.debug("CIMD fetch refused for {}: not an acceptable client_id URL", clientIdUrl)
       return CimdDocument.Rejected
     }
 
-    val addresses = resolvePinned(clientIdUrl, allowLocalAddresses, lane) ?: return CimdDocument.Unavailable
+    val addresses = hostResolver.resolve(clientIdUrl, lane) ?: return CimdDocument.Unavailable
     return fetchPinned(clientIdUrl, addresses)
-  }
-
-  /**
-   * `InetAddress.getAllByName` has no timeout and cannot be interrupted: a nameserver that drops queries holds the
-   * thread for tens of seconds. That is why the lookup runs on its own thread with a deadline here — the resolver
-   * thread stays stuck until the OS gives up, but the budget slot and the request thread do not wait with it.
-   */
-  private fun resolvePinned(
-    url: String,
-    allowLocalAddresses: Boolean,
-    lane: CimdFetchLane,
-  ): List<InetAddress>? {
-    val host = UrlOrigins.parse(url)?.host?.lowercase() ?: return null
-    val stuckHosts =
-      when (lane) {
-        CimdFetchLane.REQUEST -> recentlyStuckHosts
-        CimdFetchLane.GRANT_CHECK -> recentlyStuckHostsForCheck
-      }
-    if (stuckHosts.getIfPresent(host) != null) {
-      logger.info("CIMD fetch refused for {}: this host's last lookup ran past the deadline", url)
-      metrics.oauth2CimdCapacityRefusalsCounter.increment()
-      return null
-    }
-    val pool =
-      when (lane) {
-        CimdFetchLane.REQUEST -> resolvers
-        CimdFetchLane.GRANT_CHECK -> grantResolvers
-      }
-    // The check reads one document at a time, so its lane needs no per-host cap.
-    val live =
-      when (lane) {
-        CimdFetchLane.REQUEST -> liveResolutions
-        CimdFetchLane.GRANT_CHECK -> null
-      }
-    if (live != null && !live.take(host)) {
-      logger.info("CIMD fetch refused for {}: this host already holds its share of the resolvers", url)
-      throw CimdNoCapacityException(url)
-    }
-    val resolution = CompletableFuture<List<InetAddress>>()
-    try {
-      // execute() and not submit(): a submitted task cancelled before it starts never runs, so it would leak a slot.
-      pool.execute {
-        try {
-          resolution.complete(urlSecurity.validateUrlAndResolve(url, allowLocalAddresses))
-        } catch (e: Throwable) {
-          resolution.completeExceptionally(e)
-        } finally {
-          live?.release(host)
-        }
-      }
-    } catch (_: RejectedExecutionException) {
-      live?.release(host)
-      logger.info("CIMD fetch refused for {}: no resolver capacity", url)
-      throw CimdNoCapacityException(url)
-    }
-    return try {
-      resolution.get(RESOLVE_DEADLINE.toMillis(), TimeUnit.MILLISECONDS)
-    } catch (_: TimeoutException) {
-      stuckHosts.put(host, true)
-      logger.info("CIMD fetch refused for {}: host did not resolve within {}", url, RESOLVE_DEADLINE)
-      metrics.oauth2CimdCapacityRefusalsCounter.increment()
-      null
-    } catch (e: Exception) {
-      logger.info("CIMD fetch refused for {}: host is unresolvable or blocked ({})", url, e.cause?.message ?: e.message)
-      null
-    }
   }
 
   internal fun fetchPinned(
@@ -282,12 +166,5 @@ class CimdDocumentFetcher(
     private val CONNECT_TIMEOUT = Duration.ofSeconds(2)
     private val RESPONSE_TIMEOUT = Duration.ofSeconds(3)
     private val DEFAULT_DEADLINE = Duration.ofSeconds(4)
-
-    private val RESOLVE_DEADLINE = Duration.ofSeconds(2)
-    internal const val MAX_CONCURRENT_RESOLUTIONS = 16
-    private const val MAX_GRANT_RESOLUTIONS = 8
-    internal const val MAX_RESOLUTIONS_PER_HOST = 4
-    private val STUCK_HOST_MEMO_TTL = Duration.ofSeconds(30)
-    private const val STUCK_HOST_MEMO_ENTRIES = 4_096L
   }
 }
