@@ -16,6 +16,8 @@
 
 package io.tolgee.security.ratelimit
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
@@ -39,6 +41,10 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.HandlerMapping
 import java.time.Duration
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -66,6 +72,8 @@ class RateLimitServiceTest {
 
   private val resilientCacheAccessor = ResilientCacheAccessor()
 
+  private val meterRegistry = SimpleMeterRegistry()
+
   private val rateLimitService =
     Mockito.spy(
       RateLimitService(
@@ -75,6 +83,7 @@ class RateLimitServiceTest {
         rateLimitProperties,
         authenticationFacade,
         resilientCacheAccessor,
+        Metrics(meterRegistry),
       ),
     )
 
@@ -355,6 +364,7 @@ class RateLimitServiceTest {
         rateLimitProperties,
         authenticationFacade,
         mockAccessor,
+        Metrics(meterRegistry),
       )
 
     val testPolicy = RateLimitPolicy("corrupted_test", 5, Duration.ofSeconds(1), false)
@@ -363,7 +373,116 @@ class RateLimitServiceTest {
     serviceWithMockAccessor.consumeBucket(testPolicy)
   }
 
+  @Test
+  fun `it rejects instead of waiting when the bucket lock is not released in time`() {
+    Mockito.`when`(rateLimitProperties.lockWaitMs).thenReturn(50L)
+
+    val testPolicy = RateLimitPolicy("lock_timeout_test", 10, Duration.ofSeconds(1), false)
+    val lock = lockingProvider.getLock("tolgee.ratelimit.lock_timeout_test")
+
+    lock.lock()
+    try {
+      val thrown = AtomicReference<Throwable>()
+      val worker = Thread { runCatching { rateLimitService.consumeBucket(testPolicy) }.onFailure(thrown::set) }
+      worker.start()
+      worker.join(5_000)
+
+      assertThat(worker.isAlive).isFalse
+      assertThat(thrown.get()).isInstanceOf(RateLimitedException::class.java)
+    } finally {
+      lock.unlock()
+    }
+
+    assertThat(lockTimeoutRejections()).isEqualTo(1.0)
+  }
+
+  @Test
+  fun `it rejects requests above the per-bucket concurrency cap without waiting for the lock`() {
+    Mockito.`when`(rateLimitProperties.maxConcurrentPerBucket).thenReturn(1)
+    Mockito.`when`(rateLimitProperties.lockWaitMs).thenReturn(10_000L)
+
+    val testPolicy = RateLimitPolicy("cap_test", 10, Duration.ofSeconds(1), false)
+    val (worker, release) = consumeInBackgroundAndWaitUntilInsideLock(testPolicy)
+
+    val start = System.currentTimeMillis()
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    // Rejected via the cap, not via the 10s lock wait
+    assertThat(System.currentTimeMillis() - start).isLessThan(5_000)
+
+    release.countDown()
+    worker.join(5_000)
+    assertThat(worker.isAlive).isFalse
+
+    assertThat(concurrencyCapRejections()).isEqualTo(1.0)
+    assertThat(lockTimeoutRejections()).isEqualTo(0.0)
+  }
+
+  @Test
+  fun `the concurrency cap of one bucket does not affect other buckets`() {
+    Mockito.`when`(rateLimitProperties.maxConcurrentPerBucket).thenReturn(1)
+
+    val blockedPolicy = RateLimitPolicy("cap_isolation_blocked", 10, Duration.ofSeconds(1), false)
+    val freePolicy = RateLimitPolicy("cap_isolation_free", 10, Duration.ofSeconds(1), false)
+    val (worker, release) = consumeInBackgroundAndWaitUntilInsideLock(blockedPolicy)
+
+    rateLimitService.consumeBucket(freePolicy)
+
+    release.countDown()
+    worker.join(5_000)
+    assertThat(worker.isAlive).isFalse
+    assertThat(concurrencyCapRejections()).isEqualTo(0.0)
+  }
+
+  @Test
+  fun `zero maxConcurrentPerBucket disables the concurrency cap`() {
+    Mockito.`when`(rateLimitProperties.maxConcurrentPerBucket).thenReturn(0)
+    Mockito.`when`(rateLimitProperties.lockWaitMs).thenReturn(10_000L)
+
+    val testPolicy = RateLimitPolicy("cap_disabled_test", 10, Duration.ofSeconds(1), false)
+    val (worker, release) = consumeInBackgroundAndWaitUntilInsideLock(testPolicy)
+
+    val thrown = AtomicReference<Throwable>()
+    val second = Thread { runCatching { rateLimitService.consumeBucket(testPolicy) }.onFailure(thrown::set) }
+    second.start()
+
+    release.countDown()
+    worker.join(5_000)
+    second.join(5_000)
+
+    assertThat(worker.isAlive).isFalse
+    assertThat(second.isAlive).isFalse
+    assertThat(thrown.get()).isNull()
+    assertThat(concurrencyCapRejections()).isEqualTo(0.0)
+  }
+
   // --- HELPERS
+
+  /**
+   * Starts a thread consuming [policy] and returns once that thread is inside the bucket lock,
+   * where it stays parked until the returned latch is counted down.
+   */
+  private fun consumeInBackgroundAndWaitUntilInsideLock(policy: RateLimitPolicy): Pair<Thread, CountDownLatch> {
+    val entered = CountDownLatch(1)
+    val release = CountDownLatch(1)
+    val worker =
+      Thread {
+        rateLimitService.consumeBucketUnless(policy) {
+          entered.countDown()
+          release.await(5, TimeUnit.SECONDS)
+          false
+        }
+      }
+    worker.start()
+    assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue
+    return worker to release
+  }
+
+  private fun concurrencyCapRejections(): Double =
+    meterRegistry.counter("tolgee.ratelimit.concurrency_rejections", "reason", "concurrency_cap").count()
+
+  private fun lockTimeoutRejections(): Double =
+    meterRegistry.counter("tolgee.ratelimit.concurrency_rejections", "reason", "lock_timeout").count()
+
   private fun makeFakeGenericRequest(): MockHttpServletRequest {
     val fakeRequest = MockHttpServletRequest()
     fakeRequest.remoteAddr = "127.0.0.1"
@@ -375,14 +494,15 @@ class RateLimitServiceTest {
 
   // Accessing the one from API package is a pain here.
   class TestLockingProvider : LockingProvider {
-    private val lock = ReentrantLock()
+    private val locks = ConcurrentHashMap<String, ReentrantLock>()
 
-    override fun getLock(name: String): Lock = lock
+    override fun getLock(name: String): Lock = locks.computeIfAbsent(name) { ReentrantLock() }
 
     override fun <T> withLocking(
       name: String,
       fn: () -> T,
     ): T {
+      val lock = getLock(name)
       lock.lock()
       try {
         return fn()
