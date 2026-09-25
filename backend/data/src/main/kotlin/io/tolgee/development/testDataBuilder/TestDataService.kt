@@ -430,6 +430,7 @@ class TestDataService(
     builder.data.slackConfigs.forEach { slackConfig ->
       entityManager.persist(slackConfig.self)
       slackConfig.data.slackMessages.forEach { entityManager.persist(it.self) }
+      slackConfig.data.preferences.forEach { entityManager.persist(it.self) }
     }
   }
 

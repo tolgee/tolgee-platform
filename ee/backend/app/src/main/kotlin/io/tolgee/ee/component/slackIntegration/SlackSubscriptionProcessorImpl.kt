@@ -7,6 +7,7 @@ import io.tolgee.component.automations.processors.SlackSubscriptionProcessor
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.component.slackIntegration.notification.SlackAutomationMessageSender
 import io.tolgee.model.automations.AutomationAction
+import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -15,24 +16,32 @@ class SlackSubscriptionProcessorImpl(
   private val activityModelAssembler: IProjectActivityModelAssembler,
   private val slackAutomationMessageSender: SlackAutomationMessageSender,
   private val applicationContext: ApplicationContext,
+  private val activityModifiedEntityRepository: ActivityModifiedEntityRepository,
 ) : SlackSubscriptionProcessor {
   override fun process(
     action: AutomationAction,
     activityRevisionId: Long?,
   ) {
     if (activityRevisionId == null) return
+    val config = action.slackConfig ?: return
+    val maxMessages = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND
+    val isBigOperation =
+      activityModifiedEntityRepository.countModifiedTranslationKeys(activityRevisionId) > maxMessages
 
     val view =
       ProjectActivityViewByRevisionProvider(
         applicationContext = applicationContext,
         activityRevisionId,
-        onlyCountInListAbove = SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND,
+        onlyCountInListAbove =
+          when {
+            isBigOperation -> maxMessages
+            else -> maxMessages * config.project.languages.size
+          },
       ).get() ?: return
 
     val activityModel = activityModelAssembler.toModel(view)
 
-    val data = SlackRequest(activityData = activityModel)
-    val config = action.slackConfig ?: return
+    val data = SlackRequest(activityData = activityModel, isBigOperation = isBigOperation)
 
     when (activityModel.type) {
       ActivityType.CREATE_KEY -> slackAutomationMessageSender.sendMessageOnKeyAdded(config, data)
