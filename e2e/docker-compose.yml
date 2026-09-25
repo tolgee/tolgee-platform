@@ -10,8 +10,10 @@ services:
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}
-      # The callback is served by OAuth2ConsentE2eDataController.
-      - tolgee.oauth2.browser-extension-redirect-uris=http://localhost:${TOLGEE_E2E_PORT:-8201}/internal/e2e-data/oauth2-consent/callback
+      # The first callback is served by OAuth2ConsentE2eDataController. The second one is never reached: every host
+      # this instance answers on is loopback, so it is the only way a consent screen here can report that the code
+      # goes to a website rather than to the user's machine.
+      - tolgee.oauth2.browser-extension-redirect-uris=http://localhost:${TOLGEE_E2E_PORT:-8201}/internal/e2e-data/oauth2-consent/callback,https://e2e-site.test/callback
   fakesmtp:
     image: axllent/mailpit:v1.29.2
     ports:

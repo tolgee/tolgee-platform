@@ -109,7 +109,7 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
 
-    implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation libs.caffeine
 
     /**
      * HANDLEBARS

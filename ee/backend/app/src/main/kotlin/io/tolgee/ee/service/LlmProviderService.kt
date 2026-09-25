@@ -16,7 +16,6 @@ import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.ee.component.llm.GoogleAiApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.component.llm.TolgeeApiService
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.LlmProviderNotFoundException
@@ -28,6 +27,7 @@ import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.cache.Cache
@@ -40,7 +40,6 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
-import kotlin.jvm.optionals.getOrNull
 import kotlin.math.roundToInt
 
 @Service
@@ -58,6 +57,7 @@ class LlmProviderService(
   private val googleAiApiService: GoogleAiApiService,
   private val llmProviderResolver: LlmProviderResolver,
   private val urlSecurity: UrlSecurity,
+  private val ssrfSafeRequestFactoryProvider: SsrfSafeRequestFactoryProvider,
   private val adminMtServiceFilter: AdminMtServiceFilter,
   private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
@@ -84,7 +84,7 @@ class LlmProviderService(
       repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
         val providerService = getProviderService(providerConfig.type)
         val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
-        repeatWithTimeouts(resolvedAttempts) { restTemplate ->
+        repeatWithTimeouts(resolvedAttempts, providerConfig) { restTemplate ->
           val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
           result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
           result
@@ -153,7 +153,6 @@ class LlmProviderService(
 
   fun getAllServerProviders(): List<LlmProviderDto> {
     return llmPropertiesService.getProviders().mapIndexed { index, llmProvider ->
-      // server configured providers are indexed like -1, -2, -3, to identify them
       llmProvider.toDto(-(index.toLong()) - 1)
     }
   }
@@ -192,11 +191,12 @@ class LlmProviderService(
 
   fun <T> repeatWithTimeouts(
     attempts: List<Int>,
+    provider: LlmProviderDto,
     callback: (restTemplate: RestTemplate) -> T,
   ): T {
     var lastError: Exception? = null
     for (timeout in attempts) {
-      val restTemplate = restTemplateBuilder.readTimeout(Duration.ofSeconds(timeout.toLong())).build()
+      val restTemplate = buildRestTemplate(provider, Duration.ofSeconds(timeout.toLong()))
       try {
         return callback(restTemplate)
       } catch (e: ResourceAccessException) {
@@ -204,6 +204,37 @@ class LlmProviderService(
       }
     }
     throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
+  }
+
+  /**
+   * Every provider that names an endpoint goes through the same factory, and the only thing its origin decides is
+   * whether a private address is allowed: an organization-level `apiUrl` is user-supplied, so its connection pins
+   * DNS, matching what [validateApiUrl] already refuses at create time, while a server-configured one is the
+   * operator's own endpoint — routinely a private-network address such as a self-hosted inference server — and
+   * was never subject to that check.
+   *
+   * What neither of them does is follow a redirect. The provider's API key rides in plain headers, and
+   * httpclient5 copies those onto the hop — the same reason webhooks and SSO do not follow them. A configured
+   * endpoint answers the request it was given; one that answers with a `Location` is not the endpoint that was
+   * configured. A provider naming no endpoint at all has nothing to pin and nothing of ours to hand away.
+   */
+  private fun buildRestTemplate(
+    provider: LlmProviderDto,
+    timeout: Duration,
+  ): RestTemplate {
+    val apiUrl = provider.apiUrl
+    if (apiUrl.isNullOrBlank()) {
+      return restTemplateBuilder.readTimeout(timeout).build()
+    }
+    return restTemplateBuilder.build().apply {
+      requestFactory =
+        ssrfSafeRequestFactoryProvider.create(
+          allowLocalAddresses = provider.serverConfigured,
+          connectTimeout = timeout,
+          responseTimeout = timeout,
+          followRedirects = false,
+        )
+    }
   }
 
   fun getProviderByName(

@@ -26,6 +26,7 @@ import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.only
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -47,8 +48,9 @@ import java.util.HashMap
 class SsoGlobalTest : AuthorizedControllerTest() {
   private lateinit var testData: SsoTestData
 
-  @MockitoBean
+  @MockitoBean(name = "ssoGlobalRestTemplate")
   @Autowired
+  @Qualifier("ssoGlobalRestTemplate")
   private val restTemplate: RestTemplate? = null
 
   @Autowired

@@ -9,6 +9,7 @@ import io.tolgee.security.authentication.DisabledAuthenticationResolver
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -40,7 +41,8 @@ class WebsocketAuthenticationResolver(
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
       return attempt("Bearer token") {
-        oauth2AccessTokenResolver.tryResolve(bearer) ?: jwtService.validateToken(bearer)
+        // The STOMP channel is the webapp/REST surface, so an OAuth token here must be an API-audience one.
+        oauth2AccessTokenResolver.tryResolve(bearer, OAuth2Audience.API) ?: jwtService.validateToken(bearer)
       }
     }
 

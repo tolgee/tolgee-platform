@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
@@ -95,13 +96,16 @@ class AuthenticationFilter(
     // 401 the very requests a client makes to recover — including the RFC 9728 document a 401 pointed it at.
     // Matched on the path the dispatcher itself matched, so a percent-encoded or matrix-parameterised spelling of
     // the same route is skipped too.
-    if (UrlPathHelper.defaultInstance.getPathWithinApplication(request) in AUTHORIZATION_SERVER_PATHS) return
+    val path = UrlPathHelper.defaultInstance.getPathWithinApplication(request)
+    if (path in AUTHORIZATION_SERVER_PATHS) return
 
-    val authorization = request.getHeader("Authorization")
+    val authorization = request.getHeader(CredentialPresence.AUTHORIZATION_HEADER)
     if (authorization != null) {
       if (authorization.startsWith("Bearer ")) {
         val token = authorization.substring(7)
-        val auth = oauth2AccessTokenResolver.tryResolve(token) ?: jwtService.validateToken(token)
+        val auth =
+          oauth2AccessTokenResolver.tryResolve(token, OAuth2Audience.forRequestPath(path))
+            ?: jwtService.validateToken(token)
         checkIfSsoUserStillValid(auth.principal)
 
         SecurityContextHolder.getContext().authentication = auth
@@ -111,7 +115,9 @@ class AuthenticationFilter(
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
+    val apiKey =
+      request.getHeader(CredentialPresence.API_KEY_HEADER)
+        ?: request.getParameter(CredentialPresence.API_KEY_QUERY_PARAM)
     if (apiKey != null) {
       if (apiKey.startsWith(BILLING_API_KEY_PREFIX)) {
         return // Skip - handled by billing stats controller

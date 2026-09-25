@@ -11,12 +11,6 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.bearerHeaders
-import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -82,6 +76,34 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       .assert
       .isNotNull()
       .contains("insufficient_scope")
+  }
+
+  @Test
+  fun `an MCP-audience token is refused by the REST API with invalid_token`() {
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf("translations.view"),
+        projectIds = listOf(testData.project.id),
+        audience = OAuth2Audience.MCP,
+      )
+
+    val response = performGet(translationsUrl(), bearerHeaders(token)).andReturn().response
+
+    response.status.assert.isEqualTo(401)
+    response
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("invalid_token")
+  }
+
+  @Test
+  fun `a token whose grant audience no longer resolves is refused everywhere`() {
+    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
+    tokens.corruptAudience(token, "FUTURE")
+
+    performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
   }
 
   @Test

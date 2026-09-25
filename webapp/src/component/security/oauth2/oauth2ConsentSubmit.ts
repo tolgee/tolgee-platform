@@ -13,6 +13,7 @@ export const authorizeRequestFromSearch = (search: string) => {
     codeChallenge: value('code_challenge'),
     codeChallengeMethod: value('code_challenge_method'),
     project: value('project'),
+    resource: value('resource'),
   };
 };
 

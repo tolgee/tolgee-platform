@@ -2245,11 +2245,14 @@ export interface components {
     };
     ConsentInfoModel: {
       appName: string;
+      clientOrigin?: string;
       project?: components["schemas"]["OAuth2ProjectModel"];
+      redirectsToLocalApp: boolean;
       /** Format: int64 */
       requestedProjectId?: number;
       requiredScopes: string[];
       scopes: string[];
+      verified: boolean;
     };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
@@ -4624,6 +4627,7 @@ export interface components {
       project?: string;
       /** @description Redirect URI from the client's authorize request; must be registered for the client */
       redirectUri: string;
+      resource?: string;
       responseType?: string;
       scope?: string;
       state?: string;
