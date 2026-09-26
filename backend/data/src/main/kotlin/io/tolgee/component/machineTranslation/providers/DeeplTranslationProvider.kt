@@ -26,6 +26,7 @@ class DeeplTranslationProvider(
         params.targetLanguageTag.uppercase(),
         getFormality(params),
         params.context,
+        preserveTags = params.containsNumberTag,
       )
 
     return MtValueProvider.MtResult(
