@@ -184,13 +184,14 @@ export const useAuthService = (
   }
 
   async function setJwtToken(token: string | undefined) {
+    const previousUserId = tokenService.getUserId(jwtToken);
     _setJwtToken(token);
     if (token) {
       tokenService.setToken(token);
     } else {
       tokenService.disposeToken();
     }
-    if (Boolean(token) !== Boolean(jwtToken)) {
+    if (tokenService.getUserId(token) !== previousUserId) {
       return initialData.actions.invalidateInitialData();
     } else {
       return initialData.actions.refetchInitialData();
