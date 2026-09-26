@@ -182,7 +182,11 @@ export function SwitchPopover<T extends { id: number; name: string }>({
               </MenuItem>
               {hasNextPage && option.id === items[items.length - 1]?.id && (
                 <Box display="flex" justifyContent="center" mt={0.5}>
-                  <Button size="small" onClick={() => fetchNextPage()}>
+                  <Button
+                    size="small"
+                    onClick={() => fetchNextPage()}
+                    data-cy="switch-popover-load-more"
+                  >
                     {t('global_load_more')}
                   </Button>
                 </Box>
