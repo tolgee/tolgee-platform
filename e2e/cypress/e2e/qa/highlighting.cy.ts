@@ -3,6 +3,7 @@ import {
   qaTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { gcy } from '../../common/shared';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('QA inline highlighting', () => {
@@ -38,6 +39,21 @@ describe('QA inline highlighting', () => {
       .closestDcy('translations-row')
       .findDcy('qa-issue-marker')
       .should('exist');
+  });
+
+  it('ignores a plural variant issue from the highlight tooltip', () => {
+    view.visit(projectId);
+
+    view
+      .getTranslationCell('key_plural_issue', 'fr')
+      .findDcy('qa-issue-marker')
+      .trigger('mouseover');
+    gcy('qa-action-ignore').click();
+
+    view
+      .getTranslationCell('key_plural_issue', 'fr')
+      .findDcy('qa-issue-marker')
+      .should('not.exist');
   });
 
   it('does not show highlights on translations without issues', () => {
