@@ -8,9 +8,12 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import {
+  omitTaskScopeQuery,
+  taskScopeFiltersQuery,
+  useTaskCreationFilters,
+} from 'tg.ee.module/task/hooks/useTaskCreationFilters';
 import { User } from 'tg.component/UserAccount';
-import { TranslationStateType } from 'tg.translationTools/useStateTranslation';
 import { StateType } from 'tg.constants/translationStates';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
@@ -21,7 +24,6 @@ import {
   TaskCreateForm,
 } from './TaskCreateForm';
 import { EmptyScopeDialog } from './EmptyScopeDialog';
-import { useTranslationFilters } from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -59,8 +61,6 @@ export type InitialValues = {
   dueDate: number;
   languageAssignees: Record<number, User[]>;
   selection: number[];
-  filters: FiltersType;
-  stateFilters: TranslationStateType[];
 };
 
 type Props = {
@@ -93,20 +93,29 @@ export const TaskCreateDialog = ({
     invalidatePrefix: ['/v2/projects/{projectId}/tasks', '/v2/user-tasks'],
   });
 
-  const [filters, setFilters] = useState<FiltersType>({});
-  const { filtersQuery, ...actions } = useTranslationFilters({
+  const keysPreselected = Boolean(initialValues?.selection);
+
+  const {
     filters,
-    setFilters,
+    defaultFilters,
+    actions,
+    filtersQuery,
+    languages,
+    setLanguages,
+    stateFilters: stateFiltersOverride,
+    setStateFilters,
+  } = useTaskCreationFilters({
+    allLanguages,
+    initialLanguages: initialValues?.languages,
+    keysPreselected,
   });
-  const [_stateFilters, setStateFilters] = useState<TranslationStateType[]>();
-  const [languages, setLanguages] = useState(initialValues?.languages ?? []);
 
   const selectedLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/translations/select-all',
     method: 'get',
     path: { projectId },
     query: {
-      ...filtersQuery,
+      ...omitTaskScopeQuery(filtersQuery),
       languages: allLanguages.map((l) => l.tag),
       branch,
     },
@@ -124,8 +133,8 @@ export const TaskCreateDialog = ({
   const canBeSubmitted = scope.every(Boolean);
 
   function getStateFilters(taskType: TaskType) {
-    if (_stateFilters) {
-      return _stateFilters;
+    if (stateFiltersOverride) {
+      return stateFiltersOverride;
     }
     return taskType === 'TRANSLATE'
       ? DEFAULT_STATE_FILTERS_TRANSLATE
@@ -187,6 +196,7 @@ export const TaskCreateDialog = ({
                   (i) => i !== 'OUTDATED'
                 ) as StateType[],
                 filterOutdated: stateFilters.includes('OUTDATED'),
+                ...taskScopeFiltersQuery(filters, values.type),
               },
               content: {
                 'application/json': { tasks: data },
@@ -216,7 +226,8 @@ export const TaskCreateDialog = ({
                 disabled={!taskFeature}
                 setLanguages={setLanguages}
                 filters={filters}
-                filterActions={initialValues?.selection ? undefined : actions}
+                filterActions={keysPreselected ? undefined : actions}
+                defaultFilters={defaultFilters}
                 stateFilters={getStateFilters(values.type)}
                 setStateFilters={setStateFilters}
                 projectId={projectId}

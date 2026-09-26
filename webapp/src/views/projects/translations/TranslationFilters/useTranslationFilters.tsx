@@ -10,6 +10,13 @@ function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
 
+const LANGUAGE_SCOPES = [
+  'filterTranslationLanguage',
+  'filterSuggestionLanguage',
+  'filterTaskLanguage',
+  'filterQaCheckTypeLanguage',
+] as const satisfies readonly (keyof FiltersInternal)[];
+
 type Props = {
   filters: FiltersInternal;
   setFilters: (value: FiltersInternal) => void;
@@ -25,14 +32,22 @@ export const useTranslationFilters = ({
 }: Props) => {
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
-  function updateSelectedLanguages(newLanguages: string[] | undefined) {
-    if (
-      typeof filters.filterTranslationLanguage === 'string' &&
-      newLanguages &&
-      newLanguages.includes(filters.filterTranslationLanguage)
-    ) {
-      setFilters({ filterTranslationLanguage: undefined });
+  function clearFiltersForRemovedLanguages(newLanguages: string[] | undefined) {
+    if (!newLanguages) {
+      return;
     }
+    const dangling = LANGUAGE_SCOPES.filter((scope) => {
+      const value = filters[scope];
+      return typeof value === 'string' && !newLanguages.includes(value);
+    });
+    if (!dangling.length) {
+      return;
+    }
+    const updated = { ...filters };
+    dangling.forEach((scope) => {
+      updated[scope] = undefined;
+    });
+    setFilters(updated);
   }
 
   function addFilter(...params: AddParams) {
@@ -233,6 +248,19 @@ export const useTranslationFilters = ({
     }
   }
 
+  function inLanguageScope(scope: true | string | undefined) {
+    return (tag: string) => {
+      switch (scope) {
+        case undefined:
+          return tag !== baseLang;
+        case true:
+          return true;
+        default:
+          return tag === scope;
+      }
+    };
+  }
+
   const filtersQuery: Partial<FiltersType> = {
     filterTag: filters.filterTag,
     filterNoTag: filters.filterNoTag,
@@ -288,16 +316,7 @@ export const useTranslationFilters = ({
         });
       });
     selectedLanguages
-      .filter((tag) => {
-        switch (filters.filterTranslationLanguage) {
-          case undefined:
-            return tag !== baseLang;
-          case true:
-            return true;
-          default:
-            return tag === filters.filterTranslationLanguage;
-        }
-      })
+      .filter(inLanguageScope(filters.filterTranslationLanguage))
       .forEach((tag) => {
         filters.filterTranslationState?.forEach((state) => {
           if (state === 'OUTDATED') {
@@ -326,16 +345,7 @@ export const useTranslationFilters = ({
       });
 
     selectedLanguages
-      .filter((tag) => {
-        switch (filters.filterSuggestionLanguage) {
-          case undefined:
-            return tag !== baseLang;
-          case true:
-            return true;
-          default:
-            return tag === filters.filterSuggestionLanguage;
-        }
-      })
+      .filter(inLanguageScope(filters.filterSuggestionLanguage))
       .forEach((tag) => {
         if (filters.filterHasSuggestions) {
           filtersQuery.filterHasSuggestionsInLang = add(
@@ -350,12 +360,41 @@ export const useTranslationFilters = ({
           );
         }
       });
+
+    const taskLanguages = selectedLanguages.filter(
+      inLanguageScope(filters.filterTaskLanguage)
+    );
+    if (taskLanguages.length && filters.filterTaskType?.length) {
+      filtersQuery.filterTaskType = filters.filterTaskType;
+    }
+    taskLanguages.forEach((tag) => {
+      switch (filters.filterTaskStatus) {
+        case 'HAS_BEEN_IN_TASK':
+          filtersQuery.filterHasBeenInTaskInLang = add(
+            filtersQuery.filterHasBeenInTaskInLang,
+            tag
+          );
+          break;
+        case 'NEVER_IN_TASK':
+          filtersQuery.filterNeverInTaskInLang = add(
+            filtersQuery.filterNeverInTaskInLang,
+            tag
+          );
+          break;
+        case 'NOT_IN_OPEN_TASK':
+          filtersQuery.filterNotInOpenTaskInLang = add(
+            filtersQuery.filterNotInOpenTaskInLang,
+            tag
+          );
+          break;
+      }
+    });
   }
 
   return {
     filters,
     filtersQuery,
-    updateSelectedLanguages,
+    clearFiltersForRemovedLanguages,
     addFilter,
     removeFilter,
     setFilters,

@@ -3,6 +3,17 @@ import { E2KeyCreateDialog, KeyDialogFillProps } from './E2KeyCreateDialog';
 import { getTranslationCell } from '../common/translations';
 import { gcy, gcyAdvanced } from '../common/shared';
 import { E2GlossaryPanel } from './glossaries/E2GlossaryPanel';
+import { components } from '../../../webapp/src/service/apiSchema.generated';
+
+type TaskType = components['schemas']['TaskModel']['type'];
+
+const TASK_STATUS_FILTERS = {
+  NOT_IN_OPEN_TASK: 'translations-filter-not-in-open-task',
+  HAS_BEEN_IN_TASK: 'translations-filter-has-been-in-task',
+  NEVER_IN_TASK: 'translations-filter-never-in-task',
+} as const;
+
+type TaskStatusFilter = keyof typeof TASK_STATUS_FILTERS;
 
 export class E2TranslationsView {
   visit(projectId: number) {
@@ -63,6 +74,28 @@ export class E2TranslationsView {
 
   applyFilterForLanguage(language: string) {
     gcy('translations-filter-apply-for-language').contains(language).click();
+    return this;
+  }
+
+  getTaskStatusFilter(status: TaskStatusFilter) {
+    return gcy(TASK_STATUS_FILTERS[status]);
+  }
+
+  getTaskTypeFilter(type: TaskType) {
+    return gcyAdvanced({ value: 'translations-filter-task-type', type });
+  }
+
+  assertTaskStatusFilterChecked(status: TaskStatusFilter, checked = true) {
+    this.getTaskStatusFilter(status)
+      .find('input')
+      .should(checked ? 'be.checked' : 'not.be.checked');
+    return this;
+  }
+
+  assertTaskTypeFilterChecked(type: TaskType, checked = true) {
+    this.getTaskTypeFilter(type)
+      .find('input')
+      .should(checked ? 'be.checked' : 'not.be.checked');
     return this;
   }
 

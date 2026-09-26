@@ -10,7 +10,7 @@ import { FakeInput } from 'tg.component/FakeInput';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { TranslationFiltersPopup } from './TranslationFiltersPopup';
 import { type FilterActions } from './tools';
-import { countFilters, getFilterName } from './summary';
+import { countFilters, getFilterName, sameFilters } from './summary';
 import {
   useTranslationsActions,
   useTranslationsSelector,
@@ -50,6 +50,9 @@ export const TranslationFilters = ({
   );
 
   const numberOfFilters = countFilters(value);
+  const clearedFilters = filterOptions?.clearedFilters ?? {};
+  const clearable =
+    Boolean(numberOfFilters) && !sameFilters(value, clearedFilters);
   const labelIds = value.filterLabel?.map((id) => Number(id)) || [];
   const labelsForFilter = selectedLabels?.length ? selectedLabels : labels;
 
@@ -108,10 +111,10 @@ export const TranslationFilters = ({
             <Box
               sx={{ display: 'flex', marginRight: -0.5, alignItems: 'center' }}
             >
-              {Boolean(numberOfFilters) && (
+              {clearable && (
                 <StyledInputButton
                   size="small"
-                  onClick={stopBubble(() => actions.setFilters({}))}
+                  onClick={stopBubble(() => actions.setFilters(clearedFilters))}
                   tabIndex={-1}
                   data-cy="translations-filter-select-clear"
                 >

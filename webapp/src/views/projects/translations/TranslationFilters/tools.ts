@@ -1,5 +1,6 @@
 import { StateType } from 'tg.constants/translationStates';
 import { operations, components } from 'tg.service/apiSchema.generated';
+import { TaskType } from 'tg.service/apiSchemaTypes';
 
 export type FiltersType = operations['getTranslations']['parameters']['query'];
 
@@ -8,6 +9,11 @@ export type LanguageModel = components['schemas']['LanguageModel'];
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
+
+export type TaskStatusFilter =
+  | 'NOT_IN_OPEN_TASK'
+  | 'HAS_BEEN_IN_TASK'
+  | 'NEVER_IN_TASK';
 
 export type FiltersInternal = {
   filterTag?: string[];
@@ -26,6 +32,8 @@ export type FiltersInternal = {
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
+  filterTaskStatus?: TaskStatusFilter;
+  filterTaskType?: TaskType[];
   filterDeletedByUserId?: number[];
 
   /*
@@ -35,11 +43,12 @@ export type FiltersInternal = {
    *  - string = one language tag
    */
   filterTranslationLanguage?: true | string;
-  // same for suggestions
+  // same for suggestions and tasks
   filterSuggestionLanguage?: true | string;
+  filterTaskLanguage?: true | string;
 
   /*
-   * this one differs from the two above
+   * this one differs from the others above
    *
    * Specifies which languages will be considered when filtering by the QA check type:
    *  - undefined = all languages (default)
@@ -77,4 +86,7 @@ export type FilterActions = {
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
   showDeletedBy?: boolean;
+  taskCreation?: boolean;
+  clearedFilters?: FiltersInternal;
+  pinnedTaskType?: TaskType;
 };

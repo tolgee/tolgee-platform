@@ -247,7 +247,7 @@ class QueryTranslationFiltering(
   private fun wrapExistsOrIn(subquery: Subquery<Long>): Predicate =
     if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery)
 
-  private fun languagePredicate(
+  fun languagePredicate(
     langIdExpr: Path<Long>,
     languageIds: List<Long>,
   ): Predicate =
@@ -366,7 +366,7 @@ class QueryTranslationFiltering(
 
   private fun languageByTag(tag: String): LanguageDto? = queryBase.languages.find { it.tag == tag }
 
-  private fun languageIdsForTags(tags: List<String>?): List<Long>? {
+  fun languageIdsForTags(tags: List<String>?): List<Long>? {
     if (tags.isNullOrEmpty()) return null
     val ids = tags.mapNotNull { tag -> languageByTag(tag)?.id }
     return ids.takeIf { it.isNotEmpty() }

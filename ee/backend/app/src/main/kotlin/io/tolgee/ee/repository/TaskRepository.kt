@@ -86,6 +86,34 @@ private const val TASK_FILTERS = """
     )
 """
 
+private const val TASK_IN_LANGUAGE_EXISTS = """exists (
+              select 1 from task_key hist_tk
+                  join task hist_t on (hist_tk.task_id = hist_t.id)
+              where hist_tk.key_id = key.id and hist_t.language_id = :languageId
+                and hist_t.type in :#{#filters.matchedTaskTypeNames}
+            )"""
+
+private const val TASK_HISTORY_FILTERS = """
+          (
+            COALESCE(:#{#filters.filterNeverInTask}, false) = false
+            or not $TASK_IN_LANGUAGE_EXISTS
+          )
+          and (
+            COALESCE(:#{#filters.filterHasBeenInTask}, false) = false
+            or $TASK_IN_LANGUAGE_EXISTS
+          )
+          and (
+            COALESCE(:#{#filters.filterNotInOpenTask}, false) = false
+            or not exists (
+              select 1 from task_key open_tk
+                  join task open_t on (open_tk.task_id = open_t.id)
+              where open_tk.key_id = key.id and open_t.language_id = :languageId
+                and open_t.type in :#{#filters.matchedTaskTypeNames}
+                and open_t.state in :#{T(io.tolgee.model.enums.TaskState).OPEN_STATE_NAMES}
+            )
+          )
+"""
+
 @Repository
 interface TaskRepository : JpaRepository<Task, Long> {
   @Query(
@@ -224,7 +252,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
 
   @Query(
     nativeQuery = true,
-    value = """
+    value =
+      """
       select key.id
       from key
           left join translation t on t.key_id = key.id and t.language_id = :languageId
@@ -245,6 +274,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
+          and $TASK_HISTORY_FILTERS
     """,
   )
   fun getKeysIncludingConflicts(
@@ -257,7 +287,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
 
   @Query(
     nativeQuery = true,
-    value = """
+    value =
+      """
       select key.id
       from key
           left join (
@@ -267,7 +298,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
                 left join language l on (task.language_id = l.id)
             where task.type = :taskType
                 and task.language_id = :languageId
-                and (task.state = 'IN_PROGRESS' or task.state = 'NEW')
+                and task.state in :#{T(io.tolgee.model.enums.TaskState).OPEN_STATE_NAMES}
                 and l.deleted_at is null
                 and key.deleted_at is null
           ) as task on task.key_id = key.id
@@ -290,6 +321,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
+          and $TASK_HISTORY_FILTERS
     """,
   )
   fun getKeysWithoutConflicts(

@@ -420,14 +420,6 @@ class TaskService(
   ): KeysScopeView {
     val language = languageService.get(dto.languageId, projectEntity.id)
     val branch = getBranchForTask(projectEntity.id, dto.branch)
-    val keysIncludingConflicts =
-      taskRepository.getKeysIncludingConflicts(
-        projectEntity.id,
-        language.id,
-        dto.keys,
-        filters,
-        branch?.name,
-      )
     val relevantKeys =
       taskRepository.getKeysWithoutConflicts(
         projectEntity.id,
@@ -447,8 +439,24 @@ class TaskService(
       keyCount = relevantKeys.size.toLong(),
       wordCount = result.wordCount,
       characterCount = result.characterCount,
-      keyCountIncludingConflicts = keysIncludingConflicts.size.toLong(),
+      keyCountIncludingConflicts =
+        countKeysIncludingConflicts(projectEntity, dto, filters, language.id, relevantKeys, branch?.name),
     )
+  }
+
+  private fun countKeysIncludingConflicts(
+    projectEntity: Project,
+    dto: CalculateScopeRequest,
+    filters: TranslationScopeFilters,
+    languageId: Long,
+    relevantKeys: List<Long>,
+    branchName: String?,
+  ): Long {
+    if (filters.excludesOpenTasksOfType(dto.type)) return relevantKeys.size.toLong()
+    return taskRepository
+      .getKeysIncludingConflicts(projectEntity.id, languageId, dto.keys, filters, branchName)
+      .size
+      .toLong()
   }
 
   @Transactional
