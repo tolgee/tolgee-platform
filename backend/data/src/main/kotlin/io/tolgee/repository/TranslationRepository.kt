@@ -155,6 +155,8 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         k <> :key and
         k.deletedAt is null and
         (b is null or b.isDefault = true)
+      order by case when target.state = io.tolgee.model.enums.TranslationState.REVIEWED then 0 else 1 end,
+        target.updatedAt desc, target.id desc
       """,
   )
   fun getTranslationMemoryValue(
