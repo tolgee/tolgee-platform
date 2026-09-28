@@ -13,6 +13,7 @@ enum class Scope(
   TRANSLATIONS_EDIT("translations.edit"),
   TRANSLATIONS_SUGGEST("translations.suggest"),
   TRANSLATION_SUGGESTIONS_MANAGE("translation-suggestions.manage"),
+  TRANSLATION_SUGGESTIONS_OWN_ACCESS("translation-suggestions.own-access"),
   KEYS_EDIT("keys.edit"),
   SCREENSHOTS_UPLOAD("screenshots.upload"),
   SCREENSHOTS_DELETE("screenshots.delete"),
@@ -62,6 +63,7 @@ enum class Scope(
     private val screenshotsView = HierarchyItem(SCREENSHOTS_VIEW, listOf(keysView))
     private val translationsEdit = HierarchyItem(TRANSLATIONS_EDIT, listOf(translationsView))
     private val tasksView = HierarchyItem(TASKS_VIEW, listOf(translationsView))
+    private val suggestionsOwnAccess = HierarchyItem(TRANSLATION_SUGGESTIONS_OWN_ACCESS, listOf(translationsView))
     private val activityView = HierarchyItem(ACTIVITY_VIEW)
     private val membersView = HierarchyItem(MEMBERS_VIEW)
     private val batchJobsView = HierarchyItem(BATCH_JOBS_VIEW)
@@ -149,7 +151,7 @@ enum class Scope(
           ),
           HierarchyItem(
             TRANSLATION_SUGGESTIONS_MANAGE,
-            listOf(translationsView),
+            listOf(translationsView, suggestionsOwnAccess),
           ),
           batchJobsView,
           HierarchyItem(BATCH_JOBS_CANCEL),

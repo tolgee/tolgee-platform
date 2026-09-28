@@ -31,6 +31,8 @@ class SuggestionsTestData(
   var relatedProject: ProjectBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
+  lateinit var translatorsCzechSuggestion: SuggestionBuilder
+  lateinit var reviewersCzechSuggestion: SuggestionBuilder
   val englishSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
   var czechReviewerEnglishSuggestion: SuggestionBuilder
   val czechTranslations: MutableList<TranslationBuilder> = mutableListOf()
@@ -207,21 +209,21 @@ class SuggestionsTestData(
       }
 
       keys[0].apply {
-        czechSuggestions.add(
+        translatorsCzechSuggestion =
           addSuggestion {
             this.language = czechLanguage
             this.author = projectTranslator.self
             this.translation = "Navržený překlad 0-1"
-          },
-        )
+          }
+        czechSuggestions.add(translatorsCzechSuggestion)
 
-        czechSuggestions.add(
+        reviewersCzechSuggestion =
           addSuggestion {
             this.language = czechLanguage
             this.author = projectReviewer.self
             this.translation = "Navržený překlad 0-2"
-          },
-        )
+          }
+        czechSuggestions.add(reviewersCzechSuggestion)
 
         englishSuggestions.add(
           addSuggestion {
