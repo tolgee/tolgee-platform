@@ -32,7 +32,8 @@ class TranslationMemoryServiceEeImpl(
            ) as similarity,
            tm.name as translationMemoryName,
            tmp.priority as assignmentPriority,
-           re.updated_at as updatedAt
+           re.updated_at as updatedAt,
+           re.reviewed as reviewed
     from (
       -- Stored entries: user-created via the add-entry dialog or TMX import. No contributing
       -- key — manual entries are not linked to any project translation.
@@ -45,7 +46,8 @@ class TranslationMemoryServiceEeImpl(
              0::bigint as key_id,
              null::boolean as any_key_is_plural,
              false as includes_current_key,
-             tme.updated_at as updated_at
+             tme.updated_at as updated_at,
+             true as reviewed
       from translation_memory_entry tme
       where tme.translation_memory_id in :tmIds
         and tme.target_language_tag = :targetLanguageTag
@@ -69,7 +71,8 @@ class TranslationMemoryServiceEeImpl(
         k.id as key_id,
         k.is_plural as any_key_is_plural,
         (cast(:keyId as bigint) is not null and k.id = :keyId) as includes_current_key,
-        target_t.updated_at as updated_at
+        target_t.updated_at as updated_at,
+        target_t.state = 2 as reviewed
       from (
         select base_t.key_id, base_t.text, base_t.language_id
         from translation base_t

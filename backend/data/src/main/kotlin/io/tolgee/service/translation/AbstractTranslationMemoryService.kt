@@ -42,11 +42,14 @@ abstract class AbstractTranslationMemoryService(
              similarity,
              translationMemoryName,
              assignmentPriority,
-             updatedAt
+             updatedAt,
+             reviewed
       from ($baseSelect) raw
-      order by baseTranslationText, targetTranslationText,
-               similarity desc, assignmentPriority asc
+      order by baseTranslationText, targetTranslationText, $tiebreak
       """
+
+  private val tiebreak =
+    "similarity desc, assignmentPriority asc, reviewed desc, updatedAt desc, baseTranslationText, targetTranslationText"
 
   @Transactional
   override fun getSuggestions(
@@ -93,7 +96,7 @@ abstract class AbstractTranslationMemoryService(
           with deduped as ($dedupedBaseSelect)
           select deduped.*, count(*) over()
           from deduped
-          order by deduped.similarity desc, deduped.assignmentPriority asc
+          order by $tiebreak
           """.trimIndent(),
         baseTranslationText = baseTranslationText,
         isPlural = isPlural,
@@ -105,10 +108,9 @@ abstract class AbstractTranslationMemoryService(
         .setFirstResult(pageable.offset.toInt())
         .resultList
 
-    // count(*) over() trails the deduped projection; deduped has 10 columns
-    // (indexes 0..9), so the window count is at index 10. PG returns it as bigint —
-    // JDBC may surface Long or BigInteger depending on driver, so go through Number.
-    val count = ((resultList.firstOrNull() as Array<*>?)?.get(10) as Number?)?.toLong() ?: 0L
+    // count(*) over() is the last column; PG returns it as bigint, which JDBC may surface
+    // as Long or BigInteger depending on driver, so go through Number.
+    val count = ((resultList.firstOrNull() as Array<*>?)?.last() as Number?)?.toLong() ?: 0L
     return PageImpl(resultList.map { mapRow(it as Array<*>) }, pageable, count)
   }
 
@@ -145,7 +147,7 @@ abstract class AbstractTranslationMemoryService(
         sql =
           """
           select * from ($dedupedBaseSelect) deduped
-          order by deduped.similarity desc, deduped.assignmentPriority asc
+          order by $tiebreak
           """.trimIndent(),
         baseTranslationText = baseTranslationText,
         isPlural = isPlural,
