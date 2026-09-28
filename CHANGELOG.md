@@ -1,3 +1,10 @@
+## [3.224.9](https://github.com/tolgee/tolgee-platform/compare/v3.224.8...v3.224.9) (2026-09-28)
+
+
+### Bug Fixes
+
+* deterministic tiebreak for equal translation memory matches ([#3920](https://github.com/tolgee/tolgee-platform/issues/3920)) ([8c6e11d](https://github.com/tolgee/tolgee-platform/commit/8c6e11d68345b83d5a7d514ab1ed646f8002ce7e)), closes [#3913](https://github.com/tolgee/tolgee-platform/issues/3913)
+
 ## [3.224.8](https://github.com/tolgee/tolgee-platform/compare/v3.224.7...v3.224.8) (2026-09-25)
 
 
