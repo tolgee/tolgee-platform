@@ -426,8 +426,20 @@ These are known gaps, deferred to the client rounds that first exercise them:
   scope into `translations.suggest` would negate the reason for its existence. Roles pick it up
   at runtime, VIEW through REVIEW explicitly and EDIT / MANAGE because `translation-suggestions.manage` expands to
   it; the community floor grants it too.
-  Granular permissions store their scope list literally, so they need a backfill, which must ship in the same
-  release as this change.
+  The scope implies `translations.view`, as every suggestion scope does and as the delete endpoint already
+  required, so a token or key that carries only `translation-suggestions.own-access` — inert before, since the
+  endpoint wanted view — is granted `translations.view` and `keys.view` with it, intersected with the user's own
+  scopes as always, and deletes its holder's own suggestions. Granular permissions store their scope list
+  literally, so changeSet `1789914853000-1` backfills the scope in the same release into every granular permission
+  (members, invitations, organization base permissions) whose scopes already imply `translations.view`; one
+  holding only `keys.view` or `screenshots.view` is left alone, because the scope would bring translation reading
+  with it. Unlike `tasks.assigned-access` above, this is not an elevation being restored: every author could delete their own
+  suggestion, so the backfill grants nobody more than they had, while skipping it would take an everyday action
+  away from every granular member. API keys and OAuth grants are not backfilled, as above.
+  The scope carries **no language dimension**, deliberately: an author acting on their own item is not a
+  per-language operation, and the author bypass it replaces was not one either. So a credential holding it may
+  delete its holder's own suggestion in any language, while deleting *someone else's* still goes through
+  `translation-suggestions.manage` and its language set.
 
 - **Revocation by a superseded access token does not find the grant.** `revokeToken` resolves the presented token
   through the access-token hash, the current refresh-token hash and the *previous* refresh-token hash, so a client
