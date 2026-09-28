@@ -206,6 +206,7 @@ class ComputedPermissionDto(
                 Scope.SCREENSHOTS_VIEW,
                 Scope.ACTIVITY_VIEW,
                 Scope.TRANSLATIONS_SUGGEST,
+                Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS,
                 Scope.TRANSLATIONS_COMMENTS_ADD,
               ),
             type = ProjectPermissionType.VIEW,

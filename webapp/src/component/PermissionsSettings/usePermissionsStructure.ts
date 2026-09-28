@@ -73,6 +73,9 @@ export const usePermissionsStructure = () => {
               {
                 value: 'translation-suggestions.manage',
               },
+              {
+                value: 'translation-suggestions.own-access',
+              },
             ],
           },
           {

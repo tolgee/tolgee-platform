@@ -14,12 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * An OAuth token must not delete a suggestion through the own-author shortcut in
- * SuggestionController.checkCanDeleteSuggestion: a token whose scope∩project set excludes
- * translation-suggestions.manage stays bound by that scope even on suggestions its holder authored.
- */
-class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
+class SuggestionDeleteWithOAuthTokenTest : AbstractControllerTest() {
   @Autowired
   private lateinit var grantRepository: OAuth2GrantRepository
 
@@ -43,16 +38,26 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `the own-suggestion fallback cannot widen a token that lacks suggestions-manage`() {
-    // projectTranslator authored czechSuggestions[0], so the own-author shortcut is what would otherwise let it
-    // through.
+  fun `a token without suggestions own-access cannot delete its holder's own suggestion`() {
     val token =
       tokens.issue(
         subject = testData.projectTranslator.self.id,
         scopes = listOf("translations.view"),
         projectIds = null,
       )
-    performDelete(suggestionUrl(testData.czechSuggestions[0].self.id), null, bearerHeaders(token)).andIsForbidden
+    performDelete(suggestionUrl(testData.translatorsCzechSuggestion.self.id), null, bearerHeaders(token)).andIsForbidden
+  }
+
+  @Test
+  fun `a token carrying suggestions own-access can delete its holder's own suggestion`() {
+    val token =
+      tokens.issue(
+        subject = testData.projectTranslator.self.id,
+        scopes = listOf("translations.view", "translation-suggestions.own-access"),
+        projectIds = null,
+      )
+
+    performDelete(suggestionUrl(testData.translatorsCzechSuggestion.self.id), null, bearerHeaders(token)).andIsOk
   }
 
   @Test
@@ -64,7 +69,7 @@ class SuggestionControllerOAuthNarrowingTest : AbstractControllerTest() {
         projectIds = null,
       )
 
-    performDelete(suggestionUrl(testData.czechSuggestions[1].self.id), null, bearerHeaders(moderatorToken)).andIsOk
+    performDelete(suggestionUrl(testData.reviewersCzechSuggestion.self.id), null, bearerHeaders(moderatorToken)).andIsOk
   }
 
   private fun suggestionUrl(suggestionId: Long) =

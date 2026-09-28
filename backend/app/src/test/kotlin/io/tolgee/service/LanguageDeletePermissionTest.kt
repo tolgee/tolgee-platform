@@ -115,7 +115,11 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
     checkUser(testData.suggestManageScopeUser) {
       assertThat(computedPermissions.scopes).doesNotContain(Scope.TRANSLATION_SUGGESTIONS_MANAGE)
       assertThat(computedPermissions.scopes)
-        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+        .containsExactlyInAnyOrder(
+          Scope.TRANSLATIONS_VIEW,
+          Scope.KEYS_VIEW,
+          Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS,
+        )
     }
   }
 
@@ -154,7 +158,11 @@ class LanguageDeletePermissionTest : AbstractSpringTest() {
       assertThat(computedPermissions.scopes)
         .doesNotContain(Scope.TRANSLATIONS_STATE_EDIT, Scope.TRANSLATION_SUGGESTIONS_MANAGE)
       assertThat(computedPermissions.scopes)
-        .containsExactlyInAnyOrder(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW)
+        .containsExactlyInAnyOrder(
+          Scope.TRANSLATIONS_VIEW,
+          Scope.KEYS_VIEW,
+          Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS,
+        )
     }
   }
 
