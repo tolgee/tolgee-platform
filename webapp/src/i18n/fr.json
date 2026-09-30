@@ -1542,6 +1542,7 @@
   "invoice_usage_dialog_table_vat_rate": "Taux de TVA",
   "invoice_usage_dialog_title": "Détails d’utilisation",
   "invoice_usage_dialog_word_tier_upgrade_note": "Mise à niveau automatique vers le palier de mots {words} lors du renouvellement.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Passage automatique au palier de {words} mots à la prochaine facturation mensuelle, au prorata.",
   "invoice_usage_download_button": "Télécharger le rapport détaillé",
   "key_add": "Clé",
   "key_context_dialog_title": "Clés associées",

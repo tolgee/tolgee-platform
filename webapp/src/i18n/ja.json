@@ -1549,6 +1549,7 @@
   "invoice_usage_dialog_table_vat_rate": "VATレート",
   "invoice_usage_dialog_title": "使用状況の詳細",
   "invoice_usage_dialog_word_tier_upgrade_note": "更新時に {words} 単語プランへ自動アップグレード。",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "次回の月次請求時に、{words} ワードティアへ自動アップグレード（日割り計算）されます。",
   "invoice_usage_download_button": "詳細レポートをダウンロード",
   "key_add": "キーを追加",
   "key_context_dialog_title": "関連するキー",

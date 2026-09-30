@@ -1527,6 +1527,7 @@
   "invoice_usage_dialog_table_vat_rate": "Aliquota IVA",
   "invoice_usage_dialog_title": "Dettagli di utilizzo",
   "invoice_usage_dialog_word_tier_upgrade_note": "Aggiornamento automatico al livello di parole {words} al rinnovo.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Upgrade automatico al livello con {words} parole alla prossima fatturazione mensile, calcolato in modo proporzionale.",
   "invoice_usage_download_button": "Scarica report dettagliato",
   "key_add": "Chiave",
   "key-context-present-hint": "Il contesto di Tolgee è disponibile per questa chiave",

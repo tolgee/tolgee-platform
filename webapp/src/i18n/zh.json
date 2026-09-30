@@ -1544,6 +1544,7 @@
   "invoice_usage_dialog_table_vat_rate": "增值税率",
   "invoice_usage_dialog_title": "用量详情",
   "invoice_usage_dialog_word_tier_upgrade_note": "将在续订时自动升级到 {words} 词数级别。",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "将于下次按月计费时自动升级至 {words} 字词档位，费用按比例计算。",
   "invoice_usage_download_button": "下载详细报告",
   "key_add": "词条",
   "key_context_dialog_title": "相关词条",

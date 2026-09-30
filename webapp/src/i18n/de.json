@@ -1545,6 +1545,7 @@
   "invoice_usage_dialog_table_vat_rate": "Mehrwertsteuersatz",
   "invoice_usage_dialog_title": "Nutzungsdetails",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatisches Upgrade auf die {words}-Wörter-Stufe bei Verlängerung.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatisches Upgrade auf die Wortstufe {words} bei der nächsten monatlichen Abrechnung, anteilig berechnet.",
   "invoice_usage_download_button": "Detaillierten Bericht herunterladen",
   "key_add": "Schlüssel",
   "key_context_dialog_title": "Verwandte Schlüssel",

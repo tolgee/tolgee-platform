@@ -1547,6 +1547,7 @@
   "invoice_usage_dialog_table_vat_rate": "BTW-tarief",
   "invoice_usage_dialog_title": "Gebruiksdetails",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatisch opschalen naar het {words} woordniveau bij verlenging.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatische upgrade naar de {words} woordtarief bij de volgende maandelijkse facturering, naar rato berekend.",
   "invoice_usage_download_button": "Gedetailleerd rapport downloaden",
   "key_add": "Sleutel",
   "key_context_dialog_title": "Gerelateerde sleutels",

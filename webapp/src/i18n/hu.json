@@ -1540,6 +1540,7 @@
   "invoice_usage_dialog_table_vat_rate": "ÁFA kulcs",
   "invoice_usage_dialog_title": "Használati részletek",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatikus frissítés a {words} szavas szintre a megújításkor.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatikus váltás a {words} szavas szintre a következő havi számlázáskor, időarányosan.",
   "invoice_usage_download_button": "Részletes jelentés letöltése",
   "key_add": "Kulcs",
   "key_context_dialog_title": "Kapcsolódó kulcsok",

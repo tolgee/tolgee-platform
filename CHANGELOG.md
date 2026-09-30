@@ -1,3 +1,10 @@
+## [3.224.10](https://github.com/tolgee/tolgee-platform/compare/v3.224.9...v3.224.10) (2026-09-30)
+
+
+### Bug Fixes
+
+* bump netty to 4.2.18 to patch Snyk-reported vulnerabilities ([#3954](https://github.com/tolgee/tolgee-platform/issues/3954)) ([db26f1e](https://github.com/tolgee/tolgee-platform/commit/db26f1ee6a9697072ee3f3a2fa4287e31aaa4fb7))
+
 ## [3.224.9](https://github.com/tolgee/tolgee-platform/compare/v3.224.8...v3.224.9) (2026-09-28)
 
 

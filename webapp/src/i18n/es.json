@@ -1540,6 +1540,7 @@
   "invoice_usage_dialog_table_vat_rate": "Tasa de IVA",
   "invoice_usage_dialog_title": "Detalles de uso",
   "invoice_usage_dialog_word_tier_upgrade_note": "Actualización automática al nivel de palabras {words} al renovar.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Actualización automática al nivel de {words} palabras en la siguiente facturación mensual, de forma prorrateada.",
   "invoice_usage_download_button": "Descargar informe detallado",
   "key_add": "Clave",
   "key_context_dialog_title": "Claves relacionadas",

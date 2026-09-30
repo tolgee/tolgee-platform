@@ -1549,6 +1549,7 @@
   "invoice_usage_dialog_table_vat_rate": "VAT rate",
   "invoice_usage_dialog_title": "Usage details",
   "invoice_usage_dialog_word_tier_upgrade_note": "Auto-upgrade to the {words} word tier at renewal.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Auto-upgrade to the {words} word tier at the next monthly billing, prorated.",
   "invoice_usage_download_button": "Download detailed report",
   "key_add": "Key",
   "key_context_dialog_title": "Related keys",

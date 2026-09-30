@@ -14,6 +14,7 @@
   "activity_entity_api_key.scopes": "Rozsahy",
   "billing_price_after_auto_upgrade": "{price}/mes. od {date}",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatické prejdenie na cenový plán s {words} slovami pri obnovení.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatické zvýšenie na úroveň {words} slov pri najbližšej mesačnej fakturácii, pomerne rozpočítané.",
   "oauth2_consent_deselect_all": "Zrušiť výber všetkých",
   "oauth2_consent_local_app_notice": "Prístup bude odovzdaný aplikácii bežiacej na tomto počítači. Pokračujte len v prípade, že ste ju práve sami spustili.",
   "oauth2_consent_scope_all": "Všetky povolenia",

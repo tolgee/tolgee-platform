@@ -1549,6 +1549,7 @@
   "invoice_usage_dialog_table_vat_rate": "Sazba DPH",
   "invoice_usage_dialog_title": "Podrobnosti o spotřebě",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatické navýšení na úroveň {words} slov při obnovení.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatické navýšení na tarif s {words} slovy při dalším měsíčním vyúčtování, poměrně přepočítáno.",
   "invoice_usage_download_button": "Stáhnout detailní přehled",
   "key_add": "Klíč",
   "key_context_dialog_title": "Související klíče",

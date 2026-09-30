@@ -1540,6 +1540,7 @@
   "invoice_usage_dialog_table_vat_rate": "MVA-sats",
   "invoice_usage_dialog_title": "Bruksdetaljer",
   "invoice_usage_dialog_word_tier_upgrade_note": "Auto-oppgrader til ordnivået {words} ved fornyelse.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatisk oppgradering til ordnivået {words} ved neste månedlige fakturering, med forholdsmessig beregning.",
   "invoice_usage_download_button": "Last ned detaljert rapport",
   "key_add": "Nøkkel",
   "key_context_dialog_title": "Relaterte nøkler",

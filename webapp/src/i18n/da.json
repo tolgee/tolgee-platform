@@ -1547,6 +1547,7 @@
   "invoice_usage_dialog_table_vat_rate": "Moms-sats",
   "invoice_usage_dialog_title": "Brugsoplysninger",
   "invoice_usage_dialog_word_tier_upgrade_note": "Automatisk opgradering til ordniveauet {words} ved fornyelse.",
+  "invoice_usage_dialog_word_tier_upgrade_note_yearly": "Automatisk opgradering til {words} word-niveauet ved næste månedlige fakturering, forholdsmæssigt beregnet.",
   "invoice_usage_download_button": "Download detaljeret rapport",
   "key_add": "Nøgle",
   "key_context_dialog_title": "Relaterede nøgler",
