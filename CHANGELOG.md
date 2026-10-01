@@ -1,3 +1,10 @@
+## [3.224.11](https://github.com/tolgee/tolgee-platform/compare/v3.224.10...v3.224.11) (2026-10-01)
+
+
+### Bug Fixes
+
+* stop dropping characters typed into the key name and JSON editors ([#3948](https://github.com/tolgee/tolgee-platform/issues/3948)) ([15aa9d5](https://github.com/tolgee/tolgee-platform/commit/15aa9d544210cc5cedc213eeec882be213e1657d)), closes [#3892](https://github.com/tolgee/tolgee-platform/issues/3892)
+
 ## [3.224.10](https://github.com/tolgee/tolgee-platform/compare/v3.224.9...v3.224.10) (2026-09-30)
 
 
