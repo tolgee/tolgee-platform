@@ -23,6 +23,17 @@ export const END_STATUSES: BatchJobStatus[] = [
   'CANCELLED',
 ];
 
+export const pickBatchJobStatus = <T extends BatchJobStatus | undefined>(
+  preferred: BatchJobStatus | undefined,
+  other: T
+): BatchJobStatus | T => {
+  const isEnd = (s?: BatchJobStatus) => !!s && END_STATUSES.includes(s);
+  if (isEnd(other) && !isEnd(preferred)) {
+    return other;
+  }
+  return preferred ?? other;
+};
+
 export const STATIC_STATUSES: BatchJobStatus[] = [
   'FAILED',
   'SUCCESS',
