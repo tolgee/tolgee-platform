@@ -158,6 +158,7 @@ subprojects {
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['netty.version'] = nettyVersion
+    ext['tomcat.version'] = tomcatVersion
     ext['jackson-bom.version'] = jacksonVersion
     ext['jackson-2-bom.version'] = jackson2Version
 
