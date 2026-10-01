@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class RateLimitService(
@@ -48,7 +47,7 @@ class RateLimitService(
       ?: throw RuntimeException("Could not initialize cache!")
   }
 
-  private val inFlightConsumers = ConcurrentHashMap<String, AtomicInteger>()
+  private val inFlightConsumers = ConcurrentHashMap<String, Int>()
 
   /**
    * Consumes a token from the provided rate limit policy.
@@ -76,8 +75,7 @@ class RateLimitService(
     if (policy == null) return
 
     val lockName = getLockName(policy)
-    val inFlight = inFlightConsumers.computeIfAbsent(lockName) { AtomicInteger() }
-    val concurrent = inFlight.incrementAndGet()
+    val concurrent = inFlightConsumers.merge(lockName, 1, Int::plus)!!
     try {
       val maxConcurrent = rateLimitProperties.maxConcurrentPerBucket
       if (maxConcurrent > 0 && concurrent > maxConcurrent) {
@@ -105,8 +103,11 @@ class RateLimitService(
         }
       } ?: rejectWithoutConsuming(policy, "lock_timeout")
     } finally {
-      if (inFlight.decrementAndGet() <= 0) {
-        inFlightConsumers.remove(lockName, inFlight)
+      inFlightConsumers.compute(lockName) { _, count ->
+        when {
+          count == null || count <= 1 -> null
+          else -> count - 1
+        }
       }
     }
   }
