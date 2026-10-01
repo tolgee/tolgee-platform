@@ -245,11 +245,11 @@ export const Editor: React.FC<React.PropsWithChildren<EditorProps>> = ({
     }
     const editorValue = state.doc.toString();
     if (isExternalValue(value, editorValue, emittedValues.current)) {
-      emittedValues.current.clear();
       const transaction = state.update({
         changes: { from: 0, to: state.doc.length, insert: value || '' },
       });
       editor.current?.update([transaction]);
+      emittedValues.current.clear();
     } else if (editorValue === value) {
       emittedValues.current.clear();
     }
