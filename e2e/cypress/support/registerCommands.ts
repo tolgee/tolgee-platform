@@ -2,60 +2,34 @@
 import { addCustomCommand } from 'cy-verify-downloads';
 
 export const register = () => {
-  Cypress.Commands.add(
-    'closestDcy',
-    { prevSubject: 'element' },
-    (subject, dataCy) => {
-      return cy.wrap(subject).closest(`[data-cy="${dataCy}"]`);
-    }
-  );
+  const addQuery = (
+    name: keyof Cypress.Chainable,
+    builtIn: string,
+    selector: (...args: any[]) => string
+  ) => {
+    Cypress.Commands.addQuery(name, function (...args: any[]) {
+      const query = cy.now(builtIn, selector(...args), args[1]) as (
+        subject: any
+      ) => any;
+      return (subject) => query(subject);
+    });
+  };
 
-  Cypress.Commands.add(
-    'siblingDcy',
-    { prevSubject: 'element' },
-    (subject, dataCy) => {
-      return cy.wrap(subject).siblings(`[data-cy="${dataCy}"]`);
-    }
-  );
+  const dcy = (dataCy: string) => `[data-cy="${dataCy}"]`;
 
-  Cypress.Commands.add('gcy', (dataCy, options) => {
-    return cy.get('[data-cy="' + dataCy + '"]', options);
-  });
-
-  Cypress.Commands.add(
-    'findDcy',
-    { prevSubject: 'element' },
-    (subject, dataCy) => {
-      return cy.wrap(subject).find(`[data-cy="${dataCy}"]`);
-    }
-  );
-
-  Cypress.Commands.add(
+  addQuery('gcy', 'get', dcy);
+  addQuery('findDcy', 'find', dcy);
+  addQuery('closestDcy', 'closest', dcy);
+  addQuery('siblingDcy', 'siblings', dcy);
+  addQuery('nextUntilDcy', 'nextUntil', dcy);
+  addQuery('findInputByName', 'find', (name) => `input[name="${name}"]`);
+  addQuery(
     'findDcyAdvanced',
-    { prevSubject: 'element' },
-    (subject, { value, ...other }) => {
-      return cy.wrap(subject).find(
-        `[data-cy="${value}"]${Object.entries(other)
-          .map(([key, v]) => `[data-cy-${key}="${v}"]`)
-          .join('')}`
-      );
-    }
-  );
-
-  Cypress.Commands.add(
-    'nextUntilDcy',
-    { prevSubject: 'element' },
-    (subject, dataCy) => {
-      return cy.wrap(subject).nextUntil(`[data-cy="${dataCy}"]`);
-    }
-  );
-
-  Cypress.Commands.add(
-    'findInputByName',
-    { prevSubject: 'element' },
-    (subject, name) => {
-      return cy.wrap(subject).find(`input[name="${name}"]`);
-    }
+    'find',
+    ({ value, ...other }) =>
+      `${dcy(value)}${Object.entries(other)
+        .map(([key, v]) => `[data-cy-${key}="${v}"]`)
+        .join('')}`
   );
 
   addCustomCommand();
