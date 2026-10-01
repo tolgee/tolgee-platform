@@ -18,11 +18,13 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
+import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
 import io.tolgee.security.oauth2.OAuth2Scopes
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.nullIfBlank
@@ -55,6 +57,7 @@ class OAuth2FlowController(
 ) : IController {
   @PostMapping("/authorize")
   @Operation(summary = "Record the pending grant the consent screen will act on")
+  @RateLimited(limit = 40, refillDurationInMs = 60_000)
   fun authorize(
     @RequestBody @Valid request: OAuth2AuthorizeRequest,
   ): OAuth2AuthorizeResultModel {
@@ -71,6 +74,7 @@ class OAuth2FlowController(
         state = request.state.nullIfBlank,
         codeChallenge = request.codeChallenge.nullIfBlank,
         codeChallengeMethod = request.codeChallengeMethod.nullIfBlank,
+        resource = request.resource.nullIfBlank,
       )
     val grant =
       try {
@@ -92,11 +96,16 @@ class OAuth2FlowController(
 
   @GetMapping("/consent-info")
   @Operation(summary = "Describe the app, capabilities and project being requested, for the consent screen")
+  @RateLimited(limit = 40, refillDurationInMs = 60_000)
   fun consentInfo(
     @RequestParam state: String,
   ): ConsentInfoModel {
     val grant = authorizationService.findOwnPendingByConsentState(state, authenticationFacade.authenticatedUser.id)
-    val client = clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val cimd = clientRegistry.findCimd(grant.clientId)
+    val client =
+      cimd?.client
+        ?: clientRegistry.findForExistingGrant(grant.clientId)
+        ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
     val scopes = grant.requestedScopeValues
     val requestedProjectId = grant.projectHint
     return ConsentInfoModel(
@@ -105,6 +114,9 @@ class OAuth2FlowController(
       requiredScopes = client.requiredScopes.map { it.value }.filter { it in scopes },
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
+      verified = client.verified,
+      redirectsToLocalApp = OAuth2Client.redirectsToLocalApp(grant.redirectUri),
+      clientOrigin = cimd?.clientOrigin,
     )
   }
 

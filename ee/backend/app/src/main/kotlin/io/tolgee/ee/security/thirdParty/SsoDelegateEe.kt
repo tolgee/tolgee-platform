@@ -26,6 +26,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -47,7 +48,10 @@ import java.util.Date
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class SsoDelegateEe(
   private val jwtService: JwtService,
+  @Qualifier("ssoRestTemplate")
   private val restTemplate: RestTemplate,
+  @Qualifier("ssoGlobalRestTemplate")
+  private val globalRestTemplate: RestTemplate,
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
@@ -111,7 +115,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        templateFor(tenant).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -253,7 +257,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        templateFor(tenant).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -264,6 +268,11 @@ class SsoDelegateEe(
       logger.info("Failed to refresh token: ${e.message}")
     }
     return null
+  }
+
+  private fun templateFor(tenant: SsoTenantConfig): RestTemplate {
+    if (tenant.global) return globalRestTemplate
+    return restTemplate
   }
 
   private fun getRefreshScope(tenant: SsoTenantConfig): String {

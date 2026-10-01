@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.FrontendUrlProvider
+import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.oauth2.AuthorizationServerMetadataModel
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
 import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
@@ -14,6 +16,7 @@ import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
+import io.tolgee.security.oauth2.OAuth2Resources
 import io.tolgee.security.oauth2.OAuth2Scopes
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.util.nullIfBlank
@@ -45,9 +48,12 @@ class OAuth2AuthorizationServerController(
   private val clientRegistry: OAuth2ClientRegistry,
   private val issuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
+  private val resources: OAuth2Resources,
+  private val oauth2Properties: OAuth2ServerProperties,
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
+  @RateLimited(limit = 40, refillDurationInMs = 60_000, isAuthentication = true)
   fun authorize(
     request: HttpServletRequest,
     @RequestParam("client_id", required = false) clientId: String?,
@@ -58,6 +64,7 @@ class OAuth2AuthorizationServerController(
     @RequestParam("code_challenge", required = false) codeChallenge: String?,
     @RequestParam("code_challenge_method", required = false) codeChallengeMethod: String?,
     @RequestParam("project", required = false) project: String?,
+    @RequestParam("resource", required = false) resource: String?,
   ): ResponseEntity<Any> {
     // Errors here must not redirect: the redirect URI is exactly what has not been validated yet.
     val client = clientId.nullIfBlank?.let { clientRegistry.find(it) } ?: return badRequest("unknown client_id")
@@ -73,6 +80,7 @@ class OAuth2AuthorizationServerController(
         state = state.nullIfBlank,
         codeChallenge = codeChallenge.nullIfBlank,
         codeChallengeMethod = codeChallengeMethod.nullIfBlank,
+        resource = resource.nullIfBlank,
       )
     if (isRepeated(request, AUTHORIZE_PARAMS)) {
       return redirect(
@@ -95,6 +103,7 @@ class OAuth2AuthorizationServerController(
           "code_challenge" to params.codeChallenge,
           "code_challenge_method" to params.codeChallengeMethod,
           "project" to project.nullIfBlank,
+          "resource" to params.resource,
         ),
       ),
     )
@@ -116,11 +125,13 @@ class OAuth2AuthorizationServerController(
     @RequestParam("code_verifier", required = false) codeVerifier: String?,
     @RequestParam("refresh_token", required = false) refreshToken: String?,
     @RequestParam("scope", required = false) scope: String?,
+    @RequestParam("resource", required = false) resource: String?,
   ): ResponseEntity<Map<String, Any>> {
     try {
       requireBodyOnlyParameters(request)
       requireNoRepeatedParameters(request, TOKEN_PARAMS)
-      val client = requireRegisteredClient(clientId)
+      val client = requireClientForTokenRequest(clientId)
+      val requestedAudience = requestedAudience(resource)
       val tokens =
         when (grantType.nullIfBlank) {
           "authorization_code" ->
@@ -129,21 +140,25 @@ class OAuth2AuthorizationServerController(
               code.nullIfBlank,
               redirectUri.nullIfBlank,
               codeVerifier.nullIfBlank,
+              requestedAudience,
             )
-          "refresh_token" -> authorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank)
+          "refresh_token" ->
+            authorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank, requestedAudience)
           null -> throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "grant_type is required")
           else -> throw OAuth2Error(OAuth2Error.UNSUPPORTED_GRANT_TYPE)
         }
-      return tokenResponse(HttpStatus.OK)
-        .body(
-          mapOf(
-            "access_token" to tokens.accessToken,
-            "token_type" to "Bearer",
-            "expires_in" to tokens.expiresInSeconds,
-            "refresh_token" to tokens.refreshToken,
-            "scope" to tokens.scopes.joinToString(" "),
-          ),
+      val body =
+        mutableMapOf<String, Any>(
+          "access_token" to tokens.accessToken,
+          "token_type" to "Bearer",
+          "expires_in" to tokens.expiresInSeconds,
+          "refresh_token" to tokens.refreshToken,
+          "scope" to tokens.scopes.joinToString(" "),
         )
+      // RFC 6749 §5.1 allows extra parameters. A client holding a single-project grant would otherwise have to ask
+      // the user for a project id the authorization already fixed, and has no endpoint to read it from.
+      tokens.projectId?.let { body["project_id"] = it }
+      return tokenResponse(HttpStatus.OK).body(body)
     } catch (e: OAuth2Error) {
       return errorResponse(e)
     }
@@ -161,7 +176,7 @@ class OAuth2AuthorizationServerController(
     try {
       requireBodyOnlyParameters(request)
       requireNoRepeatedParameters(request, REVOKE_PARAMS)
-      val client = requireRegisteredClient(clientId)
+      val client = requireClientForTokenRequest(clientId)
       // §2.2.1: a malformed request gets the RFC 6749 §5.2 error, not the 200 that means "your token is not live" —
       // answering 200 here would tell a client its logout succeeded while the grant stays live.
       val presented = token.nullIfBlank ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "token is required")
@@ -176,7 +191,7 @@ class OAuth2AuthorizationServerController(
   @GetMapping(OAuth2Constants.AUTHORIZATION_SERVER_METADATA_PATH)
   @Operation(summary = "RFC 8414 authorization server metadata")
   fun metadata(): ResponseEntity<AuthorizationServerMetadataModel> {
-    if (!clientRegistry.isEnabled) throw NotFoundException()
+    if (!issuerResolver.isConfigured) throw NotFoundException()
     val issuer = issuerResolver.issuerUrl
     val model =
       AuthorizationServerMetadataModel(
@@ -191,6 +206,7 @@ class OAuth2AuthorizationServerController(
         scopesSupported = OAuth2Scopes.SUPPORTED,
         revocationEndpoint = issuer + OAuth2Constants.REVOKE_PATH,
         revocationEndpointAuthMethodsSupported = listOf("none"),
+        clientIdMetadataDocumentSupported = oauth2Properties.cimdEnabled,
       )
     return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store").body(model)
   }
@@ -255,8 +271,14 @@ class OAuth2AuthorizationServerController(
    * RFC 6749 §5.2: every client here is public, and there is no token endpoint auth method to issue a challenge with,
    * so an unknown client is `invalid_client` with 400 rather than 401.
    */
-  private fun requireRegisteredClient(clientId: String?): OAuth2Client =
-    clientId.nullIfBlank?.let { clientRegistry.find(it) } ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+  private fun requireClientForTokenRequest(clientId: String?): OAuth2Client {
+    val id = clientId.nullIfBlank ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+    return clientRegistry.findForExistingGrant(id) ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+  }
+
+  /** RFC 8707: no `resource` means no audience restriction on the request; the grant's own audience still applies. */
+  private fun requestedAudience(resource: String?): OAuth2Audience? =
+    resource.nullIfBlank?.let { resources.audienceFor(it) }
 
   // Relative when front-end-url is unset: a request-derived URL would be the proxy-internal one and strand the user.
   private fun consentPageUrl(params: Map<String, String?>): String {
@@ -277,9 +299,10 @@ class OAuth2AuthorizationServerController(
         "code_challenge",
         "code_challenge_method",
         "project",
+        "resource",
       )
     private val TOKEN_PARAMS =
-      listOf("grant_type", "client_id", "code", "redirect_uri", "code_verifier", "refresh_token", "scope")
+      listOf("grant_type", "client_id", "code", "redirect_uri", "code_verifier", "refresh_token", "scope", "resource")
 
     private val REVOKE_PARAMS = listOf("token", "token_type_hint", "client_id")
   }

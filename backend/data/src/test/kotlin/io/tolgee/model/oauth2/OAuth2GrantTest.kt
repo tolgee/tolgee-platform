@@ -1,6 +1,7 @@
 package io.tolgee.model.oauth2
 
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -31,6 +32,25 @@ class OAuth2GrantTest {
 
     grant.projectSelection.assert.isEqualTo(OAuth2Constants.ALL_PROJECTS)
     grant.boundProjectIds().assert.isNull()
+  }
+
+  @Test
+  fun `a fresh grant is bound to the REST API audience`() {
+    OAuth2Grant().boundAudience().assert.isEqualTo(OAuth2Audience.API)
+  }
+
+  @Test
+  fun `a bound audience reads back as itself`() {
+    val grant = OAuth2Grant().apply { bindAudience(OAuth2Audience.MCP) }
+
+    grant.boundAudience().assert.isEqualTo(OAuth2Audience.MCP)
+  }
+
+  @Test
+  fun `a stored audience that no longer resolves matches no resource server`() {
+    val grant = OAuth2Grant().apply { audience = "FUTURE" }
+
+    grant.boundAudience().assert.isNull()
   }
 
   @Test

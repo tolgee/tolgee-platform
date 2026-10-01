@@ -6,6 +6,7 @@ import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.ee.component.llm.GoogleAiApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
@@ -17,6 +18,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -24,12 +26,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 import java.util.Date
+
+// The ids keep the old convention for realism; what decides the branch under test is LlmProviderDto.serverConfigured.
+private const val SERVER_CONFIGURED_ID = -1L
+private const val ORG_LEVEL_ID = 7L
 
 class LlmProviderFallbackTest {
   private lateinit var service: LlmProviderService
@@ -42,6 +52,7 @@ class LlmProviderFallbackTest {
   private lateinit var currentDateProvider: CurrentDateProvider
   private lateinit var restTemplateBuilder: RestTemplateBuilder
   private lateinit var adminMtServiceFilter: AdminMtServiceFilter
+  private lateinit var ssrfSafeRequestFactoryProvider: SsrfSafeRequestFactoryProvider
 
   private val orgId = 1L
 
@@ -56,6 +67,7 @@ class LlmProviderFallbackTest {
     currentDateProvider = mock()
     restTemplateBuilder = mock()
     adminMtServiceFilter = mock()
+    ssrfSafeRequestFactoryProvider = mock()
 
     whenever(cacheManager.getCache(Caches.LLM_PROVIDERS)).thenReturn(cache)
     whenever(cache.get(any<String>(), any<Class<*>>())).thenReturn(null)
@@ -90,9 +102,39 @@ class LlmProviderFallbackTest {
         googleAiApiService = mock<GoogleAiApiService>(),
         llmProviderResolver = resolver,
         urlSecurity = mock<UrlSecurity>(),
+        ssrfSafeRequestFactoryProvider = ssrfSafeRequestFactoryProvider,
         adminMtServiceFilter = adminMtServiceFilter,
         resilientCacheAccessor = ResilientCacheAccessor(),
       )
+  }
+
+  @Test
+  fun `an organization-level provider's endpoint goes through the pinning factory`() {
+    whenever(
+      ssrfSafeRequestFactoryProvider.create(any(), any(), any(), any()),
+    ).thenReturn(mock<ClientHttpRequestFactory>())
+
+    service.repeatWithTimeouts(listOf(1), providerDto(apiUrl = "https://llm.example.com")) {}
+
+    verify(ssrfSafeRequestFactoryProvider).create(eq(false), any(), any(), eq(false))
+  }
+
+  @Test
+  fun `a server-config provider may be private, and still does not follow redirects`() {
+    whenever(
+      ssrfSafeRequestFactoryProvider.create(any(), any(), any(), any()),
+    ).thenReturn(mock<ClientHttpRequestFactory>())
+
+    service.repeatWithTimeouts(listOf(1), providerDto(apiUrl = "http://ollama:11434", serverConfigured = true)) {}
+
+    verify(ssrfSafeRequestFactoryProvider).create(eq(true), any(), any(), eq(false))
+  }
+
+  @Test
+  fun `a provider with no apiUrl keeps the ordinary template`() {
+    service.repeatWithTimeouts(listOf(1), providerDto(apiUrl = null)) {}
+
+    verify(ssrfSafeRequestFactoryProvider, never()).create(any(), any(), any(), any())
   }
 
   @Test
@@ -188,6 +230,27 @@ class LlmProviderFallbackTest {
       whenever(llmPropertiesService.getFallbackProviderName(from)).thenReturn(to)
     }
   }
+
+  private fun providerDto(
+    apiUrl: String?,
+    serverConfigured: Boolean = false,
+  ) = LlmProviderDto(
+    id = SERVER_CONFIGURED_ID.takeIf { serverConfigured } ?: ORG_LEVEL_ID,
+    name = "p",
+    type = LlmProviderType.OPENAI,
+    priority = null,
+    apiKey = null,
+    rawApiUrl = apiUrl,
+    model = null,
+    deployment = null,
+    format = null,
+    reasoningEffort = null,
+    tokenPriceInCreditsInput = null,
+    tokenPriceInCreditsOutput = null,
+    attempts = null,
+    maxTokens = 0,
+    serverConfigured = serverConfigured,
+  )
 
   private fun createParams(): LlmParams {
     return LlmParams(

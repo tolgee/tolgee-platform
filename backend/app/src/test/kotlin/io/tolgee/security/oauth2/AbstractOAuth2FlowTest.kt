@@ -78,7 +78,7 @@ abstract class AbstractOAuth2FlowTest : AbstractControllerTest() {
       .content(
         """{"clientId":"$CLIENT_ID","redirectUri":"$REDIRECT","responseType":"code",""" +
           """"scope":"translations.view","codeChallengeMethod":"S256",""" +
-          """"codeChallenge":"${OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier())}"}""",
+          """"codeChallenge":"${OAuth2FlowDriver.randomChallenge()}"}""",
       ),
   )
 
@@ -103,7 +103,7 @@ abstract class AbstractOAuth2FlowTest : AbstractControllerTest() {
     approvedScopes: List<String> = listOf("translations.view"),
     projectId: Long? = testData.project.id,
   ): JsonNode {
-    val code = driver.queryParam(driver.consentRedirect(pending, approvedScopes, projectId), "code")!!
+    val code = driver.code(pending, approvedScopes, projectId)
     return json(driver.exchangeCode(code, pending.clientId, pending.redirect, pending.verifier))
   }
 
@@ -119,13 +119,10 @@ abstract class AbstractOAuth2FlowTest : AbstractControllerTest() {
     repository.findByAccessTokenHash(keyGenerator.hash(accessToken.removePrefix(OAUTH_ACCESS_TOKEN_PREFIX)))
       ?: throw AssertionError("no authorization stored for the access token")
 
+  protected fun grantsForUser(userId: Long = testData.user.id): Int =
+    repository.findAll().count { it.userAccount.id == userId }
+
   companion object {
     internal const val INACCESSIBLE_PROJECT_ID = 9_999_999L
   }
-
-  protected fun grantsForUser(userId: Long = testData.user.id): Int =
-    repository.findAll().count {
-      it.userAccount.id ==
-        userId
-    }
 }

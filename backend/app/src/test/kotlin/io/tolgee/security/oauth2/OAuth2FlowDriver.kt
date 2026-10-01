@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.web.util.UriComponentsBuilder
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
-import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
 
@@ -75,6 +74,7 @@ class OAuth2FlowDriver(
     clientState: String? = "client-state",
     hintProjectId: Long? = null,
     verifier: String = randomVerifier(),
+    resource: String? = null,
   ): PendingConsent {
     val response =
       startAuthorization(
@@ -85,9 +85,10 @@ class OAuth2FlowDriver(
           "response_type" to "code",
           "scope" to scope,
           "state" to clientState,
-          "code_challenge" to s256Challenge(verifier),
+          "code_challenge" to OAuth2Pkce.s256(verifier),
           "code_challenge_method" to "S256",
           "project" to hintProjectId?.toString(),
+          "resource" to resource,
         ),
       ).andReturn().response.contentAsString
     val state = mapper.readTree(response).get("consentState")?.asString()
@@ -144,26 +145,41 @@ class OAuth2FlowDriver(
     return url!!
   }
 
+  fun code(
+    pending: PendingConsent,
+    approvedScopes: List<String> = listOf("translations.view"),
+    projectId: Long? = null,
+  ): String {
+    val redirectUrl = consentRedirect(pending, approvedScopes, projectId)
+    val code = queryParam(redirectUrl, "code")
+    code.assert.withFailMessage("consent did not deliver a code: $redirectUrl").isNotNull()
+    return code!!
+  }
+
   fun exchangeCode(
     code: String,
     clientId: String,
     redirect: String,
     verifier: String,
-  ): ResultActions =
-    mvc.perform(
+    resource: String? = null,
+  ): ResultActions {
+    val request =
       post(OAuth2Constants.TOKEN_PATH)
         .param("grant_type", "authorization_code")
         .param("code", code)
         .param("redirect_uri", redirect)
         .param("client_id", clientId)
         .param("code_verifier", verifier)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED),
-    )
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    resource?.let { request.param("resource", it) }
+    return mvc.perform(request)
+  }
 
   fun refresh(
     refreshToken: String,
     clientId: String,
     scope: String? = null,
+    resource: String? = null,
   ): ResultActions {
     val request =
       post(OAuth2Constants.TOKEN_PATH)
@@ -172,6 +188,7 @@ class OAuth2FlowDriver(
         .param("client_id", clientId)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
     scope?.let { request.param("scope", it) }
+    resource?.let { request.param("resource", it) }
     return mvc.perform(request)
   }
 
@@ -198,11 +215,9 @@ class OAuth2FlowDriver(
   ): JsonNode {
     val pending =
       startPendingConsent(jwt, clientId, redirect, scope = scope, hintProjectId = hintProjectId)
-    val redirectUrl = consentRedirect(pending, approvedScopes, projectId)
-    val code = queryParam(redirectUrl, "code")
-    code.assert.withFailMessage("consent did not deliver a code: $redirectUrl").isNotNull()
+    val authCode = code(pending, approvedScopes, projectId)
     val body =
-      exchangeCode(code!!, clientId, redirect, pending.verifier).andReturn().response.contentAsString
+      exchangeCode(authCode, clientId, redirect, pending.verifier).andReturn().response.contentAsString
     val tree = mapper.readTree(body)
     tree
       .get("access_token")
@@ -248,9 +263,6 @@ class OAuth2FlowDriver(
       return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 
-    fun s256Challenge(verifier: String): String {
-      val digest = MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.US_ASCII))
-      return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
-    }
+    fun randomChallenge(): String = OAuth2Pkce.s256(randomVerifier())
   }
 }

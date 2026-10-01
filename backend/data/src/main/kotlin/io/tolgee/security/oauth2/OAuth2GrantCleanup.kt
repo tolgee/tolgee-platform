@@ -19,6 +19,7 @@ package io.tolgee.security.oauth2
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.scheduling.annotation.Scheduled
@@ -28,6 +29,7 @@ import java.time.Duration
 @Component
 class OAuth2GrantCleanup(
   private val authorizationService: OAuth2AuthorizationService,
+  private val cimdClientLifecycle: CimdClientLifecycleService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val lockingProvider: LockingProvider,
@@ -45,8 +47,15 @@ class OAuth2GrantCleanup(
   private fun purgeExpiredGrants() {
     val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.grantRetentionDays))
     val deleted = authorizationService.deleteExpiredBefore(cutoff) + authorizationService.deleteExpiredPendingConsents()
-    if (deleted > 0) {
-      logger.info("OAuth2 grant cleanup removed {} expired grant(s)", deleted)
+    val prunedTokens = authorizationService.pruneRefreshHistoryBeyondDepth()
+    val deletedCheckRows = cimdClientLifecycle.deleteCheckRowsWithoutGrants()
+    if (deleted > 0 || prunedTokens > 0 || deletedCheckRows > 0) {
+      logger.info(
+        "OAuth2 grant cleanup removed {} expired grant(s), {} superseded refresh token(s) and {} document check row(s)",
+        deleted,
+        prunedTokens,
+        deletedCheckRows,
+      )
     }
   }
 

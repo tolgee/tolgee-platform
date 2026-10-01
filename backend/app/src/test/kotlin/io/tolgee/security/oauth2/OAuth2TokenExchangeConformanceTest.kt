@@ -46,7 +46,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `an authorization code is single-use and replaying it revokes the tokens it already issued`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val first = json(driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier).andReturn())
     val replay = driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier).andReturn()
 
@@ -67,7 +67,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `a code issued to one client cannot be exchanged by another client`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val result = driver.exchangeCode(code, OTHER_CLIENT_ID, OTHER_REDIRECT, pending.verifier).andReturn()
     json(result)
       .get("error")
@@ -86,7 +86,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `a code cannot be exchanged with a redirect_uri other than the one it was issued for`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val result = driver.exchangeCode(code, CLIENT_ID, "https://extension.test/other", pending.verifier).andReturn()
     json(result)
       .get("error")
@@ -98,7 +98,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `a code exchange without a code_verifier is refused`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val result = driver.exchangeCode(code, CLIENT_ID, REDIRECT, "").andReturn()
     json(result)
       .get("error")
@@ -110,7 +110,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `a code exchange with a malformed code_verifier is refused`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val tooShortForRfc7636 = "short"
     val result = driver.exchangeCode(code, CLIENT_ID, REDIRECT, tooShortForRfc7636).andReturn()
     json(result)
@@ -123,7 +123,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `a code exchange with a well-formed but wrong code_verifier is refused`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     val wrong = OAuth2FlowDriver.randomVerifier()
     wrong.assert.isNotEqualTo(pending.verifier)
     val result = driver.exchangeCode(code, CLIENT_ID, REDIRECT, wrong).andReturn()
@@ -148,7 +148,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
   @Test
   fun `an expired authorization code is refused`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     currentDateProvider.move(Duration.ofSeconds(oauth2.authorizationCodeValiditySeconds + 60))
     val result = driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier).andReturn()
     json(result)
@@ -163,7 +163,7 @@ class OAuth2TokenExchangeConformanceTest : AbstractOAuth2ConformanceTest() {
     // OAuth 2.1 §3.2.2: the request is a form body. A code and its verifier in the request line end up in proxy
     // and access logs, and together they are a complete grant.
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending, projectId = null), "code")!!
+    val code = driver.code(pending, projectId = null)
     val result =
       mvc
         .perform(

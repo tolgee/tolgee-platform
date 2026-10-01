@@ -1,6 +1,11 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.OAuth2SupersededRefreshTokenBuilder
 import io.tolgee.model.Project
+import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
+import java.time.Instant
+import java.util.Date
 
 /**
  * Shared by the token-flow suites. Beside the default user's project it holds two projects that user is not a member
@@ -15,6 +20,22 @@ class OAuth2FlowTestData : BaseTestData() {
   lateinit var otherProject: Project
 
   lateinit var publicProject: Project
+
+  /**
+   * Filler rotation history for a grant an HTTP flow created at runtime. That grant is not part of this graph, so
+   * the rows come back unsaved and the caller persists them.
+   */
+  fun refreshHistoryFor(
+    grant: OAuth2Grant,
+    count: Int,
+    from: Instant = Instant.now(),
+  ): List<OAuth2SupersededRefreshToken> =
+    (1..count).map { index ->
+      OAuth2SupersededRefreshTokenBuilder(grant).self {
+        tokenHash = "filler-$index"
+        supersededAt = Date.from(from.minusSeconds(index.toLong()))
+      }
+    }
 
   init {
     otherProject =
