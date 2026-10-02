@@ -55,6 +55,7 @@ export type EntityEnum =
   | 'ContentDeliveryConfig'
   | 'WebhookConfig'
   | 'ContentStorage'
+  | 'ApiKey'
   | 'Task'
   | 'Label'
   | 'TranslationSuggestion'
@@ -136,6 +137,11 @@ export type WebhookConfigReferenceData = {
   url: string;
 };
 
+export type ApiKeyReferenceData = {
+  type: 'api_key';
+  description: string;
+};
+
 export type Reference =
   | KeyReferenceData
   | LanguageReferenceData
@@ -143,6 +149,7 @@ export type Reference =
   | ContentDeliveryConfigReferenceData
   | ContentStorageReferenceData
   | WebhookConfigReferenceData
+  | ApiKeyReferenceData
   | TaskReferenceData
   | BranchReferenceData;
 

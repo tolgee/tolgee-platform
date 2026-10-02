@@ -1,5 +1,7 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.PropertyModification
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
@@ -12,6 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -396,5 +399,63 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     val key = apiKeyService.get(testData.usersKey.id)
     key.key.assert.isNull()
     key.keyHash.assert.isNotEqualTo(oldKeyHash)
+  }
+
+  @Test
+  fun `logs API key creation to project activity`() {
+    performAuthPost(
+      "/v2/api-keys",
+      mapOf(
+        "projectId" to testData.projectBuilder.self.id,
+        "scopes" to setOf(Scope.TRANSLATIONS_VIEW.value),
+        "description" to "CI key",
+      ),
+    ).andIsOk
+
+    val modifications = getSingleActivityModifications(ActivityType.API_KEY_CREATE)
+    modifications["description"]!!.new.assert.isEqualTo("CI key")
+    (modifications["scopesEnum"]!!.new as Collection<*>).assert.containsExactly("translations.view")
+  }
+
+  @Test
+  fun `logs API key update to project activity`() {
+    performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(Scope.TRANSLATIONS_EDIT)))
+      .andIsOk
+
+    val modifications = getSingleActivityModifications(ActivityType.API_KEY_UPDATE)
+    (modifications["scopesEnum"]!!.old as Collection<*>).assert.containsExactly("translations.view")
+    (modifications["scopesEnum"]!!.new as Collection<*>).assert.containsExactly("translations.edit")
+  }
+
+  @Test
+  fun `logs API key deletion to project activity`() {
+    performAuthDelete("/v2/api-keys/${testData.expiredKey.id}", null).andIsOk
+
+    val modifications = getSingleActivityModifications(ActivityType.API_KEY_DELETE)
+    modifications["description"]!!.old.assert.isEqualTo("Oh I am expired")
+  }
+
+  @Test
+  fun `logs API key regeneration to project activity`() {
+    val expiresAt = Date().time + 10000
+    performAuthPut("/v2/api-keys/${testData.usersKey.id}/regenerate", mapOf("expiresAt" to expiresAt)).andIsOk
+
+    val modifications = getSingleActivityModifications(ActivityType.API_KEY_REGENERATE)
+    modifications["expiresAt"]!!.old.assert.isNull()
+    modifications.keys.assert.doesNotContain("keyHash")
+  }
+
+  private fun getSingleActivityModifications(type: ActivityType): Map<String, PropertyModification> {
+    val revision =
+      entityManager
+        .createQuery(
+          "from ActivityRevision ar join fetch ar.modifiedEntities where ar.type = :type",
+          ActivityRevision::class.java,
+        ).setParameter("type", type)
+        .singleResult
+    revision.projectId.assert.isEqualTo(testData.projectBuilder.self.id)
+    val modified = revision.modifiedEntities.single()
+    modified.entityClass.assert.isEqualTo("ApiKey")
+    return modified.modifications
   }
 }
