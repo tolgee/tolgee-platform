@@ -13,10 +13,14 @@ import io.tolgee.service.notification.activity.GroupedNotificationWriter
 import io.tolgee.service.notification.digest.NotificationDigestJob
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
+import jakarta.mail.internet.MimeMessage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import java.time.Duration
 import java.util.Date
 
@@ -38,6 +42,9 @@ class NotificationDigestJobTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var notificationRepository: NotificationRepository
+
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
 
   private lateinit var testData: NotificationRecipientsTestData
 
@@ -135,12 +142,45 @@ class NotificationDigestJobTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `message id is stable for the same content`() {
-    write()
+  fun `message id is the same after a crash before commit and changes with new content`() {
+    val n = write()
     afterGrace()
     job.sendDueDigests()
-    val message = emailTestUtil.messageArgumentCaptor.firstValue
-    message.saveChanges()
-    message.getHeader("Message-ID")[0].assert.startsWith("<digest-${testData.reviewerAll.id}-")
+    val first = messageId(0)
+    first.assert.startsWith("<digest-${testData.reviewerAll.id}-")
+
+    jdbcTemplate.update("update notification set email_pending = true where id = ?", n.id)
+    jdbcTemplate.update(
+      "update notification_digest_state set last_digest_sent_at = null where user_id = ?",
+      testData.reviewerAll.id,
+    )
+    job.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(2)
+    messageId(1).assert.isEqualTo(first)
+
+    moveCurrentDate(Duration.ofHours(25))
+    write(ids = listOf(5L))
+    afterGrace()
+    job.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(3)
+    messageId(2).assert.isNotEqualTo(first)
   }
+
+  @Test
+  fun `content written during sending keeps the row pending`() {
+    val n = write()
+    afterGrace()
+    whenever(emailTestUtil.javaMailSender.send(any<MimeMessage>())).thenAnswer {
+      moveCurrentDate(Duration.ofSeconds(1))
+      write(ids = listOf(7L))
+    }
+    job.sendDueDigests()
+    notificationRepository
+      .findById(n.id)
+      .get()
+      .emailPending.assert
+      .isTrue()
+  }
+
+  private fun messageId(index: Int) = emailTestUtil.messageArgumentCaptor.allValues[index].getHeader("Message-ID")[0]
 }

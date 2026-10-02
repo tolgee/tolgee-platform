@@ -19,8 +19,6 @@ package io.tolgee.email
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailAttachment
 import jakarta.annotation.PostConstruct
-import jakarta.mail.Session
-import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSender
@@ -31,7 +29,6 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext
 import java.util.Locale
-import java.util.Properties
 
 @Service
 class EmailService(
@@ -93,14 +90,7 @@ class EmailService(
     replyTo: String? = null,
     messageId: String? = null,
   ) {
-    val message =
-      messageId?.let { id ->
-        object : MimeMessage(Session.getInstance(Properties())) {
-          override fun updateMessageID() {
-            setHeader("Message-ID", id)
-          }
-        }
-      } ?: mailSender.createMimeMessage()
+    val message = mailSender.createMimeMessage()
     val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
 
     helper.setFrom(smtpFrom)
@@ -114,6 +104,8 @@ class EmailService(
       helper.setReplyTo(it)
     }
     attachments.forEach { helper.addAttachment(it.name, it.inputStreamSource) }
+
+    messageId?.let { message.setHeader("Message-ID", it) }
 
     mailSender.send(message)
   }

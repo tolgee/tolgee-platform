@@ -81,12 +81,12 @@ class NotificationDigestJob(
     val (enabled, disabled) =
       rows.partition { settingsService.isEnabled(userId, it.row.type, NotificationChannel.EMAIL) }
     if (disabled.isNotEmpty()) {
-      clearPending(disabled.map { it.row.notificationId })
+      clearPending(disabled)
     }
     if (enabled.isEmpty()) return
 
     val digest = composer.compose(enabled.map { it.row }, props.entityCap)
-    val newestUpdate = enabled.maxOf { it.updatedAt }
+    val newestUpdate = enabled.maxOf { it.updatedAt.time }
     emailSender.sendEmail(
       EmailParams(
         to = email,
@@ -96,14 +96,14 @@ class NotificationDigestJob(
       ),
     )
     executeInNewTransaction(transactionManager) {
-      clearPending(enabled.map { it.row.notificationId })
+      clearPending(enabled)
       digestStateService.markSent(userId, currentDateProvider.date)
     }
   }
 
   private data class LoadedRow(
     val row: DigestRow,
-    val updatedAt: Long,
+    val updatedAt: Timestamp,
   )
 
   private data class PendingNotification(
@@ -111,7 +111,7 @@ class NotificationDigestJob(
     val projectId: Long,
     val projectName: String,
     val type: NotificationType,
-    val updatedAt: Long,
+    val updatedAt: Timestamp,
   )
 
   private fun loadRows(userId: Long): List<LoadedRow> {
@@ -130,7 +130,7 @@ class NotificationDigestJob(
             projectId = rs.getLong(2),
             projectName = rs.getString(3),
             type = NotificationType.valueOf(rs.getString(4)),
-            updatedAt = rs.getTimestamp(5).time,
+            updatedAt = rs.getTimestamp(5),
           )
         },
         userId,
@@ -157,11 +157,19 @@ class NotificationDigestJob(
     }
   }
 
-  private fun clearPending(notificationIds: List<Long>) {
+  private fun clearPending(rows: List<LoadedRow>) {
     jdbcTemplate.update(
-      "update notification set email_pending = false where id = any(?)",
+      """
+      update notification n
+      set email_pending = false
+      from unnest(?::bigint[], ?::timestamp[]) as l(id, updated_at)
+      where n.id = l.id and n.updated_at <= l.updated_at
+      """,
       PreparedStatementSetter { ps ->
-        ps.setArray(1, ps.connection.createArrayOf("bigint", notificationIds.toTypedArray()))
+        val ids = rows.map { it.row.notificationId }.toTypedArray()
+        val timestamps = rows.map { it.updatedAt }.toTypedArray()
+        ps.setArray(1, ps.connection.createArrayOf("bigint", ids))
+        ps.setArray(2, ps.connection.createArrayOf("timestamp", timestamps))
       },
     )
   }
