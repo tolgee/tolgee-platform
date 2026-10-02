@@ -33,10 +33,12 @@ class ActivityNotificationProcessor(
   fun processQueue() {
     lockingProvider.withLockingIfFree(LOCK_NAME, LEASE_TIME) {
       val deadline = System.currentTimeMillis() + LEASE_TIME.toMillis() * 4 / 5
+      var lastRevisionId: Long? = null
       while (System.currentTimeMillis() < deadline) {
-        val batch = queue.takeBatch(tolgeeProperties.notifications.processingBatchSize)
+        val batch = queue.takeBatch(tolgeeProperties.notifications.processingBatchSize, lastRevisionId)
         if (batch.isEmpty()) break
         batch.forEach { processMarker(it.revisionId) }
+        lastRevisionId = batch.last().revisionId
       }
     }
   }
@@ -51,13 +53,14 @@ class ActivityNotificationProcessor(
         queue.delete(revisionId)
       }
     } catch (e: Exception) {
-      logger.warn("Processing notification marker for revision $revisionId failed", e)
       val dropped =
         executeInNewTransaction(transactionManager) {
           queue.recordFailure(revisionId, tolgeeProperties.notifications.maxAttempts)
         }
       if (dropped) {
         logger.error("Dropping notification marker for revision $revisionId after repeated failures", e)
+      } else {
+        logger.warn("Processing notification marker for revision $revisionId failed: ${e.message}")
       }
     }
   }

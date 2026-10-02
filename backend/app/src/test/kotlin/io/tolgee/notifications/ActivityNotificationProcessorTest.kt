@@ -63,6 +63,10 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
       testData.reviewerFr.id,
       testData.reviewerAll.id,
     )
+    notificationsOf(NotificationType.KEYS_ADDED)
+      .single { it.user.id == testData.reviewerAll.id }
+      .emailPending.assert
+      .isTrue()
     queue.findAll().assert.isEmpty()
   }
 
@@ -94,16 +98,16 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
-  fun `marker of a missing revision is dropped at once`() {
+  fun `marker of a missing revision is deleted in a single run`() {
     queue.add(Long.MAX_VALUE)
     processor.processQueue()
     queue.findAll().assert.isEmpty()
   }
 
   @Test
-  fun `failing marker is retried, then dropped`() {
+  fun `failing marker is retried once per run, then dropped`() {
     jdbcTemplate.update(
-      "insert into notification_activity_queue (activity_revision_id, attempts, created_at) values (?, 4, now())",
+      "insert into notification_activity_queue (activity_revision_id, attempts, created_at) values (?, 0, now())",
       -1L,
     )
     jdbcTemplate.update(
@@ -117,6 +121,13 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
       """,
     )
     processor.processQueue()
+    jdbcTemplate
+      .queryForObject(
+        "select attempts from notification_activity_queue where activity_revision_id = -1",
+        Int::class.java,
+      ).assert
+      .isEqualTo(1)
+    repeat(4) { processor.processQueue() }
     queue.findAll().assert.doesNotContain(-1L)
   }
 

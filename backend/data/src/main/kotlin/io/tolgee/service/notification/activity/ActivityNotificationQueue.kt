@@ -42,10 +42,19 @@ class ActivityNotificationQueue(
     )
   }
 
-  fun takeBatch(limit: Int): List<QueuedMarker> =
+  fun takeBatch(
+    limit: Int,
+    afterRevisionId: Long? = null,
+  ): List<QueuedMarker> =
     jdbcTemplate.query(
-      "select activity_revision_id, attempts from notification_activity_queue order by activity_revision_id limit ?",
+      """
+      select activity_revision_id, attempts from notification_activity_queue
+      where (?::bigint is null or activity_revision_id > ?)
+      order by activity_revision_id limit ?
+      """,
       { rs, _ -> QueuedMarker(rs.getLong(1), rs.getInt(2)) },
+      afterRevisionId,
+      afterRevisionId,
       limit,
     )
 
