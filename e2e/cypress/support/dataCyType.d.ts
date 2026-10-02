@@ -499,7 +499,13 @@ declare namespace DataCy {
         "notifications-empty-message": true;
         "notifications-list": true;
         "notifications-list-item": true;
+        "notifications-localization-branches": true;
+        "notifications-localization-count": true;
+        "notifications-localization-flag": true;
+        "notifications-localization-item": true;
+        "notifications-settings-digest-frequency": true;
         "notifications-settings-icon": true;
+        "notifications-settings-localization-toggle": true;
         "notistack-snackbar": true;
         "oauth2-consent": true;
         "oauth2-consent-allow": true;

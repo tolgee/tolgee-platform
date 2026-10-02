@@ -174,6 +174,10 @@ export interface paths {
     /** Saves new value for given parameters */
     put: operations["putNotificationSetting"];
   };
+  "/v2/notification-settings/digest-frequency": {
+    /** Sets how often the notification digest email is sent */
+    put: operations["putDigestFrequency"];
+  };
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
   };
@@ -4563,11 +4567,29 @@ export interface components {
       /** @example homepage */
       name: string;
     };
-    NotificationModel: {
-      /** Format: date-time */
-      createdAt?: string;
+    NotificationDigestFrequencyRequest: {
+      /**
+       * @example DAILY
+       * @enum {string}
+       */
+      frequency: "DAILY" | "OFF";
+    };
+    NotificationLanguageModel: {
+      flagEmoji?: string;
       /** Format: int64 */
       id: number;
+      name: string;
+      tag: string;
+    };
+    NotificationModel: {
+      branches?: string[];
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: int32 */
+      entityCount?: number;
+      /** Format: int64 */
+      id: number;
+      languages?: components["schemas"]["NotificationLanguageModel"][];
       linkedTask?: components["schemas"]["TaskModel"];
       originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
@@ -4578,7 +4600,15 @@ export interface components {
         | "TASK_CANCELED"
         | "MFA_ENABLED"
         | "MFA_DISABLED"
-        | "PASSWORD_CHANGED";
+        | "PASSWORD_CHANGED"
+        | "KEYS_ADDED"
+        | "SOURCE_CHANGED"
+        | "STRINGS_TRANSLATED"
+        | "STRINGS_REVIEWED"
+        | "AUTOMATICALLY_TRANSLATED"
+        | "BULK_CHANGED";
+      /** Format: date-time */
+      updatedAt?: string;
     };
     NotificationSettingGroupModel: {
       email: boolean;
@@ -4586,6 +4616,9 @@ export interface components {
     };
     NotificationSettingModel: {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      /** @enum {string} */
+      digestFrequency: "DAILY" | "OFF";
+      localization: components["schemas"]["NotificationTypeSettingModel"][];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
     NotificationSettingsRequest: {
@@ -4603,7 +4636,43 @@ export interface components {
        * @example TASKS
        * @enum {string}
        */
-      group: "ACCOUNT_SECURITY" | "TASKS";
+      group: "ACCOUNT_SECURITY" | "TASKS" | "LOCALIZATION";
+      /**
+       * @description Required when group is LOCALIZATION
+       * @example KEYS_ADDED
+       * @enum {string}
+       */
+      type?:
+        | "TASK_ASSIGNED"
+        | "TASK_FINISHED"
+        | "TASK_CANCELED"
+        | "MFA_ENABLED"
+        | "MFA_DISABLED"
+        | "PASSWORD_CHANGED"
+        | "KEYS_ADDED"
+        | "SOURCE_CHANGED"
+        | "STRINGS_TRANSLATED"
+        | "STRINGS_REVIEWED"
+        | "AUTOMATICALLY_TRANSLATED"
+        | "BULK_CHANGED";
+    };
+    NotificationTypeSettingModel: {
+      email: boolean;
+      inApp: boolean;
+      /** @enum {string} */
+      type:
+        | "TASK_ASSIGNED"
+        | "TASK_FINISHED"
+        | "TASK_CANCELED"
+        | "MFA_ENABLED"
+        | "MFA_DISABLED"
+        | "PASSWORD_CHANGED"
+        | "KEYS_ADDED"
+        | "SOURCE_CHANGED"
+        | "STRINGS_TRANSLATED"
+        | "STRINGS_REVIEWED"
+        | "AUTOMATICALLY_TRANSLATED"
+        | "BULK_CHANGED";
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -10544,6 +10613,50 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationSettingsRequest"];
+      };
+    };
+  };
+  /** Sets how often the notification digest email is sent */
+  putDigestFrequency: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationDigestFrequencyRequest"];
       };
     };
   };
