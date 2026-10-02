@@ -3,6 +3,7 @@ package io.tolgee.notifications
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.NotificationRecipientsTestData
+import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitFor
@@ -63,15 +64,16 @@ class ActivityNotificationMarkerTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `batch job writes exactly one marker for the merged revision`() {
-    performProjectAuthPost(
-      "start-batch-job/set-translation-state",
-      mapOf(
-        "keyIds" to listOf(testData.existingKey.id),
-        "languageIds" to listOf(testData.french.id, testData.german.id),
-        "state" to "REVIEWED",
-      ),
-    ).andIsOk
-    val jobId = jdbcTemplate.queryForObject("select max(id) from tolgee_batch_job", Long::class.java)!!
+    val response =
+      performProjectAuthPost(
+        "start-batch-job/set-translation-state",
+        mapOf(
+          "keyIds" to listOf(testData.existingKey.id),
+          "languageIds" to listOf(testData.french.id, testData.german.id),
+          "state" to "REVIEWED",
+        ),
+      ).andIsOk
+    val jobId = (objectMapper.readValue(response.andGetContentAsString, Map::class.java)["id"] as Number).toLong()
     waitFor(pollTime = 200) { batchJobService.findJobDto(jobId)?.status?.completed == true }
     waitFor(pollTime = 200) { queue.findAll().isNotEmpty() }
     val mergedRevisionId =
@@ -85,7 +87,7 @@ class ActivityNotificationMarkerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `marker is rolled back with the user transaction`() {
+  fun `queue insert joins the surrounding transaction and rolls back with it`() {
     executeInNewTransaction { status ->
       queue.add(Long.MAX_VALUE)
       status.setRollbackOnly()
