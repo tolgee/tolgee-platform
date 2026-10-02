@@ -29,6 +29,7 @@ class GroupedNotificationWriter(
     digestEnabled: Boolean,
   ): Notification {
     require(type.grouped) { "Type $type is not grouped" }
+    entityManager.flush()
     val now = Timestamp(currentDateProvider.date.time)
     val existingId =
       jdbcTemplate
@@ -63,8 +64,9 @@ class GroupedNotificationWriter(
 
     addEntities(notificationId, entityIds)
     entityManager.flush()
-    entityManager.clear()
-    return notificationRepository.findById(notificationId).get()
+    val notification = entityManager.find(Notification::class.java, notificationId)
+    entityManager.refresh(notification)
+    return notification
   }
 
   fun entityCount(notificationId: Long): Int =

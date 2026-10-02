@@ -2,6 +2,7 @@ package io.tolgee.notifications
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.NotificationRecipientsTestData
+import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.repository.notification.NotificationRepository
 import io.tolgee.service.notification.activity.GroupedNotificationWriter
@@ -88,5 +89,21 @@ class GroupedNotificationWriterTest : AbstractSpringTest() {
       .get()
       .emailPending.assert
       .isTrue()
+  }
+
+  @Test
+  fun `write does not clear the callers persistence context`() {
+    executeInNewTransaction(platformTransactionManager) {
+      val user = entityManager.find(UserAccount::class.java, testData.reviewerAll.id)
+      writer.write(
+        userId = testData.reviewerAll.id,
+        projectId = testData.project.id,
+        originatingUserId = testData.author.id,
+        type = NotificationType.STRINGS_TRANSLATED,
+        entityIds = listOf(1L),
+        digestEnabled = true,
+      )
+      entityManager.contains(user).assert.isTrue()
+    }
   }
 }
