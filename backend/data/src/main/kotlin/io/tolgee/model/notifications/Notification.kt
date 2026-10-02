@@ -38,4 +38,7 @@ class Notification : StandardAuditModel() {
 
   @ColumnDefault("false")
   var seen: Boolean = false
+
+  @ColumnDefault("false")
+  var emailPending: Boolean = false
 }

@@ -28,5 +28,7 @@ class EmailNotificationComposer(
 
       NotificationType.PASSWORD_CHANGED,
       -> passwordChangedEmailComposer
+
+      else -> throw IllegalStateException("No email composer for notification type ${notification.type}")
     }.composeEmail(notification)
 }

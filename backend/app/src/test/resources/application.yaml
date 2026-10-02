@@ -41,6 +41,10 @@ spring:
   datasource:
     maximum-pool-size: 100
 tolgee:
+  notifications:
+    processing-interval-ms: 3600000
+    digest-interval-ms: 3600000
+    cleanup-interval-ms: 3600000
   slack:
     token: fakeToken
     signingSecret: fakeSecret
