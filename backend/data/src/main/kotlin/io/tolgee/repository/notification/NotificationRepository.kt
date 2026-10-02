@@ -29,10 +29,10 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
                 OR :#{#filters.filterSeen} = n.seen
             )
         AND (
-                CAST(:cursorCreatedAt AS timestamp) is null
+                CAST(:cursorUpdatedAt AS timestamp) is null
                 OR :cursorId is null
-                OR :cursorCreatedAt > n.createdAt
-                OR :cursorCreatedAt = n.createdAt AND :cursorId > n.id
+                OR :cursorUpdatedAt > n.updatedAt
+                OR :cursorUpdatedAt = n.updatedAt AND :cursorId > n.id
             )
     """,
   )
@@ -40,7 +40,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
-    cursorCreatedAt: Timestamp? = null,
+    cursorUpdatedAt: Timestamp? = null,
     cursorId: Long? = null,
   ): Page<Notification>
 

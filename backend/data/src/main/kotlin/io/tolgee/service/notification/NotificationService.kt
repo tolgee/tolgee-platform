@@ -22,6 +22,7 @@ class NotificationService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val emailNotificationsService: EmailNotificationsService,
   private val notificationSettingsService: NotificationSettingsService,
+  private val notificationDigestStateService: NotificationDigestStateService,
 ) {
   fun getNotifications(
     userId: Long,
@@ -33,7 +34,7 @@ class NotificationService(
       userId,
       pageable,
       filters,
-      cursor?.get("createdAt")?.value?.let { Timestamp.from(Instant.ofEpochMilli(it.toLong())) },
+      cursor?.get("updatedAt")?.value?.let { Timestamp.from(Instant.ofEpochMilli(it.toLong())) },
       cursor?.get("id")?.value?.toLong(),
     )
 
@@ -79,6 +80,7 @@ class NotificationService(
     val modifiedCount = notificationRepository.markNotificationsAsSeen(notificationIds, userId)
 
     if (modifiedCount > 0) {
+      notificationDigestStateService.resetWindow(userId)
       applicationEventPublisher.publishEvent(
         OnNotificationsChangedForUser(
           userId,
