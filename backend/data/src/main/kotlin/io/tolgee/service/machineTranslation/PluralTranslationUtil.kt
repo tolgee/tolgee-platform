@@ -5,6 +5,7 @@ import io.tolgee.formats.PluralForms
 import io.tolgee.formats.getPluralFormExamples
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.toIcuPluralString
+import org.springframework.web.util.HtmlUtils
 
 class PluralTranslationUtil(
   private val context: MtTranslatorContext,
@@ -23,8 +24,8 @@ class PluralTranslationUtil(
   }
 
   private val translated by lazy {
-    preparedFormSourceStrings.map {
-      it.first to translateFn(it.second)
+    preparedFormSourceStrings.map { (form, prepared) ->
+      Triple(form, containsNumberTag(prepared), translateFn(prepared))
     }
   }
 
@@ -35,8 +36,8 @@ class PluralTranslationUtil(
 
   private val result: MtTranslatorResult by lazy {
     val result =
-      translated.map { (form, result) ->
-        result.translatedText = result.translatedText?.replaceNumberTags()
+      translated.map { (form, hadTag, result) ->
+        result.translatedText = result.translatedText?.let { restoreNumberPlaceholder(it, htmlEscaped = hadTag) }
         form to result
       }
 
@@ -58,15 +59,33 @@ class PluralTranslationUtil(
     )
   }
 
-  private fun String.replaceNumberTags(): String {
-    return this.replace(TOLGEE_TAG_REGEX, "#")
-  }
-
   companion object {
     const val REPLACE_NUMBER_PLACEHOLDER = "{%{REPLACE_NUMBER}%}"
-    private const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
+    const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
     private const val TOLGEE_TAG_CLOSE = "</x>"
     val TOLGEE_TAG_REGEX = "$TOLGEE_TAG_OPEN.*?$TOLGEE_TAG_CLOSE".toRegex()
+
+    /**
+     * Whether the text contains the [TOLGEE_TAG_OPEN] marker used to protect the ICU plural
+     * "replace number" (`#`) placeholder while translating plural forms one by one. Providers must be
+     * told (via their own tag-handling/HTML mode) to leave this tag untouched, otherwise the engine is
+     * free to mangle or drop it, breaking [MtBatchTranslator] restoration of the `#` placeholder.
+     */
+    fun containsNumberTag(text: String): Boolean = text.contains(TOLGEE_TAG_OPEN)
+
+    /**
+     * Providers run in tag-handling mode when the number tag is present and then return `<`, `>`, `&`
+     * and quotes as HTML entities, so the escaping applied in [replaceReplaceNumberPlaceholderWithExample]
+     * has to be reversed here. Without it, `&lt;` ends up stored in the translation.
+     */
+    fun restoreNumberPlaceholder(
+      translated: String,
+      htmlEscaped: Boolean,
+    ): String {
+      val withPlaceholder = translated.replace(TOLGEE_TAG_REGEX, "#")
+      if (!htmlEscaped) return withPlaceholder
+      return HtmlUtils.htmlUnescape(withPlaceholder)
+    }
 
     /**
      * Returns all target forms with examples from source
@@ -95,11 +114,11 @@ class PluralTranslationUtil(
       example: Number,
       addTag: Boolean = true,
     ): String {
-      val tagOpenString = if (addTag) TOLGEE_TAG_OPEN else ""
-      val tagCloseString = if (addTag) TOLGEE_TAG_CLOSE else ""
-      return this.replace(
+      if (!addTag) return this.replace(REPLACE_NUMBER_PLACEHOLDER, example.toString())
+      if (!this.contains(REPLACE_NUMBER_PLACEHOLDER)) return this
+      return HtmlUtils.htmlEscape(this, Charsets.UTF_8.name()).replace(
         REPLACE_NUMBER_PLACEHOLDER,
-        "$tagOpenString${example}$tagCloseString",
+        "$TOLGEE_TAG_OPEN$example$TOLGEE_TAG_CLOSE",
       )
     }
 
