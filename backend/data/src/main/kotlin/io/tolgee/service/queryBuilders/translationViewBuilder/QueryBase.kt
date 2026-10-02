@@ -62,6 +62,7 @@ class QueryBase<T>(
   private val entityManager: EntityManager,
   private val qaEnabled: Boolean,
   val qaDisabledLanguageIds: Set<Long>,
+  private val tasksEnabled: Boolean,
   val isCountQuery: Boolean = false,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
@@ -108,6 +109,9 @@ class QueryBase<T>(
     addLeftJoinedColumns()
     applyTranslationFilters()
     queryGlobalFiltering.apply()
+    if (tasksEnabled) {
+      queryGlobalFiltering.applyTaskHistoryFilters()
+    }
   }
 
   private fun addLeftJoinedColumns() {
