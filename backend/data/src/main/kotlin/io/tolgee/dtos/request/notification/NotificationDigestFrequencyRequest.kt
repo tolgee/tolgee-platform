@@ -5,5 +5,5 @@ import io.tolgee.model.notifications.NotificationDigestFrequency
 
 class NotificationDigestFrequencyRequest(
   @Schema(example = "DAILY")
-  var frequency: NotificationDigestFrequency = NotificationDigestFrequency.DAILY,
+  var frequency: NotificationDigestFrequency,
 )

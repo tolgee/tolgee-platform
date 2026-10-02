@@ -55,6 +55,9 @@ class NotificationSettingsController(
     if (request.group == NotificationTypeGroup.ACCOUNT_SECURITY) {
       throw BadRequestException("Account security settings cannot be changed.")
     }
+    if (request.type != null && request.group != NotificationTypeGroup.LOCALIZATION) {
+      throw BadRequestException("Type can only be set for the localization group.")
+    }
     val user = authenticationFacade.authenticatedUserEntity
     if (request.group == NotificationTypeGroup.LOCALIZATION) {
       val type = request.type

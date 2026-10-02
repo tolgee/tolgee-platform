@@ -16,6 +16,7 @@ import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.databind.ObjectMapper
 import java.util.Date
 
 class LocalizationNotificationsApiTest : AuthorizedControllerTest() {
@@ -86,6 +87,29 @@ class LocalizationNotificationsApiTest : AuthorizedControllerTest() {
       node("_embedded.notificationModelList[0].id").isEqualTo(older.id)
     }
   }
+
+  @Test
+  fun `cursor follows update time and not creation time`() {
+    val base = Date().time
+    setForcedDate(Date(base))
+    val a = write(NotificationType.KEYS_ADDED, listOf(1L))
+    setForcedDate(Date(base + 1000))
+    val b = write(NotificationType.SOURCE_CHANGED, listOf(2L))
+    setForcedDate(Date(base + 2000))
+    write(NotificationType.KEYS_ADDED, listOf(3L))
+    clearForcedDate()
+
+    val first = performAuthGet("/v2/notification?size=1").andIsOk
+    first.andAssertThatJson { node("_embedded.notificationModelList[0].id").isEqualTo(a.id) }
+    val cursor = readCursor(first)
+    val second = performAuthGet("/v2/notification?size=1&cursor=$cursor").andIsOk
+    second.andAssertThatJson { node("_embedded.notificationModelList[0].id").isEqualTo(b.id) }
+    val third = performAuthGet("/v2/notification?size=1&cursor=${readCursor(second)}").andIsOk
+    third.andAssertThatJson { node("_embedded.notificationModelList").isAbsent() }
+  }
+
+  private fun readCursor(result: org.springframework.test.web.servlet.ResultActions): String =
+    ObjectMapper().readValue(result.andReturn().response.contentAsString, Map::class.java)["nextCursor"] as String
 
   @Test
   fun `marking seen resets the digest window`() {

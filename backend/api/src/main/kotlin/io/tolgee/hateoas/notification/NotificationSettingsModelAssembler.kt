@@ -34,7 +34,7 @@ class NotificationSettingsModelAssembler :
     )
 
   override fun toModel(view: List<NotificationSetting>): NotificationSettingModel =
-    toModel(view, NotificationDigestFrequency.DAILY)
+    throw UnsupportedOperationException("Use toModel(view, digestFrequency)")
 
   private fun List<NotificationSetting>.typeValue(
     type: NotificationType,
