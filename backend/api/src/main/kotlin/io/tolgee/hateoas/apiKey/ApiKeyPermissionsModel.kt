@@ -5,6 +5,8 @@ import io.tolgee.hateoas.permission.IPermissionModel
 import io.tolgee.hateoas.project.SimpleProjectModel
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -19,6 +21,12 @@ class ApiKeyPermissionsModel(
   override val suggestLanguageIds: Collection<Long>?,
   override val suggestManageLanguageIds: Collection<Long>?,
   override var scopes: Array<Scope> = arrayOf(),
+  @Schema(
+    description =
+      "The user's own scopes on the project, not narrowed by the API key or OAuth grant. " +
+        "A scope here but not in `scopes` is one the credential lacks, not the user.",
+  )
+  val userScopes: Array<Scope>,
   @get:Schema(
     description =
       "The user's permission type. This field is null if user has assigned " +
@@ -26,5 +34,9 @@ class ApiKeyPermissionsModel(
   )
   override val type: ProjectPermissionType?,
   var project: SimpleProjectModel,
+  val suggestionsMode: SuggestionsMode,
+  val translationProtection: TranslationProtection,
+  @Schema(description = "Id of the user the credential belongs to")
+  val userId: Long,
 ) : RepresentationModel<ApiKeyPermissionsModel>(),
   IPermissionModel

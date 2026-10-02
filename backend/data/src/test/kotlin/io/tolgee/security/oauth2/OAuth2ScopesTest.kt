@@ -14,6 +14,7 @@ class OAuth2ScopesTest {
       "translations.edit",
       "translations.suggest",
       "translation-suggestions.manage",
+      "translation-suggestions.own-access",
       "keys.edit",
       "screenshots.upload",
       "screenshots.delete",

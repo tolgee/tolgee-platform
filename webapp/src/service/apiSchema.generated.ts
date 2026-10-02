@@ -1435,6 +1435,7 @@ export interface components {
         | "translations.edit"
         | "translations.suggest"
         | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1495,6 +1496,8 @@ export interface components {
        * ]
        */
       suggestManageLanguageIds?: number[];
+      /** @enum {string} */
+      suggestionsMode: "DISABLED" | "ENABLED";
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example [
@@ -1503,11 +1506,61 @@ export interface components {
        * ]
        */
       translateLanguageIds?: number[];
+      /** @enum {string} */
+      translationProtection: "NONE" | "PROTECT_REVIEWED";
       /**
        * @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions
        * @enum {string}
        */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      /**
+       * Format: int64
+       * @description Id of the user the credential belongs to
+       */
+      userId: number;
+      /** @description The user's own scopes on the project, not narrowed by the API key or OAuth grant. A scope here but not in `scopes` is one the credential lacks, not the user. */
+      userScopes: (
+        | "translations.view"
+        | "translations.edit"
+        | "translations.suggest"
+        | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
+        | "keys.edit"
+        | "screenshots.upload"
+        | "screenshots.delete"
+        | "screenshots.view"
+        | "activity.view"
+        | "languages.edit"
+        | "admin"
+        | "project.edit"
+        | "members.view"
+        | "members.edit"
+        | "translation-comments.add"
+        | "translation-comments.edit"
+        | "translation-comments.set-state"
+        | "translations.state-edit"
+        | "keys.view"
+        | "keys.delete"
+        | "keys.create"
+        | "batch-jobs.view"
+        | "batch-jobs.cancel"
+        | "translations.batch-by-tm"
+        | "translations.batch-machine"
+        | "content-delivery.manage"
+        | "content-delivery.publish"
+        | "webhooks.manage"
+        | "tasks.view"
+        | "tasks.edit"
+        | "tasks.assigned-access"
+        | "prompts.view"
+        | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
+        | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
+        | "organization-quotas.view"
+      )[];
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example [
@@ -2155,6 +2208,7 @@ export interface components {
         | "translations.edit"
         | "translations.suggest"
         | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3271,7 +3325,8 @@ export interface components {
         | "project_import_missing_project_json"
         | "project_import_corrupt_archive"
         | "server_busy"
-        | "cannot_delete_initial_user";
+        | "cannot_delete_initial_user"
+        | "suggestions_disabled";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3507,6 +3562,7 @@ export interface components {
         | "translations.edit"
         | "translations.suggest"
         | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5104,6 +5160,7 @@ export interface components {
         | "translations.edit"
         | "translations.suggest"
         | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -5211,6 +5268,7 @@ export interface components {
         | "translations.edit"
         | "translations.suggest"
         | "translation-suggestions.manage"
+        | "translation-suggestions.own-access"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -7261,7 +7319,8 @@ export interface components {
         | "project_import_missing_project_json"
         | "project_import_corrupt_archive"
         | "server_busy"
-        | "cannot_delete_initial_user";
+        | "cannot_delete_initial_user"
+        | "suggestions_disabled";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -29043,6 +29102,7 @@ export interface operations {
               | "translations.edit"
               | "translations.suggest"
               | "translation-suggestions.manage"
+              | "translation-suggestions.own-access"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"

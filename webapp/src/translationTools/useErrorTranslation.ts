@@ -235,6 +235,11 @@ export function useErrorTranslation() {
         return t('suggestion_must_be_plural');
       case 'duplicate_suggestion':
         return t('duplicate_suggestion');
+      case 'suggestions_disabled':
+        return t(
+          'suggestions_disabled',
+          'Suggestions are disabled for this project'
+        );
       case 'operation_not_permitted_in_read_only_mode':
         return t('operation_not_permitted_in_read_only_mode');
       case 'cannot_delete_branch_with_children':

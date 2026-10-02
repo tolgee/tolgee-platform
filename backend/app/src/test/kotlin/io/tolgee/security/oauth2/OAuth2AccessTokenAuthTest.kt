@@ -146,8 +146,10 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       .andIsOk
       .andAssertThatJson {
         node("projectId").isNumber
+        node("userId").isEqualTo(testData.user.id)
         node("type").isNull()
         node("scopes").isArray.contains("translations.view").doesNotContain("keys.edit", "admin")
+        node("userScopes").isArray.contains("translations.view", "keys.edit", "admin")
       }
   }
 
