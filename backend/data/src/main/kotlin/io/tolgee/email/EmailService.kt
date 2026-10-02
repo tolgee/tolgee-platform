@@ -19,6 +19,8 @@ package io.tolgee.email
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailAttachment
 import jakarta.annotation.PostConstruct
+import jakarta.mail.Session
+import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSender
@@ -29,6 +31,7 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext
 import java.util.Locale
+import java.util.Properties
 
 @Service
 class EmailService(
@@ -65,6 +68,7 @@ class EmailService(
     subject: String? = null,
     bcc: Array<String>? = null,
     replyTo: String? = null,
+    messageId: String? = null,
   ) {
     val globalVariables = emailGlobalVariablesProvider()
     val context = Context(locale, properties)
@@ -77,7 +81,7 @@ class EmailService(
 
     val html = templateEngine.process(template, context)
     val subject = subject ?: extractEmailTitle(html)
-    sendEmail(recipient, subject, html, attachments, bcc, replyTo)
+    sendEmail(recipient, subject, html, attachments, bcc, replyTo, messageId)
   }
 
   fun sendEmail(
@@ -87,8 +91,16 @@ class EmailService(
     attachments: List<EmailAttachment> = listOf(),
     bcc: Array<String>? = null,
     replyTo: String? = null,
+    messageId: String? = null,
   ) {
-    val message = mailSender.createMimeMessage()
+    val message =
+      messageId?.let { id ->
+        object : MimeMessage(Session.getInstance(Properties())) {
+          override fun updateMessageID() {
+            setHeader("Message-ID", id)
+          }
+        }
+      } ?: mailSender.createMimeMessage()
     val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
 
     helper.setFrom(smtpFrom)
