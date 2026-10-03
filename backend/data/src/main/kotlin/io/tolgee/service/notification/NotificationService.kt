@@ -58,7 +58,9 @@ class NotificationService(
     if (notification.type.group == NotificationTypeGroup.TASKS && notification.linkedTask == null) {
       throw IllegalArgumentException("Task notification must have a linked task")
     }
-    if (notificationSettingsService.getSettingValue(notification, NotificationChannel.EMAIL)) {
+    if (!notification.type.grouped &&
+      notificationSettingsService.getSettingValue(notification, NotificationChannel.EMAIL)
+    ) {
       emailNotificationsService.sendEmailNotification(notification)
     }
     if (notificationSettingsService.getSettingValue(notification, NotificationChannel.IN_APP)) {
