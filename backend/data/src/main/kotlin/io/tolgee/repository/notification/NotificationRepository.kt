@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.sql.Timestamp
+import java.util.Date
 
 @Repository
 @Lazy
@@ -47,7 +48,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
   @Query(
     """
     UPDATE Notification n
-    SET n.seen = true
+    SET n.seen = true, n.seenAt = :seenAt
     WHERE n.user.id = :userId
         AND n.id IN :notificationIds 
         AND n.seen = false
@@ -57,5 +58,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
   fun markNotificationsAsSeen(
     notificationIds: List<Long>,
     userId: Long,
+    seenAt: Date,
   ): Int
 }

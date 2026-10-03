@@ -26,13 +26,23 @@ class NotificationCleanupJob(
     lockingProvider.withLockingIfFree(LOCK_NAME, LEASE_TIME) {
       val cutoff =
         currentDateProvider.date.time - Duration.ofDays(tolgeeProperties.notifications.seenRetentionDays).toMillis()
-      val deleted =
-        jdbcTemplate.update(
-          "delete from notification where seen = true and updated_at < ?",
-          Timestamp(cutoff),
-        )
-      if (deleted > 0) {
-        logger.info("Notification cleanup removed {} seen notification(s)", deleted)
+      val deadline = System.currentTimeMillis() + LEASE_TIME.toMillis() * 4 / 5
+      var total = 0
+      do {
+        val deleted =
+          jdbcTemplate.update(
+            """
+            delete from notification where id in (
+              select id from notification where seen = true and seen_at < ? limit ?
+            )
+            """,
+            Timestamp(cutoff),
+            BATCH_SIZE,
+          )
+        total += deleted
+      } while (deleted == BATCH_SIZE && System.currentTimeMillis() < deadline)
+      if (total > 0) {
+        logger.info("Notification cleanup removed {} seen notification(s)", total)
       }
     }
   }
@@ -40,5 +50,6 @@ class NotificationCleanupJob(
   companion object {
     private const val LOCK_NAME = "notification-cleanup"
     private val LEASE_TIME = Duration.ofMinutes(10)
+    private const val BATCH_SIZE = 1000
   }
 }

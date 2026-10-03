@@ -109,5 +109,7 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     assertThat(notifications.find { it.id == currentUserNotification1.id }?.seen).isTrue()
     assertThat(notifications.find { it.id == currentUserNotification2.id }?.seen).isTrue()
     assertThat(notifications.find { it.id == differentUserNotification.id }?.seen).isFalse()
+    assertThat(notifications.find { it.id == currentUserNotification1.id }?.seenAt).isNotNull()
+    assertThat(notifications.find { it.id == differentUserNotification.id }?.seenAt).isNull()
   }
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
+import java.util.Date
 
 @Entity
 @Table(
@@ -38,6 +39,8 @@ class Notification : StandardAuditModel() {
 
   @ColumnDefault("false")
   var seen: Boolean = false
+
+  var seenAt: Date? = null
 
   @ColumnDefault("false")
   var emailPending: Boolean = false

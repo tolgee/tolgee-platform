@@ -1,5 +1,6 @@
 package io.tolgee.service.notification
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.events.OnNotificationsChangedForUser
@@ -23,6 +24,7 @@ class NotificationService(
   private val emailNotificationsService: EmailNotificationsService,
   private val notificationSettingsService: NotificationSettingsService,
   private val notificationDigestStateService: NotificationDigestStateService,
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   fun getNotifications(
     userId: Long,
@@ -79,7 +81,8 @@ class NotificationService(
     notificationIds: List<Long>,
     userId: Long,
   ) {
-    val modifiedCount = notificationRepository.markNotificationsAsSeen(notificationIds, userId)
+    val modifiedCount =
+      notificationRepository.markNotificationsAsSeen(notificationIds, userId, currentDateProvider.date)
 
     if (modifiedCount > 0) {
       notificationDigestStateService.resetWindow(userId)

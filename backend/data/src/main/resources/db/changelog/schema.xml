@@ -6024,4 +6024,24 @@
             </sql>
         </rollback>
     </changeSet>
+    <changeSet author="bdshadow" id="1790900000000-3">
+        <addColumn tableName="notification">
+            <column name="seen_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+        <sql>
+            UPDATE notification SET seen_at = now() WHERE seen = true;
+            DROP INDEX notification_seen_updated_at_idx;
+            CREATE INDEX notification_seen_at_idx ON notification (seen_at) WHERE seen = true;
+            CREATE UNIQUE INDEX notification_setting_user_type_channel_idx
+            ON notification_setting (user_id, type, channel) WHERE type IS NOT NULL;
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX notification_setting_user_type_channel_idx;
+                DROP INDEX notification_seen_at_idx;
+                CREATE INDEX notification_seen_updated_at_idx ON notification (updated_at) WHERE seen = true;
+            </sql>
+            <dropColumn tableName="notification" columnName="seen_at"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
