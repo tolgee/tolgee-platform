@@ -62,7 +62,9 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
     importJson(json).andIsOk
     processor.processQueue()
 
-    val keysAdded = notificationRepository.findAll().filter { it.type == NotificationType.KEYS_ADDED }
+    val all = notificationRepository.findAll()
+    all.groupBy { it.user.id to it.type }.forEach { (_, rows) -> rows.assert.hasSize(1) }
+    val keysAdded = all.filter { it.type == NotificationType.KEYS_ADDED }
     keysAdded.map { it.user.id }.assert.containsExactlyInAnyOrder(
       testData.translatorFr.id,
       testData.reviewerFr.id,
@@ -78,7 +80,21 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
         .isEqualTo(100)
     }
 
+    digestJob.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(0)
+
     moveCurrentDate(Duration.ofMinutes(11))
+    digestJob.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(3)
+    emailTestUtil.messageArgumentCaptor.allValues
+      .map { it.getHeader("To")[0] }
+      .assert
+      .containsExactlyInAnyOrder(
+        testData.translatorFr.username,
+        testData.reviewerFr.username,
+        testData.reviewerAll.username,
+      )
+
     digestJob.sendDueDigests()
     emailTestUtil.verifyTimesEmailSent(3)
   }
