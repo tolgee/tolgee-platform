@@ -504,6 +504,7 @@ declare namespace DataCy {
         "notifications-localization-flag": true;
         "notifications-localization-item": true;
         "notifications-settings-digest-frequency": true;
+        "notifications-settings-digest-frequency-option": true;
         "notifications-settings-icon": true;
         "notifications-settings-localization-toggle": true;
         "notistack-snackbar": true;

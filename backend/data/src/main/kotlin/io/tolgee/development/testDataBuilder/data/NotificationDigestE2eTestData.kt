@@ -1,11 +1,14 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.model.key.Key
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.model.translation.Translation
 
 class NotificationDigestE2eTestData : BaseTestData("notification_digest_user", "Digest project") {
   lateinit var translatedNotification: Notification
+  lateinit var keysAddedNotification: Notification
+  lateinit var key: Key
   lateinit var frenchTranslation: Translation
 
   init {
@@ -16,16 +19,20 @@ class NotificationDigestE2eTestData : BaseTestData("notification_digest_user", "
         originalName = "Français"
         flagEmoji = "🇫🇷"
       }
-      addKey("digest-key").apply {
-        addTranslation("en", "Hello")
-        frenchTranslation = addTranslation("fr", "Bonjour").self
-      }
+      key =
+        addKey("digest-key")
+          .apply {
+            addTranslation("en", "Hello")
+            frenchTranslation = addTranslation("fr", "Bonjour").self
+          }.self
     }
-    userAccountBuilder.addNotification {
-      user = this@NotificationDigestE2eTestData.user
-      project = this@NotificationDigestE2eTestData.project
-      type = NotificationType.AUTOMATICALLY_TRANSLATED
-    }
+    keysAddedNotification =
+      userAccountBuilder
+        .addNotification {
+          user = this@NotificationDigestE2eTestData.user
+          project = this@NotificationDigestE2eTestData.project
+          type = NotificationType.KEYS_ADDED
+        }.self
     translatedNotification =
       userAccountBuilder
         .addNotification {

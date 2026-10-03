@@ -36,9 +36,14 @@ describe('Localization notifications', () => {
     toggle().click();
     toggle().should('not.be.checked');
     gcy('notifications-settings-digest-frequency').click();
-    cy.get('[data-value="OFF"]').click();
-    gcy('notifications-settings-digest-frequency')
-      .find('input')
-      .should('have.value', 'OFF');
+    gcyAdvanced({
+      value: 'notifications-settings-digest-frequency-option',
+      option: 'OFF',
+    }).click();
+    const frequencyInput = () =>
+      gcy('notifications-settings-digest-frequency').find('input');
+    frequencyInput().should('have.value', 'OFF');
+    cy.reload();
+    frequencyInput().should('have.value', 'OFF');
   });
 });

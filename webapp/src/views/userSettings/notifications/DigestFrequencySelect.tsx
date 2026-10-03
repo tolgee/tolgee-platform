@@ -31,10 +31,18 @@ export const DigestFrequencySelect = ({ value, afterChange }: Props) => {
         )
       }
     >
-      <MenuItem value="DAILY">
+      <MenuItem
+        value="DAILY"
+        data-cy="notifications-settings-digest-frequency-option"
+        data-cy-option="DAILY"
+      >
         {t('settings_notifications_digest_daily', 'Once a day')}
       </MenuItem>
-      <MenuItem value="OFF">
+      <MenuItem
+        value="OFF"
+        data-cy="notifications-settings-digest-frequency-option"
+        data-cy-option="OFF"
+      >
         {t('settings_notifications_digest_off', 'Never')}
       </MenuItem>
     </Select>

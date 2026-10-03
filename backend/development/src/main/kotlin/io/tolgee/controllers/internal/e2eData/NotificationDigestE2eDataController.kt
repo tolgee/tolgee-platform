@@ -21,10 +21,19 @@ class NotificationDigestE2eDataController : AbstractE2eDataController() {
 
   override fun afterTestDataStored(data: TestDataBuilder) {
     val testData = currentTestData ?: return
+    insertNotificationEntity(testData.keysAddedNotification.id, testData.key.id)
+    insertNotificationEntity(testData.translatedNotification.id, testData.frenchTranslation.id)
+  }
+
+  private fun insertNotificationEntity(
+    notificationId: Long,
+    entityId: Long,
+  ) {
     entityManager
-      .createNativeQuery("insert into notification_entity (notification_id, entity_id) values (:notification, :entity)")
-      .setParameter("notification", testData.translatedNotification.id)
-      .setParameter("entity", testData.frenchTranslation.id)
+      .createNativeQuery(
+        "insert into notification_entity (notification_id, entity_id) values (:notification, :entity)",
+      ).setParameter("notification", notificationId)
+      .setParameter("entity", entityId)
       .executeUpdate()
   }
 }
