@@ -53,6 +53,41 @@ describe('QA issue actions', () => {
       .should('have.attr', 'data-cy-state', 'IGNORED');
   });
 
+  it('ignores and unignores a QA issue in a plural variant', () => {
+    function reloadAndExpectSinglePluralIssue() {
+      view.visit(projectId);
+      view.getTranslationCell('key_plural_issue', 'fr').click();
+      // useOpenPanels keeps the QA panel open across reloads; toggling it again would close it
+      gcy('qa-panel-container').should('exist');
+      gcy('qa-check-item').should('have.length', 1);
+    }
+
+    view.visit(projectId);
+    view.getTranslationCell('key_plural_issue', 'fr').click();
+    openQaPanel();
+    gcy('qa-check-item').should('have.length', 1);
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'OPEN')
+      .click();
+    waitForGlobalLoading();
+
+    reloadAndExpectSinglePluralIssue();
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'IGNORED')
+      .click();
+    waitForGlobalLoading();
+
+    reloadAndExpectSinglePluralIssue();
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'OPEN');
+  });
+
   it('unignores a previously ignored issue', () => {
     view.visit(projectId);
 
