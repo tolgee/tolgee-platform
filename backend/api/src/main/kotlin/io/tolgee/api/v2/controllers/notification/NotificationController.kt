@@ -50,7 +50,7 @@ class NotificationController(
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  private val defaultSort: Sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))
+  private val defaultSort: Sort = Sort.by(Sort.Order.desc("updatedAt"), Sort.Order.desc("id"))
 
   @GetMapping
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
@@ -58,7 +58,7 @@ class NotificationController(
   fun getNotifications(
     @ParameterObject
     @SortDefaults(
-      SortDefault(sort = ["createdAt"], direction = Sort.Direction.DESC),
+      SortDefault(sort = ["updatedAt"], direction = Sort.Direction.DESC),
       SortDefault(sort = ["id"], direction = Sort.Direction.DESC),
     )
     pageable: Pageable,
@@ -77,7 +77,7 @@ class NotificationController(
       cursor
         ?.let { CursorUtil.parseCursor(it) }
         ?.apply {
-          if (get("createdAt")?.direction != Sort.Direction.DESC ||
+          if (get("updatedAt")?.direction != Sort.Direction.DESC ||
             get("id")?.direction != Sort.Direction.DESC
           ) {
             throw BadRequestException("Supplied cursor is not valid, custom sorting is not supported.")

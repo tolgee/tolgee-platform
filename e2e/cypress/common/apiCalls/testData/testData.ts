@@ -272,3 +272,7 @@ export function getInvitationsByProjectIdFromTestData(
 }
 
 export const qaTestData = generateTestDataObject('qa');
+
+export const notificationDigestTestData = generateTestDataObject(
+  'notification-digest'
+);

@@ -2,8 +2,11 @@ import React from 'react';
 import { LINKS } from 'tg.constants/links';
 import { BaseUserSettingsView } from 'tg.views/userSettings/BaseUserSettingsView';
 import { useTranslate } from '@tolgee/react';
-import { Box, styled } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import { SettingsRow } from 'tg.views/userSettings/notifications/SettingsRow';
+import { components } from 'tg.service/apiSchema.generated';
+import { LocalizationSettingsRow } from 'tg.views/userSettings/notifications/LocalizationSettingsRow';
+import { DigestFrequencySelect } from 'tg.views/userSettings/notifications/DigestFrequencySelect';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
@@ -39,6 +42,26 @@ export const NotificationsView: React.FC<
   }
 
   const tasksEnabled = isEnabled('TASKS');
+
+  const localizationLabels: Partial<
+    Record<
+      components['schemas']['NotificationTypeSettingModel']['type'],
+      string
+    >
+  > = {
+    KEYS_ADDED: t('notifications-keys-added', 'New keys added'),
+    SOURCE_CHANGED: t('notifications-source-changed', 'Base text changed'),
+    STRINGS_TRANSLATED: t(
+      'notifications-strings-translated',
+      'Strings translated'
+    ),
+    STRINGS_REVIEWED: t('notifications-strings-reviewed', 'Strings reviewed'),
+    AUTOMATICALLY_TRANSLATED: t(
+      'notifications-automatically-translated',
+      'Automatically translated'
+    ),
+    BULK_CHANGED: t('notifications-bulk-changed', 'Changed in bulk'),
+  };
 
   return (
     <BaseUserSettingsView
@@ -81,6 +104,34 @@ export const NotificationsView: React.FC<
             afterChange={() => settingsLoadable.refetch()}
           />
         )}
+        <Box sx={{ gridColumn: '1 / -1', mt: 2 }}>
+          <Typography variant="h6">
+            {t(
+              'settings_notifications_localization_title',
+              'Localization changes'
+            )}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t(
+              'settings_notifications_localization_subtitle',
+              'Email notifications are sent as one summary, at most once a day.'
+            )}
+          </Typography>
+        </Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
+          <DigestFrequencySelect
+            value={settings.digestFrequency}
+            afterChange={() => settingsLoadable.refetch()}
+          />
+        </Box>
+        {settings.localization.map((setting) => (
+          <LocalizationSettingsRow
+            key={setting.type}
+            setting={setting}
+            label={localizationLabels[setting.type] ?? setting.type}
+            afterChange={() => settingsLoadable.refetch()}
+          />
+        ))}
       </StyledRoot>
     </BaseUserSettingsView>
   );

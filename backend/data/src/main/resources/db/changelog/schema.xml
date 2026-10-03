@@ -5960,4 +5960,88 @@
         </sql>
         <rollback/>
     </changeSet>
+    <changeSet author="bdshadow" id="1790900000000-1">
+        <addColumn tableName="notification">
+            <column name="email_pending" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="notification_setting">
+            <column name="type" type="VARCHAR(255)"/>
+        </addColumn>
+        <createTable tableName="notification_entity">
+            <column name="notification_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_entity_pk"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_entity_pk"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="notification_entity" baseColumnNames="notification_id"
+                                 constraintName="notification_entity_notification_fk"
+                                 referencedTableName="notification" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <createTable tableName="notification_activity_queue">
+            <column name="activity_revision_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_activity_queue_pk"/>
+            </column>
+            <column name="attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="notification_digest_state">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_digest_state_pk"/>
+            </column>
+            <column name="frequency" type="VARCHAR(255)" defaultValue="DAILY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_digest_sent_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="notification_digest_state" baseColumnNames="user_id"
+                                 constraintName="notification_digest_state_user_fk"
+                                 referencedTableName="user_account" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1790900000000-2">
+        <sql>
+            CREATE UNIQUE INDEX notification_grouped_unseen_idx ON notification (user_id, project_id, type)
+            WHERE seen = false
+              AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                           'AUTOMATICALLY_TRANSLATED', 'BULK_CHANGED');
+            CREATE INDEX notification_email_pending_idx ON notification (user_id)
+            WHERE email_pending = true AND seen = false;
+            CREATE INDEX notification_seen_updated_at_idx ON notification (updated_at) WHERE seen = true;
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX notification_grouped_unseen_idx;
+                DROP INDEX notification_email_pending_idx;
+                DROP INDEX notification_seen_updated_at_idx;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="bdshadow" id="1790900000000-3">
+        <addColumn tableName="notification">
+            <column name="seen_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+        <sql>
+            UPDATE notification SET seen_at = now() WHERE seen = true;
+            DROP INDEX notification_seen_updated_at_idx;
+            CREATE INDEX notification_seen_at_idx ON notification (seen_at) WHERE seen = true;
+            CREATE UNIQUE INDEX notification_setting_user_type_channel_idx
+            ON notification_setting (user_id, type, channel) WHERE type IS NOT NULL;
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX notification_setting_user_type_channel_idx;
+                DROP INDEX notification_seen_at_idx;
+                CREATE INDEX notification_seen_updated_at_idx ON notification (updated_at) WHERE seen = true;
+            </sql>
+            <dropColumn tableName="notification" columnName="seen_at"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

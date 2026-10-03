@@ -23,6 +23,7 @@ class TolgeeEmailSender(
       attachments = params.attachments,
       bcc = params.bcc,
       replyTo = params.replyTo,
+      messageId = params.messageId,
     )
   }
 }

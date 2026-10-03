@@ -65,6 +65,7 @@ class EmailService(
     subject: String? = null,
     bcc: Array<String>? = null,
     replyTo: String? = null,
+    messageId: String? = null,
   ) {
     val globalVariables = emailGlobalVariablesProvider()
     val context = Context(locale, properties)
@@ -77,7 +78,7 @@ class EmailService(
 
     val html = templateEngine.process(template, context)
     val subject = subject ?: extractEmailTitle(html)
-    sendEmail(recipient, subject, html, attachments, bcc, replyTo)
+    sendEmail(recipient, subject, html, attachments, bcc, replyTo, messageId)
   }
 
   fun sendEmail(
@@ -87,6 +88,7 @@ class EmailService(
     attachments: List<EmailAttachment> = listOf(),
     bcc: Array<String>? = null,
     replyTo: String? = null,
+    messageId: String? = null,
   ) {
     val message = mailSender.createMimeMessage()
     val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
@@ -102,6 +104,8 @@ class EmailService(
       helper.setReplyTo(it)
     }
     attachments.forEach { helper.addAttachment(it.name, it.inputStreamSource) }
+
+    messageId?.let { message.setHeader("Message-ID", it) }
 
     mailSender.send(message)
   }
