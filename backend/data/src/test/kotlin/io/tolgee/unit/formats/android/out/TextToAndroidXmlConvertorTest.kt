@@ -22,6 +22,14 @@ class TextToAndroidXmlConvertorTest {
   }
 
   @Test
+  fun `apostrophe is escaped in text nested inside a supported tag (#3206)`() {
+    val nodes = "<b>L'hydratation</b> est l'objectif.".convertedNodes().toList()
+    nodes[0].nodeName.assert.isEqualTo("b")
+    nodes[0].textContent.assert.isEqualTo("L\\'hydratation")
+    nodes[1].assertTextContent(" est l\\'objectif.")
+  }
+
+  @Test
   fun `double quotes and escape chars are escaped in the HTML CDATA node`() {
     "<b>%s \" \\ </b>".assertSingleCdataNodeText().isEqualTo("<b>%s \\\" \\\\ </b>")
   }
