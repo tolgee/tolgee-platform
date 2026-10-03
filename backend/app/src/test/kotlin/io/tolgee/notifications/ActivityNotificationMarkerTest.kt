@@ -95,6 +95,12 @@ class ActivityNotificationMarkerTest : ProjectAuthControllerTest("/v2/projects/"
     queue.findAll().assert.isEmpty()
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `recording a failure of a missing marker reports it as dropped`() {
+    queue.recordFailure(Long.MAX_VALUE, 3).assert.isTrue()
+  }
+
   private fun revisionCount() =
     jdbcTemplate.queryForObject("select count(*) from activity_revision", Long::class.java)!!
 }

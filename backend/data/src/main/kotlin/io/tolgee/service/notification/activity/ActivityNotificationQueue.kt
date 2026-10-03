@@ -67,14 +67,15 @@ class ActivityNotificationQueue(
     maxAttempts: Int,
   ): Boolean {
     val attempts =
-      jdbcTemplate.queryForObject(
-        """
-        update notification_activity_queue set attempts = attempts + 1
-        where activity_revision_id = ? returning attempts
-        """,
-        Int::class.java,
-        revisionId,
-      ) ?: return true
+      jdbcTemplate
+        .query(
+          """
+          update notification_activity_queue set attempts = attempts + 1
+          where activity_revision_id = ? returning attempts
+          """,
+          { rs, _ -> rs.getInt(1) },
+          revisionId,
+        ).firstOrNull() ?: return true
     if (attempts >= maxAttempts) {
       delete(revisionId)
       return true

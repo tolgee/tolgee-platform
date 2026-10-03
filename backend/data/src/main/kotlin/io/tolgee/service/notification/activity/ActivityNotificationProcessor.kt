@@ -34,10 +34,13 @@ class ActivityNotificationProcessor(
     lockingProvider.withLockingIfFree(LOCK_NAME, LEASE_TIME) {
       val deadline = System.currentTimeMillis() + LEASE_TIME.toMillis() * 4 / 5
       var lastRevisionId: Long? = null
-      while (System.currentTimeMillis() < deadline) {
+      while (true) {
         val batch = queue.takeBatch(tolgeeProperties.notifications.processingBatchSize, lastRevisionId)
-        if (batch.isEmpty()) break
-        batch.forEach { processMarker(it.revisionId) }
+        if (batch.isEmpty()) return@withLockingIfFree
+        for (marker in batch) {
+          if (System.currentTimeMillis() >= deadline) return@withLockingIfFree
+          processMarker(marker.revisionId)
+        }
         lastRevisionId = batch.last().revisionId
       }
     }
