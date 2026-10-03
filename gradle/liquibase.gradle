@@ -41,7 +41,8 @@ ext {
                             "column:(?i)^id\$,"+
                             "table:temp_unsuccessful_job_keys," +
                             "table:notification_entity," +
-                            "table:notification_activity_queue"
+                            "table:notification_activity_queue," +
+                            "notification_digest_state_user_fk"
                 }
             }
         }
