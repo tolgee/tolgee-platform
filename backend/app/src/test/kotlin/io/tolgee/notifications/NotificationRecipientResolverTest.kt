@@ -85,16 +85,16 @@ class NotificationRecipientResolverTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `entity ids are capped at 100 per recipient`() {
+  fun `entity ids are capped at 100 per recipient and come from every language`() {
     val fr = testData.french.id
     val de = testData.german.id
     val result =
       resolve(
         mapOf(NotificationType.STRINGS_TRANSLATED to mapOf(fr to (1L..100L).toList(), de to (101L..200L).toList())),
       )
-    result
-      .single { it.userId == testData.reviewerAll.id }
-      .entityIds.assert
-      .hasSize(100)
+    val ids = result.single { it.userId == testData.reviewerAll.id }.entityIds
+    ids.assert.hasSize(100)
+    ids.filter { it <= 100L }.assert.isNotEmpty()
+    ids.filter { it > 100L }.assert.isNotEmpty()
   }
 }

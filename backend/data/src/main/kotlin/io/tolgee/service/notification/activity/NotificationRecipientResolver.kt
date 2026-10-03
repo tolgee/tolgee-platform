@@ -66,7 +66,7 @@ class NotificationRecipientResolver(
         NotificationType.KEYS_ADDED, NotificationType.SOURCE_CHANGED -> {
           if (Scope.TRANSLATIONS_EDIT !in scopes) return emptyList()
           if (permission.filterTranslatePermitted(nonBaseLanguageIds).isEmpty()) return emptyList()
-          return cap(byLanguage[null].orEmpty())
+          return cap(listOf(byLanguage[null].orEmpty()))
         }
         NotificationType.STRINGS_TRANSLATED -> {
           if (Scope.TRANSLATIONS_STATE_EDIT !in scopes) return emptyList()
@@ -81,8 +81,19 @@ class NotificationRecipientResolver(
         }
         else -> return emptyList()
       }
-    return cap(permittedLanguages.flatMap { byLanguage[it].orEmpty() })
+    return cap(permittedLanguages.map { byLanguage[it].orEmpty() })
   }
 
-  private fun cap(ids: List<Long>) = ids.distinct().take(tolgeeProperties.notifications.entityCap)
+  private fun cap(idsByLanguage: List<List<Long>>): List<Long> {
+    val cap = tolgeeProperties.notifications.entityCap
+    val result = LinkedHashSet<Long>()
+    val longest = idsByLanguage.maxOfOrNull { it.size } ?: 0
+    for (index in 0 until longest) {
+      for (ids in idsByLanguage) {
+        if (result.size >= cap) return result.toList()
+        ids.getOrNull(index)?.let { result.add(it) }
+      }
+    }
+    return result.toList()
+  }
 }
