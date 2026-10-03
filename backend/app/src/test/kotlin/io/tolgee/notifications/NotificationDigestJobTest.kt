@@ -18,9 +18,12 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.mail.MailSendException
 import java.time.Duration
 import java.util.Date
 
@@ -48,9 +51,13 @@ class NotificationDigestJobTest : AbstractSpringTest() {
 
   private lateinit var testData: NotificationRecipientsTestData
 
+  private var originalFrontEndUrl: String? = null
+
   @BeforeEach
   fun setup() {
     emailTestUtil.initMocks()
+    tolgeeProperties.smtp.host = "localhost"
+    originalFrontEndUrl = tolgeeProperties.frontEndUrl
     testData = NotificationRecipientsTestData()
     testDataService.saveTestData(testData.root)
     setForcedDate(Date())
@@ -59,6 +66,8 @@ class NotificationDigestJobTest : AbstractSpringTest() {
   @AfterEach
   fun cleanup() {
     clearForcedDate()
+    tolgeeProperties.smtp.host = null
+    tolgeeProperties.frontEndUrl = originalFrontEndUrl
   }
 
   private fun write(
@@ -181,6 +190,70 @@ class NotificationDigestJobTest : AbstractSpringTest() {
       .emailPending.assert
       .isTrue()
   }
+
+  @Test
+  fun `does nothing when smtp is not configured`() {
+    tolgeeProperties.smtp.host = null
+    val n = write()
+    afterGrace()
+    job.sendDueDigests()
+    verify(emailTestUtil.javaMailSender, never()).createMimeMessage()
+    emailTestUtil.verifyTimesEmailSent(0)
+    notificationRepository
+      .findById(n.id)
+      .get()
+      .emailPending.assert
+      .isTrue()
+    lastDigestSentAt().assert.isNull()
+  }
+
+  @Test
+  fun `failed send is retried after the normal period, not in the next run`() {
+    val n = write()
+    afterGrace()
+    whenever(emailTestUtil.javaMailSender.send(any<MimeMessage>())).thenThrow(MailSendException("no connection"))
+    job.sendDueDigests()
+    lastDigestSentAt().assert.isNotNull()
+    notificationRepository
+      .findById(n.id)
+      .get()
+      .emailPending.assert
+      .isTrue()
+
+    job.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(1)
+
+    moveCurrentDate(Duration.ofHours(25))
+    job.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(2)
+  }
+
+  @Test
+  fun `notifications of a deleted project are not sent`() {
+    write()
+    jdbcTemplate.update("update project set deleted_at = now() where id = ?", testData.project.id)
+    afterGrace()
+    job.sendDueDigests()
+    emailTestUtil.verifyTimesEmailSent(0)
+  }
+
+  @Test
+  fun `message id uses the sender domain when the frontend url has no host`() {
+    tolgeeProperties.frontEndUrl = "tolgee-host"
+    tolgeeProperties.smtp.from = "Tolgee <no-reply@mail.example.org>"
+    write()
+    afterGrace()
+    job.sendDueDigests()
+    messageId(0).assert.endsWith("@mail.example.org>")
+  }
+
+  private fun lastDigestSentAt() =
+    jdbcTemplate
+      .query(
+        "select last_digest_sent_at from notification_digest_state where user_id = ?",
+        { rs, _ -> rs.getTimestamp(1) },
+        testData.reviewerAll.id,
+      ).firstOrNull()
 
   private fun messageId(index: Int) = emailTestUtil.messageArgumentCaptor.allValues[index].getHeader("Message-ID")[0]
 }

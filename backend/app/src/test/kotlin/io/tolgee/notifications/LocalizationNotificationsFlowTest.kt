@@ -44,6 +44,7 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
   @BeforeEach
   fun setup() {
     emailTestUtil.initMocks()
+    tolgeeProperties.smtp.host = "localhost"
     testData = NotificationRecipientsTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.author
@@ -53,7 +54,10 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
   }
 
   @AfterEach
-  fun after() = clearForcedDate()
+  fun after() {
+    clearForcedDate()
+    tolgeeProperties.smtp.host = null
+  }
 
   @Test
   @ProjectJWTAuthTestMethod

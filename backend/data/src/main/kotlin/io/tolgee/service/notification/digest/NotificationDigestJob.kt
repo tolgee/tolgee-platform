@@ -42,15 +42,46 @@ class NotificationDigestJob(
     initialDelayString = "\${tolgee.notifications.digest-interval-ms:300000}",
   )
   fun sendDueDigests() {
+    if (!smtpConfigured()) return
     lockingProvider.withLockingIfFree(LOCK_NAME, LEASE_TIME) {
-      findDueUsers().forEach { (userId, email) ->
+      val deadline = System.currentTimeMillis() + LEASE_TIME.toMillis() * 4 / 5
+      for ((userId, email) in findDueUsers()) {
+        if (System.currentTimeMillis() >= deadline) break
         try {
           sendDigest(userId, email)
         } catch (e: Exception) {
           logger.error("Sending notification digest to user $userId failed", e)
+          postponeRetry(userId)
         }
       }
     }
+  }
+
+  private fun smtpConfigured(): Boolean {
+    val smtp = tolgeeProperties.smtp
+    return !smtp.host.isNullOrBlank() && !smtp.from.isNullOrBlank()
+  }
+
+  private fun postponeRetry(userId: Long) {
+    try {
+      digestStateService.markSent(userId, currentDateProvider.date)
+    } catch (e: Exception) {
+      logger.error("Postponing the notification digest of user $userId failed", e)
+    }
+  }
+
+  private fun periodStart() =
+    Timestamp(currentDateProvider.date.time - Duration.ofHours(props.digestPeriodHours).toMillis())
+
+  private fun sentInsidePeriod(userId: Long): Boolean {
+    val lastSentAt =
+      jdbcTemplate
+        .query(
+          "select last_digest_sent_at from notification_digest_state where user_id = ?",
+          { rs, _ -> rs.getTimestamp(1) },
+          userId,
+        ).firstOrNull() ?: return false
+    return !lastSentAt.before(periodStart())
   }
 
   private fun findDueUsers(): List<Pair<Long, String>> {
@@ -60,6 +91,7 @@ class NotificationDigestJob(
       select n.user_id, ua.username
       from notification n
       join user_account ua on ua.id = n.user_id and ua.deleted_at is null and ua.disabled_at is null
+      join project p on p.id = n.project_id and p.deleted_at is null
       left join notification_digest_state s on s.user_id = n.user_id
       where n.seen = false and n.email_pending = true
         and coalesce(s.frequency, 'DAILY') = 'DAILY'
@@ -68,7 +100,7 @@ class NotificationDigestJob(
       having max(n.updated_at) < ?
       """,
       { rs, _ -> rs.getLong(1) to rs.getString(2) },
-      Timestamp(now - Duration.ofHours(props.digestPeriodHours).toMillis()),
+      periodStart(),
       Timestamp(now - props.digestGracePeriodMs),
     )
   }
@@ -87,6 +119,7 @@ class NotificationDigestJob(
 
     val digest = composer.compose(enabled.map { it.row }, props.entityCap)
     val newestUpdate = enabled.maxOf { it.updatedAt.time }
+    if (sentInsidePeriod(userId)) return
     emailSender.sendEmail(
       EmailParams(
         to = email,
@@ -120,7 +153,7 @@ class NotificationDigestJob(
         """
         select n.id, p.id, p.name, n.type, n.updated_at
         from notification n
-        join project p on p.id = n.project_id
+        join project p on p.id = n.project_id and p.deleted_at is null
         where n.user_id = ? and n.seen = false and n.email_pending = true
         order by p.name, n.id
         """,
@@ -177,7 +210,14 @@ class NotificationDigestJob(
   private fun messageIdHost(): String =
     tolgeeProperties.frontEndUrl
       ?.let { runCatching { URI(it).host }.getOrNull() }
+      ?: smtpFromDomain()
       ?: "tolgee.io"
+
+  private fun smtpFromDomain(): String? =
+    tolgeeProperties.smtp.from
+      ?.substringAfterLast('@', "")
+      ?.takeWhile { it.isLetterOrDigit() || it == '.' || it == '-' }
+      ?.takeIf { it.isNotEmpty() }
 
   companion object {
     private const val LOCK_NAME = "notification-digest"
