@@ -3,6 +3,7 @@ package io.tolgee.service.notification
 import io.tolgee.model.notifications.NotificationDigestFrequency
 import io.tolgee.model.notifications.NotificationDigestState
 import io.tolgee.repository.notification.NotificationDigestStateRepository
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Date
@@ -10,6 +11,7 @@ import java.util.Date
 @Service
 class NotificationDigestStateService(
   private val repository: NotificationDigestStateRepository,
+  private val entityManager: EntityManager,
 ) {
   fun getFrequency(userId: Long): NotificationDigestFrequency =
     repository.findById(userId).orElse(null)?.frequency ?: NotificationDigestFrequency.DAILY
@@ -19,9 +21,8 @@ class NotificationDigestStateService(
     userId: Long,
     frequency: NotificationDigestFrequency,
   ) {
-    val state = repository.findById(userId).orElse(null) ?: NotificationDigestState(userId = userId)
-    state.frequency = frequency
-    repository.save(state)
+    repository.upsertFrequency(userId, frequency.name)
+    refreshLoaded(userId)
   }
 
   @Transactional
@@ -34,9 +35,12 @@ class NotificationDigestStateService(
     userId: Long,
     at: Date,
   ) {
-    val state = repository.findById(userId).orElse(null) ?: NotificationDigestState(userId = userId)
-    state.lastDigestSentAt = at
-    repository.save(state)
+    repository.upsertLastDigestSentAt(userId, at)
+    refreshLoaded(userId)
+  }
+
+  private fun refreshLoaded(userId: Long) {
+    repository.findById(userId).ifPresent { entityManager.refresh(it) }
   }
 
   fun find(userIds: Collection<Long>): Map<Long, NotificationDigestState> =
