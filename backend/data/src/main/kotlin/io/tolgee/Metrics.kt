@@ -20,6 +20,21 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  fun registerNotificationActivityQueue(
+    sizeProvider: () -> Int,
+    oldestAgeSecondsProvider: () -> Long,
+  ) {
+    Gauge
+      .builder("tolgee.notifications.activity.queue.size", sizeProvider) { it().toDouble() }
+      .description("Number of activity revisions waiting to be turned into notifications")
+      .register(meterRegistry)
+    Gauge
+      .builder("tolgee.notifications.activity.queue.oldest.age", oldestAgeSecondsProvider) { it().toDouble() }
+      .description("Age of the oldest activity revision waiting to be turned into notifications")
+      .baseUnit("seconds")
+      .register(meterRegistry)
+  }
+
   // ==========================================================================
   // Rate Limiting Metrics
   // ==========================================================================

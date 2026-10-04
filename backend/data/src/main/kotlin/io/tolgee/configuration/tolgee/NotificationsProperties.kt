@@ -10,7 +10,7 @@ class NotificationsProperties {
   var processingIntervalMs: Long = 30_000
 
   @DocProperty(description = "How many activity markers the job reads at once")
-  var processingBatchSize: Int = 100
+  var processingBatchSize: Int = 500
 
   @DocProperty(description = "How many times a failing activity marker is retried before it is dropped")
   var maxAttempts: Int = 5

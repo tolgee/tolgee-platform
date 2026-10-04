@@ -4,6 +4,7 @@ import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.model.notifications.NotificationChannel
+import io.tolgee.model.notifications.NotificationType
 import io.tolgee.service.notification.NotificationSettingsService
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
@@ -37,54 +38,85 @@ class ActivityNotificationProcessor(
       while (true) {
         val batch = queue.takeBatch(tolgeeProperties.notifications.processingBatchSize, lastRevisionId)
         if (batch.isEmpty()) return@withLockingIfFree
-        for (marker in batch) {
+        for (markersOfProject in batch.groupBy { it.projectId }.values) {
           if (System.currentTimeMillis() >= deadline) return@withLockingIfFree
-          processMarker(marker.revisionId)
+          processMarkers(markersOfProject)
         }
         lastRevisionId = batch.last().revisionId
       }
     }
   }
 
-  private fun processMarker(revisionId: Long) {
+  private fun processMarkers(markers: List<QueuedMarker>) {
     try {
       executeInNewTransaction(transactionManager) {
-        val classified = classifier.classify(revisionId)
-        if (classified != null) {
-          writeNotifications(classified)
-        }
-        queue.delete(revisionId)
+        writeNotifications(markers.mapNotNull { classifier.classify(it.revisionId) })
+        markers.forEach { queue.delete(it.revisionId) }
       }
     } catch (e: Exception) {
-      val dropped =
-        executeInNewTransaction(transactionManager) {
-          queue.recordFailure(revisionId, tolgeeProperties.notifications.maxAttempts)
-        }
-      if (dropped) {
-        logger.error("Dropping notification marker for revision $revisionId after repeated failures", e)
-      } else {
-        logger.warn("Processing notification marker for revision $revisionId failed: ${e.message}")
+      if (markers.size > 1) {
+        logger.warn(
+          "Processing ${markers.size} notification markers together failed, retrying one by one: ${e.message}",
+        )
+        markers.forEach { processMarkers(listOf(it)) }
+        return
       }
+      recordFailure(markers.single().revisionId, e)
     }
   }
 
-  private fun writeNotifications(classified: ClassifiedRevision) {
-    val recipients = recipientResolver.resolve(classified)
-    recipients.groupBy { it.type }.forEach { (type, forType) ->
-      val userIds = forType.map { it.userId }
+  private fun recordFailure(
+    revisionId: Long,
+    e: Exception,
+  ) {
+    val dropped =
+      executeInNewTransaction(transactionManager) {
+        queue.recordFailure(revisionId, tolgeeProperties.notifications.maxAttempts)
+      }
+    if (dropped) {
+      logger.error("Dropping notification marker for revision $revisionId after repeated failures", e)
+      return
+    }
+    logger.warn("Processing notification marker for revision $revisionId failed: ${e.message}")
+  }
+
+  private class PendingNotification(
+    var originatingUserId: Long?,
+    val entityIds: LinkedHashSet<Long> = LinkedHashSet(),
+  )
+
+  private fun writeNotifications(revisionsOfProject: List<ClassifiedRevision>) {
+    val first = revisionsOfProject.firstOrNull() ?: return
+    val projectMembers = recipientResolver.loadProjectMembers(first.projectId, first.baseLanguageId) ?: return
+
+    val pending = LinkedHashMap<Pair<Long, NotificationType>, PendingNotification>()
+    revisionsOfProject.forEach { revision ->
+      recipientResolver.resolve(revision, projectMembers).forEach { recipient ->
+        val notification =
+          pending.getOrPut(
+            recipient.userId to recipient.type,
+          ) { PendingNotification(revision.authorId) }
+        notification.originatingUserId = revision.authorId
+        notification.entityIds.addAll(recipient.entityIds)
+      }
+    }
+
+    pending.entries.groupBy { it.key.second }.forEach { (type, ofType) ->
+      val userIds = ofType.map { it.key.first }
       val inApp = settingsService.usersWithEnabled(userIds, type, NotificationChannel.IN_APP)
       val digest = settingsService.usersWithEnabled(userIds, type, NotificationChannel.EMAIL)
-      forType.filter { it.userId in inApp }.forEach { recipient ->
-        val notification =
+      ofType.filter { it.key.first in inApp }.forEach { (key, notification) ->
+        val userId = key.first
+        val written =
           writer.write(
-            userId = recipient.userId,
-            projectId = classified.projectId,
-            originatingUserId = classified.authorId,
+            userId = userId,
+            projectId = first.projectId,
+            originatingUserId = notification.originatingUserId,
             type = type,
-            entityIds = recipient.entityIds,
-            digestEnabled = recipient.userId in digest,
+            entityIds = notification.entityIds.take(tolgeeProperties.notifications.entityCap),
+            digestEnabled = userId in digest,
           )
-        applicationEventPublisher.publishEvent(OnNotificationsChangedForUser(recipient.userId, notification))
+        applicationEventPublisher.publishEvent(OnNotificationsChangedForUser(userId, written))
       }
     }
   }

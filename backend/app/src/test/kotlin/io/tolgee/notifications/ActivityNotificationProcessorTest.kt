@@ -49,6 +49,23 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
     jdbcTemplate.update("delete from notification_activity_queue")
   }
 
+  private fun insertFailingMarker() {
+    jdbcTemplate.update(
+      "insert into notification_activity_queue (activity_revision_id, attempts, created_at) values (?, 0, now())",
+      -1L,
+    )
+    jdbcTemplate.update(
+      "insert into activity_revision (id, timestamp, project_id) values (-1, now(), ?)",
+      testData.project.id,
+    )
+    jdbcTemplate.update(
+      """
+      insert into activity_modified_entity (activity_revision_id, entity_class, entity_id, revision_type, modifications, describing_relations)
+      values (-1, 'Translation', 1, 1, '{"state": {"old": "TRANSLATED", "new": "REVIEWED"}}', '{"language": {"entityClass": "Language", "entityId": "not-a-number"}}')
+      """,
+    )
+  }
+
   private fun notificationsOf(type: NotificationType) = notificationRepository.findAll().filter { it.type == type }
 
   @Test
@@ -106,20 +123,7 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
 
   @Test
   fun `failing marker is retried once per run, then dropped`() {
-    jdbcTemplate.update(
-      "insert into notification_activity_queue (activity_revision_id, attempts, created_at) values (?, 0, now())",
-      -1L,
-    )
-    jdbcTemplate.update(
-      "insert into activity_revision (id, timestamp, project_id) values (-1, now(), ?)",
-      testData.project.id,
-    )
-    jdbcTemplate.update(
-      """
-      insert into activity_modified_entity (activity_revision_id, entity_class, entity_id, revision_type, modifications, describing_relations)
-      values (-1, 'Translation', 1, 1, '{"state": {"old": "TRANSLATED", "new": "REVIEWED"}}', '{"language": {"entityClass": "Language", "entityId": "not-a-number"}}')
-      """,
-    )
+    insertFailingMarker()
     processor.processQueue()
     jdbcTemplate
       .queryForObject(
@@ -129,6 +133,37 @@ class ActivityNotificationProcessorTest : ProjectAuthControllerTest("/v2/project
       .isEqualTo(1)
     repeat(4) { processor.processQueue() }
     queue.findAll().assert.doesNotContain(-1L)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `markers of one project are merged into one write per recipient`() {
+    repeat(3) { performProjectAuthPost("keys", mapOf("name" to "merged-$it")).andIsCreated }
+    queue.size().assert.isEqualTo(3)
+    processor.processQueue()
+    val row = notificationsOf(NotificationType.KEYS_ADDED).single { it.user.id == testData.reviewerAll.id }
+    jdbcTemplate
+      .queryForObject("select count(*) from notification_entity where notification_id = ?", Int::class.java, row.id)
+      .assert
+      .isEqualTo(3)
+    queue.size().assert.isEqualTo(0)
+    queue.oldestAgeSeconds().assert.isEqualTo(0)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `failing marker does not block other markers of the same project`() {
+    insertFailingMarker()
+    performProjectAuthPost("keys", mapOf("name" to "good-key")).andIsCreated
+    processor.processQueue()
+    notificationsOf(NotificationType.KEYS_ADDED).map { it.user.id }.assert.contains(testData.reviewerAll.id)
+    queue.findAll().assert.containsExactly(-1L)
+    jdbcTemplate
+      .queryForObject(
+        "select attempts from notification_activity_queue where activity_revision_id = -1",
+        Int::class.java,
+      ).assert
+      .isEqualTo(1)
   }
 
   @Test

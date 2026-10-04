@@ -17,6 +17,16 @@ data class RecipientNotification(
   val entityIds: List<Long>,
 )
 
+class ProjectMember(
+  val userId: Long,
+  val permission: ComputedPermissionDto,
+)
+
+class ProjectMembers(
+  val nonBaseLanguageIds: List<Long>,
+  val members: List<ProjectMember>,
+)
+
 @Component
 class NotificationRecipientResolver(
   private val userAccountService: UserAccountService,
@@ -25,30 +35,44 @@ class NotificationRecipientResolver(
   private val languageService: LanguageService,
   private val tolgeeProperties: TolgeeProperties,
 ) {
-  fun resolve(revision: ClassifiedRevision): List<RecipientNotification> {
-    if (revision.items.isEmpty()) return emptyList()
-    val project = projectService.findDto(revision.projectId) ?: return emptyList()
-    val organizationBase = permissionService.find(organizationId = project.organizationOwnerId) ?: return emptyList()
-    val nonBaseLanguageIds =
-      languageService.findAll(revision.projectId).map { it.id }.filter { it != revision.baseLanguageId }
-
+  fun loadProjectMembers(
+    projectId: Long,
+    baseLanguageId: Long,
+  ): ProjectMembers? {
+    val project = projectService.findDto(projectId) ?: return null
+    val organizationBase = permissionService.find(organizationId = project.organizationOwnerId) ?: return null
     val members =
       userAccountService
-        .getAllInProject(revision.projectId, Pageable.unpaged(), search = null, exceptUserId = revision.authorId)
+        .getAllInProject(projectId, Pageable.unpaged(), search = null)
         .content
+        .map { member ->
+          ProjectMember(
+            userId = member.id,
+            permission =
+              permissionService.computeProjectPermission(
+                organizationRole = member.organizationRole,
+                organizationBasePermission = organizationBase,
+                directPermission = member.directPermission,
+                asScopedCredential = false,
+              ),
+          )
+        }
+    return ProjectMembers(
+      nonBaseLanguageIds = languageService.findAll(projectId).map { it.id }.filter { it != baseLanguageId },
+      members = members,
+    )
+  }
 
-    return members.flatMap { member ->
-      val permission =
-        permissionService.computeProjectPermission(
-          organizationRole = member.organizationRole,
-          organizationBasePermission = organizationBase,
-          directPermission = member.directPermission,
-          asScopedCredential = false,
-        )
+  fun resolve(
+    revision: ClassifiedRevision,
+    projectMembers: ProjectMembers? = loadProjectMembers(revision.projectId, revision.baseLanguageId),
+  ): List<RecipientNotification> {
+    if (revision.items.isEmpty() || projectMembers == null) return emptyList()
+    return projectMembers.members.filter { it.userId != revision.authorId }.flatMap { member ->
       revision.items.mapNotNull { (type, byLanguage) ->
-        entitiesFor(type, byLanguage, permission, nonBaseLanguageIds)
+        entitiesFor(type, byLanguage, member.permission, projectMembers.nonBaseLanguageIds)
           .takeIf { it.isNotEmpty() }
-          ?.let { RecipientNotification(member.id, type, it) }
+          ?.let { RecipientNotification(member.userId, type, it) }
       }
     }
   }

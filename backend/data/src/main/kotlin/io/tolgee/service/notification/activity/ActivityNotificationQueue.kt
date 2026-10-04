@@ -1,10 +1,12 @@
 package io.tolgee.service.notification.activity
 
+import io.tolgee.Metrics
 import io.tolgee.activity.ModifiedEntitiesType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import jakarta.annotation.PostConstruct
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import java.sql.Timestamp
@@ -12,13 +14,20 @@ import java.sql.Timestamp
 data class QueuedMarker(
   val revisionId: Long,
   val attempts: Int,
+  val projectId: Long?,
 )
 
 @Component
 class ActivityNotificationQueue(
   private val jdbcTemplate: JdbcTemplate,
   private val currentDateProvider: CurrentDateProvider,
+  private val metrics: Metrics,
 ) {
+  @PostConstruct
+  fun registerMetrics() {
+    metrics.registerNotificationActivityQueue(::size, ::oldestAgeSeconds)
+  }
+
   fun addIfRelevant(
     revision: ActivityRevision,
     modifiedEntities: ModifiedEntitiesType,
@@ -48,11 +57,13 @@ class ActivityNotificationQueue(
   ): List<QueuedMarker> =
     jdbcTemplate.query(
       """
-      select activity_revision_id, attempts from notification_activity_queue
-      where (?::bigint is null or activity_revision_id > ?)
-      order by activity_revision_id limit ?
+      select q.activity_revision_id, q.attempts, ar.project_id
+      from notification_activity_queue q
+      left join activity_revision ar on ar.id = q.activity_revision_id
+      where (?::bigint is null or q.activity_revision_id > ?)
+      order by q.activity_revision_id limit ?
       """,
-      { rs, _ -> QueuedMarker(rs.getLong(1), rs.getInt(2)) },
+      { rs, _ -> QueuedMarker(rs.getLong(1), rs.getInt(2), rs.getLong(3).takeUnless { rs.wasNull() }) },
       afterRevisionId,
       afterRevisionId,
       limit,
@@ -81,6 +92,17 @@ class ActivityNotificationQueue(
       return true
     }
     return false
+  }
+
+  fun size(): Int =
+    jdbcTemplate.queryForObject("select count(*) from notification_activity_queue", Int::class.java) ?: 0
+
+  fun oldestAgeSeconds(): Long {
+    val oldest =
+      jdbcTemplate
+        .query("select min(created_at) from notification_activity_queue") { rs, _ -> rs.getTimestamp(1) }
+        .firstOrNull() ?: return 0
+    return (currentDateProvider.date.time - oldest.time).coerceAtLeast(0) / 1000
   }
 
   fun findAll(): List<Long> =
