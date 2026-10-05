@@ -1372,7 +1372,8 @@ export interface components {
         | "FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS"
         | "FEATURE_BRANCHING"
         | "FEATURE_TRANSLATION_MEMORY_MANAGEMENT"
-        | "FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY";
+        | "FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY"
+        | "FEATURE_FIGMA_PLUGIN_NEW_VERSION";
     };
     ApiKeyModel: {
       /** @description Description */

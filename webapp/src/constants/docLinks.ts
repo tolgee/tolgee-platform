@@ -1,6 +1,7 @@
 export const DOCS_ROOT = 'https://docs.tolgee.io';
 
 export const DOCS_LINKS = {
+  figmaPlugin: `${DOCS_ROOT}/platform/integrations/figma_plugin/about`,
   importOverridingDescriptions: `${DOCS_ROOT}/platform/projects_and_organizations/import#overriding-key-descriptions`,
   importingPlaceholders: `${DOCS_ROOT}/platform/projects_and_organizations/import#importing-placeholders`,
   qaChecks: `${DOCS_ROOT}/platform/translation_process/qa_checks`,
