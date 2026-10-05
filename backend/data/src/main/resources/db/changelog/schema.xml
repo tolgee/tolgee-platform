@@ -5977,4 +5977,11 @@
             </sql>
         </rollback>
     </changeSet>
+    <changeSet author="dkrizan" id="1791186999000-1">
+        <addColumn tableName="s3content_storage_config">
+            <column name="public_read" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
