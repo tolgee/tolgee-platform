@@ -1,3 +1,10 @@
+# [3.226.0](https://github.com/tolgee/tolgee-platform/compare/v3.225.0...v3.226.0) (2026-10-05)
+
+
+### Features
+
+* show a top banner when the organization reaches its plan limit ([#3898](https://github.com/tolgee/tolgee-platform/issues/3898)) ([ce04342](https://github.com/tolgee/tolgee-platform/commit/ce04342dd2cfb6c969a8cb68c9828b20a98336f1)), closes [#3142](https://github.com/tolgee/tolgee-platform/issues/3142) [tolgee/billing#310](https://github.com/tolgee/billing/issues/310)
+
 # [3.225.0](https://github.com/tolgee/tolgee-platform/compare/v3.224.11...v3.225.0) (2026-10-05)
 
 
