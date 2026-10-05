@@ -1,3 +1,15 @@
+# [3.225.0](https://github.com/tolgee/tolgee-platform/compare/v3.224.11...v3.225.0) (2026-10-05)
+
+
+### Bug Fixes
+
+* upgrade embedded Tomcat to 11.0.26 ([#3960](https://github.com/tolgee/tolgee-platform/issues/3960)) ([877ff57](https://github.com/tolgee/tolgee-platform/commit/877ff5746dd3d7f2f09d827bc226aaa36a7361be))
+
+
+### Features
+
+* add Figma plugin new version announcement banner ([#3963](https://github.com/tolgee/tolgee-platform/issues/3963)) ([95b0f1c](https://github.com/tolgee/tolgee-platform/commit/95b0f1c6c2e3bb53a4ff7abfcd0bace077871afb))
+
 ## [3.224.11](https://github.com/tolgee/tolgee-platform/compare/v3.224.10...v3.224.11) (2026-10-01)
 
 
