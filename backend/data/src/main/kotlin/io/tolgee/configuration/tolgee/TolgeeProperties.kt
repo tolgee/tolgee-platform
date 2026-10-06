@@ -91,7 +91,7 @@ class TolgeeProperties(
   @DocProperty(description = "Maximum size of uploaded files (in kilobytes).", defaultExplanation = "≈ 50MB")
   var maxUploadFileSize: Int = 51200,
   @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
-  val maxScreenshotsPerKey: Int = 20,
+  var maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
   @DocProperty(
     description =
