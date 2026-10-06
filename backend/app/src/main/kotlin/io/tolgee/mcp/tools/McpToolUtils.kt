@@ -1,7 +1,7 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpServerFeatures
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessServerFeatures
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.modelcontextprotocol.spec.McpError
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult
@@ -28,7 +28,7 @@ fun errorResult(message: String): CallToolResult {
     .build()
 }
 
-fun McpSyncServer.addTool(
+fun McpStatelessSyncServer.addTool(
   name: String,
   description: String,
   schema: JsonSchema,
@@ -43,7 +43,7 @@ fun McpSyncServer.addTool(
       .build()
 
   addTool(
-    McpServerFeatures.SyncToolSpecification(tool) { _, request ->
+    McpStatelessServerFeatures.SyncToolSpecification(tool) { _, request ->
       withNonNullErrorMessage { handler(request) }
     },
   )
