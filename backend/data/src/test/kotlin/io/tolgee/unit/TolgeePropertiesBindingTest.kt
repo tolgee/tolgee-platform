@@ -10,11 +10,16 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 class TolgeePropertiesBindingTest {
   @Test
   fun `binds max screenshots per key`() {
-    val props =
-      Binder(MapConfigurationPropertySource(mapOf("tolgee.max-screenshots-per-key" to "5")))
-        .bind("tolgee", Bindable.ofInstance(TolgeeProperties()))
-        .get()
-
-    assertThat(props.maxScreenshotsPerKey).isEqualTo(5)
+    assertThat(bind("tolgee.max-screenshots-per-key" to "5").maxScreenshotsPerKey).isEqualTo(5)
   }
+
+  @Test
+  fun `binds global sso force`() {
+    assertThat(bind("tolgee.authentication.sso-global.force" to "true").authentication.ssoGlobal.force).isTrue()
+  }
+
+  private fun bind(property: Pair<String, String>): TolgeeProperties =
+    Binder(MapConfigurationPropertySource(mapOf(property)))
+      .bind("tolgee", Bindable.ofInstance(TolgeeProperties()))
+      .get()
 }
