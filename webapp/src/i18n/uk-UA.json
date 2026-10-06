@@ -2491,7 +2491,7 @@
   "storage_form_s3_access_key_hint": "Потребує \"s3:PutObject\", \"s3:GetObject\", \"s3:DeleteObject\" (та \"s3:ListBucket\", якщо увімкнено \"Prune before publish\") для бакета. Для Cloudflare R2: використовуйте API токен з дозволом \"Object Read & Write\".",
   "storage_form_s3_endpoint_hint": "наприклад \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_path_hint": "Необов'язкова підтека всередині бакета, наприклад \"i18n\". Залиште порожнім для використання кореня бакета.",
-  "storage_form_s3_public_read": "Зробити завантажені файли публічними",
+  "storage_form_s3_public_read": "Завантажувати файли як публічні",
   "storage_form_s3_public_read_hint": "Завантажує файли з доступом public-read. Потрібно для сховищ, які роблять нові файли приватними, наприклад DigitalOcean Spaces. На AWS ключу доступу також потрібен дозвіл \"s3:PutObjectAcl\". Залиште вимкненим для бакетів AWS з вимкненими ACL.",
   "storage_form_s3_public_url_prefix_hint": "напр. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "напр. \"eu-central-1\", \"auto\" для Cloudflare",

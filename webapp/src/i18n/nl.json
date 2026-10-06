@@ -2723,7 +2723,7 @@
   "storage_form_s3_access_key_hint": "Vereist \"s3:PutObject\", \"s3:GetObject\", \"s3:DeleteObject\" (en \"s3:ListBucket\" als \"Opschonen voor publiceren\" is ingeschakeld) op de bucket. Voor Cloudflare R2: gebruik een API-token met \"Object Read & Write\"-machtiging.",
   "storage_form_s3_endpoint_hint": "bijv. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_path_hint": "Optionele submap in de bucket, bijv. \"i18n\". Laat leeg om de hoofdmap van de bucket te gebruiken.",
-  "storage_form_s3_public_read": "Geüploade bestanden openbaar maken",
+  "storage_form_s3_public_read": "Bestanden uploaden als openbaar",
   "storage_form_s3_public_read_hint": "Uploadt bestanden als public-read. Nodig voor opslagen die nieuwe bestanden privé maken, zoals DigitalOcean Spaces. Bij AWS moet de toegangssleutel ook \"s3:PutObjectAcl\" hebben. Laat dit uit voor AWS-buckets met ACL's uitgeschakeld.",
   "storage_form_s3_public_url_prefix_hint": "bijv. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "bijv. \"eu-central-1\", \"auto\" voor Cloudflare",

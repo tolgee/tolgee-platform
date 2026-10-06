@@ -2719,7 +2719,7 @@
   "storage_form_s3_access_key_hint": "Kræver \"s3:PutObject\", \"s3:GetObject\", \"s3:DeleteObject\" (og \"s3:ListBucket\" hvis \"Prune before publish\" er aktiveret) på bucketen. For Cloudflare R2: brug et API-token med \"Object Read & Write\"-tilladelse.",
   "storage_form_s3_endpoint_hint": "f.eks. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_path_hint": "Valgfri undermappe i bucketen, f.eks. \"i18n\". Lad stå tomt for at bruge bucket-roden.",
-  "storage_form_s3_public_read": "Gør uploadede filer offentlige",
+  "storage_form_s3_public_read": "Upload filer som offentlige",
   "storage_form_s3_public_read_hint": "Uploader filer som public-read. Nødvendigt for lagre, der gør nye filer private, som DigitalOcean Spaces. På AWS skal adgangsnøglen også have \"s3:PutObjectAcl\". Lad den være slået fra for AWS-buckets med ACL'er deaktiveret.",
   "storage_form_s3_public_url_prefix_hint": "f.eks. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "f.eks. \"eu-central-1\", \"auto\" for Cloudflare",

@@ -34,7 +34,7 @@
   "onboarding_survey_q_source_other_placeholder": "Kde presne?",
   "onboarding_survey_subtitle_invited": "Jedna rýchla otázka o tom, čo budete robiť.",
   "permissions_item_translations_suggestions_own_access": "Odstrániť vlastné",
-  "storage_form_s3_public_read": "Zverejniť nahrané súbory",
+  "storage_form_s3_public_read": "Nahrávať súbory ako verejné",
   "storage_form_s3_public_read_hint": "Nahráva súbory ako public-read. Potrebné pre úložiská, ktoré nové súbory nastavujú ako súkromné, napríklad DigitalOcean Spaces. Na AWS musí mať prístupový kľúč aj oprávnenie „s3:PutObjectAcl“. Pre AWS buckety s vypnutými ACL túto možnosť nezapínajte.",
   "suggestions_disabled": "Návrhy sú pre tento projekt vypnuté",
   "translation_filters_in_open_task": "V otvorenej úlohe",

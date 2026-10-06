@@ -2711,7 +2711,7 @@
   "storage_form_s3_access_key_hint": "Nécessite \"s3:PutObject\", \"s3:GetObject\", \"s3:DeleteObject\" (et \"s3:ListBucket\" si \"Prune before publish\" est activé) sur le bucket. Pour Cloudflare R2 : utiliser un jeton API avec la permission \"Object Read & Write\".",
   "storage_form_s3_endpoint_hint": "par ex. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_path_hint": "Sous-répertoire optionnel dans le bucket, par ex. \"i18n\". Laisser vide pour utiliser la racine du bucket.",
-  "storage_form_s3_public_read": "Rendre les fichiers chargés publics",
+  "storage_form_s3_public_read": "Téléverser les fichiers en tant que publics",
   "storage_form_s3_public_read_hint": "Téléverse les fichiers en mode public-read. Nécessaire pour les stockages qui rendent les nouveaux fichiers privés, comme DigitalOcean Spaces. Sur AWS, la clé d'accès doit aussi avoir \"s3:PutObjectAcl\". Laissez cette option désactivée pour les buckets AWS avec les ACL désactivées.",
   "storage_form_s3_public_url_prefix_hint": "par ex. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "par ex. \"eu-central-1\", \"auto\" pour Cloudflare",

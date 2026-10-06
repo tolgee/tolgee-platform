@@ -2717,7 +2717,7 @@
   "storage_form_s3_access_key_hint": "需要对存储桶具有 \"s3:PutObject\"、\"s3:GetObject\"、\"s3:DeleteObject\" 权限（如果启用了 \"Prune before publish\"，还需要 \"s3:ListBucket\"）。对于 Cloudflare R2：使用具有 \"Object Read & Write\" 权限的 API 令牌。",
   "storage_form_s3_endpoint_hint": "例如 \"{awsExample}\"、\"{r2Example}\"",
   "storage_form_s3_path_hint": "可选的存储桶内子目录，例如 \"i18n\"。留空则使用存储桶根目录。",
-  "storage_form_s3_public_read": "将上传的文件设为公开",
+  "storage_form_s3_public_read": "将文件上传为公开",
   "storage_form_s3_public_read_hint": "将文件上传为公开可读（public-read）。对于默认将新文件设为私有的存储服务（如 DigitalOcean Spaces）是必需的。在 AWS 上，访问密钥还需要具有 \"s3:PutObjectAcl\" 权限。对于禁用了 ACL 的 AWS 存储桶，请关闭此选项。",
   "storage_form_s3_public_url_prefix_hint": "例如 \"{awsExample}\"、\"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "例如 \"eu-central-1\"、\"auto\" 用于 Cloudflare",

@@ -1,3 +1,10 @@
+## [3.226.2](https://github.com/tolgee/tolgee-platform/compare/v3.226.1...v3.226.2) (2026-10-06)
+
+
+### Bug Fixes
+
+* reject deleted languages when setting permissions ([#3958](https://github.com/tolgee/tolgee-platform/issues/3958)) ([c00200f](https://github.com/tolgee/tolgee-platform/commit/c00200f727d14cff0dc1b7938c1896dfdf4f788f)), closes [#3765](https://github.com/tolgee/tolgee-platform/issues/3765)
+
 ## [3.226.1](https://github.com/tolgee/tolgee-platform/compare/v3.226.0...v3.226.1) (2026-10-06)
 
 

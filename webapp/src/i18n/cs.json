@@ -2728,7 +2728,7 @@
   "storage_form_s3_access_key_hint": "Vyžaduje \"s3:PutObject\", \"s3:GetObject\", \"s3:DeleteObject\" (a \"s3:ListBucket\", pokud je povoleno \"Prune before publish\") na bucketu. Pro Cloudflare R2: použijte API token s oprávněním \"Object Read & Write\".",
   "storage_form_s3_endpoint_hint": "např. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_path_hint": "Volitelný podadresář uvnitř bucketu, např. \"i18n\". Ponechte prázdné pro použití kořenového adresáře bucketu.",
-  "storage_form_s3_public_read": "Nastavit nahrané soubory jako veřejné",
+  "storage_form_s3_public_read": "Nahrávat soubory jako veřejné",
   "storage_form_s3_public_read_hint": "Nahrává soubory jako veřejně čitelné (public-read). Potřebné pro úložiště, která nastavují nové soubory jako soukromé, například DigitalOcean Spaces. U AWS musí mít přístupový klíč také oprávnění \"s3:PutObjectAcl\". U AWS bucketů s vypnutými ACL to ponechte vypnuté.",
   "storage_form_s3_public_url_prefix_hint": "např. \"{awsExample}\", \"{r2Example}\"",
   "storage_form_s3_signing_region_hint": "např. \"eu-central-1\", \"auto\" pro Cloudflare",
