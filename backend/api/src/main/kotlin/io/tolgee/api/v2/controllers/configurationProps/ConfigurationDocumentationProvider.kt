@@ -75,6 +75,10 @@ class ConfigurationDocumentationProvider {
     if (annotation?.hidden == true) {
       return null
     }
+    // Computed getters have no setter, so Spring fails startup when users set them
+    if (it.javaField == null) {
+      return null
+    }
     val returnTypeFirstArgument =
       it.returnType.arguments
         .firstOrNull()

@@ -27,7 +27,7 @@ class SsoGlobalProperties : ISsoTenant {
   var enabled: Boolean = false
 
   @DocProperty(description = "When true, users with an email matching the organization's domain must sign in using SSO")
-  override val force: Boolean = false
+  override var force: Boolean = false
 
   @DocProperty(description = "Unique identifier for an application")
   override var clientId: String = ""
