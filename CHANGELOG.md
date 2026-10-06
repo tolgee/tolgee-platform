@@ -1,3 +1,10 @@
+## [3.226.1](https://github.com/tolgee/tolgee-platform/compare/v3.226.0...v3.226.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* config properties that fail startup when set ([#3965](https://github.com/tolgee/tolgee-platform/issues/3965)) ([4fd4046](https://github.com/tolgee/tolgee-platform/commit/4fd4046d40b1579c91065856fdf103abe11f8c4f))
+
 # [3.226.0](https://github.com/tolgee/tolgee-platform/compare/v3.225.0...v3.226.0) (2026-10-05)
 
 
