@@ -14,6 +14,7 @@ class PluralTranslationUtilTest {
         "en",
         "cs",
         getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+        escapeMarkup = true,
       )
 
     result.toMap().assert.isEqualTo(
@@ -37,6 +38,7 @@ class PluralTranslationUtilTest {
         "en",
         "cs",
         getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+        escapeMarkup = true,
       )
 
     result.toMap()["one"].assert.isEqualTo("<x id=\"tolgee-number\">1</x> &lt; 5 &amp; &lt;b&gt;more&lt;/b&gt;")
@@ -47,7 +49,7 @@ class PluralTranslationUtilTest {
   fun `restores number placeholder and unescapes html in a translated form`() {
     PluralTranslationUtil
       .restoreNumberPlaceholder(
-        "<x id=\"tolgee-number\">1</x> &lt; 5 &amp; &lt;b&gt;v&#237;c&lt;/b&gt;",
+        "<x id=\"tolgee-number\">1</x> &lt; 5 &amp; &lt;b&gt;víc&lt;/b&gt;",
         htmlEscaped = true,
       ).assert
       .isEqualTo("# < 5 & <b>víc</b>")
@@ -69,6 +71,7 @@ class PluralTranslationUtilTest {
         "fr",
         "en",
         getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+        escapeMarkup = true,
       )
 
     result.toMap()["one"].assert.isEqualTo("<x id=\"tolgee-number\">1</x> élément für 5 € &amp; 日本")
@@ -87,6 +90,7 @@ class PluralTranslationUtilTest {
           "en",
           "cs",
           getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+          escapeMarkup = true,
         ).toMap()["one"]!!
 
     val expectedEscaped = sample.replace("\"", "&quot;").replace("'", "&#39;")
@@ -106,6 +110,7 @@ class PluralTranslationUtilTest {
           "en",
           "cs",
           getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+          escapeMarkup = true,
         ).toMap()["one"]!!
 
     prepared.assert.isEqualTo("<x id=\"tolgee-number\">1</x> items &amp;amp; &amp;lt;b&amp;gt;")
@@ -113,5 +118,53 @@ class PluralTranslationUtilTest {
       .restoreNumberPlaceholder(prepared, htmlEscaped = true)
       .assert
       .isEqualTo("# items &amp; &lt;b&gt;")
+  }
+
+  @Test
+  fun `does not escape markup for a provider that is not put into markup mode`() {
+    val baseString = """{number, plural, one {# < 5 & <b>more</b>} other {# items}}"""
+    val result =
+      PluralTranslationUtil.getPreparedSourceStrings(
+        "en",
+        "cs",
+        getPluralFormsReplacingReplaceParam(baseString, PluralTranslationUtil.REPLACE_NUMBER_PLACEHOLDER)!!,
+        escapeMarkup = false,
+      )
+
+    result.toMap()["one"].assert.isEqualTo("<x id=\"tolgee-number\">1</x> < 5 & <b>more</b>")
+  }
+
+  @Test
+  fun `unescapes before stripping so an entity-escaped tag is still restored`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder(
+        "&lt;x id=&quot;tolgee-number&quot;&gt;1&lt;/x&gt; psi",
+        htmlEscaped = true,
+      ).assert
+      .isEqualTo("# psi")
+  }
+
+  @Test
+  fun `decodes only the entities the escape step emits`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder("a &amp; b &nbsp; c &copy; d &#237; e", htmlEscaped = true)
+      .assert
+      .isEqualTo("a & b &nbsp; c &copy; d &#237; e")
+  }
+
+  @Test
+  fun `decodes each entity exactly once so a nested entity is not over-decoded`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder("a &amp;amp; b &amp;lt;c&amp;gt;", htmlEscaped = true)
+      .assert
+      .isEqualTo("a &amp; b &lt;c&gt;")
+  }
+
+  @Test
+  fun `decodes the decimal hex and xml spellings of the escaped characters`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder("&#60;a&#x3E; &apos;b&#x27; &#34;c&#34;", htmlEscaped = true)
+      .assert
+      .isEqualTo("<a> 'b' \"c\"")
   }
 }

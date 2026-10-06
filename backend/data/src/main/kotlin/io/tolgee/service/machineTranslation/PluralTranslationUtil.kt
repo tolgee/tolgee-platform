@@ -20,13 +20,23 @@ class PluralTranslationUtil(
   private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
     val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
     val sourceLanguageTag = context.baseLanguage.tag
-    getPreparedSourceStrings(sourceLanguageTag, targetLanguageTag, forms)
+    getPreparedSourceStrings(sourceLanguageTag, targetLanguageTag, forms, item.service.escapesMarkup)
   }
 
   private val translated by lazy {
-    preparedFormSourceStrings.map { (form, prepared) ->
-      Triple(form, containsNumberTag(prepared), translateFn(prepared))
-    }
+    val escaped = item.service.escapesMarkup
+    preparedFormSourceStrings
+      .map { (form, prepared) ->
+        val result = translateFn(prepared)
+        result.translatedText =
+          result.translatedText?.let {
+            restoreNumberPlaceholder(
+              it,
+              htmlEscaped = escaped && containsNumberTag(prepared),
+            )
+          }
+        form to result
+      }.toList()
   }
 
   private val forms by lazy {
@@ -35,11 +45,7 @@ class PluralTranslationUtil(
   }
 
   private val result: MtTranslatorResult by lazy {
-    val result =
-      translated.map { (form, hadTag, result) ->
-        result.translatedText = result.translatedText?.let { restoreNumberPlaceholder(it, htmlEscaped = hadTag) }
-        form to result
-      }
+    val result = translated
 
     val resultForms = result.map { it.first to (it.second.translatedText ?: "") }.toMap()
 
@@ -82,10 +88,33 @@ class PluralTranslationUtil(
       translated: String,
       htmlEscaped: Boolean,
     ): String {
-      val withPlaceholder = translated.replace(TOLGEE_TAG_REGEX, "#")
-      if (!htmlEscaped) return withPlaceholder
-      return HtmlUtils.htmlUnescape(withPlaceholder)
+      if (!htmlEscaped) return translated.replace(TOLGEE_TAG_REGEX, "#")
+      return unescapeMarkup(translated).replace(TOLGEE_TAG_REGEX, "#")
     }
+
+    /**
+     * Reverses [escapeMarkup] and nothing else, covering only the five characters it escapes in their
+     * named, decimal and hex forms (plus XML `&apos;`, which an XML-mode engine may serialize instead).
+     * A full HTML unescape would also decode entities the engine introduced on its own (`&nbsp;` into
+     * U+00A0, say), which would then sit invisibly in the stored ICU string and break exact-match
+     * comparison on re-import.
+     */
+    private val MARKUP_ENTITIES =
+      listOf(
+        "<" to listOf("&lt;", "&#60;", "&#x3C;"),
+        ">" to listOf("&gt;", "&#62;", "&#x3E;"),
+        "\"" to listOf("&quot;", "&#34;", "&#x22;"),
+        "'" to listOf("&#39;", "&apos;", "&#x27;"),
+        // must come last, so "&amp;lt;" decodes to "&lt;" and not to "<"
+        "&" to listOf("&amp;", "&#38;", "&#x26;"),
+      )
+
+    private fun unescapeMarkup(text: String): String =
+      MARKUP_ENTITIES.fold(text) { acc, (char, entities) ->
+        entities.fold(acc) { inner, entity -> inner.replace(entity, char) }
+      }
+
+    private fun escapeMarkup(text: String): String = HtmlUtils.htmlEscape(text, Charsets.UTF_8.name())
 
     /**
      * Returns all target forms with examples from source
@@ -113,10 +142,12 @@ class PluralTranslationUtil(
     private fun String.replaceReplaceNumberPlaceholderWithExample(
       example: Number,
       addTag: Boolean = true,
+      escapeMarkup: Boolean = false,
     ): String {
       if (!addTag) return this.replace(REPLACE_NUMBER_PLACEHOLDER, example.toString())
       if (!this.contains(REPLACE_NUMBER_PLACEHOLDER)) return this
-      return HtmlUtils.htmlEscape(this, Charsets.UTF_8.name()).replace(
+      val body = if (escapeMarkup) escapeMarkup(this) else this
+      return body.replace(
         REPLACE_NUMBER_PLACEHOLDER,
         "$TOLGEE_TAG_OPEN$example$TOLGEE_TAG_CLOSE",
       )
@@ -137,13 +168,14 @@ class PluralTranslationUtil(
       sourceLanguageTag: String,
       targetLanguageTag: String,
       forms: PluralForms,
+      escapeMarkup: Boolean,
     ): Sequence<Pair<String, String>> {
       val sourceRules = getRulesByTag(sourceLanguageTag)
       val keywordCases =
         getTargetExamples(targetLanguageTag).asSequence().map {
           val form = sourceRules?.select(it.value.toDouble())
           val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
-          it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
+          it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value, escapeMarkup = escapeMarkup)
         }
 
       val exactCases =
@@ -153,7 +185,7 @@ class PluralTranslationUtil(
             it.key.startsWith("=")
           }.mapNotNull {
             val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
-            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
+            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number, escapeMarkup = escapeMarkup)
           }
 
       return keywordCases + exactCases

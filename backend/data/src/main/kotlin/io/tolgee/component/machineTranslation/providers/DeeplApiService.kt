@@ -45,9 +45,14 @@ class DeeplApiService(
     if (preserveTags) {
       // Tells DeepL to parse the text as XML and leave the content of <x> tags completely
       // untouched, so our <x id="tolgee-number"> placeholder survives translation intact.
+      // `set` overwrites rather than appends, so an operator's own tag_handling in
+      // optionalParameters above does not end up sent twice.
+      // Accounts that first used tag handling before 2025-12-01 default to v1, which parses
+      // differently, so the version is pinned to keep behaviour identical across accounts.
       // https://developers.deepl.com/docs/api-reference/translate
-      requestBody.add("tag_handling", "xml")
-      requestBody.add("ignore_tags", "x")
+      requestBody.set("tag_handling", "xml")
+      requestBody.set("tag_handling_version", "v2")
+      requestBody.set("ignore_tags", "x")
     }
 
     val request = HttpEntity(requestBody, headers)

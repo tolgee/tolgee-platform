@@ -46,7 +46,6 @@ data class ProviderTranslateParams(
           formality,
           pluralForms,
           pluralFormExamples,
-          containsNumberTag,
           provider,
         ),
       )
