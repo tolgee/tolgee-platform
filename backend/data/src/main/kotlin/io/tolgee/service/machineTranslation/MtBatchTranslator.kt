@@ -220,7 +220,7 @@ class MtBatchTranslator(
             it,
           )
         },
-      containsNumberTag = PluralTranslationUtil.containsNumberTag(baseTranslationText),
+      containsNumberTag = PluralTranslationUtil.containsNumberTag(withReplacedParams),
     )
   }
 
