@@ -1,17 +1,15 @@
 package io.tolgee.mcp
 
 import io.modelcontextprotocol.server.McpServer
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.modelcontextprotocol.spec.McpSchema
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
-import org.redisson.api.RedissonClient
-import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStreamableServerTransportProvider
+import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStatelessServerTransport
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.Ordered
 import org.springframework.web.servlet.function.RouterFunction
 import org.springframework.web.servlet.function.ServerResponse
 import tools.jackson.databind.ObjectMapper
@@ -19,27 +17,27 @@ import tools.jackson.databind.ObjectMapper
 @Configuration
 class McpConfig {
   @Bean
-  fun mcpTransportProvider(): WebMvcStreamableServerTransportProvider {
-    return WebMvcStreamableServerTransportProvider
+  fun mcpTransport(): WebMvcStatelessServerTransport {
+    return WebMvcStatelessServerTransport
       .builder()
-      .mcpEndpoint(McpConstants.DEVELOPER_ENDPOINT_PATH)
+      .messageEndpoint(McpConstants.DEVELOPER_ENDPOINT_PATH)
       .build()
   }
 
   @Bean
   fun mcpServer(
-    transportProvider: WebMvcStreamableServerTransportProvider,
+    transport: WebMvcStatelessServerTransport,
     versionProvider: VersionProvider,
     toolsProviders: List<McpToolsProvider>,
-  ): McpSyncServer {
+  ): McpStatelessSyncServer {
     val server =
       McpServer
-        .sync(transportProvider)
+        .sync(transport)
         .serverInfo("tolgee", versionProvider.version)
         .capabilities(
           McpSchema.ServerCapabilities
             .builder()
-            .tools(true)
+            .tools(false)
             .build(),
         ).immediateExecution(true)
         .build()
@@ -51,10 +49,10 @@ class McpConfig {
 
   @Bean
   fun mcpRouterFunction(
-    transportProvider: WebMvcStreamableServerTransportProvider,
-    @Suppress("unused") mcpServer: McpSyncServer,
+    transport: WebMvcStatelessServerTransport,
+    @Suppress("unused") mcpServer: McpStatelessSyncServer,
   ): RouterFunction<ServerResponse> {
-    return transportProvider.routerFunction
+    return transport.routerFunction
   }
 
   @Bean
@@ -65,20 +63,6 @@ class McpConfig {
   ): FilterRegistrationBean<McpAuthChallengeFilter> {
     val registration =
       FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper, authenticationProperties))
-    registration.addUrlPatterns("/mcp/*")
-    // Ahead of the session filter: a credential-less tools/call is answered before any session side effect runs.
-    registration.order = Ordered.LOWEST_PRECEDENCE - 10
-    return registration
-  }
-
-  @Bean
-  fun mcpSessionRedisFilter(
-    transportProvider: WebMvcStreamableServerTransportProvider,
-    redissonClient: RedissonClient?,
-    objectMapper: ObjectMapper,
-  ): FilterRegistrationBean<McpSessionRedisFilter> {
-    val filter = McpSessionRedisFilter(transportProvider, redissonClient, objectMapper)
-    val registration = FilterRegistrationBean(filter)
     registration.addUrlPatterns("/mcp/*")
     return registration
   }

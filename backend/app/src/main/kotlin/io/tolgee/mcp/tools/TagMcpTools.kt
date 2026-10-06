@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.TagsController
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
@@ -27,7 +27,7 @@ class TagMcpTools(
   private val listTagsSpec = buildSpec(TagsController::getAll, "list_tags")
   private val tagKeysSpec = buildSpec(TagsController::tagKey, "tag_keys")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_tags",
       "List all tags used in a Tolgee project. Returns up to 1000 results per page.",

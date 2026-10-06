@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
@@ -37,7 +37,7 @@ class ProjectMcpTools(
   private val getLanguageStatsSpec =
     buildSpec(ProjectStatsController::getProjectStats, "get_project_language_statistics")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_projects",
       "List Tolgee projects accessible to the current user. Returns up to 100 results per page.",

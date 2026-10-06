@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.batch.BatchJobManagementController
 import io.tolgee.api.v2.controllers.batch.StartBatchJobController
 import io.tolgee.batch.BatchJobService
@@ -34,7 +34,7 @@ class BatchJobMcpTools(
   private val getBatchJobSpec = buildSpec(BatchJobManagementController::get, "get_batch_job_status")
   private val machineTranslateSpec = buildSpec(StartBatchJobController::machineTranslation, "machine_translate")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "get_batch_job_status",
       "Get the status of a batch job (e.g. machine translation) by its ID. Use to poll for completion.",

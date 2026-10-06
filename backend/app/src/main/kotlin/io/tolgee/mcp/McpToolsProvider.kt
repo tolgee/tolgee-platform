@@ -1,7 +1,7 @@
 package io.tolgee.mcp
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 
 interface McpToolsProvider {
-  fun register(server: McpSyncServer)
+  fun register(server: McpStatelessSyncServer)
 }
