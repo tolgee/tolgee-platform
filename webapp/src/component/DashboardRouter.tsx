@@ -8,10 +8,11 @@ import { RootView } from 'tg.views/RootView';
 import { OrganizationsRouter } from 'tg.views/organizations/OrganizationsRouter';
 import { CommunityProjectsView } from 'tg.views/projects/CommunityProjectsView';
 import { ProjectsRouter } from 'tg.views/projects/ProjectsRouter';
+import { OnboardingSurveyGate } from 'tg.ee';
 
 export const DashboardRouter = () => {
   return (
-    <>
+    <OnboardingSurveyGate>
       <Switch>
         <PrivateRoute exact path={LINKS.PROJECTS.template}>
           <Redirect to={LINKS.ROOT.template} />
@@ -35,6 +36,6 @@ export const DashboardRouter = () => {
       </Switch>
 
       <HelpMenu />
-    </>
+    </OnboardingSurveyGate>
   );
 };
