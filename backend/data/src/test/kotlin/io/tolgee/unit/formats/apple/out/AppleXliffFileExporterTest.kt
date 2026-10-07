@@ -399,6 +399,31 @@ class AppleXliffFileExporterTest {
   }
 
   @Test
+  fun `an authored =0 wins over the other fallback when the locale's CLDR forms include zero`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "ar",
+          keyName = "attendee_count",
+          text = "{count, plural, =0 {No participants} one {1 Participant} other {Many participants}}",
+        ) {
+          key.isPlural = true
+          key.custom = mapOf(APPLE_FILE_ORIGINAL_CUSTOM_KEY to "Localizable.xcstrings")
+        }
+      }
+    val exporter = getExporter(built.translations, emptyList())
+    val data = getExported(exporter)
+    data["ar.xliff"]!!.assert.contains(
+      """
+    |      <trans-unit id="attendee_count|==|plural.zero">
+    |        <source xml:space="preserve"/>
+    |        <target xml:space="preserve">No participants</target>
+    |      </trans-unit>
+      """.trimMargin(),
+    )
+  }
+
+  @Test
   fun `honors the provided fileStructureTemplate`() {
     val exporter =
       getExporter(

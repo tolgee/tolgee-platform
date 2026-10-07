@@ -242,8 +242,10 @@ class AppleXliffExporter(
     val allForms = getPluralFormsForLocale(languageTag) + authoredNamedForms
     val result = allForms.associateWithTo(mutableMapOf()) { forms[it] ?: otherForm }
     // Apple can't express an "=0" exact match, so if the user wrote one and there is no explicit
-    // "zero", surface it as "zero" — the closest the format has.
-    if ("zero" !in result) {
+    // "zero", surface it as "zero" — the closest the format has. Check what was authored, not
+    // the result: for a locale whose CLDR forms already include "zero" the result has it filled
+    // with the "other" fallback, and an authored "=0" must still win over that.
+    if ("zero" !in forms) {
       forms["=0"]?.let { result["zero"] = it }
     }
     return result
