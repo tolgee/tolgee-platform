@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -41,7 +42,7 @@ class FreePlanSeatLimitTest : AbstractSpringTest() {
   fun `can disable users when over plan`() {
     val users = createNUsers(20)
     getEnabledUsersCount().assert.isEqualTo(20L)
-    userAccountService.disable(users[10].id)
+    userAccountService.disable(users[10].id, UserDisabledBy.ADMIN)
     getEnabledUsersCount().assert.isEqualTo(19L)
   }
 

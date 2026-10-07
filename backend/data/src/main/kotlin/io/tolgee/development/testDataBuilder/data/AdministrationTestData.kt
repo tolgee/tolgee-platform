@@ -34,4 +34,8 @@ class AdministrationTestData {
         user = this
       }
     }
+
+  fun makeUserInitial() {
+    user.isInitialUser = true
+  }
 }

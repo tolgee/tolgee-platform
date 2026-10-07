@@ -16,6 +16,7 @@ import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
 import org.springframework.core.io.ClassPathResource
+import java.util.Date
 
 class PermissionsTestData {
   var projectBuilder: ProjectBuilder
@@ -133,6 +134,14 @@ class PermissionsTestData {
     }
     return me.self
   }
+
+  fun addDeletedLanguage(): Language =
+    projectBuilder
+      .addLanguage {
+        name = "Deleted"
+        tag = "deleted"
+        deletedAt = Date()
+      }.self
 
   fun addUnrelatedUsers() {
     val user =

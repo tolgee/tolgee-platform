@@ -10,6 +10,12 @@ class EeProperties(
   @DocProperty(hidden = true)
   var reportUsageFixedDelayInMs: Long = 60_000,
   /**
+   * How often the instance word count may be recomputed. Much longer than the keys and seats
+   * cadence, because counting words is a full-instance aggregation.
+   */
+  @DocProperty(hidden = true)
+  var reportWordsMinIntervalInMs: Long = 15 * 60_000,
+  /**
    * Enables scheduled reporting of usage data to Tolgee.
    *
    * In tests, this will be set to false and enabled only for specific tests.

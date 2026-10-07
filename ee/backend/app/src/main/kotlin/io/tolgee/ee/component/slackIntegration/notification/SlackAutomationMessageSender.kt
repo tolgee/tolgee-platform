@@ -48,6 +48,11 @@ class SlackAutomationMessageSender(
   ) {
     val context = createContext(slackConfig, data)
     if (context.isBigOperation) {
+      val isSubscribedToAnyModifiedLanguage =
+        context.modifiedLanguageTags.any { slackTranslationChangeMessageFactory.isSubscribedToChange(context, it) }
+      if (!isSubscribedToAnyModifiedLanguage) {
+        return
+      }
       logger.debug("Too many translations to send message, sending only one message")
       val messageDto = slackTooManyTranslationsMessageFactory.createMessageIfTooManyTranslations(context)
       sendRegularMessageWithSaving(messageDto, context)

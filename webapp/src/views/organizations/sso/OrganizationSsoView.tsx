@@ -15,9 +15,6 @@ export const OrganizationSsoView: FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
   const organization = useOrganization();
-  if (!organization) {
-    return null;
-  }
   const { isEnabled } = useEnabledFeatures();
   const featureEnabled = isEnabled('SSO');
   const organizationsSsoEnabled = useGlobalContext(
@@ -26,21 +23,27 @@ export const OrganizationSsoView: FunctionComponent<
   );
   const { t } = useTranslate();
 
-  const providersLoadable =
-    featureEnabled && organizationsSsoEnabled
-      ? useApiQuery({
-          url: `/v2/organizations/{organizationId}/sso`,
-          method: 'get',
-          path: {
-            organizationId: organization.id,
-          },
-        })
-      : null;
+  const providersLoadable = useApiQuery({
+    url: `/v2/organizations/{organizationId}/sso`,
+    method: 'get',
+    path: {
+      organizationId: organization?.id as number,
+    },
+    options: {
+      enabled: Boolean(
+        organization && featureEnabled && organizationsSsoEnabled
+      ),
+    },
+  });
   const [toggleFormState, setToggleFormState] = useState(false);
 
   useEffect(() => {
-    setToggleFormState(providersLoadable?.data?.enabled || false);
-  }, [providersLoadable?.data]);
+    setToggleFormState(providersLoadable.data?.enabled || false);
+  }, [providersLoadable.data]);
+
+  if (!organization) {
+    return null;
+  }
 
   const handleSwitchChange = (event) => {
     setToggleFormState(event.target.checked);
@@ -79,7 +82,7 @@ export const OrganizationSsoView: FunctionComponent<
             />
             <Box sx={{ marginTop: '16px' }}>
               <CreateProviderSsoForm
-                data={providersLoadable?.data}
+                data={providersLoadable.data}
                 disabled={!toggleFormState}
               />
             </Box>

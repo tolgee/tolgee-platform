@@ -37,8 +37,6 @@ export const DeveloperView = () => {
       <StyledTabWrapper>
         <StyledTabs value={value}>
           {items.map((item) => {
-            const project = useProject();
-
             if (!item.tab.condition) {
               return null;
             }

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@mui/material';
 import {
   useConfig,
+  useHasSupportChat,
   usePreferredOrganization,
   useUser,
 } from 'tg.globalContext/helpers';
@@ -9,28 +10,19 @@ import { Intercom, show, update } from '@intercom/messenger-js-sdk';
 
 export function useIntercom() {
   const user = useUser();
-  const { preferredOrganization } = usePreferredOrganization();
+  const hasSupportChat = useHasSupportChat();
   const config = useConfig();
   const appId = config?.intercomAppId;
 
-  const enabledFeatures = preferredOrganization?.enabledFeatures;
-
-  const hasStandardSupport =
-    enabledFeatures?.includes('STANDARD_SUPPORT') ||
-    enabledFeatures?.includes('PREMIUM_SUPPORT');
-
-  const available = !!(appId && user && hasStandardSupport);
+  const available = !!(appId && user && hasSupportChat);
   const theme = useTheme();
-  const {
-    palette: { mode },
-  } = useTheme();
 
-  const darkMode = mode === 'dark';
+  const darkMode = theme.palette.mode === 'dark';
 
   const companyInfo = useCompanyInfo();
 
   useEffect(() => {
-    if (appId && companyInfo && user) {
+    if (available && companyInfo) {
       Intercom({
         app_id: appId,
         hide_default_launcher: true,
@@ -41,7 +33,7 @@ export function useIntercom() {
         company: companyInfo,
       });
     }
-  }, [user, preferredOrganization, companyInfo, appId]);
+  }, [available, user, companyInfo, appId]);
 
   useEffect(() => {
     update({ theme_mode: darkMode ? 'dark' : 'light' });

@@ -33,14 +33,8 @@ export const SubfilterLabels = ({
 }: Props) => {
   const { isEnabled } = useEnabledFeatures();
   const labelsEnabled = isEnabled('TRANSLATION_LABELS');
-  if (!labelsEnabled) {
-    return null;
-  }
   const allLabels = useTranslationsSelector((c) => c.labels);
-
-  if (allLabels.length === 0) {
-    return null;
-  }
+  const isVisible = labelsEnabled && allLabels.length > 0;
 
   const {
     labels: searched,
@@ -49,9 +43,7 @@ export const SubfilterLabels = ({
     searchDebounced,
     search,
     loadableList,
-  } = useLabelsService({ projectId });
-
-  const labels = searched || allLabels;
+  } = useLabelsService({ projectId, enabled: isVisible });
 
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
@@ -59,6 +51,12 @@ export const SubfilterLabels = ({
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  const labels = searched || allLabels;
 
   function toggleFilterLanguage(
     newValue: FiltersInternal['filterTranslationLanguage']

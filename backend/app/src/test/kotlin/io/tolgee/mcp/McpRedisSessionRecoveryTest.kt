@@ -1,6 +1,5 @@
 package io.tolgee.mcp
 
-import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.McpStreamableServerSession
 import io.tolgee.AbstractMcpTest
 import io.tolgee.fixtures.RedisRunner
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.redisson.api.RedissonClient
+import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStreamableServerTransportProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.util.TestPropertyValues

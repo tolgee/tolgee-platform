@@ -4,4 +4,5 @@ import io.tolgee.api.IProjectActivityModel
 
 data class SlackRequest(
   val activityData: IProjectActivityModel?,
+  val isBigOperation: Boolean,
 )

@@ -27,6 +27,10 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.Date
 
@@ -102,12 +106,38 @@ class McpServerIntegrationTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `initialize accepts unknown client capability fields`() {
+    val body =
+      """
+      {"jsonrpc":"2.0","id":0,"method":"initialize","params":{
+        "protocolVersion":"2025-06-18",
+        "capabilities":{"elicitation":{"form":{"applyDefaults":true}}},
+        "clientInfo":{"name":"opencode","version":"2.0.3"}
+      }}
+      """.trimIndent()
+
+    val request =
+      HttpRequest
+        .newBuilder(URI("http://localhost:$port/mcp/developer"))
+        .header("X-API-Key", "tgpat_${data.pat.token}")
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json, text/event-stream")
+        .POST(HttpRequest.BodyPublishers.ofString(body))
+        .build()
+
+    val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
+
+    assertThat(response.statusCode()).isEqualTo(200)
+    assertThat(response.headers().firstValue("Mcp-Session-Id")).isPresent
+  }
+
+  @Test
   fun `tool call with invalid PAT returns error`() {
     val transport =
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder ->
+        .httpRequestCustomizer { builder, _, _, _, _ ->
           builder.header("X-API-Key", "tgpat_invalid_token_here")
         }.build()
 
@@ -151,7 +181,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder ->
+        .httpRequestCustomizer { builder, _, _, _, _ ->
           builder.header("X-API-Key", "tgpat_${expiredPat!!.token}")
         }.build()
 

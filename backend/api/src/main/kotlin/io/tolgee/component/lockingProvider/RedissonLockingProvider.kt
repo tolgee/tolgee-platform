@@ -7,6 +7,7 @@ import org.redisson.api.RLock
 import org.redisson.api.RedissonClient
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.Lock
 
 open class RedissonLockingProvider(
   private val redissonClient: RedissonClient,
@@ -14,6 +15,10 @@ open class RedissonLockingProvider(
   Logging {
   override fun getLock(name: String): RLock {
     return redissonClient.getLock(name)
+  }
+
+  override fun releaseLock(lock: Lock) {
+    (lock as RLock).releaseEvenIfInterrupted()
   }
 
   override fun <T> withLocking(
@@ -25,9 +30,7 @@ open class RedissonLockingProvider(
     try {
       return fn()
     } finally {
-      if (lock.isHeldByCurrentThread) {
-        lock.unlock()
-      }
+      releaseLock(lock)
     }
   }
 
@@ -45,9 +48,7 @@ open class RedissonLockingProvider(
     try {
       return fn()
     } finally {
-      if (lock.isHeldByCurrentThread) {
-        lock.unlock()
-      }
+      releaseLock(lock)
     }
   }
 }

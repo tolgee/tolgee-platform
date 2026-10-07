@@ -67,6 +67,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     whenever(restTemplateBuilder.build()).thenReturn(restTemplate)
   }
 
+  @Test
   @ProjectJWTAuthTestMethod
   fun `correctly propagates credit spending limit exceeded`() {
     testPropagatesError(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code)

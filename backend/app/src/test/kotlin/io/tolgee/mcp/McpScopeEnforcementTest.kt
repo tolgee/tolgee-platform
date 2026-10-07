@@ -1,8 +1,11 @@
 package io.tolgee.mcp
 
 import io.modelcontextprotocol.client.McpSyncClient
+import io.modelcontextprotocol.spec.McpError
 import io.tolgee.AbstractMcpTest
+import io.tolgee.constants.Message
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class McpScopeEnforcementTest : AbstractMcpTest() {
@@ -122,5 +125,16 @@ class McpScopeEnforcementTest : AbstractMcpTest() {
     // Empty scopes -> ProjectNotFoundException (hides project existence from unauthorized users)
     assertToolFails(client, "list_keys", expectedError = "ProjectNotFoundException")
     assertToolFails(client, "list_languages", expectedError = "ProjectNotFoundException")
+  }
+
+  @Test
+  fun `message-less exception is reported with its Tolgee code`() {
+    val pakData = createTestDataWithPak(emptySet())
+    val client = createMcpClientWithPak(pakData.apiKey.encodedKey!!)
+
+    val exception = runCatching { callTool(client, "list_keys") }.exceptionOrNull()
+
+    assertThat(exception).isInstanceOf(McpError::class.java)
+    assertThat((exception as McpError).jsonRpcError.message()).isEqualTo(Message.PROJECT_NOT_FOUND.code)
   }
 }

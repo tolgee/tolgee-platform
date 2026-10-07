@@ -13,6 +13,7 @@ import io.tolgee.dtos.request.SuperTokenRequest
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
@@ -167,7 +168,11 @@ class V2UserController(
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(6)
   fun delete() {
-    userAccountService.delete(authenticationFacade.authenticatedUserEntity)
+    val user = authenticationFacade.authenticatedUserEntity
+    if (!user.isDeletable) {
+      throw PermissionException()
+    }
+    userAccountService.delete(user)
   }
 
   @Operation(

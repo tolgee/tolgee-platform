@@ -8,6 +8,7 @@ import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.service.slackIntegration.SlackUserConnectionService
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
+import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.service.language.LanguageService
 import org.springframework.context.ApplicationContext
 
@@ -34,17 +35,12 @@ class SlackMessageContext(
     author ?: activityData?.author?.name
   }
 
-  val isBigOperation: Boolean by lazy {
-    val count = modifiedTranslationsCount
+  val isBigOperation: Boolean
+    get() = data.isBigOperation || (modifiedTranslationsCount > 0 && translationChangeSizeFromModifiedEntities == 0L)
 
-    if (count > SlackAutomationMessageSender.MAX_NEW_MESSAGES_TO_SEND) {
-      return@lazy true
-    }
-
-    // This happens in case that the data are considered big in the view provider and so it is not loaded
-    // In that case we just also consider it big
-    // However, we still need to check whether there are any translations changed
-    return@lazy activityData?.let { translationChangeSizeFromModifiedEntities } == null && count > 0
+  val modifiedLanguageTags: List<String> by lazy {
+    activityData?.revisionId?.let { activityModifiedEntityRepository.findModifiedTranslationLanguageTags(it) }
+      ?: emptyList()
   }
 
   val modifiedTranslationsCount: Long by lazy {
@@ -61,9 +57,6 @@ class SlackMessageContext(
     return@lazy translationChangeSizeFromModifiedEntities
   }
 
-  /**
-   * If this is empty, it means that the operation is probably big
-   */
   private val translationChangeSizeFromModifiedEntities: Long by lazy {
     activityData
       ?.modifiedEntities
@@ -93,6 +86,10 @@ class SlackMessageContext(
 
   private val tolgeeProperties by lazy {
     applicationContext.getBean(TolgeeProperties::class.java)
+  }
+
+  private val activityModifiedEntityRepository by lazy {
+    applicationContext.getBean(ActivityModifiedEntityRepository::class.java)
   }
 
   private val languageService by lazy {

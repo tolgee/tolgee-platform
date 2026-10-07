@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
 import io.tolgee.model.enums.ThirdPartyAuthType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackUserConnection
 import io.tolgee.model.task.Task
@@ -123,6 +124,10 @@ data class UserAccount(
 
   @Column(name = "disabled_at")
   var disabledAt: Date? = null
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "disabled_by")
+  var disabledBy: UserDisabledBy? = null
 
   @Column(name = "is_initial_user", nullable = false)
   @ColumnDefault("false")

@@ -6,6 +6,7 @@ import io.tolgee.api.PlanWithIncludedKeysAndSeats
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.model.AuditModel
+import io.tolgee.publicBilling.MetricType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -69,6 +70,10 @@ class EeSubscription :
       isPayAsYouGo = isPayAsYouGo,
       keysLimit = keysLimit,
       seatsLimit = seatsLimit,
+      includedWords = includedWords,
+      wordsLimit = wordsLimit,
+      autoUpgradeEffective = autoUpgradeEffective,
+      metersWords = metricType.useWords,
     )
   }
 
@@ -98,4 +103,32 @@ class EeSubscription :
 
   @ColumnDefault("false")
   var isPayAsYouGo: Boolean = false
+
+  /**
+   * How many words are included in the subscription plan
+   */
+  @ColumnDefault("0")
+  var includedWords: Long = 0L
+
+  /**
+   * How many words can a customer use until they reach spending limit
+   */
+  @ColumnDefault("-1")
+  var wordsLimit: Long = -1L
+
+  /**
+   * False (blocking) when the licence server predates the field — see [io.tolgee.dtos.UsageLimits].
+   */
+  @ColumnDefault("false")
+  var autoUpgradeEffective: Boolean = false
+
+  /**
+   * Which metric the plan bills on. KEYS_SEATS when the licence server predates the field, and the
+   * fallback for a metric this instance is too old to know — an instance must not meter on a metric
+   * whose limits it cannot interpret.
+   */
+  @Enumerated(EnumType.STRING)
+  @ColumnDefault("'KEYS_SEATS'")
+  @Column(nullable = false)
+  var metricType: MetricType = MetricType.KEYS_SEATS
 }

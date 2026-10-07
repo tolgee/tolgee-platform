@@ -1,5 +1,5 @@
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useProject } from 'tg.hooks/useProject';
+import { useProjectContextOptional } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 
@@ -26,9 +26,27 @@ export const useBranchesService = ({
   branchName,
   enabled = true,
 }: Props) => {
-  projectId = projectId || useProject().id;
+  const contextProjectId = useProjectContextOptional()?.project?.id;
+  const resolvedProjectId = projectId || contextProjectId;
   const isBranchingEnabled = useIsBranchingEnabled();
-  if (!enabled || !isBranchingEnabled) {
+  const isActive =
+    enabled && isBranchingEnabled && resolvedProjectId !== undefined;
+  const loadableBranches = useApiQuery({
+    url: '/v2/projects/{projectId}/branches',
+    method: 'get',
+    path: { projectId: resolvedProjectId! },
+    query: {
+      size: 10000,
+    },
+    options: {
+      enabled: isActive,
+      keepPreviousData: true,
+      refetchOnMount: true,
+      noGlobalLoading: true,
+    },
+  });
+
+  if (!isActive) {
     return {
       branches: [],
       selected: null,
@@ -42,19 +60,6 @@ export const useBranchesService = ({
       },
     };
   }
-  const loadableBranches = useApiQuery({
-    url: '/v2/projects/{projectId}/branches',
-    method: 'get',
-    path: { projectId: projectId },
-    query: {
-      size: 10000,
-    },
-    options: {
-      keepPreviousData: true,
-      refetchOnMount: true,
-      noGlobalLoading: true,
-    },
-  });
 
   const loadedBranches = loadableBranches.data?._embedded?.branches ?? [];
 

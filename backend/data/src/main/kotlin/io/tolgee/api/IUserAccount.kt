@@ -7,7 +7,10 @@ interface IUserAccount : IMfa {
   var isInitialUser: Boolean
 
   val isDeletable: Boolean
-    get() = this.accountType != UserAccount.AccountType.MANAGED && !this.isInitialUser
+    get() = this.accountType != UserAccount.AccountType.MANAGED && isAdminDeletable
+
+  val isAdminDeletable: Boolean
+    get() = !this.isInitialUser
 
   val needsSuperJwt: Boolean
     get() = this.accountType == UserAccount.AccountType.LOCAL || isMfaEnabled

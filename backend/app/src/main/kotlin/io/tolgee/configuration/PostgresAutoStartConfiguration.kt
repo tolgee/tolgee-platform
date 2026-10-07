@@ -3,11 +3,13 @@ package io.tolgee.configuration
 import io.tolgee.PostgresRunner
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.util.Logging
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.sql.SQLException
 import javax.sql.DataSource
 
 @Configuration
@@ -50,7 +52,7 @@ class PostgresAutoStartConfiguration(
         // If we got this far without an exception, break the loop
         break
       } catch (e: Exception) {
-        if (e.message?.contains("the database system is starting up") != true) {
+        if (!isStartingUp(e)) {
           throw e
         }
         // Wait and then try again
@@ -58,5 +60,12 @@ class PostgresAutoStartConfiguration(
         numTries++
       }
     }
+  }
+
+  internal fun isStartingUp(e: Throwable): Boolean =
+    ExceptionUtils.getThrowableList(e).any { it is SQLException && it.sqlState == POSTGRES_CANNOT_CONNECT_NOW }
+
+  companion object {
+    private const val POSTGRES_CANNOT_CONNECT_NOW = "57P03"
   }
 }

@@ -1,10 +1,20 @@
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { resolve } from 'node:path';
-import { existsSync } from 'node:fs';
 import viteConfig from './vite.config';
 
+// The billing frontend carries no test tooling of its own, so its tests run here or nowhere.
 const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
-const hasBilling = existsSync(billingFrontendDir);
+const billingFrontendPresent = existsSync(billingFrontendDir);
+if (billingFrontendPresent) {
+  // eslint-disable-next-line no-console
+  console.log(
+    `vitest: also running billing frontend tests from ${billingFrontendDir}`
+  );
+}
+const billingFrontendTests = billingFrontendPresent
+  ? ['../../billing/frontend/src/**/*.test.{ts,tsx}']
+  : [];
 
 export default defineConfig((env) =>
   mergeConfig(viteConfig(env), {
@@ -14,10 +24,7 @@ export default defineConfig((env) =>
     test: {
       globals: true,
       environment: 'jsdom',
-      include: [
-        'src/**/*.test.{ts,tsx}',
-        ...(hasBilling ? [`${billingFrontendDir}/src/**/*.test.{ts,tsx}`] : []),
-      ],
+      include: ['src/**/*.test.{ts,tsx}', ...billingFrontendTests],
     },
   })
 );

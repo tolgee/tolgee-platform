@@ -9,4 +9,8 @@ open class NotFoundException(
   val msg: Message = Message.RESOURCE_NOT_FOUND,
   val resourceId: Any? = null,
 ) : RuntimeException(),
-  ExpectedException
+  ExpectedException,
+  ExceptionWithCode {
+  override val code: String
+    get() = msg.code
+}

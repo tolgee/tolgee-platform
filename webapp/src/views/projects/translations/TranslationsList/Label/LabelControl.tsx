@@ -48,14 +48,11 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
       props;
     const { isEnabled } = useEnabledFeatures();
     const labelsEnabled = isEnabled('TRANSLATION_LABELS');
-    if (!labelsEnabled) {
-      return null;
-    }
     const labels = useTranslationsSelector((c) => c.labels) || [];
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-    if (labels.length === 0) {
+    if (!labelsEnabled || labels.length === 0) {
       return null;
     }
 

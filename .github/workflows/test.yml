@@ -6,6 +6,10 @@ on:
     branches: [main, release]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   backend-build:
     name: Build backend 🏗️
@@ -73,12 +77,39 @@ jobs:
         include:
           - command: "server-app:runStandardTests"
             shard_index: "0"
-            shard_total: "2"
+            shard_total: "4"
           - command: "server-app:runStandardTests"
             shard_index: "1"
+            shard_total: "4"
+          - command: "server-app:runStandardTests"
+            shard_index: "2"
+            shard_total: "4"
+          - command: "server-app:runStandardTests"
+            shard_index: "3"
+            shard_total: "4"
+          - command: "server-app:runContextRecreatingTests"
+            shard_index: "0"
             shard_total: "2"
+          - command: "server-app:runContextRecreatingTests"
+            shard_index: "1"
+            shard_total: "2"
+          - command: "ee-test:test"
+            shard_index: "0"
+            shard_total: "3"
+          - command: "ee-test:test"
+            shard_index: "1"
+            shard_total: "3"
+          - command: "ee-test:test"
+            shard_index: "2"
+            shard_total: "3"
         exclude:
           - command: "server-app:runStandardTests"
+            shard_index: ""
+            shard_total: ""
+          - command: "server-app:runContextRecreatingTests"
+            shard_index: ""
+            shard_total: ""
+          - command: "ee-test:test"
             shard_index: ""
             shard_total: ""
     steps:
@@ -130,7 +161,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         with:
-          name: Test report for ${{ matrix.command }}
+          name: Test report for ${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }}
           path: "**/build/test-results/**/TEST-*.xml"
           fail-on-error: false
           reporter: java-junit
@@ -153,7 +184,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          title: CTRF Test report for ${{ matrix.command }}
+          title: CTRF Test report for ${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }}
           report-path: |
             ctrf/ctrf-report.json
           github-report: true
@@ -167,8 +198,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        total_jobs: [15]
-        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        total_jobs: [20]
+        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     steps:
       - uses: actions/checkout@v4
 

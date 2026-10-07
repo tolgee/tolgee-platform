@@ -38,7 +38,8 @@ class TranslationMemoryServiceOssImpl(
            similarity(re.source_text, :baseTranslationText) as similarity,
            tm.name as translationMemoryName,
            tmp.priority as assignmentPriority,
-           re.updated_at as updatedAt
+           re.updated_at as updatedAt,
+           re.reviewed as reviewed
     from (
       select
         target_t.text as target_text,
@@ -50,7 +51,8 @@ class TranslationMemoryServiceOssImpl(
         k.id as key_id,
         k.is_plural as any_key_is_plural,
         (cast(:keyId as bigint) is not null and k.id = :keyId) as includes_current_key,
-        target_t.updated_at as updated_at
+        target_t.updated_at as updated_at,
+        target_t.state = 2 as reviewed
       from (
         select base_t.key_id, base_t.text, base_t.language_id
         from translation base_t

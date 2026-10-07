@@ -211,6 +211,9 @@ export const enableOrganizationsSsoProvider = () =>
 export const disableOrganizationsSsoProvider = () =>
   setProperty('authentication.ssoOrganizations.enabled', false);
 
+export const setOrganizationCreationAllowed = (allowed: boolean) =>
+  setProperty('authentication.userCanCreateOrganizations', allowed);
+
 export const enableGlobalSsoProvider = () =>
   setProperty('authentication.ssoGlobal.enabled', true);
 

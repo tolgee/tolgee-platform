@@ -7,10 +7,11 @@ abstract class ExceptionWithMessage(
   private val _code: String? = null,
   val params: List<Serializable?>? = null,
   cause: Throwable? = null,
-) : RuntimeException("$_code $params", cause) {
+) : RuntimeException("$_code $params", cause),
+  ExceptionWithCode {
   var tolgeeMessage: Message? = null
 
-  val code: String
+  override val code: String
     get() = _code ?: tolgeeMessage?.code ?: throw IllegalStateException("Exception code or message not set")
 
   constructor(message: Message, params: List<Serializable?>? = null, cause: Throwable? = null) : this(

@@ -50,7 +50,7 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder -> customizeRequest(builder) }
+        .httpRequestCustomizer { builder, _, _, _, _ -> customizeRequest(builder) }
         .build()
 
     val client =

@@ -294,7 +294,7 @@ class QaIssueService(
         )
       }
     websocketEventPublisher(
-      "/projects/$projectId/${WebsocketEventType.QA_ISSUES_UPDATED.typeName}",
+      WebsocketEventType.QA_ISSUES_UPDATED.projectDestinationFor(projectId),
       WebsocketEvent(
         data = data,
         timestamp = currentDateProvider.date.time,

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
-import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.ExpectedException
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
@@ -35,10 +35,10 @@ class BusinessEventController(
   ) {
     try {
       eventData.projectId?.let { securityService.checkAnyProjectPermission(it) }
-      eventData.organizationId?.let { organizationRoleService.checkUserCanView(it) }
+      eventData.organizationId?.let { organizationRoleService.checkUserCanViewOrPublic(it) }
       businessEventPublisher.publish(eventData)
     } catch (e: Throwable) {
-      if (e is AuthenticationException) {
+      if (e is ExpectedException) {
         return
       }
       logger.error("Error storing event", e)

@@ -1,8 +1,8 @@
 package io.tolgee.mcp
 
+import io.modelcontextprotocol.json.schema.JsonSchemaValidator
 import io.modelcontextprotocol.server.McpNotificationHandler
 import io.modelcontextprotocol.server.McpRequestHandler
-import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.DefaultMcpStreamableServerSessionFactory
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpStreamableServerSession
@@ -12,15 +12,19 @@ import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpServletResponseWrapper
 import org.redisson.api.RedissonClient
 import org.slf4j.LoggerFactory
+import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStreamableServerTransportProvider
 import org.springframework.web.filter.OncePerRequestFilter
+import reactor.core.publisher.Mono
 import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Function
 
 /**
  * Servlet filter that syncs MCP sessions to Redis for multi-replica deployments.
  *
- * The MCP Java SDK's [WebMvcStreamableServerTransportProvider] stores sessions in an in-memory
+ * Spring AI's [WebMvcStreamableServerTransportProvider] (mcp-spring-webmvc) stores sessions in an in-memory
  * `ConcurrentHashMap`. When running multiple replicas behind a load balancer, requests with an
  * `Mcp-Session-Id` header may land on a replica that doesn't have the session, resulting in
  * 404 "Session not found" errors.
@@ -100,15 +104,16 @@ class McpSessionRedisFilter(
           objectMapper.readValue(it, McpSchema.Implementation::class.java)
         }
 
-      @Suppress("UNCHECKED_CAST")
       val session =
         McpStreamableServerSession(
           sessionId,
           clientCapabilities,
           clientInfo,
           factoryFields.requestTimeout,
-          factoryFields.requestHandlers as Map<String, McpRequestHandler<*>>,
-          factoryFields.notificationHandlers as Map<String, McpNotificationHandler>,
+          factoryFields.requestHandlers,
+          factoryFields.notificationHandlers,
+          { factoryFields.onClose.apply(sessionId) },
+          factoryFields.jsonSchemaValidator,
         )
 
       val existing = sessionsMap.putIfAbsent(sessionId, session)
@@ -151,7 +156,7 @@ class McpSessionRedisFilter(
     fieldName: String,
   ): Any? {
     if (fieldValue == null) return null
-    if (fieldValue is java.util.concurrent.atomic.AtomicReference<*>) {
+    if (fieldValue is AtomicReference<*>) {
       return fieldValue.get()
     }
     log.warn(
@@ -180,31 +185,23 @@ class McpSessionRedisFilter(
       )
     }
 
-    val timeoutField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("requestTimeout")
-    timeoutField.isAccessible = true
-    val requestTimeout = timeoutField.get(factory) as Duration
-
-    val handlersField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("requestHandlers")
-    handlersField.isAccessible = true
-
-    @Suppress("UNCHECKED_CAST")
-    val requestHandlers = handlersField.get(factory) as Map<String, Any>
-
-    val notifField = DefaultMcpStreamableServerSessionFactory::class.java.getDeclaredField("notificationHandlers")
-    notifField.isAccessible = true
-
-    @Suppress("UNCHECKED_CAST")
-    val notificationHandlers = notifField.get(factory) as Map<String, Any>
-
-    return FactoryFields(requestTimeout, requestHandlers, notificationHandlers)
+    val factoryClass = DefaultMcpStreamableServerSessionFactory::class.java
+    return FactoryFields(
+      requestTimeout = getPrivateField(factory, "requestTimeout", factoryClass),
+      requestHandlers = getPrivateField(factory, "requestHandlers", factoryClass),
+      notificationHandlers = getPrivateField(factory, "notificationHandlers", factoryClass),
+      onClose = getPrivateField(factory, "onClose", factoryClass),
+      jsonSchemaValidator = getPrivateField(factory, "jsonSchemaValidator", factoryClass),
+    )
   }
 
   @Suppress("UNCHECKED_CAST")
   private fun <T> getPrivateField(
     obj: Any,
     fieldName: String,
+    declaringClass: Class<*> = obj.javaClass,
   ): T {
-    val field = obj.javaClass.getDeclaredField(fieldName)
+    val field = declaringClass.getDeclaredField(fieldName)
     field.isAccessible = true
     return field.get(obj) as T
   }
@@ -238,8 +235,10 @@ class McpSessionRedisFilter(
 
   private data class FactoryFields(
     val requestTimeout: Duration,
-    val requestHandlers: Map<String, Any>,
-    val notificationHandlers: Map<String, Any>,
+    val requestHandlers: Map<String, McpRequestHandler<*>>,
+    val notificationHandlers: Map<String, McpNotificationHandler>,
+    val onClose: Function<String, Mono<Void>>,
+    val jsonSchemaValidator: JsonSchemaValidator?,
   )
 
   companion object {

@@ -69,11 +69,18 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
 
   const isCommunitySurface = selectedSurface === 'community';
 
+  if (!preferredOrganization) {
+    return null;
+  }
+
+  const offersCommunityProjects =
+    hasCommunityContributions || preferredOrganization.limitedView;
+
   const switchLabel = isCommunitySurface ? (
     <CommunityTranslationItem />
-  ) : preferredOrganization ? (
+  ) : (
     <OrganizationItem data={preferredOrganization} />
-  ) : null;
+  );
 
   return (
     <Box display="flex" data-cy="organization-switch" overflow="hidden">
@@ -92,7 +99,7 @@ export const OrganizationSwitch: React.FC<React.PropsWithChildren<Props>> = ({
         onAddNew={handleCreateNewOrg}
         communitySelected={isCommunitySurface}
         onCommunityNavigate={
-          hasCommunityContributions
+          offersCommunityProjects
             ? () => history.push(LINKS.COMMUNITY_PROJECTS.build())
             : undefined
         }

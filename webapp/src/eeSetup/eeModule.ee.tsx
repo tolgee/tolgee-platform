@@ -100,6 +100,7 @@ export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
+export { usePlanLimitBanner } from '../ee/billing/component/PlanLimitBanner';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 
@@ -447,6 +448,8 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
+  const qaRouteMatch = useRouteMatch(LINKS.PROJECT_EDIT_QA.template);
+  const labelsRouteMatch = useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template);
   const tabsAdder = createAdder<ProjectSettingsTab>({
     referencingProperty: 'value',
   });
@@ -464,7 +467,7 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
           dataCy: 'project-settings-menu-qa',
           component: ProjectSettingsQa,
           enabled: true,
-          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
+          routeMatch: qaRouteMatch,
         },
       ],
       {
@@ -485,7 +488,7 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
           dataCy: 'project-settings-menu-labels',
           component: ProjectSettingsLabels,
           enabled: true,
-          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+          routeMatch: labelsRouteMatch,
         },
       ],
       {

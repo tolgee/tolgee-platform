@@ -67,6 +67,15 @@ const buildExamples = (languageExampleTag: string) => [
     ),
   },
   {
+    syntax: 'key:=checkout',
+    hint: (
+      <T
+        keyName="translations_search_help_exact"
+        defaultValue="Exactly the key “checkout”"
+      />
+    ),
+  },
+  {
     syntax: 'namespace:web',
     hint: hintNode(QUALIFIER_HINTS.namespace),
   },

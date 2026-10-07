@@ -63,7 +63,7 @@ class McpAuthenticationTest : AbstractMcpTest() {
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder ->
+        .httpRequestCustomizer { builder, _, _, _, _ ->
           builder.header("X-API-Key", "tgpat_invalid_token")
         }.build()
 
@@ -106,7 +106,7 @@ class McpAuthenticationTest : AbstractMcpTest() {
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
-        .customizeRequest { builder ->
+        .httpRequestCustomizer { builder, _, _, _, _ ->
           builder.header("X-API-Key", "tgpat_${expiredPat!!.token}")
         }.build()
 

@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request.auth
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.constants.ValidationConstants
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -10,7 +11,7 @@ data class SignUpDto(
   var name: String = "",
   @field:Email @field:NotBlank
   var email: String = "",
-  @field:Size(min = 3, max = 50)
+  @field:Size(min = 3, max = ValidationConstants.MAX_ORGANIZATION_NAME_LENGTH)
   var organizationName: String? = null,
   @field:Size(min = 8, max = 50)
   @field:NotBlank

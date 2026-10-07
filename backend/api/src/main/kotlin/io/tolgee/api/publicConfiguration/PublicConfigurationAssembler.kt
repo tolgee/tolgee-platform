@@ -44,6 +44,7 @@ class PublicConfigurationAssembler(
       appName = properties.appName,
       showVersion = properties.internal.showVersion,
       internalControllerEnabled = properties.internal.controllerEnabled,
+      testClockEnabled = properties.internal.testClockEnabled,
       maxTranslationTextLength = properties.maxTranslationTextLength,
       recaptchaSiteKey = properties.recaptcha.siteKey,
       chatwootToken = properties.chatwootToken,

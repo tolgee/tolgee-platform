@@ -10,7 +10,7 @@ export type _TranslationKeyNotEmpty = Assert<
   [TranslationKey] extends [never] ? false : true
 >;
 
-export function tolgeeKeyCheckSelfTest() {
+export function TolgeeKeyCheckSelfTest() {
   const { t } = useTranslate();
   // @ts-expect-error
   t('__tolgee_key_check_must_stay_strict__');

@@ -212,6 +212,21 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_FIGMA_PLUGIN_NEW_VERSION':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_figma_plugin_new_version"
+                defaultValue="We've released a new version of the <linkFigma>Figma plugin</linkFigma>!"
+                params={{
+                  linkFigma: <BannerLink href={DOCS_LINKS.figmaPlugin} />,
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }

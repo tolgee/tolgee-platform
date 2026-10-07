@@ -1,9 +1,18 @@
-import { createUser, deleteUserSql } from '../common/apiCalls/common';
+import {
+  createUser,
+  deleteUserSql,
+  setBypassSeatCountCheck,
+} from '../common/apiCalls/common';
 import 'cypress-file-upload';
 import { fillAndSubmitSignUpForm, visitSignUp } from '../common/login';
+import { gcy } from '../common/shared';
 
 describe('User Limit', { retries: 5 }, () => {
   const generatedUserNames = [];
+
+  before(() => {
+    setBypassSeatCountCheck(false);
+  });
 
   beforeEach(() => {
     for (let i = 1; i <= 11; i++) {
@@ -26,7 +35,6 @@ describe('User Limit', { retries: 5 }, () => {
       createUser(username, 'password', 'user');
     });
     fillAndSubmitSignUpForm(generatedUserNames[10], true);
-    cy.contains('exceeded').should('be.visible');
-    cy.contains('seats').should('be.visible');
+    gcy('signup-error-free-seat-limit').should('be.visible');
   });
 });

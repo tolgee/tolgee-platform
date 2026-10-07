@@ -1,7 +1,7 @@
 import { MenuProps, Menu } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { getLanguagesContent } from './getLanguagesContent';
+import { useLanguagesContent } from 'tg.component/common/form/LanguagesSelect/useLanguagesContent';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -22,6 +22,13 @@ export const LanguagesMenu: React.FC<React.PropsWithChildren<Props>> = ({
   onChange,
   disabledLanguages,
 }) => {
+  const languagesContent = useLanguagesContent({
+    languages: languages || [],
+    value: value || [],
+    onChange,
+    disabledLanguages,
+  });
+
   return (
     <Menu
       anchorEl={anchorEl}
@@ -32,12 +39,7 @@ export const LanguagesMenu: React.FC<React.PropsWithChildren<Props>> = ({
         horizontal: 'left',
       }}
     >
-      {getLanguagesContent({
-        languages: languages || [],
-        value: value || [],
-        onChange,
-        disabledLanguages,
-      })}
+      {languagesContent}
     </Menu>
   );
 };

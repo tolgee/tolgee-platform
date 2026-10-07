@@ -58,6 +58,13 @@ describe('Scoped search', () => {
     view.getKeyCell('cart.title').should('not.exist');
   });
 
+  it('searches keys by exact match', () => {
+    view.searchFor('key:=cart.title');
+    view.getKeyCell('cart.title').should('be.visible');
+    view.getKeyCell('cart_subtitle').should('not.exist');
+    view.getKeyCell('my.cart').should('not.exist');
+  });
+
   it('searches in a specific language', () => {
     // "Warenkorb" is only in the German translation, so scoping to de matches
     view.searchFor('de:Warenkorb');

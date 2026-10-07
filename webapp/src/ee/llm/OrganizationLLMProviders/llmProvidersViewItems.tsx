@@ -2,7 +2,7 @@ import { useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { LlmProvidersCustom } from './LlmProvidersCustom';
 import { LlmProvidersServer } from './LlmProvidersServer';
-import { useRouteMatch } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
 
 export type ProviderItem = {
@@ -39,9 +39,10 @@ export const useLlmProvidersViewItems = () => {
     },
   ] as const;
 
+  const { pathname } = useLocation();
   const value = items
     .map((item) => {
-      const routerMatch = useRouteMatch(item.link.template);
+      const routerMatch = matchPath(pathname, item.link.template);
       if (!routerMatch) {
         return [item.value, false];
       }

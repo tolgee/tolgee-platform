@@ -8,6 +8,7 @@ import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
 import { CriticalUsageCircle } from 'tg.ee';
 import { ProjectPage } from './ProjectPage';
@@ -28,14 +29,19 @@ export const BaseProjectView: React.FC<React.PropsWithChildren<Props>> = ({
   const project = useProject() as ReturnType<typeof useProject> | undefined;
   const { withBranchLink, withBranchUrl } = useBranchLinks();
   const history = useHistory();
+  const { preferredOrganization } = usePreferredOrganization();
 
   const handleOrganizationChange = () => {
     history.push(LINKS.PROJECTS.build());
   };
 
-  const prefixNavigation: NavigationItem[] = [
-    [<OrganizationSwitch key={0} onSelect={handleOrganizationChange} />],
-  ];
+  const prefixNavigation: NavigationItem[] = [];
+
+  if (preferredOrganization) {
+    prefixNavigation.push([
+      <OrganizationSwitch key={0} onSelect={handleOrganizationChange} />,
+    ]);
+  }
 
   if (project) {
     prefixNavigation.push([

@@ -1,8 +1,10 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.slack.SlackConfigBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
@@ -13,11 +15,13 @@ import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.model.slackIntegration.SlackUserConnection
+import io.tolgee.model.translation.Translation
 
 class SlackTestData {
   var user: UserAccount
@@ -32,6 +36,13 @@ class SlackTestData {
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
   var secondLanguage: Language
+  lateinit var slackConfigBuilder: SlackConfigBuilder
+  lateinit var czechBeforeFrenchKey: Key
+  lateinit var czechTranslationOfCzechBeforeFrenchKey: Translation
+  lateinit var frenchTranslationOfCzechBeforeFrenchKey: Translation
+  lateinit var frenchBeforeEnglishKey: Key
+  lateinit var frenchTranslationOfFrenchBeforeEnglishKey: Translation
+  lateinit var englishTranslationOfFrenchBeforeEnglishKey: Translation
 
   lateinit var slackUserConnection: SlackUserConnection
 
@@ -109,7 +120,23 @@ class SlackTestData {
 
       projectBuilder.addCzech()
 
-      slackConfig =
+      czechBeforeFrenchKey =
+        projectBuilder
+          .addKey("czechBeforeFrenchKey")
+          .build {
+            czechTranslationOfCzechBeforeFrenchKey = addTranslation("cs", "Pořadí").self
+            frenchTranslationOfCzechBeforeFrenchKey = addTranslation("fr", "Ordre").self
+          }.self
+
+      frenchBeforeEnglishKey =
+        projectBuilder
+          .addKey("frenchBeforeEnglishKey")
+          .build {
+            frenchTranslationOfFrenchBeforeEnglishKey = addTranslation("fr", "Frère").self
+            englishTranslationOfFrenchBeforeEnglishKey = addTranslation("en", "Sibling").self
+          }.self
+
+      slackConfigBuilder =
         projectBuilder
           .addSlackConfig {
             this.channelId = "testChannel"
@@ -141,7 +168,8 @@ class SlackTestData {
               this.keyId = 52L
               this.languageTags = mutableSetOf("fr", "cz")
             }
-          }.self
+          }
+      slackConfig = slackConfigBuilder.self
 
       automation =
         projectBuilder
@@ -157,6 +185,57 @@ class SlackTestData {
               },
             )
           }.self
+    }
+
+  fun addMoreLanguages() {
+    projectBuilder.addGerman()
+    listOf("es" to "Spanish", "it" to "Italian", "pl" to "Polish").forEach { (languageTag, languageName) ->
+      projectBuilder.addLanguage {
+        tag = languageTag
+        name = languageName
+        originalName = languageName
+      }
+    }
+  }
+
+  fun subscribeToFrenchTranslationChangesOnly() {
+    slackConfig.isGlobalSubscription = false
+    slackConfigBuilder.addPreference {
+      languageTag = "fr"
+      events = mutableSetOf(SlackEventType.TRANSLATION_CHANGED)
+    }
+  }
+
+  fun addKeysInFeatureBranch(): List<Key> {
+    val keys = mutableListOf<Key>()
+    projectBuilder.addBranch { name = "feature-branch" }.build {
+      (1..6).forEach { index ->
+        projectBuilder
+          .addKey {
+            name = "branched$index"
+            branch = self
+          }.build { addTranslation("en", "Hello") }
+          .also { keys.add(it.self) }
+      }
+    }
+    return keys
+  }
+
+  fun add6KeysWithOutdatedMachineTranslations(): List<Key> =
+    (1..6).map { index ->
+      projectBuilder
+        .addKey("outdatedKey$index")
+        .build {
+          addTranslation("en", "Hello")
+          addTranslation {
+            language = secondLanguage
+            text = "Translated with Google"
+            state = TranslationState.TRANSLATED
+            auto = true
+            mtProvider = MtServiceType.GOOGLE
+            outdated = true
+          }
+        }.self
     }
 
   fun add10Keys(): List<Key> {

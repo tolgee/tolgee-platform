@@ -6,11 +6,13 @@ import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageReportingService
 import io.tolgee.events.BeforeOrganizationDeleteEvent
 import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.events.OnProjectContentReplaced
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
 import io.tolgee.util.Logging
+import io.tolgee.util.hasDeletionStateChangeOf
 import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import org.springframework.context.event.EventListener
@@ -47,17 +49,9 @@ class EeKeyCountReportingListener(
     }
 
     runSentryCatching {
-      val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
+      val isKeysChanged = event.modifiedEntities.keys.any { it == Key::class }
 
-      val isKeysChanged = modifiedEntityClasses.any { it == Key::class }
-
-      val isProjectDeletedChanged =
-        event.modifiedEntities[Project::class]?.any { it.value.modifications.contains("deletedAt") } == true
-
-      val isOrganizationDeletedChanged =
-        event.modifiedEntities[Organization::class]?.any { it.value.modifications.contains("deletedAt") } == true
-
-      if (isKeysChanged || isProjectDeletedChanged || isOrganizationDeletedChanged) {
+      if (isKeysChanged || event.hasDeletionStateChangeOf(Project::class)) {
         onKeyCountChanged()
       }
     }
@@ -66,6 +60,18 @@ class EeKeyCountReportingListener(
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onOrganizationDeleted(event: BeforeOrganizationDeleteEvent) {
     onKeyCountChanged()
+  }
+
+  /**
+   * An admin project import writes its keys with activity logging off and clears the old ones with
+   * bulk JPQL, so neither half reaches the activity predicate above.
+   */
+  @EventListener
+  fun onProjectContentReplaced(event: OnProjectContentReplaced) {
+    if (billingConfProvider().enabled) {
+      return
+    }
+    runSentryCatching { onKeyCountChanged() }
   }
 
   /**

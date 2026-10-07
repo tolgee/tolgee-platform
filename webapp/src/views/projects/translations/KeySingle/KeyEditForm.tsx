@@ -16,7 +16,7 @@ import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { FieldLabel } from 'tg.component/FormField';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
@@ -67,7 +67,8 @@ export const KeyEditForm: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const satisfiesPermissionWithBranching =
+    useSatisfiesPermissionWithBranching();
   const editEnabled = satisfiesPermissionWithBranching('keys.edit');
 
   const keyData = useTranslationsSelector((c) => c.translations)?.[0];

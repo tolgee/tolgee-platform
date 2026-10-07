@@ -1,4 +1,5 @@
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useSatisfiesPermissionWithBranching } from 'tg.hooks/useSatisfiesPermissionWithBranching';
 import { useTranslate } from '@tolgee/react';
 import { OperationDelete } from './OperationDelete';
 import { OperationMachineTranslate } from './OperationMachineTranslate';
@@ -32,8 +33,9 @@ export const addOperations = createMultiAdder<BatchOperation>({
 export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
-  const { satisfiesPermission, satisfiesPermissionWithBranching } =
-    useProjectPermissions();
+  const { satisfiesPermission } = useProjectPermissions();
+  const satisfiesPermissionWithBranching =
+    useSatisfiesPermissionWithBranching();
   const { t } = useTranslate();
 
   const canEditKey = satisfiesPermissionWithBranching('keys.edit');

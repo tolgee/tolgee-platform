@@ -1,5 +1,8 @@
 package io.tolgee.controllers.internal
 
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -42,6 +45,14 @@ class SqlControllerTest :
         key,
         value,
       )
+    }
+  }
+
+  @Test
+  fun `internal controllers alone do not expose the test clock page`() {
+    performGet("/api/public/configuration").andIsOk.andAssertThatJson {
+      node("internalControllerEnabled").isEqualTo(true)
+      node("testClockEnabled").isEqualTo(false)
     }
   }
 

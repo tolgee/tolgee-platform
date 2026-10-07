@@ -16,6 +16,16 @@ export const UsageDetailed: React.FC<
     },
     {
       getLabel: (params: { limit: number; used: number }) => (
+        <T
+          keyName="dashboard_billing_used_words"
+          defaultValue="Used {used} of {limit} words"
+          params={params}
+        />
+      ),
+      progress: props.wordsProgress,
+    },
+    {
+      getLabel: (params: { limit: number; used: number }) => (
         <T keyName="dashboard_billing_used_seats" params={params} />
       ),
       progress: props.seatsProgress,

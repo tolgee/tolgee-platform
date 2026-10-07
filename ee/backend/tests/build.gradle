@@ -30,6 +30,7 @@ allOpen {
 tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "8192m"
+    rootProject.setTestSharding(it)
     rootProject.setTestRetry(it)
 }
 

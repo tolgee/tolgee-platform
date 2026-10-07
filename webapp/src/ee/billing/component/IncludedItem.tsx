@@ -101,6 +101,47 @@ export const IncludedKeys = ({
   );
 };
 
+export const IncludedWords = ({
+  count,
+  highlightColor,
+  ...containerProps
+}: IncludedItemProps) => {
+  return (
+    <Container
+      {...containerProps}
+      count={count}
+      negotiableLabel={
+        <T
+          keyName="billing_subscription_included_words_negotiable"
+          defaultValue="<highlight>Negotiable</highlight> hosted words"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+          }}
+        />
+      }
+      unlimitedLabel={
+        <T
+          keyName="billing_subscription_included_words_unlimited"
+          defaultValue="<highlight>Unlimited</highlight> hosted words"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+          }}
+        />
+      }
+      numberLabel={
+        <T
+          keyName="billing_subscription_included_words"
+          defaultValue="<highlight>{quantity, number}</highlight> hosted words"
+          params={{
+            highlight: <StyledQuantity color={highlightColor} />,
+            quantity: count,
+          }}
+        />
+      }
+    />
+  );
+};
+
 export const IncludedCredits = ({
   count,
   highlightColor,

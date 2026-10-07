@@ -1,6 +1,8 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 
 class PublicProjectsE2eData(
   count: Int = 6,
@@ -13,6 +15,31 @@ class PublicProjectsE2eData(
           username = "communityUser"
           name = "Community User"
         }
+
+      addUserAccountWithoutOrganization {
+        username = "orgLessCommunityUser"
+        name = "Org Less Community User"
+      }
+
+      addUserAccountWithoutOrganization {
+        username = "supporterCommunityUser"
+        name = "Supporter Community User"
+        role = UserAccount.Role.SUPPORTER
+      }
+
+      val adminMemberBuilder =
+        addUserAccountWithoutOrganization {
+          username = "adminMemberUser"
+          name = "Admin Member User"
+          role = UserAccount.Role.ADMIN
+        }
+
+      userAccountBuilder.defaultOrganizationBuilder.build {
+        addRole {
+          user = adminMemberBuilder.self
+          type = OrganizationRoleType.MEMBER
+        }
+      }
 
       if (includeForeignOrgProject) {
         addProject(organizationOwner = communityUserBuilder.defaultOrganizationBuilder.self) {

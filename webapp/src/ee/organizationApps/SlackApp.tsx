@@ -67,10 +67,6 @@ export const SlackApp = () => {
   const config = useConfig();
   const slackConfig = config.slack;
 
-  if (!organization) {
-    return null;
-  }
-
   const getUrlMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/slack/get-connect-url',
     method: 'get',
@@ -81,9 +77,16 @@ export const SlackApp = () => {
     url: '/v2/organizations/{organizationId}/slack/workspaces',
     method: 'get',
     path: {
-      organizationId: organization.id,
+      organizationId: organization?.id as number,
+    },
+    options: {
+      enabled: Boolean(organization),
     },
   });
+
+  if (!organization) {
+    return null;
+  }
 
   const onConnect = () => {
     getUrlMutation.mutate(

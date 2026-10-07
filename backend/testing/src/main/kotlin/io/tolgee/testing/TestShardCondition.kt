@@ -32,7 +32,9 @@ class TestShardCondition : ExecutionCondition {
       context.testClass.orElse(null)
         ?: return ConditionEvaluationResult.enabled("Not a class context")
 
-    val hash = (testClass.name.hashCode() and Int.MAX_VALUE) % shardTotal
+    // a @Nested class must land in the shard of its outer class or it runs nowhere
+    val outermost = generateSequence(testClass) { it.enclosingClass }.last()
+    val hash = (outermost.name.hashCode() and Int.MAX_VALUE) % shardTotal
     return if (hash == shardIndex) {
       ConditionEvaluationResult.enabled("Class ${testClass.simpleName} assigned to shard $shardIndex")
     } else {

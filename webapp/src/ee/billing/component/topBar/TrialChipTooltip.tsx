@@ -59,7 +59,7 @@ export const TrialChipTooltip: FC<
 
   const highlightColor = getHighlightColor(theme, !plan.public);
 
-  const importantFeatures: components['schemas']['CloudPlanModel']['enabledFeatures'] =
+  const importantFeatures: components['schemas']['CloudPlanTierModel']['enabledFeatures'] =
     [
       'GRANULAR_PERMISSIONS',
       'AI_PROMPT_CUSTOMIZATION',
@@ -122,6 +122,7 @@ export const TrialChipTooltip: FC<
                 />
                 <IncludedUsage
                   metricType={plan.metricType}
+                  free={plan.free}
                   includedUsage={plan.includedUsage}
                   highlightColor={highlightColor}
                   sx={(theme: Theme) => ({

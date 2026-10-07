@@ -1,17 +1,21 @@
 package io.tolgee.unit.component.fileStorage
 
 import io.tolgee.component.fileStorage.AzureFileStorageFactory
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.InvalidConnectionStringException
 import io.tolgee.model.contentDelivery.AzureBlobConfig
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class AzureFileStorageFactoryTest {
   companion object {
     const val BAD_ENDPOINT_CONNECTION_STRING =
       "DefaultEndpointsProtocol=http;AccountName=unit;AccountKey=dGVzdA==;BlobEndpoint=::not-a-url::;"
+    const val AZURITE_CONNECTION_STRING =
+      "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
+        "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
+        "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
   }
 
   private val factory = AzureFileStorageFactory()
@@ -29,12 +33,26 @@ class AzureFileStorageFactoryTest {
   }
 
   @Test
-  fun `keeps the cause when the client cannot be created for another reason`() {
+  fun `reports a missing connection string as invalid rather than as a client creation failure`() {
+    assertThrows<InvalidConnectionStringException> {
+      factory.create(config(connectionString = null, containerName = "container"))
+    }
+  }
+
+  @Test
+  fun `reports an unparsable endpoint as an invalid connection string, keeping the cause`() {
     val exception =
-      assertThrows<BadRequestException> {
+      assertThrows<InvalidConnectionStringException> {
         factory.create(config(connectionString = BAD_ENDPOINT_CONNECTION_STRING, containerName = "container"))
       }
     exception.cause.assert.isNotNull
+  }
+
+  @Test
+  fun `accepts a well formed connection string`() {
+    assertDoesNotThrow {
+      factory.create(config(connectionString = AZURITE_CONNECTION_STRING, containerName = "container"))
+    }
   }
 
   private fun config(

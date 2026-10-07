@@ -31,6 +31,18 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  /**
+   * Requests rejected without consuming the bucket because of contention on a single rate limit
+   * bucket. Reasons: "concurrency_cap" (too many concurrent requests for the bucket),
+   * "lock_timeout" (the bucket lock was not acquired within the configured wait time).
+   */
+  fun rateLimitConcurrencyRejectionsCounter(reason: String): Counter =
+    Counter
+      .builder("tolgee.ratelimit.concurrency_rejections")
+      .description("Number of requests rejected due to contention on a single rate limit bucket")
+      .tag("reason", reason)
+      .register(meterRegistry)
+
   // ==========================================================================
   // Batch Job Metrics
   // ==========================================================================

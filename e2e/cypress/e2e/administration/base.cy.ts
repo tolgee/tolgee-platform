@@ -1,6 +1,9 @@
 /// <reference types="cypress" />
 
-import { login, setProperty } from '../../common/apiCalls/common';
+import {
+  login,
+  setOrganizationCreationAllowed,
+} from '../../common/apiCalls/common';
 import {
   assertMessage,
   confirmStandard,
@@ -25,7 +28,7 @@ describe('Administration', () => {
 
   afterEach(() => {
     administrationTestData.clean();
-    setProperty('authentication.userCanCreateOrganizations', true);
+    setOrganizationCreationAllowed(true);
   });
 
   it('gets to the administration via menu', () => {
@@ -83,13 +86,13 @@ describe('Administration', () => {
 
   it('only admin can add organization when userCanCreateOrganizations = false', () => {
     login('user@user.com');
-    setProperty('authentication.userCanCreateOrganizations', false);
+    setOrganizationCreationAllowed(false);
     visit();
     assertOrganizationAddButtonNotVisible();
     login('admin@admin.com');
     visit();
     assertOrganizationAddButtonVisible();
-    setProperty('authentication.userCanCreateOrganizations', true);
+    setOrganizationCreationAllowed(true);
     login('user@user.com');
     visit();
     assertOrganizationAddButtonVisible();

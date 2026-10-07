@@ -76,14 +76,14 @@ dependencyResolutionManagement {
             library('postHog', "com.posthog:posthog-server:1.1.0")
             library('micrometerPrometheus', "io.micrometer:micrometer-registry-prometheus:1.13.3")
             library('mailjet', "com.mailjet:mailjet-client:5.2.5")
-            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.3.0')
+            library('azureBlob', 'com.azure.spring:spring-cloud-azure-starter-storage-blob:7.4.0')
             library('slackApiClient', "com.slack.api:slack-api-client:$slackSdkVersion")
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
             library('jakartaMail', 'org.eclipse.angus', 'jakarta.mail').version('2.0.4')
-            library('mcpBom', 'io.modelcontextprotocol.sdk', 'mcp-bom').version('0.18.0')
+            library('mcpBom', 'io.modelcontextprotocol.sdk', 'mcp-bom').version('2.0.1')
             library('mcp', 'io.modelcontextprotocol.sdk', 'mcp').withoutVersion()
-            library('mcpSpringWebmvc', 'io.modelcontextprotocol.sdk', 'mcp-spring-webmvc').withoutVersion()
+            library('mcpSpringWebmvc', 'org.springframework.ai', 'mcp-spring-webmvc').version('2.0.1')
 
             // OpenTelemetry Java Agent for bytecode instrumentation
             // See: https://opentelemetry.io/docs/zero-code/java/agent/

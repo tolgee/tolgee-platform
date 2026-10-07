@@ -2,12 +2,14 @@ package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.server.McpServerFeatures
 import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.spec.McpError
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ExceptionWithCode
 import org.springframework.data.domain.Page
 
 fun textResult(text: String): CallToolResult {
@@ -41,13 +43,23 @@ fun McpSyncServer.addTool(
       .build()
 
   addTool(
-    McpServerFeatures.SyncToolSpecification(
-      tool,
-      null,
-    ) { exchange, request ->
-      handler(request)
+    McpServerFeatures.SyncToolSpecification(tool) { _, request ->
+      withNonNullErrorMessage { handler(request) }
     },
   )
+}
+
+private fun <T> withNonNullErrorMessage(block: () -> T): T {
+  try {
+    return block()
+  } catch (e: Exception) {
+    if (e.message != null) throw e
+    throw McpError
+      .builder(McpSchema.ErrorCodes.INTERNAL_ERROR)
+      .message((e as? ExceptionWithCode)?.code ?: e.javaClass.name)
+      .data(McpError.aggregateExceptionMessages(e))
+      .build()
+  }
 }
 
 fun <T : Any> pagedResponse(

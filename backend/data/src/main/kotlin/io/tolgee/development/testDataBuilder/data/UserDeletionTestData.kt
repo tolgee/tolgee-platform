@@ -105,4 +105,8 @@ class UserDeletionTestData {
       }
     }
   }
+
+  fun makeFrantaInitial() {
+    franta.isInitialUser = true
+  }
 }

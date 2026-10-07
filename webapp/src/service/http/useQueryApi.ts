@@ -203,7 +203,7 @@ function getApiMutationOptions(
   });
 }
 
-const getMutationCallback = <
+const useMutationCallback = <
   MutationFn extends (variables: any, options: any) => any
 >(
   mutateFn: MutationFn,
@@ -252,14 +252,14 @@ export const useApiMutation = <
     customOptions(options as any) as any
   );
 
-  const mutate = getMutationCallback(
+  const mutate = useMutationCallback(
     mutation.mutate,
     customOptions,
     fetchOptions,
     props
   );
 
-  const mutateAsync = getMutationCallback(
+  const mutateAsync = useMutationCallback(
     mutation.mutateAsync,
     customOptions,
     fetchOptions,
@@ -376,14 +376,14 @@ export const useNdJsonStreamedMutation = <
     return result;
   }, customOptions(options as any) as any);
 
-  const mutate = getMutationCallback(
+  const mutate = useMutationCallback(
     mutation.mutate,
     customOptions,
     fetchOptions,
     props
   );
 
-  const mutateAsync = getMutationCallback(
+  const mutateAsync = useMutationCallback(
     mutation.mutateAsync,
     customOptions,
     fetchOptions,

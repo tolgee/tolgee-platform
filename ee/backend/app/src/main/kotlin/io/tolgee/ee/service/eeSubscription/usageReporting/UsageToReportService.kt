@@ -8,12 +8,14 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.sql.SQLException
 import java.util.Date
 
 /**
@@ -68,12 +70,16 @@ class UsageToReportService(
     entityManager
       .createQuery(
         """
-          |select 
+          |select
           |new io.tolgee.ee.data.usageReporting.UsageToReportDto(
-          |    lru.lastReportedKeys, 
-          |     lru.lastReportedSeats, 
-          |     lru.keysToReport, 
-          |     lru.seatsToReport, 
+          |    lru.lastReportedKeys,
+          |     lru.lastReportedSeats,
+          |     lru.lastReportedWords,
+          |     lru.keysToReport,
+          |     lru.seatsToReport,
+          |     lru.wordsToReport,
+          |     lru.wordsDirty,
+          |     lru.wordsCountedAt,
           |     lru.reportedAt)
           |from UsageToReport lru
           |
@@ -88,6 +94,9 @@ class UsageToReportService(
       UsageToReport().apply {
         keysToReport = keyService.countAllOnInstance()
         seatsToReport = userAccountService.countAllEnabled()
+        // Not counted here: on a word-metered instance the flag makes the first periodic report
+        // take the count, and on any other instance nothing pays for an aggregation it cannot use.
+        wordsDirty = true
         // we can use this far in past distant date, because we haven't reported yes
         reportedAt = Date(1)
       }
@@ -128,11 +137,14 @@ class UsageToReportService(
    *
    * @param keys The current number of keys, or null if unchanged
    * @param seats The current number of seats, or null if unchanged
+   * @param words The current number of words, or null if unchanged
    */
+  @Transactional
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeCurrentUsage(
-    keys: Long?,
-    seats: Long?,
+    keys: Long? = null,
+    seats: Long? = null,
+    words: Long? = null,
   ) {
     if (keys != null) {
       storeCurrentKeysUsage(keys)
@@ -140,6 +152,86 @@ class UsageToReportService(
     if (seats != null) {
       storeCurrentSeatsUsage(seats)
     }
+    if (words != null) {
+      storeCurrentWordsUsage(words)
+    }
+  }
+
+  private fun storeCurrentWordsUsage(words: Long) {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsToReport = :wordsToReport,
+          lru.wordsCountedAt = :countedAt
+      """,
+      ).setParameter("wordsToReport", words)
+      .setParameter("countedAt", currentDateProvider.date)
+      .executeUpdate()
+  }
+
+  // Unconditional on purpose: the row lock is what makes takeWordsDirty wait for a writer that has
+  // raised the flag and not yet committed. The price is that it is taken before the activity
+  // revision is written and held to commit, so concurrent translation commits on a word-metered
+  // instance serialise behind the largest in-flight write's activity storage.
+  @Transactional
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun markWordsDirty() {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.wordsDirty = true
+      """,
+      ).executeUpdate()
+  }
+
+  /**
+   * Its own transaction, so a caller whose transaction already wrote this row would block on
+   * itself; the lock timeout turns that hang into an error. The eviction condition reads
+   * `#result`, which requires beforeInvocation to stay false.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1", condition = "#result")
+  fun takeWordsDirty(): Boolean {
+    entityManager.createNativeQuery("set local lock_timeout = '$TAKE_WORDS_DIRTY_LOCK_TIMEOUT'").executeUpdate()
+    try {
+      return entityManager
+        .createQuery(
+          """
+        update UsageToReport lru
+        set lru.wordsDirty = false
+        where lru.wordsDirty = true
+        """,
+        ).executeUpdate() > 0
+    } catch (e: PersistenceException) {
+      if (!e.isLockTimeout()) throw e
+      throw IllegalStateException(
+        "takeWordsDirty waited $TAKE_WORDS_DIRTY_LOCK_TIMEOUT for the usage row: " +
+          "it must not run inside a transaction that already marked the row dirty",
+        e,
+      )
+    }
+  }
+
+  private fun Throwable.isLockTimeout(): Boolean =
+    generateSequence(this) { it.cause }.any { it is SQLException && it.sqlState == "55P03" }
+
+  /** For the reporting path's own failure recovery, which cannot use the writer-path variant. */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun markWordsDirtyInNewTransaction() {
+    markWordsDirty()
+  }
+
+  /**
+   * Its own transaction: the caller counts words outside any lock, so this must not extend the
+   * reporting transaction's hold on the row across the licence-server call that follows.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
+  fun storeRecountedWords(words: Long) {
+    storeCurrentWordsUsage(words)
   }
 
   /**
@@ -152,17 +244,23 @@ class UsageToReportService(
    *
    * @param keys The number of keys that were reported, or null if unchanged
    * @param seats The number of seats that were reported, or null if unchanged
+   * @param words The number of words that were reported, or null if unchanged
    */
+  @Transactional
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeOnReport(
     keys: Long?,
     seats: Long?,
+    words: Long? = null,
   ) {
     if (keys != null) {
       storeOnReportKeys(keys)
     }
     if (seats != null) {
       storeOnReportSeats(seats)
+    }
+    if (words != null) {
+      storeOnReportWords(words)
     }
   }
 
@@ -185,7 +283,7 @@ class UsageToReportService(
     entityManager
       .createQuery(
         """
-      update UsageToReport lru  
+      update UsageToReport lru
       set lru.lastReportedSeats = :lastReportedSeats,
           lru.seatsToReport = :seatsToReport,
           lru.reportedAt = :reportedAt
@@ -194,5 +292,22 @@ class UsageToReportService(
       .setParameter("seatsToReport", seats)
       .setParameter("reportedAt", currentDateProvider.date)
       .executeUpdate()
+  }
+
+  private fun storeOnReportWords(words: Long) {
+    entityManager
+      .createQuery(
+        """
+      update UsageToReport lru
+      set lru.lastReportedWords = :lastReportedWords,
+          lru.wordsToReport = :wordsToReport
+      """,
+      ).setParameter("lastReportedWords", words)
+      .setParameter("wordsToReport", words)
+      .executeUpdate()
+  }
+
+  companion object {
+    private const val TAKE_WORDS_DIRTY_LOCK_TIMEOUT = "30s"
   }
 }

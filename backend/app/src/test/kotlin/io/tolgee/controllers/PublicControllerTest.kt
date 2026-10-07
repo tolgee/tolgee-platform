@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -71,6 +72,21 @@ class PublicControllerTest : AbstractControllerTest() {
     val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Pavel Novak")).hasSize(1)
+  }
+
+  @Test
+  fun `cuts the auto-created organization name to 50 characters and drops the trailing space`() {
+    val name = "a".repeat(49) + " " + "b".repeat(10)
+    val dto = SignUpDto(name = name, password = "aaaaaaaaa", email = "aaaa@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+    assertThat(organizationRepository.findAllByName("a".repeat(49))).hasSize(1)
+  }
+
+  @Test
+  fun `suffixes a short name when auto-creating the organization`() {
+    val dto = SignUpDto(name = " Al ", password = "aaaaaaaaa", email = "aaaa@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+    assertThat(organizationRepository.findAllByName("Al Organization")).hasSize(1)
   }
 
   @Test
@@ -200,7 +216,7 @@ class PublicControllerTest : AbstractControllerTest() {
     performPost("/api/public/sign_up", dto).andIsOk
 
     val user = userAccountService.findActive("disabled@test.com")!!
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     val dto2 =
       SignUpDto(
@@ -225,7 +241,7 @@ class PublicControllerTest : AbstractControllerTest() {
     performPost("/api/public/sign_up", dto).andIsOk
 
     val user = userAccountService.findActive("login-disabled@test.com")!!
-    userAccountService.disable(user.id)
+    userAccountService.disable(user.id, UserDisabledBy.ADMIN)
 
     doAuthentication("login-disabled@test.com", "aaaaaaaaa")
       .andIsUnauthorized

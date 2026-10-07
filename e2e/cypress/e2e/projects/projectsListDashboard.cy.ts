@@ -2,11 +2,10 @@ import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { assertTooltip, gcy } from '../../common/shared';
 import { projectListData } from '../../common/apiCalls/testData/testData';
-import { login, setBypassSeatCountCheck } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 
 describe('Projects Dashboard', () => {
   beforeEach(() => {
-    setBypassSeatCountCheck(true);
     projectListData.clean();
     projectListData.generate();
     login('projectListDashboardUser', 'admin');
@@ -67,7 +66,6 @@ describe('Projects Dashboard', () => {
 
   afterEach(() => {
     projectListData.clean();
-    setBypassSeatCountCheck(false);
   });
 });
 

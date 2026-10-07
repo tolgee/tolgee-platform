@@ -1,7 +1,7 @@
 import { Link, LINKS } from 'tg.constants/links';
 import { FC, ReactNode } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { useRouteMatch } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom';
 
 import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
 import { createAdder } from 'tg.fixtures/pluginAdder';
@@ -37,9 +37,10 @@ export const useDeveloperViewItems = () => {
 
   const items = addDeveloperViewItems(baseItems);
 
+  const { pathname } = useLocation();
   const value = items
     .map((item) => {
-      const routerMatch = useRouteMatch(item.link.template);
+      const routerMatch = matchPath(pathname, item.link.template);
       if (!routerMatch) {
         return [item.value, false];
       }

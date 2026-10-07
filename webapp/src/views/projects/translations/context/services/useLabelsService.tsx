@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
-import { useProject } from 'tg.hooks/useProject';
+import { useProjectContextOptional } from 'tg.hooks/useProject';
 import {
   useRemoveLabel,
   usePutLabel,
@@ -36,7 +36,9 @@ export const useLabelsService = ({
   const deleteLabel = useRemoveLabel();
   const putLabelWithoutTranslation = usePutLabelWithoutTranslation();
 
-  projectId = projectId || useProject().id;
+  const contextProjectId = useProjectContextOptional()?.project?.id;
+  const resolvedProjectId = projectId || contextProjectId;
+  const queriesEnabled = enabled && resolvedProjectId !== undefined;
 
   const query = {
     search: searchDebounced,
@@ -47,11 +49,11 @@ export const useLabelsService = ({
     url: '/v2/projects/{projectId}/labels',
     method: 'get',
     path: {
-      projectId,
+      projectId: resolvedProjectId!,
     },
     query,
     options: {
-      enabled,
+      enabled: queriesEnabled,
       keepPreviousData: true,
       refetchOnMount: true,
       noGlobalLoading: true,
@@ -70,7 +72,7 @@ export const useLabelsService = ({
         ) {
           return {
             path: {
-              projectId,
+              projectId: resolvedProjectId!,
             },
             query: {
               ...query,
@@ -91,13 +93,13 @@ export const useLabelsService = ({
     url: '/v2/projects/{projectId}/labels/ids',
     method: 'get',
     path: {
-      projectId,
+      projectId: resolvedProjectId!,
     },
     query: {
       id: selectedIds,
     },
     options: {
-      enabled: enabled && enabledSelected,
+      enabled: queriesEnabled && enabledSelected,
       noGlobalLoading: true,
     },
   });
@@ -129,7 +131,7 @@ export const useLabelsService = ({
     if (data.translationId) {
       promise = putLabel.mutateAsync({
         path: {
-          projectId: projectId,
+          projectId: resolvedProjectId!,
           translationId: data.translationId,
           labelId: data.labelId,
         },
@@ -137,7 +139,7 @@ export const useLabelsService = ({
     } else {
       promise = putLabelWithoutTranslation.mutateAsync({
         path: {
-          projectId: projectId,
+          projectId: resolvedProjectId!,
         },
         content: {
           'application/json': {
@@ -171,7 +173,7 @@ export const useLabelsService = ({
     deleteLabel
       .mutateAsync({
         path: {
-          projectId: projectId,
+          projectId: resolvedProjectId!,
           translationId: data.translationId,
           labelId: data.labelId,
         },
