@@ -1,3 +1,10 @@
+## [3.226.3](https://github.com/tolgee/tolgee-platform/compare/v3.226.2...v3.226.3) (2026-10-07)
+
+
+### Bug Fixes
+
+* reject requests on rate limit bucket contention instead of queueing threads ([#3908](https://github.com/tolgee/tolgee-platform/issues/3908)) ([391d5c2](https://github.com/tolgee/tolgee-platform/commit/391d5c258b1906d21b62e83e17b40428870b6f65))
+
 ## [3.226.2](https://github.com/tolgee/tolgee-platform/compare/v3.226.1...v3.226.2) (2026-10-06)
 
 
