@@ -539,6 +539,8 @@ declare namespace DataCy {
         "organization-side-menu": true;
         "organization-switch": true;
         "palette-color": true;
+        "past-due-banner": true;
+        "past-due-banner-update-payment-link": true;
         "pat-expiry-info": true;
         "pat-list-item": true;
         "pat-list-item-alert": true;

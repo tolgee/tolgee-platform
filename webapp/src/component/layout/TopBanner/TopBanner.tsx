@@ -14,7 +14,7 @@ import { tokenService } from 'tg.service/TokenService';
 import { PendingInvitationBanner } from './PendingInvitationBanner';
 import { useTranslate } from '@tolgee/react';
 import { Announcement } from './Announcement';
-import { usePlanLimitBanner } from 'tg.ee';
+import { usePastDueBanner, usePlanLimitBanner } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -67,13 +67,15 @@ export function TopBanner() {
 
   const getAnnouncement = useAnnouncement();
   const isEmailVerified = useIsEmailVerified();
+  const pastDueBanner = usePastDueBanner();
   const planLimitBanner = usePlanLimitBanner();
+  const billingBanner = pastDueBanner ?? planLimitBanner;
 
   const showEmailVerificationBanner = !isEmailVerified && isAuthenticated;
 
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton =
-    !showEmailVerificationBanner && !pendingInvitationCode && !planLimitBanner;
+    !showEmailVerificationBanner && !pendingInvitationCode && !billingBanner;
 
   useResizeObserver({
     ref: bannerRef,
@@ -89,14 +91,14 @@ export function TopBanner() {
     announcement,
     isEmailVerified,
     pendingInvitationCode,
-    Boolean(planLimitBanner),
+    Boolean(billingBanner),
   ]);
 
   if (
     !announcement &&
     !pendingInvitationCode &&
     !showEmailVerificationBanner &&
-    !planLimitBanner
+    !billingBanner
   ) {
     return null;
   }
@@ -106,7 +108,9 @@ export function TopBanner() {
       ref={bannerRef}
       data-cy="top-banner"
       className={clsx({
-        important: showEmailVerificationBanner || Boolean(planLimitBanner),
+        important:
+          showEmailVerificationBanner ||
+          (!pendingInvitationCode && Boolean(billingBanner)),
       })}
     >
       <div />
@@ -120,7 +124,7 @@ export function TopBanner() {
         ) : pendingInvitationCode ? (
           <PendingInvitationBanner code={pendingInvitationCode} />
         ) : (
-          planLimitBanner ?? announcement
+          billingBanner ?? announcement
         )}
       </StyledContent>
       {showCloseButton && (
