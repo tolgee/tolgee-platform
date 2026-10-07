@@ -19,4 +19,5 @@ class EmailParams(
   var replyTo: String? = null,
   var templateName: String? = null,
   var recipientName: String? = null,
+  var messageId: String? = null,
 )

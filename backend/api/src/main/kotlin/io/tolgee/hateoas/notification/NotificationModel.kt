@@ -16,13 +16,17 @@ data class NotificationModel(
   var originatingUser: SimpleUserAccountModel? = null,
   var linkedTask: TaskModel? = null,
   var createdAt: Date?,
+  var updatedAt: Date? = null,
+  var entityCount: Int? = null,
+  var languages: List<NotificationLanguageModel>? = null,
+  var branches: List<String>? = null,
 ) : RepresentationModel<NotificationModel>(),
   Serializable,
   Cursorable {
   override fun toCursorValue(property: String): String? =
     when (property) {
       "id" -> id.toString()
-      "createdAt" -> createdAt?.time?.toString()
+      "updatedAt" -> updatedAt?.time?.toString()
       else -> null
     }
 }
