@@ -5534,7 +5534,11 @@ export interface components {
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
         | "QA_ISSUE_IGNORE"
-        | "QA_ISSUE_UNIGNORE";
+        | "QA_ISSUE_UNIGNORE"
+        | "API_KEY_CREATE"
+        | "API_KEY_UPDATE"
+        | "API_KEY_DELETE"
+        | "API_KEY_REGENERATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**

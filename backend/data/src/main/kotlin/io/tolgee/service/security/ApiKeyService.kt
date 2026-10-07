@@ -137,7 +137,8 @@ class ApiKeyService(
     apiKey: ApiKey,
     dto: V2EditApiKeyDto,
   ): ApiKey {
-    apiKey.scopesEnum = dto.scopes.toMutableSet()
+    apiKey.scopesEnum.clear()
+    apiKey.scopesEnum.addAll(dto.scopes)
     dto.description?.let {
       apiKey.description = it
     }

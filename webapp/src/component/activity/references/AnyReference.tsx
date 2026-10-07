@@ -7,6 +7,7 @@ import { LanguageReference } from './LanguageReference';
 import { ContentDeliveryReference } from './ContentDeliveryReference';
 import { ContentStorageReference } from './ContentStorageReference';
 import { WebhookConfigReference } from './WebhookConfigReference';
+import { ApiKeyReference } from './ApiKeyReference';
 import { TaskReference } from 'tg.ee';
 import { BranchReference } from 'tg.ee';
 export const StyledReferences = styled(Box)`
@@ -79,6 +80,8 @@ const getReference = (reference: Reference) => {
       return <ContentStorageReference data={reference} />;
     case 'webhook_config':
       return <WebhookConfigReference data={reference} />;
+    case 'api_key':
+      return <ApiKeyReference data={reference} />;
     case 'task':
       return <TaskReference data={reference} />;
     case 'branch':
