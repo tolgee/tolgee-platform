@@ -29,8 +29,12 @@ export function TaskStatusFilterName({
     return <StatusLabel status={status} />;
   }
   return (
-    <>
-      {translateTaskType(taskType)}: <StatusLabel status={status} />
-    </>
+    <T
+      keyName="translation_filters_task_type_status"
+      params={{
+        taskType: translateTaskType(taskType),
+        status: <StatusLabel status={status} />,
+      }}
+    />
   );
 }
