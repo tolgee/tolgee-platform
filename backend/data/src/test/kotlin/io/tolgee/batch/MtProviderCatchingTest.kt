@@ -2,10 +2,12 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.exceptions.limits.PlanLimitExceededWordsException
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -112,6 +114,62 @@ class MtProviderCatchingTest {
     processed.assert.isEqualTo(chunk.take(2))
     thrown.assert.isInstanceOf(FailedDontRequeueException::class.java)
     thrown as FailedDontRequeueException
+    thrown.successfulTargets.assert.containsExactly(chunk[0])
+  }
+
+  @Test
+  fun `reports the spending limit reason when credit spending limit is exceeded`() {
+    assertStopsWithoutRequeue(Message.CREDIT_SPENDING_LIMIT_EXCEEDED) {
+      OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
+    }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when plan word limit is exceeded`() {
+    assertStopsWithoutRequeue(Message.PLAN_WORD_LIMIT_EXCEEDED) { PlanLimitExceededWordsException(30741, 30000) }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when the limit error carries only the code`() {
+    assertStopsWithoutRequeue(Message.PLAN_WORD_LIMIT_EXCEEDED) {
+      BadRequestException(Message.PLAN_WORD_LIMIT_EXCEEDED.code, listOf(30741, 30000))
+    }
+  }
+
+  @Test
+  fun `continues with other items on unrelated bad request`() {
+    val processed = mutableListOf<BatchTranslationTargetItem>()
+
+    val thrown =
+      catchThrowable {
+        mtProviderCatching.iterateCatching(chunk, EmptyCoroutineContext) { item ->
+          processed.add(item)
+          if (item.keyId == 2L) throw BadRequestException(Message.KEY_EXISTS)
+        }
+      }
+
+    processed.assert.isEqualTo(chunk)
+    thrown.assert.isInstanceOf(ChunkItemFailedException::class.java)
+  }
+
+  private fun assertStopsWithoutRequeue(
+    expectedMessage: Message,
+    failure: () -> Exception,
+  ) {
+    val processed = mutableListOf<BatchTranslationTargetItem>()
+
+    val thrown =
+      catchThrowable {
+        mtProviderCatching.iterateCatching(chunk, EmptyCoroutineContext) { item ->
+          processed.add(item)
+          if (item.keyId == 2L) throw failure()
+        }
+      }
+
+    processed.assert.isEqualTo(chunk.take(2))
+    thrown.assert.isInstanceOf(FailedDontRequeueException::class.java)
+    thrown as FailedDontRequeueException
+    thrown.tolgeeMessage.assert.isEqualTo(expectedMessage)
     thrown.successfulTargets.assert.containsExactly(chunk[0])
   }
 }
