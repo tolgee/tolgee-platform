@@ -159,6 +159,7 @@ export const SubfilterTasks = ({
                     {selectedLanguages?.map((lang) => (
                       <FilterItem
                         data-cy="translations-filter-apply-for-language"
+                        data-cy-lang={lang.tag}
                         key={lang.id}
                         label={lang.name}
                         selected={value.filterTaskLanguage === lang.tag}
