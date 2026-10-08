@@ -269,6 +269,32 @@ describe('project tasks', () => {
     translationsView.assertTaskStatusChecked('NOT_IN_OPEN_TASK');
   });
 
+  it('task create drops a condition the new form type cannot carry', () => {
+    openTaskCreateFilters();
+
+    // allowed while REVIEW is not the type being created
+    translationsView.selectTaskStatus('REVIEW', 'IN_OPEN_TASK');
+
+    dismissMenu();
+    dismissMenu();
+    dismissMenu();
+    cy.gcy('create-task-field-type').click();
+    cy.gcy('create-task-field-type-item').contains('Review').click();
+    cy.waitForDom();
+
+    // the stale condition must not survive in the summary ...
+    cy.gcy('translations-filter-select').should(
+      'not.contain',
+      'In an open task'
+    );
+
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Tasks').click();
+    translationsView.openTaskTypeFilter('REVIEW');
+    // ... nor in the condition list, which would otherwise show nothing checked
+    translationsView.assertTaskStatusChecked('NOT_IN_OPEN_TASK');
+  });
+
   it('task create displays correct numbers for key filter', () => {
     cy.gcy('tasks-header-add-task').click();
     cy.gcy('create-task-field-languages').click();
