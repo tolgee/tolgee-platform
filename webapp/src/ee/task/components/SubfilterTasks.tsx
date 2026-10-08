@@ -14,18 +14,13 @@ import {
   TaskStatusFilter,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { TASK_TYPES, TaskType } from 'tg.service/apiSchemaTypes';
-import { DEFAULT_PINNED_STATUS } from '../hooks/useTaskCreationFilters';
+import {
+  DEFAULT_PINNED_STATUS,
+  PINNED_TYPE_STATUSES,
+  pinnedTaskStatus,
+} from '../hooks/useTaskCreationFilters';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 import { TaskStatusFilterName } from './TaskStatusFilterName';
-
-/**
- * Task creation drops keys already in an open task of the type being created, so the type under
- * construction may only carry conditions that exclude those keys — "Any" included would be a lie.
- */
-const PINNED_TYPE_STATUSES: TaskStatusFilter[] = [
-  'NOT_IN_OPEN_TASK',
-  'NEVER_IN_TASK',
-];
 
 export const SubfilterTasks = ({
   value,
@@ -52,10 +47,10 @@ export const SubfilterTasks = ({
 
   /** The type being created is always constrained, whether or not the user picked a condition. */
   function statusOf(type: TaskType) {
-    if (byType[type] !== undefined) {
-      return byType[type];
+    if (type === pinnedTaskType) {
+      return pinnedTaskStatus(byType[type]);
     }
-    return statusOfPinnedDefault(type);
+    return byType[type];
   }
 
   function statusesFor(type: TaskType) {

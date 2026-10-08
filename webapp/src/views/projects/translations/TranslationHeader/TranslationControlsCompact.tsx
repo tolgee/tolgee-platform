@@ -144,7 +144,7 @@ export const TranslationControlsCompact: React.FC<
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
-  const prefilteredTask = useTranslationsSelector((c) => c.prefilteredTask);
+  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const { setFilters, addFilter, removeFilter } = useTranslationsActions();
 
   const handleLanguageChange = (languages: string[]) => {

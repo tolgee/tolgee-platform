@@ -81,7 +81,7 @@ export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
   const allLanguages = useTranslationsSelector((c) => c.languages);
   const languageTags = allLanguages?.map((l) => l.tag) ?? [];
   const filters = useTranslationsSelector((c) => c.filters);
-  const prefilteredTask = useTranslationsSelector((c) => c.prefilteredTask);
+  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const order = useTranslationsSelector((c) => c.order);
   const { setFilters, removeFilter, addFilter } = useTranslationsActions();
   const selectedLanguagesMapped =
