@@ -12,7 +12,7 @@ describe('taskScopeFiltersQuery', () => {
             REVIEW: 'NEVER_IN_TASK',
           },
         },
-        'TRANSLATE'
+        'REVIEW'
       ).filterTaskInStatus
     ).toEqual(['TRANSLATE,HAS_BEEN_IN_TASK', 'REVIEW,NEVER_IN_TASK']);
   });
@@ -21,7 +21,8 @@ describe('taskScopeFiltersQuery', () => {
     expect(
       taskScopeFiltersQuery(
         { filterTaskStatus: { REVIEW: 'IN_OPEN_TASK' } },
-        'REVIEW'
+        'TRANSLATE',
+        false
       ).filterTaskInStatus
     ).toEqual(['REVIEW,IN_OPEN_TASK']);
   });
@@ -40,12 +41,40 @@ describe('taskScopeFiltersQuery', () => {
     ]);
   });
 
-  it('does not override an explicit condition on the created type', () => {
+  it('keeps a stricter explicit condition on the created type', () => {
     expect(
       taskScopeFiltersQuery(
         { filterTaskStatus: { TRANSLATE: 'NEVER_IN_TASK' } },
         'TRANSLATE'
       ).filterTaskInStatus
     ).toEqual(['TRANSLATE,NEVER_IN_TASK']);
+  });
+
+  it('drops a condition the created type cannot carry', () => {
+    // picked while REVIEW was not being created, then the form switched onto it: the submenu
+    // offers no matching option, and sending it would preview zero keys for every language
+    expect(
+      taskScopeFiltersQuery(
+        { filterTaskStatus: { REVIEW: 'IN_OPEN_TASK' } },
+        'REVIEW'
+      ).filterTaskInStatus
+    ).toEqual(['REVIEW,NOT_IN_OPEN_TASK']);
+
+    expect(
+      taskScopeFiltersQuery(
+        { filterTaskStatus: { TRANSLATE: 'HAS_BEEN_IN_TASK' } },
+        'TRANSLATE'
+      ).filterTaskInStatus
+    ).toEqual(['TRANSLATE,NOT_IN_OPEN_TASK']);
+  });
+
+  it('leaves the created type alone when creation applies no condition', () => {
+    expect(
+      taskScopeFiltersQuery(
+        { filterTaskStatus: { REVIEW: 'IN_OPEN_TASK' } },
+        'REVIEW',
+        false
+      ).filterTaskInStatus
+    ).toEqual(['REVIEW,IN_OPEN_TASK']);
   });
 });

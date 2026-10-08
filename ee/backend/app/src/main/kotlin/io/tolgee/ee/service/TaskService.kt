@@ -146,6 +146,8 @@ class TaskService(
     filters: TranslationScopeFilters,
     agencyId: Long? = null,
   ): Task {
+    // the native queries read the parsed filters from SpEL, where a parse failure is a 500
+    filters.validate()
     var lastErr = DataIntegrityViolationException("Error")
     repeat(10) {
       // necessary for proper transaction creation

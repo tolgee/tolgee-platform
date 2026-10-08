@@ -15,6 +15,27 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 export const DEFAULT_PINNED_STATUS: TaskStatusFilter = 'NOT_IN_OPEN_TASK';
 
+/**
+ * Task creation drops keys already in an open task of the type being created, so the type under
+ * construction may only carry conditions that exclude those keys — "Any" included would be a lie.
+ */
+export const PINNED_TYPE_STATUSES: TaskStatusFilter[] = [
+  'NOT_IN_OPEN_TASK',
+  'NEVER_IN_TASK',
+];
+
+/**
+ * The condition in force for the type being created. A condition picked while that type was not
+ * the one being created survives the form switching onto it, and the submenu then offers nothing
+ * matching it — so it must not reach the scope query either.
+ */
+export function pinnedTaskStatus(status: TaskStatusFilter | undefined) {
+  if (status !== undefined && PINNED_TYPE_STATUSES.includes(status)) {
+    return status;
+  }
+  return DEFAULT_PINNED_STATUS;
+}
+
 type Props = {
   allLanguages: LanguageModel[];
   initialLanguages?: number[];
@@ -92,8 +113,8 @@ export function taskScopeFiltersQuery(
   constrainCreatedType = true
 ) {
   const byType = { ...(filters.filterTaskStatus ?? {}) };
-  if (constrainCreatedType && byType[createdType] === undefined) {
-    byType[createdType] = DEFAULT_PINNED_STATUS;
+  if (constrainCreatedType) {
+    byType[createdType] = pinnedTaskStatus(byType[createdType]);
   }
   return {
     filterTaskInStatus: Object.entries(byType).map(

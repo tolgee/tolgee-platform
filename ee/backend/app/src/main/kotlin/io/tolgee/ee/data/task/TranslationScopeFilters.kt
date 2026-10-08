@@ -36,6 +36,9 @@ data class TranslationScopeFilters(
     TaskScopeFilterByTask
       .parseList(filterTaskInStatus.orEmpty())
       .groupBy({ it.status }, { it.taskType })
+      // a repeated pair would inflate the `…Count` past what `count(distinct type)` can reach,
+      // turning the positive clauses into something no key can satisfy
+      .mapValues { (_, types) -> types.distinct() }
   }
 
   fun validate() {

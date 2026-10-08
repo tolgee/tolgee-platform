@@ -253,6 +253,31 @@ class TaskScopeTaskHistoryFilterTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `a repeated condition behaves like a single one`() {
+    performProjectAuthPost(
+      "tasks/calculate-scope?filterTaskInStatus=TRANSLATE,HAS_BEEN_IN_TASK" +
+        "&filterTaskInStatus=TRANSLATE,HAS_BEEN_IN_TASK",
+      czechOnlyKeyScopeRequest(testData.czechLanguage.id),
+    ).andIsOk.andAssertThatJson { node("keyCount").isEqualTo(1) }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creating a task rejects a malformed task filter with a bad request`() {
+    performProjectAuthPost(
+      "tasks?filterTaskInStatus=NONSENSE",
+      CreateTaskRequest(
+        name = "MalformedFilterTask",
+        type = TaskType.TRANSLATE,
+        languageId = testData.czechLanguage.id,
+        keys = mutableSetOf(czechOnlyKeyId),
+        assignees = mutableSetOf(testData.user.id),
+      ),
+    ).andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `rejects a malformed task filter with a bad request`() {
     performProjectAuthPost(
       "tasks/calculate-scope?filterTaskInStatus=NONSENSE",
