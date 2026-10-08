@@ -10,7 +10,10 @@ import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { TASK_TYPES } from 'tg.service/apiSchemaTypes';
-import { taskScopeFiltersQuery } from 'tg.ee.module/task/hooks/useTaskCreationFilters';
+import {
+  PINNED_TYPE_STATUSES,
+  taskScopeFiltersQuery,
+} from 'tg.ee.module/task/hooks/useTaskCreationFilters';
 import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -137,6 +140,25 @@ export const TaskCreateForm = ({
       setLanguages(languages.filter((l) => l !== baseLang.id));
     }
   }, [values.type, languages, allLanguages]);
+
+  useEffect(() => {
+    // the type being created cannot carry a condition that keeps its open-task conflicts, so one
+    // picked while another type was being created has to go — the summary reads the stored value
+    if (keysPreselected || !filterActions) {
+      return;
+    }
+    const byType = filters.filterTaskStatus;
+    const status = byType?.[values.type];
+    if (status === undefined || PINNED_TYPE_STATUSES.includes(status)) {
+      return;
+    }
+    const next = { ...byType };
+    delete next[values.type];
+    filterActions.setFilters({
+      ...filters,
+      filterTaskStatus: Object.keys(next).length ? next : undefined,
+    });
+  }, [values.type, filters, keysPreselected]);
 
   return (
     <>
