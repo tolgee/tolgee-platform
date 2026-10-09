@@ -38,7 +38,7 @@ class OAuth2TestTokens(
         maxGrantedScopeValues = scopes
         issuedTokenScopeValues = scopes
         bindProjects(projectIds)
-        bindAudience(audience)
+        this.audience = audience
         accessTokenHash = keyGenerator.hash(token)
         accessTokenIssuedAt = Date.from(issuedAt)
         accessTokenExpiresAt = Date.from(expiresAt)
@@ -54,15 +54,6 @@ class OAuth2TestTokens(
   ) {
     val grant = findByToken(token) ?: error("no grant for the given token")
     grant.projectSelection = raw
-    repository.save(grant)
-  }
-
-  fun corruptAudience(
-    token: String,
-    raw: String,
-  ) {
-    val grant = findByToken(token) ?: error("no grant for the given token")
-    grant.audience = raw
     repository.save(grant)
   }
 

@@ -9,6 +9,8 @@ import io.tolgee.security.oauth2.OAuth2Scopes
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
@@ -61,8 +63,9 @@ class OAuth2Grant : StandardAuditModel() {
   @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
 
+  @Enumerated(EnumType.STRING)
   @Column(length = 16, nullable = false)
-  var audience: String = OAuth2Audience.API.name
+  var audience: OAuth2Audience = OAuth2Audience.API
 
   @Column(length = 255)
   var clientMetadataHash: String? = null
@@ -124,12 +127,6 @@ class OAuth2Grant : StandardAuditModel() {
   /** Removing the cascade breaks the theft path's flush; the FK's own cascade covers the bulk JPQL reaper instead. */
   @OneToMany(mappedBy = "grant", cascade = [CascadeType.ALL], orphanRemoval = true)
   var supersededRefreshTokens: MutableList<OAuth2SupersededRefreshToken> = mutableListOf()
-
-  fun boundAudience(): OAuth2Audience? = OAuth2Audience.entries.firstOrNull { it.name == audience }
-
-  fun bindAudience(value: OAuth2Audience) {
-    audience = value.name
-  }
 
   var requestedScopeValues: List<String>
     get() = wireValuesOf(requestedScopes)

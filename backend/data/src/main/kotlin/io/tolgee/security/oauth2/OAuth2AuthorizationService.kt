@@ -120,7 +120,7 @@ class OAuth2AuthorizationService(
         clientState = params.state
         codeChallenge = validated.codeChallenge
         requestedScopeValues = validated.scopes
-        bindAudience(validated.audience)
+        audience = validated.audience
         clientMetadataHash = client.metadataHash
         this.projectHint = projectHint?.toLongOrNull()
         consentState = keyGenerator.generate()
@@ -427,7 +427,7 @@ class OAuth2AuthorizationService(
     grant: OAuth2Grant,
     requested: OAuth2Audience?,
   ) {
-    if (requested != null && requested != grant.boundAudience()) {
+    if (requested != null && requested != grant.audience) {
       throw OAuth2Error(OAuth2Error.INVALID_TARGET, "the grant was not authorized for this resource")
     }
   }

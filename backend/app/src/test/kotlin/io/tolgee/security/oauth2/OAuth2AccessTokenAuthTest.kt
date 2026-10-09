@@ -99,14 +99,6 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `a token whose grant audience no longer resolves is refused everywhere`() {
-    val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    oauth2Tokens.corruptAudience(token, "FUTURE")
-
-    performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
-  }
-
-  @Test
   fun `accepts a valid scoped token`() {
     val token = mintForAllProjects(scopes = listOf("translations.view"))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk

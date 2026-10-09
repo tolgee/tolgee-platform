@@ -100,7 +100,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     token.assert.isNotBlank()
     val grant = stored(token)
     grant.clientMetadataHash.assert.isNotNull()
-    grant.boundAudience().assert.isEqualTo(OAuth2Audience.MCP)
+    grant.audience.assert.isEqualTo(OAuth2Audience.MCP)
   }
 
   @Test

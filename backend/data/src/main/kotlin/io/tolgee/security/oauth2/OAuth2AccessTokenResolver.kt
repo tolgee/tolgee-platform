@@ -58,7 +58,7 @@ class OAuth2AccessTokenResolver(
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 
-    if (grant.boundAudience() != expectedAudience) {
+    if (grant.audience != expectedAudience) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 

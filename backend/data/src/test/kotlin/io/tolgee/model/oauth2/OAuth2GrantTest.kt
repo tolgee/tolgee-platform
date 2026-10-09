@@ -36,21 +36,7 @@ class OAuth2GrantTest {
 
   @Test
   fun `a fresh grant is bound to the REST API audience`() {
-    OAuth2Grant().boundAudience().assert.isEqualTo(OAuth2Audience.API)
-  }
-
-  @Test
-  fun `a bound audience reads back as itself`() {
-    val grant = OAuth2Grant().apply { bindAudience(OAuth2Audience.MCP) }
-
-    grant.boundAudience().assert.isEqualTo(OAuth2Audience.MCP)
-  }
-
-  @Test
-  fun `a stored audience that no longer resolves matches no resource server`() {
-    val grant = OAuth2Grant().apply { audience = "FUTURE" }
-
-    grant.boundAudience().assert.isNull()
+    OAuth2Grant().audience.assert.isEqualTo(OAuth2Audience.API)
   }
 
   @Test
