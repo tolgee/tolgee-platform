@@ -10,6 +10,7 @@ services:
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}
+      - tolgee.oauth2.browser-extension-enabled=true
       # The first callback is served by OAuth2ConsentE2eDataController. Keep the second in sync with
       # application-e2e.yaml; used by oauth2Consent.cy.ts SITE_REDIRECT_URI.
       - tolgee.oauth2.browser-extension-redirect-uris=http://localhost:${TOLGEE_E2E_PORT:-8201}/internal/e2e-data/oauth2-consent/callback,https://e2e-site.test/callback
