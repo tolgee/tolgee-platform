@@ -11,12 +11,6 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.bearerHeaders
-import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
-import io.tolgee.model.batch.BatchJob
-import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -39,12 +33,12 @@ import java.util.zip.ZipInputStream
  */
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var grantRepository: OAuth2GrantRepository
+  private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
 
-  private lateinit var tokens: OAuth2TestTokens
+  private lateinit var oauth2Tokens: OAuth2TestTokens
 
   private lateinit var testData: OAuth2AccessTokenAuthTestData
 
@@ -52,12 +46,12 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun setup() {
     testData = OAuth2AccessTokenAuthTestData()
     testDataService.saveTestData(testData.root)
-    tokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
+    oauth2Tokens = OAuth2TestTokens(oauth2GrantRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
   fun cleanup() {
-    tokens.deleteAll()
+    oauth2Tokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -82,6 +76,26 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
       .assert
       .isNotNull()
       .contains("insufficient_scope")
+  }
+
+  @Test
+  fun `an MCP-audience token is refused by the REST API with invalid_token`() {
+    val token =
+      oauth2Tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf("translations.view"),
+        projectIds = listOf(testData.project.id),
+        audience = OAuth2Audience.MCP,
+      )
+
+    val response = performGet(translationsUrl(), bearerHeaders(token)).andReturn().response
+
+    response.status.assert.isEqualTo(401)
+    response
+      .getHeader("WWW-Authenticate")
+      .assert
+      .isNotNull()
+      .contains("invalid_token")
   }
 
   @Test
@@ -116,7 +130,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `fails closed on an unparseable stored project selection`() {
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    tokens.corruptProjectSelection(token, "nonsense")
+    oauth2Tokens.corruptProjectSelection(token, "nonsense")
 
     performGet(translationsUrl(), bearerHeaders(token)).andIsForbidden
   }
@@ -220,7 +234,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
 
-    tokens.revoke(token)
+    oauth2Tokens.revoke(token)
 
     performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
   }
@@ -228,7 +242,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `rejects a token whose client is no longer registered`() {
     val token =
-      tokens.issue(
+      oauth2Tokens.issue(
         subject = testData.user.id,
         scopes = listOf("translations.view"),
         projectIds = listOf(testData.project.id),
@@ -415,7 +429,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     issuedAt: Instant = Instant.now(),
     expiresAt: Instant = issuedAt.plus(30, ChronoUnit.MINUTES),
   ): String =
-    tokens.issue(
+    oauth2Tokens.issue(
       subject = subject,
       scopes = scopes,
       projectIds = projects,

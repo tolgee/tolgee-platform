@@ -3,13 +3,18 @@ package io.tolgee.model.oauth2
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.security.oauth2.OAuth2Scopes
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -37,6 +42,7 @@ import java.util.Date
   indexes = [
     Index(columnList = "user_account_id"),
     Index(columnList = "previous_refresh_token_hash"),
+    Index(columnList = "client_id"),
   ],
 )
 class OAuth2Grant : StandardAuditModel() {
@@ -57,6 +63,13 @@ class OAuth2Grant : StandardAuditModel() {
 
   @Column(length = 4000, nullable = false)
   var requestedScopes: String = ""
+
+  @Enumerated(EnumType.STRING)
+  @Column(length = 16, nullable = false)
+  var audience: OAuth2Audience = OAuth2Audience.API
+
+  @Column(length = 255)
+  var clientMetadataHash: String? = null
 
   @Column(length = 4000)
   var maxGrantedScopes: String? = null
@@ -100,7 +113,14 @@ class OAuth2Grant : StandardAuditModel() {
   var previousRefreshTokenHash: String? = null
 
   @Temporal(TemporalType.TIMESTAMP)
+  var refreshTokenRotatedAt: Date? = null
+
+  @Temporal(TemporalType.TIMESTAMP)
   var refreshTokenExpiresAt: Date? = null
+
+  /** Removing the cascade breaks the theft path's flush; the FK's own cascade covers the bulk JPQL reaper instead. */
+  @OneToMany(mappedBy = "grant", cascade = [CascadeType.ALL], orphanRemoval = true)
+  var supersededRefreshTokens: MutableList<OAuth2SupersededRefreshToken> = mutableListOf()
 
   var requestedScopeValues: List<String>
     get() = wireValuesOf(requestedScopes)

@@ -15,7 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.TestPropertySource
 import tools.jackson.databind.JsonNode
+import java.net.URI
+import java.net.http.HttpClient
 import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 
 // OSIV is disabled to replicate production MCP environment where tool handlers
@@ -24,6 +27,11 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestPropertySource(properties = ["spring.jpa.open-in-view=false"])
 abstract class AbstractMcpTest : AbstractSpringTest() {
+  companion object {
+    const val CREDENTIAL_LESS_TOOLS_CALL =
+      """{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_keys","arguments":{}}}"""
+  }
+
   @LocalServerPort
   protected val port: Int = 0
 
@@ -34,6 +42,21 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
   fun createMcpClientWithPak(pak: String): McpSyncClient = createMcpClientWithHeader("tgpak_$pak")
 
   fun createMcpClientWithoutAuth(): McpSyncClient = createMcpClientWithHeader(null)
+
+  /** One raw JSON-RPC POST, for tests about what the endpoint answers before any MCP session exists. */
+  fun postRawJsonRpc(
+    body: String,
+    query: String = "",
+  ): HttpResponse<String> {
+    val request =
+      HttpRequest
+        .newBuilder(URI.create("http://localhost:$port/mcp/developer$query"))
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json, text/event-stream")
+        .POST(HttpRequest.BodyPublishers.ofString(body))
+        .build()
+    return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
+  }
 
   fun createMcpClientWithBearer(accessToken: String): McpSyncClient =
     createMcpClient { it.header("Authorization", "Bearer $accessToken") }

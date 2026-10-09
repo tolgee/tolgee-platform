@@ -26,6 +26,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -47,7 +48,10 @@ import java.util.Date
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class SsoDelegateEe(
   private val jwtService: JwtService,
+  @Qualifier("ssoRestTemplate")
   private val restTemplate: RestTemplate,
+  @Qualifier("ssoGlobalRestTemplate")
+  private val globalRestTemplate: RestTemplate,
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
@@ -111,7 +115,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -253,7 +257,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -264,6 +268,26 @@ class SsoDelegateEe(
       logger.info("Failed to refresh token: ${e.message}")
     }
     return null
+  }
+
+  /**
+   * The token endpoint receives the client secret and a code or refresh token. Over plain http they travel in the
+   * clear, so an organization's endpoint must be https: an organization owner configures it. The global endpoint is
+   * operator configuration, where an on-prem provider on plain http is the normal case, and the two switches that
+   * let organization SSO reach local providers let it use plain http too.
+   */
+  private fun requireHttpsTokenUri(tenant: SsoTenantConfig): SsoTenantConfig {
+    if (tenant.global) return tenant
+    if (tolgeeProperties.internal.disableUrlSsrfProtection) return tenant
+    if (tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses) return tenant
+    if (tenant.tokenUri.startsWith("https://", ignoreCase = true)) return tenant
+    logger.warn("Refusing the SSO token exchange for {}: the token endpoint is not https", tenant.domain)
+    throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
+  }
+
+  private fun restTemplateFor(tenant: SsoTenantConfig): RestTemplate {
+    if (tenant.global) return globalRestTemplate
+    return restTemplate
   }
 
   private fun getRefreshScope(tenant: SsoTenantConfig): String {

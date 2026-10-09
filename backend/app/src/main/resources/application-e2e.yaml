@@ -14,9 +14,12 @@ tolgee:
     enabled: false
   frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
   oauth2:
+    browser-extension-enabled: true
     # The callback is served by OAuth2ConsentE2eDataController.
     browser-extension-redirect-uris:
       - http://localhost:${TOLGEE_E2E_PORT:8201}/internal/e2e-data/oauth2-consent/callback
+      # Keep in sync with e2e/docker-compose.yml; used by oauth2Consent.cy.ts SITE_REDIRECT_URI.
+      - https://e2e-site.test/callback
   authentication:
     enabled: true
     needs-email-verification: true
