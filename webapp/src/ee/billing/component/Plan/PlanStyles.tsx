@@ -21,6 +21,11 @@ export const PlanContainer = styled('div')`
     border-color: ${({ theme }) =>
       theme.palette.tokens.secondary._states.outlinedBorder};
   }
+  &.active.pastDue {
+    box-shadow: ${({ theme }) =>
+      pricingShadow(theme.palette.tokens.error._states.focusVisible)};
+    border-color: ${({ theme }) => theme.palette.tokens.error.main};
+  }
   &.popular {
     border-color: ${({ theme }) => theme.palette.tokens.primary.main};
     background-image: linear-gradient(
