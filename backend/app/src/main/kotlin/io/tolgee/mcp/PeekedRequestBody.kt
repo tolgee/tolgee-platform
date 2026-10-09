@@ -19,7 +19,10 @@ class PeekedRequestBody private constructor(
   val overCap: Boolean,
 ) {
   /** A request that serves the peeked body again, afresh on every stream or reader access. */
-  fun replay(): HttpServletRequest = BufferedReplayRequest(request, bytes)
+  fun replay(): HttpServletRequest {
+    check(!overCap) { "the body ran past the cap, so only a prefix of it was read; it cannot be replayed" }
+    return BufferedReplayRequest(request, bytes)
+  }
 
   companion object {
     fun peek(

@@ -2,6 +2,7 @@ package io.tolgee.mcp
 
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.mock.web.MockHttpServletRequest
 
 class PeekedRequestBodyTest {
@@ -36,6 +37,13 @@ class PeekedRequestBodyTest {
     peeked.overCap.assert.isTrue()
     peeked.bytes.size.assert
       .isEqualTo(CAP)
+  }
+
+  @Test
+  fun `a body past the cap cannot be replayed, since only a prefix of it was read`() {
+    val peeked = PeekedRequestBody.peek(request("A".repeat(CAP + 1)), CAP)
+
+    assertThrows<IllegalStateException> { peeked.replay() }
   }
 
   @Test
