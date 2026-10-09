@@ -1,6 +1,7 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.security.oauth2.OAuth2Constants
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.oauth2")
@@ -25,8 +26,8 @@ class OAuth2ServerProperties {
         "needed for a custom build of the extension, whose id is part of the URI, e.g. " +
         "`https://<extension-id>.chromiumapp.org/`. An empty list keeps the published extension's URIs.",
     defaultValue =
-      "https://hacnbapajkkfohnonhbmegojnddagfnj.chromiumapp.org/, " +
-        "https://e262e73e8cbdd8d796b491acfa20a501bfc7b9c0.extensions.allizom.org/",
+      OAuth2Constants.OFFICIAL_CHROME_EXTENSION_REDIRECT_URI + ", " +
+        OAuth2Constants.OFFICIAL_FIREFOX_EXTENSION_REDIRECT_URI,
   )
   var browserExtensionRedirectUris: List<String> = listOf()
 
