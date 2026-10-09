@@ -3,20 +3,13 @@ package io.tolgee.mcp
 import io.tolgee.security.authentication.CredentialPresence
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import jakarta.servlet.FilterChain
-import jakarta.servlet.ReadListener
-import jakarta.servlet.ServletInputStream
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.filter.OncePerRequestFilter
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
-import java.io.BufferedReader
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.io.InputStreamReader
 
 /**
  * Answers a credential-less MCP call with an HTTP 401 and a `WWW-Authenticate` challenge, unless the call is one
@@ -36,17 +29,13 @@ class McpAuthChallengeFilter(
       return
     }
 
-    // Read one byte past the cap so an exactly-cap body still parses while a larger one is detectably over.
-    val prefix = ByteArray(PEEK_CAP + 1)
-    val read = readFully(request.inputStream, prefix)
-    val peeked = prefix.copyOf(read)
-
-    if (read > PEEK_CAP || !isOpenToAnonymous(peeked)) {
+    val body = PeekedRequestBody.peek(request, PEEK_CAP)
+    if (body.overCap || !isOpenToAnonymous(body.bytes)) {
       challenge(request, response)
       return
     }
 
-    filterChain.doFilter(BufferedReplayRequest(request, peeked), response)
+    filterChain.doFilter(body.replay(), response)
   }
 
   private fun isOpenToAnonymous(body: ByteArray): Boolean {
@@ -71,19 +60,6 @@ class McpAuthChallengeFilter(
     response.setHeader(HttpHeaders.WWW_AUTHENTICATE, header)
   }
 
-  private fun readFully(
-    source: InputStream,
-    into: ByteArray,
-  ): Int {
-    var total = 0
-    while (total < into.size) {
-      val n = source.read(into, total, into.size - total)
-      if (n == -1) break
-      total += n
-    }
-    return total
-  }
-
   companion object {
     const val PEEK_CAP = 64 * 1024
 
@@ -91,40 +67,5 @@ class McpAuthChallengeFilter(
     private val ANONYMOUS_METHODS = setOf("initialize", "tools/list", "ping")
 
     private const val NOTIFICATION_PREFIX = "notifications/"
-  }
-}
-
-/**
- * Re-serves a fully-read body through both [getInputStream] and [getReader], afresh on every call — the transport
- * reads the stream, but an unoverridden [getReader] would hand it a drained one.
- */
-private class BufferedReplayRequest(
-  request: HttpServletRequest,
-  private val buffered: ByteArray,
-) : HttpServletRequestWrapper(request) {
-  private val charset get() = characterEncoding ?: Charsets.UTF_8.name()
-
-  override fun getInputStream(): ServletInputStream = ReplayServletInputStream(ByteArrayInputStream(buffered))
-
-  override fun getReader(): BufferedReader = BufferedReader(InputStreamReader(ByteArrayInputStream(buffered), charset))
-}
-
-private class ReplayServletInputStream(
-  private val delegate: InputStream,
-) : ServletInputStream() {
-  override fun read(): Int = delegate.read()
-
-  override fun read(
-    b: ByteArray,
-    off: Int,
-    len: Int,
-  ): Int = delegate.read(b, off, len)
-
-  override fun isFinished(): Boolean = delegate.available() == 0
-
-  override fun isReady(): Boolean = true
-
-  override fun setReadListener(listener: ReadListener?) {
-    throw UnsupportedOperationException()
   }
 }

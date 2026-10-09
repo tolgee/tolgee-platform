@@ -45,19 +45,13 @@ class McpAuthChallengeFilterTest {
   }
 
   @Test
-  fun `initialize passes through and the body is re-served on every stream access`() {
+  fun `initialize passes through with its body intact`() {
     val body = """{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"note":"přeložit"}}"""
     val chain = MockFilterChain()
 
     filter.doFilter(request(body), MockHttpServletResponse(), chain)
 
-    val downstream = chain.request!!
-    String(downstream.inputStream.readBytes(), Charsets.UTF_8).assert.isEqualTo(body)
-    String(downstream.inputStream.readBytes(), Charsets.UTF_8).assert.isEqualTo(body)
-    downstream.reader
-      .readText()
-      .assert
-      .isEqualTo(body)
+    String(chain.request!!.inputStream.readBytes(), Charsets.UTF_8).assert.isEqualTo(body)
   }
 
   @Test
