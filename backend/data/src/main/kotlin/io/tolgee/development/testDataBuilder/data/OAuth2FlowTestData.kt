@@ -25,7 +25,7 @@ class OAuth2FlowTestData : BaseTestData() {
    * Filler rotation history for a grant an HTTP flow created at runtime. That grant is not part of this graph, so
    * the rows come back unsaved and the caller persists them.
    */
-  fun refreshHistoryFor(
+  fun supersededRefreshTokensFor(
     grant: OAuth2Grant,
     count: Int,
     from: Instant = Instant.now(),

@@ -31,9 +31,10 @@ class OAuth2ClientDocumentCheck : StandardAuditModel() {
   var checkedAt: Date = Date()
 
   /**
-   * The attempt before [checkedAt]. A withdrawal mark written after this moment has not yet survived a read, so it
-   * may still be a mis-deploy. A wall clock cannot answer that on its own: a client nobody refreshes is not read at
-   * all, however much time passes.
+   * The attempt before [checkedAt]. It decides whether a withdrawal mark has already survived a read: a mark newer
+   * than this attempt was written by that attempt, so the document has not been read again since and the mark may
+   * still be a mis-deploy; a mark older than it has been read again and stays. The grace window alone cannot tell,
+   * because a document is read only when a user of the client refreshes.
    */
   @Temporal(TemporalType.TIMESTAMP)
   var previousCheckedAt: Date? = null

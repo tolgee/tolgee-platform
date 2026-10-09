@@ -69,7 +69,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
     val (grant, refreshToken) = rotatedOnce()
     val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
     val ancient = Instant.now().minus(Duration.ofDays(400))
-    val oldest = supersededRepository.saveAll(testData.refreshHistoryFor(grant, ceiling, ancient)).last()
+    val oldest = supersededRepository.saveAll(testData.supersededRefreshTokensFor(grant, ceiling, ancient)).last()
 
     json(driver.refresh(refreshToken, CLIENT_ID))
 
@@ -81,7 +81,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   fun `a grant whose whole history is younger than the floor stops recording rather than evicting`() {
     val (grant, refreshToken) = rotatedOnce()
     val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
-    val young = supersededRepository.saveAll(testData.refreshHistoryFor(grant, ceiling)).toList()
+    val young = supersededRepository.saveAll(testData.supersededRefreshTokensFor(grant, ceiling)).toList()
 
     val refreshed = json(driver.refresh(refreshToken, CLIENT_ID))
 
