@@ -110,22 +110,24 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   ): Long
 
   /**
-   * Revokes every grant of this client whose consented terms the document no longer matches.
+   * Revokes every grant of this client whose consented terms the document no longer matches: its stored hash differs
+   * from [currentHash].
    *
-   * [consentedScheme] keeps out hashes this build cannot reproduce - reading one of those as drift would revoke
-   * every grant an earlier release issued.
+   * Only hashes matching [reproducibleHashPattern] (a `LIKE` pattern such as `v1:%`) are compared. A hash written
+   * by an older scheme cannot be recomputed by this build, so a mismatch there proves nothing, and reading it as
+   * drift would revoke every grant an earlier release issued.
    */
   @Modifying
   @Query(
     """DELETE FROM OAuth2Grant g
        WHERE g.clientId = :clientId
-         AND g.clientMetadataHash LIKE :consentedScheme
+         AND g.clientMetadataHash LIKE :reproducibleHashPattern
          AND g.clientMetadataHash <> :currentHash""",
   )
   fun deleteDriftedFromDocument(
     @Param("clientId") clientId: String,
     @Param("currentHash") currentHash: String,
-    @Param("consentedScheme") consentedScheme: String,
+    @Param("reproducibleHashPattern") reproducibleHashPattern: String,
   ): Int
 
   /**
