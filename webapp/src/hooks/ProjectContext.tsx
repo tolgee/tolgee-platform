@@ -10,6 +10,7 @@ import {
   BatchJobModel,
   BatchJobStatus,
 } from 'tg.views/projects/translations/BatchOperations/types';
+import { pickBatchJobStatus } from 'tg.views/projects/translations/BatchOperations/OperationsSummary/utils';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 
@@ -26,7 +27,7 @@ type Props = {
 
 export const [ProjectContext, useProjectActions, useProjectContext] =
   createProvider(({ id }: Props) => {
-    const [knownJobs, setKnownJobs] = useState<number[]>([]);
+    const knownJobs = useRef(new Set<number>());
     const client = useGlobalContext((c) => c.wsClient.client);
     const connected = useGlobalContext((c) => c.wsClient.clientConnected);
 
@@ -51,17 +52,18 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
         noGlobalLoading: true,
         staleTime: 0,
         onSuccess(data) {
-          setBatchOperations(
+          setBatchOperations((current) =>
             (
               data._embedded?.batchJobs?.map((job) => {
                 // if data about the progress already exist, don't override them
                 // because that can cause out of order issues
-                const existingProgress = batchOperations?.find(
-                  (o) => o.id === job.id
-                );
+                const existingProgress = current?.find((o) => o.id === job.id);
                 return {
                   ...job,
-                  status: existingProgress?.status ?? job.status,
+                  status: pickBatchJobStatus(
+                    existingProgress?.status,
+                    job.status
+                  ),
                   totalItems: existingProgress?.totalItems ?? job.totalItems,
                   progress: existingProgress?.progress ?? job.progress,
                   errorMessage:
@@ -78,14 +80,15 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       useState<(Partial<BatchJobModel> & BatchJobUpdateModel)[]>();
 
     const changeHandler = ({ data }: BatchJobProgress) => {
-      const exists = batchOperations?.find((job) => job.id === data.jobId);
-      let shouldRefetch = false;
-      if (!exists) {
-        if (!knownJobs.includes(data.jobId)) {
-          shouldRefetch = true;
-          // only refetch jobs first time we see unknown job
-          setKnownJobs((jobs) => [...jobs, data.jobId]);
-          setBatchOperations((jobs) => [
+      // only refetch jobs first time we see unknown job
+      const isUnknown = !knownJobs.current.has(data.jobId);
+      knownJobs.current.add(data.jobId);
+      setBatchOperations((jobs) => {
+        if (!jobs?.some((job) => job.id === data.jobId)) {
+          if (!isUnknown) {
+            return jobs;
+          }
+          return [
             ...(jobs || []),
             {
               id: data.jobId,
@@ -94,29 +97,22 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
               status: data.status,
               errorMessage: data.errorMessage,
             },
-          ]);
+          ];
         }
-      } else {
-        setBatchOperations((jobs) =>
-          jobs?.map((job) => {
-            if (job.id === data.jobId) {
-              if (data.status === 'FAILED' && data.status !== job.status) {
-                // load error message
-                shouldRefetch = true;
-              }
-              return {
+        return jobs.map((job) =>
+          job.id === data.jobId
+            ? {
                 ...job,
                 totalItems: data.total ?? job.totalItems,
                 progress: data.processed ?? job.progress,
-                status: data.status ?? job.status,
+                status: pickBatchJobStatus(data.status, job.status),
                 errorMessage: data.errorMessage ?? job.errorMessage,
-              };
-            }
-            return job;
-          })
+              }
+            : job
         );
-      }
-      if (shouldRefetch) {
+      });
+      // FAILED: load error message
+      if (isUnknown || data.status === 'FAILED') {
         batchJobsLoadable.refetch({ fetching: true });
       }
     };
