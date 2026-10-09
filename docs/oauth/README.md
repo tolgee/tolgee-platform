@@ -214,7 +214,7 @@ single-project token resolves the project-implicit endpoints exactly as a projec
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
-**pre-registration** (`OAuth2ClientRegistry.kt`): the client ships with a known `client_id`, an on/off flag and a
+**pre-registration** (`PreRegisteredOAuth2Clients.kt`): the client ships with a known `client_id`, an on/off flag and a
 redirect URI list with a built-in default. The **CLI is on by default and registered on every instance whose
 issuer resolves**, with `http://127.0.0.1/callback`: `tolgee login` has to work against an instance nobody
 configured for it, and a loopback redirect is predefined in the CLI, not chosen by the operator. The **browser
@@ -520,7 +520,7 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | API accepts the token + narrows scopes | `AuthenticationFilter.kt`, `OAuth2AccessTokenResolver.kt`, `SecurityService.getCurrentPermittedScopes` |
 | Websocket accepts the token + narrows the subscribed topic | `WebsocketAuthenticationResolver.kt`, `WebsocketSubscribeAuthorizer.kt` |
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
-| Client registry (pre-registered from config, plus the CIMD fallthrough) | `OAuth2ClientRegistry.kt` |
+| Client registry: the clients Tolgee ships, built from config, plus the CIMD fallthrough | `PreRegisteredOAuth2Clients.kt`, `OAuth2ClientRegistry.kt` |
 | CIMD: SSRF-hardened DNS-pinned fetch, fail-closed validation, per-pod cache, fetch budget, candidate policy | `security/oauth2/cimd/CimdHostResolver.kt`, `CimdDocumentFetcher.kt`, `CimdMetadataFetcher.kt`, `CimdClientCache.kt`, `CimdFetchBudget.kt`, `CimdClientPolicy.kt`, `util/UrlSecurity.kt` |
 | CIMD client lifecycle: the document read on the refresh path, written to the document-check table | `security/oauth2/cimd/CimdDocumentCheck.kt`, `CimdClientLifecycleService.kt` |
 | RFC 8707 audience binding: which resource server a token is for, enforced on every request | `security/oauth2/OAuth2Resources.kt`, `OAuth2Audience.kt`, `OAuth2AccessTokenResolver.kt`, `AuthenticationFilter.kt` |

@@ -43,7 +43,7 @@ class OAuth2IssuerResolver(
    * A warning, not a failure. `tolgee.front-end-url` carrying a path is valid for everything else that property does,
    * and an instance that never wanted OAuth must not stop booting over it — [isConfigured] already reports the
    * server as off, so the whole feature degrades coherently. The hard failure lives in
-   * [OAuth2ClientRegistry.requireIssuerForPreRegisteredClients], where the operator has opted into OAuth.
+   * [PreRegisteredOAuth2Clients.requireIssuerForConfiguredClients], where the operator has opted into OAuth.
    */
   @PostConstruct
   fun warnOnUnusableIssuer() {
