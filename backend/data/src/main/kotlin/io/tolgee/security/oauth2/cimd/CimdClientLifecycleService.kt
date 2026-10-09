@@ -30,9 +30,10 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
- * What a document check learns about a client that identifies itself with a metadata document, written to the grant
- * rows and to `oauth2_client_document_check`. [CimdDocumentCheck] calls it from the refresh path; the grant flow only
- * reads the marks it leaves. `docs/oauth/README.md` explains each rule and what it stops.
+ * What a document check learns about a client that identifies itself with a metadata document, written to
+ * `oauth2_client_document_check` and, for a drifted document, to the grant rows. [CimdDocumentCheck] calls it from
+ * the refresh path; the grant flow only reads the marks it leaves. `docs/oauth/README.md` explains each rule and
+ * what it stops.
  *
  * Every write runs in its own transaction. The check happens inside a token request, and what it learned about the
  * publisher must stay written whatever becomes of that request.
@@ -75,7 +76,7 @@ class CimdClientLifecycleService(
     documentCheckRepository.deleteFirstAttempt(clientId, claimedAt)
   }
 
-  /** Writes what the publisher answered to the grant rows and the check row. */
+  /** Writes what the publisher answered to the client's check row, and revokes the grants its document drifted from. */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun recordCheckResult(
     clientId: String,
@@ -95,23 +96,29 @@ class CimdClientLifecycleService(
     logger.info("CIMD check could not read the document of {}: {}", clientId, resolution)
   }
 
-  /** Since when this server has been trying to read the document and failing. Null while it reads fine. */
-  fun documentFailingSince(clientId: String): Date? = documentCheckRepository.findByClientId(clientId)?.failingSince
+  /** What this server knows about the client's document. Null when nothing has ever tried to read it. */
+  fun documentCheckOf(clientId: String): OAuth2ClientDocumentCheck? = documentCheckRepository.findByClientId(clientId)
+
+  fun isClientWithdrawn(clientId: String): Boolean =
+    documentCheckRepository.findByClientId(clientId)?.withdrawnAt != null
 
   @Transactional
   fun deleteCheckRowsWithoutGrants(): Int = documentCheckRepository.deleteWithoutGrants()
 
-  /** A publisher's refusal, made durable on the grant rows so every instance reads it. */
+  /** A publisher's refusal, made durable on the client's row so every instance reads it. */
   @Transactional
   fun recordClientWithdrawn(clientId: String) {
-    val marked = oauth2GrantRepository.markClientWithdrawn(clientId, currentDateProvider.date)
-    if (marked > 0) {
-      logger.warn(
-        "Marked {} OAuth2 grant(s) of client {} as withdrawn: its metadata document refuses",
-        marked,
-        clientId,
-      )
-    }
+    val now = currentDateProvider.date
+    val row =
+      documentCheckRepository.findByClientId(clientId)
+        ?: OAuth2ClientDocumentCheck().also {
+          it.clientId = clientId
+          it.checkedAt = now
+        }
+    if (row.withdrawnAt != null) return
+    row.withdrawnAt = now
+    documentCheckRepository.save(row)
+    logger.warn("Marked client {} as withdrawn: its metadata document is gone", clientId)
   }
 
   private fun markFailing(clientId: String) {
@@ -147,17 +154,14 @@ class CimdClientLifecycleService(
    * client and stays.
    */
   private fun clearClientWithdrawn(clientId: String) {
+    val row = documentCheckRepository.findByClientId(clientId) ?: return
+    val mark = row.withdrawnAt ?: return
     // The claim for this check already moved the row on, so `previousCheckedAt` is the attempt before this one. A
     // mark newer than it was written by that very attempt and has not survived a read yet; a mark older than it has.
-    val previousAttempt = documentCheckRepository.findByClientId(clientId)?.previousCheckedAt ?: NEVER_CHECKED
-    val cleared = oauth2GrantRepository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
-    if (cleared > 0) {
-      logger.info(
-        "Lifted the withdrawal mark on {} OAuth2 grant(s) of client {}: its document answers again",
-        cleared,
-        clientId,
-      )
-    }
+    val previousAttempt = row.previousCheckedAt ?: NEVER_CHECKED
+    if (!mark.after(graceStart()) && !mark.after(previousAttempt)) return
+    row.withdrawnAt = null
+    logger.info("Lifted the withdrawal mark on client {}: its document answers again", clientId)
   }
 
   private fun dueBefore(now: Date): Date =

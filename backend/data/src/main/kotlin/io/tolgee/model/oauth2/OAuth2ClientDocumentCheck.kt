@@ -10,9 +10,9 @@ import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 /**
- * What this server knows about reading one `client_id`'s metadata document: when it last tried, when it tried before
- * that, and since when the tries have been failing. One row per client, not per grant, because every fact here is
- * about the document and not about any one user's authorization.
+ * What this server knows about one `client_id`'s metadata document: when it last tried to read it, when it tried
+ * before that, since when the tries have been failing, and whether the publisher has taken it down. One row per
+ * client, not per grant, because every fact here is about the document and not about any one user's authorization.
  */
 @Entity
 @Table(
@@ -46,4 +46,12 @@ class OAuth2ClientDocumentCheck : StandardAuditModel() {
    */
   @Temporal(TemporalType.TIMESTAMP)
   var failingSince: Date? = null
+
+  /**
+   * When the document was last seen to be gone: the host answered that there is nothing there. Every grant of the
+   * client is refused while this is set. Cleared when the document answers again inside the grace rules, so a
+   * publisher's mis-deploy is recoverable.
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  var withdrawnAt: Date? = null
 }

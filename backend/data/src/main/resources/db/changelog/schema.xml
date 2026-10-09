@@ -6035,11 +6035,7 @@
                                  onDelete="CASCADE" validate="true"/>
     </changeSet>
     <changeSet author="bdshadow" id="1790090000000-1">
-        <addColumn tableName="oauth2_grant">
-            <!-- When the client's document was last seen to be gone. -->
-            <column name="client_withdrawn_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
-        </addColumn>
-        <!-- The mark is written for every grant of one client, which is how it is read as well. -->
+        <!-- Everything a document check learns is applied to every grant of one client. -->
         <createIndex indexName="oauth2_grant_client_id_idx" tableName="oauth2_grant">
             <column name="client_id"/>
         </createIndex>
@@ -6059,6 +6055,8 @@
             <column name="previous_checked_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <!-- The first failed attempt since the document was last read successfully; null while it reads fine. -->
             <column name="failing_since" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <!-- When the document was last seen to be gone; null while it answers. -->
+            <column name="withdrawn_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
             <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>

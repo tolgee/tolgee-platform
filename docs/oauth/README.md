@@ -295,7 +295,7 @@ someone could do if it were missing.
 
 | Rule | What it stops |
 |---|---|
-| The withdrawal mark is written to the grant rows, not kept in memory | Only the instance that read the document knows the client is retired, and a restart forgets it. The publisher pulls the one lever they have and nothing happens. |
+| The withdrawal mark is written to the client's row in the database, not kept in memory | Only the instance that read the document knows the client is retired, and a restart forgets it. The publisher pulls the one lever they have and nothing happens. |
 | A document that comes back lifts the mark only inside the grace window | Someone who takes over the `client_id` URL publishes a file again and gets back every grant the retirement ended. |
 | The document of an existing grant is read only behind a validated refresh token, once per client per interval | An anonymous caller picks both the host Tolgee connects to and how often. Tolgee becomes the tool that floods someone else's server, and its own threads sit waiting on a slow host. |
 | The claim for a read is one conditional `UPDATE` | Two refreshes of the same client at the same moment both fetch, and a busy client's users turn one read per interval into one read per refresh. |
@@ -309,8 +309,9 @@ someone could do if it were missing.
 For a client that already has a grant, exactly one thing reads its document: `CimdDocumentCheck`, called from the
 token endpoint while a refresh token is being used. It runs only after the token matched a live grant of that
 client, and at most once per client within `tolgee.oauth2.cimd-check-interval-minutes` (default 15). What it
-learns it writes to the grant rows and to `oauth2_client_document_check`: the withdrawal mark, the revocation of
-grants whose consented terms the document no longer matches, and since when the document has been failing to read.
+learns it writes to `oauth2_client_document_check`, one row per client: the withdrawal mark and since when the
+document has been failing to read. The one thing written to the grants themselves is the revocation of those whose
+consented terms the document no longer matches.
 
 The order inside one refresh matters. The token hash is first matched against a live grant without loading it.
 Then the check claims the attempt, fetches, and writes. Only then is the grant locked and loaded. The check's
@@ -354,10 +355,10 @@ within a round. Its refresh is refused the moment it is tried.
 ### Retiring a client
 
 Taking the document down is how a publisher retires a client they no longer control. A **gone** answer at the next
-read is written to every grant of that `client_id` (`oauth2_grant.client_withdrawn_at`). From then on every
-access token of those grants is refused, on every instance, and so is every refresh: `invalid_client` on an
-instance whose cache holds the refusal, `invalid_grant` where the mark is read off the grant row. The mark is in
-the database rather than in memory, so it outlives the process that read it and reaches the instances that never
+read is written to the client's row (`oauth2_client_document_check.withdrawn_at`). From then on every access
+token of that client's grants is refused, on every instance, and so is every refresh: `invalid_client` on an
+instance whose cache holds the refusal, `invalid_grant` where the mark is read off the row. The mark is in the
+database rather than in memory, so it outlives the process that read it and reaches the instances that never
 fetched anything.
 
 A document that answers again clears the mark, so a publisher who took a document down by mistake can put it
@@ -398,12 +399,12 @@ started just now is forgiven for the full window, whatever happened before it. A
 for sets nothing, so the server's own busy minute never counts against a publisher.
 
 The failing-since time is a fact about the `client_id`, so it lives on the one check row per client and not on
-the grants. One successful read by any user of the client clears it for every grant of that client, the same way
-the withdrawal mark is written to and lifted from every grant at once. An earlier version stamped a per-grant
-"last read" instead, on whichever request happened to read the document, which on a busy client is one request in
-hundreds; most users of a healthy client would have aged out.
+the grants, next to the withdrawal mark. One successful read by any user of the client clears it for every grant
+of that client at once. An earlier version stamped a per-grant "last read" instead, on whichever request happened
+to read the document, which on a busy client is one request in hundreds; most users of a healthy client would
+have aged out.
 
-What the per-request path checks is split on purpose. The **retirement** is read from the grant row, which the
+What the per-request path checks is split on purpose. The **retirement** is read from the client's row, which the
 check writes. Whether the client is one this instance serves at all is `servesClient`, and it reads no
 resolution cache: that lane is filled by `/oauth2/authorize`, so a caller who samples a publisher through a deploy
 or a CDN purge could otherwise have every token of a client nobody retired refused until the entry expired.
@@ -521,7 +522,7 @@ over `AbstractOAuth2FlowTest` cover what is Tolgee-specific on top of it.
 | Consent-screen API: open the authorization, describe it, approve/deny + project selection | `backend/api/.../controllers/oauth2/OAuth2FlowController.kt` |
 | Client registry (pre-registered from config, plus the CIMD fallthrough) | `OAuth2ClientRegistry.kt` |
 | CIMD: SSRF-hardened DNS-pinned fetch, fail-closed validation, per-pod cache, fetch budget, candidate policy | `security/oauth2/cimd/CimdHostResolver.kt`, `CimdDocumentFetcher.kt`, `CimdMetadataFetcher.kt`, `CimdClientCache.kt`, `CimdFetchBudget.kt`, `CimdClientPolicy.kt`, `util/UrlSecurity.kt` |
-| CIMD client lifecycle: the document read on the refresh path, written to the grant rows and the document-check table | `security/oauth2/cimd/CimdDocumentCheck.kt`, `CimdClientLifecycleService.kt` |
+| CIMD client lifecycle: the document read on the refresh path, written to the document-check table | `security/oauth2/cimd/CimdDocumentCheck.kt`, `CimdClientLifecycleService.kt` |
 | RFC 8707 audience binding: which resource server a token is for, enforced on every request | `security/oauth2/OAuth2Resources.kt`, `OAuth2Audience.kt`, `OAuth2AccessTokenResolver.kt`, `AuthenticationFilter.kt` |
 | MCP cold-start: a credential-less call to anything but the open set gets a 401 challenge a client can act on | `mcp/McpAuthChallengeFilter.kt` |
 | Refresh-token replay: soft grace window + multi-generation theft history | `OAuth2AuthorizationService.kt`, `model/oauth2/OAuth2SupersededRefreshToken.kt` |

@@ -23,6 +23,7 @@ import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.model.oauth2.OAuth2SupersededRefreshToken
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
@@ -214,7 +215,7 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "code expired")
     }
-    refuseIfClientWithdrawn(grant)
+    refuseIfClientWithdrawn(grant, client)
     // RFC 9700 4.5.3.1: a mismatching redirect_uri or code_verifier is the authorization-code-injection signal, so
     // the code is spent rather than left redeemable for the rest of its validity across unlimited attempts.
     if (grant.redirectUri != redirectUri || !OAuth2Pkce.matchesChallenge(verifier, grant.codeChallenge)) {
@@ -255,8 +256,7 @@ class OAuth2AuthorizationService(
       repository.delete(grant)
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "refresh token expired")
     }
-    refuseIfClientWithdrawn(grant)
-    refuseIfDocumentUnreadableForTooLong(grant, client)
+    refuseIfDocumentUnusable(grant, client)
     requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
     grant.issuedTokenScopeValues = narrowedScopes(grant, requestedScope)
@@ -322,16 +322,43 @@ class OAuth2AuthorizationService(
   }
 
   /**
-   * A grant of a client that identifies itself with a metadata document lives on that document being readable.
-   * A failure is forgiven until it has lasted [OAuth2ServerProperties.cimdVerificationMaxAgeDays], counted from the
-   * first failed read after the last successful one. A client nobody tried to read is never refused here.
+   * The two facts the document check leaves on the client's row, read from the row and never from this instance's
+   * resolution cache: whether the publisher took the document down, and since when it has failed to read.
    */
-  private fun refuseIfDocumentUnreadableForTooLong(
+  private fun refuseIfDocumentUnusable(
     grant: OAuth2Grant,
     client: OAuth2Client,
   ) {
     if (!client.hasMetadataDocument) return
-    val failingSince = cimdClientLifecycle.documentFailingSince(grant.clientId) ?: return
+    val document = cimdClientLifecycle.documentCheckOf(grant.clientId) ?: return
+    refuseIfWithdrawn(document)
+    refuseIfUnreadableForTooLong(grant, document)
+  }
+
+  /** The grant is kept, not deleted, so a document that answers again inside the grace rules can clear the mark. */
+  private fun refuseIfClientWithdrawn(
+    grant: OAuth2Grant,
+    client: OAuth2Client,
+  ) {
+    if (!client.hasMetadataDocument) return
+    cimdClientLifecycle.documentCheckOf(grant.clientId)?.let { refuseIfWithdrawn(it) }
+  }
+
+  private fun refuseIfWithdrawn(document: OAuth2ClientDocumentCheck) {
+    if (document.withdrawnAt == null) return
+    throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document is gone")
+  }
+
+  /**
+   * A grant of a client that identifies itself with a metadata document lives on that document being readable.
+   * A failure is forgiven until it has lasted [OAuth2ServerProperties.cimdVerificationMaxAgeDays], counted from the
+   * first failed read after the last successful one. A client nobody tried to read is never refused here.
+   */
+  private fun refuseIfUnreadableForTooLong(
+    grant: OAuth2Grant,
+    document: OAuth2ClientDocumentCheck,
+  ) {
+    val failingSince = document.failingSince ?: return
     val maxAgeMs = TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays)
     if (currentDateProvider.date.time - failingSince.time <= maxAgeMs) return
     logger.info(
@@ -340,15 +367,6 @@ class OAuth2AuthorizationService(
       failingSince,
     )
     throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document could not be read")
-  }
-
-  /**
-   * The mark another instance may have written, read from the row and not from this instance's resolution cache.
-   * The grant is kept, not deleted, so a document that answers again inside the grace window can clear the mark.
-   */
-  private fun refuseIfClientWithdrawn(grant: OAuth2Grant) {
-    if (grant.clientWithdrawnAt == null) return
-    throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document is gone")
   }
 
   @Transactional

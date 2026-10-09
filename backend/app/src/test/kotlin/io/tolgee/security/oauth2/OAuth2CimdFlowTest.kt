@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.fixtures.bearerHeaders
+import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.oauth2.cimd.CimdClientCache
 import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
@@ -38,6 +39,9 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
   @Autowired
   private lateinit var cimdClientLifecycle: CimdClientLifecycleService
+
+  @Autowired
+  private lateinit var documentCheckRepository: OAuth2ClientDocumentCheckRepository
 
   @Autowired
   private lateinit var oauth2Properties: OAuth2ServerProperties
@@ -222,7 +226,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isEqualTo("invalid_grant")
 
-    stored(accessToken).clientWithdrawnAt.assert.isNotNull()
+    withdrawnAt(clientId).assert.isNotNull()
     performGet("/v2/projects/${testData.project.id}/translations", bearerHeaders(accessToken)).andIsUnauthorized
   }
 
@@ -234,7 +238,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val pending = driver.startPendingConsent(jwt(), clientId, redirect)
     val code = driver.code(pending, projectId = null)
     val issued = json(driver.exchangeCode(code, clientId, redirect, pending.verifier))
-    val grantId = stored(issued.get("access_token").asString()).id
 
     var refreshToken = issued.get("refresh_token").asString()
     listOf(500, 503, 429, 403).forEach { status ->
@@ -249,11 +252,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
         .isNotBlank()
       refreshToken = renewed.get("refresh_token").asString()
     }
-    oauth2GrantRepository
-      .findById(grantId)
-      .get()
-      .clientWithdrawnAt.assert
-      .isNull()
+    withdrawnAt(clientId).assert.isNull()
   }
 
   @Test
@@ -264,7 +263,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val pending = driver.startPendingConsent(jwt(), clientId, redirect)
     val code = driver.code(pending, projectId = null)
     val issued = json(driver.exchangeCode(code, clientId, redirect, pending.verifier))
-    val grantId = stored(issued.get("access_token").asString()).id
 
     // The other instance saw the document go and wrote the mark; this one still caches the answer from the
     // authorize hop. The mark on the row is what decides, not the cache.
@@ -276,11 +274,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    oauth2GrantRepository
-      .findById(grantId)
-      .get()
-      .clientWithdrawnAt.assert
-      .isNotNull()
+    withdrawnAt(clientId).assert.isNotNull()
   }
 
   @Test
@@ -325,7 +319,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    val grantId = oauth2GrantRepository.findAll().first { it.clientId == clientId }.id
 
     // A second read with the document still gone: the mark has now survived a read, so it is no longer a
     // mis-deploy we are waiting to see recover.
@@ -344,11 +337,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    oauth2GrantRepository
-      .findById(grantId)
-      .get()
-      .clientWithdrawnAt.assert
-      .isNotNull()
+    withdrawnAt(clientId).assert.isNotNull()
   }
 
   /** The age bound counts failed reads, not idle time: a user coming back after a long break is not signed out by a blip. */
@@ -601,6 +590,8 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .response.status.assert
       .isEqualTo(400)
   }
+
+  private fun withdrawnAt(clientId: String): Date? = documentCheckRepository.findByClientId(clientId)?.withdrawnAt
 
   private fun clientIdAt(port: Int) = "http://127.0.0.1:$port/client"
 

@@ -99,7 +99,9 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     """
     SELECT COUNT(DISTINCT g.clientId) FROM OAuth2Grant g
     WHERE g.userAccount.id = :userId AND g.clientId LIKE 'http%' AND g.clientId <> :exceptClientId
-      AND g.clientWithdrawnAt IS NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM OAuth2ClientDocumentCheck c WHERE c.clientId = g.clientId AND c.withdrawnAt IS NOT NULL
+      )
       AND GREATEST(g.refreshTokenExpiresAt, g.accessTokenExpiresAt, g.codeExpiresAt) > :now
     """,
   )
@@ -128,34 +130,5 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     @Param("clientId") clientId: String,
     @Param("currentHash") currentHash: String,
     @Param("reproducibleHashPattern") reproducibleHashPattern: String,
-  ): Int
-
-  /**
-   * Records a publisher's withdrawal where it survives the process that saw it and reaches every other instance.
-   * The grants are left in place rather than deleted, so a mis-deploy can still be recovered from.
-   */
-  @Modifying
-  @Query(
-    """UPDATE OAuth2Grant g SET g.clientWithdrawnAt = :at WHERE g.clientId = :clientId AND g.clientWithdrawnAt IS NULL""",
-  )
-  fun markClientWithdrawn(
-    @Param("clientId") clientId: String,
-    @Param("at") at: Date,
-  ): Int
-
-  /**
-   * Lifts a withdrawal that is still young enough to be a mis-deploy, by either of two measures: it was made
-   * within [markedAfter], or it is newer than [previousAttempt]. A mark past both stays.
-   */
-  @Modifying
-  @Query(
-    """UPDATE OAuth2Grant g SET g.clientWithdrawnAt = null
-       WHERE g.clientId = :clientId
-         AND (g.clientWithdrawnAt > :markedAfter OR g.clientWithdrawnAt > :previousAttempt)""",
-  )
-  fun clearRecentClientWithdrawn(
-    @Param("clientId") clientId: String,
-    @Param("markedAfter") markedAfter: Date,
-    @Param("previousAttempt") previousAttempt: Date,
   ): Int
 }

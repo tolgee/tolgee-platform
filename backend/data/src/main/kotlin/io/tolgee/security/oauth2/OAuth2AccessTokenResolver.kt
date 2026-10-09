@@ -25,6 +25,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.stereotype.Component
 
@@ -35,6 +36,7 @@ class OAuth2AccessTokenResolver(
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
+  private val cimdClientLifecycle: CimdClientLifecycleService,
 ) {
   fun tryResolve(
     token: String,
@@ -52,9 +54,9 @@ class OAuth2AccessTokenResolver(
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
-    // A grant outlives the client it was issued to, so both are checked per request rather than at issue time: the
-    // withdrawal mark on the row, and whether this instance still serves the client at all.
-    if (grant.clientWithdrawnAt != null || !oauth2ClientRegistry.servesClient(grant.clientId)) {
+    // A grant outlives the client it was issued to, so both are checked per request rather than at issue time:
+    // whether this instance still serves the client at all, and the withdrawal mark on the client's row.
+    if (!oauth2ClientRegistry.servesClient(grant.clientId) || cimdClientLifecycle.isClientWithdrawn(grant.clientId)) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 
