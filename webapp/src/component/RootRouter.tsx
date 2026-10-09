@@ -94,11 +94,18 @@ export const RootRouter = () => {
         <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
           <PreferredOrganizationRedirect />
         </PrivateRoute>
+        {/* The survey covers the app. Only one of these routes renders at a time,
+            so the gates below never stack; the routes above complete an auth or
+            account action and must stay reachable while a survey is pending. */}
         <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-          <UserSettingsRouter />
+          <OnboardingSurveyGate>
+            <UserSettingsRouter />
+          </OnboardingSurveyGate>
         </PrivateRoute>
         <PrivateRoute path={LINKS.ADMINISTRATION.template}>
-          <AdministrationView />
+          <OnboardingSurveyGate>
+            <AdministrationView />
+          </OnboardingSurveyGate>
         </PrivateRoute>
 
         <Route>
