@@ -1,3 +1,10 @@
+# [3.228.0](https://github.com/tolgee/tolgee-platform/compare/v3.227.0...v3.228.0) (2026-10-09)
+
+
+### Features
+
+* ask self-hosted admins for a G2 review on startup ([#3971](https://github.com/tolgee/tolgee-platform/issues/3971)) ([3772e92](https://github.com/tolgee/tolgee-platform/commit/3772e92bf74b85d55a9acd38d392852dfb9fc4ad))
+
 # [3.227.0](https://github.com/tolgee/tolgee-platform/compare/v3.226.3...v3.227.0) (2026-10-09)
 
 
