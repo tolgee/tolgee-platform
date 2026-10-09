@@ -48,7 +48,7 @@ const OAuth2ConsentView = React.lazy(
 
 export const RootRouter = () => {
   return (
-    <OnboardingSurveyGate>
+    <>
       <Switch>
         <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
           <SlackConnectView />
@@ -102,11 +102,12 @@ export const RootRouter = () => {
         </PrivateRoute>
 
         <Route>
-          <DashboardRouter />
+          <OnboardingSurveyGate>
+            <DashboardRouter />
+            <routes.Root />
+          </OnboardingSurveyGate>
         </Route>
       </Switch>
-
-      <routes.Root />
-    </OnboardingSurveyGate>
+    </>
   );
 };
