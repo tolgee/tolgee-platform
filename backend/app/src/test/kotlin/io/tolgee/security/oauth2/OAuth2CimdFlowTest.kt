@@ -38,7 +38,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
-  private lateinit var cimdClientLifecycle: CimdClientLifecycleService
+  private lateinit var cimdClientLifecycleService: CimdClientLifecycleService
 
   @Autowired
   private lateinit var documentCheckRepository: OAuth2ClientDocumentCheckRepository
@@ -267,7 +267,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     // The other instance saw the document go and wrote the mark; this one still caches the answer from the
     // authorize hop. The mark on the row is what decides, not the cache.
     documentWithdrawn = true
-    cimdClientLifecycle.recordClientWithdrawn(clientId)
+    cimdClientLifecycleService.recordClientWithdrawn(clientId)
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("error")

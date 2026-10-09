@@ -56,7 +56,7 @@ class OAuth2AuthorizationService(
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
-  private val cimdClientLifecycle: CimdClientLifecycleService,
+  private val cimdClientLifecycleService: CimdClientLifecycleService,
   private val cimdDocumentCheck: CimdDocumentCheck,
   private val oauth2Resources: OAuth2Resources,
   private val metrics: Metrics,
@@ -330,7 +330,7 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
   ) {
     if (!client.hasMetadataDocument) return
-    val document = cimdClientLifecycle.documentCheckOf(grant.clientId) ?: return
+    val document = cimdClientLifecycleService.documentCheckOf(grant.clientId) ?: return
     refuseIfWithdrawn(document)
     refuseIfUnreadableForTooLong(grant, document)
   }
@@ -341,7 +341,7 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
   ) {
     if (!client.hasMetadataDocument) return
-    cimdClientLifecycle.documentCheckOf(grant.clientId)?.let { refuseIfWithdrawn(it) }
+    cimdClientLifecycleService.documentCheckOf(grant.clientId)?.let { refuseIfWithdrawn(it) }
   }
 
   private fun refuseIfWithdrawn(document: OAuth2ClientDocumentCheck) {

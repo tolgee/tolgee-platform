@@ -29,7 +29,7 @@ import java.time.Duration
 @Component
 class OAuth2GrantCleanup(
   private val oauth2AuthorizationService: OAuth2AuthorizationService,
-  private val cimdClientLifecycle: CimdClientLifecycleService,
+  private val cimdClientLifecycleService: CimdClientLifecycleService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val lockingProvider: LockingProvider,
@@ -49,7 +49,7 @@ class OAuth2GrantCleanup(
     val deleted =
       oauth2AuthorizationService.deleteExpiredBefore(cutoff) + oauth2AuthorizationService.deleteExpiredPendingConsents()
     val prunedTokens = oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
-    val deletedCheckRows = cimdClientLifecycle.deleteCheckRowsWithoutGrants()
+    val deletedCheckRows = cimdClientLifecycleService.deleteCheckRowsWithoutGrants()
     if (deleted > 0 || prunedTokens > 0 || deletedCheckRows > 0) {
       logger.info(
         "OAuth2 grant cleanup removed {} expired grant(s), {} superseded refresh token(s) and {} document check row(s)",

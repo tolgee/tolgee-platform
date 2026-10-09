@@ -32,7 +32,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   @Autowired
-  private lateinit var cimdClientLifecycle: CimdClientLifecycleService
+  private lateinit var cimdClientLifecycleService: CimdClientLifecycleService
 
   private lateinit var testData: OAuth2GrantCleanupTestData
 
@@ -55,10 +55,10 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   fun `only the check rows of clients nobody holds a grant for are deleted`() {
     testData.addGrant(refreshExpiresAt = Instant.now().plus(Duration.ofDays(20)), clientId = LIVE_CLIENT)
     testDataService.saveTestData(testData.root)
-    cimdClientLifecycle.claimCheck(LIVE_CLIENT)
-    cimdClientLifecycle.claimCheck(ORPHAN_CLIENT)
+    cimdClientLifecycleService.claimCheck(LIVE_CLIENT)
+    cimdClientLifecycleService.claimCheck(ORPHAN_CLIENT)
 
-    cimdClientLifecycle.deleteCheckRowsWithoutGrants()
+    cimdClientLifecycleService.deleteCheckRowsWithoutGrants()
 
     documentCheckRepository.findByClientId(LIVE_CLIENT).assert.isNotNull()
     documentCheckRepository.findByClientId(ORPHAN_CLIENT).assert.isNull()
