@@ -287,6 +287,42 @@ class OAuth2AuthorizationService(
     repository.delete(grant)
   }
 
+  @Transactional
+  fun revokeAllForUser(userId: Long): Int = repository.deleteAllByUserAccountId(userId)
+
+  @Transactional
+  fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(Date.from(cutoff))
+
+  @Transactional
+  fun pruneRefreshHistoryBeyondDepth(): Int =
+    oauth2SupersededRefreshTokenRepository.deleteBeyondNewestPerGrant(
+      properties.refreshTokenHistoryGenerations,
+      historyFloor(),
+    )
+
+  @Transactional
+  fun deleteExpiredPendingConsents(): Int = repository.deleteExpiredPendingConsents(currentDateProvider.date)
+
+  private fun lockOwnPendingGrant(
+    consentState: String,
+    userId: Long,
+  ): OAuth2Grant = requireOwnPending(repository.findAndLockByConsentState(consentState), userId)
+
+  /**
+   * Every refusal is the same NotFoundException: a state that is not yours must be indistinguishable from one
+   * that never existed.
+   */
+  private fun requireOwnPending(
+    grant: OAuth2Grant?,
+    userId: Long,
+  ): OAuth2Grant {
+    val pending =
+      grant?.takeIf { !isExpiredOrUnset(it.consentExpiresAt) }
+        ?: throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
+    if (pending.userAccount.id != userId) throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
+    return pending
+  }
+
   /**
    * Bounds how many publishers one account can make this server fetch from, and so how many fetches per interval
    * its refreshes can start. See `docs/oauth/README.md`.
@@ -367,42 +403,6 @@ class OAuth2AuthorizationService(
       failingSince,
     )
     throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document could not be read")
-  }
-
-  @Transactional
-  fun revokeAllForUser(userId: Long): Int = repository.deleteAllByUserAccountId(userId)
-
-  @Transactional
-  fun deleteExpiredBefore(cutoff: Instant): Int = repository.deleteExpiredBefore(Date.from(cutoff))
-
-  @Transactional
-  fun pruneRefreshHistoryBeyondDepth(): Int =
-    oauth2SupersededRefreshTokenRepository.deleteBeyondNewestPerGrant(
-      properties.refreshTokenHistoryGenerations,
-      historyFloor(),
-    )
-
-  @Transactional
-  fun deleteExpiredPendingConsents(): Int = repository.deleteExpiredPendingConsents(currentDateProvider.date)
-
-  private fun lockOwnPendingGrant(
-    consentState: String,
-    userId: Long,
-  ): OAuth2Grant = requireOwnPending(repository.findAndLockByConsentState(consentState), userId)
-
-  /**
-   * Every refusal is the same NotFoundException: a state that is not yours must be indistinguishable from one
-   * that never existed.
-   */
-  private fun requireOwnPending(
-    grant: OAuth2Grant?,
-    userId: Long,
-  ): OAuth2Grant {
-    val pending =
-      grant?.takeIf { !isExpiredOrUnset(it.consentExpiresAt) }
-        ?: throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
-    if (pending.userAccount.id != userId) throw NotFoundException(Message.OAUTH_UNKNOWN_STATE)
-    return pending
   }
 
   private fun bindConsentAndMintCode(
