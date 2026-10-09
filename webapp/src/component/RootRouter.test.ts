@@ -1,7 +1,5 @@
 import source from './RootRouter.tsx?raw';
 
-// Routes placed above the survey gate are not covered by it, so the exempt list
-// is pinned here.
 const EXPECTED_UNGATED_ROUTES = [
   'RESET_PASSWORD_REQUEST',
   'RESET_PASSWORD_WITH_PARAMS',

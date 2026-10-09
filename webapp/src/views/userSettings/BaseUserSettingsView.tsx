@@ -31,8 +31,6 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
     : [];
 
   if (isEmailVerified) {
-    // /v2/notification-settings refuses an unverified user, so offering the tab
-    // sends them to the verification page instead of to any settings.
     menuItems.push({
       link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
       label: t('user_menu_notifications'),

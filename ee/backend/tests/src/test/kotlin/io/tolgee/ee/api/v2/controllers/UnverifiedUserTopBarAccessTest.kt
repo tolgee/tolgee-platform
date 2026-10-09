@@ -69,6 +69,13 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `refuses the notification settings the account menu stops offering`() {
+    performAuthGet("/v2/notification-settings").andIsForbidden.andAssertThatJson {
+      node("code").isEqualTo("email_not_verified")
+    }
+  }
+
+  @Test
   fun `still serves the account settings the user menu keeps offering`() {
     performAuthGet("/v2/user").andIsOk
   }
