@@ -56,7 +56,8 @@ class OAuth2AccessTokenResolver(
 
     // A grant outlives the client it was issued to, so both are checked per request rather than at issue time:
     // whether this instance still serves the client at all, and the withdrawal mark on the client's row.
-    if (!oauth2ClientRegistry.servesClient(grant.clientId) ||
+    if (!oauth2ClientRegistry.servesClient(grant.clientId)) throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    if (oauth2ClientRegistry.servesCimdClient(grant.clientId) &&
       cimdClientLifecycleService.isClientWithdrawn(grant.clientId)
     ) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
