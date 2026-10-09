@@ -29,8 +29,8 @@ class SignUpListener(
         organizationName = organization?.name,
         userAccountId = user.id,
         userAccountDto = UserAccountDto.fromEntity(user),
-        data = mapOf("userSource" to userSource),
-        personProperties = mapOf("userSource" to userSource),
+        data = mapOf(PersonProperties.USER_SOURCE to userSource),
+        personProperties = mapOf(PersonProperties.USER_SOURCE to userSource),
       ),
     )
   }

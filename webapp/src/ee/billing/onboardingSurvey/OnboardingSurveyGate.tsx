@@ -3,10 +3,9 @@
  * When the billing repo exists, Vite's alias overrides this with the real
  * implementation from billing/frontend/src/onboardingSurvey/OnboardingSurveyGate.tsx.
  */
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement } from 'react';
+import { OnboardingSurveyGateProps } from 'eeSetup/EeModuleType';
 
 export const OnboardingSurveyGate = ({
   children,
-}: {
-  children: ReactNode;
-}): ReactElement | null => <>{children}</>;
+}: OnboardingSurveyGateProps): ReactElement | null => <>{children}</>;

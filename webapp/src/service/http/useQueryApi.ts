@@ -37,6 +37,12 @@ export type QueryProps<
   fetchOptions?: RequestOptions;
   options?: UseQueryOptions<ResponseContent<Url, Method, Paths>, ApiError> &
     CustomOptions;
+  /**
+   * Extra cache-key part, for a response that belongs to something the URL does
+   * not name. An endpoint that answers "for the current user" needs the user
+   * here, or a second user in the same tab is served the first one's response.
+   */
+  keyScope?: unknown;
 } & RequestParamsType<Url, Method, Paths>;
 
 export type QueriesProps<
@@ -123,7 +129,7 @@ export const useApiQuery = <
 >(
   props: QueryProps<Url, Method, Paths>
 ) => {
-  const { url, method, fetchOptions, options, ...request } = props;
+  const { url, method, fetchOptions, options, keyScope, ...request } = props;
 
   return useQuery<ResponseContent<Url, Method, Paths>, ApiError>(
     [
@@ -131,6 +137,7 @@ export const useApiQuery = <
       (request as any)?.path,
       (request as any)?.query,
       (request as any)?.content,
+      keyScope,
     ],
     ({ signal }) =>
       apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {

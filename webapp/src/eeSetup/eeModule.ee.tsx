@@ -389,7 +389,7 @@ export const useAddUserMenuItems = () => {
           );
         },
         enabled: isEmailVerified,
-        id: 'mu-tasks',
+        id: 'my-tasks',
       },
     ],
     { position: 'start' }
