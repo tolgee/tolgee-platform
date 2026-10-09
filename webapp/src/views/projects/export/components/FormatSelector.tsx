@@ -1,10 +1,15 @@
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { Select } from 'tg.component/common/Select';
 
 import React, { ReactNode } from 'react';
-import { formatGroups, getFormatById } from './formatGroups';
+import {
+  formatGroups,
+  getFormatById,
+  MessageFormat,
+  normalizeSelectedMessageFormat,
+} from 'tg.views/projects/export/components/formatGroups';
 import {
   CompactListSubheader,
   CompactMenuItem,
@@ -19,6 +24,9 @@ export const FormatSelector: React.FC<React.PropsWithChildren<Props>> = ({
 }) => {
   const { t } = useTranslate();
   const [field, _, fieldHelperProps] = useField('format');
+  const { values, setFieldValue } = useFormikContext<{
+    messageFormat?: MessageFormat;
+  }>();
 
   const options: ReactNode[] = [];
 
@@ -36,6 +44,13 @@ export const FormatSelector: React.FC<React.PropsWithChildren<Props>> = ({
           value={option.id}
           onClick={stopAndPrevent(() => {
             fieldHelperProps.setValue(option.id);
+            setFieldValue(
+              'messageFormat',
+              normalizeSelectedMessageFormat({
+                format: option.id,
+                messageFormat: values.messageFormat,
+              })
+            );
           })}
         >
           {option.name}

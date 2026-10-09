@@ -101,6 +101,7 @@ export const TagsSelector = () => {
       <Box
         display="grid"
         gridTemplateColumns="minmax(0, 1fr) minmax(0, 1fr)"
+        alignItems="start"
         columnGap={3}
         rowGap={1}
       >
