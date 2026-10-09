@@ -22,11 +22,11 @@ import io.tolgee.security.oauth2.lowercaseHost
 import io.tolgee.security.oauth2.lowercaseScheme
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import io.tolgee.util.sha256Base64Url
+import io.tolgee.util.textOrNull
 import org.springframework.stereotype.Component
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.json.JsonMapper
-import java.security.MessageDigest
-import java.util.Base64
 
 /**
  * Resolves an unknown client presenting an HTTPS URL as its `client_id` into an unverified [CimdClient]. No
@@ -60,10 +60,10 @@ class CimdMetadataFetcher(
     val root = runCatching { mapper.readTree(document) }.getOrNull() ?: return reject(clientIdUrl, "unparseable JSON")
     if (!root.isObject) return reject(clientIdUrl, "document root is not an object")
 
-    if (textOrNull(root, "client_id") != clientIdUrl) {
+    if (root.textOrNull("client_id") != clientIdUrl) {
       return reject(clientIdUrl, "client_id does not match the URL the document was fetched from")
     }
-    if (textOrNull(root, "token_endpoint_auth_method") != "none") {
+    if (root.textOrNull("token_endpoint_auth_method") != "none") {
       return reject(clientIdUrl, "token_endpoint_auth_method is not \"none\"")
     }
     val grantTypes = grantTypes(root) ?: return reject(clientIdUrl, "grant_types does not allow authorization_code")
@@ -99,7 +99,7 @@ class CimdMetadataFetcher(
   }
 
   private fun displayName(root: JsonNode): String? {
-    val name = textOrNull(root, "client_name")?.trim()?.takeIf { it.isNotBlank() } ?: return null
+    val name = root.textOrNull("client_name")?.trim()?.takeIf { it.isNotBlank() } ?: return null
     if (name.length > MAX_CLIENT_NAME_LENGTH) return null
     if (name.codePoints().anyMatch { it.isFormattingControl() || it.isCombiningMark() }) return null
     return name
@@ -133,7 +133,7 @@ class CimdMetadataFetcher(
     grantTypes: List<String>,
   ): String =
     HASH_SCHEME_PREFIX +
-      sha256(
+      sha256Base64Url(
         listOf(
           clientIdUrl,
           redirectUris.map { OAuth2Client.redirectEquivalenceKey(it) }.sorted().joinToString(" "),
@@ -188,21 +188,6 @@ class CimdMetadataFetcher(
     val base = "${parsed.lowercaseScheme}://${parsed.lowercaseHost}"
     if (parsed.port == -1) return base
     return "$base:${parsed.port}"
-  }
-
-  private fun textOrNull(
-    node: JsonNode,
-    field: String,
-  ): String? {
-    // asString throws on a container node in Jackson 3, so a non-value is treated as absent rather than crashing.
-    val value = node.get(field) ?: return null
-    if (!value.isValueNode) return null
-    return value.asString()
-  }
-
-  private fun sha256(value: String): String {
-    val digest = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
   }
 
   companion object {

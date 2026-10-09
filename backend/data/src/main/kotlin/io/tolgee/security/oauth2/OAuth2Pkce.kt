@@ -16,8 +16,8 @@
 
 package io.tolgee.security.oauth2
 
+import io.tolgee.util.sha256Base64Url
 import java.security.MessageDigest
-import java.util.Base64
 
 object OAuth2Pkce {
   /** RFC 7636 §4.1: 43-128 characters of unreserved ASCII. */
@@ -33,10 +33,7 @@ object OAuth2Pkce {
     challenge: String,
   ): Boolean = constantTimeEquals(s256(verifier), challenge)
 
-  fun s256(verifier: String): String {
-    val digest = MessageDigest.getInstance("SHA-256").digest(verifier.toByteArray(Charsets.US_ASCII))
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(digest)
-  }
+  fun s256(verifier: String): String = sha256Base64Url(verifier, Charsets.US_ASCII)
 
   private fun constantTimeEquals(
     a: String,

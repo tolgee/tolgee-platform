@@ -3,13 +3,13 @@ package io.tolgee.mcp
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.authentication.CredentialPresence
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
+import io.tolgee.util.textOrNull
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.filter.OncePerRequestFilter
-import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 
 /**
@@ -43,15 +43,8 @@ class McpAuthChallengeFilter(
 
   private fun isOpenToAnonymous(body: ByteArray): Boolean {
     val root = runCatching { objectMapper.readTree(body) }.getOrNull() ?: return false
-    val method = methodOf(root) ?: return false
+    val method = root.textOrNull("method") ?: return false
     return method in ANONYMOUS_METHODS || method.startsWith(NOTIFICATION_PREFIX)
-  }
-
-  // asString throws on a container node in Jackson 3, so a non-value (a batch array included) is treated as absent.
-  private fun methodOf(root: JsonNode): String? {
-    val method = root.get("method") ?: return null
-    if (!method.isValueNode) return null
-    return method.asString()
   }
 
   private fun challenge(
