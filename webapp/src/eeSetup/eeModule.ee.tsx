@@ -14,6 +14,7 @@ import { PrivateRoute } from '../component/common/PrivateRoute';
 import { LINKS, PARAMS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
 import { useGlobalContext } from '../globalContext/GlobalContext';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { useUserTasks } from '../globalContext/useUserTasks';
 import { AdministrationEeLicenseView } from 'tg.ee.module/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
@@ -185,7 +186,9 @@ export const routes = {
 
 export function useUserTaskCount() {
   const userInfo = useGlobalContext((context) => context.initialData.userInfo);
-  const loadable = useUserTasks({ enabled: !!userInfo });
+  const isEmailVerified = useIsEmailVerified();
+  // Tasks are off limits until the email is verified, so asking costs a 403.
+  const loadable = useUserTasks({ enabled: !!userInfo && isEmailVerified });
   return loadable.data?.page?.totalElements ?? 0;
 }
 
@@ -360,6 +363,7 @@ export const useAddDeveloperViewItems = () => {
 
 export const useAddUserMenuItems = () => {
   const taskCount = useUserTaskCount();
+  const isEmailVerified = useIsEmailVerified();
   return addUserMenuItems(
     [
       {
@@ -384,7 +388,7 @@ export const useAddUserMenuItems = () => {
             </MenuItem>
           );
         },
-        enabled: true,
+        enabled: isEmailVerified,
         id: 'mu-tasks',
       },
     ],
