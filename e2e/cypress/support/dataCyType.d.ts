@@ -703,6 +703,7 @@ declare namespace DataCy {
         "project-states-bar-legend": true;
         "project-states-bar-root": true;
         "project-states-bar-state-progress": true;
+        "project-switch": true;
         "project-transfer-autocomplete-field": true;
         "project-transfer-autocomplete-suggested-option": true;
         "project-transfer-confirmation-field": true;
@@ -789,6 +790,7 @@ declare namespace DataCy {
         "suggestions-show-all": true;
         "switch-popover-footer-action": true;
         "switch-popover-item": true;
+        "switch-popover-load-more": true;
         "switch-popover-new": true;
         "switch-popover-search": true;
         "tag-autocomplete-input": true;
