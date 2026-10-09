@@ -15,6 +15,10 @@ import {
   getDescriptionFiltersLength,
   getDescriptionFiltersName,
 } from './SubfilterDescription';
+import {
+  getPluralFiltersLength,
+  getPluralFiltersName,
+} from './SubfilterPlurals';
 import { getTagFiltersLength, getTagFiltersName } from './SubfilterTags';
 import {
   getTranslationFiltersLength,
@@ -43,6 +47,7 @@ export function countFilters(value: FiltersInternal) {
     getNamespaceFiltersLength(value) +
     getScreenshotFiltersLength(value) +
     getDescriptionFiltersLength(value) +
+    getPluralFiltersLength(value) +
     getTagFiltersLength(value) +
     getTranslationFiltersLength(value) +
     getLabelFiltersLength(value) +
@@ -58,6 +63,7 @@ export function getFilterName(value: FiltersInternal, labels?: LabelModel[]) {
     getNamespaceFiltersName(value) ||
     getScreenshotFiltersName(value) ||
     getDescriptionFiltersName(value) ||
+    getPluralFiltersName(value) ||
     getTagFiltersName(value) ||
     getTranslationFiltersName(value) ||
     getLabelFiltersName(value, labels) ||
