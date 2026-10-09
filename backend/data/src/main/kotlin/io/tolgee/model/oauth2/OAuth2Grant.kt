@@ -42,6 +42,7 @@ import java.util.Date
   indexes = [
     Index(columnList = "user_account_id"),
     Index(columnList = "previous_refresh_token_hash"),
+    Index(columnList = "client_id"),
   ],
 )
 class OAuth2Grant : StandardAuditModel() {
