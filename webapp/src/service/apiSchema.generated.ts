@@ -6428,6 +6428,8 @@ export interface components {
       endpoint: string;
       /** @description Specifies an optional subfolder structure within s3 bucket to which content will be stored */
       path: string;
+      /** @description Uploads files with the public-read ACL, for storages that make new files private by default */
+      publicRead: boolean;
       secretKey?: string;
       signingRegion: string;
     };
@@ -6435,6 +6437,7 @@ export interface components {
       bucketName: string;
       endpoint: string;
       path: string;
+      publicRead: boolean;
       signingRegion: string;
     };
     ScreenshotInfoDto: {

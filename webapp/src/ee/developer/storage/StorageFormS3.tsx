@@ -1,8 +1,9 @@
-import { DialogContent } from '@mui/material';
+import { DialogContent, FormControlLabel } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Form, Formik, setNestedObjectValues } from 'formik';
 
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { Checkbox } from 'tg.component/common/form/fields/Checkbox';
 import { components } from 'tg.service/apiSchema.generated';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LabelHint } from 'tg.component/common/LabelHint';
@@ -58,6 +59,7 @@ export const StorageFormS3 = ({
           path: data?.s3ContentStorageConfig?.path ?? '',
           endpoint: data?.s3ContentStorageConfig?.endpoint ?? '',
           signingRegion: data?.s3ContentStorageConfig?.signingRegion ?? '',
+          publicRead: data?.s3ContentStorageConfig?.publicRead ?? false,
         },
       }}
       onSubmit={(values) => {
@@ -180,6 +182,24 @@ export const StorageFormS3 = ({
                   </LabelHint>
                 }
                 data-cy="storage-form-public-url-prefix"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="s3ContentStorageConfig.publicRead"
+                    data-cy="storage-form-s3-public-read"
+                  />
+                }
+                label={
+                  <LabelHint
+                    title={t(
+                      'storage_form_s3_public_read_hint',
+                      'Uploads files as public-read. Needed for storages that make new files private, like DigitalOcean Spaces. On AWS, the access key also needs "s3:PutObjectAcl". Leave it off for AWS buckets with ACLs disabled.'
+                    )}
+                  >
+                    {t('storage_form_s3_public_read', 'Upload files as public')}
+                  </LabelHint>
+                }
               />
             </DialogContent>
             <StorageFormActions

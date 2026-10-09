@@ -10,13 +10,16 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import java.io.ByteArrayInputStream
 
 open class S3FileStorage(
   private val bucketName: String,
   private val path: String?,
   private val s3: S3Client,
+  private val publicRead: Boolean,
 ) : FileStorage {
   override fun readFile(storageFilePath: String): ByteArray {
     try {
@@ -41,10 +44,11 @@ open class S3FileStorage(
   ) {
     val byteArrayInputStream = ByteArrayInputStream(bytes)
     try {
-      s3.putObject(
-        { b -> b.bucket(bucketName).key("$canonicalPath$storageFilePath") },
-        RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()),
-      )
+      val request = PutObjectRequest.builder().bucket(bucketName).key("$canonicalPath$storageFilePath")
+      if (publicRead) {
+        request.acl(ObjectCannedACL.PUBLIC_READ)
+      }
+      s3.putObject(request.build(), RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()))
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)
     }

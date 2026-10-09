@@ -773,6 +773,7 @@ declare namespace DataCy {
         "storage-form-s3-bucket-name": true;
         "storage-form-s3-endpoint": true;
         "storage-form-s3-path": true;
+        "storage-form-s3-public-read": true;
         "storage-form-s3-secret-key": true;
         "storage-form-s3-signing-region": true;
         "storage-form-save": true;

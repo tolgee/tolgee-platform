@@ -12,6 +12,9 @@ interface S3Config : StorageConfig {
    */
   val path: String?
 
+  val publicRead: Boolean
+    get() = false
+
   override val enabled: Boolean
     get() = bucketName != null
 
