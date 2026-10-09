@@ -13,3 +13,5 @@ tolgee:
     stop-right-after-start: true
   telemetry:
     enabled: false
+  review-ask:
+    enabled: false
