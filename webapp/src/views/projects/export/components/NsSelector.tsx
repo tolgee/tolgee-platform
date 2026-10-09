@@ -1,10 +1,5 @@
 import { useField } from 'formik';
-import {
-  Checkbox,
-  ListItemText,
-  MenuItem,
-  SelectChangeEvent,
-} from '@mui/material';
+import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { Select } from 'tg.component/common/Select';
@@ -22,21 +17,16 @@ export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
   const { t } = useTranslate();
   const project = useProject();
 
-  const [field, meta, helper] = useField<string[]>('namespaces');
+  const [field, meta] = useField<string[]>('namespaces');
 
   if (!namespaces || !project.useNamespaces) {
     return null;
   }
 
-  const onChange = (e: SelectChangeEvent<unknown>) => {
-    helper.setValue(e.target.value as string[]);
-  };
-
   return (
     <div className={className}>
       <Select
         {...field}
-        onChange={onChange}
         label={t('export_translations_namespaces_label')}
         error={meta.error}
         minHeight={false}
