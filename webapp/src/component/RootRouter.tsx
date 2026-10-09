@@ -4,7 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-import { routes } from 'tg.ee';
+import { OnboardingSurveyGate, routes } from 'tg.ee';
 
 import { DashboardRouter } from 'tg.component/DashboardRouter';
 import { PrivateRoute } from './common/PrivateRoute';
@@ -48,7 +48,7 @@ const OAuth2ConsentView = React.lazy(
 
 export const RootRouter = () => {
   return (
-    <>
+    <OnboardingSurveyGate>
       <Switch>
         <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
           <SlackConnectView />
@@ -107,6 +107,6 @@ export const RootRouter = () => {
       </Switch>
 
       <routes.Root />
-    </>
+    </OnboardingSurveyGate>
   );
 };

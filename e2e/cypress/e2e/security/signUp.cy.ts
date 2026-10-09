@@ -136,11 +136,10 @@ context('Sign up', () => {
     checkAnonymousUserIdentified();
   });
 
-  it('Offers nothing in the top bar that an unverified email cannot reach', () => {
+  it('Hides top bar options an unverified email cannot use, and restores them on verification', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     gcy('resend-email-button', { timeout: 20000 }).should('be.visible');
 
-    // Both answer 403 until the email is verified.
     gcy('notifications-button').should('not.exist');
     gcy('global-user-menu-button').click();
     gcy('user-menu-my-tasks').should('not.exist');
@@ -160,8 +159,7 @@ context('Sign up', () => {
 
   it('Shows success (not error) when visiting the same verification link again', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
-    cy.contains('Thank you for signing up!').should('be.visible');
-    cy.contains('Check your inbox');
+    gcy('resend-email-button', { timeout: 20000 }).should('be.visible');
 
     cy.wait(1000);
     getParsedEmailVerification().then((r) => {

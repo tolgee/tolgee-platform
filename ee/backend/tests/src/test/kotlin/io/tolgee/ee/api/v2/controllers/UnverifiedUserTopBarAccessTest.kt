@@ -23,6 +23,7 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
   // TransientPropertyValueException on commit, because UserAccount.emailVerification is the
   // inverse side of the association.
   private var pendingVerificationCode: String? = null
+  private var originalFrontEndUrl: String? = null
 
   @BeforeEach
   fun setup() {
@@ -31,6 +32,7 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
     userAccount = testData.user
     emailTestUtil.initMocks()
     tolgeeProperties.authentication.needsEmailVerification = true
+    originalFrontEndUrl = tolgeeProperties.frontEndUrl
     tolgeeProperties.frontEndUrl = "https://dummy-url.com"
     executeInNewTransaction {
       val emailVerification =
@@ -49,7 +51,7 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
     pendingVerificationCode = null
     testDataService.cleanTestData(testData.root)
     tolgeeProperties.authentication.needsEmailVerification = false
-    tolgeeProperties.frontEndUrl = null
+    tolgeeProperties.frontEndUrl = originalFrontEndUrl
   }
 
   @Test
