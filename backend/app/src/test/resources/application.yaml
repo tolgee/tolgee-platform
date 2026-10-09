@@ -105,6 +105,7 @@ tolgee:
     old-job-cleanup-enabled: false
   front-end-url: https://dummy-url.com
   oauth2:
+    browser-extension-enabled: true
     browser-extension-redirect-uris:
       - https://extension.test/callback
       - https://extension.test/alternate

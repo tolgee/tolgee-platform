@@ -374,6 +374,49 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
+  fun `the extension is off until an operator turns it on`() {
+    registry().find(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID).assert.isNull()
+  }
+
+  @Test
+  fun `turning the extension on registers the published extension's redirect URIs`() {
+    val extension = registry(extensionEnabled = true).find(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID)
+
+    extension.assert.isNotNull()
+    extension!!.redirectUris.assert.containsExactlyElementsOf(OAuth2Constants.OFFICIAL_BROWSER_EXTENSION_REDIRECT_URIS)
+  }
+
+  @Test
+  fun `configured extension redirect URIs replace the published ones rather than adding to them`() {
+    val extension =
+      registry(extensionEnabled = true, extensionUris = listOf("https://ext.example/callback"))
+        .find(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID)!!
+
+    extension.allowsRedirectUri("https://ext.example/callback").assert.isTrue()
+    OAuth2Constants.OFFICIAL_BROWSER_EXTENSION_REDIRECT_URIS.forEach {
+      extension
+        .allowsRedirectUri(
+          it,
+        ).assert
+        .isFalse()
+    }
+  }
+
+  @Test
+  fun `turning the extension off also refuses redirect URIs configured for it`() {
+    val registry = registry(extensionEnabled = false, extensionUris = listOf("https://ext.example/callback"))
+
+    registry.find(OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID).assert.isNull()
+  }
+
+  @Test
+  fun `turning the extension on requires a usable issuer at startup`() {
+    val registry = registry(extensionEnabled = true, resolver = throwingResolver())
+
+    assertThrows<IllegalStateException> { registry.requireIssuerForPreRegisteredClients() }
+  }
+
+  @Test
   fun `a pre-registered client still requires a usable issuer at startup`() {
     val registry = registry(extensionUris = listOf("https://ext.example/callback"), resolver = throwingResolver())
 
@@ -402,8 +445,10 @@ class OAuth2ClientRegistryTest {
       clientOrigin = url,
     )
 
+  /** Configured extension URIs imply the operator turned the extension on, as the test configs do. */
   private fun registry(
     extensionUris: List<String> = listOf(),
+    extensionEnabled: Boolean = extensionUris.isNotEmpty(),
     cliUris: List<String> = listOf(),
     cliEnabled: Boolean = true,
     cimdAllowedHosts: List<String> = listOf(),
@@ -412,6 +457,7 @@ class OAuth2ClientRegistryTest {
   ): OAuth2ClientRegistry {
     val properties =
       OAuth2ServerProperties().apply {
+        browserExtensionEnabled = extensionEnabled
         browserExtensionRedirectUris = extensionUris
         cliRedirectUris = cliUris
         this.cliEnabled = cliEnabled

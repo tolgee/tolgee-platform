@@ -125,12 +125,15 @@ class OAuth2ClientRegistry(
 
   private fun findPreRegistered(clientId: String): OAuth2Client? = clients.firstOrNull { it.clientId == clientId }
 
+  /** Off until an operator turns it on; a configured redirect list replaces the published extension's URIs. */
   private fun browserExtension(): OAuth2Client? {
-    if (properties.browserExtensionRedirectUris.isEmpty()) return null
+    if (!properties.browserExtensionEnabled) return null
+    val redirectUris =
+      properties.browserExtensionRedirectUris.ifEmpty { OAuth2Constants.OFFICIAL_BROWSER_EXTENSION_REDIRECT_URIS }
     return OAuth2Client(
       clientId = OAuth2Constants.BROWSER_EXTENSION_CLIENT_ID,
       name = "Tolgee Browser Extension",
-      redirectUris = requireValidRedirectUris(properties.browserExtensionRedirectUris),
+      redirectUris = requireValidRedirectUris(redirectUris),
       requiredScopes = listOf(Scope.KEYS_VIEW, Scope.TRANSLATIONS_VIEW),
     )
   }

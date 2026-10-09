@@ -5,15 +5,28 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.oauth2")
 @DocProperty(
-  description = "Settings for Tolgee acting as an OAuth 2.1 authorization server (browser-extension login, MCP).",
+  description =
+    "Settings for Tolgee acting as an OAuth 2.1 authorization server (CLI and browser-extension login, MCP).",
   displayName = "OAuth2 authorization server",
 )
 class OAuth2ServerProperties {
   @DocProperty(
     description =
-      "Exact redirect URIs of the Tolgee browser extension, e.g. `https://<extension-id>.chromiumapp.org/`. " +
-        "The extension OAuth client is only registered when this is set.",
-    defaultValue = "",
+      "Whether the Tolgee Tools browser extension can sign users in against this instance. Off by default: an " +
+        "instance that turns it on lets anyone with the published extension sign in with their own account, " +
+        "which not every self-hosted instance wants.",
+    defaultValue = "false",
+  )
+  var browserExtensionEnabled: Boolean = false
+
+  @DocProperty(
+    description =
+      "Exact redirect URIs of the browser extension, accepted instead of the published extension's own. Only " +
+        "needed for a custom build of the extension, whose id is part of the URI, e.g. " +
+        "`https://<extension-id>.chromiumapp.org/`. An empty list keeps the published extension's URIs.",
+    defaultValue =
+      "https://hacnbapajkkfohnonhbmegojnddagfnj.chromiumapp.org/, " +
+        "https://e262e73e8cbdd8d796b491acfa20a501bfc7b9c0.extensions.allizom.org/",
   )
   var browserExtensionRedirectUris: List<String> = listOf()
 

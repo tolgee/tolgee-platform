@@ -214,14 +214,16 @@ single-project token resolves the project-implicit endpoints exactly as a projec
 ### Registered clients: how an app becomes "known"
 Before Tolgee will issue tokens to an app, it must know that app's `client_id` and its allowed
 `redirect_uris` (so a stolen code can't be sent to an attacker's URL). Round 1 does this by
-**pre-registration** (`OAuth2ClientRegistry.kt`): the client ships with a known `client_id`. The browser extension
-is registered only where an operator configured its redirect URI, because that URI carries the published
-extension's id, which this repo does not know and so cannot seed. The **CLI is registered on every instance whose
-issuer resolves**, with a default `http://127.0.0.1/callback`: `tolgee login` has to work against an instance
-nobody configured for it, and a loopback redirect is not an operator's to know. `tolgee.oauth2.cli-enabled: false`
-is how an instance that will never see the CLI refuses it, and `cli-redirect-uris` accepts a different redirect
-instead of the default, for a CLI build that listens elsewhere. Every client is public, must use PKCE (S256 only),
-and always goes through the consent screen.
+**pre-registration** (`OAuth2ClientRegistry.kt`): the client ships with a known `client_id`, an on/off flag and a
+redirect URI list with a built-in default. The **CLI is on by default and registered on every instance whose
+issuer resolves**, with `http://127.0.0.1/callback`: `tolgee login` has to work against an instance nobody
+configured for it, and a loopback redirect is predefined in the CLI, not chosen by the operator. The **browser
+extension is off by default** (`tolgee.oauth2.browser-extension-enabled`), because not every self-hosted instance
+wants anyone with the published extension to sign in; turning it on registers the published extension's Chrome
+and Firefox redirect URIs (`OAuth2Constants.OFFICIAL_BROWSER_EXTENSION_REDIRECT_URIS`). For both clients the
+`*-redirect-uris` list replaces the default when set, for a build that listens elsewhere, and an empty list means
+the default: off is only ever the flag, so an empty YAML value and an absent key cannot mean different things.
+Every client is public, must use PKCE (S256 only), and always goes through the consent screen.
 
 Redirect URIs are matched exactly, except that a loopback URI is accepted on any port — a CLI takes whatever port
 the OS gives it at request time. RFC 8252 §7.3 requires that for the IP literals (`127.0.0.1`,
@@ -833,12 +835,14 @@ Both are needed together: with `VITE_APP_API_URL` non-empty the app bypasses the
 consent screen calls a different origin than the one `/oauth2/authorize` redirected it to. Restart vite after
 changing env (build-time vars).
 
-### 2. Register the extension's redirect URI on the local backend
+### 2. Turn the extension on for the local backend
 
 Load the unpacked extension (`chrome://extensions` → Developer mode → Load unpacked → `dist-chrome`
-after `npm run build` in the chrome-plugin repo). In its **service worker** console run
-`chrome.identity.getRedirectURL()` and add that exact value (trailing slash included) to the local
-backend config, then restart the backend so `OAuth2ClientRegistry` picks the client up:
+after `npm run build` in the chrome-plugin repo). The chrome-plugin manifest pins the extension's key, so an
+unpacked build gets the published id and the default redirect URIs already match: turning the extension on is
+enough. For a build with another id, run `chrome.identity.getRedirectURL()` in its **service worker** console and
+add that exact value (trailing slash included) as well. Then restart the backend so `OAuth2ClientRegistry` picks
+the client up:
 
 ```yaml
 tolgee:
@@ -848,13 +852,13 @@ tolgee:
   # vite will not answer.
   back-end-url: http://localhost:3000
   oauth2:
-    browser-extension-redirect-uris:
-      - https://<your-unpacked-extension-id>.chromiumapp.org/
+    browser-extension-enabled: true
+    # Only for a build whose id differs from the published one:
+    # browser-extension-redirect-uris:
+    #   - https://<your-unpacked-extension-id>.chromiumapp.org/
 ```
 
-An unpacked extension keeps its id as long as `dist-chrome` isn't moved. (Production/testing/preview
-already register the *published* extension's redirect in the deployment repo, so this step is
-dev-only.)
+(Production, testing and previews turn the extension on in the deployment repo, so this step is dev-only.)
 
 ### 3. Connect
 
