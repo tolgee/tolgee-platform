@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong
 @Component
 class OAuth2CimdDocumentCheck(
   private val lifecycle: CimdClientLifecycleService,
-  private val clientRegistry: OAuth2ClientRegistry,
+  private val oauth2ClientRegistry: OAuth2ClientRegistry,
   private val properties: OAuth2ServerProperties,
   private val lockingProvider: LockingProvider,
   private val metrics: Metrics,
@@ -98,7 +98,7 @@ class OAuth2CimdDocumentCheck(
 
   private fun checkOne(clientId: String): Boolean {
     try {
-      val resolution = clientRegistry.resolveForCheck(clientId) ?: return false
+      val resolution = oauth2ClientRegistry.resolveForCheck(clientId) ?: return false
       return recordResolution(clientId, resolution)
     } catch (e: Exception) {
       logger.error("CIMD check failed for {}", clientId, e)

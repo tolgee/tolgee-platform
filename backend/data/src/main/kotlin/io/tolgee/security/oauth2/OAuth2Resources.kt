@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component
  */
 @Component
 class OAuth2Resources(
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
 ) {
-  val apiResource: String get() = issuerResolver.issuerUrl
+  val apiResource: String get() = oauth2IssuerResolver.issuerUrl
 
-  val mcpResource: String get() = issuerResolver.issuerUrl + OAuth2Audience.MCP.pathPrefix
+  val mcpResource: String get() = oauth2IssuerResolver.issuerUrl + OAuth2Audience.MCP.pathPrefix
 
   fun audienceFor(resource: String?): OAuth2Audience {
     if (resource == null) return OAuth2Audience.API

@@ -27,13 +27,13 @@ import java.util.concurrent.TimeUnit
 @TestPropertySource(properties = ["tolgee.internal.disable-url-ssrf-protection=true"])
 class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   @Autowired
-  private lateinit var resources: OAuth2Resources
+  private lateinit var oauth2Resources: OAuth2Resources
 
   @Autowired
   private lateinit var cimdClientCache: CimdClientCache
 
   @Autowired
-  private lateinit var grantRepository: OAuth2GrantRepository
+  private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var documentCheck: OAuth2CimdDocumentCheck
@@ -80,7 +80,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val redirect = redirectAt(port)
-    val mcpResource = resources.mcpResource
+    val mcpResource = oauth2Resources.mcpResource
 
     driver
       .authorize(clientId, redirect, validParams(mcpResource))
@@ -156,7 +156,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isNotBlank()
-    grantRepository.existsById(grantId).assert.isTrue()
+    oauth2GrantRepository.existsById(grantId).assert.isTrue()
   }
 
   @Test
@@ -177,7 +177,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    grantRepository.existsById(grantId).assert.isFalse()
+    oauth2GrantRepository.existsById(grantId).assert.isFalse()
   }
 
   @Test
@@ -254,7 +254,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
         .isNotBlank()
       refreshToken = renewed.get("refresh_token").asString()
     }
-    grantRepository
+    oauth2GrantRepository
       .findById(grantId)
       .get()
       .clientWithdrawnAt.assert
@@ -278,7 +278,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    grantRepository
+    oauth2GrantRepository
       .findById(grantId)
       .get()
       .clientWithdrawnAt.assert
@@ -320,7 +320,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
     documentWithdrawn = true
     documentCheck.checkBatch()
-    val grantId = grantRepository.findAll().first { it.clientId == clientId }.id
+    val grantId = oauth2GrantRepository.findAll().first { it.clientId == clientId }.id
 
     // A second round with the document still gone: the mark has now survived a read, so it is no longer a
     // mis-deploy we are waiting to see recover.
@@ -337,7 +337,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .asString()
       .assert
       .isEqualTo("invalid_grant")
-    grantRepository
+    oauth2GrantRepository
       .findById(grantId)
       .get()
       .clientWithdrawnAt.assert
@@ -359,7 +359,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
     repeat(cimdClientLifecycle.clientIdsDueForCheck(1000).size) { documentCheck.checkBatch() }
 
-    grantRepository
+    oauth2GrantRepository
       .findAll()
       .first { it.clientId == healthy }
       .cimdVerifiedAt.assert

@@ -44,11 +44,11 @@ import java.net.URI
 @OpenApiHideFromPublicDocs
 @Tag(name = "OAuth2 authorization server")
 class OAuth2AuthorizationServerController(
-  private val authorizationService: OAuth2AuthorizationService,
-  private val clientRegistry: OAuth2ClientRegistry,
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2AuthorizationService: OAuth2AuthorizationService,
+  private val oauth2ClientRegistry: OAuth2ClientRegistry,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
-  private val resources: OAuth2Resources,
+  private val oauth2Resources: OAuth2Resources,
   private val oauth2Properties: OAuth2ServerProperties,
 ) : IController {
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
@@ -67,7 +67,7 @@ class OAuth2AuthorizationServerController(
     @RequestParam("resource", required = false) resource: String?,
   ): ResponseEntity<Any> {
     // Errors here must not redirect: the redirect URI is exactly what has not been validated yet.
-    val client = clientId.nullIfBlank?.let { clientRegistry.find(it) } ?: return badRequest("unknown client_id")
+    val client = clientId.nullIfBlank?.let { oauth2ClientRegistry.find(it) } ?: return badRequest("unknown client_id")
     val registeredRedirect =
       redirectUri.nullIfBlank?.takeIf { client.allowsRedirectUri(it) }
         ?: return badRequest("redirect_uri is not registered")
@@ -84,13 +84,18 @@ class OAuth2AuthorizationServerController(
       )
     if (isRepeated(request, AUTHORIZE_PARAMS)) {
       return redirect(
-        OAuth2Redirects.error(registeredRedirect, repeatedParameterError(), issuerResolver.issuerUrl, params.state),
+        OAuth2Redirects.error(
+          registeredRedirect,
+          repeatedParameterError(),
+          oauth2IssuerResolver.issuerUrl,
+          params.state,
+        ),
       )
     }
     try {
-      authorizationService.validateAuthorizeRequest(params)
+      oauth2AuthorizationService.validateAuthorizeRequest(params)
     } catch (e: OAuth2Error) {
-      return redirect(OAuth2Redirects.error(registeredRedirect, e, issuerResolver.issuerUrl, params.state))
+      return redirect(OAuth2Redirects.error(registeredRedirect, e, oauth2IssuerResolver.issuerUrl, params.state))
     }
     return redirect(
       consentPageUrl(
@@ -135,7 +140,7 @@ class OAuth2AuthorizationServerController(
       val tokens =
         when (grantType.nullIfBlank) {
           "authorization_code" ->
-            authorizationService.exchangeCode(
+            oauth2AuthorizationService.exchangeCode(
               client,
               code.nullIfBlank,
               redirectUri.nullIfBlank,
@@ -143,7 +148,7 @@ class OAuth2AuthorizationServerController(
               requestedAudience,
             )
           "refresh_token" ->
-            authorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank, requestedAudience)
+            oauth2AuthorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank, requestedAudience)
           null -> throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "grant_type is required")
           else -> throw OAuth2Error(OAuth2Error.UNSUPPORTED_GRANT_TYPE)
         }
@@ -180,7 +185,7 @@ class OAuth2AuthorizationServerController(
       // §2.2.1: a malformed request gets the RFC 6749 §5.2 error, not the 200 that means "your token is not live" —
       // answering 200 here would tell a client its logout succeeded while the grant stays live.
       val presented = token.nullIfBlank ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "token is required")
-      authorizationService.revokeToken(client, presented)
+      oauth2AuthorizationService.revokeToken(client, presented)
       return tokenResponse(HttpStatus.OK).body(emptyMap())
     } catch (e: OAuth2Error) {
       return errorResponse(e)
@@ -191,8 +196,8 @@ class OAuth2AuthorizationServerController(
   @GetMapping(OAuth2Constants.AUTHORIZATION_SERVER_METADATA_PATH)
   @Operation(summary = "RFC 8414 authorization server metadata")
   fun metadata(): ResponseEntity<AuthorizationServerMetadataModel> {
-    if (!issuerResolver.isConfigured) throw NotFoundException()
-    val issuer = issuerResolver.issuerUrl
+    if (!oauth2IssuerResolver.isConfigured) throw NotFoundException()
+    val issuer = oauth2IssuerResolver.issuerUrl
     val model =
       AuthorizationServerMetadataModel(
         issuer = issuer,
@@ -273,12 +278,12 @@ class OAuth2AuthorizationServerController(
    */
   private fun requireClientForTokenRequest(clientId: String?): OAuth2Client {
     val id = clientId.nullIfBlank ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
-    return clientRegistry.findForExistingGrant(id) ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
+    return oauth2ClientRegistry.findForExistingGrant(id) ?: throw OAuth2Error(OAuth2Error.INVALID_CLIENT)
   }
 
   /** RFC 8707: no `resource` means no audience restriction on the request; the grant's own audience still applies. */
   private fun requestedAudience(resource: String?): OAuth2Audience? =
-    resource.nullIfBlank?.let { resources.audienceFor(it) }
+    resource.nullIfBlank?.let { oauth2Resources.audienceFor(it) }
 
   // Relative when front-end-url is unset: a request-derived URL would be the proxy-internal one and strand the user.
   private fun consentPageUrl(params: Map<String, String?>): String {

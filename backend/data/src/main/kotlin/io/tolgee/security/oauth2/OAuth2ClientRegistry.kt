@@ -43,7 +43,7 @@ class OAuth2ClientRegistry(
   private val properties: OAuth2ServerProperties,
   private val cimdClientCache: CimdClientCache,
   private val cimdClientPolicy: CimdClientPolicy,
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
 ) {
   private val configuredClients: List<OAuth2Client> = listOfNotNull(browserExtension(), configuredCli())
 
@@ -52,7 +52,7 @@ class OAuth2ClientRegistry(
   @PostConstruct
   fun requireIssuerForPreRegisteredClients() {
     if (configuredClients.isEmpty()) return
-    runCatching { issuerResolver.issuerUrl }.onFailure {
+    runCatching { oauth2IssuerResolver.issuerUrl }.onFailure {
       throw IllegalStateException(
         "tolgee.back-end-url (or tolgee.front-end-url) must be a usable issuer when a tolgee.oauth2 client is " +
           "configured: ${it.message}",
@@ -112,7 +112,7 @@ class OAuth2ClientRegistry(
 
   /** A client_id only the CIMD path could serve: not pre-registered, and past the local candidate policy. */
   private fun isCimdCandidate(clientId: String): Boolean =
-    issuerResolver.isConfigured && findPreRegistered(clientId) == null && cimdClientPolicy.isCandidate(clientId)
+    oauth2IssuerResolver.isConfigured && findPreRegistered(clientId) == null && cimdClientPolicy.isCandidate(clientId)
 
   private fun unresolvableCimdClient(clientId: String) =
     OAuth2Client(
@@ -145,7 +145,7 @@ class OAuth2ClientRegistry(
   private fun defaultCli(): OAuth2Client? {
     if (!properties.cliEnabled) return null
     if (properties.cliRedirectUris.isNotEmpty()) return null
-    if (!issuerResolver.isConfigured) return null
+    if (!oauth2IssuerResolver.isConfigured) return null
     return cliClient(listOf(DEFAULT_CLI_REDIRECT_URI))
   }
 

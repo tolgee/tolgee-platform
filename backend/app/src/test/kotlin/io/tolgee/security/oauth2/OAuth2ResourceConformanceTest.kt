@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets
 
 class OAuth2ResourceConformanceTest : AbstractOAuth2ConformanceTest() {
   @Autowired
-  private lateinit var resources: OAuth2Resources
+  private lateinit var oauth2Resources: OAuth2Resources
 
-  private val apiResource get() = resources.apiResource
-  private val mcpResource get() = resources.mcpResource
+  private val apiResource get() = oauth2Resources.apiResource
+  private val mcpResource get() = oauth2Resources.mcpResource
 
   @Test
   fun `an authorize request naming an unknown resource error-redirects with invalid_target`() {

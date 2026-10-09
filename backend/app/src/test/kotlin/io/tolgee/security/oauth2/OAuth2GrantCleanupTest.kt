@@ -29,7 +29,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   private lateinit var properties: OAuth2ServerProperties
 
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   @Autowired
   private lateinit var cimdClientLifecycle: CimdClientLifecycleService
@@ -81,7 +81,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
     val codeOnly = testData.addGrant(codeExpiresAt = old, codeHash = "abandoned-code")
     testDataService.saveTestData(testData.root)
 
-    val deleted = authorizationService.deleteExpiredBefore(now.minus(Duration.ofDays(7)))
+    val deleted = oauth2AuthorizationService.deleteExpiredBefore(now.minus(Duration.ofDays(7)))
 
     deleted.assert.isEqualTo(3)
     repository.existsById(expiredLongAgo.id).assert.isFalse()
@@ -102,7 +102,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
     val spentGrant = testData.addGrant(refreshExpiresAt = now.plus(Duration.ofDays(20)))
     testDataService.saveTestData(testData.root)
 
-    val deleted = authorizationService.deleteExpiredPendingConsents()
+    val deleted = oauth2AuthorizationService.deleteExpiredPendingConsents()
 
     deleted.assert.isEqualTo(1)
     repository.existsById(abandonedConsent.id).assert.isFalse()
@@ -121,7 +121,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
       (1..keep).map { testData.addSupersededRefreshToken(liveGrant, "hash-$it", now.minusSeconds(it.toLong())) }
     testDataService.saveTestData(testData.root)
 
-    authorizationService.pruneRefreshHistoryBeyondDepth()
+    oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
 
     supersededRepository.countByGrantId(liveGrant.id).assert.isEqualTo(keep.toLong())
     supersededRepository.existsById(ancientButShallow.id).assert.isFalse()
@@ -140,7 +140,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
     val quietOnly = testData.addSupersededRefreshToken(quiet, "quiet-1", now.minus(Duration.ofDays(200)))
     testDataService.saveTestData(testData.root)
 
-    authorizationService.pruneRefreshHistoryBeyondDepth()
+    oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
 
     supersededRepository.existsById(quietOnly.id).assert.isTrue()
     supersededRepository.countByGrantId(busy.id).assert.isEqualTo(keep.toLong())
@@ -157,7 +157,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
         .map { testData.addSupersededRefreshToken(grant, "burst-$it", now.minusSeconds(it.toLong())) }
     testDataService.saveTestData(testData.root)
 
-    authorizationService.pruneRefreshHistoryBeyondDepth()
+    oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
 
     supersededRepository.countByGrantId(grant.id).assert.isEqualTo(burst.size.toLong() + 1)
     supersededRepository.existsById(stolen.id).assert.isTrue()
@@ -173,7 +173,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
     (1..keep).forEach { testData.addSupersededRefreshToken(grant, "newer-$it", now.minusSeconds(it.toLong())) }
     testDataService.saveTestData(testData.root)
 
-    authorizationService.pruneRefreshHistoryBeyondDepth()
+    oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
 
     supersededRepository.countByGrantId(grant.id).assert.isEqualTo(keep.toLong() + 1)
     supersededRepository.existsById(recentButDeep.id).assert.isTrue()
@@ -186,7 +186,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
     val history = testData.addSupersededRefreshToken(expired, "history-of-a-doomed-grant", now.minusSeconds(60))
     testDataService.saveTestData(testData.root)
 
-    authorizationService.deleteExpiredBefore(now.minus(Duration.ofDays(7)))
+    oauth2AuthorizationService.deleteExpiredBefore(now.minus(Duration.ofDays(7)))
 
     repository.existsById(expired.id).assert.isFalse()
     supersededRepository.existsById(history.id).assert.isFalse()

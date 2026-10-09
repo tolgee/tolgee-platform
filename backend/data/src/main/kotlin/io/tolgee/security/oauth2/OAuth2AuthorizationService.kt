@@ -49,13 +49,13 @@ import java.util.concurrent.TimeUnit
 @Service
 class OAuth2AuthorizationService(
   private val repository: OAuth2GrantRepository,
-  private val supersededRefreshTokenRepository: OAuth2SupersededRefreshTokenRepository,
+  private val oauth2SupersededRefreshTokenRepository: OAuth2SupersededRefreshTokenRepository,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
   private val cimdClientLifecycle: CimdClientLifecycleService,
-  private val resources: OAuth2Resources,
+  private val oauth2Resources: OAuth2Resources,
   private val metrics: Metrics,
 ) : Logging {
   data class AuthorizeParams(
@@ -96,7 +96,7 @@ class OAuth2AuthorizationService(
     val challenge =
       params.codeChallenge?.takeIf { OAuth2Pkce.isValidCodeChallenge(it) }
         ?: throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "code_challenge is not a valid S256 challenge")
-    return ValidatedAuthorizeRequest(knownRequestedScopes, challenge, resources.audienceFor(params.resource))
+    return ValidatedAuthorizeRequest(knownRequestedScopes, challenge, oauth2Resources.audienceFor(params.resource))
   }
 
   @Transactional
@@ -278,7 +278,7 @@ class OAuth2AuthorizationService(
       repository.findAndLockByAccessTokenHash(hash)
         ?: repository.findAndLockByRefreshTokenHash(hash)
         ?: repository.findAndLockByPreviousRefreshTokenHash(hash)
-        ?: supersededRefreshTokenRepository.findAndLockByTokenHash(hash)?.grant
+        ?: oauth2SupersededRefreshTokenRepository.findAndLockByTokenHash(hash)?.grant
         ?: return
     if (grant.clientId != client.clientId) throw OAuth2Error(OAuth2Error.INVALID_GRANT)
     repository.delete(grant)
@@ -351,7 +351,7 @@ class OAuth2AuthorizationService(
 
   @Transactional
   fun pruneRefreshHistoryBeyondDepth(): Int =
-    supersededRefreshTokenRepository.deleteBeyondNewestPerGrant(
+    oauth2SupersededRefreshTokenRepository.deleteBeyondNewestPerGrant(
       properties.refreshTokenHistoryGenerations,
       historyFloor(),
     )
@@ -448,7 +448,7 @@ class OAuth2AuthorizationService(
       repository.delete(justRotated)
       return
     }
-    val superseded = supersededRefreshTokenRepository.findAndLockByTokenHash(hash) ?: return
+    val superseded = oauth2SupersededRefreshTokenRepository.findAndLockByTokenHash(hash) ?: return
     if (isWithinRefreshGrace(superseded.supersededAt)) {
       recordGraceHit(superseded.grant.id, "a token superseded within the grace window was replayed")
       return
@@ -547,7 +547,7 @@ class OAuth2AuthorizationService(
     }
     // Touching grant.supersededRefreshTokens would initialise it: up to MAX_HISTORY_ROWS_PER_GRANT entities loaded
     // on a path that writes one row.
-    supersededRefreshTokenRepository.save(
+    oauth2SupersededRefreshTokenRepository.save(
       OAuth2SupersededRefreshToken().apply {
         this.grant = grant
         tokenHash = demotedHash
@@ -562,7 +562,7 @@ class OAuth2AuthorizationService(
    */
   private fun makeRoomInHistory(grant: OAuth2Grant): Boolean {
     if (!isAtHistoryCeiling(grant)) return true
-    return supersededRefreshTokenRepository.deleteOldestPastFloor(grant.id, historyFloor()) > 0
+    return oauth2SupersededRefreshTokenRepository.deleteOldestPastFloor(grant.id, historyFloor()) > 0
   }
 
   private fun historyFloor(): Date =
@@ -571,7 +571,7 @@ class OAuth2AuthorizationService(
   private fun isAtHistoryCeiling(grant: OAuth2Grant): Boolean {
     val id = grant.id
     if (id == 0L) return false
-    return supersededRefreshTokenRepository.countByGrantId(id) >= MAX_HISTORY_ROWS_PER_GRANT
+    return oauth2SupersededRefreshTokenRepository.countByGrantId(id) >= MAX_HISTORY_ROWS_PER_GRANT
   }
 
   private fun parseScopes(raw: String?): List<String> = OAuth2Scopes.splitScopeString(raw).distinct()

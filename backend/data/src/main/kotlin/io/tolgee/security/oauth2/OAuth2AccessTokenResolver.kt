@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 @Component
 class OAuth2AccessTokenResolver(
   private val repository: OAuth2GrantRepository,
-  private val clientRegistry: OAuth2ClientRegistry,
+  private val oauth2ClientRegistry: OAuth2ClientRegistry,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
@@ -54,7 +54,7 @@ class OAuth2AccessTokenResolver(
 
     // A grant outlives the client it was issued to, so both are checked per request rather than at issue time: the
     // withdrawal mark on the row, and whether this instance still serves the client at all.
-    if (grant.clientWithdrawnAt != null || !clientRegistry.servesClient(grant.clientId)) {
+    if (grant.clientWithdrawnAt != null || !oauth2ClientRegistry.servesClient(grant.clientId)) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 

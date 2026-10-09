@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 class CimdClientPolicy(
   private val properties: OAuth2ServerProperties,
   private val internalProperties: InternalProperties,
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
 ) {
   fun isCandidate(clientId: String): Boolean {
@@ -55,7 +55,7 @@ class CimdClientPolicy(
 
   private fun ownOrigins(): Set<String> =
     setOfNotNull(
-      runCatching { issuerResolver.issuerUrl }.getOrNull()?.let { UrlOrigins.originOf(it) },
+      runCatching { oauth2IssuerResolver.issuerUrl }.getOrNull()?.let { UrlOrigins.originOf(it) },
       frontendUrlProvider.stableUrl?.let { UrlOrigins.originOf(it) },
     )
 

@@ -33,12 +33,12 @@ import java.util.zip.ZipInputStream
  */
 class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Autowired
-  private lateinit var grantRepository: OAuth2GrantRepository
+  private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
 
-  private lateinit var tokens: OAuth2TestTokens
+  private lateinit var oauth2Tokens: OAuth2TestTokens
 
   private lateinit var testData: OAuth2AccessTokenAuthTestData
 
@@ -46,12 +46,12 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   fun setup() {
     testData = OAuth2AccessTokenAuthTestData()
     testDataService.saveTestData(testData.root)
-    tokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
+    oauth2Tokens = OAuth2TestTokens(oauth2GrantRepository, userAccountService, keyGenerator)
   }
 
   @AfterEach
   fun cleanup() {
-    tokens.deleteAll()
+    oauth2Tokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -81,7 +81,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `an MCP-audience token is refused by the REST API with invalid_token`() {
     val token =
-      tokens.issue(
+      oauth2Tokens.issue(
         subject = testData.user.id,
         scopes = listOf("translations.view"),
         projectIds = listOf(testData.project.id),
@@ -101,7 +101,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `a token whose grant audience no longer resolves is refused everywhere`() {
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    tokens.corruptAudience(token, "FUTURE")
+    oauth2Tokens.corruptAudience(token, "FUTURE")
 
     performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
   }
@@ -138,7 +138,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `fails closed on an unparseable stored project selection`() {
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
-    tokens.corruptProjectSelection(token, "nonsense")
+    oauth2Tokens.corruptProjectSelection(token, "nonsense")
 
     performGet(translationsUrl(), bearerHeaders(token)).andIsForbidden
   }
@@ -228,7 +228,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `rejects an access token issued before the user invalidated their tokens`() {
+  fun `rejects an access token issued before the user invalidated their oauth2Tokens`() {
     val token = mintForAllProjects(scopes = listOf("translations.view"))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
     val user = userAccountService.get(testData.user.id)
@@ -242,7 +242,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     val token = mint(scopes = listOf("translations.view"), projects = listOf(testData.project.id))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
 
-    tokens.revoke(token)
+    oauth2Tokens.revoke(token)
 
     performGet(translationsUrl(), bearerHeaders(token)).andIsUnauthorized
   }
@@ -250,7 +250,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   @Test
   fun `rejects a token whose client is no longer registered`() {
     val token =
-      tokens.issue(
+      oauth2Tokens.issue(
         subject = testData.user.id,
         scopes = listOf("translations.view"),
         projectIds = listOf(testData.project.id),
@@ -437,7 +437,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
     issuedAt: Instant = Instant.now(),
     expiresAt: Instant = issuedAt.plus(30, ChronoUnit.MINUTES),
   ): String =
-    tokens.issue(
+    oauth2Tokens.issue(
       subject = subject,
       scopes = scopes,
       projectIds = projects,

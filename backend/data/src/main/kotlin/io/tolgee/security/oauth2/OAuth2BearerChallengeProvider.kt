@@ -27,7 +27,7 @@ import org.springframework.web.util.UrlPathHelper
  */
 @Component
 class OAuth2BearerChallengeProvider(
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
 ) {
   fun challengeFor(
     request: HttpServletRequest,
@@ -74,10 +74,10 @@ class OAuth2BearerChallengeProvider(
   // one only for the MCP resource.
   private fun resourceMetadataUrl(request: HttpServletRequest): String? {
     if (!isProtectedResourcePath(request)) return null
-    if (!issuerResolver.isConfigured) return null
+    if (!oauth2IssuerResolver.isConfigured) return null
     // This runs from inside the exception handler. A misconfigured issuer throws, and letting that escape would
     // replace every handled error on the MCP path with a 500 raised while rendering it.
-    val issuer = runCatching { issuerResolver.issuerUrl }.getOrNull() ?: return null
+    val issuer = runCatching { oauth2IssuerResolver.issuerUrl }.getOrNull() ?: return null
     return issuer + OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH
   }
 }

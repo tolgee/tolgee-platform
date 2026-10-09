@@ -161,7 +161,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
     echoedState.assert.isEqualTo("client-state").isNotEqualTo(pending.state)
     // Read live rather than hardcoded: another test in the same JVM can change the URL property it derives from.
     assertThat(URLDecoder.decode(driver.queryParam(codeRedirect, "iss")!!, StandardCharsets.UTF_8))
-      .isEqualTo(issuerResolver.issuerUrl)
+      .isEqualTo(oauth2IssuerResolver.issuerUrl)
   }
 
   @Test

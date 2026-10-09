@@ -28,7 +28,7 @@ import java.time.Duration
 
 @Component
 class OAuth2GrantCleanup(
-  private val authorizationService: OAuth2AuthorizationService,
+  private val oauth2AuthorizationService: OAuth2AuthorizationService,
   private val cimdClientLifecycle: CimdClientLifecycleService,
   private val properties: OAuth2ServerProperties,
   private val currentDateProvider: CurrentDateProvider,
@@ -46,8 +46,9 @@ class OAuth2GrantCleanup(
 
   private fun purgeExpiredGrants() {
     val cutoff = currentDateProvider.date.toInstant().minus(Duration.ofDays(properties.grantRetentionDays))
-    val deleted = authorizationService.deleteExpiredBefore(cutoff) + authorizationService.deleteExpiredPendingConsents()
-    val prunedTokens = authorizationService.pruneRefreshHistoryBeyondDepth()
+    val deleted =
+      oauth2AuthorizationService.deleteExpiredBefore(cutoff) + oauth2AuthorizationService.deleteExpiredPendingConsents()
+    val prunedTokens = oauth2AuthorizationService.pruneRefreshHistoryBeyondDepth()
     val deletedCheckRows = cimdClientLifecycle.deleteCheckRowsWithoutGrants()
     if (deleted > 0 || prunedTokens > 0 || deletedCheckRows > 0) {
       logger.info(

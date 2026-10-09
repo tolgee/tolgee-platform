@@ -24,7 +24,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
   private lateinit var repository: OAuth2GrantRepository
 
   @Autowired
-  private lateinit var authorizationService: OAuth2AuthorizationService
+  private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
@@ -54,7 +54,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     val a2 = insertGrant("client-y", testData.userA)
     val b1 = insertGrant("client-x", testData.userB)
 
-    val deleted = authorizationService.revokeAllForUser(testData.userA.id)
+    val deleted = oauth2AuthorizationService.revokeAllForUser(testData.userA.id)
 
     deleted.assert.isEqualTo(2)
     repository.existsById(a1).assert.isFalse()
@@ -77,21 +77,29 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     repository.save(grant)
 
     assertThrows<OAuth2Error> {
-      authorizationService.exchangeCode(client, CODE, grant.redirectUri, "b".repeat(43), null)
+      oauth2AuthorizationService.exchangeCode(client, CODE, grant.redirectUri, "b".repeat(43), null)
     }
 
-    assertThrows<OAuth2Error> { authorizationService.exchangeCode(client, CODE, grant.redirectUri, verifier, null) }
+    assertThrows<OAuth2Error> {
+      oauth2AuthorizationService.exchangeCode(
+        client,
+        CODE,
+        grant.redirectUri,
+        verifier,
+        null,
+      )
+    }
     repository.existsById(grant.id).assert.isFalse()
   }
 
   @Test
   fun `a refresh from two generations back kills the grant via the history`() {
     val grant = grantWithRefreshChain()
-    val first = authorizationService.refresh(client, "tgort_$OLDEST", null, null)
-    authorizationService.refresh(client, first.refreshToken, null, null)
+    val first = oauth2AuthorizationService.refresh(client, "tgort_$OLDEST", null, null)
+    oauth2AuthorizationService.refresh(client, first.refreshToken, null, null)
     currentDateProvider.move(Duration.ofSeconds(properties.refreshTokenGraceSeconds + 5))
 
-    assertThrows<OAuth2Error> { authorizationService.refresh(client, "tgort_$OLDEST", null, null) }
+    assertThrows<OAuth2Error> { oauth2AuthorizationService.refresh(client, "tgort_$OLDEST", null, null) }
     repository.existsById(grant.id).assert.isFalse()
   }
 
@@ -101,7 +109,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
 
     val changedClient = cimdClient(V1 + "hash-after-the-document-changed")
     assertThrows<OAuth2Error> {
-      authorizationService.exchangeCode(changedClient, CODE, grant.redirectUri, VERIFIER, null)
+      oauth2AuthorizationService.exchangeCode(changedClient, CODE, grant.redirectUri, VERIFIER, null)
     }
     repository.existsById(grant.id).assert.isFalse()
   }
@@ -111,7 +119,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     val grant = cimdGrant(V1 + "stable-hash")
 
     val sameClient = cimdClient(V1 + "stable-hash")
-    val tokens = authorizationService.exchangeCode(sameClient, CODE, grant.redirectUri, VERIFIER, null)
+    val tokens = oauth2AuthorizationService.exchangeCode(sameClient, CODE, grant.redirectUri, VERIFIER, null)
     tokens.accessToken.assert.isNotBlank()
   }
 
@@ -120,7 +128,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     val grant = cimdGrant(V1 + "hash-at-authorize-time")
 
     val unresolvedClient = cimdClient(metadataHash = null, redirectUris = emptyList())
-    val tokens = authorizationService.exchangeCode(unresolvedClient, CODE, grant.redirectUri, VERIFIER, null)
+    val tokens = oauth2AuthorizationService.exchangeCode(unresolvedClient, CODE, grant.redirectUri, VERIFIER, null)
 
     tokens.accessToken.assert.isNotBlank()
     repository.existsById(grant.id).assert.isTrue()
@@ -131,7 +139,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
     val grant = cimdGrant("hash-from-a-release-that-did-not-version-it")
 
     val currentClient = cimdClient(V1 + "whatever-this-build-computes")
-    authorizationService.exchangeCode(currentClient, CODE, grant.redirectUri, VERIFIER, null)
+    oauth2AuthorizationService.exchangeCode(currentClient, CODE, grant.redirectUri, VERIFIER, null)
 
     repository.existsById(grant.id).assert.isTrue()
   }

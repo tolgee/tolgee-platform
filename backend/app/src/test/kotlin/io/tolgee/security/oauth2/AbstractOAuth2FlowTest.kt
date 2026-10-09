@@ -34,7 +34,7 @@ abstract class AbstractOAuth2FlowTest : AbstractControllerTest() {
   protected lateinit var oauth2AuthorizationService: OAuth2AuthorizationService
 
   @Autowired
-  protected lateinit var issuerResolver: OAuth2IssuerResolver
+  protected lateinit var oauth2IssuerResolver: OAuth2IssuerResolver
 
   @Autowired
   protected lateinit var repository: OAuth2GrantRepository

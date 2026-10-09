@@ -25,24 +25,24 @@ import java.net.http.HttpResponse
  */
 class McpOAuthAccessTest : AbstractMcpTest() {
   @Autowired
-  private lateinit var grantRepository: OAuth2GrantRepository
+  private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
 
-  private lateinit var tokens: OAuth2TestTokens
+  private lateinit var oauth2Tokens: OAuth2TestTokens
   private lateinit var testData: McpOAuthTestData
 
   @BeforeEach
   fun setup() {
-    tokens = OAuth2TestTokens(grantRepository, userAccountService, keyGenerator)
+    oauth2Tokens = OAuth2TestTokens(oauth2GrantRepository, userAccountService, keyGenerator)
     testData = McpOAuthTestData()
     testDataService.saveTestData(testData.root)
   }
 
   @AfterEach
   fun cleanup() {
-    tokens.deleteAll()
+    oauth2Tokens.deleteAll()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -89,7 +89,7 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   @Test
   fun `a revoked token no longer authenticates`() {
     val token = tokenFor(listOf(Scope.KEYS_VIEW.value, Scope.TRANSLATIONS_VIEW.value), testData.project.id)
-    tokens.revoke(token)
+    oauth2Tokens.revoke(token)
 
     val response = mcpInitializeWith(token)
 
@@ -114,7 +114,7 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   @Test
   fun `an all-projects token has no implicit project to fall back on`() {
     val token =
-      tokens.issue(
+      oauth2Tokens.issue(
         subject = testData.user.id,
         scopes = listOf(Scope.KEYS_VIEW.value),
         projectIds = null,
@@ -127,7 +127,7 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   @Test
   fun `an API-audience token is refused by the MCP endpoint with invalid_token`() {
     val token =
-      tokens.issue(
+      oauth2Tokens.issue(
         subject = testData.user.id,
         scopes = listOf(Scope.KEYS_VIEW.value, Scope.TRANSLATIONS_VIEW.value),
         projectIds = listOf(testData.project.id),
@@ -166,7 +166,7 @@ class McpOAuthAccessTest : AbstractMcpTest() {
     scopes: List<String>,
     projectId: Long,
   ): String =
-    tokens.issue(
+    oauth2Tokens.issue(
       subject = testData.user.id,
       scopes = scopes,
       projectIds = listOf(projectId),

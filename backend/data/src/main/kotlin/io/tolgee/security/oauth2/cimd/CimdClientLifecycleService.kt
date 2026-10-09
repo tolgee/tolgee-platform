@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit
  */
 @Service
 class CimdClientLifecycleService(
-  private val grantRepository: OAuth2GrantRepository,
+  private val oauth2GrantRepository: OAuth2GrantRepository,
   private val documentCheckRepository: OAuth2ClientDocumentCheckRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
@@ -45,7 +45,7 @@ class CimdClientLifecycleService(
   fun recordDocumentRead(clientId: String) {
     val now = currentDateProvider.date
     val refreshBefore = Date(now.time - TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays) / 2)
-    grantRepository.markClientDocumentRead(clientId, now, refreshBefore)
+    oauth2GrantRepository.markClientDocumentRead(clientId, now, refreshBefore)
   }
 
   /** The document no longer matches what its users agreed to, so those grants end. */
@@ -56,7 +56,7 @@ class CimdClientLifecycleService(
   ): Int {
     if (currentHash == null) return 0
     val revoked =
-      grantRepository.deleteDriftedFromDocument(
+      oauth2GrantRepository.deleteDriftedFromDocument(
         clientId,
         currentHash,
         CimdMetadataFetcher.HASH_SCHEME_PREFIX + "%",
@@ -72,7 +72,7 @@ class CimdClientLifecycleService(
   }
 
   fun clientIdsDueForCheck(limit: Int): List<String> =
-    grantRepository.findCimdClientIdsDueForCheck(
+    oauth2GrantRepository.findCimdClientIdsDueForCheck(
       currentDateProvider.date,
       dueBefore(),
       graceStart(),
@@ -81,7 +81,12 @@ class CimdClientLifecycleService(
     )
 
   fun clientsDueForCheckCount(): Long =
-    grantRepository.countCimdClientIdsDueForCheck(currentDateProvider.date, dueBefore(), graceStart(), NEVER_CHECKED)
+    oauth2GrantRepository.countCimdClientIdsDueForCheck(
+      currentDateProvider.date,
+      dueBefore(),
+      graceStart(),
+      NEVER_CHECKED,
+    )
 
   @Transactional
   fun recordCheckAttempt(clientId: String) {
@@ -101,7 +106,7 @@ class CimdClientLifecycleService(
   /** A publisher's refusal, made durable on the grant rows so every instance reads it. */
   @Transactional
   fun recordClientWithdrawn(clientId: String) {
-    val marked = grantRepository.markClientWithdrawn(clientId, currentDateProvider.date)
+    val marked = oauth2GrantRepository.markClientWithdrawn(clientId, currentDateProvider.date)
     if (marked > 0) {
       logger.warn(
         "Marked {} OAuth2 grant(s) of client {} as withdrawn: its metadata document refuses",
@@ -121,7 +126,7 @@ class CimdClientLifecycleService(
     // `previousCheckedAt` reaches two attempts back. Comparing against the latest one instead would make every
     // mark look "already read" on the very next round.
     val previousAttempt = documentCheckRepository.findByClientId(clientId)?.previousCheckedAt ?: NEVER_CHECKED
-    val cleared = grantRepository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
+    val cleared = oauth2GrantRepository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
     if (cleared > 0) {
       logger.info(
         "Lifted the withdrawal mark on {} OAuth2 grant(s) of client {}: its document answers again",
