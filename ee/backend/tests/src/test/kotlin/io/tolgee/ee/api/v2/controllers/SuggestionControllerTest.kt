@@ -9,6 +9,7 @@ import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsConflict
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -400,7 +401,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest(translation = "New suggestion"),
-    ).andIsBadRequest.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
+    ).andIsConflict.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
   }
 
   @Test
@@ -410,7 +411,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest(translation = "New suggestion"),
-    ).andIsBadRequest.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
+    ).andIsConflict.andHasErrorMessage(Message.SUGGESTIONS_DISABLED)
   }
 
   @Test
