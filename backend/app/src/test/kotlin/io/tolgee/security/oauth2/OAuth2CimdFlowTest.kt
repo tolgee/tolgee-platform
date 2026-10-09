@@ -20,12 +20,7 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * The whole CIMD journey through the real HTTP stack: an unknown client presents an HTTPS (here, dev-loopback) URL as
- * its `client_id`, the authorization server fetches and validates the document at that URL, and a token is issued
- * against the unverified client it describes. SSRF protection is disabled so the metadata can be served on loopback,
- * which is exactly the dev escape hatch the fetcher documents.
- */
+/** SSRF protection is off so the test's own loopback server can serve the metadata document. */
 @TestPropertySource(properties = ["tolgee.internal.disable-url-ssrf-protection=true"])
 class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   @Autowired
@@ -48,19 +43,15 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
 
   private var server: HttpServer? = null
 
-  /** Set mid-test to make the served document declare a redirect the user never consented to. */
   private var extraRedirectUri: String? = null
 
-  /** A publisher retiring the client: the document is taken down, so the host answers but the document does not. */
+  /** The host answers 404: the publisher took the document down. */
   private var documentWithdrawn: Boolean = false
 
-  /** The publisher's origin having a bad minute: it answers, but not with the document. */
   private var documentStatus: Int? = null
 
-  /** A second client on the same host, so one account can hold two document-backed clients. */
   private var otherDocumentBroken: Boolean = false
 
-  /** How often the publisher was asked for the main client's document. */
   private val documentRequests = AtomicInteger()
 
   @AfterEach
@@ -264,8 +255,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val code = driver.code(pending, projectId = null)
     val issued = json(driver.exchangeCode(code, clientId, redirect, pending.verifier))
 
-    // The other instance saw the document go and wrote the mark; this one still caches the answer from the
-    // authorize hop. The mark on the row is what decides, not the cache.
     documentWithdrawn = true
     cimdClientLifecycleService.recordClientWithdrawn(clientId)
 
@@ -293,8 +282,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isEqualTo("invalid_grant")
 
-    // Past the re-check interval, still inside the grace window: the mis-deploy is fixed and read again in time.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    advancePastCheckInterval()
     documentWithdrawn = false
 
     json(driver.refresh(refreshToken, clientId))
@@ -320,16 +308,14 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isEqualTo("invalid_grant")
 
-    // A second read with the document still gone: the mark has now survived a read, so it is no longer a
-    // mis-deploy we are waiting to see recover.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    advancePastCheckInterval()
     json(driver.refresh(refreshToken, clientId))
       .get("error")
       .asString()
       .assert
       .isEqualTo("invalid_grant")
 
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
+    advancePastGraceWindow()
     documentWithdrawn = false
 
     json(driver.refresh(refreshToken, clientId))
@@ -340,7 +326,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     withdrawnAt(clientId).assert.isNotNull()
   }
 
-  /** The age bound counts failed reads, not idle time: a user coming back after a long break is not signed out by a blip. */
   @Test
   fun `a grant idle for longer than the maximum age is not refused over a single failed read`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
@@ -350,8 +335,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issued = json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
     val issuedAt = currentDateProvider.date
 
-    // Twice the maximum age, and this refresh is the first time anything reads the document again.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(14))
+    jumpTo(issuedAt, days = 14)
     documentStatus = 503
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
@@ -376,14 +360,13 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val second = json(driver.refresh(first.get("refresh_token").asString(), clientId))
     documentRequests.get().assert.isEqualTo(readsBefore + 1)
 
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    advancePastCheckInterval()
     json(
       driver.refresh(second.get("refresh_token").asString(), clientId),
     ).get("access_token").asString().assert.isNotBlank()
     documentRequests.get().assert.isEqualTo(readsBefore + 2)
   }
 
-  /** The fetch is the one outbound call an existing grant can cause, so only its real holder may cause it. */
   @Test
   fun `a refresh token that matches no live grant reads no document`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
@@ -416,7 +399,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isEqualTo("invalid_grant")
 
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(4))
+    advancePastGraceWindow()
     documentWithdrawn = false
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
@@ -484,8 +467,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val pending = driver.startPendingConsent(jwt(), expiring, redirectAt(port))
     driver.exchangeCode(driver.code(pending, projectId = null), expiring, redirectAt(port), pending.verifier)
 
-    // Past the life of every token the grant holds, with nothing having deleted the row yet.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.DAYS.toMillis(400))
+    advancePastEveryTokenLifetime()
 
     json(driver.startAuthorization(jwt(), otherClientIdAt(port), redirectAt(port), validParams(null)))
       .get("consentState")
@@ -494,7 +476,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .isNotBlank()
   }
 
-  /** What one refresh learns about the document is a fact about the client, so every grant of it reads the same. */
   @Test
   fun `one successful read clears the failing state for every grant of the client`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
@@ -507,7 +488,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
         json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
       }
 
-    // The first grant's refresh finds the document unreadable and starts the clock.
     documentStatus = 503
     val firstRenewed = json(driver.refresh(first.get("refresh_token").asString(), clientId))
     firstRenewed
@@ -516,15 +496,13 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isNotBlank()
 
-    // Past the maximum age, the first grant's refresh reads the document fine again.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(8))
+    jumpTo(issuedAt, days = 8)
     documentStatus = null
     json(
       driver.refresh(firstRenewed.get("refresh_token").asString(), clientId),
     ).get("access_token").asString().assert.isNotBlank()
 
-    // The second grant's refresh fails to read again: a fresh failure, not one eight days old, so it is forgiven.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    advancePastCheckInterval()
     documentStatus = 503
     json(driver.refresh(second.get("refresh_token").asString(), clientId))
       .get("access_token")
@@ -543,8 +521,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issuedAt = currentDateProvider.date
     documentStatus = 503
 
-    // The first failed read starts the clock; the grant is still fine.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(6))
+    jumpTo(issuedAt, days = 6)
     val renewed = json(driver.refresh(issued.get("refresh_token").asString(), clientId))
     renewed
       .get("access_token")
@@ -552,8 +529,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isNotBlank()
 
-    // Two days of failing: forgiven.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(8))
+    jumpTo(issuedAt, days = 8)
     val renewedAgain = json(driver.refresh(renewed.get("refresh_token").asString(), clientId))
     renewedAgain
       .get("access_token")
@@ -561,8 +537,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isNotBlank()
 
-    // Past the bound counted from the first failure: that is the publisher's document, not our own downtime.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(13) + TimeUnit.MINUTES.toMillis(2))
+    jumpTo(issuedAt, days = 13, minutes = 2)
     json(driver.refresh(renewedAgain.get("refresh_token").asString(), clientId))
       .get("error")
       .asString()
@@ -591,11 +566,28 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .isEqualTo(400)
   }
 
+  private fun advance(millis: Long) {
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + millis)
+  }
+
+  private fun advancePastCheckInterval() = advance(TimeUnit.MINUTES.toMillis(20))
+
+  private fun advancePastGraceWindow() = advance(TimeUnit.HOURS.toMillis(2))
+
+  private fun advancePastEveryTokenLifetime() = advance(TimeUnit.DAYS.toMillis(400))
+
+  private fun jumpTo(
+    from: Date,
+    days: Long,
+    minutes: Long = 0,
+  ) {
+    currentDateProvider.forcedDate = Date(from.time + TimeUnit.DAYS.toMillis(days) + TimeUnit.MINUTES.toMillis(minutes))
+  }
+
   private fun withdrawnAt(clientId: String): Date? = documentCheckRepository.findByClientId(clientId)?.withdrawnAt
 
   private fun clientIdAt(port: Int) = "http://127.0.0.1:$port/client"
 
-  /** Sorts before [clientIdAt], so the round order in the starvation test does not depend on the database. */
   private fun otherClientIdAt(port: Int) = "http://127.0.0.1:$port/broken-client"
 
   private fun redirectAt(port: Int) = "http://127.0.0.1:$port/cb"

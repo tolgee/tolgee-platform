@@ -154,11 +154,6 @@ class OAuth2RevocationConformanceTest : AbstractOAuth2ConformanceTest() {
       .isEqualTo("invalid_grant")
   }
 
-  /**
-   * Two rotations back the token is no longer on the grant row, only in the rotation history - which the token
-   * endpoint already treats as authoritative enough to revoke a grant on replay. Answering 200 here without
-   * revoking would be the RFC 7009 answer for a token that is not live, given for one that is.
-   */
   @Test
   fun `revoking a refresh token from two rotations back still ends the grant`() {
     val issued = json(tokenResult())
