@@ -125,6 +125,20 @@ class MtProviderCatchingTest {
   }
 
   @Test
+  fun `stops iteration and does not requeue when out of credits is wrapped in another exception`() {
+    assertStopsWithoutRequeue(Message.OUT_OF_CREDITS) {
+      RuntimeException(OutOfCreditsException(OutOfCreditsException.Reason.OUT_OF_CREDITS))
+    }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when spending limit is wrapped in another exception`() {
+    assertStopsWithoutRequeue(Message.CREDIT_SPENDING_LIMIT_EXCEEDED) {
+      RuntimeException(OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED))
+    }
+  }
+
+  @Test
   fun `stops iteration and does not requeue when plan word limit is exceeded`() {
     assertStopsWithoutRequeue(Message.PLAN_WORD_LIMIT_EXCEEDED) { PlanLimitExceededWordsException(30741, 30000) }
   }

@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.OutOfCreditsException
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 interface HasSuccessfulTargets {
@@ -52,6 +53,7 @@ private val USER_LIMIT_MESSAGES =
 
 fun Throwable.findUserLimitMessage(): Message? =
   ExceptionUtils.getThrowableList(this).firstNotNullOfOrNull { throwable ->
+    if (throwable is OutOfCreditsException) return@firstNotNullOfOrNull throwable.reason.tolgeeMessage
     val code = (throwable as? ExceptionWithMessage)?.let { runCatching { it.code }.getOrNull() }
     USER_LIMIT_MESSAGES.firstOrNull { it.code == code }
   }

@@ -77,7 +77,7 @@ class ChunkFailureLoggerTest {
   @Test
   fun `logs items failing for the same reason once`() {
     val items =
-      (1..5).map { ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("boom $it")) }
+      (1..5).map { ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("boom")) }
 
     ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
 
@@ -97,6 +97,34 @@ class ChunkFailureLoggerTest {
     ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
 
     appender.list.assert.hasSize(2)
+  }
+
+  @Test
+  fun `logs items failing with different messages of the same class separately`() {
+    val items =
+      listOf(
+        ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("invalid configuration")),
+        ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("provider unavailable")),
+      )
+
+    ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
+
+    appender.list.assert.hasSize(2)
+  }
+
+  @Test
+  fun `logs items failing with the same error code and different params once`() {
+    val items =
+      (1..5).map {
+        ChunkItemFailedException(
+          Message.TRANSLATION_FAILED,
+          cause = BadRequestException(Message.KEY_EXISTS, listOf(it)),
+        )
+      }
+
+    ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
+
+    appender.list.assert.hasSize(1)
   }
 
   @Test

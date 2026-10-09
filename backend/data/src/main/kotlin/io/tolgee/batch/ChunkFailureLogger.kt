@@ -47,7 +47,7 @@ object ChunkFailureLogger : Logging {
   private fun failureReason(exception: ChunkItemFailedException): List<Any?> {
     val rootCause = ExceptionUtils.getRootCause(exception)
     val rootCauseCode = (rootCause as? ExceptionWithCode)?.let { runCatching { it.code }.getOrNull() }
-    return listOf(exception.code, rootCause?.javaClass, rootCauseCode)
+    return listOf(exception.code, rootCause?.javaClass, rootCauseCode ?: rootCause?.message)
   }
 
   private fun describeCauseChain(exception: Throwable): String =
