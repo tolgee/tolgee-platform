@@ -32,6 +32,11 @@ private const val DEFAULT_CLI_REDIRECT_URI = "http://127.0.0.1/callback"
  * The clients Tolgee ships, built from `tolgee.oauth2.*`: the CLI, on by default and registered wherever the
  * authorization server is live, and the browser extension, off until an operator turns it on. Each has an on/off
  * flag and a redirect URI list with a built-in default. Clients nobody registered are [OAuth2ClientRegistry]'s job.
+ *
+ * The default redirect URIs live here, not as property defaults: an empty list is how the code tells a client nobody
+ * configured from one an operator did, and the startup guard below fires only for the latter. A property default
+ * would make every instance look configured, and an empty YAML value, which binds to an empty list, would silently
+ * drop the default.
  */
 @Component
 class PreRegisteredOAuth2Clients(

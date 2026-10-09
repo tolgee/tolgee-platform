@@ -272,10 +272,14 @@ class SsoDelegateEe(
 
   /**
    * The token endpoint receives the client secret and a code or refresh token. Over plain http they travel in the
-   * clear, so only https is accepted. The dev switch that relaxes SSRF checks relaxes this too, for local providers.
+   * clear, so an organization's endpoint must be https: an organization owner configures it. The global endpoint is
+   * operator configuration, where an on-prem provider on plain http is the normal case, and the two switches that
+   * let organization SSO reach local providers let it use plain http too.
    */
   private fun requireHttpsTokenUri(tenant: SsoTenantConfig): SsoTenantConfig {
+    if (tenant.global) return tenant
     if (tolgeeProperties.internal.disableUrlSsrfProtection) return tenant
+    if (tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses) return tenant
     if (tenant.tokenUri.startsWith("https://", ignoreCase = true)) return tenant
     logger.warn("Refusing the SSO token exchange for {}: the token endpoint is not https", tenant.domain)
     throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)

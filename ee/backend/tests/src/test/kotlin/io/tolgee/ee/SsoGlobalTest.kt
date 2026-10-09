@@ -82,6 +82,7 @@ class SsoGlobalTest : AuthorizedControllerTest() {
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
     tolgeeProperties.authentication.ssoGlobal.enabled = false
+    tolgeeProperties.internal.disableUrlSsrfProtection = true
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
   }
@@ -115,6 +116,15 @@ class SsoGlobalTest : AuthorizedControllerTest() {
       )
     assertThat(response.response.status).isEqualTo(404)
     assertThat(response.response.contentAsString).contains(Message.SSO_DOMAIN_NOT_FOUND_OR_DISABLED.code)
+  }
+
+  @Test
+  fun `a global token endpoint on plain http is accepted, since the operator configured it`() {
+    tolgeeProperties.internal.disableUrlSsrfProtection = false
+
+    val response = ssoMultiTenantsMocks.authorize("domain.com")
+
+    assertThat(response.response.status).isEqualTo(200)
   }
 
   @Test

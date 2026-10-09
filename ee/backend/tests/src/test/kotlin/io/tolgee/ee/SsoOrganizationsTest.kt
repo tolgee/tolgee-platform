@@ -86,6 +86,8 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
   fun tearDown() {
     testDataService.cleanTestData(testData.root)
     tolgeeProperties.authentication.ssoOrganizations.enabled = false
+    tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses = false
+    tolgeeProperties.internal.disableUrlSsrfProtection = true
     currentDateProvider.forcedDate = null
     enabledFeaturesProvider.forceEnabled = null
   }
@@ -126,6 +128,27 @@ class SsoOrganizationsTest : AuthorizedControllerTest() {
     val user = userAccountService.get(userName)
     assertThat(organizationRoleService.isUserOfRole(user.id, testData.organization.id, OrganizationRoleType.MEMBER))
       .isEqualTo(true)
+  }
+
+  @Test
+  fun `a token endpoint on plain http is refused when the provider must be a public https one`() {
+    tolgeeProperties.internal.disableUrlSsrfProtection = false
+    tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses = false
+
+    val response = loginAsSsoUser()
+
+    assertThat(response.response.status).isEqualTo(401)
+    assertThat(response.response.contentAsString).contains(Message.SSO_TOKEN_EXCHANGE_FAILED.code)
+  }
+
+  @Test
+  fun `a token endpoint on plain http is accepted when local providers are allowed`() {
+    tolgeeProperties.internal.disableUrlSsrfProtection = false
+    tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses = true
+
+    val response = loginAsSsoUser()
+
+    assertThat(response.response.status).isEqualTo(200)
   }
 
   @Test
