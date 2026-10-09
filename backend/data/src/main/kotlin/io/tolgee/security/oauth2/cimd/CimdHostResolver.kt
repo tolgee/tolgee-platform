@@ -62,10 +62,7 @@ class CimdHostResolver(
    */
   private val liveResolutions = CountingSlots(MAX_RESOLUTIONS_PER_HOST)
 
-  /**
-   * Hosts whose lookup just ran past the deadline, refused for a while without a thread. One memo per lane: a
-   * shared one would let a request decide what the background check may read.
-   */
+  /** Hosts whose lookup just ran past the deadline, refused for a while without a thread. One per lane, see [CimdFetchLane]. */
   private val recentlyStuckHosts: Cache<String, Boolean> = stuckHostMemo()
   private val recentlyStuckHostsForCheck: Cache<String, Boolean> = stuckHostMemo()
 

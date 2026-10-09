@@ -17,13 +17,19 @@
 package io.tolgee.security.oauth2.cimd
 
 /**
- * Which resolver pool and stuck-host memo a document fetch runs on. The lanes share neither: a shared one would let
- * an arriving request decide what the background check may read.
+ * Which lane a document fetch runs on. The two lanes share nothing that one could leave behind for the other: not
+ * the resolver pool, not the stuck-host memo, and not the cache.
+ *
+ * In one direction, anything the request lane may fill is something an anonymous caller fills on purpose: a shared
+ * pool, memo or cache would let an arriving request decide what the check may read for a client somebody holds a
+ * grant for. In the other, what the check reads must never warm the lane `/oauth2/authorize` answers from, because
+ * the check runs only for clients somebody on this instance consented to, so a warm entry or a faster answer would
+ * tell a caller polling the endpoint that someone here uses that app.
  */
 enum class CimdFetchLane {
   /** `/oauth2/authorize` reading the document of a client nobody has consented to yet. */
   REQUEST,
 
-  /** The scheduled check re-reading the document of a client that already holds a grant. */
+  /** The document check on the refresh path re-reading the document of a client that already holds a grant. */
   GRANT_CHECK,
 }

@@ -52,10 +52,8 @@ class CimdClientCache(
   }
 
   /**
-   * Fetches the publisher's document now, on the lane kept for clients that already have a grant: no cache on
-   * either side of the call. [CimdDocumentCheck] is its only caller: it has to see what the publisher serves at
-   * this moment, and what it reads must not warm the lane `/oauth2/authorize` answers from — see
-   * `docs/oauth/README.md`. Null means this server had no room for the fetch and the publisher was never asked.
+   * Fetches the publisher's document now on the [CimdFetchLane.GRANT_CHECK] lane, with no cache on either side of
+   * the call. Null means this server had no room for the fetch and the publisher was never asked.
    */
   fun fetchOnGrantLane(clientIdUrl: String): CimdResolution? =
     try {

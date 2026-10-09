@@ -58,13 +58,9 @@ class OAuth2ClientRegistry(
   }
 
   /**
-   * Reads the document now, through the lane kept for clients that already have a grant. Only
+   * Reads the document now on the [io.tolgee.security.oauth2.cimd.CimdFetchLane.GRANT_CHECK] lane. Only
    * [io.tolgee.security.oauth2.cimd.CimdDocumentCheck] may call it, and only for an id [servesCimdClient] accepts.
    * Null means this server had no room for the fetch.
-   *
-   * It must leave the lane `/oauth2/authorize` answers from exactly as it found it. Writing to that lane and
-   * evicting from it both let an anonymous caller who polls the endpoint see that the check ran for this
-   * `client_id`, and the check runs only for clients somebody on this instance holds a grant for.
    */
   fun resolveForCheck(clientIdUrl: String): CimdResolution? = cimdClientCache.fetchOnGrantLane(clientIdUrl)
 
