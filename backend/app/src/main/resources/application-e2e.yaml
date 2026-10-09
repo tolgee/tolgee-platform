@@ -92,6 +92,8 @@ tolgee:
       secretKey: mock
   telemetry:
     enabled: false
+  review-ask:
+    enabled: false
   batch:
     concurrency: 10
   postgres-autostart:

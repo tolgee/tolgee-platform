@@ -6,26 +6,29 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 
 @Service
 class InstanceIdService(
   private val entityManager: EntityManager,
   private val platformTransactionManager: PlatformTransactionManager,
 ) {
-  @Transactional
   fun getInstanceId(): String {
+    return getOrCreate().instanceId
+  }
+
+  fun getInstanceCreatedAt(): Date? {
+    return getOrCreate().createdAt
+  }
+
+  private fun getOrCreate(): InstanceId {
     return tryUntilItDoesntBreakConstraint {
       executeInNewTransaction(platformTransactionManager) {
-        val entity =
-          entityManager.find(InstanceId::class.java, 1)
-            ?: let {
-              val instanceId = InstanceId()
-              entityManager.persist(instanceId)
-              entityManager.flush()
-              instanceId
-            }
-        entity.instanceId
+        entityManager.find(InstanceId::class.java, 1)
+          ?: InstanceId().also {
+            entityManager.persist(it)
+            entityManager.flush()
+          }
       }
     }
   }
