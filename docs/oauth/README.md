@@ -376,8 +376,9 @@ revocation of every grant that publisher holds.
 Past both, the retirement is permanent for those grants. That bound exists because `client_id` is the app's
 identity and is baked into every installed copy: a publisher who retires a compromised client and later ships a
 fix republishes at the *same* URL, and without it that ordinary act would hand back every grant the retirement
-ended — the thief's among them. Users of the fixed build simply consent again. So a publisher who wants a
-retirement to stick just leaves the URL answering 404 until it has been read twice.
+ended — the thief's among them. Users of the fixed build simply consent again: the mark covers only the grants
+made before it, because a grant made after it came from a document that answered on the authorize path. So a
+publisher who wants a retirement to stick just leaves the URL answering 404 until it has been read twice.
 
 This is also why the gone/unreadable split matters so much: if a 503 or a slow read counted as gone, one bad
 minute at a publisher's origin would log out every user of that client everywhere. And it is why the check never

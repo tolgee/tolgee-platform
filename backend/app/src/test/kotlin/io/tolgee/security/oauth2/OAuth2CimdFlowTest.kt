@@ -327,6 +327,43 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
+  fun `a grant consented after a confirmed retirement is not covered by it`() {
+    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
+    val clientId = clientIdAt(port)
+    val redirect = redirectAt(port)
+    val pending = driver.startPendingConsent(jwt(), clientId, redirect)
+    val old = json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
+
+    documentWithdrawn = true
+    json(
+      driver.refresh(old.get("refresh_token").asString(), clientId),
+    ).get("error").asString().assert.isEqualTo("invalid_grant")
+    advancePastCheckInterval()
+    json(
+      driver.refresh(old.get("refresh_token").asString(), clientId),
+    ).get("error").asString().assert.isEqualTo("invalid_grant")
+    advancePastGraceWindow()
+    documentWithdrawn = false
+    cimdClientCache.invalidate(clientId)
+
+    val again = driver.startPendingConsent(jwt(), clientId, redirect)
+    val fresh = json(driver.exchangeCode(driver.code(again, projectId = null), clientId, redirect, again.verifier))
+    fresh
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+    json(
+      driver.refresh(fresh.get("refresh_token").asString(), clientId),
+    ).get("access_token").asString().assert.isNotBlank()
+
+    json(
+      driver.refresh(old.get("refresh_token").asString(), clientId),
+    ).get("error").asString().assert.isEqualTo("invalid_grant")
+    withdrawnAt(clientId).assert.isNotNull()
+  }
+
+  @Test
   fun `a grant idle for longer than the maximum age is not refused over a single failed read`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)

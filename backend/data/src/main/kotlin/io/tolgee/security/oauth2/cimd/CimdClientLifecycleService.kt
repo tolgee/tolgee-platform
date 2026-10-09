@@ -19,6 +19,7 @@ package io.tolgee.security.oauth2.cimd
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
+import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.util.Logging
@@ -99,8 +100,8 @@ class CimdClientLifecycleService(
   /** What this server knows about the client's document. Null when nothing has ever tried to read it. */
   fun documentCheckOf(clientId: String): OAuth2ClientDocumentCheck? = documentCheckRepository.findByClientId(clientId)
 
-  fun isClientWithdrawn(clientId: String): Boolean =
-    documentCheckRepository.findByClientId(clientId)?.withdrawnAt != null
+  fun isGrantWithdrawn(grant: OAuth2Grant): Boolean =
+    documentCheckRepository.findByClientId(grant.clientId)?.covers(grant) == true
 
   @Transactional
   fun deleteCheckRowsWithoutGrants(): Int = documentCheckRepository.deleteWithoutGrants()

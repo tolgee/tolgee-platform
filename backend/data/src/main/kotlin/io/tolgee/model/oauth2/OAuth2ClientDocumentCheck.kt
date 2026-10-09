@@ -48,9 +48,16 @@ class OAuth2ClientDocumentCheck : StandardAuditModel() {
 
   /**
    * When the document was last seen to be gone: the host answered that there is nothing there. Every grant of the
-   * client is refused while this is set. Cleared when the document answers again inside the grace rules, so a
-   * publisher's mis-deploy is recoverable.
+   * client made before this is refused while it is set. Cleared when the document answers again inside the grace
+   * rules, so a publisher's mis-deploy is recoverable.
    */
   @Temporal(TemporalType.TIMESTAMP)
   var withdrawnAt: Date? = null
+
+  /** Whether the withdrawal mark is about this grant: a grant consented after the mark came from a document that answered. */
+  fun covers(grant: OAuth2Grant): Boolean {
+    val mark = withdrawnAt ?: return false
+    val made = grant.createdAt ?: return true
+    return !made.after(mark)
+  }
 }

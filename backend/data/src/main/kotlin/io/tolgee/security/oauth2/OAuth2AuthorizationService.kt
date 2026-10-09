@@ -366,7 +366,7 @@ class OAuth2AuthorizationService(
   ) {
     if (!client.hasMetadataDocument) return
     val document = cimdClientLifecycleService.documentCheckOf(grant.clientId) ?: return
-    refuseIfWithdrawn(document)
+    refuseIfWithdrawn(grant, document)
     refuseIfUnreadableForTooLong(grant, document)
   }
 
@@ -376,11 +376,15 @@ class OAuth2AuthorizationService(
     client: OAuth2Client,
   ) {
     if (!client.hasMetadataDocument) return
-    cimdClientLifecycleService.documentCheckOf(grant.clientId)?.let { refuseIfWithdrawn(it) }
+    cimdClientLifecycleService.documentCheckOf(grant.clientId)?.let { refuseIfWithdrawn(grant, it) }
   }
 
-  private fun refuseIfWithdrawn(document: OAuth2ClientDocumentCheck) {
-    if (document.withdrawnAt == null) return
+  /** A grant made after the mark came from a document that answered on the authorize path, so the mark is not about it. */
+  private fun refuseIfWithdrawn(
+    grant: OAuth2Grant,
+    document: OAuth2ClientDocumentCheck,
+  ) {
+    if (!document.covers(grant)) return
     throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document is gone")
   }
 

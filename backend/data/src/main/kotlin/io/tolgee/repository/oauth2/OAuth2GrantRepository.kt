@@ -102,7 +102,8 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     SELECT COUNT(DISTINCT g.clientId) FROM OAuth2Grant g
     WHERE g.userAccount.id = :userId AND g.clientMetadataHash IS NOT NULL AND g.clientId <> :exceptClientId
       AND NOT EXISTS (
-        SELECT 1 FROM OAuth2ClientDocumentCheck c WHERE c.clientId = g.clientId AND c.withdrawnAt IS NOT NULL
+        SELECT 1 FROM OAuth2ClientDocumentCheck c
+        WHERE c.clientId = g.clientId AND c.withdrawnAt IS NOT NULL AND c.withdrawnAt >= g.createdAt
       )
       AND GREATEST(g.refreshTokenExpiresAt, g.accessTokenExpiresAt, g.codeExpiresAt) > :now
     """,
