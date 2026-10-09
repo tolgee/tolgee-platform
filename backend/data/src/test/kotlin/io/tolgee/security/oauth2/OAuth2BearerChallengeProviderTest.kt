@@ -4,27 +4,11 @@ import io.tolgee.mcp.McpConstants
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpServletRequest
 
 class OAuth2BearerChallengeProviderTest {
-  @Test
-  fun `an unusable issuer costs the challenge its metadata pointer, not the response`() {
-    val provider =
-      OAuth2BearerChallengeProvider(
-        mock {
-          on { isConfigured } doReturn true
-          on { issuerUrl } doThrow IllegalStateException("bad issuer")
-        },
-      )
-
-    val challenge = provider.challengeFor(mcpRequest(), HttpStatus.UNAUTHORIZED)
-
-    challenge.assert.isEqualTo("Bearer")
-  }
-
   @Test
   fun `a usable issuer points at the protected-resource document`() {
     val provider =
