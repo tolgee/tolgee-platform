@@ -133,9 +133,10 @@ class OAuth2ServerProperties {
 
   @DocProperty(
     description =
-      "Grace window, in seconds, during which replaying the refresh token that was just rotated away fails the " +
-        "request without revoking the grant. It absorbs innocent collisions (two tabs, a lost response) instead of " +
-        "signing the user out everywhere; a replay after the window, or of an older token, is still treated as theft.",
+      "Grace window, in seconds, during which replaying a refresh token that was rotated away fails the request " +
+        "without revoking the grant. It absorbs innocent collisions (two tabs, a lost response) instead of signing " +
+        "the user out everywhere, and it covers every rotated-away token, not only the latest. A replay after the " +
+        "window is treated as theft.",
   )
   var refreshTokenGraceSeconds: Long = 60
 

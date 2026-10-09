@@ -117,8 +117,10 @@ we deliberately did not take it:
 What is given up is offline validation by a *third-party* resource server, which none of Tolgee's own
 resource servers (the REST API and the MCP endpoint) needs. Each token is bound to exactly one of them
 by an `audience` on the grant (RFC 8707): `OAuth2AccessTokenResolver` checks it against the resource the
-request arrived at, so a token minted for one surface is `invalid_token` on the other. Grants predating this read as
-`api` (the column defaults to it), so every one of them keeps working against the REST API; a grant that was being
+request arrived at, so a token minted for one surface is `invalid_token` on the other. Grants predating this were
+backfilled to `api` when the column was added, so every one of them keeps working against the REST API; the
+column has no default after that, so an insert path that forgets the audience fails at the database instead of
+silently minting a REST token. A grant that was being
 used against `/mcp/developer` has to be re-authorized, which a spec-following client discovers for itself from the
 `invalid_token` challenge.
 
@@ -271,7 +273,8 @@ not an answer at all: it says nothing about the client and is only counted.
 
 The grant records a hash of the terms the user consented to — the `client_id` and the redirect set — not of the
 document bytes, so a publisher reformatting their JSON or fixing a typo in `client_name` changes nothing, while a
-changed redirect set invalidates the grants issued against the old one at the next exchange or refresh. It covers
+changed redirect set invalidates the grants issued against the old one: at the next exchange, on a pod whose cache
+already holds the new document, and otherwise at the next refresh that re-reads it. It covers
 only what the authorize path acts on, because every false positive is a mass re-consent logged as a security event:
 a loopback redirect's port is left out (RFC 8252 §7.3 means any port is accepted, so documenting a different one
 changed nothing), and so is every `grant_types` entry other than `authorization_code`, which is the only one read.
@@ -690,8 +693,10 @@ These are known gaps, deferred to the client rounds that first exercise them:
 - **Refresh replay handling: soft grace, then theft.** Every refresh replaces both tokens on the grant. Replaying
   the token that was *just* rotated away, within `tolgee.oauth2.refresh-token-grace-seconds` (default 60s), fails
   the request but keeps the grant — an innocent collision (two tabs, a lost response, a proactive/reactive race)
-  costs the loser one failed request instead of signing the user out everywhere. The same token after the window,
-  or a token from two or more rotations back, is treated as theft and revokes the whole grant (RFC 9700 §4.14.2).
+  costs the loser one failed request instead of signing the user out everywhere. The window applies to every
+  rotated-away token, not only the latest: two processes can race more than one rotation apart within a minute.
+  Outside the window, replaying any rotated-away token is treated as theft and revokes the whole grant (RFC 9700
+  §4.14.2).
   The grant carries its current and immediately-previous hash for the grace check; older superseded hashes live in
   `oauth2_superseded_refresh_token`. Retention is the newest `tolgee.oauth2.refresh-token-history-generations` per
   grant, plus anything younger than `tolgee.oauth2.refresh-token-history-min-days` whatever its rank, up to a hard
