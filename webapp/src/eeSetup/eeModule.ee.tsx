@@ -187,7 +187,6 @@ export const routes = {
 export function useUserTaskCount() {
   const userInfo = useGlobalContext((context) => context.initialData.userInfo);
   const isEmailVerified = useIsEmailVerified();
-  // Tasks are off limits until the email is verified, so asking costs a 403.
   const loadable = useUserTasks({ enabled: !!userInfo && isEmailVerified });
   return loadable.data?.page?.totalElements ?? 0;
 }

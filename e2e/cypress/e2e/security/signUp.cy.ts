@@ -136,6 +136,28 @@ context('Sign up', () => {
     checkAnonymousUserIdentified();
   });
 
+  it('Offers nothing in the top bar that an unverified email cannot reach', () => {
+    fillAndSubmitSignUpForm(TEST_USERNAME);
+    gcy('resend-email-button', { timeout: 20000 }).should('be.visible');
+
+    // Both answer 403 until the email is verified.
+    gcy('notifications-button').should('not.exist');
+    gcy('global-user-menu-button').click();
+    gcy('user-menu-my-tasks').should('not.exist');
+
+    gcy('user-menu-user-settings').should('exist');
+    gcy('user-menu-logout').should('exist');
+
+    getParsedEmailVerification().then((r) => {
+      cy.visit(r.verifyEmailLink);
+      waitForGlobalLoading();
+
+      gcy('notifications-button', { timeout: 20000 }).should('be.visible');
+      gcy('global-user-menu-button').click();
+      gcy('user-menu-my-tasks').should('exist');
+    });
+  });
+
   it('Shows success (not error) when visiting the same verification link again', () => {
     fillAndSubmitSignUpForm(TEST_USERNAME);
     cy.contains('Thank you for signing up!').should('be.visible');
