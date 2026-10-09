@@ -220,7 +220,7 @@ class OAuth2AccessTokenAuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun `rejects an access token issued before the user invalidated their oauth2Tokens`() {
+  fun `rejects an access token issued before the user invalidated their tokens`() {
     val token = mintForAllProjects(scopes = listOf("translations.view"))
     performGet(translationsUrl(), bearerHeaders(token)).andIsOk
     val user = userAccountService.get(testData.user.id)
