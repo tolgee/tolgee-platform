@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.constants.Feature
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
@@ -43,7 +43,7 @@ class BranchMcpTools(
   private val deleteBranchSpec =
     buildSpec(branchControllerClass, "delete", "delete_branch", Long::class.javaPrimitiveType!!)
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_branches",
       "List branches in a Tolgee project. Returns up to 100 results per page. Only available for projects with branching enabled (enterprise feature).",
