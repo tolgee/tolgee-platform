@@ -39,12 +39,7 @@ class OAuth2IssuerResolver(
   private val backendUrlProvider: BackendUrlProvider,
   private val frontendUrlProvider: FrontendUrlProvider,
 ) : Logging {
-  /**
-   * A warning, not a failure. `tolgee.front-end-url` carrying a path is valid for everything else that property does,
-   * and an instance that never wanted OAuth must not stop booting over it — [isConfigured] already reports the
-   * server as off, so the whole feature degrades coherently. The hard failure lives in
-   * [PreRegisteredOAuth2Clients.requireIssuerForConfiguredClients], where the operator has opted into OAuth.
-   */
+  /** A warning, not a failure: the hard failure is [PreRegisteredOAuth2Clients.requireIssuerForConfiguredClients]. */
   @PostConstruct
   fun warnOnUnusableIssuer() {
     val reason = runCatching { configuredBaseUrl }.exceptionOrNull() ?: return

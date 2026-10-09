@@ -75,9 +75,6 @@ class OAuth2BearerChallengeProvider(
   private fun resourceMetadataUrl(request: HttpServletRequest): String? {
     if (!isProtectedResourcePath(request)) return null
     if (!oauth2IssuerResolver.isConfigured) return null
-    // This runs from inside the exception handler. A misconfigured issuer throws, and letting that escape would
-    // replace every handled error on the MCP path with a 500 raised while rendering it.
-    val issuer = runCatching { oauth2IssuerResolver.issuerUrl }.getOrNull() ?: return null
-    return issuer + OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH
+    return oauth2IssuerResolver.issuerUrl + OAuth2Constants.PROTECTED_RESOURCE_METADATA_PATH
   }
 }

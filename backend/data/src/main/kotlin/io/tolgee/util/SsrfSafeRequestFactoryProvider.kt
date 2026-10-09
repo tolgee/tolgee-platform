@@ -46,8 +46,8 @@ import java.util.concurrent.ConcurrentHashMap
  * SSRF-sensitive [RestTemplate] makes to a user-configured URL (webhooks, custom LLM endpoints, SSO token endpoints).
  *
  * The pin is defeated by an egress proxy, which resolves the target host itself — the proxy, not this class, is then
- * the control on where a request may reach. Tolgee honours the JVM's proxy system properties here anyway, because
- * every one of these paths did before it existed and an operator who configured a proxy expects it to be used.
+ * the control on where a request may reach. Tolgee honours the JVM's proxy system properties here anyway: an
+ * operator who configured a proxy expects it to be used.
  */
 @Component
 class SsrfSafeRequestFactoryProvider(
