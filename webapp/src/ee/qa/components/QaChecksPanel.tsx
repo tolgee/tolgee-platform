@@ -8,7 +8,6 @@ import {
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { QaCheckItem } from './QaCheckItem';
@@ -59,7 +58,7 @@ export const QaChecksPanel: FC<React.PropsWithChildren<PanelContentProps>> = (
   data
 ) => {
   const { isEnabled } = useEnabledFeatures();
-  const { issues, isLoading, isDisconnected, updateIssueState } =
+  const { issues, isLoading, isDisconnected, toggleIgnore } =
     useQaChecksForPanel(data);
   const text = data.editingText ?? '';
   const project = useProject();
@@ -86,16 +85,6 @@ export const QaChecksPanel: FC<React.PropsWithChildren<PanelContentProps>> = (
   useEffect(() => {
     data.setItemsCount(openIssueCount);
   }, [openIssueCount, data.setItemsCount]);
-
-  const ignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
-    method: 'post',
-  });
-
-  const unignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
-    method: 'delete',
-  });
 
   if (!isEnabled('QA_CHECKS')) {
     return (
@@ -153,30 +142,6 @@ export const QaChecksPanel: FC<React.PropsWithChildren<PanelContentProps>> = (
     reportEvent('QA_ISSUE_CORRECTED_INLINE', { checkType: issue.type });
   };
 
-  const handleIgnoreToggle = (issue: QaPreviewIssue) => {
-    const translationId = data.keyData.translations[data.language.tag]?.id;
-    if (translationId == null) return;
-
-    const newState = issue.state === 'IGNORED' ? 'OPEN' : 'IGNORED';
-    const mutation =
-      issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
-    const { state: _, ...issueRequest } = issue;
-    mutation.mutate(
-      {
-        path: {
-          projectId: project.id,
-          translationId,
-        },
-        content: {
-          'application/json': issueRequest,
-        },
-      },
-      {
-        onSuccess: () => updateIssueState(issue, newState),
-      }
-    );
-  };
-
   return (
     <StyledWrapper>
       {showProgress && <StyledLinearProgress />}
@@ -206,7 +171,7 @@ export const QaChecksPanel: FC<React.PropsWithChildren<PanelContentProps>> = (
                 ? () => handleCorrect(issue)
                 : undefined
             }
-            onIgnore={() => handleIgnoreToggle(issue)}
+            onIgnore={() => toggleIgnore(issue)}
           />
         ))}
       </StyledContainer>
