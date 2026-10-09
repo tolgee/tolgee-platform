@@ -28,21 +28,8 @@ class PeekedRequestBody private constructor(
     ): PeekedRequestBody {
       // Read one byte past the cap so an exactly-cap body still fits while a larger one is detectably over.
       val prefix = ByteArray(cap + 1)
-      val read = readFully(request.inputStream, prefix)
+      val read = request.inputStream.readNBytes(prefix, 0, prefix.size)
       return PeekedRequestBody(request, prefix.copyOf(minOf(read, cap)), overCap = read > cap)
-    }
-
-    private fun readFully(
-      source: InputStream,
-      into: ByteArray,
-    ): Int {
-      var total = 0
-      while (total < into.size) {
-        val n = source.read(into, total, into.size - total)
-        if (n == -1) break
-        total += n
-      }
-      return total
     }
   }
 }
