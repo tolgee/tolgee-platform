@@ -115,7 +115,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplateFor(tenant).exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -257,7 +257,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplateFor(tenant).exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -268,6 +268,17 @@ class SsoDelegateEe(
       logger.info("Failed to refresh token: ${e.message}")
     }
     return null
+  }
+
+  /**
+   * The token endpoint receives the client secret and a code or refresh token. Over plain http they travel in the
+   * clear, so only https is accepted. The dev switch that relaxes SSRF checks relaxes this too, for local providers.
+   */
+  private fun requireHttpsTokenUri(tenant: SsoTenantConfig): SsoTenantConfig {
+    if (tolgeeProperties.internal.disableUrlSsrfProtection) return tenant
+    if (tenant.tokenUri.startsWith("https://", ignoreCase = true)) return tenant
+    logger.warn("Refusing the SSO token exchange for {}: the token endpoint is not https", tenant.domain)
+    throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
   }
 
   private fun restTemplateFor(tenant: SsoTenantConfig): RestTemplate {
