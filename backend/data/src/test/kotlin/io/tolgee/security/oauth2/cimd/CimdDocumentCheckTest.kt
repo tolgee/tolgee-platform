@@ -1,7 +1,5 @@
 package io.tolgee.security.oauth2.cimd
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.tolgee.Metrics
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -63,24 +61,6 @@ class CimdDocumentCheckTest {
   }
 
   @Test
-  fun `a fetch the budget turns away claims nothing and is counted`() {
-    val lifecycle = claimingLifecycle()
-    val metrics = Metrics(SimpleMeterRegistry())
-    val full = CimdFetchBudget(maxConcurrent = 0)
-
-    check(lifecycle, servingRegistry(), full, metrics)
-      .checkIfDue(CLIENT)
-      .assert
-      .isEqualTo(CimdDocumentCheck.Outcome.NOT_ATTEMPTED)
-
-    verify(lifecycle, never()).claimCheck(any())
-    metrics.oauth2CimdCapacityRefusalsCounter
-      .count()
-      .assert
-      .isEqualTo(1.0)
-  }
-
-  @Test
   fun `losing the race for a client's first attempt is not an error`() {
     val lifecycle =
       mock<CimdClientLifecycleService> {
@@ -119,9 +99,7 @@ class CimdDocumentCheckTest {
   private fun check(
     lifecycle: CimdClientLifecycleService,
     registry: OAuth2ClientRegistry,
-    budget: CimdFetchBudget = CimdFetchBudget(),
-    metrics: Metrics = Metrics(SimpleMeterRegistry()),
-  ) = CimdDocumentCheck(lifecycle, registry, budget, metrics)
+  ) = CimdDocumentCheck(lifecycle, registry)
 
   companion object {
     private const val CLIENT = "https://publisher.example/client"

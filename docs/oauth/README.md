@@ -334,11 +334,13 @@ unique constraint and simply does not fetch. One account can hold at most `tolge
 that many publishers. Nothing refuses a new client because the instance as a whole is busy: doing that would hand
 an attacker a way to stop all third-party onboarding, which is a worse trade than more fetches.
 
-**Room on this server.** The fetch takes a slot from `CimdFetchBudget`, the same budget `/oauth2/authorize` uses:
-32 in flight at once, 3 per origin, 120 per origin per minute. A fetch the budget turns away, or one the resolver
-pool refuses, is **not an attempt**: the claim is given back, nothing is written, and the client is due again on
-the next refresh. Counting it would turn a busy minute on this server into a publisher's failure, and seven days
-of those into a sign-out. `tolgee.oauth2.cimd.capacity_refusals` counts these refusals.
+**Room on this server.** The fetch takes nothing from `CimdFetchBudget`. That budget is filled by anonymous
+`/oauth2/authorize` traffic, and a caller filling it for a publisher's origin must not be able to keep that
+publisher's retirement from being read. The check's own bound is the grant lane's resolver pool, with the
+per-client interval and the per-account cap above it. A fetch that pool refuses is **not an attempt**: the claim
+is given back, nothing is written, and the client is due again on the next refresh. Counting it would turn a busy
+minute on this server into a publisher's failure, and seven days of those into a sign-out.
+`tolgee.oauth2.cimd.capacity_refusals` counts these refusals.
 
 The check keeps no resolution cache at all: it reads the publisher on every attempt, and what it reads is never
 written to the cache `/oauth2/authorize` answers from. Sharing one cache meant the clients somebody held a grant
@@ -433,8 +435,8 @@ per origin per minute, a 2-second resolve deadline, a 256KB body cap, no redirec
 an https URL with no fragment and no query string. A separate lane with its own resolver pool and its own stuck-host
 memo belongs to the document check. It is entered only from the refresh path, behind a validated refresh token, so
 an anonymous caller cannot fill it, and what the request lane learns about a stuck host does not decide what the
-check may read. The budget above is shared: a check fetch takes the same slots as a request-lane fetch, and when
-none is free the check records nothing and tries again at the next refresh.
+check may read. The budget above is not shared either: a check fetch takes none of its slots, so filling it stalls
+onboarding at that origin and nothing else.
 
 Two of those need their reason stated, because each is a bound one party can spend on another.
 
