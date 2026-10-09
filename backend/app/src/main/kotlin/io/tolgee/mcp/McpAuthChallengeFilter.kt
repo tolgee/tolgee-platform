@@ -1,5 +1,6 @@
 package io.tolgee.mcp
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.authentication.CredentialPresence
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import jakarta.servlet.FilterChain
@@ -13,18 +14,20 @@ import tools.jackson.databind.ObjectMapper
 
 /**
  * Answers a credential-less MCP call with an HTTP 401 and a `WWW-Authenticate` challenge, unless the call is one
- * the client may make before it logs in. `docs/oauth/README.md` says which calls those are and why.
+ * the client may make before it logs in. `docs/oauth/README.md` says which calls those are and why. With
+ * authentication turned off every call runs as the initial user, so nothing is challenged.
  */
 class McpAuthChallengeFilter(
   private val challengeProvider: OAuth2BearerChallengeProvider,
   private val objectMapper: ObjectMapper,
+  private val authenticationProperties: AuthenticationProperties,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     filterChain: FilterChain,
   ) {
-    if (request.method != "POST" || CredentialPresence.hasAny(request)) {
+    if (!authenticationProperties.enabled || request.method != "POST" || CredentialPresence.hasAny(request)) {
       filterChain.doFilter(request, response)
       return
     }

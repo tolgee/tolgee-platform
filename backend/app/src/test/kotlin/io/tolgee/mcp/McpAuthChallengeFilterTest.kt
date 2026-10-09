@@ -1,5 +1,6 @@
 package io.tolgee.mcp
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ class McpAuthChallengeFilterTest {
   private val challengeProvider: OAuth2BearerChallengeProvider =
     mock { on { challengeFor(any(), eq(HttpStatus.UNAUTHORIZED)) } doReturn CHALLENGE }
 
-  private val filter = McpAuthChallengeFilter(challengeProvider, jacksonObjectMapper())
+  private val filter = McpAuthChallengeFilter(challengeProvider, jacksonObjectMapper(), AuthenticationProperties())
 
   @Test
   fun `a credential-less tools call is answered with 401 and the bearer challenge`() {
@@ -38,7 +39,8 @@ class McpAuthChallengeFilterTest {
     val provider: OAuth2BearerChallengeProvider = mock { on { challengeFor(any(), any()) } doReturn null }
     val response = MockHttpServletResponse()
 
-    McpAuthChallengeFilter(provider, jacksonObjectMapper()).doFilter(request(TOOLS_CALL), response, MockFilterChain())
+    McpAuthChallengeFilter(provider, jacksonObjectMapper(), AuthenticationProperties())
+      .doFilter(request(TOOLS_CALL), response, MockFilterChain())
 
     response.status.assert.isEqualTo(401)
     response.getHeader("WWW-Authenticate").assert.isEqualTo("Bearer")
@@ -149,6 +151,18 @@ class McpAuthChallengeFilterTest {
     )
 
     chain.request.assert.isNotNull()
+  }
+
+  @Test
+  fun `nothing is challenged while authentication is turned off`() {
+    val disabled = AuthenticationProperties().apply { enabled = false }
+    val chain = MockFilterChain()
+    val anonymous = request(TOOLS_CALL)
+
+    McpAuthChallengeFilter(challengeProvider, jacksonObjectMapper(), disabled)
+      .doFilter(anonymous, MockHttpServletResponse(), chain)
+
+    chain.request.assert.isSameAs(anonymous)
   }
 
   @Test

@@ -5,15 +5,11 @@ import io.tolgee.security.oauth2.OAuth2Constants
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 
 class McpAuthChallengeTest : AbstractMcpTest() {
   @Test
   fun `a credential-less tools call is challenged with the protected-resource pointer`() {
-    val response = post(TOOLS_CALL)
+    val response = postRawJsonRpc(TOOLS_CALL)
 
     response.statusCode().assert.isEqualTo(401)
     val challenge = response.headers().firstValue("WWW-Authenticate").orElse("")
@@ -37,7 +33,7 @@ class McpAuthChallengeTest : AbstractMcpTest() {
     val pakData = createTestDataWithPak()
     val response =
       try {
-        post(TOOLS_CALL, query = "?ak=tgpak_${pakData.apiKey.encodedKey!!}")
+        postRawJsonRpc(TOOLS_CALL, query = "?ak=tgpak_${pakData.apiKey.encodedKey!!}")
       } finally {
         testDataService.cleanTestData(pakData.testData.root)
       }
@@ -54,34 +50,20 @@ class McpAuthChallengeTest : AbstractMcpTest() {
 
   @Test
   fun `an oversized body is challenged rather than passed through unparsed`() {
-    val response = post("""{"pad":"${"A".repeat(McpAuthChallengeFilter.PEEK_CAP + 1024)}","method":"initialize"}""")
+    val response =
+      postRawJsonRpc("""{"pad":"${"A".repeat(McpAuthChallengeFilter.PEEK_CAP + 1024)}","method":"initialize"}""")
 
     response.statusCode().assert.isEqualTo(401)
   }
 
   @Test
   fun `a batch is challenged, because nothing can say it holds only open methods`() {
-    val response = post("[$TOOLS_CALL]")
+    val response = postRawJsonRpc("[$TOOLS_CALL]")
 
     response.statusCode().assert.isEqualTo(401)
   }
 
-  private fun post(
-    body: String,
-    query: String = "",
-  ): HttpResponse<String> {
-    val request =
-      HttpRequest
-        .newBuilder(URI.create("http://localhost:$port${McpConstants.DEVELOPER_ENDPOINT_PATH}$query"))
-        .header("Content-Type", "application/json")
-        .header("Accept", "application/json, text/event-stream")
-        .POST(HttpRequest.BodyPublishers.ofString(body))
-        .build()
-    return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
-  }
-
   companion object {
-    private const val TOOLS_CALL =
-      """{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_keys","arguments":{}}}"""
+    private const val TOOLS_CALL = CREDENTIAL_LESS_TOOLS_CALL
   }
 }

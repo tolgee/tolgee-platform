@@ -3,6 +3,7 @@ package io.tolgee.mcp
 import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
 import org.redisson.api.RedissonClient
@@ -60,8 +61,10 @@ class McpConfig {
   fun mcpAuthChallengeFilter(
     challengeProvider: OAuth2BearerChallengeProvider,
     objectMapper: ObjectMapper,
+    authenticationProperties: AuthenticationProperties,
   ): FilterRegistrationBean<McpAuthChallengeFilter> {
-    val registration = FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper))
+    val registration =
+      FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper, authenticationProperties))
     registration.addUrlPatterns("/mcp/*")
     // Ahead of the session filter: a credential-less tools/call is answered before any session side effect runs.
     registration.order = Ordered.LOWEST_PRECEDENCE - 10
