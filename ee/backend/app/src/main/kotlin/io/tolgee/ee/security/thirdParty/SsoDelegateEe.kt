@@ -115,7 +115,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        templateFor(tenant).exchange(
+        restTemplateFor(tenant).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -257,7 +257,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        templateFor(tenant).exchange(
+        restTemplateFor(tenant).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -270,7 +270,7 @@ class SsoDelegateEe(
     return null
   }
 
-  private fun templateFor(tenant: SsoTenantConfig): RestTemplate {
+  private fun restTemplateFor(tenant: SsoTenantConfig): RestTemplate {
     if (tenant.global) return globalRestTemplate
     return restTemplate
   }
