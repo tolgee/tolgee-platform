@@ -32,13 +32,7 @@ export const EmailVerificationHandler = () => {
         await handleAfterLogin(data);
         refetchInitialData();
       },
-      onError(error) {
-        if (error.code === 'email_already_verified') {
-          messageService.success(<T keyName="email_verified_message" />);
-        } else {
-          error.handleError?.();
-        }
-      },
+      onError: reportVerificationError,
       onSettled() {
         history.replace(LINKS.AFTER_LOGIN.build());
       },
@@ -46,4 +40,15 @@ export const EmailVerificationHandler = () => {
   });
 
   return <FullPageLoading />;
+};
+
+export const reportVerificationError = (error: {
+  code?: string;
+  handleError?: () => void;
+}) => {
+  if (error.code === 'email_already_verified') {
+    messageService.success(<T keyName="email_verified_message" />);
+    return;
+  }
+  error.handleError?.();
 };
