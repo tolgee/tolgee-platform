@@ -247,6 +247,45 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `current permissions report the project's suggestion settings`() {
+    performGet("/v2/api-keys/current-permissions", apiKeyHeaders(testData.usersKey.key!!)).andAssertThatJson {
+      node("suggestionsMode").isEqualTo("DISABLED")
+      node("translationProtection").isEqualTo("NONE")
+    }
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders())
+      .andAssertThatJson {
+        node("suggestionsMode").isEqualTo("ENABLED")
+        node("translationProtection").isEqualTo("PROTECT_REVIEWED")
+      }
+  }
+
+  @Test
+  fun `current permissions name the user behind a PAK and behind a PAT`() {
+    performGet("/v2/api-keys/current-permissions", apiKeyHeaders(testData.usersKey.key!!)).andAssertThatJson {
+      node("userId").isEqualTo(testData.usersKey.userAccount.id)
+    }
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders())
+      .andAssertThatJson {
+        node("userId").isEqualTo(testData.frantisekDobrota.id)
+      }
+  }
+
+  @Test
+  fun `current permissions report the user's own scopes unnarrowed by the credential`() {
+    performGet("/v2/api-keys/current-permissions", apiKeyHeaders(testData.frantasKey.key!!)).andAssertThatJson {
+      node("scopes").isArray.contains("translations.view").doesNotContain("translations.edit")
+      node("userScopes").isArray.contains("translations.view", "translations.edit").doesNotContain("admin")
+    }
+
+    performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", patHeaders())
+      .andAssertThatJson {
+        node("userScopes").isArray.contains("admin")
+      }
+  }
+
+  @Test
   fun `a PAT cannot read the details of a project its user has no access to`() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
@@ -397,4 +436,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     key.key.assert.isNull()
     key.keyHash.assert.isNotEqualTo(oldKeyHash)
   }
+
+  private fun apiKeyHeaders(key: String) = HttpHeaders().apply { this["x-api-key"] = key }
+
+  private fun patHeaders() = apiKeyHeaders("tgpat_${testData.frantasPat.token!!}")
 }
