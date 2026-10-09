@@ -36,11 +36,6 @@ internal object CimdUrls {
     // A query string is never needed to name a document, and it is the cheapest way to mint unlimited distinct
     // client_ids at one host: each one is a fresh cache entry and a fresh outbound GET at that host.
     if (clientId.contains('?')) return false
-    // Spelled in lower case, not merely parsing to it. The `client_id` is stored and matched as the string the
-    // caller sent, and every durable control keys off `LIKE 'http%'`, which Postgres compares case-sensitively -
-    // so `HTTPS://x/y` would resolve, consent and hold a grant while being invisible to the withdrawal check, the
-    // staleness bound and the per-account cap.
-    if (!clientId.startsWith("https://") && !(allowHttp && clientId.startsWith("http://"))) return false
     val parsed = UrlOrigins.parse(clientId) ?: return false
     val scheme = parsed.lowercaseScheme ?: return false
     if (scheme != "https" && !(allowHttp && scheme == "http")) return false

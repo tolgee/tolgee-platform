@@ -92,13 +92,15 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   fun deleteExpiredPendingConsents(now: Date): Int
 
   /**
-   * How many different document-backed clients this user already holds a **live** grant for. A withdrawn client
-   * drops out even while its mark could still be lifted: counting fewer is the safe direction for a cap.
+   * How many different document-backed clients this user already holds a **live** grant for. A grant is
+   * document-backed when it carries the hash of the document it was consented against, which
+   * `startAuthorization` writes for every client that came through the CIMD path and for no other. A withdrawn
+   * client drops out even while its mark could still be lifted: counting fewer is the safe direction for a cap.
    */
   @Query(
     """
     SELECT COUNT(DISTINCT g.clientId) FROM OAuth2Grant g
-    WHERE g.userAccount.id = :userId AND g.clientId LIKE 'http%' AND g.clientId <> :exceptClientId
+    WHERE g.userAccount.id = :userId AND g.clientMetadataHash IS NOT NULL AND g.clientId <> :exceptClientId
       AND NOT EXISTS (
         SELECT 1 FROM OAuth2ClientDocumentCheck c WHERE c.clientId = g.clientId AND c.withdrawnAt IS NOT NULL
       )

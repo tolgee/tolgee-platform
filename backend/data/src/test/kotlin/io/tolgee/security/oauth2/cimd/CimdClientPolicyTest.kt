@@ -109,28 +109,9 @@ class CimdClientPolicyTest {
   }
 
   @Test
-  fun `a client_id whose scheme is not spelled in lower case is not a candidate`() {
-    listOf("HTTPS://publisher.example/c", "Https://publisher.example/c", "hTTps://publisher.example/c").forEach {
-      policy().isCandidate(it).assert.isFalse()
-    }
-  }
-
-  @Test
-  fun `every client_id the gate accepts is one the SQL prefix selects`() {
-    val candidates =
-      listOf(
-        "https://publisher.example/client",
-        "HTTPS://publisher.example/client",
-        "Https://publisher.example/client",
-        "http://127.0.0.1:8080/client",
-        "HTTP://127.0.0.1:8080/client",
-        "hxxps://publisher.example/client",
-        "//publisher.example/client",
-        "publisher.example/client",
-      )
-
-    candidates.filter { CimdUrls.isAcceptableClientId(it, allowHttp = true) }.forEach {
-      it.startsWith("http").assert.isTrue()
+  fun `an https scheme in upper case is still the https scheme`() {
+    listOf("HTTPS://publisher.example/c", "Https://publisher.example/c").forEach {
+      policy().isCandidate(it).assert.isTrue()
     }
   }
 
