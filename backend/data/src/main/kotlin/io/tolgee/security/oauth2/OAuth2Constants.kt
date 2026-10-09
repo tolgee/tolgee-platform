@@ -22,6 +22,9 @@ object OAuth2Constants {
   /** Project-selection sentinel: not narrowed to any project subset (still bounded by live permissions). */
   const val ALL_PROJECTS = "*"
 
+  /** The HTTP authentication scheme an OAuth access token, and Tolgee's own JWT, arrive under. */
+  const val BEARER_PREFIX = "Bearer "
+
   const val BROWSER_EXTENSION_CLIENT_ID = "tolgee-browser-extension"
   const val CLI_CLIENT_ID = "tolgee-cli"
 

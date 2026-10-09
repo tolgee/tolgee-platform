@@ -63,8 +63,8 @@ class OAuth2BearerChallengeProvider(
    */
   private fun hasOAuthCredentials(request: HttpServletRequest): Boolean {
     val header = request.getHeader("Authorization") ?: return false
-    if (!header.startsWith("Bearer ")) return false
-    return header.removePrefix("Bearer ").startsWith(OAUTH_ACCESS_TOKEN_PREFIX)
+    if (!header.startsWith(OAuth2Constants.BEARER_PREFIX)) return false
+    return header.removePrefix(OAuth2Constants.BEARER_PREFIX).startsWith(OAUTH_ACCESS_TOKEN_PREFIX)
   }
 
   private fun isProtectedResourcePath(request: HttpServletRequest): Boolean =

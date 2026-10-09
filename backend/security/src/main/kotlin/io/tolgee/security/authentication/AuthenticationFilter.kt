@@ -101,8 +101,8 @@ class AuthenticationFilter(
 
     val authorization = request.getHeader(CredentialPresence.AUTHORIZATION_HEADER)
     if (authorization != null) {
-      if (authorization.startsWith("Bearer ")) {
-        val token = authorization.substring(7)
+      if (authorization.startsWith(OAuth2Constants.BEARER_PREFIX)) {
+        val token = authorization.removePrefix(OAuth2Constants.BEARER_PREFIX)
         val auth =
           oauth2AccessTokenResolver.tryResolve(token, OAuth2Audience.forRequestPath(path))
             ?: jwtService.validateToken(token)
