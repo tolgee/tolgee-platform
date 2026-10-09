@@ -99,17 +99,9 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
-  fun `a client whose document cannot be reached keeps its grant, so a blip cannot kill one`() {
-    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Unavailable }
+  fun `a client whose document is not in the cache keeps its grant, so a blip cannot kill one`() {
+    val cache = mock<CimdClientCache> { on { cachedClient(any()) } doReturn null }
     val registry = registry(extensionUris = listOf("https://ext.example/callback"), cliUris = listOf(), cache = cache)
-
-    registry.findForExistingGrant(CIMD_URL).assert.isNotNull
-  }
-
-  @Test
-  fun `a withdrawal seen only in the authorize lane does not end a grant`() {
-    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Withdrawn }
-    val registry = registry(cache = cache)
 
     registry.findForExistingGrant(CIMD_URL).assert.isNotNull
     registry.servesClient(CIMD_URL).assert.isTrue()
@@ -136,14 +128,14 @@ class OAuth2ClientRegistryTest {
 
     registry.servesClient(CIMD_URL).assert.isTrue()
 
-    verify(cache, never()).cachedResolution(any())
+    verify(cache, never()).cachedClient(any())
     verify(cache, never()).fetchOnGrantLane(any())
     verify(cache, never()).get(any())
   }
 
   @Test
   fun `the token path never reads a document`() {
-    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn null }
+    val cache = mock<CimdClientCache> { on { cachedClient(any()) } doReturn null }
 
     registry(cache = cache)
       .findForExistingGrant(CIMD_URL)!!
@@ -175,8 +167,8 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
-  fun `a document that served but did not validate is not a withdrawal`() {
-    val cache = mock<CimdClientCache> { on { cachedResolution(any()) } doReturn CimdResolution.Rejected }
+  fun `a resolved client in the cache is what an existing grant's lookup answers with`() {
+    val cache = mock<CimdClientCache> { on { cachedClient(any()) } doReturn cimdClient(CIMD_URL) }
     val registry = registry(cache = cache)
 
     val client = registry.findForExistingGrant(CIMD_URL)
@@ -184,7 +176,7 @@ class OAuth2ClientRegistryTest {
     client!!
       .clientId.assert
       .isEqualTo(CIMD_URL)
-    client.verified.assert.isFalse()
+    client.metadataHash.assert.isEqualTo("h")
   }
 
   @Test

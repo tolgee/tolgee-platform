@@ -259,15 +259,15 @@ is what the cap is there to bound. Unlike the webhook and SSO paths, this fetch 
 system properties: a proxy would resolve the host itself and the pin would never run, and here the URL is chosen by
 an unauthenticated caller.
 
-A failed resolution is remembered, but not as one thing. The host answering 404 or 410 means the document is
-**gone**, which is the publisher retiring the client; a document that was served but did not validate is
-**refused**; and "no answer right now" is **unavailable**. Gone and refused are cached as long as a positive
-answer, five minutes, because a caller who can fill the fetch budget must not be able to age a retirement out.
-Unavailable is cached for seconds, so a third party's hiccup does not cost a legitimate client five minutes of
-refusals. Every other outcome — a 5xx, a 429, a WAF page, a redirect, a body over the size cap, a read that passes
-the deadline — is unavailable, not refused: only the host saying the document is not there is read as a decision by
-the publisher. A refusal by Tolgee's own fetch budget is not cached at all: it says nothing about the client, and
-remembering it would let one burst suppress a legitimate client for the whole negative TTL.
+A failed resolution is not remembered. The CIMD draft (section 5.2) forbids caching error responses and invalid
+documents, and the request lane has no use for them: it answers the callers waiting on that fetch and forgets,
+so the next `/oauth2/authorize` for that `client_id` asks the publisher again, within the fetch budget's bounds.
+The kinds still matter to the document check on the refresh path: the host answering 404 or 410 means the document
+is **gone**, which is the publisher retiring the client; a document that was served but did not validate is
+**refused**; and "no answer right now" is **unavailable**. Every other outcome — a 5xx, a 429, a WAF page, a
+redirect, a body over the size cap, a read that passes the deadline — is unavailable, not refused: only the host
+saying the document is not there is read as a decision by the publisher. A refusal by Tolgee's own fetch budget is
+not an answer at all: it says nothing about the client and is only counted.
 
 The grant records a hash of the terms the user consented to — the `client_id` and the redirect set — not of the
 document bytes, so a publisher reformatting their JSON or fixing a typo in `client_name` changes nothing, while a

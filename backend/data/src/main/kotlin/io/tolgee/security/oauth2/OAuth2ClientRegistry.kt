@@ -53,10 +53,7 @@ class OAuth2ClientRegistry(
   fun findForExistingGrant(clientId: String): OAuth2Client? {
     findPreRegistered(clientId)?.let { return it }
     if (!isCimdCandidate(clientId)) return null
-    val cached = cimdClientCache.cachedResolution(clientId)
-    if (cached is CimdResolution.Resolved) return cached.client.client
-    // A cached refusal is never read here: /oauth2/authorize fills this lane, so a caller could otherwise pin
-    // "gone" for a client nobody retired. Only what the check writes to the grant row ends a grant.
+    cimdClientCache.cachedClient(clientId)?.let { return it.client }
     return unresolvableCimdClient(clientId)
   }
 

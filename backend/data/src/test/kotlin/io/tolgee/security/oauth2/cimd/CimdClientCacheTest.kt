@@ -156,26 +156,22 @@ class CimdClientCacheTest {
     cache.estimatedSize().assert.isLessThan(50)
   }
 
+  /** CIMD draft section 5.2: an authorization server must not cache error responses or invalid documents. */
   @Test
-  fun `a document the host says is gone is remembered far longer than one that could not be fetched`() {
-    val clock = AtomicLong(0)
-    val refused = "https://refused.example/client"
-    val unreachable = "https://unreachable.example/client"
+  fun `a negative answer is never cached, so the next caller asks the publisher again`() {
     val fetcher =
       mock<CimdMetadataFetcher> {
-        on { fetchAndValidate(eq(refused), any()) } doReturn CimdResolution.Withdrawn
-        on { fetchAndValidate(eq(unreachable), any()) } doReturn CimdResolution.Unavailable
+        on { fetchAndValidate(eq(GONE), any()) } doReturn CimdResolution.Withdrawn
+        on { fetchAndValidate(eq(INVALID), any()) } doReturn CimdResolution.Rejected
+        on { fetchAndValidate(eq(UNREACHABLE), any()) } doReturn CimdResolution.Unavailable
       }
-    val cache = newCache(fetcher, ticker = clock::get)
+    val cache = newCache(fetcher)
 
-    cache.get(refused)
-    cache.get(unreachable)
-    clock.set(seconds(30))
-    cache.get(refused)
-    cache.get(unreachable)
-
-    verify(fetcher, times(1)).fetchAndValidate(eq(refused), any())
-    verify(fetcher, times(2)).fetchAndValidate(eq(unreachable), any())
+    listOf(GONE, INVALID, UNREACHABLE).forEach { url ->
+      repeat(2) { cache.get(url).assert.isNull() }
+      cache.cachedClient(url).assert.isNull()
+      verify(fetcher, times(2)).fetchAndValidate(eq(url), any())
+    }
   }
 
   @Test
@@ -191,21 +187,10 @@ class CimdClientCacheTest {
   }
 
   @Test
-  fun `an unresolved client_id is cached as a negative rather than refetched every time`() {
-    val fetcher =
-      mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn CimdResolution.Unavailable }
-    val cache = newCache(fetcher)
-
-    repeat(5) { cache.get(URL).assert.isNull() }
-
-    verify(fetcher, times(1)).fetchAndValidate(eq(URL), any())
-  }
-
-  @Test
   fun `a resolved client is refetched only once its positive TTL has passed, and reads do not extend it`() {
     val clock = AtomicLong(0)
     val fetcher = mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn resolved(URL) }
-    val cache = newCache(fetcher, positiveTtlSeconds = 300, unavailableTtlSeconds = 60, ticker = clock::get)
+    val cache = newCache(fetcher, positiveTtlSeconds = 300, ticker = clock::get)
 
     cache.get(URL)
     clock.set(seconds(299))
@@ -218,30 +203,13 @@ class CimdClientCacheTest {
   }
 
   @Test
-  fun `an unreachable client_id is retried on the shorter TTL, not held for the positive one`() {
-    val clock = AtomicLong(0)
-    val fetcher =
-      mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn CimdResolution.Unavailable }
-    val cache = newCache(fetcher, positiveTtlSeconds = 300, unavailableTtlSeconds = 60, ticker = clock::get)
-
-    cache.get(URL)
-    clock.set(seconds(59))
-    cache.get(URL)
-    verify(fetcher, times(1)).fetchAndValidate(eq(URL), any())
-
-    clock.set(seconds(61))
-    cache.get(URL)
-    verify(fetcher, times(2)).fetchAndValidate(eq(URL), any())
-  }
-
-  @Test
   fun `what the check reads does not warm the cache the request path answers from`() {
     val fetcher = mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn resolved(URL) }
     val cache = newCache(fetcher)
 
     cache.fetchOnGrantLane(URL)
 
-    cache.cachedResolution(URL).assert.isNull()
+    cache.cachedClient(URL).assert.isNull()
     cache.get(URL).assert.isNotNull()
     verify(fetcher, times(2)).fetchAndValidate(eq(URL), any())
   }
@@ -278,15 +246,14 @@ class CimdClientCacheTest {
       mock<CimdMetadataFetcher> {
         on { fetchAndValidate(any(), any()) } doAnswer {
           if (attempts.incrementAndGet() == 1) throw CimdNoCapacityException(URL)
-          CimdResolution.Withdrawn
+          resolved(URL)
         }
       }
     val cache = newCache(fetcher)
 
     cache.get(URL)
-    cache.cachedResolution(URL).assert.isNull()
+    cache.cachedClient(URL).assert.isNull()
     cache.get(URL)
-    cache.cachedResolution(URL).assert.isEqualTo(CimdResolution.Withdrawn)
     attempts.get().assert.isEqualTo(2)
   }
 
@@ -316,27 +283,13 @@ class CimdClientCacheTest {
   }
 
   @Test
-  fun `a withdrawal outlives the short-lived unavailable answers a saturating caller can produce`() {
-    val clock = AtomicLong(0)
-    val fetcher = mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn CimdResolution.Withdrawn }
-    val cache = newCache(fetcher, ticker = clock::get)
-
-    cache.get(URL)
-    // Far past the 5s an "unavailable" answer lives for.
-    clock.set(seconds(120))
-    cache.cachedResolution(URL).assert.isEqualTo(CimdResolution.Withdrawn)
-
-    verify(fetcher, times(1)).fetchAndValidate(any(), any())
-  }
-
-  @Test
   fun `a withdrawal the check found is not visible to the request path's cache`() {
     val fetcher = mock<CimdMetadataFetcher> { on { fetchAndValidate(any(), any()) } doReturn CimdResolution.Withdrawn }
     val cache = newCache(fetcher)
 
     cache.fetchOnGrantLane(URL)
 
-    cache.cachedResolution(URL).assert.isNull()
+    cache.cachedClient(URL).assert.isNull()
   }
 
   private fun newCache(
@@ -344,7 +297,6 @@ class CimdClientCacheTest {
     budget: CimdFetchBudget = CimdFetchBudget(),
     approximateMaxEntries: Long = CimdClientCache.MAX_ENTRIES,
     positiveTtlSeconds: Long = CimdClientCache.POSITIVE_TTL_SECONDS,
-    unavailableTtlSeconds: Long = CimdClientCache.UNAVAILABLE_TTL_SECONDS,
     ticker: Ticker = Ticker.systemTicker(),
   ) = CimdClientCache(
     fetcher,
@@ -352,7 +304,6 @@ class CimdClientCacheTest {
     budget,
     approximateMaxEntries = approximateMaxEntries,
     positiveTtlSeconds = positiveTtlSeconds,
-    unavailableTtlSeconds = unavailableTtlSeconds,
     ticker = ticker,
   )
 
@@ -371,5 +322,8 @@ class CimdClientCacheTest {
 
   companion object {
     private const val URL = "https://app.example.com/.well-known/oauth-client"
+    private const val GONE = "https://gone.example/client"
+    private const val INVALID = "https://invalid.example/client"
+    private const val UNREACHABLE = "https://unreachable.example/client"
   }
 }
