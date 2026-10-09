@@ -58,6 +58,8 @@ class QueryGlobalFiltering(
     filterHasNoScreenshot()
     filterHasDescription()
     filterHasNoDescription()
+    filterIsPlural()
+    filterIsNotPlural()
     filterPatterns()
     filterSearch()
     filterRevisionId()
@@ -237,6 +239,18 @@ class QueryGlobalFiltering(
   private fun filterHasNoDescription() {
     if (params.filterHasNoDescription == true) {
       queryBase.whereConditions.add(cb.isNullOrBlank(queryBase.descriptionExpression))
+    }
+  }
+
+  private fun filterIsPlural() {
+    if (params.filterIsPlural == true) {
+      queryBase.whereConditions.add(cb.isTrue(queryBase.keyIsPluralExpression))
+    }
+  }
+
+  private fun filterIsNotPlural() {
+    if (params.filterIsNotPlural == true) {
+      queryBase.whereConditions.add(cb.isFalse(queryBase.keyIsPluralExpression))
     }
   }
 

@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,6 +29,11 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @ProjectJWTAuthTestMethod
@@ -312,6 +318,42 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
           node("[2].keyName").isEqualTo("desc-empty")
         }
         node("page.totalElements").isEqualTo(3)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by isPlural`() {
+    testData.addPluralKeys()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterIsPlural=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+          node("[0].keyName").isEqualTo("plural-items")
+          node("[1].keyName").isEqualTo("plural-days")
+        }
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by isNotPlural`() {
+    testData.addPluralKeys()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterIsNotPlural=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+          node("[0].keyName").isEqualTo("A key")
+          node("[1].keyName").isEqualTo("Z key")
+        }
+        node("page.totalElements").isEqualTo(2)
       }
   }
 

@@ -19,6 +19,8 @@ export type FiltersInternal = {
   filterHasNoScreenshot?: boolean;
   filterHasDescription?: boolean;
   filterHasNoDescription?: boolean;
+  filterIsPlural?: boolean;
+  filterIsNotPlural?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
   filterQaCheckTypes?: QaCheckType[];
@@ -59,6 +61,8 @@ export type AddParams =
   | ['filterHasNoScreenshot']
   | ['filterHasDescription']
   | ['filterHasNoDescription']
+  | ['filterIsPlural']
+  | ['filterIsNotPlural']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
   | ['filterQaCheckTypes', QaCheckType]
