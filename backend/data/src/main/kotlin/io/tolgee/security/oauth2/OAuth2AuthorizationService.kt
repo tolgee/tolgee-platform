@@ -235,6 +235,22 @@ class OAuth2AuthorizationService(
     return issueTokens(grant)
   }
 
+  /**
+   * Re-reads the client's document when it is due. The caller runs this before [refresh], outside its transaction:
+   * the fetch may wait seconds on a publisher and must not hold a database connection meanwhile. Only a refresh
+   * token that matches a live grant of this client starts a read, so an anonymous caller cannot.
+   */
+  fun readClientDocumentIfDue(
+    client: OAuth2Client,
+    refreshToken: String?,
+  ) {
+    if (!client.hasMetadataDocument || refreshToken.isNullOrBlank()) return
+    val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
+    val liveClientId = repository.findLiveClientIdByRefreshTokenHash(hash, currentDateProvider.date) ?: return
+    if (liveClientId != client.clientId) return
+    cimdDocumentCheck.checkIfDue(client.clientId)
+  }
+
   @Transactional(noRollbackFor = [OAuth2Error::class])
   fun refresh(
     client: OAuth2Client,
@@ -244,7 +260,6 @@ class OAuth2AuthorizationService(
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
-    checkClientDocumentIfDue(client, hash)
     val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeReplayedGrantAndFail(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
@@ -339,22 +354,6 @@ class OAuth2AuthorizationService(
       OAuth2Error.ACCESS_DENIED,
       "this account already holds authorizations for too many clients that identify themselves with a document",
     )
-  }
-
-  /**
-   * Re-reads the client's document before the grant is locked, and only for a refresh token that matches a live
-   * grant of this client: that is what keeps the fetch something only a consenting user can start. It runs before
-   * the lock because what it writes lands on this grant's row too, from its own transaction, and a row this one
-   * already held would make that write wait on itself.
-   */
-  private fun checkClientDocumentIfDue(
-    client: OAuth2Client,
-    hash: String,
-  ) {
-    if (!client.hasMetadataDocument) return
-    val liveClientId = repository.findLiveClientIdByRefreshTokenHash(hash, currentDateProvider.date) ?: return
-    if (liveClientId != client.clientId) return
-    cimdDocumentCheck.checkIfDue(client.clientId)
   }
 
   /**

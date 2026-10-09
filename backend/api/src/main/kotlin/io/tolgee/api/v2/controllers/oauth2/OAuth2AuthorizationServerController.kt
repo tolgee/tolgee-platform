@@ -147,8 +147,10 @@ class OAuth2AuthorizationServerController(
               codeVerifier.nullIfBlank,
               requestedAudience,
             )
-          "refresh_token" ->
+          "refresh_token" -> {
+            oauth2AuthorizationService.readClientDocumentIfDue(client, refreshToken.nullIfBlank)
             oauth2AuthorizationService.refresh(client, refreshToken.nullIfBlank, scope.nullIfBlank, requestedAudience)
+          }
           null -> throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "grant_type is required")
           else -> throw OAuth2Error(OAuth2Error.UNSUPPORTED_GRANT_TYPE)
         }
