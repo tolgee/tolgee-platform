@@ -257,14 +257,14 @@ class CimdClientCacheTest {
   }
 
   @Test
-  fun `a capacity refusal answers unavailable rather than something the caller could act on`() {
+  fun `a capacity refusal answers nothing, so the caller knows the publisher was never asked`() {
     val fetcher =
       mock<CimdMetadataFetcher> {
         on { fetchAndValidate(any(), any()) } doAnswer { throw CimdNoCapacityException(URL) }
       }
     val cache = newCache(fetcher)
 
-    cache.fetchOnGrantLane(URL).assert.isEqualTo(CimdResolution.Unavailable)
+    cache.fetchOnGrantLane(URL).assert.isNull()
     metrics.oauth2CimdCapacityRefusalsCounter
       .count()
       .assert

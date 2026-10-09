@@ -17,6 +17,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * The whole CIMD journey through the real HTTP stack: an unknown client presents an HTTPS (here, dev-loopback) URL as
@@ -36,9 +37,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   private lateinit var oauth2GrantRepository: OAuth2GrantRepository
 
   @Autowired
-  private lateinit var documentCheck: OAuth2CimdDocumentCheck
-
-  @Autowired
   private lateinit var cimdClientLifecycle: CimdClientLifecycleService
 
   @Autowired
@@ -55,8 +53,11 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   /** The publisher's origin having a bad minute: it answers, but not with the document. */
   private var documentStatus: Int? = null
 
-  /** A second client on the same host, so one client's document can break while the other keeps serving. */
+  /** A second client on the same host, so one account can hold two document-backed clients. */
   private var otherDocumentBroken: Boolean = false
+
+  /** How often the publisher was asked for the main client's document. */
+  private val documentRequests = AtomicInteger()
 
   @AfterEach
   fun resetFixture() {
@@ -65,7 +66,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     documentWithdrawn = false
     documentStatus = null
     otherDocumentBroken = false
-    oauth2Properties.cimdCheckBatchSize = OAuth2ServerProperties().cimdCheckBatchSize
+    documentRequests.set(0)
     oauth2Properties.cimdMaxClientsPerUser = OAuth2ServerProperties().cimdMaxClientsPerUser
     currentDateProvider.forcedDate = null
   }
@@ -147,9 +148,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val grantId = stored(issued.get("access_token").asString()).id
 
     stopServer()
-    // Without this the 300s cache answers from the resolution the authorize hop already made, and the refresh never
-    // reaches the path this test exists for.
-    cimdClientCache.invalidate(clientId)
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("access_token")
@@ -170,7 +168,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val grantId = stored(issued.get("access_token").asString()).id
 
     extraRedirectUri = "http://127.0.0.1:$port/attacker-cb"
-    documentCheck.checkBatch()
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("error")
@@ -208,7 +205,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
-  fun `a withdrawal the check observes is written to the grant, so the access token dies with it`() {
+  fun `a withdrawal seen on a refresh is written to the grant, so the access token dies with it`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
@@ -218,7 +215,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     performGet("/v2/projects/${testData.project.id}/translations", bearerHeaders(accessToken)).andIsOk
 
     documentWithdrawn = true
-    documentCheck.checkBatch()
 
     json(driver.refresh(tokens.get("refresh_token").asString(), clientId))
       .get("error")
@@ -227,7 +223,6 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .isEqualTo("invalid_grant")
 
     stored(accessToken).clientWithdrawnAt.assert.isNotNull()
-    cimdClientCache.invalidate(clientId)
     performGet("/v2/projects/${testData.project.id}/translations", bearerHeaders(accessToken)).andIsUnauthorized
   }
 
@@ -271,6 +266,9 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issued = json(driver.exchangeCode(code, clientId, redirect, pending.verifier))
     val grantId = stored(issued.get("access_token").asString()).id
 
+    // The other instance saw the document go and wrote the mark; this one still caches the answer from the
+    // authorize hop. The mark on the row is what decides, not the cache.
+    documentWithdrawn = true
     cimdClientLifecycle.recordClientWithdrawn(clientId)
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
@@ -295,12 +293,15 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val refreshToken = issued.get("refresh_token").asString()
 
     documentWithdrawn = true
-    documentCheck.checkBatch()
+    json(driver.refresh(refreshToken, clientId))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
 
     // Past the re-check interval, still inside the grace window: the mis-deploy is fixed and read again in time.
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
     documentWithdrawn = false
-    documentCheck.checkBatch()
 
     json(driver.refresh(refreshToken, clientId))
       .get("access_token")
@@ -310,7 +311,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
-  fun `a retirement the check has already confirmed survives republishing`() {
+  fun `a retirement a later read has already confirmed survives republishing`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val redirect = redirectAt(port)
@@ -319,18 +320,24 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val refreshToken = issued.get("refresh_token").asString()
 
     documentWithdrawn = true
-    documentCheck.checkBatch()
+    json(driver.refresh(refreshToken, clientId))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
     val grantId = oauth2GrantRepository.findAll().first { it.clientId == clientId }.id
 
-    // A second round with the document still gone: the mark has now survived a read, so it is no longer a
+    // A second read with the document still gone: the mark has now survived a read, so it is no longer a
     // mis-deploy we are waiting to see recover.
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
-    documentCheck.checkBatch()
+    json(driver.refresh(refreshToken, clientId))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
 
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
     documentWithdrawn = false
-    documentCheck.checkBatch()
-    cimdClientCache.invalidate(clientId)
 
     json(driver.refresh(refreshToken, clientId))
       .get("error")
@@ -344,59 +351,9 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .isNotNull()
   }
 
+  /** The age bound counts failed reads, not idle time: a user coming back after a long break is not signed out by a blip. */
   @Test
-  fun `a client whose document cannot be read does not keep the others from being checked`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val broken = otherClientIdAt(port)
-    val healthy = clientIdAt(port)
-    // The broken one first, so it is also the one an ordering by last-success would keep picking.
-    listOf(broken, healthy).forEach { clientId ->
-      val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
-      driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
-    }
-    otherDocumentBroken = true
-    oauth2Properties.cimdCheckBatchSize = 1
-
-    repeat(cimdClientLifecycle.clientIdsDueForCheck(1000).size) { documentCheck.checkBatch() }
-
-    oauth2GrantRepository
-      .findAll()
-      .first { it.clientId == healthy }
-      .cimdVerifiedAt.assert
-      .isNotNull()
-  }
-
-  @Test
-  fun `a client read a moment ago is not read again in the same interval`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val clientId = clientIdAt(port)
-    val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
-    driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
-
-    documentCheck.checkBatch()
-
-    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
-  }
-
-  @Test
-  fun `a client retired for good is not read any more`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val clientId = clientIdAt(port)
-    val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
-    driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
-
-    documentWithdrawn = true
-    documentCheck.checkBatch()
-    // One more round with the document still gone, so the mark has had its chance to be lifted and was not.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
-    documentCheck.checkBatch()
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
-
-    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientId)
-  }
-
-  @Test
-  fun `a grant is kept when nothing has tried to read its document, however old the last read is`() {
+  fun `a grant idle for longer than the maximum age is not refused over a single failed read`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val redirect = redirectAt(port)
@@ -404,16 +361,55 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issued = json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
     val issuedAt = currentDateProvider.date
 
-    // Twice the maximum age, and the check has never run.
+    // Twice the maximum age, and this refresh is the first time anything reads the document again.
     currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(14))
     documentStatus = 503
-    cimdClientCache.invalidate(clientId)
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("access_token")
       .asString()
       .assert
       .isNotBlank()
+  }
+
+  @Test
+  fun `a refresh inside the interval does not read the document again`() {
+    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
+    val clientId = clientIdAt(port)
+    val redirect = redirectAt(port)
+    val pending = driver.startPendingConsent(jwt(), clientId, redirect)
+    val issued = json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
+    val readsBefore = documentRequests.get()
+
+    val first = json(driver.refresh(issued.get("refresh_token").asString(), clientId))
+    documentRequests.get().assert.isEqualTo(readsBefore + 1)
+
+    val second = json(driver.refresh(first.get("refresh_token").asString(), clientId))
+    documentRequests.get().assert.isEqualTo(readsBefore + 1)
+
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    json(
+      driver.refresh(second.get("refresh_token").asString(), clientId),
+    ).get("access_token").asString().assert.isNotBlank()
+    documentRequests.get().assert.isEqualTo(readsBefore + 2)
+  }
+
+  /** The fetch is the one outbound call an existing grant can cause, so only its real holder may cause it. */
+  @Test
+  fun `a refresh token that matches no live grant reads no document`() {
+    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
+    val clientId = clientIdAt(port)
+    val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
+    driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
+    val readsBefore = documentRequests.get()
+
+    json(driver.refresh("tgort_not-a-token-anyone-was-issued", clientId))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+
+    documentRequests.get().assert.isEqualTo(readsBefore)
   }
 
   @Test
@@ -425,11 +421,14 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issued = json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
 
     documentWithdrawn = true
-    documentCheck.checkBatch()
+    json(driver.refresh(issued.get("refresh_token").asString(), clientId))
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
 
     currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(4))
     documentWithdrawn = false
-    documentCheck.checkBatch()
 
     json(driver.refresh(issued.get("refresh_token").asString(), clientId))
       .get("access_token")
@@ -473,10 +472,13 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     oauth2Properties.cimdMaxClientsPerUser = 1
     val retired = clientIdAt(port)
     val pending = driver.startPendingConsent(jwt(), retired, redirectAt(port))
-    driver.exchangeCode(driver.code(pending, projectId = null), retired, redirectAt(port), pending.verifier)
+    val issued =
+      json(driver.exchangeCode(driver.code(pending, projectId = null), retired, redirectAt(port), pending.verifier))
 
     documentWithdrawn = true
-    documentCheck.checkBatch()
+    json(
+      driver.refresh(issued.get("refresh_token").asString(), retired),
+    ).get("error").asString().assert.isEqualTo("invalid_grant")
 
     json(driver.startAuthorization(jwt(), otherClientIdAt(port), redirectAt(port), validParams(null)))
       .get("consentState")
@@ -503,115 +505,47 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .isNotBlank()
   }
 
+  /** What one refresh learns about the document is a fact about the client, so every grant of it reads the same. */
   @Test
-  fun `a freshly onboarded client does not jump ahead of one already waiting`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val waiting = clientIdAt(port)
-    val first = driver.startPendingConsent(jwt(), waiting, redirectAt(port))
-    driver.exchangeCode(driver.code(first, projectId = null), waiting, redirectAt(port), first.verifier)
-    documentCheck.checkBatch()
-
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
-    val fresh = otherClientIdAt(port)
-    val second = driver.startPendingConsent(jwt(), fresh, redirectAt(port))
-    driver.exchangeCode(driver.code(second, projectId = null), fresh, redirectAt(port), second.verifier)
-
-    cimdClientLifecycle.clientIdsDueForCheck(1).assert.containsExactly(waiting)
-  }
-
-  /**
-   * The backlog gauge runs a hand-written native copy of the work-list predicate, and the two are only equal by
-   * hand. A divergence shows up as a permanently wrong gauge and nothing else, because the job logs and swallows
-   * any error from it - and that gauge is the only signal that retirements and the freshness bound are keeping up.
-   */
-  @Test
-  fun `the backlog gauge counts exactly the clients the work list would return`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    val listed = { cimdClientLifecycle.clientIdsDueForCheck(1000).size.toLong() }
-    val counted = { cimdClientLifecycle.clientsDueForCheckCount() }
-
-    counted().assert.isEqualTo(listed())
-
-    listOf(clientIdAt(port), otherClientIdAt(port)).forEach { clientId ->
-      val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
-      driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
-    }
-    counted().assert.isEqualTo(listed())
-
-    // Read once: both sides have to apply the interval the same way.
-    documentCheck.checkBatch()
-    counted().assert.isEqualTo(listed())
-
-    // Past the interval, so both sides have to bring them back.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(60))
-    counted().assert.isEqualTo(listed())
-    counted().assert.isEqualTo(2L)
-
-    // A fresh withdrawal, inside the grace window: both sides have to keep the client, which is still liftable.
-    documentWithdrawn = true
-    documentCheck.checkBatch()
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
-    counted().assert.isEqualTo(listed())
-    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
-
-    // Past the wall-clock window, but the mark is still newer than the attempt before it. Only the third measure
-    // keeps the client now, and that is the one the two queries spell differently.
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(4))
-    counted().assert.isEqualTo(listed())
-    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.contains(clientIdAt(port))
-    counted().assert.isEqualTo(2L)
-
-    // A second attempt with the document still gone, then past the window again: retired for good, and only the
-    // client nobody withdrew is left.
-    documentCheck.checkBatch()
-    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.HOURS.toMillis(2))
-    counted().assert.isEqualTo(listed())
-    cimdClientLifecycle.clientIdsDueForCheck(1000).assert.doesNotContain(clientIdAt(port))
-    counted().assert.isEqualTo(1L)
-  }
-
-  @Test
-  fun `a round takes no more clients than its batch size`() {
-    val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
-    listOf(clientIdAt(port), otherClientIdAt(port)).forEach { clientId ->
-      val pending = driver.startPendingConsent(jwt(), clientId, redirectAt(port))
-      driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirectAt(port), pending.verifier)
-    }
-
-    cimdClientLifecycle.clientIdsDueForCheck(1).assert.hasSize(1)
-  }
-
-  @Test
-  fun `one read keeps every grant of that client alive, not only the one that triggered it`() {
+  fun `one successful read clears the failing state for every grant of the client`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val redirect = redirectAt(port)
     val issuedAt = currentDateProvider.date
-    val untouched =
+    val (first, second) =
       listOf(1, 2).map {
         val pending = driver.startPendingConsent(jwt(), clientId, redirect)
         json(driver.exchangeCode(driver.code(pending, projectId = null), clientId, redirect, pending.verifier))
       }
 
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(6))
-    documentCheck.checkBatch()
-
-    // Past the maximum age counted from when the grants were made, but well inside it counted from that one read.
-    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(10))
+    // The first grant's refresh finds the document unreadable and starts the clock.
     documentStatus = 503
-    cimdClientCache.invalidate(clientId)
+    val firstRenewed = json(driver.refresh(first.get("refresh_token").asString(), clientId))
+    firstRenewed
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
 
-    untouched.forEach { issued ->
-      json(driver.refresh(issued.get("refresh_token").asString(), clientId))
-        .get("access_token")
-        .asString()
-        .assert
-        .isNotBlank()
-    }
+    // Past the maximum age, the first grant's refresh reads the document fine again.
+    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(8))
+    documentStatus = null
+    json(
+      driver.refresh(firstRenewed.get("refresh_token").asString(), clientId),
+    ).get("access_token").asString().assert.isNotBlank()
+
+    // The second grant's refresh fails to read again: a fresh failure, not one eight days old, so it is forgiven.
+    currentDateProvider.forcedDate = Date(currentDateProvider.date.time + TimeUnit.MINUTES.toMillis(20))
+    documentStatus = 503
+    json(driver.refresh(second.get("refresh_token").asString(), clientId))
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
   }
 
   @Test
-  fun `a grant ends once its client's document has been unreadable for longer than the maximum age`() {
+  fun `a grant ends once its client's document has failed to read for longer than the maximum age`() {
     val port = serveDocument { p -> validDocument(clientIdAt(p), p) }
     val clientId = clientIdAt(port)
     val redirect = redirectAt(port)
@@ -620,9 +554,8 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
     val issuedAt = currentDateProvider.date
     documentStatus = 503
 
+    // The first failed read starts the clock; the grant is still fine.
     currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(6))
-    documentCheck.checkBatch()
-    cimdClientCache.invalidate(clientId)
     val renewed = json(driver.refresh(issued.get("refresh_token").asString(), clientId))
     renewed
       .get("access_token")
@@ -630,12 +563,18 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .isNotBlank()
 
-    // The check keeps trying and keeps failing: that is the publisher's document, not our own downtime.
+    // Two days of failing: forgiven.
     currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(8))
-    documentCheck.checkBatch()
-    cimdClientCache.invalidate(clientId)
+    val renewedAgain = json(driver.refresh(renewed.get("refresh_token").asString(), clientId))
+    renewedAgain
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
 
-    json(driver.refresh(renewed.get("refresh_token").asString(), clientId))
+    // Past the bound counted from the first failure: that is the publisher's document, not our own downtime.
+    currentDateProvider.forcedDate = Date(issuedAt.time + TimeUnit.DAYS.toMillis(13) + TimeUnit.MINUTES.toMillis(2))
+    json(driver.refresh(renewedAgain.get("refresh_token").asString(), clientId))
       .get("error")
       .asString()
       .assert
@@ -713,6 +652,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
       exchange.responseBody.use { it.write(body) }
     }
     created.createContext("/client") { exchange ->
+      documentRequests.incrementAndGet()
       val status = documentStatus ?: 404.takeIf { documentWithdrawn }
       if (status != null) {
         exchange.sendResponseHeaders(status, -1)

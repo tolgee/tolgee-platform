@@ -54,14 +54,6 @@ class Metrics(
       .register(meterRegistry)
   }
 
-  fun registerCimdCheckBacklog(sizeProvider: () -> Long) {
-    Gauge
-      .builder("tolgee.oauth2.cimd.check_backlog", sizeProvider) { it().toDouble() }
-      .strongReference(true)
-      .description("Client metadata documents waiting to be re-read by the CIMD check")
-      .register(meterRegistry)
-  }
-
   val oauth2CimdCapacityRefusalsCounter: Counter by lazy {
     Counter
       .builder("tolgee.oauth2.cimd.capacity_refusals")

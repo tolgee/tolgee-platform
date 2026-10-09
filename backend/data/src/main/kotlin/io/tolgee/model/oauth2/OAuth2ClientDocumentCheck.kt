@@ -10,8 +10,9 @@ import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 /**
- * When a `client_id`'s metadata document was last *attempted*, which is what orders the background check's work
- * list. One row per client, not per grant. `OAuth2Grant.cimdVerifiedAt` records the last *successful* read instead.
+ * What this server knows about reading one `client_id`'s metadata document: when it last tried, when it tried before
+ * that, and since when the tries have been failing. One row per client, not per grant, because every fact here is
+ * about the document and not about any one user's authorization.
  */
 @Entity
 @Table(
@@ -24,15 +25,24 @@ class OAuth2ClientDocumentCheck : StandardAuditModel() {
   @Column(nullable = false)
   var clientId: String = ""
 
+  /** The latest attempt, written before the document is fetched so that only one caller fetches per interval. */
   @Temporal(TemporalType.TIMESTAMP)
   @Column(nullable = false)
   var checkedAt: Date = Date()
 
   /**
    * The attempt before [checkedAt]. A withdrawal mark written after this moment has not yet survived a read, so it
-   * may still be a mis-deploy. A wall clock cannot answer that: how soon a client is read again is a queue
-   * position, not a duration.
+   * may still be a mis-deploy. A wall clock cannot answer that on its own: a client nobody refreshes is not read at
+   * all, however much time passes.
    */
   @Temporal(TemporalType.TIMESTAMP)
   var previousCheckedAt: Date? = null
+
+  /**
+   * The first failed attempt since the document was last read successfully. Null while the document reads fine.
+   * Counting from here, and not from the last success, is what keeps a single blip after a long idle period from
+   * ending a grant.
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  var failingSince: Date? = null
 }

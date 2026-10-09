@@ -55,8 +55,8 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   fun `only the check rows of clients nobody holds a grant for are deleted`() {
     testData.addGrant(refreshExpiresAt = Instant.now().plus(Duration.ofDays(20)), clientId = LIVE_CLIENT)
     testDataService.saveTestData(testData.root)
-    cimdClientLifecycle.recordCheckAttempt(LIVE_CLIENT)
-    cimdClientLifecycle.recordCheckAttempt(ORPHAN_CLIENT)
+    cimdClientLifecycle.claimCheck(LIVE_CLIENT)
+    cimdClientLifecycle.claimCheck(ORPHAN_CLIENT)
 
     cimdClientLifecycle.deleteCheckRowsWithoutGrants()
 

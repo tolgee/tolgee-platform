@@ -73,8 +73,8 @@ class OAuth2ClientRegistry(
    * The client a token request, or a consent screen for an already-created grant, claims to be. A CIMD client
    * nothing has read yet still gets one — bare, unverified, with no redirect URIs.
    *
-   * This must never fetch: only [OAuth2CimdDocumentCheck] reads a document for a client that already holds a
-   * grant. See `docs/oauth/README.md`.
+   * This must never fetch: only [io.tolgee.security.oauth2.cimd.CimdDocumentCheck] reads a document for a client
+   * that already holds a grant, and only behind a validated refresh token. See `docs/oauth/README.md`.
    */
   fun findForExistingGrant(clientId: String): OAuth2Client? {
     findPreRegistered(clientId)?.let { return it }
@@ -88,16 +88,17 @@ class OAuth2ClientRegistry(
 
   /**
    * Reads the document now, through the lane kept for clients that already have a grant. Only
-   * [OAuth2CimdDocumentCheck] may call it. Null when the id is not one the CIMD path serves at all.
+   * [io.tolgee.security.oauth2.cimd.CimdDocumentCheck] may call it, and only for an id [servesCimdClient] accepts.
+   * Null means this server had no room for the fetch.
    *
    * It must leave the lane `/oauth2/authorize` answers from exactly as it found it. Writing to that lane and
    * evicting from it both let an anonymous caller who polls the endpoint see that the check ran for this
    * `client_id`, and the check runs only for clients somebody on this instance holds a grant for.
    */
-  fun resolveForCheck(clientIdUrl: String): CimdResolution? {
-    if (!isCimdCandidate(clientIdUrl)) return null
-    return cimdClientCache.fetchOnGrantLane(clientIdUrl)
-  }
+  fun resolveForCheck(clientIdUrl: String): CimdResolution? = cimdClientCache.fetchOnGrantLane(clientIdUrl)
+
+  /** A `client_id` only the CIMD path could serve: not pre-registered, and past the local candidate policy. */
+  fun servesCimdClient(clientId: String): Boolean = isCimdCandidate(clientId)
 
   /**
    * Whether this instance serves the client at all: a pre-registered id, or an id the CIMD path would still accept
@@ -110,7 +111,6 @@ class OAuth2ClientRegistry(
     return isCimdCandidate(clientId)
   }
 
-  /** A client_id only the CIMD path could serve: not pre-registered, and past the local candidate policy. */
   private fun isCimdCandidate(clientId: String): Boolean =
     oauth2IssuerResolver.isConfigured && findPreRegistered(clientId) == null && cimdClientPolicy.isCandidate(clientId)
 

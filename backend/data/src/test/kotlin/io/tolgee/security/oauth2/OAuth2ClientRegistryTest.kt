@@ -268,7 +268,7 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
-  fun `the background check reads the document and leaves the request lane untouched`() {
+  fun `the document check reads the document and leaves the request lane untouched`() {
     val cache = mock<CimdClientCache> { on { fetchOnGrantLane(any()) } doReturn CimdResolution.Withdrawn }
     val registry = registry(cache = cache)
 
@@ -281,13 +281,10 @@ class OAuth2ClientRegistryTest {
   }
 
   @Test
-  fun `the background check leaves a client_id the CIMD path does not serve alone`() {
-    val cache = mock<CimdClientCache>()
-    val registry = registry(cache = cache, cimdAllowedHosts = listOf("allowed.example"))
+  fun `a client_id the CIMD path does not serve is not one the document check may read`() {
+    val registry = registry(cimdAllowedHosts = listOf("allowed.example"))
 
-    registry.resolveForCheck(CIMD_URL).assert.isNull()
-
-    verify(cache, never()).fetchOnGrantLane(any())
+    registry.servesCimdClient(CIMD_URL).assert.isFalse()
   }
 
   @Test

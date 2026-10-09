@@ -42,19 +42,17 @@ class CimdClientCache(
 
   /**
    * Fetches the publisher's document now, on the lane kept for clients that already have a grant: no cache on
-   * either side of the call, and nothing taken from [CimdFetchBudget], which only bounds request traffic. The
-   * background check is its only caller: it has to see what the publisher serves at this moment, and what it reads
-   * must not warm the lane `/oauth2/authorize` answers from — see `docs/oauth/README.md`.
+   * either side of the call. [CimdDocumentCheck] is its only caller: it has to see what the publisher serves at
+   * this moment, and what it reads must not warm the lane `/oauth2/authorize` answers from — see
+   * `docs/oauth/README.md`. Null means this server had no room for the fetch and the publisher was never asked.
    */
-  fun fetchOnGrantLane(clientIdUrl: String): CimdResolution {
-    val resolution =
-      try {
-        metadataFetcher.fetchAndValidate(clientIdUrl, CimdFetchLane.GRANT_CHECK)
-      } catch (_: CimdNoCapacityException) {
-        null
-      }
-    return resolution ?: refuseForNoCapacity()
-  }
+  fun fetchOnGrantLane(clientIdUrl: String): CimdResolution? =
+    try {
+      metadataFetcher.fetchAndValidate(clientIdUrl, CimdFetchLane.GRANT_CHECK)
+    } catch (_: CimdNoCapacityException) {
+      metrics.oauth2CimdCapacityRefusalsCounter.increment()
+      null
+    }
 
   /** What is already known, with no outbound call: for callers that run on every request. */
   fun cachedResolution(clientIdUrl: String): CimdResolution? = cache.getIfPresent(clientIdUrl)

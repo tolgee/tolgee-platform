@@ -23,16 +23,19 @@ import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
- * What the background check learns about a client that identifies itself with a metadata document, written to the
- * grant rows and to `oauth2_client_document_check`. The scheduled check and the cleanup job call it; the grant flow
- * only reads the marks it leaves. `docs/oauth/README.md` explains each rule and what it stops.
+ * What a document check learns about a client that identifies itself with a metadata document, written to the grant
+ * rows and to `oauth2_client_document_check`. [CimdDocumentCheck] calls it from the refresh path; the grant flow only
+ * reads the marks it leaves. `docs/oauth/README.md` explains each rule and what it stops.
+ *
+ * Every write runs in its own transaction. The check happens inside a token request, and what it learned about the
+ * publisher must stay written whatever becomes of that request.
  */
 @Service
 class CimdClientLifecycleService(
@@ -41,64 +44,59 @@ class CimdClientLifecycleService(
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
 ) : Logging {
-  @Transactional
-  fun recordDocumentRead(clientId: String) {
+  /**
+   * Takes this client's next attempt if the last one is older than `cimd-check-interval-minutes`. Returns the
+   * attempt time, or null when another caller got there first or the client is not due.
+   *
+   * The first-ever attempt inserts the row, and two callers racing for it make the second insert fail on the unique
+   * constraint. The caller treats that failure as "not claimed".
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun claimCheck(clientId: String): Date? {
     val now = currentDateProvider.date
-    val refreshBefore = Date(now.time - TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays) / 2)
-    oauth2GrantRepository.markClientDocumentRead(clientId, now, refreshBefore)
+    if (documentCheckRepository.claimAttempt(clientId, now, dueBefore(now)) > 0) return now
+    if (documentCheckRepository.existsByClientId(clientId)) return null
+    documentCheckRepository.save(
+      OAuth2ClientDocumentCheck().also {
+        it.clientId = clientId
+        it.checkedAt = now
+      },
+    )
+    return now
   }
 
-  /** The document no longer matches what its users agreed to, so those grants end. */
-  @Transactional
-  fun revokeDriftedFromDocument(
+  /** Gives a claim back when the fetch was refused before it reached the publisher: that was no attempt. */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun releaseCheck(
     clientId: String,
-    currentHash: String?,
-  ): Int {
-    if (currentHash == null) return 0
-    val revoked =
-      oauth2GrantRepository.deleteDriftedFromDocument(
-        clientId,
-        currentHash,
-        CimdMetadataFetcher.HASH_SCHEME_PREFIX + "%",
-      )
-    if (revoked > 0) {
-      logger.warn(
-        "Revoked {} OAuth2 grant(s) of client {}: its metadata document no longer matches the consented terms",
-        revoked,
-        clientId,
-      )
+    claimedAt: Date,
+  ) {
+    if (documentCheckRepository.releaseAttempt(clientId, claimedAt) > 0) return
+    documentCheckRepository.deleteFirstAttempt(clientId, claimedAt)
+  }
+
+  /** Writes what the publisher answered to the grant rows and the check row. */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun recordCheckResult(
+    clientId: String,
+    resolution: CimdResolution,
+  ) {
+    if (resolution is CimdResolution.Resolved) {
+      revokeDriftedFromDocument(clientId, resolution.client.client.metadataHash)
+      clearClientWithdrawn(clientId)
+      documentCheckRepository.findByClientId(clientId)?.let { it.failingSince = null }
+      return
     }
-    return revoked
+    markFailing(clientId)
+    if (resolution == CimdResolution.Withdrawn) {
+      recordClientWithdrawn(clientId)
+      return
+    }
+    logger.info("CIMD check could not read the document of {}: {}", clientId, resolution)
   }
 
-  fun clientIdsDueForCheck(limit: Int): List<String> =
-    oauth2GrantRepository.findCimdClientIdsDueForCheck(
-      currentDateProvider.date,
-      dueBefore(),
-      graceStart(),
-      NEVER_CHECKED,
-      PageRequest.of(0, limit),
-    )
-
-  fun clientsDueForCheckCount(): Long =
-    oauth2GrantRepository.countCimdClientIdsDueForCheck(
-      currentDateProvider.date,
-      dueBefore(),
-      graceStart(),
-      NEVER_CHECKED,
-    )
-
-  @Transactional
-  fun recordCheckAttempt(clientId: String) {
-    val existing = documentCheckRepository.findByClientId(clientId)
-    val row = existing ?: OAuth2ClientDocumentCheck().also { it.clientId = clientId }
-    row.previousCheckedAt = existing?.checkedAt
-    row.checkedAt = currentDateProvider.date
-    documentCheckRepository.save(row)
-  }
-
-  /** When this server last tried to read the client's document, whatever came of it. */
-  fun lastCheckAttempt(clientId: String): Date? = documentCheckRepository.findByClientId(clientId)?.checkedAt
+  /** Since when this server has been trying to read the document and failing. Null while it reads fine. */
+  fun documentFailingSince(clientId: String): Date? = documentCheckRepository.findByClientId(clientId)?.failingSince
 
   @Transactional
   fun deleteCheckRowsWithoutGrants(): Int = documentCheckRepository.deleteWithoutGrants()
@@ -116,15 +114,41 @@ class CimdClientLifecycleService(
     }
   }
 
+  private fun markFailing(clientId: String) {
+    val row = documentCheckRepository.findByClientId(clientId) ?: return
+    if (row.failingSince != null) return
+    row.failingSince = currentDateProvider.date
+  }
+
+  /** The document no longer matches what its users agreed to, so those grants end. */
+  private fun revokeDriftedFromDocument(
+    clientId: String,
+    currentHash: String?,
+  ) {
+    if (currentHash == null) return
+    val revoked =
+      oauth2GrantRepository.deleteDriftedFromDocument(
+        clientId,
+        currentHash,
+        CimdMetadataFetcher.HASH_SCHEME_PREFIX + "%",
+      )
+    if (revoked > 0) {
+      logger.warn(
+        "Revoked {} OAuth2 grant(s) of client {}: its metadata document no longer matches the consented terms",
+        revoked,
+        clientId,
+      )
+    }
+  }
+
   /**
-   * The document resolves again. A mark younger than the grace window was a mis-deploy and is lifted; an older one
-   * is the publisher retiring the client and stays.
+   * The document resolves again. A mark younger than the grace window was a mis-deploy and is lifted; so is one no
+   * check has happened since, however old. An older one that a check has already seen is the publisher retiring the
+   * client and stays.
    */
-  @Transactional
-  fun clearClientWithdrawn(clientId: String) {
-    // This round's attempt is recorded after the work, so the row still holds the previous round's and
-    // `previousCheckedAt` reaches two attempts back. Comparing against the latest one instead would make every
-    // mark look "already read" on the very next round.
+  private fun clearClientWithdrawn(clientId: String) {
+    // The claim for this check already moved the row on, so `previousCheckedAt` is the attempt before this one. A
+    // mark newer than it was written by that very attempt and has not survived a read yet; a mark older than it has.
     val previousAttempt = documentCheckRepository.findByClientId(clientId)?.previousCheckedAt ?: NEVER_CHECKED
     val cleared = oauth2GrantRepository.clearRecentClientWithdrawn(clientId, graceStart(), previousAttempt)
     if (cleared > 0) {
@@ -136,8 +160,8 @@ class CimdClientLifecycleService(
     }
   }
 
-  private fun dueBefore(): Date =
-    Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdCheckIntervalMinutes))
+  private fun dueBefore(now: Date): Date =
+    Date(now.time - TimeUnit.MINUTES.toMillis(properties.cimdCheckIntervalMinutes))
 
   private fun graceStart(): Date =
     Date(currentDateProvider.date.time - TimeUnit.MINUTES.toMillis(properties.cimdWithdrawalGraceMinutes))

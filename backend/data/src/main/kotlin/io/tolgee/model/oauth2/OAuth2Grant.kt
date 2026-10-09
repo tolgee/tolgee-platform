@@ -121,13 +121,6 @@ class OAuth2Grant : StandardAuditModel() {
   @Temporal(TemporalType.TIMESTAMP)
   var clientWithdrawnAt: Date? = null
 
-  /**
-   * When this client's metadata document was last read and accepted, for a client that has one. Null means it has
-   * not been read since the grant was made, so [io.tolgee.model.StandardAuditModel.createdAt] is the age to use.
-   */
-  @Temporal(TemporalType.TIMESTAMP)
-  var cimdVerifiedAt: Date? = null
-
   /** Removing the cascade breaks the theft path's flush; the FK's own cascade covers the bulk JPQL reaper instead. */
   @OneToMany(mappedBy = "grant", cascade = [CascadeType.ALL], orphanRemoval = true)
   var supersededRefreshTokens: MutableList<OAuth2SupersededRefreshToken> = mutableListOf()

@@ -30,6 +30,7 @@ import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.OAUTH_REFRESH_TOKEN_PREFIX
 import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
+import io.tolgee.security.oauth2.cimd.CimdDocumentCheck
 import io.tolgee.security.oauth2.cimd.CimdMetadataFetcher
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
@@ -55,6 +56,7 @@ class OAuth2AuthorizationService(
   private val currentDateProvider: CurrentDateProvider,
   private val properties: OAuth2ServerProperties,
   private val cimdClientLifecycle: CimdClientLifecycleService,
+  private val cimdDocumentCheck: CimdDocumentCheck,
   private val oauth2Resources: OAuth2Resources,
   private val metrics: Metrics,
 ) : Logging {
@@ -241,6 +243,7 @@ class OAuth2AuthorizationService(
   ): IssuedTokens {
     if (refreshToken.isNullOrBlank()) throw OAuth2Error(OAuth2Error.INVALID_REQUEST, "refresh_token is required")
     val hash = keyGenerator.hash(refreshToken.removePrefix(OAUTH_REFRESH_TOKEN_PREFIX))
+    checkClientDocumentIfDue(client, hash)
     val grant = repository.findAndLockByRefreshTokenHash(hash) ?: revokeReplayedGrantAndFail(hash)
     // RFC 9700 §4.14.2: a refresh token surfacing under a client it was not issued to is the same compromise signal
     // as a code doing so, and exchangeCode kills the grant for it. Probing the other registered client must not be free.
@@ -253,7 +256,7 @@ class OAuth2AuthorizationService(
       throw OAuth2Error(OAuth2Error.INVALID_GRANT, "refresh token expired")
     }
     refuseIfClientWithdrawn(grant)
-    refuseIfDocumentUnreadForTooLong(grant, client)
+    refuseIfDocumentUnreadableForTooLong(grant, client)
     requireMatchingAudience(grant, requestedAudience)
     revokeAndFailIfUserInvalidated(grant)
     grant.issuedTokenScopeValues = narrowedScopes(grant, requestedScope)
@@ -285,8 +288,8 @@ class OAuth2AuthorizationService(
   }
 
   /**
-   * Bounds how many document-backed clients one account adds to the background check's work list. See
-   * `docs/oauth/README.md` for what that queue's length costs everybody else.
+   * Bounds how many publishers one account can make this server fetch from, and so how many fetches per interval
+   * its refreshes can start. See `docs/oauth/README.md`.
    */
   private fun refuseIfTooManyDocumentBackedClients(
     userId: Long,
@@ -303,33 +306,38 @@ class OAuth2AuthorizationService(
   }
 
   /**
-   * A grant of a client that identifies itself with a metadata document lives on that document being readable.
-   * Not having been read is forgiven until [OAuth2ServerProperties.cimdVerificationMaxAgeDays].
+   * Re-reads the client's document before the grant is locked, and only for a refresh token that matches a live
+   * grant of this client: that is what keeps the fetch something only a consenting user can start. It runs before
+   * the lock because what it writes lands on this grant's row too, from its own transaction, and a row this one
+   * already held would make that write wait on itself.
    */
-  private fun refuseIfDocumentUnreadForTooLong(
+  private fun checkClientDocumentIfDue(
+    client: OAuth2Client,
+    hash: String,
+  ) {
+    if (!client.hasMetadataDocument) return
+    val liveClientId = repository.findLiveClientIdByRefreshTokenHash(hash, currentDateProvider.date) ?: return
+    if (liveClientId != client.clientId) return
+    cimdDocumentCheck.checkIfDue(client.clientId)
+  }
+
+  /**
+   * A grant of a client that identifies itself with a metadata document lives on that document being readable.
+   * A failure is forgiven until it has lasted [OAuth2ServerProperties.cimdVerificationMaxAgeDays], counted from the
+   * first failed read after the last successful one. A client nobody tried to read is never refused here.
+   */
+  private fun refuseIfDocumentUnreadableForTooLong(
     grant: OAuth2Grant,
     client: OAuth2Client,
   ) {
     if (!client.hasMetadataDocument) return
-    val lastRead = grant.cimdVerifiedAt ?: grant.createdAt ?: return
+    val failingSince = cimdClientLifecycle.documentFailingSince(grant.clientId) ?: return
     val maxAgeMs = TimeUnit.DAYS.toMillis(properties.cimdVerificationMaxAgeDays)
-    if (currentDateProvider.date.time - lastRead.time <= maxAgeMs) return
-    // Past the bound, the next question is whose doing that is: a client we kept *trying* to read is the
-    // publisher's answer, while one we never got round to is our own downtime and must not end a grant.
-    val lastAttempt = cimdClientLifecycle.lastCheckAttempt(grant.clientId)
-    if (lastAttempt == null || lastAttempt.time - lastRead.time <= maxAgeMs) {
-      logger.warn(
-        "Keeping grant {} of client {}: its document has not been read since {}, but neither has it been tried",
-        grant.id,
-        grant.clientId,
-        lastRead,
-      )
-      return
-    }
+    if (currentDateProvider.date.time - failingSince.time <= maxAgeMs) return
     logger.info(
       "Refusing a refresh of grant {}: its client's metadata document has not been readable since {}",
       grant.id,
-      lastRead,
+      failingSince,
     )
     throw OAuth2Error(OAuth2Error.INVALID_GRANT, "the client's metadata document could not be read")
   }
