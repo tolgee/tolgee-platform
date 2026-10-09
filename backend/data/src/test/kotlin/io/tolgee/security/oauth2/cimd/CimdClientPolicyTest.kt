@@ -87,6 +87,27 @@ class CimdClientPolicyTest {
     policy().isCandidate("https://publisher.example/c.json").assert.isTrue()
   }
 
+  /** CIMD draft section 3. */
+  @Test
+  fun `a client_id carrying a userinfo component is not a candidate`() {
+    policy().isCandidate("https://user@publisher.example/c.json").assert.isFalse()
+    policy().isCandidate("https://user:secret@publisher.example/c.json").assert.isFalse()
+  }
+
+  @Test
+  fun `a client_id without a path component is not a candidate`() {
+    policy().isCandidate("https://publisher.example").assert.isFalse()
+    policy().isCandidate("https://publisher.example/").assert.isTrue()
+  }
+
+  @Test
+  fun `a client_id with a dot or double-dot path segment is not a candidate`() {
+    policy().isCandidate("https://publisher.example/./c.json").assert.isFalse()
+    policy().isCandidate("https://publisher.example/a/../c.json").assert.isFalse()
+    policy().isCandidate("https://publisher.example/c.json/..").assert.isFalse()
+    policy().isCandidate("https://publisher.example/.well-known/c.json").assert.isTrue()
+  }
+
   @Test
   fun `a client_id whose scheme is not spelled in lower case is not a candidate`() {
     listOf("HTTPS://publisher.example/c", "Https://publisher.example/c", "hTTps://publisher.example/c").forEach {

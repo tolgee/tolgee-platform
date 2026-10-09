@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2.cimd
 
 import io.tolgee.security.oauth2.UrlOrigins
 import io.tolgee.security.oauth2.lowercaseScheme
+import java.net.URI
 
 /** The shape a `client_id` must have before anything will route it, or fetch it, through the CIMD path. */
 internal object CimdUrls {
@@ -40,7 +41,20 @@ internal object CimdUrls {
     // so `HTTPS://x/y` would resolve, consent and hold a grant while being invisible to the withdrawal check, the
     // staleness bound and the per-account cap.
     if (!clientId.startsWith("https://") && !(allowHttp && clientId.startsWith("http://"))) return false
-    val scheme = UrlOrigins.parse(clientId)?.lowercaseScheme ?: return false
-    return scheme == "https" || (allowHttp && scheme == "http")
+    val parsed = UrlOrigins.parse(clientId) ?: return false
+    val scheme = parsed.lowercaseScheme ?: return false
+    if (scheme != "https" && !(allowHttp && scheme == "http")) return false
+    return hasRequiredShape(parsed)
+  }
+
+  /**
+   * CIMD draft section 3: the URL must not carry a userinfo component, must contain a path component, and must not
+   * contain single-dot or double-dot path segments.
+   */
+  private fun hasRequiredShape(parsed: URI): Boolean {
+    if (parsed.rawUserInfo != null) return false
+    val path = parsed.rawPath
+    if (path.isNullOrEmpty()) return false
+    return path.split('/').none { it == "." || it == ".." }
   }
 }
