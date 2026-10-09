@@ -1,3 +1,10 @@
+# [3.230.0](https://github.com/tolgee/tolgee-platform/compare/v3.229.0...v3.230.0) (2026-10-09)
+
+
+### Features
+
+* OAuth 2.1 for MCP clients — audience binding, client ID metadata documents and SSRF hardening ([#3944](https://github.com/tolgee/tolgee-platform/issues/3944)) ([bd3d71e](https://github.com/tolgee/tolgee-platform/commit/bd3d71e98d2c1e77d737fac501d36bab65f9a30f)), closes [tolgee/tolgee-platform#3907](https://github.com/tolgee/tolgee-platform/issues/3907) [tolgee/tolgee-cli#210](https://github.com/tolgee/tolgee-cli/issues/210)
+
 # [3.229.0](https://github.com/tolgee/tolgee-platform/compare/v3.228.0...v3.229.0) (2026-10-09)
 
 
