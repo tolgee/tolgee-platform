@@ -1,7 +1,7 @@
 import { useField } from 'formik';
-import { FormControl, InputLabel, Select } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { Select } from 'tg.component/common/Select';
 
 import React, { ReactNode } from 'react';
 import { formatGroups, getFormatById } from './formatGroups';
@@ -11,7 +11,7 @@ import {
 } from 'tg.component/ListComponents';
 
 type Props = {
-  className: string;
+  className?: string;
 };
 
 export const FormatSelector: React.FC<React.PropsWithChildren<Props>> = ({
@@ -45,20 +45,21 @@ export const FormatSelector: React.FC<React.PropsWithChildren<Props>> = ({
   });
 
   return (
-    <FormControl className={className} variant="standard">
-      <InputLabel>{t('export_translations_format_label')}</InputLabel>
+    <div className={className}>
       <Select
-        renderValue={(value) => getFormatById(value).name}
+        label={t('export_translations_format_label')}
+        minHeight={false}
+        shrinkable
+        renderValue={(value) => getFormatById(value as string).name}
         value={field.value}
         data-cy="export-format-selector"
         MenuProps={{
           variant: 'menu',
         }}
-        margin="dense"
         displayEmpty
       >
         {options}
       </Select>
-    </FormControl>
+    </div>
   );
 };
