@@ -1,3 +1,10 @@
+# [3.229.0](https://github.com/tolgee/tolgee-platform/compare/v3.228.0...v3.229.0) (2026-10-09)
+
+
+### Features
+
+* allow uploading content delivery files as public-read to S3 storages ([#3962](https://github.com/tolgee/tolgee-platform/issues/3962)) ([ec2c285](https://github.com/tolgee/tolgee-platform/commit/ec2c285e40d44cee86fb775b5be5cbac1a5276df))
+
 # [3.228.0](https://github.com/tolgee/tolgee-platform/compare/v3.227.0...v3.228.0) (2026-10-09)
 
 
