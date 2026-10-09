@@ -13,10 +13,9 @@ import {
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { StateSelector } from 'tg.views/projects/export/components/StateSelector';
 import { LanguageSelector } from 'tg.views/projects/export/components/LanguageSelector';
 import { FormatSelector } from 'tg.views/projects/export/components/FormatSelector';
-import { NsSelector } from 'tg.views/projects/export/components/NsSelector';
+import { ExportAdvancedSettings } from 'tg.views/projects/export/components/ExportAdvancedSettings';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { confirmation } from 'tg.hooks/confirmation';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -25,9 +24,6 @@ import { CdStorageSelector } from './CdStorageSelector';
 import { CdAutoPublish } from './CdAutoPublish';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { getFormatById } from '../../export/components/formatGroups';
-import { SupportArraysSelector } from '../../export/components/SupportArraysSelector';
-import { MessageFormatSelector } from '../../export/components/MessageFormatSelector';
 import {
   ContentDeliveryConfigModel,
   getCdEditInitialValues,
@@ -36,7 +32,6 @@ import { useCdActions } from './useCdActions';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { CdPruneBeforePublish } from './CdPruneBeforePublish';
 import { CdZipExport } from './CdZipExport';
-import { EscapeHtmlSelector } from 'tg.views/projects/export/components/EscapeHtmlSelector';
 import { BranchSelect } from 'tg.component/branching/BranchSelect';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 import React from 'react';
@@ -125,7 +120,7 @@ export const CdDialog = ({ onClose, data }: Props) => {
           enableReinitialize={false}
           onSubmit={(values, formikHelpers) => {
             if (data) {
-              return actions.update(values, formikHelpers, data.id);
+              return actions.update(values, formikHelpers, data);
             }
             return actions.create(values, formikHelpers);
           }}
@@ -143,13 +138,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                     <TextField
                       name="name"
                       label={t('content_delivery_form_name_label')}
-                      variant="standard"
                       data-cy="content-delivery-form-name"
                       minHeight={false}
                     />
-                  </Box>
-                  <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
-                    <StateSelector className="states" />
                   </Box>
                   <LanguageSelector
                     className="langs"
@@ -182,8 +173,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                       />
                     </Box>
                   )}
-                  <NsSelector className="ns" namespaces={allNamespaces} />
-                  <MessageFormatSelector className="messageFormat" />
+                  <Box sx={{ gridColumn: '1 / span 2', display: 'grid' }}>
+                    <ExportAdvancedSettings allNamespaces={allNamespaces} />
+                  </Box>
                   {Boolean(
                     storagesLoadable.data?._embedded?.contentStorages?.length
                   ) && (
@@ -198,15 +190,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                   )}
 
                   <StyledOptions>
-                    {getFormatById(values.format).showSupportArrays && (
-                      <SupportArraysSelector />
-                    )}
                     <CdZipExport />
                     <CdAutoPublish />
                     <CdPruneBeforePublish />
-                    {getFormatById(values.format).showEscapeHtml && (
-                      <EscapeHtmlSelector />
-                    )}
                   </StyledOptions>
                 </StyledDialogContent>
                 <DialogActions sx={{ justifyContent: 'space-between' }}>

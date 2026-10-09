@@ -1,15 +1,19 @@
 import { useField, useFormikContext } from 'formik';
-import { FormControl, InputLabel, Select } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { Select } from 'tg.component/common/Select';
 
 import React, { useEffect } from 'react';
-import { getFormatById, normalizeSelectedMessageFormat } from './formatGroups';
+import {
+  getFormatById,
+  MessageFormat,
+  normalizeSelectedMessageFormat,
+} from 'tg.views/projects/export/components/formatGroups';
 import { CompactMenuItem } from 'tg.component/ListComponents';
 import { messageFormatTranslation } from './messageFormatTranslation';
 
 type Props = {
-  className: string;
+  className?: string;
 };
 
 export const MessageFormatSelector: React.FC<
@@ -52,20 +56,23 @@ export const MessageFormatSelector: React.FC<
   ));
 
   return (
-    <FormControl className={className} variant="standard">
-      <InputLabel>{t('export_translations_message_format_label')}</InputLabel>
+    <div className={className}>
       <Select
-        renderValue={(value) => messageFormatTranslation[value]}
+        label={t('export_translations_message_format_label')}
+        minHeight={false}
+        shrinkable
+        renderValue={(value) =>
+          messageFormatTranslation[value as MessageFormat]
+        }
         value={field.value}
         data-cy="export-message-format-selector"
         MenuProps={{
           variant: 'menu',
         }}
-        margin="dense"
         displayEmpty
       >
         {options}
       </Select>
-    </FormControl>
+    </div>
   );
 };

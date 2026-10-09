@@ -9,6 +9,7 @@ import {
   testExportFormats,
   visitExport,
 } from '../../../common/export';
+import { expandExportAdvancedSettings } from '../../../compounds/E2ExportAdvancedSettings';
 
 describe('Export Formats', () => {
   let projectId: number;
@@ -31,6 +32,7 @@ describe('Export Formats', () => {
   beforeEach(() => {
     login();
     visitExport(projectId);
+    expandExportAdvancedSettings();
   });
 
   it('correctly exports to all formats', () => {

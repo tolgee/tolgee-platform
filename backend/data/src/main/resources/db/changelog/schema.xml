@@ -5984,4 +5984,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1791543989000-1">
+        <addColumn tableName="user_preferences">
+            <column name="project_storage_json" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

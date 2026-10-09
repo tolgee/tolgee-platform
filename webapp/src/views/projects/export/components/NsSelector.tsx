@@ -1,22 +1,13 @@
 import { useField } from 'formik';
-import {
-  Checkbox,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from '@mui/material';
+import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { StateType } from 'tg.constants/translationStates';
+import { Select } from 'tg.component/common/Select';
 import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   namespaces: string[] | undefined;
-  className: string;
+  className?: string;
 };
 
 export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
@@ -26,31 +17,23 @@ export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
   const { t } = useTranslate();
   const project = useProject();
 
-  const [field, meta, helper] = useField('namespaces');
+  const [field, meta] = useField<string[]>('namespaces');
 
-  if (!namespaces) {
-    return null;
-  }
-
-  const onChange = (e: SelectChangeEvent<StateType[]>) => {
-    helper.setValue(e.target.value);
-  };
-
-  if (!project.useNamespaces) {
+  if (!namespaces || !project.useNamespaces) {
     return null;
   }
 
   return (
-    <FormControl className={className} error={!!meta.error} variant="standard">
-      <InputLabel shrink={true}>
-        {t('export_translations_namespaces_label')}
-      </InputLabel>
+    <div className={className}>
       <Select
         {...field}
-        onChange={onChange}
-        variant="standard"
+        label={t('export_translations_namespaces_label')}
+        error={meta.error}
+        minHeight={false}
+        shrinkable
         data-cy="export-namespace-selector"
-        renderValue={(values: StateType[]) => {
+        renderValue={(value) => {
+          const values = value as string[];
           if (values.length === namespaces.length || values.length === 0) {
             return t('export_translations_namespaces_all');
           }
@@ -59,9 +42,10 @@ export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
         displayEmpty={true}
         multiple
       >
-        {namespaces?.map((ns) => (
+        {namespaces.map((ns) => (
           <MenuItem
             data-cy="export-namespace-selector-item"
+            data-cy-namespace={ns}
             key={ns}
             value={ns}
             dense
@@ -71,7 +55,6 @@ export const NsSelector: React.FC<React.PropsWithChildren<Props>> = ({
           </MenuItem>
         ))}
       </Select>
-      <FormHelperText>{meta.error}</FormHelperText>
-    </FormControl>
+    </div>
   );
 };

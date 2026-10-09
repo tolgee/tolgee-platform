@@ -216,6 +216,11 @@ declare namespace DataCy {
         "expiration-date-field": true;
         "expiration-date-picker": true;
         "expiration-select": true;
+        "export-advanced-settings": true;
+        "export-advanced-settings-content": true;
+        "export-advanced-settings-summary": true;
+        "export-advanced-settings-summary-item": true;
+        "export-advanced-settings-toggle": true;
         "export-escape_html-selector": true;
         "export-format-selector": true;
         "export-format-selector-item": true;
@@ -225,10 +230,13 @@ declare namespace DataCy {
         "export-message-format-selector-item": true;
         "export-namespace-selector": true;
         "export-namespace-selector-item": true;
+        "export-reset-to-defaults-button": true;
         "export-state-selector": true;
         "export-state-selector-item": true;
         "export-submit-button": true;
         "export-support_arrays-selector": true;
+        "export-tags-in-selector": true;
+        "export-tags-not-in-selector": true;
         "file-dropzone-add-more-button": true;
         "file-dropzone-file-input": true;
         "file-dropzone-remove-button": true;

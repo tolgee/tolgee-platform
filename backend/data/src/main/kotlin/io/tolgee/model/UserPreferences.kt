@@ -45,4 +45,9 @@ class UserPreferences(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   var storageJson: Map<String, Any>? = mutableMapOf()
+
+  /** Hibernate must never write this column: native jsonb updates in UserPreferencesRepository own it. */
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb", insertable = false, updatable = false)
+  var projectStorageJson: Map<String, Any>? = null
 }
