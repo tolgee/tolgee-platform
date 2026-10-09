@@ -21,6 +21,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.tolgee.Metrics
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.security.oauth2.UrlOrigins
+import io.tolgee.security.oauth2.lowercaseHost
 import io.tolgee.util.Logging
 import io.tolgee.util.UrlSecurity
 import io.tolgee.util.logger
@@ -97,7 +98,7 @@ class CimdHostResolver(
     url: String,
     lane: CimdFetchLane,
   ): List<InetAddress>? {
-    val host = UrlOrigins.parse(url)?.host?.lowercase() ?: return null
+    val host = UrlOrigins.parse(url)?.lowercaseHost ?: return null
     val stuckHosts =
       when (lane) {
         CimdFetchLane.REQUEST -> recentlyStuckHosts

@@ -48,7 +48,7 @@ class OAuth2Resources(
   private fun normalize(resource: String): String {
     val uri = UrlOrigins.parse(resource) ?: return resource
     val scheme = uri.lowercaseScheme ?: return resource
-    val host = uri.host?.lowercase() ?: return resource
+    val host = uri.lowercaseHost ?: return resource
     val port =
       uri.port
         .takeIf { it != -1 && it != UrlOrigins.defaultPort(scheme) }

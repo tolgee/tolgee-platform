@@ -33,7 +33,7 @@ internal object UrlOrigins {
   fun originOf(value: String): String? {
     val parsed = parse(value) ?: return null
     val scheme = parsed.lowercaseScheme ?: return null
-    val host = parsed.host?.lowercase() ?: return null
+    val host = parsed.lowercaseHost ?: return null
     val port = parsed.port.takeIf { it != -1 } ?: defaultPort(scheme) ?: return null
     return "$scheme://$host:$port"
   }
@@ -47,7 +47,9 @@ internal object UrlOrigins {
 }
 
 /**
- * Schemes are case-insensitive, so a check reading [URI.getScheme] directly lets `HTTPS://` past a comparison
- * against `"https"`.
+ * Schemes and hosts are case-insensitive, so a check reading [URI.getScheme] or [URI.getHost] directly lets
+ * `HTTPS://EXAMPLE.COM` past a comparison against `https://example.com`.
  */
 internal val URI.lowercaseScheme: String? get() = scheme?.lowercase()
+
+internal val URI.lowercaseHost: String? get() = host?.lowercase()

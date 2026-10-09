@@ -18,6 +18,7 @@ package io.tolgee.security.oauth2.cimd
 
 import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.UrlOrigins
+import io.tolgee.security.oauth2.lowercaseHost
 import io.tolgee.security.oauth2.lowercaseScheme
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -184,7 +185,7 @@ class CimdMetadataFetcher(
 
   private fun displayOrigin(uri: String): String {
     val parsed = UrlOrigins.parse(uri) ?: return uri
-    val base = "${parsed.lowercaseScheme}://${parsed.host?.lowercase()}"
+    val base = "${parsed.lowercaseScheme}://${parsed.lowercaseHost}"
     if (parsed.port == -1) return base
     return "$base:${parsed.port}"
   }
