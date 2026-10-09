@@ -15,10 +15,7 @@ const CODE_CHALLENGE = '9fa4Kxg-kvmCollzytmpG-4BeAy0obZey5rQMBKBXVc';
 // budget rather than relying on retries — PR runs have none.
 const NAVIGATION_TIMEOUT = 60000;
 
-// A redirect that is not on the user's machine. It must be registered for the extension in BOTH
-// e2e/docker-compose.yml (docker run) and backend/app/src/main/resources/application-e2e.yaml (openE2eDev run);
-// the two have drifted before. Nothing listens there: this is only ever presented on cases that read the consent
-// screen and never approve.
+// Must be registered for the extension in BOTH e2e/docker-compose.yml and application-e2e.yaml.
 const SITE_REDIRECT_URI = 'https://e2e-site.test/callback';
 // The CLI is registered on every instance whose issuer resolves, with no redirect URI configured for it. The port is
 // ignored on a loopback redirect, so this one is accepted without anything listening behind it.
