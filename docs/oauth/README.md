@@ -556,7 +556,8 @@ Three relocations inside the CIMD code were agreed to be right. All three are in
 behaviour change:
 
 - The CIMD client lifecycle lives in `CimdClientLifecycleService`, which owns the `oauth2_client_document_check`
-  table and is called only by the scheduled check and the cleanup job.
+  table. The document check on the refresh path writes through it; the token endpoint, the access token resolver
+  and the cleanup job read through it.
 - The fetch lane is `CimdFetchLane` rather than a boolean, so a call site names the lane and the resolver picks the
   pool, the stuck-host memo and the per-host cap in one place.
 - `CimdHostResolver` (admission and the pinned lookup) and `CimdDocumentFetcher` (the HTTP fetch of an
