@@ -104,6 +104,7 @@ export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle
 export { usePlanLimitBanner } from '../ee/billing/component/PlanLimitBanner';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
+export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';
 
 export const billingMenuItems = billingModule.billingMenuItems as React.FC<
   React.PropsWithChildren<BillingMenuItemsProps>
@@ -504,5 +505,3 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
     return tabs;
   };
 };
-
-export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';

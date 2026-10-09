@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
@@ -9,11 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
-interface OAuthRedirectionHandlerProps {}
-
-export const EmailVerificationHandler: FunctionComponent<
-  React.PropsWithChildren<OAuthRedirectionHandlerProps>
-> = () => {
+export const EmailVerificationHandler = () => {
   const match = useRouteMatch();
   const history = useHistory();
   const { handleAfterLogin, refetchInitialData } = useGlobalActions();
@@ -50,9 +45,5 @@ export const EmailVerificationHandler: FunctionComponent<
     },
   });
 
-  return (
-    <>
-      <FullPageLoading />
-    </>
-  );
+  return <FullPageLoading />;
 };

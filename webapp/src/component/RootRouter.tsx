@@ -50,12 +50,9 @@ export const RootRouter = () => {
   return (
     <>
       <Switch>
-        <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
-          <SlackConnectView />
-        </PrivateRoute>
-        <PrivateRoute exact path={LINKS.SLACK_CONNECTED.template}>
-          <SlackConnectedView />
-        </PrivateRoute>
+        {/* Auth and account callbacks. A survey is pending for exactly the
+            users who land here, so gating these swallows the verification link
+            they just followed. */}
         <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
           <PasswordResetView />
         </Route>
@@ -69,9 +66,6 @@ export const RootRouter = () => {
         </PublicOnlyRoute>
         <Route path={LINKS.LOGIN.template}>
           <LoginRouter />
-        </Route>
-        <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
-          <PublicProjectListView />
         </Route>
         <Route path={LINKS.ACCEPT_INVITATION.template}>
           <AcceptInvitationView />
@@ -94,23 +88,31 @@ export const RootRouter = () => {
         <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
           <PreferredOrganizationRedirect />
         </PrivateRoute>
-        {/* The survey covers the app. Only one of these routes renders at a time,
-            so the gates below never stack; the routes above complete an auth or
-            account action and must stay reachable while a survey is pending. */}
-        <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-          <OnboardingSurveyGate>
-            <UserSettingsRouter />
-          </OnboardingSurveyGate>
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.ADMINISTRATION.template}>
-          <OnboardingSurveyGate>
-            <AdministrationView />
-          </OnboardingSurveyGate>
-        </PrivateRoute>
 
+        {/* A route added to the inner Switch is covered by the survey gate;
+            one added above this point escapes it silently. */}
         <Route>
           <OnboardingSurveyGate>
-            <DashboardRouter />
+            <Switch>
+              <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
+                <SlackConnectView />
+              </PrivateRoute>
+              <PrivateRoute exact path={LINKS.SLACK_CONNECTED.template}>
+                <SlackConnectedView />
+              </PrivateRoute>
+              <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
+                <PublicProjectListView />
+              </Route>
+              <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+                <UserSettingsRouter />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.ADMINISTRATION.template}>
+                <AdministrationView />
+              </PrivateRoute>
+              <Route>
+                <DashboardRouter />
+              </Route>
+            </Switch>
             <routes.Root />
           </OnboardingSurveyGate>
         </Route>

@@ -18,8 +18,6 @@ describe('navigating away from a response the page cannot use', () => {
 
   const respond = (status: number) => ({ status } as Response);
 
-  // ApiSchemaHttpService uppercases the method before fetch sees it, so a check
-  // against the lowercase spelling silently stops redirecting every GET.
   it.each(['get', 'GET', undefined])(
     'redirects away from a forbidden GET sent as %s',
     (method) => {

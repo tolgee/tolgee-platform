@@ -58,7 +58,6 @@ const StyledLogoWrapper = styled(Box)`
 `;
 
 const StyledTolgeeLink = styled(Link)`
-  color: ${({ theme }) => theme.palette.navbar.text};
   text-decoration: inherit;
   outline: 0;
 
@@ -71,12 +70,12 @@ type Props = {
   hideQuickStart?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
-  nonInteractive?: boolean;
+  hideAppNavigation?: boolean;
 };
 
 export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   hideQuickStart,
-  nonInteractive,
+  hideAppNavigation,
   ...announcementProps
 }) => {
   const config = useConfig();
@@ -94,7 +93,7 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
     <Box
       display="flex"
       alignItems="center"
-      sx={{ color: (theme) => theme.palette.navbar.text }}
+      sx={{ color: theme.palette.navbar.text }}
     >
       <StyledLogoWrapper
         pr={1}
@@ -122,7 +121,7 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
       sx={{
         top: topBannerSize,
         transform:
-          !nonInteractive && topBarHidden
+          !hideAppNavigation && topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,
       }}
@@ -130,23 +129,23 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
       <StyledToolbar>
         <Box flexGrow={1} display="flex">
           <Box data-cy="top-bar-logo">
-            {nonInteractive ? (
+            {hideAppNavigation ? (
               logoContent
             ) : (
               <StyledTolgeeLink to={'/'}>{logoContent}</StyledTolgeeLink>
             )}
           </Box>
-          {!nonInteractive && <TopBarAnnouncements {...announcementProps} />}
+          {!hideAppNavigation && <TopBarAnnouncements {...announcementProps} />}
         </Box>
-        {!nonInteractive && user && isEmailVerified && (
+        {!hideAppNavigation && user && isEmailVerified && (
           <NotificationsTopBarButton />
         )}
-        {!nonInteractive && <TopBarTestClockInfo />}
-        {!nonInteractive && quickStartEnabled && !hideQuickStart && (
+        {!hideAppNavigation && <TopBarTestClockInfo />}
+        {!hideAppNavigation && quickStartEnabled && !hideQuickStart && (
           <QuickStartTopBarButton />
         )}
-        {(nonInteractive || !user) && <LanguageMenu />}
-        {!nonInteractive && user && <UserMenu />}
+        {(hideAppNavigation || !user) && <LanguageMenu />}
+        {!hideAppNavigation && user && <UserMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
