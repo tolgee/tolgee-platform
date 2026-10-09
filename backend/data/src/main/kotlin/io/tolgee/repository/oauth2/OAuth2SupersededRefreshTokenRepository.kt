@@ -26,7 +26,7 @@ interface OAuth2SupersededRefreshTokenRepository : JpaRepository<OAuth2Supersede
    * Age is the floor on **every** eviction, with no rank-only escape: rank is a function of how many rotations
    * followed a row, and a thief holding a stolen token produces those in minutes, so any branch that evicts by rank
    * alone is a lever for switching theft detection off. What bounds the table instead is the write side, which stops
-   * recording once a grant is at its ceiling — see `OAuth2AuthorizationService.demoteToSupersededHistory`.
+   * recording once a grant is at its ceiling — see [io.tolgee.security.oauth2.OAuth2AuthorizationService.refresh].
    */
   @Modifying
   @Query(

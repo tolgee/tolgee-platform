@@ -94,7 +94,8 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   /**
    * How many different document-backed clients this user already holds a **live** grant for. A grant is
    * document-backed when it carries the hash of the document it was consented against, which
-   * `startAuthorization` writes for every client that came through the CIMD path and for no other. A withdrawn
+   * [io.tolgee.security.oauth2.OAuth2AuthorizationService.startAuthorization] writes for every client that came
+   * through the CIMD path and for no other. A withdrawn
    * client drops out even while its mark could still be lifted: counting fewer is the safe direction for a cap.
    */
   @Query(
