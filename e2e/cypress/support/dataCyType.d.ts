@@ -1030,6 +1030,7 @@ declare namespace DataCy {
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;
         "user-profile": true;
+        "user-settings-menu-notifications": true;
         "user-switch-item": true;
         "user-switch-search": true;
         "webhook-auto-disabled-label": true;

@@ -27,14 +27,18 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
           link: LINKS.USER_ACCOUNT_SECURITY.build(),
           label: t('user-account-security-title'),
         },
-        {
-          link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
-          label: t('user_menu_notifications'),
-        },
       ]
     : [];
 
   if (isEmailVerified) {
+    // /v2/notification-settings refuses an unverified user, so offering the tab
+    // sends them to the verification page instead of to any settings.
+    menuItems.push({
+      link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
+      label: t('user_menu_notifications'),
+      'data-cy': 'user-settings-menu-notifications',
+    });
+
     menuItems.push({
       link: LINKS.USER_API_KEYS.build(),
       label: t('user_menu_api_keys'),
