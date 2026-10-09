@@ -38,7 +38,6 @@ class CimdClientCache(
   positiveTtlSeconds: Long = POSITIVE_TTL_SECONDS,
   ticker: Ticker = Ticker.systemTicker(),
 ) {
-  // The value type is nullable only so the loader may answer null, which Caffeine then does not store.
   private val cache: Cache<String, CimdClient?> = buildCache(approximateMaxEntries, positiveTtlSeconds, ticker)
 
   /**

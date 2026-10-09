@@ -41,9 +41,8 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   ): OAuth2Grant?
 
   /**
-   * The client of the live grant this refresh token belongs to, without loading or locking the grant: the caller
-   * locks and loads it afterwards, and a managed entity read here would keep the state it had before the document
-   * check ran. It must take no lock, because the check writes to this row from its own transaction.
+   * The client of the live grant this refresh token belongs to. It loads no entity and takes no lock. The document
+   * check writes to this grant's row from its own transaction, and the refresh locks and loads the row afterwards.
    */
   @Query(
     """SELECT g.clientId FROM OAuth2Grant g
