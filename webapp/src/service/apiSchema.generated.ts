@@ -1284,6 +1284,12 @@ export interface paths {
   "/v2/user-preferences": {
     get: operations["get_18"];
   };
+  "/v2/user-preferences/project-storage/{projectId}/{fieldName}": {
+    /** Returns a field the current user stored for the given project, e.g. the last used export settings. Data is `null` when the field is not set. Requires any access to the project. */
+    get: operations["getProjectStorageField"];
+    /** Stores any JSON value under the field for the current user and the given project. Sending `null` removes the field. Other fields and other projects are left untouched. Field name must match `[A-Za-z0-9_.-]{1,64}`, the serialized value must not exceed 16 KB and a project can hold at most 50 fields. Requires any access to the project. */
+    put: operations["setProjectStorageField"];
+  };
   "/v2/user-preferences/set-language/{languageTag}": {
     put: operations["setLanguage"];
   };
@@ -3327,7 +3333,10 @@ export interface components {
         | "project_import_corrupt_archive"
         | "server_busy"
         | "cannot_delete_initial_user"
-        | "suggestions_disabled";
+        | "suggestions_disabled"
+        | "project_storage_invalid_field_name"
+        | "project_storage_value_too_large"
+        | "project_storage_too_many_fields";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7324,7 +7333,10 @@ export interface components {
         | "project_import_corrupt_archive"
         | "server_busy"
         | "cannot_delete_initial_user"
-        | "suggestions_disabled";
+        | "suggestions_disabled"
+        | "project_storage_invalid_field_name"
+        | "project_storage_value_too_large"
+        | "project_storage_too_many_fields";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -29991,6 +30003,105 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Returns a field the current user stored for the given project, e.g. the last used export settings. Data is `null` when the field is not set. Requires any access to the project. */
+  getProjectStorageField: {
+    parameters: {
+      path: {
+        projectId: number;
+        fieldName: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserStorageResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Stores any JSON value under the field for the current user and the given project. Sending `null` removes the field. Other fields and other projects are left untouched. Field name must match `[A-Za-z0-9_.-]{1,64}`, the serialized value must not exceed 16 KB and a project can hold at most 50 fields. Requires any access to the project. */
+  setProjectStorageField: {
+    parameters: {
+      path: {
+        projectId: number;
+        fieldName: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": { [key: string]: unknown };
       };
     };
   };

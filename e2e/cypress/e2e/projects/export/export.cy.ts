@@ -7,6 +7,7 @@ import {
   getFileName,
   visitExport,
 } from '../../../common/export';
+import { expandExportAdvancedSettings } from '../../../compounds/E2ExportAdvancedSettings';
 
 describe('Export Basics', () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
@@ -63,6 +64,7 @@ describe('Export Basics', () => {
   it('the support arrays switch works', { retries: { runMode: 5 } }, () => {
     exportToggleLanguage('English');
     exportSelectFormat('Structured JSON');
+    expandExportAdvancedSettings();
 
     cy.gcy('export-support_arrays-selector').click();
     cy.waitForDom();
