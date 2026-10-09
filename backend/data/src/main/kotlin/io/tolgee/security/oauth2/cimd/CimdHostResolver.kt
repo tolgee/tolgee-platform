@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException
 
 /**
  * Resolves the host of a `client_id` URL to the addresses a fetch is pinned to, through
- * [UrlSecurity.validateUrlAndResolve], and decides who may spend a resolver thread on it.
+ * [UrlSecurity.resolveAndValidateUrl], and decides who may spend a resolver thread on it.
  *
  * `InetAddress.getAllByName` has no timeout and cannot be interrupted: a nameserver that drops queries holds the
  * thread for tens of seconds. That is why the lookup runs on its own thread with a deadline — the resolver thread
@@ -130,7 +130,7 @@ class CimdHostResolver(
       // execute() and not submit(): a submitted task cancelled before it starts never runs, so it would leak a slot.
       pool.execute {
         try {
-          resolution.complete(urlSecurity.validateUrlAndResolve(url, allowLocalAddresses))
+          resolution.complete(urlSecurity.resolveAndValidateUrl(url, allowLocalAddresses))
         } catch (e: Throwable) {
           resolution.completeExceptionally(e)
         } finally {

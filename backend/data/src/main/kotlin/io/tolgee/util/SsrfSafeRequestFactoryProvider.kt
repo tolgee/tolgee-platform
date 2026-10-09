@@ -42,7 +42,7 @@ import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Builds a [ClientHttpRequestFactory] that pins DNS, per [UrlSecurity.validateUrlAndResolve], for every request an
+ * Builds a [ClientHttpRequestFactory] that pins DNS, per [UrlSecurity.resolveAndValidateUrl], for every request an
  * SSRF-sensitive [RestTemplate] makes to a user-configured URL (webhooks, custom LLM endpoints, SSO token endpoints).
  *
  * The pin is defeated by an egress proxy, which resolves the target host itself — the proxy, not this class, is then

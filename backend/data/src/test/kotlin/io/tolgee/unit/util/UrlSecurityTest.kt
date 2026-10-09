@@ -136,21 +136,21 @@ class UrlSecurityTest {
   }
 
   @Test
-  fun `validateUrlAndResolve returns the resolved public addresses`() {
-    val addresses = urlSecurity.validateUrlAndResolve("https://example.com/.well-known/client")
+  fun `resolveAndValidateUrl returns the resolved public addresses`() {
+    val addresses = urlSecurity.resolveAndValidateUrl("https://example.com/.well-known/client")
 
     addresses.assert.isNotEmpty()
   }
 
   @Test
-  fun `validateUrlAndResolve resolves an IP literal to itself`() {
-    val addresses = urlSecurity.validateUrlAndResolve("https://93.184.216.34/x")
+  fun `resolveAndValidateUrl resolves an IP literal to itself`() {
+    val addresses = urlSecurity.resolveAndValidateUrl("https://93.184.216.34/x")
 
     addresses.map { it.hostAddress }.assert.containsExactly("93.184.216.34")
   }
 
   @Test
-  fun `validateUrlAndResolve blocks the same ranges validateUrl does`() {
+  fun `resolveAndValidateUrl blocks the same ranges validateUrl does`() {
     listOf(
       "http://127.0.0.1/admin",
       "https://localhost/admin",
@@ -161,13 +161,13 @@ class UrlSecurityTest {
       "http://",
       "not-a-url",
     ).forEach { url ->
-      assertUrlNotValid { urlSecurity.validateUrlAndResolve(url) }
+      assertUrlNotValid { urlSecurity.resolveAndValidateUrl(url) }
     }
   }
 
   @Test
-  fun `validateUrlAndResolve returns loopback addresses when local addresses are allowed`() {
-    val addresses = urlSecurity.validateUrlAndResolve("http://127.0.0.1/x", allowLocalAddresses = true)
+  fun `resolveAndValidateUrl returns loopback addresses when local addresses are allowed`() {
+    val addresses = urlSecurity.resolveAndValidateUrl("http://127.0.0.1/x", allowLocalAddresses = true)
 
     addresses
       .single()

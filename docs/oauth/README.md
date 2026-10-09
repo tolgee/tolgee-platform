@@ -240,7 +240,7 @@ origin, and a warning, so the user can tell it from a client Tolgee vouches for.
 
 The outbound fetch is the most security-sensitive surface in the feature — it reaches a URL an untrusted
 client chose — so it is https-only, follows no redirects, is size- and deadline-capped, and is **DNS-pinned**:
-`UrlSecurity.validateUrlAndResolve` resolves and vets the host once and the connection is pinned to exactly
+`UrlSecurity.resolveAndValidateUrl` resolves and vets the host once and the connection is pinned to exactly
 those addresses, closing the DNS-rebinding hole a re-resolving client would otherwise open. It never throws,
 so a hostile document cannot 500 `/oauth2/authorize`. Validation is fail-closed: the document's `client_id`
 must equal the fetched URL, the auth method must be `none`, and every `redirect_uri` must be same-origin

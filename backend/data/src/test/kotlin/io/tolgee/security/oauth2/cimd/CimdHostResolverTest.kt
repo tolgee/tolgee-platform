@@ -25,7 +25,7 @@ class CimdHostResolverTest {
     val parked = CountDownLatch(CimdHostResolver.MAX_RESOLUTIONS_PER_HOST)
     val urlSecurity =
       mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
+        on { resolveAndValidateUrl(any(), any()) } doAnswer {
           parked.countDown()
           release.await()
           listOf(loopback())
@@ -43,7 +43,7 @@ class CimdHostResolverTest {
         .isInstanceOf(CimdNoCapacityException::class.java)
       // Another host still gets in: the cap is per host, not a global one this host just spent.
       resolver.resolve("https://other-host.invalid/client", CimdFetchLane.REQUEST)
-      verify(urlSecurity).validateUrlAndResolve(eq("https://other-host.invalid/client"), any())
+      verify(urlSecurity).resolveAndValidateUrl(eq("https://other-host.invalid/client"), any())
     } finally {
       release.countDown()
       pool.shutdown()
@@ -55,7 +55,7 @@ class CimdHostResolverTest {
   fun `a host whose lookup ran past the deadline is not given another thread straight away`() {
     val urlSecurity =
       mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
+        on { resolveAndValidateUrl(any(), any()) } doAnswer {
           Thread.sleep(10_000)
           listOf(loopback())
         }
@@ -66,7 +66,7 @@ class CimdHostResolverTest {
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.REQUEST).assert.isNull()
     resolver.resolve("https://stuck.invalid/other", CimdFetchLane.REQUEST).assert.isNull()
 
-    verify(urlSecurity, times(1)).validateUrlAndResolve(any(), any())
+    verify(urlSecurity, times(1)).resolveAndValidateUrl(any(), any())
     // Both the lookup that ran past the deadline and the one refused because of it: a host whose lookups keep
     // hanging is exactly what an operator alerting on this counter needs to see.
     metrics.oauth2CimdCapacityRefusalsCounter
@@ -79,7 +79,7 @@ class CimdHostResolverTest {
   fun `a host stuck on the request lane is still read for the background check`() {
     val urlSecurity =
       mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
+        on { resolveAndValidateUrl(any(), any()) } doAnswer {
           Thread.sleep(10_000)
           listOf(loopback())
         }
@@ -89,7 +89,7 @@ class CimdHostResolverTest {
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.REQUEST).assert.isNull()
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.GRANT_CHECK).assert.isNull()
 
-    verify(urlSecurity, times(2)).validateUrlAndResolve(any(), any())
+    verify(urlSecurity, times(2)).resolveAndValidateUrl(any(), any())
   }
 
   /**
@@ -103,7 +103,7 @@ class CimdHostResolverTest {
     val parked = CountDownLatch(CimdHostResolver.MAX_CONCURRENT_RESOLUTIONS)
     val urlSecurity =
       mock<UrlSecurity> {
-        on { validateUrlAndResolve(any(), any()) } doAnswer {
+        on { resolveAndValidateUrl(any(), any()) } doAnswer {
           parked.countDown()
           release.await()
           listOf(loopback())
@@ -137,7 +137,7 @@ class CimdHostResolverTest {
 
     resolveUntilAThreadIsFree(resolver)
 
-    verify(urlSecurity).validateUrlAndResolve(eq(VICTIM), any())
+    verify(urlSecurity).resolveAndValidateUrl(eq(VICTIM), any())
   }
 
   /** The parked threads go back to the pool a moment after they are released, not before. */

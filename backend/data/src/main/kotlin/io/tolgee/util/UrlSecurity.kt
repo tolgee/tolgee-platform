@@ -43,12 +43,12 @@ class UrlSecurity(
    * Unlike [validateUrl] this ignores `disable-url-ssrf-protection`: the fetcher relaxing SSRF for dev localhost is a
    * decision it makes itself (passing `allowLocalAddresses`), and it always needs the addresses to pin to.
    */
-  fun validateUrlAndResolve(
+  fun resolveAndValidateUrl(
     url: String,
     allowLocalAddresses: Boolean = false,
   ): List<InetAddress> = resolveAndValidateHost(requireHttpHost(url), allowLocalAddresses)
 
-  /** The host-only half of [validateUrlAndResolve], for a DNS resolver that resolves and vets at connect time. */
+  /** The host-only half of [resolveAndValidateUrl], for a DNS resolver that resolves and vets at connect time. */
   fun resolveAndValidateHost(
     host: String,
     allowLocalAddresses: Boolean = false,
