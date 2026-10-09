@@ -120,7 +120,7 @@ class OAuth2AuthorizationService(
         this.redirectUri = redirectUri
         clientState = params.state
         codeChallenge = validated.codeChallenge
-        requestedScopeValues = validated.scopes
+        requestedScopeValues = validated.knownRequestedScopes
         audience = validated.audience
         clientMetadataHash = client.metadataHash
         this.projectHint = projectHint?.toLongOrNull()
@@ -599,8 +599,6 @@ class OAuth2AuthorizationService(
     if (id == 0L) return false
     return oauth2SupersededRefreshTokenRepository.countByGrantId(id) >= MAX_HISTORY_ROWS_PER_GRANT
   }
-
-  private fun parseScopes(raw: String?): List<String> = OAuth2Scopes.splitScopeString(raw).distinct()
 
   private fun nowPlus(duration: Duration): Date = Date.from(currentDateProvider.date.toInstant().plus(duration))
 

@@ -569,11 +569,6 @@ differently for a token handed to a third party than for a key the user minted f
 apply to project API keys today in exactly the same way, so each fix belongs to both credentials at once and to its
 own PR:
 
-- **Account-level endpoints apply no scope narrowing to any API credential.** `GET /v2/user` returns the account's
-  email and server role, and `GET /v2/notifications` returns notifications across every project, to a token the
-  consent screen presented as "translations.view on project X". Neither resolves a project, so neither the token's
-  scopes nor its project set is consulted. The follow-up is a scope covering account-level reads, or narrowing the
-  non-project `@AllowApiAccess(ANY)` set for scoped credentials generally.
 - **`current-permissions` tells the client what the *user* may do, not only what the token may do.**
   `GET /v2/api-keys/current-permissions` returns `userScopes`, the expanded scope set of the user's own project
   permission, alongside `scopes`, which is narrowed by the credential. A third-party client therefore learns the

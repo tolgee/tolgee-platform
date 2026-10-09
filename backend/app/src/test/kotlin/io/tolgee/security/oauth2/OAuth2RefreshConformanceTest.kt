@@ -3,9 +3,9 @@ package io.tolgee.security.oauth2
 import io.tolgee.Metrics
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import tools.jackson.databind.JsonNode
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
 /**
@@ -213,6 +213,7 @@ class OAuth2RefreshConformanceTest : AbstractOAuth2ConformanceTest() {
       scope = "translations.view keys.view",
       approvedScopes = listOf("translations.view", "keys.view"),
     )
+
   private fun rotate(token: String): String =
     json(driver.refresh(token, CLIENT_ID).andReturn()).get("refresh_token").asString()
 
