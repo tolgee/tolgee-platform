@@ -77,11 +77,10 @@ class PostHogBusinessEventReporter(
     postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)
   }
 
-  // PostHog accepts user information in the $set property.
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
     val userSet = data.userAccountDto?.let { getUserDataMap(it) }
     val instanceSet = data.instanceId?.let { mapOf("instanceId" to it) }
-    val baseSet = userSet ?: instanceSet ?: emptyMap()
+    val baseSet = (userSet ?: emptyMap()) + (instanceSet ?: emptyMap())
 
     val merged = baseSet + (data.personProperties?.filterValueNotNull() ?: emptyMap())
     if (merged.isEmpty()) return getAnonIdMap(data)
