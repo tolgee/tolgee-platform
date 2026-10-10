@@ -1,5 +1,6 @@
 import { StateType } from 'tg.constants/translationStates';
 import { operations, components } from 'tg.service/apiSchema.generated';
+import { TaskType } from 'tg.service/apiSchemaTypes';
 
 export type FiltersType = operations['getTranslations']['parameters']['query'];
 
@@ -8,6 +9,22 @@ export type LanguageModel = components['schemas']['LanguageModel'];
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
+
+export type TaskStatusFilter =
+  | 'IN_OPEN_TASK'
+  | 'NOT_IN_OPEN_TASK'
+  | 'HAS_BEEN_IN_TASK'
+  | 'NEVER_IN_TASK';
+
+export const TASK_STATUSES: TaskStatusFilter[] = [
+  'IN_OPEN_TASK',
+  'NOT_IN_OPEN_TASK',
+  'HAS_BEEN_IN_TASK',
+  'NEVER_IN_TASK',
+];
+
+/** One condition per task type; a type with no entry is unconstrained ("Any"). */
+export type TaskStatusByType = Partial<Record<TaskType, TaskStatusFilter>>;
 
 export type FiltersInternal = {
   filterTag?: string[];
@@ -26,6 +43,7 @@ export type FiltersInternal = {
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
+  filterTaskStatus?: TaskStatusByType;
   filterDeletedByUserId?: number[];
 
   /*
@@ -35,11 +53,12 @@ export type FiltersInternal = {
    *  - string = one language tag
    */
   filterTranslationLanguage?: true | string;
-  // same for suggestions
+  // same for suggestions and tasks
   filterSuggestionLanguage?: true | string;
+  filterTaskLanguage?: true | string;
 
   /*
-   * this one differs from the two above
+   * this one differs from the others above
    *
    * Specifies which languages will be considered when filtering by the QA check type:
    *  - undefined = all languages (default)
@@ -77,4 +96,8 @@ export type FilterActions = {
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
   showDeletedBy?: boolean;
+  /** The view is already scoped to one task, which leaves nothing for the task filter to say. */
+  taskPrefiltered?: boolean;
+  taskCreation?: boolean;
+  pinnedTaskType?: TaskType;
 };
