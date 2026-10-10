@@ -79,6 +79,12 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "Selects only keys without a description")
   var filterHasNoDescription: Boolean? = false
 
+  @field:Parameter(description = "Selects only plural keys")
+  var filterIsPlural: Boolean? = false
+
+  @field:Parameter(description = "Selects only non-plural keys")
+  var filterIsNotPlural: Boolean? = false
+
   @field:Parameter(
     description = """Selects only keys with provided namespaces. 
 

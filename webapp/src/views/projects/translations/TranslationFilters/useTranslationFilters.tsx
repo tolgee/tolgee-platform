@@ -91,6 +91,18 @@ export const useTranslationFilters = ({
           filterHasNoDescription: true,
           filterHasDescription: undefined,
         });
+      case 'filterIsPlural':
+        return setFilters({
+          ...filters,
+          filterIsPlural: true,
+          filterIsNotPlural: undefined,
+        });
+      case 'filterIsNotPlural':
+        return setFilters({
+          ...filters,
+          filterIsNotPlural: true,
+          filterIsPlural: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -188,6 +200,16 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasNoDescription: undefined,
         });
+      case 'filterIsPlural':
+        return setFilters({
+          ...filters,
+          filterIsPlural: undefined,
+        });
+      case 'filterIsNotPlural':
+        return setFilters({
+          ...filters,
+          filterIsNotPlural: undefined,
+        });
       case 'filterHasUnresolvedComments':
         return setFilters({
           ...filters,
@@ -242,6 +264,8 @@ export const useTranslationFilters = ({
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
     filterHasDescription: filters.filterHasDescription,
     filterHasNoDescription: filters.filterHasNoDescription,
+    filterIsPlural: filters.filterIsPlural,
+    filterIsNotPlural: filters.filterIsNotPlural,
     filterDeletedByUserId: filters.filterDeletedByUserId,
   };
 
