@@ -88,6 +88,7 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   const isEmailVerified = useIsEmailVerified();
 
   const theme = useTheme();
+  const appNavigation = !hideAppNavigation;
 
   const logoContent = (
     <Box
@@ -121,7 +122,7 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
       sx={{
         top: topBannerSize,
         transform:
-          !hideAppNavigation && topBarHidden
+          appNavigation && topBarHidden
             ? `translate(0px, -55px)`
             : `translate(0px, 0px)`,
       }}
@@ -129,23 +130,26 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
       <StyledToolbar>
         <Box flexGrow={1} display="flex">
           <Box data-cy="top-bar-logo">
-            {hideAppNavigation ? (
-              logoContent
-            ) : (
+            {appNavigation ? (
               <StyledTolgeeLink to={'/'}>{logoContent}</StyledTolgeeLink>
+            ) : (
+              logoContent
             )}
           </Box>
-          {!hideAppNavigation && <TopBarAnnouncements {...announcementProps} />}
+          {appNavigation && <TopBarAnnouncements {...announcementProps} />}
         </Box>
-        {!hideAppNavigation && user && isEmailVerified && (
-          <NotificationsTopBarButton />
+        {/* Everything the survey's bar must not offer goes in here, so a child
+            added outside it is on the pre-verification survey by default. */}
+        {appNavigation && (
+          <>
+            {user && isEmailVerified && <NotificationsTopBarButton />}
+            <TopBarTestClockInfo />
+            {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
+            {!user && <LanguageMenu />}
+            {user && <UserMenu />}
+          </>
         )}
-        {!hideAppNavigation && <TopBarTestClockInfo />}
-        {!hideAppNavigation && quickStartEnabled && !hideQuickStart && (
-          <QuickStartTopBarButton />
-        )}
-        {(hideAppNavigation || !user) && <LanguageMenu />}
-        {!hideAppNavigation && user && <UserMenu />}
+        {!appNavigation && <LanguageMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
