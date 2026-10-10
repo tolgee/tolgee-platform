@@ -95,8 +95,23 @@ class TmAutoTranslateProviderEeImpl(
     //
     // The `kind` column lets us pick stored entries first when both halves return rows,
     // mirroring how the suggestion panel surfaces a user's manual additions.
+    //
+    // `base_match` must stay MATERIALIZED: inlined, the planner misestimates the writer-project
+    // fan-out and walks every key of every writer project (seconds per lookup on shared TMs)
+    // instead of probing ix_translation_lang_text_md5 once per writer project's base language.
     val sql =
       """
+      with base_match as materialized (
+        select t.key_id, t.language_id
+        from translation_memory_project tmp_w
+        join project p on p.id = tmp_w.project_id
+        join translation t
+          on t.language_id = p.base_language_id
+         and md5(t.text) = md5(:baseText)
+         and t.text = :baseText
+        where tmp_w.translation_memory_id in :tmIds
+          and tmp_w.write_access = true
+      )
       select target_text, kind from (
         select e.target_text, 'stored' as kind, true as reviewed, e.updated_at
         from translation_memory_entry e
@@ -105,6 +120,7 @@ class TmAutoTranslateProviderEeImpl(
           on tmp_recv.translation_memory_id = e.translation_memory_id
          and tmp_recv.project_id = :projectId
         where e.translation_memory_id in :tmIds
+          and md5(e.source_text) = md5(:baseText)
           and e.source_text = :baseText
           and e.target_language_tag = :targetLanguageTag
           and e.target_text <> ''
@@ -113,7 +129,7 @@ class TmAutoTranslateProviderEeImpl(
         union all
 
         select target_t.text as target_text, 'virtual' as kind, target_t.state = 2 as reviewed, target_t.updated_at
-        from translation base_t
+        from base_match base_t
         join key k on k.id = base_t.key_id and k.deleted_at is null
         join project p
           on p.id = k.project_id
@@ -132,8 +148,7 @@ class TmAutoTranslateProviderEeImpl(
           on target_t.key_id = k.id
          and target_t.language_id <> base_t.language_id
         join language target_lang on target_lang.id = target_t.language_id
-        where base_t.text = :baseText
-          and target_lang.tag = :targetLanguageTag
+        where target_lang.tag = :targetLanguageTag
           and target_t.text is not null and target_t.text <> ''
           and (b.id is null or b.is_default = true)
           and (not tm_virt.write_only_reviewed or target_t.state = 2)

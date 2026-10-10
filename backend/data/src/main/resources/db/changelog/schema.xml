@@ -6072,4 +6072,34 @@
             <column name="project_storage_json" type="JSONB"/>
         </addColumn>
     </changeSet>
+    <changeSet author="dkrizan" id="translation-lang-text-md5-index" runInTransaction="false">
+        <comment>
+            Exact-text probe within a language for TM auto-translate lookups. md5(text) because
+            translation texts can exceed the ~2704 B btree row limit.
+
+            An interrupted CONCURRENTLY build leaves an INVALID index of this name that
+            CREATE ... IF NOT EXISTS would skip on retry, so drop any such leftover first.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            BEGIN
+              IF EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'ix_translation_lang_text_md5'
+                  AND NOT i.indisvalid
+              ) THEN
+                DROP INDEX ix_translation_lang_text_md5;
+              END IF;
+            END $$;
+        ]]></sql>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_translation_lang_text_md5
+                ON translation (language_id, md5(text));
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
