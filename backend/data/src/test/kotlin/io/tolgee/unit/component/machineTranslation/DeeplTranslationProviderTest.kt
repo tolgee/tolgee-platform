@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
@@ -46,6 +47,34 @@ class DeeplTranslationProviderTest {
       eq("DE"),
       any(),
       eq("Button label on the settings screen"),
+      eq(false),
+    )
+  }
+
+  @Test
+  fun `enables XML tag handling when the text carries the plural number tag`() {
+    val apiService = mock<DeeplApiService>()
+    val provider = DeeplTranslationProvider(DeeplMachineTranslationProperties(), apiService)
+
+    provider.translate(
+      ProviderTranslateParams(
+        text = "<x id=\"tolgee-number\">1</x> apple",
+        textRaw = "# apple",
+        keyName = "fruit.apple",
+        sourceLanguageTag = "en",
+        targetLanguageTag = "de",
+        isBatch = false,
+        containsNumberTag = true,
+      ),
+    )
+
+    verify(apiService).translate(
+      eq("<x id=\"tolgee-number\">1</x> apple"),
+      eq("EN"),
+      eq("DE"),
+      any(),
+      isNull(),
+      eq(true),
     )
   }
 
