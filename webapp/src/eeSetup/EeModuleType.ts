@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   HierarchyItem,
   LanguageModel,
@@ -90,4 +91,8 @@ export type SubfilterQaChecksProps = {
   value: FiltersInternal;
   actions: FilterActions;
   selectedLanguages: LanguageModel[];
+};
+
+export type OnboardingSurveyGateProps = {
+  children: React.ReactNode;
 };

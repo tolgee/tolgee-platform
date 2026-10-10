@@ -16,7 +16,6 @@ class SignUpProcessor(
   private val invitationCode: String?,
   private val organizationNameSuggestion: String?,
   /** The answer for the "Where did you hear about us? */
-  private val userSource: String?,
 ) {
   private val tolgeeProperties by lazy {
     applicationContext.getBean(TolgeeProperties::class.java)
@@ -60,7 +59,7 @@ class SignUpProcessor(
     invitationCode?.let(invitationService::getInvitation)
   }
   val user by lazy {
-    userAccountService.createUser(entity, userSource)
+    userAccountService.createUser(entity)
   }
 
   fun checkSignUpAllowed() {

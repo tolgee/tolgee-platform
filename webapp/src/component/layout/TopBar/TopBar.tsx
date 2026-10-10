@@ -5,7 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useIsEmailVerified,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 
 import { UserMenu } from '../../security/UserMenu/UserMenu';
@@ -54,7 +58,6 @@ const StyledLogoWrapper = styled(Box)`
 `;
 
 const StyledTolgeeLink = styled(Link)`
-  color: ${({ theme }) => theme.palette.navbar.text};
   text-decoration: inherit;
   outline: 0;
 
@@ -67,10 +70,12 @@ type Props = {
   hideQuickStart?: boolean;
   isAdminAccess?: boolean;
   isDebuggingCustomerAccount?: boolean;
+  hideAppNavigation?: boolean;
 };
 
 export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   hideQuickStart,
+  hideAppNavigation,
   ...announcementProps
 }) => {
   const config = useConfig();
@@ -80,53 +85,71 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
 
   const user = useUser();
+  const isEmailVerified = useIsEmailVerified();
 
   const theme = useTheme();
+  const appNavigation = !hideAppNavigation;
+
+  const logoContent = (
+    <Box
+      display="flex"
+      alignItems="center"
+      sx={{ color: theme.palette.navbar.text }}
+    >
+      <StyledLogoWrapper
+        pr={1}
+        display="flex"
+        justifyItems="center"
+        className="logoWrapper"
+      >
+        <TolgeeLogo
+          fontSize="large"
+          sx={{ color: theme.palette.navbar.logo }}
+        />
+      </StyledLogoWrapper>
+      <StyledLogoTitle variant="h5" color="inherit">
+        {config.appName}
+      </StyledLogoTitle>
+      <TrialChip />
+      {config.showVersion && (
+        <StyledVersion variant="body1">{config.version}</StyledVersion>
+      )}
+    </Box>
+  );
 
   return (
     <StyledAppBar
       sx={{
         top: topBannerSize,
-        transform: topBarHidden
-          ? `translate(0px, -55px)`
-          : `translate(0px, 0px)`,
+        transform:
+          appNavigation && topBarHidden
+            ? `translate(0px, -55px)`
+            : `translate(0px, 0px)`,
       }}
     >
       <StyledToolbar>
         <Box flexGrow={1} display="flex">
-          <Box>
-            <StyledTolgeeLink to={'/'}>
-              <Box display="flex" alignItems="center">
-                <StyledLogoWrapper
-                  pr={1}
-                  display="flex"
-                  justifyItems="center"
-                  className="logoWrapper"
-                >
-                  <TolgeeLogo
-                    fontSize="large"
-                    sx={{ color: theme.palette.navbar.logo }}
-                  />
-                </StyledLogoWrapper>
-                <StyledLogoTitle variant="h5" color="inherit">
-                  {config.appName}
-                </StyledLogoTitle>
-                <TrialChip />
-                {config.showVersion && (
-                  <StyledVersion variant="body1">
-                    {config.version}
-                  </StyledVersion>
-                )}
-              </Box>
-            </StyledTolgeeLink>
+          <Box data-cy="top-bar-logo">
+            {appNavigation ? (
+              <StyledTolgeeLink to={'/'}>{logoContent}</StyledTolgeeLink>
+            ) : (
+              logoContent
+            )}
           </Box>
-          <TopBarAnnouncements {...announcementProps} />
+          {appNavigation && <TopBarAnnouncements {...announcementProps} />}
         </Box>
-        {user && <NotificationsTopBarButton />}
-        <TopBarTestClockInfo />
-        {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
-        {!user && <LanguageMenu />}
-        {user && <UserMenu />}
+        {/* Everything the survey's bar must not offer goes in here, so a child
+            added outside it is on the pre-verification survey by default. */}
+        {appNavigation && (
+          <>
+            {user && isEmailVerified && <NotificationsTopBarButton />}
+            <TopBarTestClockInfo />
+            {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
+            {!user && <LanguageMenu />}
+            {user && <UserMenu />}
+          </>
+        )}
+        {!appNavigation && <LanguageMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );

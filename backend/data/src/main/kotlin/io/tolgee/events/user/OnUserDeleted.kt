@@ -2,7 +2,7 @@ package io.tolgee.events.user
 
 import io.tolgee.model.UserAccount
 
-class OnUserCreated(
+class OnUserDeleted(
   source: Any,
   userAccount: UserAccount,
 ) : UserAccountEvent(source, userAccount)

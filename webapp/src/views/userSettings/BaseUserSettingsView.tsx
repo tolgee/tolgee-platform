@@ -27,14 +27,16 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
           link: LINKS.USER_ACCOUNT_SECURITY.build(),
           label: t('user-account-security-title'),
         },
-        {
-          link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
-          label: t('user_menu_notifications'),
-        },
       ]
     : [];
 
   if (isEmailVerified) {
+    menuItems.push({
+      link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
+      label: t('user_menu_notifications'),
+      'data-cy': 'user-settings-menu-notifications',
+    });
+
     menuItems.push({
       link: LINKS.USER_API_KEYS.build(),
       label: t('user_menu_api_keys'),

@@ -22,6 +22,10 @@ export const handleApiError = (
   init: RequestInit | undefined,
   options: RequestOptions
 ) => {
+  // ApiSchemaHttpService uppercases the method, fetch does not; compare both the same way.
+  const isGetRequest =
+    init?.method === undefined || init.method.toUpperCase() === 'GET';
+
   if (r.status >= 500) {
     const message =
       '500: ' + (resObject?.message || 'Error status code from server');
@@ -75,7 +79,7 @@ export const handleApiError = (
         return;
       }
 
-      if (init?.method === undefined || init?.method === 'get') {
+      if (isGetRequest) {
         globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
       }
 
@@ -91,7 +95,7 @@ export const handleApiError = (
     }
   }
   if (r.status == 404 && !options.disable404Redirect) {
-    if (init?.method === undefined || init?.method === 'get') {
+    if (isGetRequest) {
       globalContext.actions?.redirectTo(LINKS.AFTER_LOGIN.build());
     }
     messageService.error(<T keyName="resource_not_found_message" />);

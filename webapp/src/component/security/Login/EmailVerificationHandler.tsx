@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
@@ -9,11 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 
-interface OAuthRedirectionHandlerProps {}
-
-export const EmailVerificationHandler: FunctionComponent<
-  React.PropsWithChildren<OAuthRedirectionHandlerProps>
-> = () => {
+export const EmailVerificationHandler = () => {
   const match = useRouteMatch();
   const history = useHistory();
   const { handleAfterLogin, refetchInitialData } = useGlobalActions();
@@ -26,20 +21,34 @@ export const EmailVerificationHandler: FunctionComponent<
       code: match.params[PARAMS.VERIFICATION_CODE],
     },
     options: {
-      onSuccess(data) {
+      // the code is one-time-use and gets consumed by the first GET that hits it,
+      // so a remount/refetch of this same query must not re-issue the request
+      staleTime: Infinity,
+      cacheTime: Infinity,
+      async onSuccess(data) {
         messageService.success(<T keyName="email_verified_message" />);
+        // handleAfterLogin puts the token in place; initial data must not be
+        // fetched before that or it comes back as the unauthenticated payload
+        await handleAfterLogin(data);
         refetchInitialData();
-        handleAfterLogin(data);
       },
+      onError: reportVerificationError,
       onSettled() {
         history.replace(LINKS.AFTER_LOGIN.build());
       },
     },
   });
 
-  return (
-    <>
-      <FullPageLoading />
-    </>
-  );
+  return <FullPageLoading />;
+};
+
+export const reportVerificationError = (error: {
+  code?: string;
+  handleError?: () => void;
+}) => {
+  if (error.code === 'email_already_verified') {
+    messageService.success(<T keyName="email_verified_message" />);
+    return;
+  }
+  error.handleError?.();
 };

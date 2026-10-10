@@ -73,7 +73,9 @@ export class ApiSchemaHttpService extends ApiHttpService {
       return await this.fetch(
         urlResult + queryString,
         {
-          method: method as string,
+          // fetch's "normalize a method" step uppercases only GET/POST/PUT/DELETE/HEAD/OPTIONS —
+          // a lowercase PATCH reaches the wire as-is and Spring rejects it.
+          method: (method as string).toUpperCase(),
           body: body || jsonBody,
           headers: jsonBody
             ? {

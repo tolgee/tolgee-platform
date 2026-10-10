@@ -897,6 +897,7 @@ declare namespace DataCy {
         "top-banner": true;
         "top-banner-content": true;
         "top-banner-dismiss-button": true;
+        "top-bar-logo": true;
         "topbap-trial-popover-content": true;
         "topbar-trial-announcement": true;
         "topbar-trial-chip": true;
@@ -1037,6 +1038,7 @@ declare namespace DataCy {
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;
         "user-profile": true;
+        "user-settings-menu-notifications": true;
         "user-switch-item": true;
         "user-switch-search": true;
         "webhook-auto-disabled-label": true;

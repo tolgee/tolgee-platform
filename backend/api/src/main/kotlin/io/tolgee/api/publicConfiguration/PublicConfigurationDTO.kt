@@ -34,7 +34,6 @@ class PublicConfigurationDTO(
   val postHogApiKey: String?,
   val postHogHost: String?,
   val contentDeliveryConfigured: Boolean,
-  val userSourceField: Boolean,
   val plausible: PlausibleDto,
   val slack: SlackDTO,
   val translationsViewLanguagesLimit: Int,

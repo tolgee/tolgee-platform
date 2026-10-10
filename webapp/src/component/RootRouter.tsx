@@ -4,7 +4,7 @@ import { Route, Switch } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { AdministrationView } from 'tg.views/administration/AdministrationView';
-import { routes } from 'tg.ee';
+import { OnboardingSurveyGate, routes } from 'tg.ee';
 
 import { DashboardRouter } from 'tg.component/DashboardRouter';
 import { PrivateRoute } from './common/PrivateRoute';
@@ -48,65 +48,73 @@ const OAuth2ConsentView = React.lazy(
 
 export const RootRouter = () => {
   return (
-    <>
-      <Switch>
-        <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
-          <SlackConnectView />
-        </PrivateRoute>
-        <PrivateRoute exact path={LINKS.SLACK_CONNECTED.template}>
-          <SlackConnectedView />
-        </PrivateRoute>
-        <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-          <PasswordResetView />
-        </Route>
-        <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-          <PasswordResetSetView />
-        </Route>
-        <PublicOnlyRoute exact path={LINKS.SIGN_UP.template}>
-          <RecaptchaProvider>
-            <SignUpView />
-          </RecaptchaProvider>
-        </PublicOnlyRoute>
-        <Route path={LINKS.LOGIN.template}>
-          <LoginRouter />
-        </Route>
-        <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
-          <PublicProjectListView />
-        </Route>
-        <Route path={LINKS.ACCEPT_INVITATION.template}>
-          <AcceptInvitationView />
-        </Route>
-        <PrivateRoute path={LINKS.SSO_MIGRATION.template}>
-          <SsoMigrationView />
-        </PrivateRoute>
-        <PrivateRoute exact path={LINKS.OAUTH2_CONSENT.template}>
-          <OAuth2ConsentView />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.template}>
-          <AcceptAuthProviderChangeView />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.GO_TO_CLOUD_BILLING.template}>
-          <OrganizationBillingRedirect selfHosted={false} />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
-          <OrganizationBillingRedirect selfHosted={true} />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
-          <PreferredOrganizationRedirect />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-          <UserSettingsRouter />
-        </PrivateRoute>
-        <PrivateRoute path={LINKS.ADMINISTRATION.template}>
-          <AdministrationView />
-        </PrivateRoute>
+    <Switch>
+      {/* Auth and account callbacks. A survey is pending for exactly the users
+          who land here, so gating these swallows the verification link they
+          just followed. RootRouter.test.ts pins this list. */}
+      <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
+        <PasswordResetView />
+      </Route>
+      <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
+        <PasswordResetSetView />
+      </Route>
+      <PublicOnlyRoute exact path={LINKS.SIGN_UP.template}>
+        <RecaptchaProvider>
+          <SignUpView />
+        </RecaptchaProvider>
+      </PublicOnlyRoute>
+      <Route path={LINKS.LOGIN.template}>
+        <LoginRouter />
+      </Route>
+      <Route path={LINKS.ACCEPT_INVITATION.template}>
+        <AcceptInvitationView />
+      </Route>
+      <PrivateRoute path={LINKS.SSO_MIGRATION.template}>
+        <SsoMigrationView />
+      </PrivateRoute>
+      <PrivateRoute exact path={LINKS.OAUTH2_CONSENT.template}>
+        <OAuth2ConsentView />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.template}>
+        <AcceptAuthProviderChangeView />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.GO_TO_CLOUD_BILLING.template}>
+        <OrganizationBillingRedirect selfHosted={false} />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.GO_TO_SELF_HOSTED_BILLING.template}>
+        <OrganizationBillingRedirect selfHosted={true} />
+      </PrivateRoute>
+      <PrivateRoute path={LINKS.GO_TO_PREFERRED_ORGANIZATION.template}>
+        <PreferredOrganizationRedirect />
+      </PrivateRoute>
 
-        <Route>
-          <DashboardRouter />
-        </Route>
-      </Switch>
-
-      <routes.Root />
-    </>
+      {/* A route added to the inner Switch is covered by the survey gate; one
+          added above this point escapes it silently. */}
+      <Route>
+        <OnboardingSurveyGate>
+          <Switch>
+            <PrivateRoute exact path={LINKS.SLACK_CONNECT.template}>
+              <SlackConnectView />
+            </PrivateRoute>
+            <PrivateRoute exact path={LINKS.SLACK_CONNECTED.template}>
+              <SlackConnectedView />
+            </PrivateRoute>
+            <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
+              <PublicProjectListView />
+            </Route>
+            <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+              <UserSettingsRouter />
+            </PrivateRoute>
+            <PrivateRoute path={LINKS.ADMINISTRATION.template}>
+              <AdministrationView />
+            </PrivateRoute>
+            <Route>
+              <DashboardRouter />
+            </Route>
+          </Switch>
+          <routes.Root />
+        </OnboardingSurveyGate>
+      </Route>
+    </Switch>
   );
 };
