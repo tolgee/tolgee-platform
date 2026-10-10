@@ -8,9 +8,6 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.ExceptionWithMessage
-import io.tolgee.exceptions.ExpectedUserError
-import io.tolgee.exceptions.LlmRateLimitedException
-import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -22,7 +19,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.Timeouts
 import org.springframework.context.ApplicationContext
 import tools.jackson.module.kotlin.jacksonObjectMapper
-import java.lang.RuntimeException
 import java.util.Date
 import kotlin.collections.sorted
 import kotlin.coroutines.CoroutineContext
@@ -105,7 +101,7 @@ open class ChunkProcessingUtil(
           .joinToString(",")
     }
 
-    logException(exception)
+    ChunkFailureLogger.log(exception)
 
     if (exception is HasSuccessfulTargets) {
       successfulTargets = exception.successfulTargets
@@ -117,31 +113,6 @@ open class ChunkProcessingUtil(
     }
 
     retryFailedExecution(exception)
-  }
-
-  private fun logException(exception: Throwable) {
-    if (exception is MultipleItemsFailedException) {
-      exception.exceptions.forEach { logKnownException(it) }
-      return
-    }
-    logKnownException(exception)
-  }
-
-  private fun logKnownException(exception: Throwable) {
-    if (isExpectedUserError(exception)) {
-      logger.info("Skipping Sentry capture for expected user error: ${exception.message}", exception)
-      return
-    }
-    Sentry.captureException(exception)
-    logger.error(exception.message, exception)
-  }
-
-  private fun isExpectedUserError(exception: Throwable): Boolean {
-    if (knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }) return true
-    if (exception is MultipleItemsFailedException) {
-      return exception.exceptions.isNotEmpty() && exception.exceptions.all { isExpectedUserError(it) }
-    }
-    return ExceptionUtils.getThrowableList(exception).any { it is ExpectedUserError }
   }
 
   private fun retryFailedExecution(exception: Throwable) {
@@ -164,7 +135,7 @@ open class ChunkProcessingUtil(
     )
     if (errorKeyRetries >= maxRetries && maxRetries != -1) {
       logger.debug("Max retries reached for job execution ${execution.id}")
-      if (!isExpectedUserError(exception)) {
+      if (!ChunkFailureLogger.isExpectedUserError(exception)) {
         Sentry.captureException(exception)
       }
       return
@@ -173,13 +144,6 @@ open class ChunkProcessingUtil(
     logger.debug("Retrying job execution ${execution.id} in ${waitTime}ms")
     retryExecution.executeAfter = Date(waitTime + currentDateProvider.date.time)
     execution.retry = true
-  }
-
-  private val knownCauses: List<Class<out RuntimeException>> by lazy {
-    listOf(
-      OutOfCreditsException::class.java,
-      LlmRateLimitedException::class.java,
-    )
   }
 
   private fun getWaitTime(exception: ChunkItemFailedException) =

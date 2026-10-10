@@ -35,7 +35,7 @@ class MtProviderCatching(
         fn(item)
         successfulTargets.add(item)
       } catch (e: OutOfCreditsException) {
-        throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
+        throw FailedDontRequeueException(e.reason.tolgeeMessage, successfulTargets, e)
       } catch (e: LlmContentFilterException) {
         throw FailedDontRequeueException(Message.LLM_CONTENT_FILTER, successfulTargets, e)
       } catch (e: LlmEmptyResponseException) {
@@ -74,6 +74,7 @@ class MtProviderCatching(
       } catch (e: EntityNotFoundException) {
         throw FailedDontRequeueException(Message.TRANSLATION_FAILED, successfulTargets, e)
       } catch (e: Throwable) {
+        e.findUserLimitMessage()?.let { throw FailedDontRequeueException(it, successfulTargets, e) }
         exceptions.add(ChunkItemFailedException(Message.TRANSLATION_FAILED, successfulTargets, e))
       }
     }

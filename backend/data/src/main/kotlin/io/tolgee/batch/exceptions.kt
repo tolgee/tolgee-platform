@@ -2,6 +2,8 @@ package io.tolgee.batch
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.OutOfCreditsException
+import org.apache.commons.lang3.exception.ExceptionUtils
 
 interface HasSuccessfulTargets {
   val successfulTargets: List<Any>
@@ -38,3 +40,20 @@ open class MultipleItemsFailedException(
 open class CannotFinalizeActivityException(
   cause: Throwable,
 ) : ExceptionWithMessage(Message.CANNOT_FINALIZE_ACTIVITY, cause = cause)
+
+private val USER_LIMIT_MESSAGES =
+  setOf(
+    Message.PLAN_TRANSLATION_LIMIT_EXCEEDED,
+    Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED,
+    Message.PLAN_KEY_LIMIT_EXCEEDED,
+    Message.KEYS_SPENDING_LIMIT_EXCEEDED,
+    Message.PLAN_WORD_LIMIT_EXCEEDED,
+    Message.WORDS_SPENDING_LIMIT_EXCEEDED,
+  )
+
+fun Throwable.findUserLimitMessage(): Message? =
+  ExceptionUtils.getThrowableList(this).firstNotNullOfOrNull { throwable ->
+    if (throwable is OutOfCreditsException) return@firstNotNullOfOrNull throwable.reason.tolgeeMessage
+    val code = (throwable as? ExceptionWithMessage)?.let { runCatching { it.code }.getOrNull() }
+    USER_LIMIT_MESSAGES.firstOrNull { it.code == code }
+  }
