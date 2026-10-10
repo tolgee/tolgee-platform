@@ -1,12 +1,16 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.oauth2.OAuth2Grant
+import io.tolgee.repository.oauth2.OAuth2SupersededRefreshTokenRepository
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.beans.factory.annotation.Autowired
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.time.Duration
+import java.time.Instant
 import java.util.Date
 
 /**
@@ -15,6 +19,9 @@ import java.util.Date
  * then reaches lives in [OAuth2AccessTokenFlowTest].
  */
 class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
+  @Autowired
+  private lateinit var supersededRepository: OAuth2SupersededRefreshTokenRepository
+
   @Test
   fun `refresh grant is rejected after the user invalidates their tokens`() {
     val refreshToken = completeFlow(projectId = testData.project.id).get("refresh_token").asString()
@@ -57,6 +64,75 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
   }
 
   @Test
+  fun `a grant at its ceiling makes room from rows past the floor rather than stopping`() {
+    // The second rotation is the first with a predecessor to demote; the first has none.
+    val (grant, refreshToken) = rotatedOnce()
+    val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
+    val ancient = Instant.now().minus(Duration.ofDays(400))
+    val oldest = supersededRepository.saveAll(testData.supersededRefreshTokensFor(grant, ceiling, ancient)).last()
+
+    json(driver.refresh(refreshToken, CLIENT_ID))
+
+    supersededRepository.countByGrantId(grant.id).assert.isEqualTo(ceiling.toLong())
+    supersededRepository.existsById(oldest.id).assert.isFalse()
+  }
+
+  @Test
+  fun `a grant whose whole history is younger than the floor stops recording rather than evicting`() {
+    val (grant, refreshToken) = rotatedOnce()
+    val ceiling = OAuth2AuthorizationService.MAX_HISTORY_ROWS_PER_GRANT
+    val young = supersededRepository.saveAll(testData.supersededRefreshTokensFor(grant, ceiling)).toList()
+
+    val refreshed = json(driver.refresh(refreshToken, CLIENT_ID))
+
+    refreshed
+      .get("access_token")
+      .asString()
+      .assert
+      .isNotBlank()
+    young.forEach { supersededRepository.existsById(it.id).assert.isTrue() }
+    supersededRepository.countByGrantId(grant.id).assert.isEqualTo(ceiling.toLong())
+  }
+
+  /** A grant that has rotated once, so the next rotation has a predecessor to demote into the history. */
+  private fun rotatedOnce(): Pair<OAuth2Grant, String> {
+    val first = completeFlow(projectId = testData.project.id)
+    val second = json(driver.refresh(first.get("refresh_token").asString(), CLIENT_ID))
+    return stored(second.get("access_token").asString()) to second.get("refresh_token").asString()
+  }
+
+  @Test
+  fun `the token response names the project a single-project consent bound`() {
+    val tokens = completeFlow(projectId = testData.project.id)
+
+    tokens
+      .get("project_id")
+      .asLong()
+      .assert
+      .isEqualTo(testData.project.id)
+  }
+
+  @Test
+  fun `the token response names no project when the consent covered all of them`() {
+    val tokens = completeFlow(projectId = null)
+
+    tokens.has("project_id").assert.isFalse()
+  }
+
+  @Test
+  fun `a refresh keeps naming the project the consent bound`() {
+    val refreshToken = completeFlow(projectId = testData.project.id).get("refresh_token").asString()
+
+    val refreshed = json(driver.refresh(refreshToken, CLIENT_ID))
+
+    refreshed
+      .get("project_id")
+      .asLong()
+      .assert
+      .isEqualTo(testData.project.id)
+  }
+
+  @Test
   fun `a scope deselected at consent is absent from the issued token`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view translations.edit")
     val accessToken = tokenFrom(pending, approvedScopes = listOf("translations.view")).get("access_token").asString()
@@ -85,7 +161,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
     echoedState.assert.isEqualTo("client-state").isNotEqualTo(pending.state)
     // Read live rather than hardcoded: another test in the same JVM can change the URL property it derives from.
     assertThat(URLDecoder.decode(driver.queryParam(codeRedirect, "iss")!!, StandardCharsets.UTF_8))
-      .isEqualTo(issuerResolver.issuerUrl)
+      .isEqualTo(oauth2IssuerResolver.issuerUrl)
   }
 
   @Test
@@ -100,7 +176,7 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
           mapOf(
             "response_type" to "code",
             "scope" to "translations.view",
-            "code_challenge" to OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier()),
+            "code_challenge" to OAuth2FlowDriver.randomChallenge(),
             "code_challenge_method" to "S256",
           ),
         ).andReturn()
@@ -232,6 +308,20 @@ class OAuth2AuthorizationCodeFlowTest : AbstractOAuth2FlowTest() {
       .assert
       .contains("translations.view")
       .doesNotContain("translations.edit")
+  }
+
+  @Test
+  fun `consent-info leaves out a scope the server does not know`() {
+    val jwt = jwt()
+    val pending =
+      driver.startPendingConsent(jwt, CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+
+    consentInfo(jwt, pending.state)
+      .get("scopes")
+      .toString()
+      .assert
+      .contains("translations.view")
+      .doesNotContain("not.a.tolgee.scope")
   }
 
   @Test

@@ -110,6 +110,41 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `creates S3 Content Storage with public read`() {
+    doAnswer {
+      mock<S3FileStorage>()
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+
+    performProjectAuthPost(
+      "content-storages",
+      mapOf(
+        "name" to "s3",
+        "s3ContentStorageConfig" to
+          mapOf(
+            "bucketName" to "bucketName",
+            "accessKey" to "accessKey",
+            "secretKey" to "secretKey",
+            "endpoint" to "endpoint",
+            "signingRegion" to "signingRegion",
+            "publicRead" to true,
+          ),
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("s3ContentStorageConfig.publicRead").isBoolean.isTrue
+    }
+    val all =
+      contentStorageService
+        .getAllInProject(project.id, Pageable.ofSize(100))
+        .sortedBy { it.id }
+    all
+      .last()
+      .s3ContentStorageConfig!!
+      .publicRead.assert
+      .isTrue()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `lists storages`() {
     performCreate()
     performProjectAuthGet("content-storages").andAssertThatJson {

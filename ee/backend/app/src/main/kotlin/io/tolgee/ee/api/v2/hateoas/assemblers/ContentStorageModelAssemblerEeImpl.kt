@@ -26,6 +26,7 @@ class ContentStorageModelAssemblerEeImpl :
             endpoint = it.endpoint,
             signingRegion = it.signingRegion,
             path = it.path ?: "",
+            publicRead = it.publicRead,
           )
         },
       azureContentStorageConfig =

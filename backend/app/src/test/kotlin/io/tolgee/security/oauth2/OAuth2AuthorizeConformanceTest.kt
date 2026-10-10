@@ -78,7 +78,7 @@ class OAuth2AuthorizeConformanceTest : AbstractOAuth2ConformanceTest() {
             "response_type" to "code",
             "scope" to "translations.view",
             "state" to "client-state",
-            "code_challenge" to OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier()),
+            "code_challenge" to OAuth2FlowDriver.randomChallenge(),
             "code_challenge_method" to "S256",
             "project" to "7",
           ),
@@ -117,8 +117,25 @@ class OAuth2AuthorizeConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
-  fun `opening an authorization with a scope the server does not support yields invalid_scope`() {
+  fun `an authorization asking only for unknown scopes yields invalid_scope`() {
     errorRedirect(mapOf("scope" to "not.a.tolgee.scope")).assert.contains("error=invalid_scope")
+  }
+
+  @Test
+  fun `a scope this server does not know is dropped and the rest of the request stands`() {
+    val mixed = validParams() + ("scope" to "translations.view not.a.tolgee.scope")
+
+    driver
+      .authorize(CLIENT_ID, REDIRECT, mixed)
+      .andReturn()
+      .response
+      .getHeader("Location")!!
+      .assert
+      .contains(OAuth2Constants.CONSENT_PAGE_PATH)
+
+    val pending =
+      driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+    driver.consentRedirect(pending).assert.contains("code=")
   }
 
   @Test

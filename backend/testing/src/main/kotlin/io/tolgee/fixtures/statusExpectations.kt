@@ -33,6 +33,9 @@ val ResultActions.andIsCreated: ResultActions
 val ResultActions.andIsBadRequest: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isBadRequest) }
 
+val ResultActions.andIsConflict: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isConflict) }
+
 val ResultActions.andIsNotModified: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isNotModified) }
 

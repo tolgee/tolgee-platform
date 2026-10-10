@@ -31,6 +31,10 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  // ==========================================================================
+  // OAuth2 Metrics
+  // ==========================================================================
+
   /**
    * Requests rejected without consuming the bucket because of contention on a single rate limit
    * bucket. Reasons: "concurrency_cap" (too many concurrent requests for the bucket),
@@ -42,6 +46,20 @@ class Metrics(
       .description("Number of requests rejected due to contention on a single rate limit bucket")
       .tag("reason", reason)
       .register(meterRegistry)
+
+  val oauth2RefreshGraceHitsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.oauth2.refresh.grace_hits")
+      .description("Refresh tokens replayed within the grace window, where the grant was kept instead of revoked")
+      .register(meterRegistry)
+  }
+
+  val oauth2CimdCapacityRefusalsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.oauth2.cimd.capacity_refusals")
+      .description("CIMD resolutions refused for lack of capacity, so no metadata document was read")
+      .register(meterRegistry)
+  }
 
   // ==========================================================================
   // Batch Job Metrics

@@ -54,8 +54,6 @@ class OAuth2IssuerResolverTest {
 
   @Test
   fun `refuses an issuer with a path, naming the property to fix`() {
-    // RFC 8414 §3 would put the metadata document at a path Tolgee does not serve, so this must fail loudly at the
-    // first read rather than dead-ending the flow in the browser.
     assertThatThrownBy { resolverFor("https://tolgee.example.com/tolgee", null).issuerUrl }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessageContaining("tolgee.back-end-url")
@@ -66,7 +64,6 @@ class OAuth2IssuerResolverTest {
 
   @Test
   fun `refuses an issuer carrying a query or a fragment`() {
-    // RFC 8414 §2: the issuer identifier has no query or fragment components.
     assertThatThrownBy { resolverFor("https://tolgee.example.com?tenant=a", null).issuerUrl }
       .isInstanceOf(IllegalStateException::class.java)
     assertThatThrownBy { resolverFor("https://tolgee.example.com#f", null).issuerUrl }
@@ -79,14 +76,51 @@ class OAuth2IssuerResolverTest {
     resolverFor("https://tolgee.example.com", null).issuerUrl.assert.isEqualTo("https://tolgee.example.com")
   }
 
+  @Test
+  fun `a malformed issuer does not stop an instance booting - it only turns the OAuth server off`() {
+    val resolver = resolverFor("https://tolgee.example.com/tolgee", null)
+
+    assertThatCode { resolver.warnOnUnusableIssuer() }.doesNotThrowAnyException()
+    resolver.isConfigured.assert.isFalse()
+  }
+
+  @Test
+  fun `an unset issuer does not fail startup - the server is simply off`() {
+    assertThatCode { resolverFor(null, null).warnOnUnusableIssuer() }.doesNotThrowAnyException()
+  }
+
+  @Test
+  fun `isConfigured reflects a usable issuer`() {
+    resolverFor("https://tolgee.example.com", null).isConfigured.assert.isTrue()
+    resolverFor(null, "https://front.example.com").isConfigured.assert.isTrue()
+    resolverFor(null, null).isConfigured.assert.isFalse()
+    resolverFor("https://tolgee.example.com/path", null).isConfigured.assert.isFalse()
+  }
+
+  @Test
+  fun `isConfigured says exactly whether the issuer can be read`() {
+    // OAuth2ClientRegistry seeds the CLI client on isConfigured alone, and skips the startup check that a configured
+    // client gets. That is only safe while these two cannot disagree: a resolver that claimed to be configured while
+    // issuerUrl throws would register a client on an instance whose OAuth endpoints cannot answer.
+    listOf(
+      resolverFor("https://tolgee.example.com", null),
+      resolverFor(null, "https://front.example.com"),
+      resolverFor(null, null),
+      resolverFor("", null),
+      resolverFor("https://tolgee.example.com/path", null),
+      resolverFor(null, "https://front.example.com/x?q=1"),
+    ).forEach { resolver ->
+      resolver.isConfigured.assert
+        .isEqualTo(runCatching { resolver.issuerUrl }.isSuccess)
+    }
+  }
+
   private fun resolverFor(
     backEnd: String?,
     frontEnd: String?,
-    clients: List<OAuth2Client> = listOf(),
   ) = OAuth2IssuerResolver(
     BackendUrlProvider(propertiesWith(backEnd, frontEnd)),
     FrontendUrlProvider(propertiesWith(backEnd, frontEnd)),
-    mock<OAuth2ClientRegistry> { on { isEnabled } doReturn clients.isNotEmpty() },
   )
 
   private fun propertiesWith(
@@ -95,29 +129,5 @@ class OAuth2IssuerResolverTest {
   ) = mock<TolgeeProperties> {
     on { backEndUrl } doReturn backEnd
     on { frontEndUrl } doReturn frontEnd
-  }
-
-  private fun anyClient() =
-    listOf(OAuth2Client(clientId = "c", name = "c", redirectUris = listOf("https://ext.example/cb")))
-
-  @Test
-  fun `an unusable issuer fails startup once a client is configured`() {
-    assertThatThrownBy {
-      resolverFor("https://tolgee.example.com/tolgee", null, anyClient()).requireConfiguredIssuer()
-    }.isInstanceOf(IllegalStateException::class.java)
-  }
-
-  @Test
-  fun `an unset issuer fails startup once a client is configured`() {
-    assertThatThrownBy {
-      resolverFor(null, null, anyClient()).requireConfiguredIssuer()
-    }.isInstanceOf(IllegalStateException::class.java)
-  }
-
-  @Test
-  fun `an unusable issuer does not fail startup for a deployment that issues no tokens`() {
-    assertThatCode {
-      resolverFor("https://tolgee.example.com/tolgee", null).requireConfiguredIssuer()
-    }.doesNotThrowAnyException()
   }
 }

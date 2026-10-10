@@ -25,6 +25,7 @@ class OAuth2Error(
     const val INVALID_CLIENT = "invalid_client"
     const val INVALID_GRANT = "invalid_grant"
     const val INVALID_SCOPE = "invalid_scope"
+    const val INVALID_TARGET = "invalid_target"
     const val ACCESS_DENIED = "access_denied"
     const val UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type"
     const val UNSUPPORTED_RESPONSE_TYPE = "unsupported_response_type"

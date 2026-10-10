@@ -5,4 +5,5 @@ class S3ContentStorageConfigModel(
   var endpoint: String = "",
   var signingRegion: String = "",
   var path: String = "",
+  var publicRead: Boolean = false,
 )

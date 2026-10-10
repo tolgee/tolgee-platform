@@ -41,6 +41,7 @@ class S3ContentStorageConfigProcessor : ContentStorageConfigProcessor<S3ContentS
     entity.signingRegion = s3dto.signingRegion
     entity.endpoint = s3dto.endpoint
     entity.path = s3dto.path
+    entity.publicRead = s3dto.publicRead
     storageEntity.s3ContentStorageConfig = entity
     em.persist(entity)
     return entity
