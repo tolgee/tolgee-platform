@@ -32,7 +32,9 @@ export const PhoneNumberField = forwardRef<PhoneNumberFieldHandle, Props>(
     const [invalid, setInvalid] = useState(false);
     const defaultCountry = useMemo(detectCountry, []);
 
-    const isEmpty = !info?.nationalNumber;
+    // `info` stays null until the field is touched, so emptiness has to come
+    // from the value while a prefilled number is still untouched.
+    const isEmpty = info ? !info.nationalNumber : !value;
 
     useImperativeHandle(ref, () => ({
       read: () => {
@@ -43,7 +45,7 @@ export const PhoneNumberField = forwardRef<PhoneNumberFieldHandle, Props>(
           setInvalid(true);
           return null;
         }
-        return info?.numberValue ?? '';
+        return info?.numberValue ?? value;
       },
     }));
 
