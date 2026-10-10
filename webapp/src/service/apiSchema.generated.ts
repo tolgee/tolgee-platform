@@ -5925,7 +5925,6 @@ export interface components {
       /** Format: int32 */
       translationsViewLanguagesLimit: number;
       userCanCreateOrganizations: boolean;
-      userSourceField: boolean;
       version: string;
     };
     PublicInvitationModel: {
@@ -6605,8 +6604,6 @@ export interface components {
       organizationName?: string;
       password: string;
       recaptchaToken?: string;
-      /** @description Where did the user find us? */
-      userSource?: string;
     };
     SimpleGlossaryModel: {
       /**

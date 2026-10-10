@@ -194,9 +194,8 @@ class UserAccountService(
     /**
      * The answer for the "Where did you hear about us?"
      */
-    userSource: String? = null,
   ): UserAccount {
-    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount

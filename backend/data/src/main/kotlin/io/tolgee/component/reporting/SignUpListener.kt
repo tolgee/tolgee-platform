@@ -14,13 +14,10 @@ class SignUpListener(
 ) {
   @TransactionalEventListener(OnUserCreated::class)
   fun listen(onUserCreated: OnUserCreated) {
-    publishBusinessEvent(onUserCreated.userAccount, onUserCreated.userSource)
+    publishBusinessEvent(onUserCreated.userAccount)
   }
 
-  private fun publishBusinessEvent(
-    user: UserAccount,
-    userSource: String?,
-  ) {
+  private fun publishBusinessEvent(user: UserAccount) {
     val organization = organizationService.findPreferred(userAccountId = user.id)
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(
@@ -29,8 +26,6 @@ class SignUpListener(
         organizationName = organization?.name,
         userAccountId = user.id,
         userAccountDto = UserAccountDto.fromEntity(user),
-        data = mapOf(PersonProperties.USER_SOURCE to userSource),
-        personProperties = mapOf(PersonProperties.USER_SOURCE to userSource),
       ),
     )
   }
