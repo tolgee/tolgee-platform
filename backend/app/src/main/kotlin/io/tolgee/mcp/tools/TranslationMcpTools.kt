@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
@@ -26,7 +26,7 @@ class TranslationMcpTools(
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
   private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "get_translations",
       "Get translations for a specific key in a Tolgee project. Returns translations in all project languages, or only the specified languages if provided.",

@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.mcp.McpRequestContext
@@ -23,7 +23,7 @@ class LanguageMcpTools(
   private val listLanguagesSpec = buildSpec(V2LanguagesController::getAll, "list_languages")
   private val createLanguageSpec = buildSpec(V2LanguagesController::createLanguage, "create_language")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_languages",
       "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
