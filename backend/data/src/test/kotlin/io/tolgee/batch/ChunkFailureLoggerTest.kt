@@ -75,9 +75,9 @@ class ChunkFailureLoggerTest {
   }
 
   @Test
-  fun `logs items failing for the same reason once`() {
+  fun `logs items failing with the same exception class and different messages once`() {
     val items =
-      (1..5).map { ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("boom")) }
+      (1..5).map { ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("boom $it")) }
 
     ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
 
@@ -92,19 +92,6 @@ class ChunkFailureLoggerTest {
       listOf(
         ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("boom")),
         ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalArgumentException("bang")),
-      )
-
-    ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))
-
-    appender.list.assert.hasSize(2)
-  }
-
-  @Test
-  fun `logs items failing with different messages of the same class separately`() {
-    val items =
-      listOf(
-        ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("invalid configuration")),
-        ChunkItemFailedException(Message.TRANSLATION_FAILED, cause = IllegalStateException("provider unavailable")),
       )
 
     ChunkFailureLogger.log(MultipleItemsFailedException(items, listOf()))

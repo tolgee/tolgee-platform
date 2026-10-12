@@ -43,6 +43,8 @@ open class CannotFinalizeActivityException(
 
 private val USER_LIMIT_MESSAGES =
   setOf(
+    Message.OUT_OF_CREDITS,
+    Message.CREDIT_SPENDING_LIMIT_EXCEEDED,
     Message.PLAN_TRANSLATION_LIMIT_EXCEEDED,
     Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED,
     Message.PLAN_KEY_LIMIT_EXCEEDED,

@@ -7,6 +7,7 @@ import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanLimitExceededWordsException
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.catchThrowable
@@ -121,6 +122,25 @@ class MtProviderCatchingTest {
   fun `reports the spending limit reason when credit spending limit is exceeded`() {
     assertStopsWithoutRequeue(Message.CREDIT_SPENDING_LIMIT_EXCEEDED) {
       OutOfCreditsException(OutOfCreditsException.Reason.SPENDING_LIMIT_EXCEEDED)
+    }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when out of credits carries only the code`() {
+    assertStopsWithoutRequeue(Message.OUT_OF_CREDITS) { BadRequestException(Message.OUT_OF_CREDITS) }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when credit spending limit carries only the code`() {
+    assertStopsWithoutRequeue(Message.CREDIT_SPENDING_LIMIT_EXCEEDED) {
+      BadRequestException(Message.CREDIT_SPENDING_LIMIT_EXCEEDED)
+    }
+  }
+
+  @Test
+  fun `stops iteration and does not requeue when translation limit is exceeded`() {
+    assertStopsWithoutRequeue(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED) {
+      PlanLimitExceededStringsException(1001, 1000)
     }
   }
 

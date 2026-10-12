@@ -10,9 +10,6 @@ import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.LlmRateLimitedException
-import io.tolgee.exceptions.OutOfCreditsException
-import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
-import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import jakarta.persistence.EntityNotFoundException
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -34,8 +31,6 @@ class MtProviderCatching(
       try {
         fn(item)
         successfulTargets.add(item)
-      } catch (e: OutOfCreditsException) {
-        throw FailedDontRequeueException(e.reason.tolgeeMessage, successfulTargets, e)
       } catch (e: LlmContentFilterException) {
         throw FailedDontRequeueException(Message.LLM_CONTENT_FILTER, successfulTargets, e)
       } catch (e: LlmEmptyResponseException) {
@@ -63,10 +58,6 @@ class MtProviderCatching(
             maxRetries = -1,
           ),
         )
-      } catch (e: PlanLimitExceededStringsException) {
-        throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
-      } catch (e: PlanSpendingLimitExceededStringsException) {
-        throw FailedDontRequeueException(Message.TRANSLATION_SPENDING_LIMIT_EXCEEDED, successfulTargets, e)
       } catch (e: FormalityNotSupportedException) {
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
       } catch (e: LanguageNotSupportedException) {

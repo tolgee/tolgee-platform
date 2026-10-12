@@ -4,17 +4,12 @@ import io.sentry.Sentry
 import io.tolgee.exceptions.ExceptionWithCode
 import io.tolgee.exceptions.ExpectedUserError
 import io.tolgee.exceptions.LlmRateLimitedException
-import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 object ChunkFailureLogger : Logging {
-  private val knownCauses: List<Class<out RuntimeException>> =
-    listOf(
-      OutOfCreditsException::class.java,
-      LlmRateLimitedException::class.java,
-    )
+  private val knownCauses: List<Class<out RuntimeException>> = listOf(LlmRateLimitedException::class.java)
 
   fun log(exception: Throwable) {
     if (exception is MultipleItemsFailedException) {
@@ -47,7 +42,7 @@ object ChunkFailureLogger : Logging {
   private fun failureReason(exception: ChunkItemFailedException): List<Any?> {
     val rootCause = ExceptionUtils.getRootCause(exception)
     val rootCauseCode = (rootCause as? ExceptionWithCode)?.let { runCatching { it.code }.getOrNull() }
-    return listOf(exception.code, rootCause?.javaClass, rootCauseCode ?: rootCause?.message)
+    return listOf(exception.code, rootCause?.javaClass, rootCauseCode)
   }
 
   private fun describeCauseChain(exception: Throwable): String =
