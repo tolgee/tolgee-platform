@@ -171,6 +171,25 @@ class QaE2eTestData : BaseTestData() {
           }
         }
       }
+
+      // key_plural_issue: issue positions index the full ICU string, not the "one" variant
+      addKey {
+        name = "key_plural_issue"
+        isPlural = true
+      }.build {
+        addTranslation("en", "{value, plural, one {# item.} other {# items.}}")
+        addTranslation("fr", "{value, plural, one {# élément} other {# éléments.}}").build {
+          addQaIssue {
+            type = QaCheckType.PUNCTUATION_MISMATCH
+            message = QaIssueMessage.QA_PUNCTUATION_ADD
+            state = QaIssueState.OPEN
+            positionStart = 30
+            positionEnd = 30
+            replacement = "."
+            pluralVariant = "one"
+          }
+        }
+      }
     }
 
     // Mark all translations as not stale — the seeded QA issues represent the final

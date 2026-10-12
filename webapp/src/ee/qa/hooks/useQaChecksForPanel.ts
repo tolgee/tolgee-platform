@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { getTolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
+import { useMemo, useRef } from 'react';
+import {
+  getTolgeeFormat,
+  TolgeeFormat,
+  tolgeeFormatGenerateIcu,
+} from '@tginternal/editor';
 import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { useQaCheckPreview } from './useQaCheckPreview';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 import { useProject } from 'tg.hooks/useProject';
 import { offsetQaIssue } from 'tg.fixtures/qaUtils';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 export const useQaChecksForPanel = (data: PanelContentData) => {
   const { keyData, language, editingText, activeVariant, isModified } = data;
@@ -51,28 +56,56 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   });
 
   // Adjust positions from full-ICU to variant-relative for the panel
-  const adjustedIssues = useMemo(() => {
-    return result?.issues?.map((issue) => {
-      const offset =
-        variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule];
-      return offsetQaIssue(issue, offset ?? 0);
-    });
-  }, [result.issues, variantOffsets]);
-
-  const updateIssueState = useCallback(
-    (issue: QaPreviewIssue, newState: QaPreviewIssue['state']) => {
-      // Reverse position adjustment
-      const offset =
-        variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule];
-      result.updateIssueState(offsetQaIssue(issue, -(offset ?? 0)), newState);
-    },
-    [result.updateIssueState, variantOffsets]
+  const adjustedIssues = useMemo(
+    () =>
+      result.issues.map((issue) =>
+        offsetQaIssue(issue, variantOffsetOf(variantOffsets, issue))
+      ),
+    [result.issues, variantOffsets]
   );
+
+  const ignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
+    method: 'post',
+  });
+
+  const unignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
+    method: 'delete',
+  });
+
+  const toggleIgnore = (issue: QaPreviewIssue) => {
+    const translationId = translation?.id;
+    if (translationId == null) return;
+
+    const fullTextIssue = offsetQaIssue(
+      issue,
+      -variantOffsetOf(variantOffsets, issue)
+    );
+    const isIgnored = issue.state === 'IGNORED';
+    const newState = isIgnored ? 'OPEN' : 'IGNORED';
+    const mutation = isIgnored ? unignoreMutation : ignoreMutation;
+    const { state: _, ...issueRequest } = fullTextIssue;
+    mutation.mutate(
+      {
+        path: { projectId: project.id, translationId },
+        content: { 'application/json': issueRequest },
+      },
+      {
+        onSuccess: () => result.updateIssueState(fullTextIssue, newState),
+      }
+    );
+  };
 
   return {
     issues: adjustedIssues,
     isLoading: result.isLoading,
     isDisconnected: result.isDisconnected,
-    updateIssueState,
+    toggleIgnore,
   };
 };
+
+const variantOffsetOf = (
+  variantOffsets: TolgeeFormat['variantOffsets'],
+  issue: QaPreviewIssue
+) => variantOffsets?.[issue.pluralVariant as Intl.LDMLPluralRule] ?? 0;
