@@ -1,3 +1,10 @@
+# [3.234.0](https://github.com/tolgee/tolgee-platform/compare/v3.233.0...v3.234.0) (2026-10-13)
+
+
+### Features
+
+* platform support for the post-signup onboarding survey ([#3909](https://github.com/tolgee/tolgee-platform/issues/3909)) ([04cafed](https://github.com/tolgee/tolgee-platform/commit/04cafed778130966180918c39a4c2a6fe6f83c80)), closes [tolgee/billing#314](https://github.com/tolgee/billing/issues/314)
+
 # [3.233.0](https://github.com/tolgee/tolgee-platform/compare/v3.232.0...v3.233.0) (2026-10-13)
 
 
