@@ -107,7 +107,7 @@ class TmAutoTranslateProviderEeImpl(
         join project p on p.id = tmp_w.project_id
         join translation t
           on t.language_id = p.base_language_id
-         and md5(t.text) = md5(:baseText)
+         and cast(md5(t.text) as uuid) = cast(md5(:baseText) as uuid)
          and t.text = :baseText
         where tmp_w.translation_memory_id in :tmIds
           and tmp_w.write_access = true

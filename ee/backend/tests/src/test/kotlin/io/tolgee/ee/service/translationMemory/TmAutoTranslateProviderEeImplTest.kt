@@ -147,7 +147,7 @@ class TmAutoTranslateProviderEeImplTest : AuthorizedControllerTest() {
         .resultList
 
     assertThat(indexDefs).anySatisfy {
-      assertThat(it as String).endsWith("USING btree (language_id, md5(text))")
+      assertThat(it as String).endsWith("USING btree (language_id, ((md5(text))::uuid))")
     }
   }
 
