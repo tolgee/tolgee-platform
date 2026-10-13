@@ -32,7 +32,7 @@ export const EmailVerificationHandler = () => {
         await handleAfterLogin(data);
         refetchInitialData();
       },
-      onError: reportVerificationError,
+      onError: handleVerificationError,
       onSettled() {
         history.replace(LINKS.AFTER_LOGIN.build());
       },
@@ -48,7 +48,7 @@ const EmailVerifiedMessage = () => (
   </span>
 );
 
-export const reportVerificationError = (error: {
+export const handleVerificationError = (error: {
   code?: string;
   handleError?: () => void;
 }) => {
