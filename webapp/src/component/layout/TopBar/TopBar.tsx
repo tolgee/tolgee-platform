@@ -145,11 +145,10 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
             {user && isEmailVerified && <NotificationsTopBarButton />}
             <TopBarTestClockInfo />
             {quickStartEnabled && !hideQuickStart && <QuickStartTopBarButton />}
-            {!user && <LanguageMenu />}
             {user && <UserMenu />}
           </>
         )}
-        {!appNavigation && <LanguageMenu />}
+        {(!user || !appNavigation) && <LanguageMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );

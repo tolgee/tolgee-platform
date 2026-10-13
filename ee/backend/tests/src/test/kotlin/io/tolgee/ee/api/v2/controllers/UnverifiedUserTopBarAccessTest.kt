@@ -17,8 +17,6 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
 
   private lateinit var testData: BaseTestData
 
-  // UserAccount.emailVerification is the inverse side, so the row cannot be
-  // deleted directly without a TransientPropertyValueException on commit.
   private var pendingVerificationCode: String? = null
   private var originalFrontEndUrl: String? = null
 
@@ -40,6 +38,8 @@ class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
+    // UserAccount.emailVerification is the inverse side, so the row cannot be
+    // deleted directly without a TransientPropertyValueException on commit.
     pendingVerificationCode?.let { code ->
       executeInNewTransaction {
         emailVerificationService.verify(testData.user.id, code)

@@ -47,7 +47,7 @@ export const PhoneNumberField = forwardRef<PhoneNumberFieldHandle, Props>(
         {label && (
           <Box
             fontSize={(theme) => theme.typography.body2.fontSize}
-            fontWeight={500}
+            fontWeight={(theme) => theme.typography.fontWeightMedium}
           >
             {label}
           </Box>

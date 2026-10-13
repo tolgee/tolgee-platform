@@ -211,6 +211,7 @@ declare namespace DataCy {
         "edit-pat-dialog-content": true;
         "edit-pat-dialog-description-input": true;
         "edit-pat-dialog-title": true;
+        "email-verified-message": true;
         "empty-scope-dialog": true;
         "error-message": true;
         "expiration-date-field": true;

@@ -26,7 +26,7 @@ export const EmailVerificationHandler = () => {
       staleTime: Infinity,
       cacheTime: Infinity,
       async onSuccess(data) {
-        messageService.success(<T keyName="email_verified_message" />);
+        messageService.success(<EmailVerifiedMessage />);
         // handleAfterLogin puts the token in place; initial data must not be
         // fetched before that or it comes back as the unauthenticated payload
         await handleAfterLogin(data);
@@ -42,12 +42,18 @@ export const EmailVerificationHandler = () => {
   return <FullPageLoading />;
 };
 
+const EmailVerifiedMessage = () => (
+  <span data-cy="email-verified-message">
+    <T keyName="email_verified_message" />
+  </span>
+);
+
 export const reportVerificationError = (error: {
   code?: string;
   handleError?: () => void;
 }) => {
   if (error.code === 'email_already_verified') {
-    messageService.success(<T keyName="email_verified_message" />);
+    messageService.success(<EmailVerifiedMessage />);
     return;
   }
   error.handleError?.();

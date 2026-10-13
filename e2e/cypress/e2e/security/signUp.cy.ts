@@ -164,10 +164,10 @@ context('Sign up', () => {
     cy.wait(1000);
     getParsedEmailVerification().then((r) => {
       cy.visit(r.verifyEmailLink);
-      assertMessage('Email was verified');
+      gcy('email-verified-message').should('be.visible');
 
       cy.visit(r.verifyEmailLink);
-      assertMessage('Email was verified');
+      gcy('email-verified-message').should('be.visible');
     });
   });
 

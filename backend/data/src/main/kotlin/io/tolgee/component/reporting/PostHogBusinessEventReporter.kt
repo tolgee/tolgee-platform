@@ -80,9 +80,9 @@ class PostHogBusinessEventReporter(
   private fun getIdentificationMapForPostHog(data: OnBusinessEventToCaptureEvent): Map<String, Any?> {
     val userSet = data.userAccountDto?.let { getUserDataMap(it) }
     val instanceSet = data.instanceId?.let { mapOf("instanceId" to it) }
-    val baseSet = (userSet ?: emptyMap()) + (instanceSet ?: emptyMap())
+    val baseSet = userSet.orEmpty() + instanceSet.orEmpty()
 
-    val merged = baseSet + (data.personProperties?.filterValueNotNull() ?: emptyMap())
+    val merged = baseSet + data.personProperties?.filterValueNotNull().orEmpty()
     if (merged.isEmpty()) return getAnonIdMap(data)
 
     return mapOf("${'$'}set" to merged) + getAnonIdMap(data)
