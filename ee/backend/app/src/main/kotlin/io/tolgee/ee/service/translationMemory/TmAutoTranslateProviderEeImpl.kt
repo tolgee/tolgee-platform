@@ -102,7 +102,7 @@ class TmAutoTranslateProviderEeImpl(
     val sql =
       """
       with base_match as materialized (
-        select t.key_id, t.language_id
+        select distinct t.key_id, t.language_id
         from translation_memory_project tmp_w
         join project p on p.id = tmp_w.project_id
         join translation t
