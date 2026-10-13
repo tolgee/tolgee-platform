@@ -69,6 +69,11 @@ export const publicProjectsData = {
 
 export const projectTestData = generateTestDataObject('projects');
 
+export const exportTagFilterTestData =
+  generateTestDataObject('export-tag-filter');
+
+export const exportSettingsTestData = generateTestDataObject('export-settings');
+
 export const apiKeysTestData = generateTestDataObject('api-keys');
 
 export const patsTestData = generateTestDataObject('pat');

@@ -9,11 +9,12 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { OperationProps } from './types';
 import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
 import { OperationContainer } from './components/OperationContainer';
-import { EXPORT_DEFAULT_STATES } from 'tg.views/projects/export/ExportForm';
+import { API_DEFAULT_EXPORT_STATES } from 'tg.views/projects/export/exportSettings';
 import {
   MessageFormat,
   formatGroups,
   getFormatById,
+  getStructureDelimiter,
   normalizeSelectedMessageFormat,
 } from 'tg.views/projects/export/components/formatGroups';
 import { Formik, FormikErrors } from 'formik';
@@ -100,7 +101,7 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
         </DialogTitle>
         <Formik
           initialValues={{
-            states: EXPORT_DEFAULT_STATES,
+            states: API_DEFAULT_EXPORT_STATES,
             languages: getPreselectedLanguages(
               allLanguages,
               translationsLanguages ?? []
@@ -136,9 +137,7 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
                     format: format.format,
                     filterState: values.states,
                     languages: values.languages,
-                    structureDelimiter: format.structured
-                      ? format.defaultStructureDelimiter
-                      : '',
+                    structureDelimiter: getStructureDelimiter(format),
                     zip: true,
                     supportArrays: values.supportArrays || false,
                     filterKeyId: selection,

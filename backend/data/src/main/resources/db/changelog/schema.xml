@@ -6067,4 +6067,9 @@
         <addUniqueConstraint columnNames="client_id" constraintName="oauth2_client_document_check_client_id_unique"
                              tableName="oauth2_client_document_check"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1791543989000-1">
+        <addColumn tableName="user_preferences">
+            <column name="project_storage_json" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

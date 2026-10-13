@@ -2,8 +2,8 @@ import {
   findByExportParams,
   formatGroups,
   normalizeSelectedMessageFormat,
-} from '../../export/components/formatGroups';
-import { EXPORTABLE_STATES, StateType } from 'tg.constants/translationStates';
+} from 'tg.views/projects/export/components/formatGroups';
+import { API_DEFAULT_EXPORT_STATES } from 'tg.views/projects/export/exportSettings';
 import { components } from 'tg.service/apiSchema.generated';
 
 export function getCdEditInitialValues(
@@ -17,10 +17,12 @@ export function getCdEditInitialValues(
 
   return {
     name: data?.name ?? '',
-    states: data?.filterState ?? EXPORT_DEFAULT_STATES,
+    states: data?.filterState ?? API_DEFAULT_EXPORT_STATES,
     languages: data?.languages ?? allowedTags,
     format: initialFormat.id,
     namespaces: data?.filterNamespace ?? allNamespaces ?? [],
+    tagsIn: getInitialTagsIn(data),
+    tagsNotIn: data?.filterTagNotIn ?? [],
     autoPublish: data?.autoPublish ?? true,
     nested: initialFormat.structured ? data?.structureDelimiter === '.' : false,
     contentStorageId: data?.storage?.id,
@@ -44,16 +46,13 @@ export function getCdEditInitialValues(
 
 export type CdValues = ReturnType<typeof getCdEditInitialValues>;
 
-function sortStates(arr: StateType[]) {
-  return [...arr].sort(
-    (a, b) => EXPORTABLE_STATES.indexOf(a) - EXPORTABLE_STATES.indexOf(b)
-  );
+function getInitialTagsIn(data?: ContentDeliveryConfigModel) {
+  const tags = data?.filterTagIn ?? [];
+  if (!data?.filterTag || tags.includes(data.filterTag)) {
+    return tags;
+  }
+  return [...tags, data.filterTag];
 }
-
-const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
-  'TRANSLATED',
-  'REVIEWED',
-]);
 
 export type ContentDeliveryConfigModel =
   components['schemas']['ContentDeliveryConfigModel'];
