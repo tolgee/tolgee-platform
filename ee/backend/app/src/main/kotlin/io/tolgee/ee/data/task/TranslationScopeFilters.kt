@@ -23,6 +23,18 @@ data class TranslationScopeFilters(
         "types are combined with AND.",
   )
   var filterTaskInStatus: List<String>? = listOf(),
+  @Schema(
+    description =
+      "Include only keys that have an active suggestion in the task language. Evaluated per " +
+        "language, so a suggestion in one target language does not pull the key into the others.",
+  )
+  var filterHasSuggestions: Boolean? = false,
+  @Schema(
+    description =
+      "Include only keys that have no active suggestion in the task language. Evaluated per " +
+        "language, so a suggestion in one target language does not drop the key from the others.",
+  )
+  var filterHasNoSuggestions: Boolean? = false,
 ) {
   val filterStateOrdinal: List<Int>? get() {
     return filterState?.map { it.ordinal }

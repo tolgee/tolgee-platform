@@ -134,6 +134,30 @@ private const val TASK_STATUS_FILTERS = """
           )
 """
 
+/**
+ * Suggestion conditions, evaluated against the task language. The translations view sends these per
+ * language too, but task creation picks its keys once for every target language, so leaving them
+ * out would put a key suggested in one language into the tasks for all the others.
+ */
+private const val SUGGESTION_FILTERS = """
+          and (
+            :#{#filters.filterHasSuggestions} = false
+            or exists (
+              select 1 from translation_suggestion hs
+              where hs.key_id = key.id and hs.language_id = :languageId
+                and hs.state = 'ACTIVE'
+            )
+          )
+          and (
+            :#{#filters.filterHasNoSuggestions} = false
+            or not exists (
+              select 1 from translation_suggestion ns
+              where ns.key_id = key.id and ns.language_id = :languageId
+                and ns.state = 'ACTIVE'
+            )
+          )
+"""
+
 @Repository
 interface TaskRepository : JpaRepository<Task, Long> {
   @Query(
@@ -294,7 +318,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
               and :#{#filters.filterState} is null
             )
           )
-$TASK_STATUS_FILTERS
+$TASK_STATUS_FILTERS$SUGGESTION_FILTERS
     """,
   )
   fun getKeysIncludingConflicts(
@@ -341,7 +365,7 @@ $TASK_STATUS_FILTERS
               and :#{#filters.filterState} is null
             )
           )
-$TASK_STATUS_FILTERS
+$TASK_STATUS_FILTERS$SUGGESTION_FILTERS
     """,
   )
   fun getKeysWithoutConflicts(

@@ -88,13 +88,15 @@ export function useTaskCreationFilters({
 }
 
 /**
- * The task status filter is applied per target language by TranslationScopeFilters, which runs once
- * per language. `select-all` builds a single key set shared by every target language, so leaving the
- * status in that query drops a key from all of them as soon as one language has it tasked.
+ * These filters are applied per target language by TranslationScopeFilters, which runs once per
+ * language. `select-all` builds a single key set shared by every target language, so leaving them in
+ * that query lets one language's match decide the key for all of them.
  */
 export function omitTaskScopeQuery<T extends FiltersType>(query: T): T {
   const result = { ...query };
   delete result.filterTaskInLang;
+  delete result.filterHasSuggestionsInLang;
+  delete result.filterHasNoSuggestionsInLang;
   return result;
 }
 
@@ -120,5 +122,8 @@ export function taskScopeFiltersQuery(
     filterTaskInStatus: Object.entries(byType).map(
       ([type, status]) => `${type},${status}`
     ),
+    // the language scope is the task language, so the flags travel without their language list
+    filterHasSuggestions: filters.filterHasSuggestions || undefined,
+    filterHasNoSuggestions: filters.filterHasNoSuggestions || undefined,
   };
 }

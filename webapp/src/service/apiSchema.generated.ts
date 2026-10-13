@@ -25316,6 +25316,10 @@ export interface operations {
         filterOutdated?: boolean;
         /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
         filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;
@@ -25381,6 +25385,10 @@ export interface operations {
         filterOutdated?: boolean;
         /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
         filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;
@@ -25446,6 +25454,10 @@ export interface operations {
         filterOutdated?: boolean;
         /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
         filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;

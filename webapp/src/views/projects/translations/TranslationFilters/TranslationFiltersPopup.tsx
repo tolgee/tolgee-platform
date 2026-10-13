@@ -132,6 +132,7 @@ export const TranslationFiltersPopup = ({
             actions={actions}
             projectId={projectId}
             selectedLanguages={selectedLanguages}
+            taskCreation={filterOptions?.taskCreation}
           />
         )}
         {filterOptions?.showDeletedBy && (

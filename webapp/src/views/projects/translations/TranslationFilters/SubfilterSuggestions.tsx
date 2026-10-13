@@ -15,12 +15,18 @@ type Props = {
   value: FiltersInternal;
   actions: FilterActions;
   selectedLanguages: LanguageModel[];
+  /**
+   * Task creation evaluates the filter against each target language in turn, so there is no
+   * language left for the user to pick and the rows below would do nothing.
+   */
+  taskCreation?: boolean;
 };
 
 export const SubfilterSuggestions = ({
   value,
   actions,
   selectedLanguages,
+  taskCreation,
 }: Props) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
@@ -95,52 +101,56 @@ export const SubfilterSuggestions = ({
                 handleToggleHasNoSuggestions(!value.filterHasNoSuggestions)
               }
             />
-            <CompactListSubheader>
-              <Box display="flex" justifyContent="space-between">
-                <Box>{t('translations_filter_languages_select_title')}</Box>
-              </Box>
-            </CompactListSubheader>
-            <FilterItem
-              data-cy="translations-filter-apply-no-base"
-              label={t('translations_filter_languages_no_base')}
-              selected={value.filterSuggestionLanguage === undefined}
-              onClick={() => toggleFilterLanguage(undefined)}
-              exclusive
-            />
-            {expanded && (
+            {!taskCreation && (
               <>
+                <CompactListSubheader>
+                  <Box display="flex" justifyContent="space-between">
+                    <Box>{t('translations_filter_languages_select_title')}</Box>
+                  </Box>
+                </CompactListSubheader>
                 <FilterItem
-                  data-cy="translations-filter-apply-for-all"
-                  label={t('translations_filter_languages_all')}
-                  selected={value.filterSuggestionLanguage === true}
-                  onClick={() => toggleFilterLanguage(true)}
+                  data-cy="translations-filter-apply-no-base"
+                  label={t('translations_filter_languages_no_base')}
+                  selected={value.filterSuggestionLanguage === undefined}
+                  onClick={() => toggleFilterLanguage(undefined)}
                   exclusive
                 />
-                {selectedLanguages?.map((lang) => {
-                  return (
+                {expanded && (
+                  <>
                     <FilterItem
-                      data-cy="translations-filter-apply-for-language"
-                      key={lang.id}
-                      label={lang.name}
-                      selected={value.filterSuggestionLanguage === lang.tag}
-                      onClick={() => toggleFilterLanguage(lang.tag)}
+                      data-cy="translations-filter-apply-for-all"
+                      label={t('translations_filter_languages_all')}
+                      selected={value.filterSuggestionLanguage === true}
+                      onClick={() => toggleFilterLanguage(true)}
                       exclusive
                     />
-                  );
-                })}
+                    {selectedLanguages?.map((lang) => {
+                      return (
+                        <FilterItem
+                          data-cy="translations-filter-apply-for-language"
+                          key={lang.id}
+                          label={lang.name}
+                          selected={value.filterSuggestionLanguage === lang.tag}
+                          onClick={() => toggleFilterLanguage(lang.tag)}
+                          exclusive
+                        />
+                      );
+                    })}
+                  </>
+                )}
+                <MenuItem
+                  data-cy="translations-filter-apply-for-expand"
+                  role="button"
+                  onClick={() => setExpanded((value) => !value)}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {expanded ? <ChevronUp /> : <ChevronDown />}
+                </MenuItem>
               </>
             )}
-            <MenuItem
-              data-cy="translations-filter-apply-for-expand"
-              role="button"
-              onClick={() => setExpanded((value) => !value)}
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-              }}
-            >
-              {expanded ? <ChevronUp /> : <ChevronDown />}
-            </MenuItem>
           </Box>
         </Menu>
       )}
