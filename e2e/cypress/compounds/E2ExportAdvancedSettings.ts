@@ -1,31 +1,19 @@
-import { gcyAdvanced } from '../common/shared';
-
-type SummaryItemState = 'default' | 'changed' | 'invalid';
+const TOGGLE: DataCy.Value = 'export-advanced-settings-toggle';
 
 export class E2ExportAdvancedSettings {
   getToggle() {
-    return cy.gcy('export-advanced-settings-toggle');
+    return cy.gcy(TOGGLE);
   }
 
   getContent() {
     return cy.gcy('export-advanced-settings-content');
   }
 
-  getSummary() {
-    return cy.gcy('export-advanced-settings-summary');
-  }
-
-  getSummaryItems(state: SummaryItemState) {
-    return gcyAdvanced({
-      value: 'export-advanced-settings-summary-item',
-      state,
-    });
-  }
-
   expand() {
-    this.getToggle().then(($toggle) => {
-      if ($toggle.attr('aria-expanded') !== 'true') {
-        cy.wrap($toggle).click();
+    cy.gcy('export-advanced-settings').then(($section) => {
+      const toggle = $section.find(`[data-cy="${TOGGLE}"]`);
+      if (toggle.length && toggle.attr('aria-expanded') !== 'true') {
+        cy.wrap(toggle).click();
       }
     });
     this.getContent().should('be.visible');
@@ -34,6 +22,11 @@ export class E2ExportAdvancedSettings {
   collapse() {
     this.getToggle().should('have.attr', 'aria-expanded', 'true').click();
     this.getContent().should('not.exist');
+  }
+
+  shouldBeLockedOpen() {
+    this.getContent().should('be.visible');
+    this.getToggle().should('not.exist');
   }
 }
 

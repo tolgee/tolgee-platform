@@ -108,14 +108,9 @@ export const ExportForm = () => {
     namespaces
   );
 
-  function handleExpandedChange(
-    value: boolean,
-    source: 'user' | 'invalidField'
-  ) {
+  function handleExpandedChange(value: boolean) {
     setExpandedOverride(value);
-    if (source === 'user') {
-      expandedStorage.update(value);
-    }
+    expandedStorage.update(value);
   }
 
   return (

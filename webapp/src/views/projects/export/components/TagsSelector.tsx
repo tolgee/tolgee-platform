@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useField } from 'formik';
-import { Box, FormHelperText, styled } from '@mui/material';
+import { Box, styled, Tooltip, Typography } from '@mui/material';
+import { InfoCircle } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import {
@@ -45,16 +46,28 @@ const StyledTagInput = styled(TagInput)`
   }
 `;
 
+const StyledInfoIcon = styled(InfoCircle)`
+  width: 16px;
+  height: 16px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  cursor: help;
+`;
+
+type TagsFieldName = 'tagsIn' | 'tagsNotIn';
+
 type TagsFieldProps = {
-  name: 'tagsIn' | 'tagsNotIn';
+  name: TagsFieldName;
+  hideTagsUsedIn: TagsFieldName;
   label: string;
   dataCy: 'export-tags-in-selector' | 'export-tags-not-in-selector';
 };
 
-const TagsField = ({ name, label, dataCy }: TagsFieldProps) => {
+const TagsField = ({ name, hideTagsUsedIn, label, dataCy }: TagsFieldProps) => {
   const { t } = useTranslate();
   const [field, , helper] = useField<string[]>(name);
+  const [otherField] = useField<string[]>(hideTagsUsedIn);
   const tags = field.value;
+  const usedTags = [...tags, ...otherField.value];
   const tagsRef = useRef<HTMLDivElement>(null);
 
   const handleAdd = (tag: string) => {
@@ -79,8 +92,10 @@ const TagsField = ({ name, label, dataCy }: TagsFieldProps) => {
         ))}
         <StyledTagInput
           onAdd={handleAdd}
-          filtered={tags}
-          canAddNew={(value) => value.includes('*')}
+          filtered={usedTags}
+          canAddNew={(value) =>
+            value.includes('*') && !usedTags.includes(value)
+          }
           newOptionLabel={(pattern) =>
             t('export_translations_tags_pattern_option', 'Match "{pattern}"', {
               pattern,
@@ -98,6 +113,25 @@ export const TagsSelector = () => {
 
   return (
     <Box display="grid" gap={1}>
+      <Box display="flex" alignItems="center" gap={0.5}>
+        <Typography variant="body2" fontWeight={500}>
+          {t('export_translations_tags_title', 'Tags')}
+        </Typography>
+        <Tooltip
+          title={
+            <span data-cy="export-tags-hint">
+              {t(
+                'export_translations_tags_hint',
+                'Use * to match several tags at once. For example, release-* matches release-1.0, release-2.0 and every other tag that starts with release-. Leave both fields empty to export all keys.'
+              )}
+            </span>
+          }
+        >
+          <span style={{ display: 'inline-flex' }} data-cy="export-tags-info">
+            <StyledInfoIcon />
+          </span>
+        </Tooltip>
+      </Box>
       <Box
         display="grid"
         gridTemplateColumns="minmax(0, 1fr) minmax(0, 1fr)"
@@ -107,6 +141,7 @@ export const TagsSelector = () => {
       >
         <TagsField
           name="tagsIn"
+          hideTagsUsedIn="tagsNotIn"
           label={t(
             'export_translations_tags_in_label',
             'Include keys with tags'
@@ -115,6 +150,7 @@ export const TagsSelector = () => {
         />
         <TagsField
           name="tagsNotIn"
+          hideTagsUsedIn="tagsIn"
           label={t(
             'export_translations_tags_not_in_label',
             'Exclude keys with tags'
@@ -122,12 +158,6 @@ export const TagsSelector = () => {
           dataCy="export-tags-not-in-selector"
         />
       </Box>
-      <FormHelperText sx={{ mt: -0.5 }}>
-        {t(
-          'export_translations_tags_hint',
-          'Leave empty to include all keys. Use * as a wildcard, e.g. feature-*'
-        )}
-      </FormHelperText>
     </Box>
   );
 };

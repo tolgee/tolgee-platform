@@ -76,8 +76,7 @@ export function restoreExportValues(
     languages: keepKnown(stored.languages, allLanguageTags),
     format,
     namespaces: keepKnown(stored.namespaces, allNamespaces),
-    tagsIn: stored.tagsIn ?? [],
-    tagsNotIn: stored.tagsNotIn ?? [],
+    ...withoutTagOverlap(stored.tagsIn ?? [], stored.tagsNotIn ?? []),
     supportArrays:
       stored.supportArrays ??
       getFormatById(format).defaultSupportArrays ??
@@ -106,6 +105,35 @@ export function toStoredExportSettings(
     messageFormat: getEffectiveMessageFormat(values),
     escapeHtml: values.escapeHtml,
   };
+}
+
+export function hasCustomAdvancedSettings(
+  values: ExportFormValues,
+  allNamespaces: string[]
+) {
+  const format = getFormatById(values.format);
+  const statesChanged = !sameItems(values.states, ALL_EXPORTABLE_STATES);
+  const namespacesNarrowed =
+    values.namespaces.length > 0 &&
+    !sameItems(values.namespaces, allNamespaces);
+  const tagsFiltered = values.tagsIn.length > 0 || values.tagsNotIn.length > 0;
+  const formatDefaultMessageFormat = getEffectiveMessageFormat({
+    ...values,
+    messageFormat: undefined,
+  });
+  const messageFormatChanged =
+    getEffectiveMessageFormat(values) !== formatDefaultMessageFormat;
+  const supportArraysEnabled =
+    Boolean(format.showSupportArrays) && values.supportArrays;
+  const escapeHtmlEnabled = Boolean(format.showEscapeHtml) && values.escapeHtml;
+  return (
+    statesChanged ||
+    namespacesNarrowed ||
+    tagsFiltered ||
+    messageFormatChanged ||
+    supportArraysEnabled ||
+    escapeHtmlEnabled
+  );
 }
 
 export function getEffectiveMessageFormat(values: ExportFormValues) {
@@ -200,6 +228,13 @@ function keepKnown<T extends string>(
     return known;
   }
   return kept;
+}
+
+function withoutTagOverlap(tagsIn: string[], tagsNotIn: string[]) {
+  return {
+    tagsIn,
+    tagsNotIn: tagsNotIn.filter((tag) => !tagsIn.includes(tag)),
+  };
 }
 
 function nullIfAll(selected: string[], all: string[]) {

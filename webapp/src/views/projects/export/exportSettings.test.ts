@@ -1,6 +1,8 @@
 import {
+  ExportFormValues,
   getDefaultExportValues,
   getTagFilterParams,
+  hasCustomAdvancedSettings,
   isSameExportSetup,
   readExportSettingsFromUrl,
   restoreExportValues,
@@ -99,6 +101,74 @@ describe('export settings', () => {
     expect(
       toStoredExportSettings(withLeftover, LANGUAGES, NAMESPACES).messageFormat
     ).toBeUndefined();
+  });
+
+  describe('hasCustomAdvancedSettings', () => {
+    const defaults = getDefaultExportValues(LANGUAGES, NAMESPACES);
+    const isCustomWith = (changes: Partial<ExportFormValues>) =>
+      hasCustomAdvancedSettings({ ...defaults, ...changes }, NAMESPACES);
+
+    it('is false for the defaults', () => {
+      expect(hasCustomAdvancedSettings(defaults, NAMESPACES)).toBe(false);
+    });
+
+    it('ignores languages and format, which are not advanced', () => {
+      expect(isCustomWith({ languages: ['cs'], format: 'generic_xliff' })).toBe(
+        false
+      );
+    });
+
+    it('detects changed states', () => {
+      expect(isCustomWith({ states: ['REVIEWED'] })).toBe(true);
+      expect(isCustomWith({ states: [] })).toBe(true);
+    });
+
+    it('treats an empty namespace selection as all namespaces', () => {
+      expect(isCustomWith({ namespaces: [] })).toBe(false);
+      expect(isCustomWith({ namespaces: ['ns-1'] })).toBe(true);
+    });
+
+    it('detects tag filters', () => {
+      expect(isCustomWith({ tagsIn: ['release'] })).toBe(true);
+      expect(isCustomWith({ tagsNotIn: ['wip'] })).toBe(true);
+    });
+
+    it('detects a message format only for formats offering a choice', () => {
+      expect(
+        isCustomWith({ format: 'generic_xliff', messageFormat: 'PHP_SPRINTF' })
+      ).toBe(true);
+      expect(isCustomWith({ messageFormat: 'PHP_SPRINTF' })).toBe(false);
+    });
+
+    it('detects support arrays only when enabled', () => {
+      expect(
+        isCustomWith({
+          format: 'generic_structured_json',
+          supportArrays: false,
+        })
+      ).toBe(false);
+      expect(
+        isCustomWith({ format: 'generic_structured_json', supportArrays: true })
+      ).toBe(true);
+      expect(isCustomWith({ supportArrays: true })).toBe(false);
+    });
+
+    it('detects escaping HTML only for formats offering it', () => {
+      expect(isCustomWith({ format: 'generic_xliff', escapeHtml: true })).toBe(
+        true
+      );
+      expect(isCustomWith({ escapeHtml: true })).toBe(false);
+    });
+  });
+
+  it('drops tags from the exclude filter that are also included', () => {
+    const restored = restoreExportValues(
+      { tagsIn: ['release', 'web'], tagsNotIn: ['release', 'wip'] },
+      LANGUAGES,
+      NAMESPACES
+    );
+    expect(restored.tagsIn).toEqual(['release', 'web']);
+    expect(restored.tagsNotIn).toEqual(['wip']);
   });
 
   it('omits empty tag filters from the request', () => {

@@ -218,8 +218,6 @@ declare namespace DataCy {
         "expiration-select": true;
         "export-advanced-settings": true;
         "export-advanced-settings-content": true;
-        "export-advanced-settings-summary": true;
-        "export-advanced-settings-summary-item": true;
         "export-advanced-settings-toggle": true;
         "export-escape_html-selector": true;
         "export-format-selector": true;
@@ -235,7 +233,9 @@ declare namespace DataCy {
         "export-state-selector-item": true;
         "export-submit-button": true;
         "export-support_arrays-selector": true;
+        "export-tags-hint": true;
         "export-tags-in-selector": true;
+        "export-tags-info": true;
         "export-tags-not-in-selector": true;
         "file-dropzone-add-more-button": true;
         "file-dropzone-file-input": true;

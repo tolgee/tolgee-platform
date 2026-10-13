@@ -100,6 +100,24 @@ describe('Export tag and namespace filtering', () => {
     tagFilters.getIncludedTagRemoveButtons().should('have.length', 1);
   });
 
+  it('does not offer a tag that is already used in the other field', () => {
+    tagFilters.addIncludedTag('feature-login');
+    tagFilters.typeExcludedTag('feature-');
+    cy.gcy('tag-autocomplete-option').should('have.length', 1);
+
+    tagFilters.addExcludedTag('feature-*');
+    cy.intercept('GET', '/v2/projects/*/tags?*').as('tagSearch');
+    tagFilters.typeIncludedTag('feature-*');
+    cy.wait('@tagSearch');
+    cy.waitForDom();
+    cy.gcy('tag-autocomplete-option').should('not.exist');
+  });
+
+  it('explains tag filters in a tooltip', () => {
+    cy.gcy('export-tags-info').trigger('mouseover');
+    cy.gcy('export-tags-hint').should('be.visible');
+  });
+
   it('removes tag filter when tag chip is deleted', () => {
     tagFilters.addIncludedTag('included');
     tagFilters.removeOnlyIncludedTag();

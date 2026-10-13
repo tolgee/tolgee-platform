@@ -26,16 +26,24 @@ export class E2ExportTagFilters {
   }
 
   getIncludedTagInput() {
-    return cy.gcy('export-tags-in-selector').findDcy('tag-autocomplete-input');
+    return this.getTagInput('export-tags-in-selector');
   }
 
   typeIncludedTag(text: string) {
     this.getIncludedTagInput().clear().type(text);
   }
 
+  typeExcludedTag(text: string) {
+    this.getTagInput('export-tags-not-in-selector').clear().type(text);
+  }
+
   private addTag(field: TagFilterField, tag: string) {
-    cy.gcy(field).findDcy('tag-autocomplete-input').type(tag);
+    this.getTagInput(field).clear().type(tag);
     cy.gcy('tag-autocomplete-option').should('have.length', 1).click();
+  }
+
+  private getTagInput(field: TagFilterField) {
+    return cy.gcy(field).findDcy('tag-autocomplete-input');
   }
 
   private getTagRemoveButtons(field: TagFilterField) {

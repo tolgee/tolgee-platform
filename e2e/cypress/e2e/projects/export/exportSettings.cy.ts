@@ -30,17 +30,47 @@ describe('Export settings', () => {
     cy.gcy('export-language-selector').should('be.visible');
     cy.gcy('export-format-selector').should('be.visible');
     advanced.getContent().should('not.exist');
-    advanced.getSummaryItems('default').should('have.length', 3);
-    advanced.getSummaryItems('changed').should('not.exist');
     cy.gcy('export-reset-to-defaults-button').should('be.disabled');
 
     advanced.expand();
-    advanced.getSummary().should('not.exist');
     cy.gcy('export-state-selector').should('be.visible');
     cy.gcy('export-tags-in-selector').should('be.visible');
 
     advanced.collapse();
-    advanced.getSummary().should('be.visible');
+  });
+
+  it('keeps advanced settings open while they differ from the defaults', () => {
+    advanced.expand();
+    tagFilters.addIncludedTag('release');
+    advanced.shouldBeLockedOpen();
+
+    tagFilters.removeOnlyIncludedTag();
+    advanced.getToggle().should('be.visible');
+    advanced.collapse();
+  });
+
+  it('keeps remembered advanced settings open after reverting them', () => {
+    storeSettings({ tagsIn: ['release'] });
+    visitExport(projectId);
+    advanced.shouldBeLockedOpen();
+
+    tagFilters.removeOnlyIncludedTag();
+    advanced.getContent().should('be.visible');
+    advanced.collapse();
+  });
+
+  it('keeps advanced settings collapsed after choosing a format with its defaults', () => {
+    cy.gcy('export-format-selector').click();
+    gcyAdvanced({
+      value: 'export-format-selector-item',
+      format: 'generic_structured_json',
+    }).click();
+    advanced.getContent().should('not.exist');
+
+    advanced.expand();
+    cy.gcy('export-support_arrays-selector')
+      .find('input')
+      .should('not.be.checked');
   });
 
   it('exports all states by default', () => {
@@ -67,8 +97,7 @@ describe('Export settings', () => {
 
     cy.location('search').should('equal', '');
     cy.reload();
-    advanced.collapse();
-    advanced.getSummaryItems('changed').should('have.length', 2);
+    advanced.shouldBeLockedOpen();
     cy.gcy('export-reset-to-defaults-button').should('be.enabled');
     interceptExport();
     cy.gcy('export-submit-button').click();
@@ -131,23 +160,23 @@ describe('Export settings', () => {
       });
   });
 
-  it('shows remembered format options in the collapsed summary', () => {
+  it('opens advanced settings for remembered format options', () => {
     storeSettings({ format: 'generic_xliff', escapeHtml: true });
     visitExport(projectId);
-    advanced.getSummaryItems('changed').should('have.length', 1);
+    advanced.shouldBeLockedOpen();
   });
 
-  it('shows a non-default message format in the collapsed summary', () => {
+  it('opens advanced settings for a remembered message format', () => {
     storeSettings({ format: 'generic_xliff', messageFormat: 'PHP_SPRINTF' });
     visitExport(projectId);
-    advanced.getSummaryItems('changed').should('have.length', 1);
+    advanced.shouldBeLockedOpen();
   });
 
   it('ignores a message format the selected format does not use', () => {
     storeSettings({ format: 'native_json', messageFormat: 'PHP_SPRINTF' });
     visitExport(projectId);
-    advanced.getSummaryItems('default').should('have.length', 3);
-    advanced.getSummaryItems('changed').should('not.exist');
+    advanced.getContent().should('not.exist');
+    advanced.getToggle().should('be.visible');
     cy.gcy('export-reset-to-defaults-button').should('be.disabled');
   });
 
@@ -158,14 +187,15 @@ describe('Export settings', () => {
       tagsIn: ['release'],
     });
     visitExport(projectId);
-    advanced.getSummaryItems('changed').should('have.length', 2);
+    advanced.shouldBeLockedOpen();
 
     interceptSettingsSave();
     cy.gcy('export-reset-to-defaults-button').click();
     cy.wait('@saveSettings').then((interception) => {
       expect(interception.request.body).to.equal(null);
     });
-    advanced.getSummaryItems('changed').should('not.exist');
+    advanced.getContent().should('be.visible');
+    advanced.getToggle().should('have.attr', 'aria-expanded', 'true');
     cy.gcy('export-reset-to-defaults-button').should('be.disabled');
 
     interceptExport();
@@ -190,17 +220,10 @@ describe('Export settings', () => {
   });
 
   it('keeps advanced settings open while no state is selected', () => {
-    interceptExpandedSave();
     advanced.expand();
     deselectStates(ALL_STATES);
-    advanced.getToggle().click();
-    advanced.getContent().should('be.visible');
+    advanced.shouldBeLockedOpen();
     cy.gcy('export-submit-button').should('be.disabled');
-    cy.get('@saveExpanded.all')
-      .should('have.length', 2)
-      .then((saves: any) => {
-        expect(saves[1].request.body).to.equal(false);
-      });
   });
 
   function storeSettings(settings: Record<string, unknown>) {
