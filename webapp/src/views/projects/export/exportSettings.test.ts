@@ -1,6 +1,7 @@
 import {
   ExportFormValues,
   getDefaultExportValues,
+  getExportRequestBody,
   getTagFilterParams,
   hasCustomAdvancedSettings,
   isSameExportSetup,
@@ -169,6 +170,18 @@ describe('export settings', () => {
     );
     expect(restored.tagsIn).toEqual(['release', 'web']);
     expect(restored.tagsNotIn).toEqual(['wip']);
+  });
+
+  it('sends no message format for a format without a choice', () => {
+    const defaults = getDefaultExportValues(LANGUAGES, NAMESPACES);
+    const leftover = { ...defaults, messageFormat: 'PHP_SPRINTF' as const };
+    expect(getExportRequestBody(leftover, undefined).messageFormat).toBe(
+      undefined
+    );
+    expect(
+      getExportRequestBody({ ...leftover, format: 'generic_xliff' }, undefined)
+        .messageFormat
+    ).toBe('PHP_SPRINTF');
   });
 
   it('omits empty tag filters from the request', () => {

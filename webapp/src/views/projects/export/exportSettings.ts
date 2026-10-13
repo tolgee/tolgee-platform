@@ -170,8 +170,7 @@ export function getExportRequestBody(
     filterBranch: branchName,
     zip: values.languages.length > 1 || values.namespaces.length > 1,
     supportArrays: values.supportArrays || false,
-    messageFormat:
-      format.messageFormat ?? normalizeSelectedMessageFormat(values),
+    messageFormat: format.messageFormat ?? getEffectiveMessageFormat(values),
     escapeHtml: values.escapeHtml || false,
   };
 }
