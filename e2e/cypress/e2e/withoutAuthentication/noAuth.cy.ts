@@ -6,7 +6,7 @@ import {
   enableAuthentication,
   login,
 } from '../../common/apiCalls/common';
-import { gcy } from '../../common/shared';
+import { gcy, gcyAdvanced } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Test no authentication mode', () => {
@@ -59,7 +59,11 @@ describe('Test no authentication mode', () => {
     cy.visit(HOST + '/account/apiKeys');
     waitForGlobalLoading();
 
-    gcy('user-settings-menu-notifications').should('not.exist');
+    gcy('settings-menu-item').should('exist');
+    gcyAdvanced({
+      value: 'settings-menu-item',
+      item: 'user-settings-menu-notifications',
+    }).should('not.exist');
   });
 
   after(() => {
