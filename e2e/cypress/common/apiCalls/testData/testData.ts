@@ -69,6 +69,9 @@ export const publicProjectsData = {
 
 export const projectTestData = generateTestDataObject('projects');
 
+export const projectSwitchingTestData =
+  generateTestDataObject('project-switching');
+
 export const apiKeysTestData = generateTestDataObject('api-keys');
 
 export const patsTestData = generateTestDataObject('pat');
