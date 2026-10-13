@@ -32,11 +32,13 @@ describe('RootRouter survey coverage', () => {
     expect(linksBefore(GATE)).toEqual(EXPECTED_UNGATED_ROUTES);
   });
 
-  // The extra one is the pathless <Route> that wraps the gate.
   it('has no route above the gate that this file cannot name', () => {
     const routesAbove = source
       .slice(0, source.indexOf(GATE))
       .match(/<(?:Private|PublicOnly)?Route[\s>]/g);
-    expect(routesAbove).toHaveLength(EXPECTED_UNGATED_ROUTES.length + 1);
+    const GATE_WRAPPER_ROUTE = 1;
+    expect(routesAbove).toHaveLength(
+      EXPECTED_UNGATED_ROUTES.length + GATE_WRAPPER_ROUTE
+    );
   });
 });

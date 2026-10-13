@@ -187,8 +187,7 @@ export const useAuthService = (
   }
 
   async function setJwtToken(token: string | undefined) {
-    // Elevating to a super token keeps the same user, so compare ids rather
-    // than tokens.
+    // Elevating to a super token keeps the same user.
     if (tokenService.getUserId(token) !== tokenService.getUserId(jwtToken)) {
       queryClient.clear();
     }

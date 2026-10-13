@@ -70,7 +70,9 @@ export const OAuthRedirectionHandler: FunctionComponent<
       return;
     }
 
-    loginWithOAuthCode(type, code, domain);
+    // Rendered from loginLoadable.error, so the rejection is handled there; this
+    // keeps clearing the query cache mid-login from raising an unhandled one.
+    loginWithOAuthCode(type, code, domain).catch(() => undefined);
   }, []);
 
   if (loginLoadable.error) {

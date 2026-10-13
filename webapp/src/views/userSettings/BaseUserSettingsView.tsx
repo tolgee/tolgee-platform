@@ -30,15 +30,15 @@ export const BaseUserSettingsView: React.FC<React.PropsWithChildren<Props>> = ({
       ]
     : [];
 
-  if (authentication && isEmailVerified) {
-    menuItems.push({
-      link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
-      label: t('user_menu_notifications'),
-      'data-cy': 'user-settings-menu-notifications',
-    });
-  }
-
   if (isEmailVerified) {
+    if (authentication) {
+      menuItems.push({
+        link: LINKS.USER_ACCOUNT_NOTIFICATIONS.build(),
+        label: t('user_menu_notifications'),
+        'data-cy': 'user-settings-menu-notifications',
+      });
+    }
+
     menuItems.push({
       link: LINKS.USER_API_KEYS.build(),
       label: t('user_menu_api_keys'),

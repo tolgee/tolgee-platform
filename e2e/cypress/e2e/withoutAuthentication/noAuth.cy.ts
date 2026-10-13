@@ -54,6 +54,14 @@ describe('Test no authentication mode', () => {
     cy.location().its('pathname').should('not.eq', '/account/security');
   });
 
+  it('does not offer notification settings in the user settings menu', () => {
+    disableAuthentication();
+    cy.visit(HOST + '/account/apiKeys');
+    waitForGlobalLoading();
+
+    gcy('user-settings-menu-notifications').should('not.exist');
+  });
+
   after(() => {
     enableAuthentication();
   });
