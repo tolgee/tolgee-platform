@@ -5,6 +5,7 @@ import { login } from '../../common/apiCalls/common';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { dismissMenu } from '../../common/shared';
 import { setFeature } from '../../common/features';
+import { assertTaskFilter } from '../../common/filters';
 
 describe('Translation filters tasks', () => {
   const translationsView = new E2TranslationsView();
@@ -32,24 +33,6 @@ describe('Translation filters tasks', () => {
   after(() => {
     tasks.clean({ failOnStatusCode: false });
   });
-
-  /**
-   * The task filter nests three menus deep, one more than assertFilter's fixed two escapes,
-   * so the dismissal is spelled out here.
-   */
-  function assertTaskFilter(and: () => void, toSeeAfter: string[]) {
-    cy.gcy('translations-filter-select').click();
-    cy.waitForDom();
-    cy.gcy('submenu-item').contains('Tasks').click();
-    cy.waitForDom();
-    and();
-    dismissMenu();
-    dismissMenu();
-    dismissMenu();
-    waitForGlobalLoading();
-    toSeeAfter.forEach((i) => cy.contains(i).should('be.visible'));
-    cy.gcy('translations-key-name').should('have.length', toSeeAfter.length);
-  }
 
   it('filters keys never in a translate task', () => {
     assertTaskFilter(() => {

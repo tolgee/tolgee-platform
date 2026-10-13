@@ -69,26 +69,6 @@ class TaskScopeTaskHistoryFilterTest : ProjectAuthControllerTest("/v2/projects/"
     enabledFeaturesProvider.forceEnabled = null
   }
 
-  private fun openReviewAndFreeKeyRequest() =
-    CalculateScopeRequest(
-      languageId = testData.englishLanguage.id,
-      type = TaskType.REVIEW,
-      keys =
-        mutableSetOf(
-          openReviewKey.self.id,
-          testData.keysOutOfTask
-            .first()
-            .self.id,
-        ),
-    )
-
-  private fun czechOnlyKeyScopeRequest(languageId: Long) =
-    CalculateScopeRequest(
-      languageId = languageId,
-      type = TaskType.TRANSLATE,
-      keys = mutableSetOf(czechOnlyKeyId),
-    )
-
   @Test
   @ProjectJWTAuthTestMethod
   fun `without the filter the key is in scope for both languages`() {
@@ -324,4 +304,24 @@ class TaskScopeTaskHistoryFilterTest : ProjectAuthControllerTest("/v2/projects/"
       node("_embedded.tasks[0].totalItems").isEqualTo(1)
     }
   }
+
+  private fun openReviewAndFreeKeyRequest() =
+    CalculateScopeRequest(
+      languageId = testData.englishLanguage.id,
+      type = TaskType.REVIEW,
+      keys =
+        mutableSetOf(
+          openReviewKey.self.id,
+          testData.keysOutOfTask
+            .first()
+            .self.id,
+        ),
+    )
+
+  private fun czechOnlyKeyScopeRequest(languageId: Long) =
+    CalculateScopeRequest(
+      languageId = languageId,
+      type = TaskType.TRANSLATE,
+      keys = mutableSetOf(czechOnlyKeyId),
+    )
 }
