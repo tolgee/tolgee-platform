@@ -7,8 +7,11 @@ import { renderCountryFlag } from 'tg.component/common/form/fields/countryFlag';
 import { readPhoneValue } from 'tg.component/common/form/fields/phoneValue';
 
 export type PhoneNumberFieldHandle = {
-  /** The number in E.164, or an empty string. Null when what is typed is not a number. */
-  read: () => string | null;
+  /**
+   * The number in E.164, or an empty string. Marks the field invalid and
+   * returns null when what is typed is not a number.
+   */
+  validateAndRead: () => string | null;
 };
 
 type Props = {
@@ -30,7 +33,7 @@ export const PhoneNumberField = forwardRef<PhoneNumberFieldHandle, Props>(
     const defaultCountry = useMemo(detectCountry, []);
 
     useImperativeHandle(ref, () => ({
-      read: () => {
+      validateAndRead: () => {
         const read = readPhoneValue(value, info);
         if (read === null) {
           setInvalid(true);
