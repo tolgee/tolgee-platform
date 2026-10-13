@@ -19853,6 +19853,10 @@ export interface operations {
         filterHasDescription?: boolean;
         /** Selects only keys without a description */
         filterHasNoDescription?: boolean;
+        /** Selects only plural keys */
+        filterIsPlural?: boolean;
+        /** Selects only non-plural keys */
+        filterIsNotPlural?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -20124,6 +20128,10 @@ export interface operations {
         filterHasDescription?: boolean;
         /** Selects only keys without a description */
         filterHasNoDescription?: boolean;
+        /** Selects only plural keys */
+        filterIsPlural?: boolean;
+        /** Selects only non-plural keys */
+        filterIsNotPlural?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -20439,6 +20447,10 @@ export interface operations {
         filterHasDescription?: boolean;
         /** Selects only keys without a description */
         filterHasNoDescription?: boolean;
+        /** Selects only plural keys */
+        filterIsPlural?: boolean;
+        /** Selects only non-plural keys */
+        filterIsNotPlural?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -26501,6 +26513,10 @@ export interface operations {
         filterHasDescription?: boolean;
         /** Selects only keys without a description */
         filterHasNoDescription?: boolean;
+        /** Selects only plural keys */
+        filterIsPlural?: boolean;
+        /** Selects only non-plural keys */
+        filterIsNotPlural?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *
@@ -26984,6 +27000,10 @@ export interface operations {
         filterHasDescription?: boolean;
         /** Selects only keys without a description */
         filterHasNoDescription?: boolean;
+        /** Selects only plural keys */
+        filterIsPlural?: boolean;
+        /** Selects only non-plural keys */
+        filterIsNotPlural?: boolean;
         /**
          * Selects only keys with provided namespaces.
          *

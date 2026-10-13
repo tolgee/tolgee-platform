@@ -61,6 +61,15 @@ class TranslationsE2eDataController(
     return mapOf("id" to testData.project.id)
   }
 
+  @GetMapping(value = ["/generate-for-plural-filters"])
+  @Transactional
+  fun generateForPluralFilters(): Map<String, Long> {
+    val testData = TranslationsTestData()
+    testData.addPluralKeys()
+    testDataService.saveTestData(testData.root)
+    return mapOf("id" to testData.project.id)
+  }
+
   @GetMapping(value = ["/cleanup-for-filters"])
   @Transactional
   fun cleanupForFilters() {
