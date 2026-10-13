@@ -1,3 +1,10 @@
+# [3.233.0](https://github.com/tolgee/tolgee-platform/compare/v3.232.0...v3.233.0) (2026-10-13)
+
+
+### Features
+
+* export page redesign with tag filters and remembered export setup ([#3973](https://github.com/tolgee/tolgee-platform/issues/3973)) ([90188bc](https://github.com/tolgee/tolgee-platform/commit/90188bcd1806780f7c9c0c3a19bf123a27cbc8ac))
+
 # [3.232.0](https://github.com/tolgee/tolgee-platform/compare/v3.231.0...v3.232.0) (2026-10-13)
 
 
