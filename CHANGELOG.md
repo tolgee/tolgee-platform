@@ -1,3 +1,10 @@
+# [3.231.0](https://github.com/tolgee/tolgee-platform/compare/v3.230.0...v3.231.0) (2026-10-13)
+
+
+### Features
+
+* add filter by key pluralization to translations view ([#3972](https://github.com/tolgee/tolgee-platform/issues/3972)) ([1ca5b49](https://github.com/tolgee/tolgee-platform/commit/1ca5b493853ae2c9fa7d2cdfadf00f89eed86d23))
+
 # [3.230.0](https://github.com/tolgee/tolgee-platform/compare/v3.229.0...v3.230.0) (2026-10-09)
 
 
