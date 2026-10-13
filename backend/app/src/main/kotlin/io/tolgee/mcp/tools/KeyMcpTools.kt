@@ -242,8 +242,7 @@ class KeyMcpTools(
       "delete_keys",
       "Delete keys",
       McpToolEffect.DESTRUCTIVE,
-      "Delete translation keys from a Tolgee project. " +
-        "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
+      "Delete translation keys from a Tolgee project.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         stringArray("keyNames", "Names of the keys to delete", required = true)
