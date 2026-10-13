@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.NamespaceController
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
@@ -19,7 +19,7 @@ class NamespaceMcpTools(
 ) : McpToolsProvider {
   private val listNamespacesSpec = buildSpec(NamespaceController::getAllNamespaces, "list_namespaces")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_namespaces",
       "List all namespaces in a Tolgee project. Namespaces organize translation keys into logical groups (e.g. by feature, page, or module).",

@@ -1245,6 +1245,7 @@
   "export_translations_tags_not_in_label": "Vyloučit klíče s tagy",
   "export_translations_tags_pattern_option": "Odpovídá vzoru \"{pattern}\"",
   "export_translations_tags_placeholder": "Přidat tag...",
+  "export_translations_tags_title": "Tagy",
   "export_translations_title": "Exportovat překlady",
   "failed_job_filter_indicator_label": "Předfiltrování neúspěšných klíčů",
   "feature-explanation-check-license-action": "Zobrazit licenci",

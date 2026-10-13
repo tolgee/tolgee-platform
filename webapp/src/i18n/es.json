@@ -1238,6 +1238,7 @@
   "export_translations_tags_not_in_label": "Excluir claves con tags",
   "export_translations_tags_pattern_option": "Coincidir con \"{pattern}\"",
   "export_translations_tags_placeholder": "Añadir etiqueta...",
+  "export_translations_tags_title": "Tags",
   "export_translations_title": "Exportar traducciones",
   "failed_job_filter_indicator_label": "Filtrado previo de claves fallidas",
   "feature-explanation-check-license-action": "Mostrar licencia",

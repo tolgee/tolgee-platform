@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.BigMetaController
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
@@ -24,7 +24,7 @@ class BigMetaMcpTools(
 ) : McpToolsProvider {
   private val storeBigMetaSpec = buildSpec(BigMetaController::store, "store_big_meta")
 
-  override fun register(server: McpSyncServer) {
+  override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "store_big_meta",
       "Store key relationships so Tolgee can use translations of related keys as context during machine translation, " +

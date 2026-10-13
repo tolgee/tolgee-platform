@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,6 +31,11 @@ class KeyTrashFilterTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     this.projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @ProjectJWTAuthTestMethod
@@ -123,6 +129,35 @@ class KeyTrashFilterTest : ProjectAuthControllerTest("/v2/projects/") {
       }
 
     performProjectAuthGet("/keys/trash?filterHasNoDescription=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("key 01")
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `trashed listing combined with filterIsPlural returns only trashed plural keys`() {
+    keyService.softDeleteMultiple(
+      listOf(testData.pluralKey.id, testData.numberedKeys[0].id),
+      testData.user,
+    )
+
+    performProjectAuthGet("/keys/trash?filterIsPlural=true")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].name").isEqualTo("Plural key")
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+
+    performProjectAuthGet("/keys/trash?filterIsNotPlural=true")
       .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("_embedded.keys") {

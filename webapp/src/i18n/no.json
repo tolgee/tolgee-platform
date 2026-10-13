@@ -1238,6 +1238,7 @@
   "export_translations_tags_not_in_label": "Ekskluder nøkler med tagger",
   "export_translations_tags_pattern_option": "Samsvar med \"{pattern}\"",
   "export_translations_tags_placeholder": "Legg til tagg...",
+  "export_translations_tags_title": "Tagger",
   "export_translations_title": "Eksporter oversettelser",
   "failed_job_filter_indicator_label": "Forfiltrering av mislykkede nøkler",
   "feature-explanation-check-license-action": "Vis lisens",
