@@ -3141,6 +3141,7 @@ export interface components {
         | "content_storage_test_failed"
         | "content_storage_config_invalid"
         | "invalid_connection_string"
+        | "invalid_onboarding_answer"
         | "cannot_create_azure_storage_client"
         | "s3_access_key_required"
         | "azure_connection_string_required"
@@ -3885,6 +3886,8 @@ export interface components {
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
       hasCommunityContributions: boolean;
       languageTag?: string;
+      /** @enum {string} */
+      onboardingSurveyVersion?: "default_v1" | "invited_v1";
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
       qaCheckCategories?: components["schemas"]["QaCheckCategoryModel"][];
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
@@ -5993,7 +5996,6 @@ export interface components {
       /** Format: int32 */
       translationsViewLanguagesLimit: number;
       userCanCreateOrganizations: boolean;
-      userSourceField: boolean;
       version: string;
     };
     PublicInvitationModel: {
@@ -6676,8 +6678,6 @@ export interface components {
       organizationName?: string;
       password: string;
       recaptchaToken?: string;
-      /** @description Where did the user find us? */
-      userSource?: string;
     };
     SimpleGlossaryModel: {
       /**
@@ -7142,6 +7142,7 @@ export interface components {
         | "content_storage_test_failed"
         | "content_storage_config_invalid"
         | "invalid_connection_string"
+        | "invalid_onboarding_answer"
         | "cannot_create_azure_storage_client"
         | "s3_access_key_required"
         | "azure_connection_string_required"

@@ -44,7 +44,6 @@ export type SignUpType = {
   password: string;
   organizationName: string;
   invitationCode?: string;
-  userSource?: string;
 };
 
 type Props = {
@@ -57,7 +56,6 @@ export const SignUpForm = (props: Props) => {
   const invitationEmail = useGlobalContext((c) => c.auth.invitationEmail);
   const config = useConfig();
   const orgRequired = !invitationCode && config.userCanCreateOrganizations;
-  const userSourceField = config.userSourceField;
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,7 +73,6 @@ export const SignUpForm = (props: Props) => {
             name: '',
             email: invitationEmail ?? '',
             organizationName: orgRequired ? '' : undefined,
-            userSource: '',
           } as SignUpType
         }
         validationSchema={Validation.SIGN_UP(t, orgRequired)}
@@ -113,19 +110,6 @@ export const SignUpForm = (props: Props) => {
               }
             />
           )}
-          {userSourceField && (
-            <TextField
-              autoComplete="off"
-              name="userSource"
-              label={
-                <>
-                  <T keyName="sign_up_form_user_source" /> (
-                  <T keyName="sign_up_form_optional_label" />)
-                </>
-              }
-            />
-          )}
-
           <StyledSeparator />
 
           <TextField

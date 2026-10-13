@@ -54,7 +54,6 @@ class PublicConfigurationAssembler(
       postHogApiKey = properties.postHog.apiKey,
       postHogHost = properties.postHog.host,
       contentDeliveryConfigured = contentDeliveryFileStorageProvider.isServerContentDeliveryConfigured(),
-      userSourceField = properties.userSourceField,
       plausible =
         PlausibleDto(
           properties.plausible.domain,

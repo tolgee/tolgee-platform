@@ -18,6 +18,13 @@ class AuthorizedRequestPerformer :
     return mvc.perform(AuthorizedRequestFactory.loggedPut(url).withJsonContent(content))
   }
 
+  override fun performAuthPatch(
+    url: String,
+    content: Any?,
+  ): ResultActions {
+    return mvc.perform(AuthorizedRequestFactory.loggedPatch(url).withJsonContent(content))
+  }
+
   override fun performAuthPost(
     url: String,
     content: Any?,

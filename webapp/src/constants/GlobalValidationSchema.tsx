@@ -183,7 +183,6 @@ export class Validation {
       organizationName: orgRequired
         ? Yup.string().min(3).max(50).required()
         : Yup.string(),
-      userSource: Yup.string().max(255),
     });
 
   static readonly USER_SETTINGS = (

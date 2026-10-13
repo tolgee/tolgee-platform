@@ -14,6 +14,7 @@ import { PrivateRoute } from '../component/common/PrivateRoute';
 import { LINKS, PARAMS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
 import { useGlobalContext } from '../globalContext/GlobalContext';
+import { useIsEmailVerified } from 'tg.globalContext/helpers';
 import { useUserTasks } from '../globalContext/useUserTasks';
 import { AdministrationEeLicenseView } from 'tg.ee.module/billing/administration/AdministrationEeLicenseView';
 import { SlackApp } from '../ee/organizationApps/SlackApp';
@@ -104,6 +105,7 @@ export { usePlanLimitBanner } from '../ee/billing/component/PlanLimitBanner';
 export { usePastDueBanner } from '../ee/billing/component/PastDueBanner';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
+export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';
 
 export const billingMenuItems = billingModule.billingMenuItems as React.FC<
   React.PropsWithChildren<BillingMenuItemsProps>
@@ -186,7 +188,8 @@ export const routes = {
 
 export function useUserTaskCount() {
   const userInfo = useGlobalContext((context) => context.initialData.userInfo);
-  const loadable = useUserTasks({ enabled: !!userInfo });
+  const isEmailVerified = useIsEmailVerified();
+  const loadable = useUserTasks({ enabled: !!userInfo && isEmailVerified });
   return loadable.data?.page?.totalElements ?? 0;
 }
 
@@ -361,6 +364,7 @@ export const useAddDeveloperViewItems = () => {
 
 export const useAddUserMenuItems = () => {
   const taskCount = useUserTaskCount();
+  const isEmailVerified = useIsEmailVerified();
   return addUserMenuItems(
     [
       {
@@ -385,8 +389,8 @@ export const useAddUserMenuItems = () => {
             </MenuItem>
           );
         },
-        enabled: true,
-        id: 'mu-tasks',
+        enabled: isEmailVerified,
+        id: 'my-tasks',
       },
     ],
     { position: 'start' }

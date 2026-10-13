@@ -17,5 +17,6 @@ data class OnBusinessEventToCaptureEvent(
   val sdkType: String? = null,
   val sdkVersion: String? = null,
   val data: Map<String, Any?>? = null,
+  val personProperties: Map<String, Any?>? = null,
   val anonymousUserId: String? = null,
 )

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useQueryClient } from 'react-query';
 import { T } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -88,6 +89,8 @@ export const useAuthService = (
       disable404Redirect: true,
     },
   });
+
+  const queryClient = useQueryClient();
 
   const [jwtToken, _setJwtToken] = useState<string | undefined>(
     tokenService.getToken()
@@ -184,6 +187,10 @@ export const useAuthService = (
   }
 
   async function setJwtToken(token: string | undefined) {
+    // Elevating to a super token keeps the same user.
+    if (tokenService.getUserId(token) !== tokenService.getUserId(jwtToken)) {
+      queryClient.clear();
+    }
     _setJwtToken(token);
     if (token) {
       tokenService.setToken(token);

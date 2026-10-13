@@ -211,6 +211,7 @@ declare namespace DataCy {
         "edit-pat-dialog-content": true;
         "edit-pat-dialog-description-input": true;
         "edit-pat-dialog-title": true;
+        "email-verified-message": true;
         "empty-scope-dialog": true;
         "error-message": true;
         "expiration-date-field": true;
@@ -907,6 +908,8 @@ declare namespace DataCy {
         "top-banner": true;
         "top-banner-content": true;
         "top-banner-dismiss-button": true;
+        "top-bar-logo": true;
+        "top-bar-logo-link": true;
         "topbap-trial-popover-content": true;
         "topbar-trial-announcement": true;
         "topbar-trial-chip": true;
@@ -1038,15 +1041,18 @@ declare namespace DataCy {
         "trash-sort-button": true;
         "trash-table": true;
         "user-delete-organization-message-item": true;
+        "user-menu-api-keys": true;
         "user-menu-language-switch": true;
         "user-menu-logout": true;
         "user-menu-my-tasks": true;
         "user-menu-organization-settings": true;
         "user-menu-organization-switch": true;
+        "user-menu-pats": true;
         "user-menu-server-administration": true;
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;
         "user-profile": true;
+        "user-settings-menu-notifications": true;
         "user-switch-item": true;
         "user-switch-search": true;
         "webhook-auto-disabled-label": true;
