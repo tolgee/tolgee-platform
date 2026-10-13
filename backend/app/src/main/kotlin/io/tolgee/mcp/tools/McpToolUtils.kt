@@ -28,8 +28,19 @@ fun errorResult(message: String): CallToolResult {
     .build()
 }
 
+enum class McpToolEffect(
+  val readOnly: Boolean,
+  val destructive: Boolean,
+) {
+  READ_ONLY(readOnly = true, destructive = false),
+  ADDITIVE(readOnly = false, destructive = false),
+  DESTRUCTIVE(readOnly = false, destructive = true),
+}
+
 fun McpStatelessSyncServer.addTool(
   name: String,
+  title: String,
+  effect: McpToolEffect,
   description: String,
   schema: JsonSchema,
   handler: (McpSchema.CallToolRequest) -> CallToolResult,
@@ -38,9 +49,17 @@ fun McpStatelessSyncServer.addTool(
     McpSchema.Tool
       .builder()
       .name(name)
+      .title(title)
       .description(description)
       .inputSchema(schema)
-      .build()
+      .annotations(
+        McpSchema.ToolAnnotations
+          .builder()
+          .title(title)
+          .readOnlyHint(effect.readOnly)
+          .destructiveHint(effect.destructive)
+          .build(),
+      ).build()
 
   addTool(
     McpStatelessServerFeatures.SyncToolSpecification(tool) { _, request ->

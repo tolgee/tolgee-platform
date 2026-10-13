@@ -30,6 +30,8 @@ class TagMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_tags",
+      "List tags",
+      McpToolEffect.READ_ONLY,
       "List all tags used in a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -59,6 +61,8 @@ class TagMcpTools(
 
     server.addTool(
       "tag_keys",
+      "Tag keys",
+      McpToolEffect.ADDITIVE,
       "Add tags to translation keys. Creates tags if they don't exist.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")

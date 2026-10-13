@@ -46,6 +46,8 @@ class BranchMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_branches",
+      "List branches",
+      McpToolEffect.READ_ONLY,
       "List branches in a Tolgee project. Returns up to 100 results per page. Only available for projects with branching enabled (enterprise feature).",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -78,6 +80,8 @@ class BranchMcpTools(
 
     server.addTool(
       "create_branch",
+      "Create branch",
+      McpToolEffect.ADDITIVE,
       "Create a new branch in a Tolgee project by forking from an existing branch. Only available for projects with branching enabled (enterprise feature).",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -109,6 +113,8 @@ class BranchMcpTools(
 
     server.addTool(
       "delete_branch",
+      "Delete branch",
+      McpToolEffect.DESTRUCTIVE,
       "Delete a branch from a Tolgee project. " +
         "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
       toolSchema {
