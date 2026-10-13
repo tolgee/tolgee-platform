@@ -40,6 +40,8 @@ class ProjectMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_projects",
+      "List projects",
+      McpToolEffect.READ_ONLY,
       "List Tolgee projects accessible to the current user. Returns up to 100 results per page.",
       toolSchema {
         string("search", "Optional search query to filter projects by name")
@@ -71,6 +73,8 @@ class ProjectMcpTools(
 
     server.addTool(
       "create_project",
+      "Create project",
+      McpToolEffect.ADDITIVE,
       "Create a new Tolgee project with initial languages",
       toolSchema {
         string("name", "Project name", required = true)
@@ -121,6 +125,8 @@ class ProjectMcpTools(
 
     server.addTool(
       "get_project_language_statistics",
+      "Get project language statistics",
+      McpToolEffect.READ_ONLY,
       "Get translation status and progress for each language in a project. " +
         "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {

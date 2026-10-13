@@ -47,6 +47,8 @@ class KeyMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_keys",
+      "List keys",
+      McpToolEffect.READ_ONLY,
       "List translation keys in a Tolgee project. " +
         "Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
@@ -77,6 +79,8 @@ class KeyMcpTools(
 
     server.addTool(
       "search_keys",
+      "Search keys",
+      McpToolEffect.READ_ONLY,
       "Search for translation keys in a Tolgee project by name or translation text. " +
         "Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
@@ -114,6 +118,8 @@ class KeyMcpTools(
 
     server.addTool(
       "create_keys",
+      "Create keys",
+      McpToolEffect.ADDITIVE,
       "Create translation keys in a Tolgee project with optional translations and tags. " +
         "Keys that already exist are silently skipped — their translations and tags are not updated. " +
         "Use update_key and set_translation to modify existing keys.",
@@ -151,6 +157,8 @@ class KeyMcpTools(
 
     server.addTool(
       "get_key",
+      "Get key",
+      McpToolEffect.READ_ONLY,
       "Get a translation key's metadata (name, namespace, description) by its name. To get the key's translations, use get_translations.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -186,6 +194,8 @@ class KeyMcpTools(
 
     server.addTool(
       "update_key",
+      "Update key",
+      McpToolEffect.DESTRUCTIVE,
       "Update an existing translation key's name, namespace, or description",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -230,6 +240,8 @@ class KeyMcpTools(
 
     server.addTool(
       "delete_keys",
+      "Delete keys",
+      McpToolEffect.DESTRUCTIVE,
       "Delete translation keys from a Tolgee project. " +
         "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
       toolSchema {
