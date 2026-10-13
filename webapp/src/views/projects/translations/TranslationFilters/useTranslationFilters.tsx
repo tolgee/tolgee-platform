@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { AddParams, FiltersInternal, FiltersType } from './tools';
 
@@ -17,6 +19,31 @@ const LANGUAGE_SCOPES = [
   'filterQaCheckTypeLanguage',
 ] as const satisfies readonly (keyof FiltersInternal)[];
 
+/**
+ * Drops every language-scoped filter whose language is no longer selected, or returns undefined
+ * when there is nothing to drop.
+ */
+export function withoutDanglingLanguageScopes(
+  filters: FiltersInternal,
+  newLanguages: string[] | undefined
+): FiltersInternal | undefined {
+  if (!newLanguages) {
+    return undefined;
+  }
+  const dangling = LANGUAGE_SCOPES.filter((scope) => {
+    const value = filters[scope];
+    return typeof value === 'string' && !newLanguages.includes(value);
+  });
+  if (!dangling.length) {
+    return undefined;
+  }
+  const updated = { ...filters };
+  dangling.forEach((scope) => {
+    updated[scope] = undefined;
+  });
+  return updated;
+}
+
 type Props = {
   filters: FiltersInternal;
   setFilters: (value: FiltersInternal) => void;
@@ -30,24 +57,21 @@ export const useTranslationFilters = ({
   selectedLanguages,
   baseLang,
 }: Props) => {
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
   function clearFiltersForRemovedLanguages(newLanguages: string[] | undefined) {
-    if (!newLanguages) {
-      return;
+    // the caller runs this from a debounce, so `filters` from that render can be several edits
+    // behind by now and writing it back would undo them
+    const updated = withoutDanglingLanguageScopes(
+      filtersRef.current,
+      newLanguages
+    );
+    if (updated) {
+      setFilters(updated);
     }
-    const dangling = LANGUAGE_SCOPES.filter((scope) => {
-      const value = filters[scope];
-      return typeof value === 'string' && !newLanguages.includes(value);
-    });
-    if (!dangling.length) {
-      return;
-    }
-    const updated = { ...filters };
-    dangling.forEach((scope) => {
-      updated[scope] = undefined;
-    });
-    setFilters(updated);
   }
 
   function addFilter(...params: AddParams) {
