@@ -19,6 +19,8 @@ import {
 const StyledHeader = styled('div')`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+  justify-self: start;
   min-height: 40px;
 
   &.toggleable {
@@ -118,7 +120,8 @@ export const ExportAdvancedSettings = ({
         </StyledTitle>
         {!lockedOpen && (
           <IconButton
-            sx={{ ml: 'auto', my: -1 }}
+            size="small"
+            sx={{ my: -1 }}
             aria-expanded={isOpen}
             aria-label={t(
               'export_advanced_settings_toggle',
