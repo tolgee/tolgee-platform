@@ -25,21 +25,15 @@ describe('Test no authentication mode', () => {
     gcy('global-user-menu-button').click();
 
     // needs have access to tokens
-    gcy('user-menu-user-settings')
-      .contains('Project API keys')
-      .should('be.visible');
-    gcy('user-menu-user-settings')
-      .contains('Personal Access Tokens')
-      .should('be.visible');
+    gcy('user-menu-api-keys').should('be.visible');
+    gcy('user-menu-pats').should('be.visible');
 
     // needs access to language and theme switching
     gcy('user-menu-language-switch').should('be.visible');
     gcy('user-menu-theme-switch').should('be.visible');
 
     // no access to profile and organization
-    gcy('user-menu-user-settings')
-      .contains('Account settings')
-      .should('not.exist');
+    gcy('user-menu-user-settings').should('not.exist');
     gcy('user-menu-organization-settings').should('not.exist');
     gcy('user-menu-logout').should('not.exist');
   });

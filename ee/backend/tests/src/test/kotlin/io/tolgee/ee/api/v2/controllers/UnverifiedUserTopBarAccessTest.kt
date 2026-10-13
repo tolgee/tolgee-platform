@@ -11,17 +11,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-// The top bar decides what to offer an unverified user from `isEmailVerified` alone, so what these
-// endpoints answer is the contract it mirrors.
 class UnverifiedUserTopBarAccessTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
 
   private lateinit var testData: BaseTestData
 
-  // Deleting the EmailVerification row directly throws a Hibernate
-  // TransientPropertyValueException on commit, because UserAccount.emailVerification is the
-  // inverse side of the association.
+  // UserAccount.emailVerification is the inverse side, so the row cannot be
+  // deleted directly without a TransientPropertyValueException on commit.
   private var pendingVerificationCode: String? = null
   private var originalFrontEndUrl: String? = null
 

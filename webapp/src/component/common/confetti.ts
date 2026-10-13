@@ -10,7 +10,6 @@ type ConfettiBit = {
   color: string;
 };
 
-/** Colours are passed in so this knows nothing about any particular palette. */
 export function runConfetti(
   canvas: HTMLCanvasElement,
   colors: string[],

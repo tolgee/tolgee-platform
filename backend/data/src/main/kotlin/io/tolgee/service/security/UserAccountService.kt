@@ -186,15 +186,7 @@ class UserAccountService(
   }
 
   @Transactional
-  fun createUser(
-    /**
-     * the user account to be created
-     */
-    userAccount: UserAccount,
-    /**
-     * The answer for the "Where did you hear about us?"
-     */
-  ): UserAccount {
+  fun createUser(userAccount: UserAccount): UserAccount {
     applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))

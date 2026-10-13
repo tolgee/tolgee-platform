@@ -1,6 +1,5 @@
 package io.tolgee.dtos.request.auth
 
-import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.ValidationConstants
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

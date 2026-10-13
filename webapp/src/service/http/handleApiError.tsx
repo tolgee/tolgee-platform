@@ -22,7 +22,6 @@ export const handleApiError = (
   init: RequestInit | undefined,
   options: RequestOptions
 ) => {
-  // ApiSchemaHttpService uppercases the method, fetch does not; compare both the same way.
   const isGetRequest =
     init?.method === undefined || init.method.toUpperCase() === 'GET';
 

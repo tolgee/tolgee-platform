@@ -898,6 +898,7 @@ declare namespace DataCy {
         "top-banner-content": true;
         "top-banner-dismiss-button": true;
         "top-bar-logo": true;
+        "top-bar-logo-link": true;
         "topbap-trial-popover-content": true;
         "topbar-trial-announcement": true;
         "topbar-trial-chip": true;
@@ -1029,11 +1030,13 @@ declare namespace DataCy {
         "trash-sort-button": true;
         "trash-table": true;
         "user-delete-organization-message-item": true;
+        "user-menu-api-keys": true;
         "user-menu-language-switch": true;
         "user-menu-logout": true;
         "user-menu-my-tasks": true;
         "user-menu-organization-settings": true;
         "user-menu-organization-switch": true;
+        "user-menu-pats": true;
         "user-menu-server-administration": true;
         "user-menu-theme-switch": true;
         "user-menu-user-settings": true;

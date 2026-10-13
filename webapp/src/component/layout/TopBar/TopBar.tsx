@@ -131,15 +131,15 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
         <Box flexGrow={1} display="flex">
           <Box data-cy="top-bar-logo">
             {appNavigation ? (
-              <StyledTolgeeLink to={'/'}>{logoContent}</StyledTolgeeLink>
+              <StyledTolgeeLink to={'/'} data-cy="top-bar-logo-link">
+                {logoContent}
+              </StyledTolgeeLink>
             ) : (
               logoContent
             )}
           </Box>
           {appNavigation && <TopBarAnnouncements {...announcementProps} />}
         </Box>
-        {/* Everything the survey's bar must not offer goes in here, so a child
-            added outside it is on the pre-verification survey by default. */}
         {appNavigation && (
           <>
             {user && isEmailVerified && <NotificationsTopBarButton />}

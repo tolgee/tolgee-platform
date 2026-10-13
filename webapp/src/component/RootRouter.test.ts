@@ -32,8 +32,6 @@ describe('RootRouter survey coverage', () => {
     expect(linksBefore(GATE)).toEqual(EXPECTED_UNGATED_ROUTES);
   });
 
-  // linksBefore only sees LINKS.X.template, so count the route elements too: a
-  // route added above the gate with a literal path would be invisible otherwise.
   // The extra one is the pathless <Route> that wraps the gate.
   it('has no route above the gate that this file cannot name', () => {
     const routesAbove = source

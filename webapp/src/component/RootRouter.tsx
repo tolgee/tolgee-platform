@@ -49,9 +49,6 @@ const OAuth2ConsentView = React.lazy(
 export const RootRouter = () => {
   return (
     <Switch>
-      {/* Auth and account callbacks. A survey is pending for exactly the users
-          who land here, so gating these swallows the verification link they
-          just followed. RootRouter.test.ts pins this list. */}
       <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
         <PasswordResetView />
       </Route>
