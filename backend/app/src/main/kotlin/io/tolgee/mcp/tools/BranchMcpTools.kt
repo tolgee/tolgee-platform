@@ -115,8 +115,7 @@ class BranchMcpTools(
       "delete_branch",
       "Delete branch",
       McpToolEffect.DESTRUCTIVE,
-      "Delete a branch from a Tolgee project. " +
-        "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
+      "Delete a branch from a Tolgee project.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("branchName", "Name of the branch to delete", required = true)
