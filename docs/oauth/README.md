@@ -508,6 +508,20 @@ each new method through unchallenged until somebody noticed. A body the filter c
 over the peek cap, unparseable, or a JSON-RPC batch. None of those can be one of the four above, whose bodies are
 tiny single objects, so the cost to an honest caller is one retry with a credential.
 
+### Which tools an MCP client sees
+
+`McpConfig` builds two MCP servers on the same endpoint and picks one per request:
+
+- An OAuth token, or no credential at all, gets the server without `McpConfig.OAUTH_UNAVAILABLE_TOOLS`
+  (today only `create_project`).
+- A personal access token or a project API key gets the full server.
+
+`create_project` is an organization action. The consent screen can only grant project scopes, so the tool would
+refuse every OAuth token. Hiding it means a client is never offered a tool that cannot work for it. A client
+with no credential gets the short list because it will most likely log in through OAuth. Clients that use a
+personal access token or an API key send it on every call, so they still get the full list. A call to a hidden
+tool fails with "Tool not found", and `McpRequestContext` would still refuse it if it ran.
+
 ## Where it lives in the code
 
 The authorization server is Tolgee's own code, not a library: the authorization-code grant with PKCE for public
