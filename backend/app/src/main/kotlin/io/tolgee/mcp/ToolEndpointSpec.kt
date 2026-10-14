@@ -42,6 +42,7 @@ data class ToolEndpointSpec(
   val requiredOneOfFeatures: Array<out Feature>? = null,
   val activityType: ActivityType? = null,
   val rateLimitPolicy: RateLimitSpec? = null,
+  val allowsOAuthToken: Boolean = allowedTokenType == AuthTokenType.ANY,
 )
 
 fun buildSpec(

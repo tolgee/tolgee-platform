@@ -626,17 +626,18 @@ These are known gaps, deferred to the client rounds that first exercise them:
   narrower than requested, and it is the user's own account — and the cost is that the client discovers the
   missing scope at its first API call rather than at consent.
 
-- **An all-projects token cannot enumerate the projects it reaches.** `*` means "every project this user can
-  currently see", a set that changes with their membership, so a client cannot cache it — and nothing lets it ask:
-  neither project-listing route admits an OAuth token: `getAll` is `ONLY_PAT` and `getAllWithStatistics` carries no
-  `@AllowApiAccess` at all, and MCP's `listProjectsSpec` is refused for the same reason. Note what does *not* do
+- **An all-projects token cannot enumerate the projects it reaches over REST.** `*` means "every project this user
+  can currently see", a set that changes with their membership, so a client cannot cache it — and no REST route
+  lets it ask: `getAll` is `ONLY_PAT` and `getAllWithStatistics` carries no `@AllowApiAccess` at all. MCP is the
+  exception: the `list_projects` tool opts in through `ToolEndpointSpec.allowsOAuthToken` and returns the user's
+  permitted projects narrowed to the token's project set. Note what does *not* do
   that work: `@IsGlobalRoute` short-circuits `AbstractAuthorizationInterceptor.preHandle` before either
   authorization interceptor runs, and `AuthenticationInterceptor.isOAuthAllowed` inspects only
   `@AllowApiAccess.tokenType`, so a global route is not gated for OAuth tokens — it is simply never asked. Not a
   boundary problem — every request is still narrowed by `coversProject()` and the user's live permissions, so the
   failure is "cannot discover", never "reaches further than intended". The browser extension is handed its project
-  by the page it edits; MCP is the round that needs discovery, and the follow-up is one non-global OAuth-reachable
-  route returning the token's projects. `AuthenticationFacade.implicitProjectId` answers it through the shared
+  by the page it edits; the follow-up for REST clients is one non-global OAuth-reachable route returning the token's
+  projects. `AuthenticationFacade.implicitProjectId` answers it through the shared
   `ScopedCredential.singleProjectId`, so `*` currently reads as "no project" — the opposite of what it means — and
   wants fixing in the same change.
 
@@ -741,9 +742,9 @@ These are known gaps, deferred to the client rounds that first exercise them:
 
 - **The "may an OAuth token reach this endpoint" rule still has two implementations.**
   `AuthenticationInterceptor` answers it for servlet dispatch and `McpRequestContext` answers it again for the MCP
-  RouterFunction, which no interceptor sees. Both now reduce to the same single condition
-  (`tokenType == ANY`), so the copies are trivially comparable, but a second condition would still have to be
-  added in both places. The same is true of the org-role refusal, which `OrganizationAuthorizationInterceptor`
+  RouterFunction, which no interceptor sees. Both start from the same condition (`tokenType == ANY`); MCP alone
+  lets a tool opt in on top of it (`ToolEndpointSpec.allowsOAuthToken`, used by `list_projects`), and a second
+  shared condition would still have to be added in both places. The same is true of the org-role refusal, which `OrganizationAuthorizationInterceptor`
   and `McpRequestContext.checkOrgRole` each state.
 
 - **Project API keys lose the author self-access bypass** (released behaviour, changed by
