@@ -1,16 +1,16 @@
 package io.tolgee.util
 
 import jakarta.persistence.OptimisticLockException
-import org.springframework.dao.CannotAcquireLockException
-import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.PessimisticLockingFailureException
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import java.sql.SQLException
 
 fun <T> executeInNewTransaction(
   transactionManager: PlatformTransactionManager,
-  isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
+  isolationLevel: Int = TransactionDefinition.ISOLATION_DEFAULT,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
   readOnly: Boolean = false,
   fn: (ts: TransactionStatus) -> T,
@@ -38,35 +38,40 @@ fun <T> executeInNewTransaction(
   )
 }
 
+private const val SERIALIZATION_FAILURE = "40001"
+private const val DEADLOCK_DETECTED = "40P01"
+private const val UNIQUE_VIOLATION = "23505"
+private val RETRYABLE_SQL_STATES = setOf(SERIALIZATION_FAILURE, DEADLOCK_DETECTED, UNIQUE_VIOLATION)
+
+/**
+ * "Repeatable" means retried: when an attempt fails on a locking, serialization or unique-violation conflict, [fn]
+ * runs again in a fresh transaction, so it can run several times. Anything the rollback does not undo (notifications,
+ * events, file storage) belongs after this call returns or in an afterCommit synchronization.
+ */
 fun <T> executeInNewRepeatableTransaction(
   transactionManager: PlatformTransactionManager,
   propagationBehavior: Int = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
-  isolationLevel: Int = TransactionDefinition.ISOLATION_READ_COMMITTED,
+  isolationLevel: Int = TransactionDefinition.ISOLATION_REPEATABLE_READ,
   fn: () -> T,
-): T {
-  var exception: Exception? = null
-  var repeats = 0
-  for (it in 1..100) {
-    try {
-      return executeInNewTransaction(
-        transactionManager,
-        propagationBehavior = propagationBehavior,
-        isolationLevel = isolationLevel,
-      ) {
-        fn()
-      }
-    } catch (e: Exception) {
-      when (e) {
-        is OptimisticLockException, is CannotAcquireLockException, is DataIntegrityViolationException -> {
-          exception = e
-          repeats++
-        }
-
-        else -> throw e
-      }
+): T =
+  tryUntil(
+    shouldRetry = { it.isRetryable() },
+    exceptionToThrow = { repeats, cause -> RepeatedlyCannotSerializeTransactionException(cause, repeats) },
+  ) {
+    executeInNewTransaction(
+      transactionManager,
+      propagationBehavior = propagationBehavior,
+      isolationLevel = isolationLevel,
+    ) {
+      fn()
     }
   }
-  throw RepeatedlyCannotSerializeTransactionException(exception!!, repeats)
+
+private fun Exception.isRetryable(): Boolean {
+  if (this is OptimisticLockException || this is PessimisticLockingFailureException) return true
+  return generateSequence<Throwable>(this) { it.cause }
+    .filterIsInstance<SQLException>()
+    .any { it.sqlState in RETRYABLE_SQL_STATES }
 }
 
 class RepeatedlyCannotSerializeTransactionException(
