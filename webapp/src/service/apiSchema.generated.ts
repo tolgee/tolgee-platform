@@ -8075,6 +8075,8 @@ export interface components {
       subscriptionPrice?: number;
       total: number;
       translations: components["schemas"]["AverageProportionalUsageItemModel"];
+      /** @description Relevant for expected usage only. One-time charge for moving a yearly subscription to a higher tier for the rest of its billing year, included in the total. */
+      upgradeProrationTotal?: number;
     };
     UsedNamespaceModel: {
       /**
