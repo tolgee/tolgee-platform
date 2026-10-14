@@ -8,7 +8,6 @@ import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 
 /**
  * Shared helper for initializing batch job state from the database.
@@ -23,11 +22,7 @@ class BatchJobStateInitializer(
     logger.debug("Initializing batch job state for job $jobId")
     // we want to get state which is not affected by current transaction
     val executions =
-      executeInNewTransaction(
-        platformTransactionManager,
-        isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
-        readOnly = true,
-      ) {
+      executeInNewTransaction(platformTransactionManager, readOnly = true) {
         entityManager
           .createQuery(
             """
