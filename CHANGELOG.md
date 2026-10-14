@@ -1,3 +1,10 @@
+## [3.234.1](https://github.com/tolgee/tolgee-platform/compare/v3.234.0...v3.234.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* stop the log flood from batch translation jobs that hit a plan or credit limit ([#3969](https://github.com/tolgee/tolgee-platform/issues/3969)) ([fed205a](https://github.com/tolgee/tolgee-platform/commit/fed205ad23004b826ab7a544ee35c446a2205553)), closes [#3642](https://github.com/tolgee/tolgee-platform/issues/3642)
+
 # [3.234.0](https://github.com/tolgee/tolgee-platform/compare/v3.233.0...v3.234.0) (2026-10-13)
 
 
