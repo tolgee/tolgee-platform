@@ -7,6 +7,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
+import jakarta.annotation.PreDestroy
 import org.springframework.ai.mcp.server.webmvc.transport.WebMvcStatelessServerTransport
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
@@ -22,6 +23,8 @@ import tools.jackson.databind.ObjectMapper
  */
 @Configuration
 class McpConfig {
+  private val servers = mutableListOf<McpStatelessSyncServer>()
+
   @Bean
   fun mcpRouterFunction(
     versionProvider: VersionProvider,
@@ -30,13 +33,20 @@ class McpConfig {
   ): RouterFunction<ServerResponse> {
     val fullTransport = createTransport()
     val oauthTransport = createTransport()
-    createServer(fullTransport, versionProvider, toolsProviders)
+    val fullServer = createServer(fullTransport, versionProvider, toolsProviders)
     val oauthServer = createServer(oauthTransport, versionProvider, toolsProviders)
     OAUTH_UNAVAILABLE_TOOLS.forEach { oauthServer.removeTool(it) }
+    servers.addAll(listOf(fullServer, oauthServer))
 
     return RouterFunction { request ->
       transportFor(authenticationFacade, fullTransport, oauthTransport).routerFunction.route(request)
     }
+  }
+
+  @PreDestroy
+  fun closeServers() {
+    servers.forEach { runCatching { it.close() } }
+    servers.clear()
   }
 
   private fun transportFor(
