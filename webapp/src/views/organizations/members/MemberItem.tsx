@@ -12,7 +12,7 @@ import {
   Link as MuiLink,
 } from '@mui/material';
 import { XClose, InfoCircle } from '@untitled-ui/icons-react';
-import { useIsAdmin, useUser } from 'tg.globalContext/helpers';
+import { useUser } from 'tg.globalContext/helpers';
 import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -73,22 +73,19 @@ const StyledItemUser = styled('div')`
 
 type Props = {
   user: UserAccountWithOrganizationRoleModel;
+  canManage: boolean;
 };
 
 export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
   user,
+  canManage,
 }) => {
   const { t } = useTranslate();
   const currentUser = useUser();
-  const isAdmin = useIsAdmin();
   const organization = useOrganization();
   const leaveOrganization = useLeaveOrganization();
 
   const [projectsOpen, setProjectsOpen] = useState(false);
-
-  // A SUPPORTER's bypass is read-only (OrganizationAuthorizationInterceptor.canBypass), so the
-  // disable, enable and remove calls below would 403 for them.
-  const canManageMembers = organization?.currentUserRole === 'OWNER' || isAdmin;
 
   const renderMemberAction = () => {
     if (currentUser?.id === user.id) {
@@ -107,7 +104,7 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
         </Tooltip>
       );
     }
-    if (!canManageMembers) {
+    if (!canManage) {
       return null;
     }
     if (user.managed) {
@@ -147,21 +144,25 @@ export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
             </>
           )}
         </StyledItemText>
-        <StyledMfaBadgeWrapper>
-          <MfaBadge enabled={user.mfaEnabled} />
-        </StyledMfaBadgeWrapper>
+        {typeof user.mfaEnabled === 'boolean' && (
+          <StyledMfaBadgeWrapper data-cy="organization-member-mfa-badge">
+            <MfaBadge enabled={user.mfaEnabled} />
+          </StyledMfaBadgeWrapper>
+        )}
       </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (
-          <UpdateRoleButton user={user} />
+          <UpdateRoleButton user={user} canManage={canManage} />
         ) : (
           <>
             <Tooltip title={t('organization_users_project_access_hint')}>
               <StyledInfo fontSize="small" />
             </Tooltip>
-            <Button size="small" onClick={() => setProjectsOpen(true)}>
-              {t('organization_users_project_access')}
-            </Button>
+            {user.projectsWithDirectPermission.length > 0 && (
+              <Button size="small" onClick={() => setProjectsOpen(true)}>
+                {t('organization_users_project_access')}
+              </Button>
+            )}
           </>
         )}
 
