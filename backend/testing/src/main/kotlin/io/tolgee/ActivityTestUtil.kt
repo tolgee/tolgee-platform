@@ -1,13 +1,27 @@
 package io.tolgee
 
+import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.model.activity.ActivityRevision
 import jakarta.persistence.EntityManager
+import org.hibernate.exception.LockAcquisitionException
 import org.springframework.stereotype.Component
+import java.sql.SQLException
 
 @Component
 class ActivityTestUtil(
   private val entityManager: EntityManager,
+  private val activityHolderProvider: ActivityHolderProvider,
 ) {
+  fun failCommitOnceAfterActivityStored() {
+    var failed = false
+    activityHolderProvider.getActivityHolder().afterActivityFlushed = {
+      if (!failed) {
+        failed = true
+        throw LockAcquisitionException("simulated", SQLException("could not serialize access", "40001"))
+      }
+    }
+  }
+
   fun getLastRevision(): ActivityRevision? {
     return entityManager
       .createQuery(

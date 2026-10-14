@@ -200,7 +200,7 @@ class KeyController(
   ): KeyWithDataModel {
     keyFacade.checkNamespaceFeature(dto.namespace)
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
-    return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
+    return KeyComplexEditHelper.edit(applicationContext, id, dto)
   }
 
   @DeleteMapping(value = [""])
