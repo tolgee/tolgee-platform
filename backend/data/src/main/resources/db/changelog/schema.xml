@@ -6102,6 +6102,7 @@
             CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_translation_lang_text_md5
                 ON translation (language_id, (md5(text)::uuid));
         </sql>
+        <sql dbms="postgresql">analyze translation;</sql>
         <rollback>
             <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
         </rollback>
