@@ -1,5 +1,6 @@
 package io.tolgee.mcp
 
+import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
 import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.McpOAuthTestData
@@ -77,8 +78,18 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `a tool outside the project-scoped surface is refused for any OAuth token`() {
-    val token = tokenFor(Scope.entries.map { it.value }, testData.project.id)
+  fun `an OAuth client is not offered create_project`() {
+    val token = tokenFor(Scope.entries.map { it.value }, null)
+
+    val toolNames = listedToolNames(createMcpClientWithBearer(token))
+
+    assertThat(toolNames).contains("list_projects")
+    assertThat(toolNames).doesNotContain("create_project")
+  }
+
+  @Test
+  fun `create_project cannot be called with an OAuth token`() {
+    val token = tokenFor(Scope.entries.map { it.value }, null)
 
     assertToolFails(
       createMcpClientWithBearer(token),
@@ -88,8 +99,23 @@ class McpOAuthAccessTest : AbstractMcpTest() {
         "organizationId" to testData.project.organizationOwner.id,
         "languages" to listOf(mapOf("name" to "English", "tag" to "en")),
       ),
-      expectedError = "oauth_access_not_allowed",
+      expectedError = "create_project",
     )
+  }
+
+  @Test
+  fun `a client that has not logged in is not offered create_project`() {
+    assertThat(listedToolNames(createMcpClientWithoutAuth())).doesNotContain("create_project")
+  }
+
+  @Test
+  fun `a personal access token client is offered create_project`() {
+    val patData = createTestDataWithPat()
+    try {
+      assertThat(listedToolNames(createMcpClientWithPat(patData.pat.token!!))).contains("create_project")
+    } finally {
+      testDataService.cleanTestData(patData.testData.root)
+    }
   }
 
   @Test
@@ -197,14 +223,16 @@ class McpOAuthAccessTest : AbstractMcpTest() {
     return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
   }
 
+  private fun listedToolNames(client: McpSyncClient): List<String> = client.listTools().tools().map { it.name() }
+
   private fun tokenFor(
     scopes: List<String>,
-    projectId: Long,
+    projectId: Long?,
   ): String =
     oauth2Tokens.issue(
       subject = testData.user.id,
       scopes = scopes,
-      projectIds = listOf(projectId),
+      projectIds = projectId?.let { listOf(it) },
       audience = OAuth2Audience.MCP,
     )
 }
