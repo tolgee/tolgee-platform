@@ -13,6 +13,7 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.StreamingUnavailableException
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.security.ratelimit.RateLimitBlockedException
@@ -187,6 +188,13 @@ class ExceptionHandlers(
       builder.header(HttpHeaders.WWW_AUTHENTICATE, it)
     }
     return builder.body(ex.errorResponseBody)
+  }
+
+  @ExceptionHandler(OutOfCreditsException::class)
+  fun handleOutOfCredits(ex: OutOfCreditsException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST)
+      .body(ErrorResponseBody(ex.reason.tolgeeMessage.code, null))
   }
 
   @ExceptionHandler(EntityNotFoundException::class)

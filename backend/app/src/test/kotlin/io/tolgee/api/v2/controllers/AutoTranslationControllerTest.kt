@@ -49,6 +49,17 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns bad request when out of credits`() {
+    initMachineTranslationProperties(0)
+    saveTestData()
+    performProjectAuthPut(
+      "keys/${testData.thisIsBeautifulKey.id}/auto-translate?useMachineTranslation=true&languages=de",
+      null,
+    ).andIsBadRequest.andHasErrorMessage(Message.OUT_OF_CREDITS)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `auto translates manually only specified language`() {
     saveTestData()
     performProjectAuthPut(
