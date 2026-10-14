@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.databind.JsonNode
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -81,9 +82,38 @@ class McpOAuthAccessTest : AbstractMcpTest() {
 
     assertToolFails(
       createMcpClientWithBearer(token),
-      "list_projects",
+      "create_project",
+      mapOf(
+        "name" to "OAuth project",
+        "organizationId" to testData.project.organizationOwner.id,
+        "languages" to listOf(mapOf("name" to "English", "tag" to "en")),
+      ),
       expectedError = "oauth_access_not_allowed",
     )
+  }
+
+  @Test
+  fun `list_projects returns only the project a token is bound to`() {
+    val token = tokenFor(listOf(Scope.KEYS_VIEW.value), testData.project.id)
+
+    val result = callToolAndGetJson(createMcpClientWithBearer(token), "list_projects")
+
+    assertThat(listedProjectIds(result)).isEqualTo(listOf(testData.project.id))
+  }
+
+  @Test
+  fun `list_projects returns every project the user can reach for an all-projects token`() {
+    val token =
+      oauth2Tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.KEYS_VIEW.value),
+        projectIds = null,
+        audience = OAuth2Audience.MCP,
+      )
+
+    val result = callToolAndGetJson(createMcpClientWithBearer(token), "list_projects")
+
+    assertThat(listedProjectIds(result).containsAll(listOf(testData.project.id, testData.otherProject.id))).isTrue()
   }
 
   @Test
@@ -143,6 +173,11 @@ class McpOAuthAccessTest : AbstractMcpTest() {
       .orElse("")
       .assert
       .contains("invalid_token")
+  }
+
+  private fun listedProjectIds(result: JsonNode): List<Long> {
+    val items = result["items"]
+    return (0 until items.size()).map { items[it]["id"].asLong() }
   }
 
   private fun projectArgument() = mapOf("projectId" to testData.project.id)
