@@ -182,49 +182,41 @@ class QaCheckBatchServiceImpl(
     results: List<ItemResult>,
     checkTypes: List<QaCheckType>?,
   ) {
-    executeInNewRepeatableTransaction(transactionManager) {
-      results
-        .mapNotNull { result ->
-          // Create / Get translation entities
+    val events =
+      executeInNewRepeatableTransaction(transactionManager) {
+        results
+          .mapNotNull { result ->
+            if (result.results.isEmpty() && !result.hadExistingTranslation) return@mapNotNull null
 
-          if (result.results.isEmpty() && !result.hadExistingTranslation) return@mapNotNull null
+            // Second most expensive operation here - we deal with each translation separately
+            // Might be worth batching this in single query in future
+            val translation = translationService.getOrCreate(projectId, result.keyId, result.languageId)
 
-          // Second most expensive operation here - we deal with each translation separately
-          // Might be worth batching this in single query in future
-          val translation = translationService.getOrCreate(projectId, result.keyId, result.languageId)
+            // Only clear the stale flag if the translation text hasn't changed since we collected inputs.
+            // If it changed, QaActivityListener already marked it stale again, and a new batch job
+            // will re-check with the updated text.
+            if (checkTypes == null && (translation.text ?: "") == result.textSnapshot) {
+              translation.qaChecksStale = false
+            }
 
-          // Only clear the stale flag if the translation text hasn't changed since we collected inputs.
-          // If it changed, QaActivityListener already marked it stale again, and a new batch job
-          // will re-check with the updated text.
-          if (checkTypes == null && (translation.text ?: "") == result.textSnapshot) {
-            translation.qaChecksStale = false
+            // Disable activity logging — no content changes are happening here.
+            // Without this, when we create a new empty translation (so we can reference it from QA issues),
+            // it gets logged.
+            translation.disableActivityLogging = true
+            translationService.save(translation)
+
+            translation to result
+          }.also {
+            val resultsByTranslationId = it.associate { (t, itemResult) -> t.id to itemResult.results }
+            qaIssueService.replaceIssuesForTranslations(
+              resultsByTranslationId = resultsByTranslationId,
+              checkTypes = checkTypes,
+            )
+          }.map { (translation, result) ->
+            QaIssuesUpdatedEvent(translation.id, result.keyId, result.languageTag, translation.qaChecksStale)
           }
-
-          // Disable activity logging — no content changes are happening here.
-          // Without this, when we create a new empty translation (so we can reference it from QA issues),
-          // it gets logged.
-          translation.disableActivityLogging = true
-          translationService.save(translation)
-
-          translation to result
-        }.also {
-          // Save QA issues
-
-          val resultsByTranslationId = it.associate { (t, itemResult) -> t.id to itemResult.results }
-          qaIssueService.replaceIssuesForTranslations(
-            resultsByTranslationId = resultsByTranslationId,
-            checkTypes = checkTypes,
-          )
-        }.map { (translation, result) ->
-          // Create events for updated QA issues
-
-          QaIssuesUpdatedEvent(translation.id, result.keyId, result.languageTag, translation.qaChecksStale)
-        }.also { events ->
-          // Send events
-
-          qaIssueService.publishQaIssuesUpdated(projectId, events)
-        }
-    }
+      }
+    qaIssueService.publishQaIssuesUpdated(projectId, events)
   }
 
   private fun findGlossaryTerms(
