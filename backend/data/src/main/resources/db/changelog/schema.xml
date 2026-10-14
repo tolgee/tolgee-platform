@@ -6079,11 +6079,14 @@
             ::uuid cast, otherwise they silently skip this index.
 
             An interrupted CONCURRENTLY build leaves an INVALID index of this name that
-            CREATE ... IF NOT EXISTS would skip on retry, so drop any such leftover first.
+            CREATE ... IF NOT EXISTS would skip on retry, so drop any such leftover first. The
+            drop has a lock_timeout because while it waits for its lock, every read and write on
+            translation queues behind it.
         </comment>
         <sql dbms="postgresql" splitStatements="false"><![CDATA[
             DO $$
             BEGIN
+              SET LOCAL lock_timeout = '5s';
               IF EXISTS (
                 SELECT 1
                 FROM pg_class c
