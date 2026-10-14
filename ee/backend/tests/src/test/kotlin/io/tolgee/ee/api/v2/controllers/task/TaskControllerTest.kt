@@ -1,6 +1,8 @@
 package io.tolgee.ee.api.v2.controllers.task
 
+import io.tolgee.ActivityTestUtil
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
@@ -13,6 +15,8 @@ import io.tolgee.ee.data.task.UpdateTaskKeyRequest
 import io.tolgee.ee.data.task.UpdateTaskKeysRequest
 import io.tolgee.ee.data.task.UpdateTaskRequest
 import io.tolgee.ee.repository.TaskRepository
+import io.tolgee.ee.service.TaskService
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -21,6 +25,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.notifications.NotificationType.TASK_CANCELED
 import io.tolgee.model.notifications.NotificationType.TASK_FINISHED
+import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.repository.notification.NotificationRepository
@@ -30,8 +35,16 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import org.springframework.dao.CannotAcquireLockException
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 
@@ -47,6 +60,16 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil
+
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
+
+  @Autowired
+  @MockitoSpyBean
+  private lateinit var taskServiceSpy: TaskService
+
+  @Autowired
+  private lateinit var activityUtil: ActivityTestUtil
 
   @Autowired
   private lateinit var taskService: ITaskService
@@ -142,10 +165,55 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     executeInNewTransaction {
       assertThat(notificationUtil.newestInAppNotification().linkedTask?.name).isEqualTo("Another task")
       waitForNotThrowing(timeout = 2000, pollTime = 25) {
-        assertThat(
-          notificationUtil.newestEmailNotification(),
-        ).contains("/projects/${testData.project.id}/task?number=3")
+        assertThat(emailTestUtil.singleEmailContent).contains("/projects/${testData.project.id}/task?number=3")
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a retried task creation notifies the assignee once and records one TASK_CREATE activity`() {
+    var failedOnce = false
+    doAnswer { invocation ->
+      val task = invocation.callRealMethod()
+      if (!failedOnce) {
+        failedOnce = true
+        TransactionSynchronizationManager.registerSynchronization(
+          object : TransactionSynchronization {
+            override fun beforeCommit(readOnly: Boolean) {
+              throw CannotAcquireLockException("simulated serialization failure")
+            }
+          },
+        )
+      }
+      task
+    }.whenever(taskServiceSpy).createTaskInTransaction(any(), any(), any(), anyOrNull())
+    val lastRevisionBefore = executeInNewTransaction { activityUtil.getLastRevision()?.id ?: 0L }
+
+    performProjectAuthPost(
+      "tasks",
+      CreateTaskRequest(
+        name = "Retried task",
+        description = "...",
+        type = TaskType.TRANSLATE,
+        languageId = testData.englishLanguage.id,
+        assignees = mutableSetOf(testData.user.id),
+        keys = testData.keysOutOfTask.map { it.self.id }.toMutableSet(),
+      ),
+    ).andAssertThatJson {
+      node("name").isEqualTo("Retried task")
+    }
+
+    assertThat(failedOnce).isTrue
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      assertThat(emailTestUtil.singleEmailContent).contains("/projects/${testData.project.id}/task?number=")
+    }
+    executeInNewTransaction {
+      val created = activityUtil.findRevisionsAfter(lastRevisionBefore).filter { it.type == ActivityType.TASK_CREATE }
+      assertThat(created).hasSize(1)
+      assertThat(created.single().modifiedEntities.filter { it.entityClass == Task::class.simpleName }).hasSize(1)
+      assertThat(created.single().projectId).isEqualTo(testData.project.id)
+      assertThat(created.single().authorId).isEqualTo(testData.user.id)
     }
   }
 

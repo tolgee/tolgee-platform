@@ -27,6 +27,7 @@ import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
 import org.hibernate.collection.spi.AbstractPersistentCollection
+import org.hibernate.engine.spi.TransactionCompletionCallbacks.AfterCompletionCallback
 import org.hibernate.engine.spi.TransactionCompletionCallbacks.BeforeCompletionCallback
 import org.hibernate.event.spi.EventSource
 import org.slf4j.LoggerFactory
@@ -414,6 +415,9 @@ class InterceptedEventsManager(
   fun initActivityHolder() {
     if (!activityHolder.activityRevision.isInitializedByInterceptor) {
       initializeActivityRevision()
+      // both callbacks land on the session that is current now; a REQUIRES_NEW transaction opened later on another
+      // session (outer @Transactional already initialized the holder) gets neither, so its rollback does not reset
+      registerResetOnRollback()
       registerBeforeCompletion()
     }
   }
@@ -424,7 +428,19 @@ class InterceptedEventsManager(
     }
   }
 
+  private fun registerResetOnRollback() {
+    val registeredFor = activityHolder.activityRevision
+    entityManager.unwrap(EventSource::class.java).actionQueue.registerCallback(
+      AfterCompletionCallback { success, _ ->
+        if (!success && activityHolder.activityRevision === registeredFor) {
+          activityHolder.resetAfterRollback()
+        }
+      },
+    )
+  }
+
   private fun registerBeforeCompletion() {
+    val registeredFor = activityHolder.activityRevision
     entityManager.unwrap(EventSource::class.java).actionQueue.registerCallback(
       BeforeCompletionCallback {
         if (it.transaction.isActive) {
@@ -432,7 +448,7 @@ class InterceptedEventsManager(
             return@BeforeCompletionCallback
           }
           val activityRevision = activityHolder.activityRevision
-          if (!activityRevision.isInitializedByInterceptor) {
+          if (activityRevision !== registeredFor || !activityRevision.isInitializedByInterceptor) {
             return@BeforeCompletionCallback
           }
           logger.debug("Publishing project activity event")

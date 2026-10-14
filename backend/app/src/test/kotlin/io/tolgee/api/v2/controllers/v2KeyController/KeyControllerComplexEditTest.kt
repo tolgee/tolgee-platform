@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import io.tolgee.ActivityTestUtil
 import io.tolgee.Metrics
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
@@ -22,8 +23,11 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.translation.Translation
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -31,11 +35,18 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.core.io.InputStreamSource
+import org.springframework.dao.CannotAcquireLockException
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -45,6 +56,13 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Autowired
   lateinit var bigMetaService: BigMetaService
+
+  @Autowired
+  @MockitoSpyBean
+  lateinit var keyMetaServiceSpy: KeyMetaService
+
+  @Autowired
+  lateinit var activityUtil: ActivityTestUtil
 
   @Autowired
   lateinit var metrics: Metrics
@@ -425,6 +443,55 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
       keyService.get(testData.keyWithReferences.id).let {
         assertThat(it.keyMeta!!.description).isEqualTo("Changed!")
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a retried complex edit stores its changes and one activity revision`() {
+    var failedOnce = false
+    doAnswer { invocation ->
+      val result = invocation.callRealMethod()
+      if (!failedOnce) {
+        failedOnce = true
+        TransactionSynchronizationManager.registerSynchronization(
+          object : TransactionSynchronization {
+            override fun beforeCommit(readOnly: Boolean) {
+              throw CannotAcquireLockException("simulated serialization failure")
+            }
+          },
+        )
+      }
+      result
+    }.whenever(keyMetaServiceSpy).getOrCreateForKey(any())
+    val lastRevisionBefore = executeInNewTransaction { activityUtil.getLastRevision()?.id ?: 0L }
+
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.keyWithReferences.name,
+        description = "Changed after retry",
+        translations = mapOf("en" to "Translated after retry"),
+      ),
+    ).andIsOk
+
+    assertThat(failedOnce).isTrue
+    executeInNewTransaction {
+      val revisions = activityUtil.findRevisionsAfter(lastRevisionBefore)
+      assertThat(revisions).hasSize(1)
+      assertThat(revisions.single().modifiedEntities.filter { it.entityClass == KeyMeta::class.simpleName }).hasSize(1)
+      assertThat(
+        revisions.single().modifiedEntities.filter { it.entityClass == Translation::class.simpleName },
+      ).hasSize(1)
+      assertThat(keyService.get(testData.keyWithReferences.id).keyMeta!!.description).isEqualTo("Changed after retry")
+      val enTexts =
+        entityManager
+          .createQuery(
+            "select t.text from Translation t where t.key.id = :keyId and t.language.tag = 'en'",
+            String::class.java,
+          ).setParameter("keyId", testData.keyWithReferences.id)
+          .resultList
+      assertThat(enTexts).containsExactly("Translated after retry")
     }
   }
 
