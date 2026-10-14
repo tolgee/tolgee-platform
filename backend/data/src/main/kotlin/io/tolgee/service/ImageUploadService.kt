@@ -17,6 +17,8 @@ import org.springframework.core.io.InputStreamSource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile
 import java.time.temporal.ChronoUnit
 import java.util.Date
@@ -75,8 +77,16 @@ class ImageUploadService(
 
   @Transactional
   fun delete(uploadedImage: UploadedImage) {
-    fileStorage.deleteFile(uploadedImage.filePath)
     uploadedImageRepository.delete(uploadedImage)
+    val filePath = uploadedImage.filePath
+    TransactionSynchronizationManager.registerSynchronization(
+      object : TransactionSynchronization {
+        override fun afterCommit() {
+          runCatching { fileStorage.deleteFile(filePath) }
+            .onFailure { logger.warn("Could not delete uploaded image file $filePath", it) }
+        }
+      },
+    )
   }
 
   fun find(ids: Collection<Long>): List<UploadedImage> {

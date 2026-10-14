@@ -57,4 +57,21 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     }
     assertThat(after[0].id).isEqualTo(storedNewer.id)
   }
+
+  @Test
+  fun `keeps the file when the deleting transaction rolls back`() {
+    val user = dbPopulator.createUserIfNotExists("user")
+    val stored = imageUploadService.store(screenshotFile, user, null)
+    val path = UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + stored.filenameWithExtension
+
+    assertThrows<IllegalStateException> {
+      executeInNewTransaction {
+        imageUploadService.delete(imageUploadService.find(listOf(stored.id)).single())
+        throw IllegalStateException("roll back after delete")
+      }
+    }
+
+    assertThat(fileStorage.readFile(path)).isNotEmpty
+    assertThat(imageUploadService.find(listOf(stored.id))).hasSize(1)
+  }
 }

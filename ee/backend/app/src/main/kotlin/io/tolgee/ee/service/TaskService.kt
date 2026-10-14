@@ -40,12 +40,12 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.task.AbstractTaskService
 import io.tolgee.util.executeInNewRepeatableTransaction
+import io.tolgee.util.executeInNewTransaction
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -146,26 +146,18 @@ class TaskService(
     filters: TranslationScopeFilters,
     agencyId: Long? = null,
   ): Task {
-    var lastErr = DataIntegrityViolationException("Error")
-    repeat(10) {
-      // necessary for proper transaction creation
-      try {
-        return executeInNewRepeatableTransaction(platformTransactionManager) {
-          val task = taskService.createTaskInTransaction(projectId, dto, filters, agencyId)
-          entityManager.flush()
-          task.assignees.forEach {
-            notifyNewAssignee(it, task)
-          }
-          task
-        }
-      } catch (e: DataIntegrityViolationException) {
-        lastErr = e
+    val taskId =
+      executeInNewRepeatableTransaction(platformTransactionManager) {
+        taskService.createTaskInTransaction(projectId, dto, filters, agencyId).id
       }
+    return executeInNewTransaction(platformTransactionManager) {
+      val task = taskRepository.findById(taskId).orElseThrow { NotFoundException(Message.TASK_NOT_FOUND) }
+      task.assignees.forEach { notifyNewAssignee(it, task) }
+      task
     }
-    throw lastErr
   }
 
-  @Transactional()
+  @Transactional
   fun createTaskInTransaction(
     projectId: Long,
     dto: CreateTaskRequest,

@@ -178,8 +178,7 @@ class BatchJobActionService(
   }
 
   private fun rollbackActivity() {
-    activityHolder.modifiedEntities.clear()
-    activityHolder.activityRevision.describingRelations.clear()
+    activityHolder.resetAfterRollback()
   }
 
   private fun recordSpanError(
