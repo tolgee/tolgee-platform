@@ -1,3 +1,10 @@
+## [3.234.2](https://github.com/tolgee/tolgee-platform/compare/v3.234.1...v3.234.2) (2026-10-14)
+
+
+### Performance Improvements
+
+* index exact-text translation memory lookups ([#3974](https://github.com/tolgee/tolgee-platform/issues/3974)) ([14f08c7](https://github.com/tolgee/tolgee-platform/commit/14f08c7bbb9b3992cbd5839a0384018c09504ba2))
+
 ## [3.234.1](https://github.com/tolgee/tolgee-platform/compare/v3.234.0...v3.234.1) (2026-10-14)
 
 
