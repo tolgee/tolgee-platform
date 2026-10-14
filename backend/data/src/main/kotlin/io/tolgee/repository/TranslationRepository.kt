@@ -136,6 +136,9 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
    * MT pre-translate pipeline: the trigram-similarity suggestion query in
    * `AbstractTranslationMemoryService` is too slow to run per-key, so the hot path resolves
    * exact matches here and falls back to MT for the rest.
+   *
+   * The md5 probe goes through `sql()` because HQL `md5` renders as `decode(md5(..), 'hex')`,
+   * which doesn't match the `ix_translation_lang_text_md5` expression.
    */
   @Query(
     """
@@ -144,13 +147,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       from Translation baseTranslation
       join baseTranslation.key k
       left join k.branch b
-      join k.project p
       join Translation target on
             target.key = k and
             target.language.id = :targetLanguageId and
             target.text <> '' and
             target.text is not null
-      where baseTranslation.language = p.baseLanguage and
+      where baseTranslation.language.id = :baseLanguageId and
+        sql('md5(?)::uuid', baseTranslation.text) = sql('md5(?)::uuid', :baseTranslationText) and
         baseTranslation.text = :baseTranslationText and
         k <> :key and
         k.deletedAt is null and
@@ -162,6 +165,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslationMemoryValue(
     baseTranslationText: String,
     key: Key,
+    baseLanguageId: Long,
     targetLanguageId: Long,
     pageable: Pageable = Pageable.ofSize(1),
   ): List<TranslationMemoryItemView>

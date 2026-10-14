@@ -140,6 +140,18 @@ class TmAutoTranslateProviderEeImplTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `translation has an index for the exact base-text probe`() {
+    val indexDefs =
+      entityManager
+        .createNativeQuery("select indexdef from pg_indexes where tablename = 'translation'")
+        .resultList
+
+    assertThat(indexDefs).anySatisfy {
+      assertThat(it as String).endsWith("USING btree (language_id, ((md5(text))::uuid))")
+    }
+  }
+
+  @Test
   fun `with feature disabled, auto-translate falls back to classic path and finds no match`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val germanId = testData.helloKeyGermanTranslation.id
