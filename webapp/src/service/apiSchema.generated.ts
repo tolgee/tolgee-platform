@@ -3026,6 +3026,7 @@ export interface components {
         | "request_validation_error"
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
+        | "filter_by_value_task_not_valid"
         | "filter_pattern_not_valid"
         | "filter_pattern_language_not_valid"
         | "import_has_expired"
@@ -7027,6 +7028,7 @@ export interface components {
         | "request_validation_error"
         | "filter_by_value_state_not_valid"
         | "filter_by_value_qa_check_type_not_valid"
+        | "filter_by_value_task_not_valid"
         | "filter_pattern_not_valid"
         | "filter_pattern_language_not_valid"
         | "import_has_expired"
@@ -20023,6 +20025,8 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK and NEVER_IN_TASK require the key to be free in all of them. Does not affect filterTaskNumber. */
+        filterTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -20298,6 +20302,8 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK and NEVER_IN_TASK require the key to be free in all of them. Does not affect filterTaskNumber. */
+        filterTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -20617,6 +20623,8 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK and NEVER_IN_TASK require the key to be free in all of them. Does not affect filterTaskNumber. */
+        filterTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -25306,6 +25314,12 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
+        filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;
@@ -25369,6 +25383,12 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
+        filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;
@@ -25432,6 +25452,12 @@ export interface operations {
         )[];
         /** Include keys where translation is outdated */
         filterOutdated?: boolean;
+        /** Filter by task membership, as `taskType,status` — e.g. `TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Evaluated against the task language, so a key already tasked for one language is still included for the others. Conditions on different task types are combined with AND. */
+        filterTaskInStatus?: string[];
+        /** Include only keys that have an active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not pull the key into the others. */
+        filterHasSuggestions?: boolean;
+        /** Include only keys that have no active suggestion in the task language. Evaluated per language, so a suggestion in one target language does not drop the key from the others. */
+        filterHasNoSuggestions?: boolean;
       };
       path: {
         projectId: number;
@@ -26683,6 +26709,8 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK and NEVER_IN_TASK require the key to be free in all of them. Does not affect filterTaskNumber. */
+        filterTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
@@ -27170,6 +27198,8 @@ export interface operations {
         filterTaskKeysNotDone?: boolean;
         /** Filter task keys which are `done` */
         filterTaskKeysDone?: boolean;
+        /** Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK and NEVER_IN_TASK require the key to be free in all of them. Does not affect filterTaskNumber. */
+        filterTaskInLang?: string[];
         /** Filter keys with unresolved comments in lang */
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */

@@ -638,6 +638,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthGet(
       "/translations?filterTaskNumber=${testData.translateTask.self.number}",
     ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(2)
       node("_embedded.keys") {
         isArray.hasSize(2)
         node("[0].keyName").isEqualTo("key 0")
@@ -647,6 +648,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthGet(
       "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysNotDone=true",
     ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(1)
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 1")
@@ -655,6 +657,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     performProjectAuthGet(
       "/translations?filterTaskNumber=${testData.translateTask.self.number}&filterTaskKeysDone=true",
     ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(1)
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 0")

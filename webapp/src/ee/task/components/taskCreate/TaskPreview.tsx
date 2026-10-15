@@ -6,10 +6,10 @@ import { components } from 'tg.service/apiSchema.generated';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
-import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
+import { TaskType } from 'tg.service/apiSchemaTypes';
+import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
 
-type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeysScopeView = components['schemas']['KeysScopeView'];
 
@@ -43,28 +43,28 @@ const StyledSmallCaption = styled('div')`
 `;
 
 type Props = {
-  type: TaskType;
   language: LanguageModel;
   assignees: User[];
   onUpdateAssignees: (users: User[]) => void;
   projectId: number;
   hideAssignees?: boolean;
   scope: KeysScopeView | undefined;
+  type: TaskType;
 };
 
 export const TaskPreview = ({
-  type,
   language,
   assignees,
   onUpdateAssignees,
   projectId,
   hideAssignees,
   scope,
+  type,
 }: Props) => {
   const { t } = useTranslate();
-  const formatNumber = useNumberFormatter();
   const theme = useTheme();
   const translateTaskType = useTaskTypeTranslation();
+  const formatNumber = useNumberFormatter();
 
   return (
     <StyledContainer

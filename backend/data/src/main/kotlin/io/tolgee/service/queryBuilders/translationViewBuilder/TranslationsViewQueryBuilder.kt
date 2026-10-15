@@ -25,6 +25,7 @@ class TranslationsViewQueryBuilder(
   private val entityManager: EntityManager,
   private val qaEnabled: Boolean,
   private val qaDisabledLanguageIds: Set<Long>,
+  private val tasksEnabled: Boolean,
 ) {
   private fun <T> getBaseQuery(
     query: CriteriaQuery<T>,
@@ -39,6 +40,7 @@ class TranslationsViewQueryBuilder(
       entityManager,
       qaEnabled = qaEnabled,
       qaDisabledLanguageIds = qaDisabledLanguageIds,
+      tasksEnabled = tasksEnabled,
       isCountQuery = isCountQuery,
     )
   }
