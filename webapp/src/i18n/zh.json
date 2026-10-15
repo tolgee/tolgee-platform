@@ -1554,6 +1554,8 @@
   "invoice_usage_dialog_table_subtotal": "小计",
   "invoice_usage_dialog_table_total": "总计",
   "invoice_usage_dialog_table_translations_item": "字符串",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, other {结算年剩余 # 天，于 {date} 扣费}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "升级至 {words, number} 字",
   "invoice_usage_dialog_table_vat": "增值税",
   "invoice_usage_dialog_table_vat_rate": "增值税率",
   "invoice_usage_dialog_title": "用量详情",

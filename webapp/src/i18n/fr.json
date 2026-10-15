@@ -1552,6 +1552,8 @@
   "invoice_usage_dialog_table_subtotal": "Sous-total",
   "invoice_usage_dialog_table_total": "Total",
   "invoice_usage_dialog_table_translations_item": "Chaînes",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# jour restant de l'année de facturation, facturé {date}} many {# jour restant de l'année de facturation, facturé {date}} other {# jours restants de l'année de facturation, facturé {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Passage à {words, number} mots",
   "invoice_usage_dialog_table_vat": "TVA",
   "invoice_usage_dialog_table_vat_rate": "Taux de TVA",
   "invoice_usage_dialog_title": "Détails d’utilisation",

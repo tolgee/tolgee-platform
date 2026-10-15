@@ -1559,6 +1559,8 @@
   "invoice_usage_dialog_table_subtotal": "Mezisoučet",
   "invoice_usage_dialog_table_total": "Celkem",
   "invoice_usage_dialog_table_translations_item": "Řetězce",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# den zbývá do konce fakturačního roku, účtováno {date}} few {# dny zbývají do konce fakturačního roku, účtováno {date}} many {# dne zbývá do konce fakturačního roku, účtováno {date}} other {# dní zbývá do konce fakturačního roku, účtováno {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgrade na {words, number} slov",
   "invoice_usage_dialog_table_vat": "DPH",
   "invoice_usage_dialog_table_vat_rate": "Sazba DPH",
   "invoice_usage_dialog_title": "Podrobnosti o spotřebě",

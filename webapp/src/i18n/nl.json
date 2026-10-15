@@ -1557,6 +1557,8 @@
   "invoice_usage_dialog_table_subtotal": "Subtotaal",
   "invoice_usage_dialog_table_total": "Totaal",
   "invoice_usage_dialog_table_translations_item": "Vertalingen",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# dag resterend van het factureringsjaar, in rekening gebracht op {date}} other {# dagen resterend van het factureringsjaar, in rekening gebracht op {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgraden naar {words, number} woorden",
   "invoice_usage_dialog_table_vat": "BTW",
   "invoice_usage_dialog_table_vat_rate": "BTW-tarief",
   "invoice_usage_dialog_title": "Gebruiksdetails",

@@ -1550,6 +1550,8 @@
   "invoice_usage_dialog_table_subtotal": "Részösszeg",
   "invoice_usage_dialog_table_total": "Összesen",
   "invoice_usage_dialog_table_translations_item": "Szövegek",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, other {# nap van hátra a számlázási évből, terhelve: {date}} }",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Frissítés {words, number} szóra",
   "invoice_usage_dialog_table_vat": "ÁFA",
   "invoice_usage_dialog_table_vat_rate": "ÁFA kulcs",
   "invoice_usage_dialog_title": "Használati részletek",

@@ -1550,6 +1550,8 @@
   "invoice_usage_dialog_table_subtotal": "Subtotal",
   "invoice_usage_dialog_table_total": "Total",
   "invoice_usage_dialog_table_translations_item": "Cadeias de caracteres",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# dia restante do ano de faturamento, cobrado em {date}} other {# dias restantes do ano de faturamento, cobrado em {date}} }",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgrade para {words, number} palavras",
   "invoice_usage_dialog_table_vat": "IVA",
   "invoice_usage_dialog_table_vat_rate": "Taxa de IVA",
   "invoice_usage_dialog_title": "Detalhes de uso",

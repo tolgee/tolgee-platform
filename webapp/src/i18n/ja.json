@@ -1559,6 +1559,8 @@
   "invoice_usage_dialog_table_subtotal": "小計",
   "invoice_usage_dialog_table_total": "合計",
   "invoice_usage_dialog_table_translations_item": "文字列",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, other {請求年度の残り # 日、{date} に請求}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "{words, number} 件の単語にアップグレード",
   "invoice_usage_dialog_table_vat": "VAT(付加価値税)",
   "invoice_usage_dialog_table_vat_rate": "VATレート",
   "invoice_usage_dialog_title": "使用状況の詳細",

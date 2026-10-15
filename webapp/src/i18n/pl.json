@@ -1362,6 +1362,8 @@
   "invoice_usage_dialog_table_subtotal": "Suma częściowa",
   "invoice_usage_dialog_table_total": "Razem",
   "invoice_usage_dialog_table_translations_item": "Ciągi",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {pozostał # dzień roku rozliczeniowego, naliczono {date}} few {pozostały # dni roku rozliczeniowego, naliczono {date}} many {pozostało # dni roku rozliczeniowego, naliczono {date}} other {pozostało # dnia roku rozliczeniowego, naliczono {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Uaktualnienie do {words, number} słów",
   "invoice_usage_dialog_table_vat": "VAT",
   "invoice_usage_dialog_table_vat_rate": "Stawka VAT",
   "invoice_usage_dialog_title": "Szczegóły użytkowania",

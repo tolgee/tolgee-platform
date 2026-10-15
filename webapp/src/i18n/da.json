@@ -1557,6 +1557,8 @@
   "invoice_usage_dialog_table_subtotal": "Subtotal",
   "invoice_usage_dialog_table_total": "Total",
   "invoice_usage_dialog_table_translations_item": "Oversættelser",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# dag tilbage af faktureringsåret, opkrævet {date}} other {# dage tilbage af faktureringsåret, opkrævet {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Opgrader til {words, number} ord",
   "invoice_usage_dialog_table_vat": "Moms",
   "invoice_usage_dialog_table_vat_rate": "Moms-sats",
   "invoice_usage_dialog_title": "Brugsoplysninger",

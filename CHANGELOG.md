@@ -1,3 +1,10 @@
+# [3.235.0](https://github.com/tolgee/tolgee-platform/compare/v3.234.2...v3.235.0) (2026-10-15)
+
+
+### Features
+
+* add language-scoped filter for translations never included in a task ([#3871](https://github.com/tolgee/tolgee-platform/issues/3871)) ([abfab54](https://github.com/tolgee/tolgee-platform/commit/abfab5441451fc9f9f052728cffb40a513e64272)), closes [#3848](https://github.com/tolgee/tolgee-platform/issues/3848) [tolgee/billing#299](https://github.com/tolgee/billing/issues/299)
+
 ## [3.234.2](https://github.com/tolgee/tolgee-platform/compare/v3.234.1...v3.234.2) (2026-10-14)
 
 

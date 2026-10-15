@@ -1550,6 +1550,8 @@
   "invoice_usage_dialog_table_subtotal": "Delsum",
   "invoice_usage_dialog_table_total": "Totalt",
   "invoice_usage_dialog_table_translations_item": "Oversettelser",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# dag igjen av faktureringsåret, belastet {date}} other {# dager igjen av faktureringsåret, belastet {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Oppgrader til {words, number} ord",
   "invoice_usage_dialog_table_vat": "MVA",
   "invoice_usage_dialog_table_vat_rate": "MVA-sats",
   "invoice_usage_dialog_title": "Bruksdetaljer",
