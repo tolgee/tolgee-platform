@@ -22,12 +22,14 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.AiPlaygroundResultService
+import io.tolgee.service.aiReview.AiReviewAvailability
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -49,6 +51,7 @@ class StartBatchJobController(
   private val batchJobModelAssembler: BatchJobModelAssembler,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val aiReviewAvailability: AiReviewAvailability,
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @Operation(
@@ -104,6 +107,9 @@ class StartBatchJobController(
     @Valid @RequestBody
     data: MachineTranslationRequest,
   ): BatchJobModel {
+    if (data.llmPrompt?.type == PromptType.REVIEW) {
+      aiReviewAvailability.checkAvailable(projectHolder.project.organizationOwnerId)
+    }
     if (data.llmPrompt?.template !== null) {
       enabledFeaturesProvider.checkFeatureEnabled(
         projectHolder.project.organizationOwnerId,

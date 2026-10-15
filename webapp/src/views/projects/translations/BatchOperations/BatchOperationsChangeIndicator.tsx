@@ -7,9 +7,12 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
-import { BatchJobStatus } from './types';
+import { BatchJobModel, BatchJobStatus } from './types';
 
 const NOTIFY_STATUSES: BatchJobStatus[] = ['SUCCESS', 'CANCELLED'];
+const TRANSLATIONS_UNCHANGED_TYPES: BatchJobModel['type'][] = [
+  'AI_PLAYGROUND_TRANSLATE',
+];
 
 export const BatchOperationsChangeIndicator = () => {
   const { t } = useTranslate();
@@ -17,7 +20,11 @@ export const BatchOperationsChangeIndicator = () => {
   const [isRefetching, setIsRefetching] = useState(false);
   const lastJob = useProjectContext((c) => {
     return c.batchOperations
-      ? c.batchOperations.find((o) => NOTIFY_STATUSES.includes(o.status))?.id
+      ? c.batchOperations.find(
+          (o) =>
+            NOTIFY_STATUSES.includes(o.status) &&
+            !TRANSLATIONS_UNCHANGED_TYPES.includes(o.type)
+        )?.id
       : 'not-loaded';
   });
   const isFetching = useTranslationsSelector((c) => c.isFetching);

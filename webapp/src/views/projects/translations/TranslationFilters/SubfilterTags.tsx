@@ -103,6 +103,7 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
     return (
       <FilterItem
         label={item.name}
+        data-cy-tag={item.name}
         selected={Boolean(value.filterTag?.includes(item.name))}
         excluded={Boolean(value.filterNoTag?.includes(item.name))}
         onClick={() => handleToggleTag(item.name)}
@@ -116,6 +117,7 @@ export const SubfilterTags = ({ value, actions, projectId }: Props) => {
       <SubmenuItem
         ref={anchorEl as any}
         label={t('translations_filters_heading_tags')}
+        data-cy-submenu="tags"
         onClick={() => setOpen(true)}
         selected={Boolean(getTagFiltersLength(value))}
         open={open}

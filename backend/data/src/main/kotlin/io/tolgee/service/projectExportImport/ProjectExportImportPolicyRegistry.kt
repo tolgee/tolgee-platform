@@ -14,6 +14,7 @@ import io.tolgee.model.LanguageStats
 import io.tolgee.model.LlmProvider
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
+import io.tolgee.model.OrganizationFeatureGrant
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Pat
 import io.tolgee.model.Permission
@@ -29,6 +30,8 @@ import io.tolgee.model.UserPreferences
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.aiReview.AiReviewRule
+import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationTrigger
@@ -132,6 +135,7 @@ object ProjectExportImportPolicyRegistry {
 
       ignored(
         Organization::class,
+        OrganizationFeatureGrant::class,
         OrganizationRole::class,
         Permission::class,
         ApiKey::class,
@@ -157,6 +161,8 @@ object ProjectExportImportPolicyRegistry {
         MtServiceConfig::class,
         Prompt::class,
         AiPlaygroundResult::class,
+        AiReviewRule::class,
+        TranslationAiReview::class,
         MtCreditBucket::class,
         LlmProvider::class,
         BatchJob::class,

@@ -34,6 +34,8 @@ export function useBatchOperationActionPhrase() {
         return t('batch_operation_action_restoring_keys');
       case 'HARD_DELETE_KEYS':
         return t('batch_operation_action_deleting_keys_permanently');
+      case 'AI_REVIEW':
+        return t('batch_operation_action_ai_reviewing', 'Reviewing');
       default:
         return t('batch_operation_action_processing');
     }

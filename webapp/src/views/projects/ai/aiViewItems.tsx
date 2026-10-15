@@ -4,10 +4,16 @@ import { useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
-import { AiContextData, AiPromptsList } from 'tg.ee';
+import {
+  AiContextData,
+  AiPromptsList,
+  AiReviewRulesView,
+  useAiReviewEnabled,
+} from 'tg.ee';
 
 export const useAiViewItems = () => {
   const { t } = useTranslate();
+  const { visible: aiReviewVisible } = useAiReviewEnabled();
 
   const items: AiViewItem[] = [
     {
@@ -33,6 +39,20 @@ export const useAiViewItems = () => {
       component: AiPromptsList,
     },
   ];
+
+  if (aiReviewVisible) {
+    items.push({
+      value: 'review',
+      tab: {
+        label: t('ai_menu_review', 'AI review'),
+        dataCy: 'ai-menu-review',
+        condition: () => true,
+      },
+      link: LINKS.PROJECT_AI_REVIEW,
+      requireExactMatch: true,
+      component: AiReviewRulesView,
+    });
+  }
 
   const match = useRouteMatch(items.map((item) => item.link.template));
 

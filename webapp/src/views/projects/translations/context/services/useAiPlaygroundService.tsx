@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQueries } from 'tg.service/http/useQueryApi';
 import { useTranslationsService } from './useTranslationsService';
+import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptState';
+import { useAiReviewEnabled } from 'tg.ee';
+import { useProjectContext } from 'tg.hooks/ProjectContext';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type AiPlaygroundResultModel = components['schemas']['AiPlaygroundResultModel'];
@@ -21,6 +24,11 @@ export const useAiPlaygroundService = ({
   projectId,
   enabled,
 }: Props) => {
+  const { playgroundType } = usePromptUrlState();
+  const { visible: aiReviewVisible } = useAiReviewEnabled();
+  const type: AiPlaygroundResultModel['type'] =
+    aiReviewVisible && playgroundType === 'review' ? 'REVIEW' : 'TRANSLATE';
+
   const languageIds = useMemo(() => {
     return allLanguages
       ?.filter((l) => translationsLanguages?.includes(l.tag))
@@ -35,7 +43,7 @@ export const useAiPlaygroundService = ({
   // refetch data when first page data changes
   const hash = useMemo(() => {
     return Math.random();
-  }, [translationService.data?.pages?.[0]]);
+  }, [translationService.data?.pages?.[0], type]);
 
   const aiPlaygroundResult = useApiQueries(
     pagedKeys.map((keys) => ({
@@ -48,6 +56,7 @@ export const useAiPlaygroundService = ({
         'application/json': {
           keys: keys,
           languages: languageIds,
+          type,
         },
       },
       query: {
@@ -58,6 +67,25 @@ export const useAiPlaygroundService = ({
       },
     }))
   );
+
+  const playgroundJobsProgress = useProjectContext(
+    (c) =>
+      c.batchOperations
+        ?.filter((o) => o.type === 'AI_PLAYGROUND_TRANSLATE')
+        .map((o) => `${o.id}:${o.progress}:${o.status}`)
+        .join(',') ?? ''
+  );
+  const lastJobsProgress = useRef(playgroundJobsProgress);
+
+  useEffect(() => {
+    if (lastJobsProgress.current === playgroundJobsProgress) {
+      return;
+    }
+    lastJobsProgress.current = playgroundJobsProgress;
+    if (enabled) {
+      aiPlaygroundResult.forEach((i) => i.refetch());
+    }
+  }, [playgroundJobsProgress]);
 
   const data = useMemo(() => {
     const result: Record<number, Record<number, AiPlaygroundResultModel>> = {};

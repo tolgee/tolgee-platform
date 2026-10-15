@@ -20,6 +20,13 @@ class PublicEnabledFeaturesProvider(
 ) : EnabledFeaturesProvider {
   var forceEnabled: Set<Feature>? = null
 
-  override fun get(organizationId: Long?): Array<Feature> =
-    forceEnabled?.toTypedArray() ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures ?: emptyArray()
+  override fun get(organizationId: Long?): Array<Feature> {
+    val fromPlan =
+      forceEnabled?.toTypedArray() ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures ?: emptyArray()
+    val granted = eeSubscriptionService.getGrantedFeatures(organizationId)
+    if (granted.isEmpty()) {
+      return fromPlan
+    }
+    return (fromPlan.toList() + granted).toSet().toTypedArray()
+  }
 }

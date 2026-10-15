@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.LlmProvider
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
+import io.tolgee.model.OrganizationFeatureGrant
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.SsoTenant
@@ -27,6 +28,7 @@ class OrganizationBuilder(
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
     var tenant: SsoTenantBuilder? = null
     var llmProviders: MutableList<LlmProviderBuilder> = mutableListOf()
+    var featureGrants: MutableList<OrganizationFeatureGrantBuilder> = mutableListOf()
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -79,6 +81,13 @@ class OrganizationBuilder(
   fun addLlmProvider(ft: FT<LlmProvider>): LlmProviderBuilder {
     val builder = LlmProviderBuilder(this)
     data.llmProviders.add(builder)
+    ft(builder.self)
+    return builder
+  }
+
+  fun addFeatureGrant(ft: FT<OrganizationFeatureGrant>): OrganizationFeatureGrantBuilder {
+    val builder = OrganizationFeatureGrantBuilder(this)
+    data.featureGrants.add(builder)
     ft(builder.self)
     return builder
   }

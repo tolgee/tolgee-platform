@@ -93,6 +93,29 @@ export type SubfilterQaChecksProps = {
   selectedLanguages: LanguageModel[];
 };
 
+export type SubfilterAiReviewProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+};
+
 export type OnboardingSurveyGateProps = {
   children: React.ReactNode;
+};
+
+export type AiReviewBadgeProps = {
+  aiReview:
+    | components['schemas']['TranslationAiReviewSummaryModel']
+    | undefined;
+  translationId: number | undefined;
+  translationState: components['schemas']['TranslationViewModel']['state'];
+  keyId: number;
+  languageTag: string;
+  actionsEnabled: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+};
+
+export type AiReviewPlaygroundPreviewProps = {
+  data: components['schemas']['AiPlaygroundResultModel'];
 };

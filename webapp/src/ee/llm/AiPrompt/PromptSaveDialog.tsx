@@ -79,13 +79,14 @@ export const PromptSaveDialog = ({
                 label={t('ai_prompt_save_as_field_name')}
                 data-cy="ai-prompt-save-as-field-name"
               />
-              {satisfiesPermission('languages.edit') && (
-                <FormControlLabel
-                  control={<Checkbox name="useAsDefault" size="small" />}
-                  label={t('ai_prompt_save_as_field_default')}
-                  data-cy="ai-prompt-save-as-field-use-as-default"
-                />
-              )}
+              {satisfiesPermission('languages.edit') &&
+                data.type !== 'REVIEW' && (
+                  <FormControlLabel
+                    control={<Checkbox name="useAsDefault" size="small" />}
+                    label={t('ai_prompt_save_as_field_default')}
+                    data-cy="ai-prompt-save-as-field-use-as-default"
+                  />
+                )}
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose} data-cy="ai-prompt-save-dialog-cancel">

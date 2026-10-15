@@ -135,6 +135,18 @@ export const useEditService = ({
         },
       ]);
     }
+    const currentTranslation = translationService.fixedTranslations?.find(
+      (k) => k.keyId === params.keyId
+    )?.translations[params.language];
+    if (currentTranslation?.aiReview) {
+      translationService.changeTranslations([
+        {
+          keyId: params.keyId,
+          language: params.language,
+          value: { aiReview: undefined },
+        },
+      ]);
+    }
 
     const result = await putTranslation.mutateAsync({
       path: { projectId: project.id },

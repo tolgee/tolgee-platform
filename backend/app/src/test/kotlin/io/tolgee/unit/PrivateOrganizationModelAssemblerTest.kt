@@ -1,6 +1,7 @@
 package io.tolgee.unit
 
 import io.tolgee.constants.Feature
+import io.tolgee.constants.FeatureFlag
 import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
@@ -59,6 +60,7 @@ class PrivateOrganizationModelAssemblerTest {
       underTest.toModel(
         view,
         arrayOf(Feature.GLOSSARY, Feature.PREMIUM_SUPPORT),
+        emptySet(),
         isAtLeastMember = false,
         limitedView = true,
       )
@@ -81,6 +83,7 @@ class PrivateOrganizationModelAssemblerTest {
       underTest.toModel(
         view,
         arrayOf(Feature.GLOSSARY),
+        emptySet(),
         isAtLeastMember = false,
         limitedView = false,
       )
@@ -100,6 +103,7 @@ class PrivateOrganizationModelAssemblerTest {
       underTest.toModel(
         view,
         arrayOf(Feature.PREMIUM_SUPPORT, Feature.GLOSSARY),
+        setOf(FeatureFlag.AI_REVIEW),
         isAtLeastMember = true,
         limitedView = false,
       )
@@ -108,6 +112,10 @@ class PrivateOrganizationModelAssemblerTest {
       .toSet()
       .assert
       .isEqualTo(setOf(Feature.PREMIUM_SUPPORT, Feature.GLOSSARY))
+    model.enabledFeatureFlags
+      .toList()
+      .assert
+      .containsExactly(FeatureFlag.AI_REVIEW)
     model.limitedView.assert.isEqualTo(false)
     model.activeCloudSubscription.assert.isEqualTo(subscription)
   }

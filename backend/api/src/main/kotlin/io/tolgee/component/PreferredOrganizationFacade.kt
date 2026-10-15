@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.featureFlags.FeatureFlagService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.UserPreferencesService
@@ -19,6 +20,7 @@ class PreferredOrganizationFacade(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
+  private val featureFlagService: FeatureFlagService,
 ) {
   fun getPreferred(): PrivateOrganizationModel? {
     val user = authenticationFacade.authenticatedUser
@@ -40,6 +42,7 @@ class PreferredOrganizationFacade(
     return privateOrganizationModelAssembler.toModel(
       view,
       enabledFeaturesProvider.get(view.organization.id),
+      featureFlagService.getEnabledFlags(view.organization.id),
       isAtLeastMember,
       limitedView,
     )

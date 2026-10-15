@@ -27,6 +27,9 @@ class BatchJobDto(
 ) : IBatchJob {
   val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
 
+  val activityAuthorId: Long?
+    get() = authorId.takeUnless { type.activityAuthoredBySystem }
+
   companion object {
     fun fromEntity(entity: BatchJob): BatchJobDto {
       return BatchJobDto(

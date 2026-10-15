@@ -8,6 +8,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.ee.component.llm.AnthropicApiService
+import io.tolgee.ee.component.llm.FakeAiReviewResponder
 import io.tolgee.ee.component.llm.GoogleAiApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.component.llm.TolgeeApiService
@@ -35,6 +36,7 @@ import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Date
 
 // The ids keep the old convention for realism; what decides the branch under test is LlmProviderDto.serverConfigured.
@@ -105,6 +107,7 @@ class LlmProviderFallbackTest {
         ssrfSafeRequestFactoryProvider = ssrfSafeRequestFactoryProvider,
         adminMtServiceFilter = adminMtServiceFilter,
         resilientCacheAccessor = ResilientCacheAccessor(),
+        fakeAiReviewResponder = FakeAiReviewResponder(jacksonObjectMapper()),
       )
   }
 

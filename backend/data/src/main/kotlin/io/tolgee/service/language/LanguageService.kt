@@ -17,6 +17,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.aiReview.AiReviewRuleLanguageCleaner
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
@@ -57,6 +58,8 @@ class LanguageService(
   private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext,
   private val languageQaConfigRepository: LanguageQaConfigRepository,
+  @Lazy
+  private val aiReviewRuleLanguageCleaner: AiReviewRuleLanguageCleaner,
 ) {
   @Lazy
   @Autowired
@@ -99,6 +102,7 @@ class LanguageService(
     language.deletedAt = currentDateProvider.date
     importService.onExistingLanguageRemoved(language)
     permissionService.removeLanguageFromPermissions(language)
+    aiReviewRuleLanguageCleaner.removeLanguage(language)
     save(language)
     self.hardDeleteLanguageAsync(language, authenticationFacade.authenticatedUserOrNull?.id)
   }

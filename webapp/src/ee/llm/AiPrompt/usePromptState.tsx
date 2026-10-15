@@ -12,8 +12,10 @@ import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { components } from 'tg.service/apiSchema.generated';
 import { DeletableKeyWithTranslationsModelType } from 'tg.views/projects/translations/context/types';
 import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptState';
+import { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+type PromptType = components['schemas']['PromptModel']['type'];
 type BasicPromptOption = NonNullable<
   components['schemas']['PromptRunDto']['basicPromptOptions']
 >[number];
@@ -38,13 +40,18 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const { isEnabled } = useEnabledFeatures();
   const project = useProject();
 
-  const { setOpenPrompt, setAiPlayground } = usePromptUrlState();
+  const { setOpenPrompt, setAiPlayground, playgroundType, setPlaygroundType } =
+    usePromptUrlState();
+  const aiReview = useAiReviewEnabled();
+  const isReview = aiReview.visible && playgroundType === 'review';
+  const promptType: PromptType = isReview ? 'REVIEW' : 'TRANSLATE';
 
   const [options, setOptions] = useState<BasicPromptOption[]>(
     DEFAULT_BASIC_OPTIONS
   );
 
   const [value, setValue] = useState('');
+  const [reviewCriteria, setReviewCriteria] = useState('');
 
   function getPromptType(prompt: PromptItem) {
     if (!prompt.id) {
@@ -64,6 +71,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const openPromptLoadable = useOpenedPrompt({
     projectId: project.id,
+    type: promptType,
   });
 
   useEffect(() => {
@@ -81,6 +89,12 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const unsavedChanges = useMemo(() => {
     if (openPromptData) {
       if (openPromptData.providerName !== provider) {
+        return true;
+      }
+      if (
+        isReview &&
+        (openPromptData.reviewCriteria ?? '') !== reviewCriteria
+      ) {
         return true;
       }
       const type = getPromptType(openPromptData);
@@ -102,7 +116,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
       return false;
     }
     return undefined;
-  }, [openPromptData, value, options, provider, tab]);
+  }, [openPromptData, value, options, provider, tab, reviewCriteria, isReview]);
 
   const preventLeave = unsavedChanges === true && tab === 'advanced';
 
@@ -132,7 +146,11 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   function updateForm(item: PromptItem, overrideTab: boolean) {
     setOpenPrompt(item.id);
+    if (item.id !== undefined && aiReview.visible) {
+      setPlaygroundType(item.type === 'REVIEW' ? 'review' : 'translate');
+    }
     setProvider(item.providerName);
+    setReviewCriteria(item.reviewCriteria ?? '');
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
     setOptions(item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS);
     if (!tab || overrideTab) {
@@ -144,8 +162,22 @@ export const usePromptState = ({ language, keyData }: Props) => {
     }
   }
 
+  function switchType(type: 'translate' | 'review') {
+    if (type === playgroundType) {
+      return;
+    }
+    confirmUnsaved(() => {
+      setOpenPrompt(undefined);
+      setTab('basic');
+      setPlaygroundType(type);
+    });
+  }
+
+  const reviewFeatureEnabled = !isReview || aiReview.available;
+
   const featureEnabled =
-    tab === 'advanced' ? isEnabled('AI_PROMPT_CUSTOMIZATION') : true;
+    reviewFeatureEnabled &&
+    (tab === 'advanced' ? isEnabled('AI_PROMPT_CUSTOMIZATION') : true);
 
   const canBeRenamed =
     typeof openPromptData?.id === 'number' &&
@@ -190,6 +222,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
             targetLanguageId: language.id,
             provider,
             basicPromptOptions: tab === 'basic' ? options : undefined,
+            type: promptType,
+            reviewCriteria: isReview ? reviewCriteria || undefined : undefined,
           },
         },
       },
@@ -220,6 +254,13 @@ export const usePromptState = ({ language, keyData }: Props) => {
     handleTestPrompt,
     canBeRenamed,
     featureEnabled,
+    reviewFeatureEnabled,
+    isReview,
+    promptType,
+    reviewVisible: aiReview.visible,
+    switchType,
+    reviewCriteria,
+    setReviewCriteria,
     confirmUnsaved,
     setAiPlayground,
     setOpenPrompt,

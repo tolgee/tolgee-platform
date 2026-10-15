@@ -78,14 +78,15 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
       useState<(Partial<BatchJobModel> & BatchJobUpdateModel)[]>();
 
     const changeHandler = ({ data }: BatchJobProgress) => {
-      const exists = batchOperations?.find((job) => job.id === data.jobId);
-      let shouldRefetch = false;
-      if (!exists) {
-        if (!knownJobs.includes(data.jobId)) {
-          shouldRefetch = true;
-          // only refetch jobs first time we see unknown job
-          setKnownJobs((jobs) => [...jobs, data.jobId]);
-          setBatchOperations((jobs) => [
+      const known = batchOperations?.find((job) => job.id === data.jobId);
+      const firstSeen = !known && !knownJobs.includes(data.jobId);
+      if (firstSeen) {
+        setKnownJobs((jobs) => [...jobs, data.jobId]);
+      }
+      setBatchOperations((jobs) => {
+        const existing = jobs?.find((job) => job.id === data.jobId);
+        if (!existing) {
+          return [
             ...(jobs || []),
             {
               id: data.jobId,
@@ -94,29 +95,24 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
               status: data.status,
               errorMessage: data.errorMessage,
             },
-          ]);
+          ];
         }
-      } else {
-        setBatchOperations((jobs) =>
-          jobs?.map((job) => {
-            if (job.id === data.jobId) {
-              if (data.status === 'FAILED' && data.status !== job.status) {
-                // load error message
-                shouldRefetch = true;
-              }
-              return {
-                ...job,
-                totalItems: data.total ?? job.totalItems,
-                progress: data.processed ?? job.progress,
-                status: data.status ?? job.status,
-                errorMessage: data.errorMessage ?? job.errorMessage,
-              };
-            }
+        return jobs!.map((job) => {
+          if (job.id !== data.jobId) {
             return job;
-          })
-        );
-      }
-      if (shouldRefetch) {
+          }
+          return {
+            ...job,
+            totalItems: data.total ?? job.totalItems,
+            progress: data.processed ?? job.progress,
+            status: data.status ?? job.status,
+            errorMessage: data.errorMessage ?? job.errorMessage,
+          };
+        });
+      });
+      const turnedFailed =
+        data.status === 'FAILED' && known?.status !== 'FAILED';
+      if (firstSeen || turnedFailed) {
         batchJobsLoadable.refetch({ fetching: true });
       }
     };

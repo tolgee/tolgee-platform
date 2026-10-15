@@ -195,6 +195,8 @@ export class ReactList extends Component {
       PASSIVE
     );
     this.scrollParent.removeEventListener('mousewheel', NOOP, PASSIVE);
+    // StrictMode remounts the same instance; a kept scrollParent makes updateScrollParent skip re-adding the listener.
+    this.scrollParent = null;
   }
 
   getOffset(el) {

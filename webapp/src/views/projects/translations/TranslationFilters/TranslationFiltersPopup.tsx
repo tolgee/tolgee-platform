@@ -18,7 +18,13 @@ import { SubfilterComments } from './SubfilterComments';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
-import { getQaChecksFiltersLength, SubfilterQaChecks } from 'tg.ee';
+import {
+  getAiReviewFiltersLength,
+  getQaChecksFiltersLength,
+  SubfilterAiReview,
+  SubfilterQaChecks,
+  useAiReviewEnabled,
+} from 'tg.ee';
 
 type Props = {
   value: FiltersType;
@@ -43,6 +49,7 @@ export const TranslationFiltersPopup = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const aiReview = useAiReviewEnabled();
   return (
     <Menu
       open={true}
@@ -64,18 +71,22 @@ export const TranslationFiltersPopup = ({
             projectId={projectId}
           />
         )}
-        <SubfilterScreenshots
-          value={value}
-          actions={actions}
-          projectId={projectId}
-        />
-        <SubfilterDescription
-          value={value}
-          actions={actions}
-          projectId={projectId}
-        />
-        <SubfilterPlurals value={value} actions={actions} />
-        {!filterOptions?.keyRelatedOnly && (
+        {!filterOptions?.scopeOnly && (
+          <>
+            <SubfilterScreenshots
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+            <SubfilterDescription
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+            <SubfilterPlurals value={value} actions={actions} />
+          </>
+        )}
+        {!filterOptions?.keyRelatedOnly && !filterOptions?.scopeOnly && (
           <>
             <SubfilterTranslations
               value={value}
@@ -102,16 +113,25 @@ export const TranslationFiltersPopup = ({
                 selectedLanguages={selectedLanguages}
               />
             )}
+            {(aiReview.available ||
+              Boolean(getAiReviewFiltersLength(value))) && (
+              <SubfilterAiReview
+                value={value}
+                actions={actions}
+                selectedLanguages={selectedLanguages}
+              />
+            )}
           </>
         )}
-        {project.suggestionsMode !== 'DISABLED' && (
-          <SubfilterSuggestions
-            value={value}
-            actions={actions}
-            projectId={projectId}
-            selectedLanguages={selectedLanguages}
-          />
-        )}
+        {project.suggestionsMode !== 'DISABLED' &&
+          !filterOptions?.scopeOnly && (
+            <SubfilterSuggestions
+              value={value}
+              actions={actions}
+              projectId={projectId}
+              selectedLanguages={selectedLanguages}
+            />
+          )}
         {filterOptions?.showDeletedBy && (
           <SubfilterDeletedBy
             value={value}

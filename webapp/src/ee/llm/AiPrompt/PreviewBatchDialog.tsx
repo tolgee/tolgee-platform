@@ -30,6 +30,8 @@ type Props = {
   providerName: string;
   template: string | undefined;
   options: BasicPromptOption[] | undefined;
+  type: 'TRANSLATE' | 'REVIEW';
+  reviewCriteria: string | undefined;
   projectId: number;
   numberOfKeys: number;
 };
@@ -42,6 +44,8 @@ export const PreviewBatchDialog = ({
   options,
   projectId,
   numberOfKeys,
+  type,
+  reviewCriteria,
 }: Props) => {
   const { getAllIds } = useTranslationsActions();
   const { t } = useTranslate();
@@ -76,6 +80,8 @@ export const PreviewBatchDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type,
+              reviewCriteria,
             },
           },
         },

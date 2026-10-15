@@ -4,6 +4,7 @@ import io.sentry.Sentry
 import io.tolgee.constants.Feature
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.events.OnOrganizationFeaturesChanged
+import io.tolgee.service.featureFlags.OrganizationFeatureGrantService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.logger
 import org.springframework.scheduling.annotation.Async
@@ -15,6 +16,7 @@ import org.springframework.transaction.event.TransactionalEventListener
 class QaFeatureAccessListener(
   private val projectService: ProjectService,
   private val projectQaConfigService: ProjectQaConfigService,
+  private val organizationFeatureGrantService: OrganizationFeatureGrantService,
 ) {
   private val logger = logger()
 
@@ -24,7 +26,7 @@ class QaFeatureAccessListener(
     // Disable on both gain AND loss: gaining the feature would make stale QA flags visible
     // without a recheck; this way we get two chances to disable QA checks for the project.
     // User must manually re-enable QA, which triggers a fresh recheck.
-    val qaChecksAffected = Feature.QA_CHECKS in event.gainedFeatures || Feature.QA_CHECKS in event.lostFeatures
+    val qaChecksAffected = Feature.QA_CHECKS in organizationFeatureGrantService.getEffectivelyChangedFeatures(event)
     if (!qaChecksAffected) return
 
     val orgId = event.organizationId

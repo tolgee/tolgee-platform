@@ -14,9 +14,10 @@ export type PromptItem = PromptDto & { id?: number };
 type Props = {
   onSelect: (prompt: PromptItem) => void;
   projectId: number;
+  type: 'TRANSLATE' | 'REVIEW';
 };
 
-export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
+export const PromptLoadMenu = ({ onSelect, projectId, type }: Props) => {
   const [open, setOpen] = useState(false);
   const { t } = useTranslate();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -29,6 +30,7 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
     query: {
       size: 1000,
       sort: ['name'],
+      type,
     },
   });
 
@@ -37,6 +39,9 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
     method: 'get',
     path: {
       projectId,
+    },
+    query: {
+      type,
     },
   });
 

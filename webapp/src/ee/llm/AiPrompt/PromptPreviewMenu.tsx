@@ -30,8 +30,9 @@ type Props = {
   projectId: number;
   templateValue: string | undefined;
   options: BasicPromptOption[] | undefined;
+  type: 'TRANSLATE' | 'REVIEW';
+  reviewCriteria: string | undefined;
   providerName: string;
-  onBatchFinished: () => void;
   onTestPrompt: () => void;
   loading?: boolean;
   disabled?: boolean;
@@ -42,8 +43,9 @@ export const PromptPreviewMenu = ({
   projectId,
   templateValue,
   options,
+  type,
+  reviewCriteria,
   providerName,
-  onBatchFinished,
   onTestPrompt,
   loading,
   disabled,
@@ -135,6 +137,8 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          type={type}
+          reviewCriteria={reviewCriteria}
           onStart={(data) => setRunningOperation(data)}
         />
       )}
@@ -143,10 +147,7 @@ export const PromptPreviewMenu = ({
         <BatchOperationDialog
           operation={runningOperation}
           onClose={() => setRunningOperation(undefined)}
-          onFinished={() => {
-            setRunningOperation(undefined);
-            onBatchFinished();
-          }}
+          onFinished={() => setRunningOperation(undefined)}
         />
       )}
 
@@ -157,6 +158,8 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          type={type}
+          reviewCriteria={reviewCriteria}
           onStart={(data) => setRunningOperation(data)}
         />
       )}

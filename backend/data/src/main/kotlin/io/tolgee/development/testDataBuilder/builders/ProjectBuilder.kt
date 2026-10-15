@@ -12,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Prompt
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
@@ -92,6 +93,8 @@ class ProjectBuilder(
     val taskKeys = mutableListOf<TaskKeyBuilder>()
     val prompts = mutableListOf<PromptBuilder>()
     val aiPlaygroundResults = mutableListOf<AiPlaygroundResultBuilder>()
+    val aiReviewRules = mutableListOf<AiReviewRuleBuilder>()
+    val translationAiReviews = mutableListOf<TranslationAiReviewBuilder>()
     val labels = mutableListOf<LabelBuilder>()
     val suggestions = mutableListOf<SuggestionBuilder>()
     val branches = mutableListOf<BranchBuilder>()
@@ -277,6 +280,8 @@ class ProjectBuilder(
   fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
 
   fun addAiPlaygroundResult(ft: FT<AiPlaygroundResult>) = addOperation(data.aiPlaygroundResults, ft)
+
+  fun addAiReviewRule(ft: FT<AiReviewRule>) = addOperation(data.aiReviewRules, ft)
 
   val onlyUser
     get() =

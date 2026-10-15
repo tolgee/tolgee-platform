@@ -1,5 +1,6 @@
-import { Feature, QaCheckType } from 'tg.service/apiSchemaTypes';
+import { Feature, FeatureFlag, QaCheckType } from 'tg.service/apiSchemaTypes';
 import { hasSupportChat } from 'tg.fixtures/supportChat';
+import { hasFeatureFlag } from 'tg.fixtures/featureFlags';
 
 import { useGlobalActions, useGlobalContext } from './GlobalContext';
 
@@ -86,6 +87,14 @@ export const useEnabledFeatures = () => {
     },
   };
 };
+
+export const useFeatureFlag = (flag: FeatureFlag) =>
+  useGlobalContext((c) =>
+    hasFeatureFlag(
+      c.initialData.preferredOrganization?.enabledFeatureFlags,
+      flag
+    )
+  );
 
 export const useHasSupportChat = () => {
   const limitedView = useGlobalContext(

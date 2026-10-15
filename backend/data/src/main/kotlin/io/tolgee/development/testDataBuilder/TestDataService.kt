@@ -232,6 +232,15 @@ class TestDataService(
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
     saveLlmProviders(builder)
+    saveOrganizationFeatureGrants(builder)
+  }
+
+  private fun saveOrganizationFeatureGrants(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.data.featureGrants.map { it.self }.forEach {
+        entityManager.persist(it)
+      }
+    }
   }
 
   private fun saveLlmProviders(builder: TestDataBuilder) {
@@ -401,6 +410,8 @@ class TestDataService(
     saveTaskKeys(builder)
     savePrompts(builder)
     saveAiPlaygroundResults(builder)
+    saveAiReviewRules(builder)
+    saveTranslationAiReviews(builder)
     saveLabels(builder)
     saveTags(builder)
     saveSuggestions(builder)
@@ -698,6 +709,19 @@ class TestDataService(
 
   private fun saveAiPlaygroundResults(builder: ProjectBuilder) {
     builder.data.aiPlaygroundResults.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveAiReviewRules(builder: ProjectBuilder) {
+    builder.data.aiReviewRules.forEach {
+      it.resolveLanguageReferences()
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveTranslationAiReviews(builder: ProjectBuilder) {
+    builder.data.translationAiReviews.forEach {
       entityManager.persist(it.self)
     }
   }

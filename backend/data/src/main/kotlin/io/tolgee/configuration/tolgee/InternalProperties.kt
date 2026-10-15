@@ -53,4 +53,10 @@ class InternalProperties {
    * Only enable for E2E tests that use localhost URLs for webhooks/LLM providers.
    */
   var disableUrlSsrfProtection: Boolean = false
+
+  /**
+   * Lets server administrators grant plan features to organizations on an instance without billing.
+   * Only for tests and E2E; on self-hosted instances plan features come from the EE license.
+   */
+  var allowPlanFeatureGrants: Boolean = false
 }

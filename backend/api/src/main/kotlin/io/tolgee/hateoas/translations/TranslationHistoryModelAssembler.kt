@@ -33,6 +33,7 @@ class TranslationHistoryModelAssembler(
         },
       timestamp = view.timestamp.time,
       revisionType = view.revisionType,
+      activityType = view.activityType,
     )
   }
 }

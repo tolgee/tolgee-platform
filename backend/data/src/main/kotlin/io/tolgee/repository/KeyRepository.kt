@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.dtos.queryResults.KeyView
+import io.tolgee.dtos.queryResults.aiReview.AiReviewKeyScopeRowView
 import io.tolgee.dtos.queryResults.keyDisabledLanguages.KeyDisabledLanguagesQueryResultView
 import io.tolgee.model.Language
 import io.tolgee.model.UserAccount
@@ -578,4 +579,16 @@ interface KeyRepository : JpaRepository<Key, Long> {
     ids: Collection<Long>,
     projectId: Long,
   ): List<Key>
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.aiReview.AiReviewKeyScopeRowView(k.id, ns.name, tag.name)
+    from Key k
+    left join k.namespace ns
+    left join k.keyMeta km
+    left join km.tags tag
+    where k.id in :keyIds
+    """,
+  )
+  fun getNamespaceAndTagRows(keyIds: Collection<Long>): List<AiReviewKeyScopeRowView>
 }

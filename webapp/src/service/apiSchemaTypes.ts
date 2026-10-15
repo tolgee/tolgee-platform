@@ -5,12 +5,14 @@
  */
 
 import {
+  FeatureFlagStateModel,
   QaSettingsRequest,
   QaIssueModel,
   SelfHostedEePlanModel,
 } from 'tg.service/apiSchemaTypes.generated';
 
 export type Feature = SelfHostedEePlanModel['enabledFeatures'][number];
+export type FeatureFlag = FeatureFlagStateModel['flag'];
 export type QaCheckType = QaIssueModel['type'];
 export type QaCheckSeverity =
   QaSettingsRequest['settings'][keyof QaSettingsRequest['settings']];

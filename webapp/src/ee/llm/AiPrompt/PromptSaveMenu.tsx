@@ -15,6 +15,9 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { messageService } from 'tg.service/MessageService';
 
+import { confirmation } from 'tg.hooks/confirmation';
+import { useAiReviewRules } from 'tg.ee.module/aiReview/hooks/useAiReviewRules';
+
 import { PromptItem } from './PromptLoadMenu';
 import { PromptSaveDialog } from './PromptSaveDialog';
 
@@ -55,32 +58,80 @@ export const PromptSaveMenu = ({
     invalidatePrefix: '/v2/projects/{projectId}/prompts',
   });
 
+  const savedPrompt =
+    typeof existingPrompt?.id === 'number'
+      ? { id: existingPrompt.id, name: existingPrompt.name }
+      : undefined;
+  const isExistingReviewPrompt =
+    savedPrompt !== undefined && existingPrompt?.type === 'REVIEW';
+
+  const rulesLoadable = useAiReviewRules(projectId, isExistingReviewPrompt);
+
+  const activeRulesCount =
+    rulesLoadable.data?._embedded?.rules?.filter(
+      (rule) => rule.promptId === savedPrompt?.id && rule.mode === 'ACTIVE'
+    ).length ?? 0;
+
+  function save(prompt: { id: number; name: string }) {
+    updatePrompt.mutate(
+      {
+        path: { projectId, promptId: prompt.id },
+        content: {
+          'application/json': { ...data, name: prompt.name },
+        },
+      },
+      {
+        onSuccess(data) {
+          messageService.success(<T keyName="ai_prompt_update_success" />);
+          if (isExistingReviewPrompt) {
+            rulesLoadable.refetch();
+          }
+          onSuccess(data);
+        },
+      }
+    );
+  }
+
+  function handleSave(prompt: { id: number; name: string }) {
+    if (isExistingReviewPrompt && activeRulesCount > 0) {
+      confirmation({
+        title: (
+          <T
+            keyName="ai_prompt_save_dry_run_warning_title"
+            defaultValue="Switch rules to dry run?"
+          />
+        ),
+        message: (
+          <span data-cy="ai-prompt-save-dry-run-warning">
+            <T
+              keyName="ai_prompt_save_dry_run_warning"
+              defaultValue="{count, plural, one {# active AI review rule uses} other {# active AI review rules use}} this prompt. Saving the change switches {count, plural, one {it} other {them}} back to dry run, so you can check the new results before they mark anything as reviewed."
+              params={{ count: activeRulesCount }}
+            />
+          </span>
+        ),
+        confirmButtonText: (
+          <T
+            keyName="ai_prompt_save_dry_run_warning_confirm"
+            defaultValue="Save and switch to dry run"
+          />
+        ),
+        onConfirm: () => save(prompt),
+      });
+    } else {
+      save(prompt);
+    }
+  }
+
   return (
     <Box>
-      {typeof existingPrompt?.id === 'number' ? (
+      {savedPrompt ? (
         <ButtonGroup variant="contained" size="small" color="primary">
           <LoadingButton
             disabled={disabled || !unsavedChanges}
             loading={updatePrompt.isLoading}
             data-cy="ai-prompt-save-button"
-            onClick={() => {
-              updatePrompt.mutate(
-                {
-                  path: { projectId, promptId: existingPrompt.id! },
-                  content: {
-                    'application/json': { ...data, name: existingPrompt.name },
-                  },
-                },
-                {
-                  onSuccess(data) {
-                    messageService.success(
-                      <T keyName="ai_prompt_update_success" />
-                    );
-                    onSuccess(data);
-                  },
-                }
-              );
-            }}
+            onClick={() => handleSave(savedPrompt)}
           >
             {t('ai_prompt_save_label')}
           </LoadingButton>

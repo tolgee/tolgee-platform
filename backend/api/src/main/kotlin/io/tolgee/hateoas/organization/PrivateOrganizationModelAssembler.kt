@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.organization
 
 import io.tolgee.constants.Feature
+import io.tolgee.constants.FeatureFlag
 import io.tolgee.dtos.queryResults.organization.PrivateOrganizationView
 import io.tolgee.hateoas.quickStart.QuickStartModelAssembler
 import io.tolgee.publicBilling.CloudSubscriptionModelProvider
@@ -16,6 +17,7 @@ class PrivateOrganizationModelAssembler(
   fun toModel(
     view: PrivateOrganizationView,
     features: Array<Feature>,
+    featureFlags: Set<FeatureFlag>,
     isAtLeastMember: Boolean,
     limitedView: Boolean,
   ): PrivateOrganizationModel {
@@ -24,6 +26,7 @@ class PrivateOrganizationModelAssembler(
     return PrivateOrganizationModel(
       organizationModel = organizationModel,
       enabledFeatures = features,
+      enabledFeatureFlags = featureFlags.toTypedArray(),
       quickStart = view.quickStart?.let { quickStartModelAssembler.toModel(it) },
       activeCloudSubscription = activeCloudSubscription(isAtLeastMember, organizationId),
       limitedView = limitedView,

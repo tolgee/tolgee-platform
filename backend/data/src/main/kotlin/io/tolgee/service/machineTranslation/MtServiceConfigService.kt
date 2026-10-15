@@ -10,6 +10,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.Prompt
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
@@ -145,10 +147,7 @@ class MtServiceConfigService(
           languageSetting.primaryServiceInfo?.promptId
             ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId
         )?.let {
-          promptService.findPrompt(
-            project.id,
-            it,
-          )
+          findTranslatePrompt(project.id, it)
         }
 
       setPrimaryService(entity, languageSetting)
@@ -313,10 +312,21 @@ class MtServiceConfigService(
     val data = getProjectSettings(projectEntity)
     data.forEach { entity ->
       if (entity.primaryService == MtServiceType.PROMPT || entity.enabledServices.contains(MtServiceType.PROMPT)) {
-        entity.prompt = promptService.findPrompt(projectEntity.id, promptId)
+        entity.prompt = findTranslatePrompt(projectEntity.id, promptId)
         save(entity)
       }
     }
+  }
+
+  private fun findTranslatePrompt(
+    projectId: Long,
+    promptId: Long,
+  ): Prompt {
+    val prompt = promptService.findPrompt(projectId, promptId)
+    if (prompt.type != PromptType.TRANSLATE) {
+      throw BadRequestException(Message.PROMPT_TYPE_NOT_SUPPORTED)
+    }
+    return prompt
   }
 
   @Transactional

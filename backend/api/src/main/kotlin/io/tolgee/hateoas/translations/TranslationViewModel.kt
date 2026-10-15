@@ -2,6 +2,7 @@ package io.tolgee.hateoas.translations
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType
+import io.tolgee.hateoas.aiReview.TranslationAiReviewSummaryModel
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.qa.QaIssueModel
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionSimpleModel
@@ -42,6 +43,8 @@ open class TranslationViewModel(
   val suggestions: List<TranslationSuggestionSimpleModel>? = null,
   @Schema(description = "Detailed QA issues for inline highlighting (only when includeQaIssues=true)")
   val qaIssues: List<QaIssueModel>? = null,
+  @Schema(description = "AI review result for the current text, present only when AI review is available")
+  val aiReview: TranslationAiReviewSummaryModel? = null,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

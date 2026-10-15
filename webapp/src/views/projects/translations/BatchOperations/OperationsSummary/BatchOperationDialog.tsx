@@ -71,6 +71,7 @@ export const BatchOperationDialog = ({
     'AI_PLAYGROUND_TRANSLATE',
     'MACHINE_TRANSLATE',
     'AUTO_TRANSLATE',
+    'AI_REVIEW',
   ].includes(data.type);
   const isFinalizing =
     data.status === 'RUNNING' && data.progress === data.totalItems;

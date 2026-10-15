@@ -20,6 +20,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.featureFlags.OrganizationFeatureGrantService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.testing.AuthorizedControllerTest
@@ -69,6 +70,9 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  private lateinit var organizationFeatureGrantService: OrganizationFeatureGrantService
 
   lateinit var testData: QaTestData
   private var demoProjectId: Long? = null
@@ -165,6 +169,36 @@ class QaEventListenerTest : AuthorizedControllerTest() {
         val project = projectService.get(testData.project.id)
         assertThat(project.useQaChecks).isFalse()
       }
+    }
+  }
+
+  @Test
+  fun `keeps QA when the plan loses QA_CHECKS but the organization has it granted`() {
+    val organizationId = testData.userAccountBuilder.defaultOrganizationBuilder.self.id
+    internalProperties.allowPlanFeatureGrants = true
+    try {
+      organizationFeatureGrantService.setGrants(organizationId, emptySet(), setOf(Feature.QA_CHECKS), null)
+
+      executeInNewTransaction(platformTransactionManager) {
+        applicationEventPublisher.publishEvent(
+          OnOrganizationFeaturesChanged(
+            organizationId = organizationId,
+            gainedFeatures = emptySet(),
+            lostFeatures = setOf(Feature.QA_CHECKS),
+          ),
+        )
+      }
+
+      Thread.sleep(2_000)
+      executeInNewTransaction(platformTransactionManager) {
+        projectService
+          .get(testData.project.id)
+          .useQaChecks.assert
+          .isTrue()
+      }
+    } finally {
+      organizationFeatureGrantService.setGrants(organizationId, emptySet(), emptySet(), null)
+      internalProperties.allowPlanFeatureGrants = false
     }
   }
 

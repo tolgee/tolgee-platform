@@ -13,6 +13,7 @@ import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.ee.component.llm.AbstractLlmApiService
 import io.tolgee.ee.component.llm.AnthropicApiService
+import io.tolgee.ee.component.llm.FakeAiReviewResponder
 import io.tolgee.ee.component.llm.GoogleAiApiService
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.component.llm.TolgeeApiService
@@ -60,6 +61,7 @@ class LlmProviderService(
   private val ssrfSafeRequestFactoryProvider: SsrfSafeRequestFactoryProvider,
   private val adminMtServiceFilter: AdminMtServiceFilter,
   private val resilientCacheAccessor: ResilientCacheAccessor,
+  private val fakeAiReviewResponder: FakeAiReviewResponder,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -300,7 +302,7 @@ class LlmProviderService(
     restTemplate: RestTemplate,
   ): PromptResult {
     if (internalProperties.fakeLlmProviders) {
-      return getFakedResponse(config)
+      return getFakedResponse(config, params)
     }
     return providerService.translate(params, config, restTemplate)
   }
@@ -342,7 +344,17 @@ class LlmProviderService(
     cache.set(name, providerInfo)
   }
 
-  fun getFakedResponse(config: LlmProviderInterface): PromptResult {
+  fun getFakedResponse(
+    config: LlmProviderInterface,
+    params: LlmParams,
+  ): PromptResult {
+    val promptText = params.messages.mapNotNull { it.text }.joinToString("\n")
+    if (fakeAiReviewResponder.isReviewPrompt(promptText)) {
+      return PromptResult(
+        response = fakeAiReviewResponder.respond(promptText),
+        usage = FAKE_USAGE,
+      )
+    }
     val json =
       """
       {
@@ -352,7 +364,7 @@ class LlmProviderService(
       """.trimIndent()
     return PromptResult(
       response = json,
-      usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
+      usage = FAKE_USAGE,
     )
   }
 
@@ -364,6 +376,7 @@ class LlmProviderService(
 
   companion object {
     private const val RATE_LIMIT_SUSPEND_PERIOD_MS = 60000L
+    private val FAKE_USAGE = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1)
 
     data class ProviderInfo(
       var suspendMap: MutableMap<Long, Long> = mutableMapOf(),

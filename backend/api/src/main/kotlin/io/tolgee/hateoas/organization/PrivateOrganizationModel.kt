@@ -2,6 +2,7 @@ package io.tolgee.hateoas.organization
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.Feature
+import io.tolgee.constants.FeatureFlag
 import io.tolgee.hateoas.quickStart.QuickStartModel
 import io.tolgee.publicBilling.PublicCloudSubscriptionModel
 import org.springframework.hateoas.RepresentationModel
@@ -13,6 +14,8 @@ open class PrivateOrganizationModel(
   organizationModel: OrganizationModel,
   @get:Schema(example = "Features organization has enabled")
   val enabledFeatures: Array<Feature>,
+  @get:Schema(description = "Feature flags enabled for the organization")
+  val enabledFeatureFlags: Array<FeatureFlag>,
   @get:Schema(example = "Quick start data for current user")
   val quickStart: QuickStartModel?,
   @get:Schema(example = "Current active subscription info")

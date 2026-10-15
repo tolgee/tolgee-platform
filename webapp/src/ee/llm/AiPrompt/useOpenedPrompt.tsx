@@ -6,9 +6,10 @@ import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptSt
 
 type Props = {
   projectId: number;
+  type: 'TRANSLATE' | 'REVIEW';
 };
 
-export const useOpenedPrompt = ({ projectId }: Props) => {
+export const useOpenedPrompt = ({ projectId, type }: Props) => {
   const { openPrompt, setOpenPrompt } = usePromptUrlState();
 
   const defaultPromptLoadable = useApiQuery({
@@ -16,6 +17,9 @@ export const useOpenedPrompt = ({ projectId }: Props) => {
     method: 'get',
     path: {
       projectId,
+    },
+    query: {
+      type,
     },
   });
 

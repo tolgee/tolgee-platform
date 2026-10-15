@@ -13,7 +13,7 @@ class PromptResultParser(
   private val objectMapper: ObjectMapper,
 ) {
   fun parse(): ParsedResult {
-    val json = extractJsonFromResponse(promptResult.response)
+    val json = extractJson(promptResult.response, objectMapper)
     val output = json?.get("output")?.asScalarString() ?: throw LlmProviderNotReturnedJsonException()
     val contextDescription = json.get("contextDescription")?.asScalarString()
 
@@ -31,44 +31,52 @@ class PromptResultParser(
     return asString()
   }
 
-  private fun extractJsonFromResponse(content: String): JsonNode? {
-    // attempting different strategies to find a json in the response
-    val attemptFns =
-      listOf<(String) -> String>(
-        { it },
-        { getJsonLike(it) },
-        { getJsonLike(it.substringAfter("```").substringBefore("```")) },
-      )
-    for (attemptFn in attemptFns) {
-      val result = parseJsonSafely(attemptFn(content))
-      if (result != null) {
-        return result
-      }
-    }
-    return null
-  }
-
-  private fun getJsonLike(content: String): String {
-    return "{${content.substringAfter("{").substringBeforeLast("}")}}"
-  }
-
-  private fun parseJsonSafely(content: String): JsonNode? {
-    return try {
-      val result = objectMapper.readValue<JsonNode>(content)
-      updateStringsInJson(result) {
-        // gpt-4.1 sometimes includes NIL,
-        // which is invalid utf-8 character breaking DB saving
-        it.replace("\u0000", "")
-      }
-    } catch (_: JacksonException) {
-      null
-    }
-  }
-
   data class ParsedResult(
     val promptResult: PromptResult,
     val parsedJson: JsonNode,
     val output: String,
     val contextDescription: String?,
   )
+
+  companion object {
+    fun extractJson(
+      content: String,
+      objectMapper: ObjectMapper,
+    ): JsonNode? {
+      // attempting different strategies to find a json in the response
+      val attemptFns =
+        listOf<(String) -> String>(
+          { it },
+          { getJsonLike(it) },
+          { getJsonLike(it.substringAfter("```").substringBefore("```")) },
+        )
+      for (attemptFn in attemptFns) {
+        val result = parseJsonSafely(attemptFn(content), objectMapper)
+        if (result != null) {
+          return result
+        }
+      }
+      return null
+    }
+
+    private fun getJsonLike(content: String): String {
+      return "{${content.substringAfter("{").substringBeforeLast("}")}}"
+    }
+
+    private fun parseJsonSafely(
+      content: String,
+      objectMapper: ObjectMapper,
+    ): JsonNode? {
+      return try {
+        val result = objectMapper.readValue<JsonNode>(content)
+        updateStringsInJson(result) {
+          // gpt-4.1 sometimes includes NIL,
+          // which is invalid utf-8 character breaking DB saving
+          it.replace("\u0000", "")
+        }
+      } catch (_: JacksonException) {
+        null
+      }
+    }
+  }
 }

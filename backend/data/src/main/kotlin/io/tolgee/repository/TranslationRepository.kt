@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
 import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
@@ -372,4 +373,10 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     translationIds: LongArray,
     baseLanguageId: Long,
   )
+
+  @Query("select t.id from Translation t where t.id in :ids and t.state = :state")
+  fun findIdsByIdInAndState(
+    ids: Collection<Long>,
+    state: TranslationState,
+  ): List<Long>
 }

@@ -125,4 +125,5 @@ enum class ActivityType(
   BRANCH_MERGE(onlyCountsInList = true, paramsProvider = BranchMergeActivityParamsProvider::class),
   QA_ISSUE_IGNORE,
   QA_ISSUE_UNIGNORE,
+  AI_REVIEW(onlyCountsInList = true),
 }

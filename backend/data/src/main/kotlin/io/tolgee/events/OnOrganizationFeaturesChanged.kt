@@ -10,4 +10,5 @@ class OnOrganizationFeaturesChanged(
   val organizationId: Long?,
   val gainedFeatures: Set<Feature>,
   val lostFeatures: Set<Feature>,
+  val grantsAccountedFor: Boolean = false,
 )

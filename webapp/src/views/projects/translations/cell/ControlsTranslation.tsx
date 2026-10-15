@@ -16,10 +16,16 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
-import { QaBadge, useQaChecksEnabled } from 'tg.ee';
+import {
+  AiReviewBadge,
+  QaBadge,
+  useAiReviewEnabled,
+  useQaChecksEnabled,
+} from 'tg.ee';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
+type AiReviewSummary = components['schemas']['TranslationAiReviewSummaryModel'];
 
 const StyledControlsWrapper = styled(Box)`
   display: grid;
@@ -70,6 +76,10 @@ type ControlsProps = {
   unresolvedCommentCount: number | undefined;
   qaIssueCount: number | undefined;
   qaChecksStale?: boolean;
+  aiReview?: AiReviewSummary;
+  translationId?: number;
+  keyId?: number;
+  languageTag?: string;
   // render last focusable button
   lastFocusable: boolean;
   active?: boolean;
@@ -93,6 +103,10 @@ export const ControlsTranslation: React.FC<
   unresolvedCommentCount,
   qaIssueCount,
   qaChecksStale,
+  aiReview,
+  translationId,
+  keyId,
+  languageTag,
   lastFocusable,
   active,
   className,
@@ -111,6 +125,13 @@ export const ControlsTranslation: React.FC<
   const qaIssuesResolved = qaIssueCount === 0;
   const displayQaIssues =
     qaChecksEnabled && onQaIssues && (qaIssuesPresent || qaChecksStale);
+  const { available: aiReviewAvailable } = useAiReviewEnabled();
+  const displayAiReview =
+    aiReviewAvailable &&
+    Boolean(aiReview) &&
+    translationId !== undefined &&
+    keyId !== undefined &&
+    languageTag !== undefined;
   const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const task = tasks?.[0];
   const displayTaskButton =
@@ -128,6 +149,9 @@ export const ControlsTranslation: React.FC<
   if (displayQaIssues) {
     spots.push('qa');
   }
+  if (displayAiReview) {
+    spots.push('aiReview');
+  }
   if (displayTaskButton) {
     spots.push('task');
   }
@@ -139,7 +163,9 @@ export const ControlsTranslation: React.FC<
   const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = Array(spots.length).fill('28px').join(' ');
+  const gridTemplateColumns = spots
+    .map((spot) => (spot === 'aiReview' ? 'auto' : '28px'))
+    .join(' ');
 
   const { t } = useTranslate();
 
@@ -219,6 +245,17 @@ export const ControlsTranslation: React.FC<
         >
           <QaBadge count={qaIssueCount} stale={qaChecksStale} />
         </ControlsButton>
+      )}
+      {displayAiReview && (
+        <AiReviewBadge
+          style={{ gridArea: 'aiReview', alignSelf: 'center' }}
+          aiReview={aiReview}
+          translationId={translationId}
+          translationState={state!}
+          keyId={keyId!}
+          languageTag={languageTag!}
+          actionsEnabled={Boolean(stateChangeEnabled)}
+        />
       )}
       {inDomTask && (
         <ControlsButton

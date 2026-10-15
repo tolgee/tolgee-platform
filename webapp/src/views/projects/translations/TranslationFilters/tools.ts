@@ -7,6 +7,10 @@ export type LanguageModel = components['schemas']['LanguageModel'];
 
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
+export type AiReviewFilterOutcome = NonNullable<
+  FiltersType['filterAiReviewOutcome']
+>[number];
+
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
 export type FiltersInternal = {
@@ -29,6 +33,9 @@ export type FiltersInternal = {
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
   filterDeletedByUserId?: number[];
+  filterAiReviewOutcome?: AiReviewFilterOutcome[];
+  filterAiReviewScoreBelow?: number;
+  filterAiReviewRuleId?: number[];
 
   /*
    * Specifies which languages will be considered when filtering by translation state
@@ -39,9 +46,11 @@ export type FiltersInternal = {
   filterTranslationLanguage?: true | string;
   // same for suggestions
   filterSuggestionLanguage?: true | string;
+  // same for AI review
+  filterAiReviewApplyLanguage?: true | string;
 
   /*
-   * this one differs from the two above
+   * this one differs from the ones above
    *
    * Specifies which languages will be considered when filtering by the QA check type:
    *  - undefined = all languages (default)
@@ -70,7 +79,9 @@ export type AddParams =
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
-  | ['filterDeletedByUserId', number];
+  | ['filterDeletedByUserId', number]
+  | ['filterAiReviewOutcome', AiReviewFilterOutcome]
+  | ['filterAiReviewRuleId', number];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
@@ -81,4 +92,5 @@ export type FilterActions = {
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
   showDeletedBy?: boolean;
+  scopeOnly?: boolean;
 };

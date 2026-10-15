@@ -3,21 +3,29 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.aiReview.AiReviewOutcome
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
+import io.tolgee.repository.aiReview.AiReviewRuleRepository
+import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
+import io.tolgee.service.aiReview.AiReviewAvailability
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.CursorUtil
+import io.tolgee.util.aiReviewTextHash
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Tuple
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -33,6 +41,10 @@ class TranslationViewDataProvider(
   private val languageQaConfigRepository: LanguageQaConfigRepository,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
+  private val aiReviewAvailability: AiReviewAvailability,
+  private val translationAiReviewRepository: TranslationAiReviewRepository,
+  private val aiReviewRuleRepository: AiReviewRuleRepository,
+  @Lazy private val languageService: LanguageService,
 ) {
   companion object {
     private const val IN_CLAUSE_CHUNK_SIZE = 10_000
@@ -49,15 +61,24 @@ class TranslationViewDataProvider(
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
+    val aiReviewFilterContext = resolveAiReviewFilterContext(project, params)
 
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
 
-    val countBuilder =
-      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
-    val count = em.createQuery(countBuilder.countQuery).singleResult
+    fun newQueryBuilder() =
+      getTranslationsViewQueryBuilder(
+        projectId,
+        languages,
+        params,
+        pageable,
+        cursor,
+        qaEnabled,
+        qaDisabledLanguageIds,
+        aiReviewFilterContext,
+      )
+    val count = em.createQuery(newQueryBuilder().countQuery).singleResult
 
-    val translationsViewQueryBuilder =
-      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled, qaDisabledLanguageIds)
+    val translationsViewQueryBuilder = newQueryBuilder()
     val query = em.createQuery(translationsViewQueryBuilder.dataQuery).setMaxResults(pageable.pageSize)
     if (cursor == null) {
       query.firstResult = pageable.offset.toInt()
@@ -90,6 +111,9 @@ class TranslationViewDataProvider(
     }
     if (qaEnabled && includeQaIssues && translationIds.isNotEmpty()) {
       populateQaIssues(translationIds, views, qaDisabledLanguageIds)
+    }
+    if (translationIds.isNotEmpty() && aiReviewAvailability.isAvailable(project.organizationOwner.id)) {
+      populateAiReviews(translationIds, views)
     }
     return PageImpl(views, pageable, count)
   }
@@ -257,6 +281,26 @@ class TranslationViewDataProvider(
     }
   }
 
+  private fun populateAiReviews(
+    translationIds: List<Long>,
+    views: List<KeyWithTranslationsView>,
+  ) {
+    val reviews =
+      translationIds
+        .chunked(IN_CLAUSE_CHUNK_SIZE)
+        .flatMap { translationAiReviewRepository.findViewsByTranslationIds(it, AiReviewOutcome.VISIBLE) }
+        .associateBy { it.translationId }
+    if (reviews.isEmpty()) return
+    views.forEach { view ->
+      view.translations.values.forEach { translation ->
+        val review = reviews[translation.id] ?: return@forEach
+        if (review.textHash == aiReviewTextHash(translation.text) && review.outcome.isShownFor(translation.state)) {
+          translation.aiReview = review
+        }
+      }
+    }
+  }
+
   private fun createFailedKeysInJobTempTable(filterFailedKeysOfJob: Long?) {
     if (filterFailedKeysOfJob == null) {
       return
@@ -311,6 +355,7 @@ class TranslationViewDataProvider(
         entityManager = em,
         qaEnabled = qaEnabled,
         qaDisabledLanguageIds = qaDisabledLanguageIds,
+        aiReviewFilterContext = resolveAiReviewFilterContext(project, params),
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -325,6 +370,7 @@ class TranslationViewDataProvider(
     cursor: String?,
     qaEnabled: Boolean,
     qaDisabledLanguageIds: Set<Long>,
+    aiReviewFilterContext: AiReviewFilterContext?,
   ) = TranslationsViewQueryBuilder(
     cb = em.criteriaBuilder,
     projectId = projectId,
@@ -335,5 +381,17 @@ class TranslationViewDataProvider(
     entityManager = em,
     qaEnabled = qaEnabled,
     qaDisabledLanguageIds = qaDisabledLanguageIds,
+    aiReviewFilterContext = aiReviewFilterContext,
   )
+
+  private fun resolveAiReviewFilterContext(
+    project: Project,
+    params: TranslationFilters,
+  ): AiReviewFilterContext? {
+    if (!params.hasAiReviewFilter() || !aiReviewAvailability.isAvailable(project.organizationOwner.id)) return null
+    return AiReviewFilterContext(
+      enabledRules = aiReviewRuleRepository.findAllEnabledByProjectId(project.id),
+      baseLanguageId = languageService.getProjectBaseLanguage(project.id).id,
+    )
+  }
 }

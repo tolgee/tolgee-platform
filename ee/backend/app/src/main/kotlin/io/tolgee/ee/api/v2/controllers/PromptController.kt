@@ -8,6 +8,7 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
@@ -15,16 +16,23 @@ import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseModel
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
 import io.tolgee.ee.service.prompt.DefaultPromptHelper
+import io.tolgee.ee.service.prompt.PromptResultParser
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.ee.service.prompt.PromptVariablesHelper
+import io.tolgee.exceptions.AiReviewInvalidOutputException
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.aiReview.AiReviewIssueModel
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.aiReview.AiPlaygroundReviewRunner
+import io.tolgee.service.aiReview.AiReviewAvailability
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -40,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import tools.jackson.databind.ObjectMapper
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -63,6 +72,9 @@ class PromptController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val authenticationFacade: AuthenticationFacade,
   private val promptResponseUsageModelAssembler: PromptResponseUsageModelAssembler,
+  private val aiReviewAvailability: AiReviewAvailability,
+  private val aiPlaygroundReviewRunner: AiPlaygroundReviewRunner,
+  private val objectMapper: ObjectMapper,
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
@@ -70,16 +82,20 @@ class PromptController(
   fun getAllPaged(
     @ParameterObject pageable: Pageable,
     @RequestParam search: String?,
+    @RequestParam type: PromptType?,
   ): PagedModel<PromptModel> {
-    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search)
+    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search, visibleType(type))
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
 
   @GetMapping("default")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
   @Operation(summary = "Get default prompt")
-  fun getDefaultPrompt(): PromptDto {
-    return promptService.getDefaultPrompt()
+  fun getDefaultPrompt(
+    @RequestParam(required = false, defaultValue = "TRANSLATE") type: PromptType,
+  ): PromptDto {
+    checkTypeVisible(type)
+    return promptService.getDefaultPrompt(type)
   }
 
   @PostMapping("")
@@ -95,6 +111,8 @@ class PromptController(
         userAccountDto = authenticationFacade.authenticatedUser,
       ),
     )
+
+    checkTypeAvailable(dto.type)
 
     // ai-playground allows custom templates only as paid feature
     if (dto.template != null) {
@@ -115,6 +133,7 @@ class PromptController(
     @PathVariable promptId: Long,
   ): PromptModel {
     val result = promptService.findPromptWithResolvedProvider(projectHolder.project.id, promptId)
+    checkTypeVisible(result.type)
     return promptModelAssembler.toModel(result)
   }
 
@@ -132,6 +151,9 @@ class PromptController(
         userAccountDto = authenticationFacade.authenticatedUser,
       ),
     )
+
+    checkTypeVisible(promptService.findPrompt(projectHolder.project.id, promptId).type)
+    checkTypeAvailable(dto.type)
 
     // ai-playground allows custom templates only as paid feature
     if (dto.template != null) {
@@ -158,6 +180,7 @@ class PromptController(
       ),
     )
 
+    checkTypeVisible(promptService.findPrompt(projectHolder.project.id, promptId).type)
     promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 
@@ -174,12 +197,18 @@ class PromptController(
       ),
     )
 
+    checkTypeAvailable(data.type)
+
     // ai-playground allows custom templates only as paid feature
     if (data.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
         projectHolder.project.organizationOwnerId,
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
+    }
+
+    if (data.type == PromptType.REVIEW) {
+      return runReview(data)
     }
 
     val projectId = projectHolder.project.id
@@ -206,6 +235,53 @@ class PromptController(
       price = response.promptResult.price,
       usage = response.promptResult.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
     )
+  }
+
+  private fun runReview(data: PromptRunDto): PromptResponseModel {
+    val result =
+      try {
+        aiPlaygroundReviewRunner.reviewAndStoreResult(
+          projectId = projectHolder.project.id,
+          userId = authenticationFacade.authenticatedUser.id,
+          data = data,
+          priority = LlmProviderPriority.HIGH,
+        )
+      } catch (e: AiReviewInvalidOutputException) {
+        return PromptResponseModel(
+          prompt = e.prompt ?: "",
+          result = e.rawResponse,
+          parsedJson = PromptResultParser.extractJson(e.rawResponse, objectMapper),
+          price = e.price,
+          usage = e.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
+          reviewError = Message.AI_REVIEW_INVALID_OUTPUT.code,
+        )
+      }
+    return PromptResponseModel(
+      prompt = result.prompt,
+      result = result.rawResponse,
+      parsedJson = PromptResultParser.extractJson(result.rawResponse, objectMapper),
+      price = result.price,
+      usage = result.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
+      reviewScore = result.score,
+      reviewIssues = result.issues.map { AiReviewIssueModel.of(it) },
+    )
+  }
+
+  private fun visibleType(type: PromptType?): PromptType? {
+    if (aiReviewAvailability.isVisible(projectHolder.project.organizationOwnerId)) return type
+    return PromptType.TRANSLATE
+  }
+
+  private fun checkTypeVisible(type: PromptType) {
+    if (type == PromptType.TRANSLATE) return
+    if (!aiReviewAvailability.isVisible(projectHolder.project.organizationOwnerId)) {
+      throw NotFoundException()
+    }
+  }
+
+  private fun checkTypeAvailable(type: PromptType) {
+    if (type == PromptType.TRANSLATE) return
+    aiReviewAvailability.checkAvailable(projectHolder.project.organizationOwnerId)
   }
 
   @GetMapping("get-variables")

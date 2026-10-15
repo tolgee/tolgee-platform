@@ -20,6 +20,8 @@ class PromptModelAssembler :
       projectId = entity.project.id,
       providerName = entity.providerName,
       basicPromptOptions = entity.basicPromptOptions?.toList(),
+      type = entity.type,
+      reviewCriteria = entity.reviewCriteria,
     )
   }
 }
