@@ -1,4 +1,4 @@
-import { act, StrictMode } from 'react';
+import { act, createRef, StrictMode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -54,5 +54,25 @@ describe('ReactList', () => {
     );
 
     expect(listeners.size).toBe(1);
+  });
+
+  it('answers getVisibleRange after unmount', () => {
+    const ref = createRef<ReactList>();
+    act(() =>
+      root.render(
+        <ReactList
+          ref={ref}
+          type="variable"
+          length={20}
+          // @ts-ignore
+          scrollParentGetter={() => container}
+          itemRenderer={(index) => <div key={index}>{index}</div>}
+        />
+      )
+    );
+    const list = ref.current!;
+    act(() => root.render(<div />));
+
+    expect(() => list.getVisibleRange()).not.toThrow();
   });
 });
