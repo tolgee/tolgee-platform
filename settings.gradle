@@ -147,6 +147,13 @@ if (gradle.ext.billingTestDirectory.exists()) {
     project(':billing-test').projectDir = gradle.ext.billingTestDirectory
 }
 
+gradle.ext.docsScreenshotsAppDirectory = new File('../documentation/screenshots/app')
+
+if (gradle.ext.docsScreenshotsAppDirectory.exists()) {
+    include ':docs-screenshots'
+    project(':docs-screenshots').projectDir = gradle.ext.docsScreenshotsAppDirectory
+}
+
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')
 
