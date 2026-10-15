@@ -95,7 +95,7 @@ export const AiContextData = Empty;
 export const AiPromptsList = Empty;
 export const AiReviewRulesView = Empty;
 export const AiReviewBadge = (_props: AiReviewBadgeProps) =>
-  Empty() as JSX.Element;
+  Empty() as JSX.Element | null;
 export const AiReviewPlaygroundPreview = (
   _props: AiReviewPlaygroundPreviewProps
 ) => Empty() as JSX.Element;
