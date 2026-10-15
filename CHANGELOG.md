@@ -1,3 +1,10 @@
+# [3.236.0](https://github.com/tolgee/tolgee-platform/compare/v3.235.0...v3.236.0) (2026-10-15)
+
+
+### Features
+
+* add an error for picking a plan tier below the organization's word count ([#3968](https://github.com/tolgee/tolgee-platform/issues/3968)) ([f5f2948](https://github.com/tolgee/tolgee-platform/commit/f5f294880bbd01cabac9c8ad7dde186f043aceb0))
+
 # [3.235.0](https://github.com/tolgee/tolgee-platform/compare/v3.234.2...v3.235.0) (2026-10-15)
 
 
