@@ -513,6 +513,15 @@ export function useErrorTranslation() {
           'auto_upgrade_cannot_be_disabled_over_limit',
           'Auto-upgrade cannot be turned off while your organization is over its word allowance. Reduce your content or upgrade your plan first.'
         );
+      case 'plan_tier_below_current_words':
+        return t(
+          'plan_tier_below_current_words',
+          'Your organization has {currentWords, number} hosted words, more than the {includedWords, number} this plan includes. Pick a bigger tier.',
+          {
+            currentWords: Number(params?.[0] || 0),
+            includedWords: Number(params?.[1] || 0),
+          }
+        );
       case 'cannot_downgrade_word_tier':
         return t(
           'cannot_downgrade_word_tier',
