@@ -92,24 +92,15 @@ interface TagRepository : JpaRepository<Tag, Long> {
   @Modifying(flushAutomatically = true)
   @Query(
     """
-    with keys as (
-        select t.id from tag t
-        left join key_meta_tags kmt on t.id = kmt.tags_id
-        left join key_meta km on kmt.key_metas_id = km.id
-        where t.project_id = :projectId
-        group by t.id having count(km) = 0
-    )
-      delete from tag t
-      where t.id in (select * from keys)
+    delete from tag t
+    where t.project_id = :projectId
+      and not exists (
+        select 1 from key_meta_tags kmt
+        join key_meta km on km.id = kmt.key_metas_id
+        where kmt.tags_id = t.id
+      )
   """,
     nativeQuery = true,
-    countQuery = """
-      select count(t.id) from tag t
-      left join key_meta_tags kmt on t.id = kmt.tags_id
-      left join key_meta km on kmt.key_metas_id = km.id
-      where t.project_id = :projectId
-      group by t.id having count(km) = 0
-    """,
   )
   fun deleteAllUnused(projectId: Long)
 

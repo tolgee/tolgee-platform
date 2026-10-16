@@ -175,6 +175,10 @@ open class ChunkProcessingUtil(
     batchJobService.getProcessor(job.type)
   }
 
+  private val batchJobTargetProvider by lazy {
+    applicationContext.getBean(BatchJobTargetProvider::class.java)
+  }
+
   private val projectService by lazy {
     applicationContext.getBean(ProjectService::class.java)
   }
@@ -207,15 +211,13 @@ open class ChunkProcessingUtil(
    * we actually need a list of Long
    */
   private val chunk by lazy {
-    val chunked = job.chunkedTarget
-    val chunk = chunked[execution.chunkNumber]
-    convertChunkToItsType(chunk)
+    convertChunkToItsType(batchJobTargetProvider.getChunk(job, execution.chunkNumber))
   }
 
   private fun convertChunkToItsType(chunk: List<Any>): List<Any> {
     val type =
-      jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, processor.getTargetItemType())
-    return jacksonObjectMapper().convertValue(chunk, type) as List<Any>
+      objectMapper.typeFactory.constructCollectionType(List::class.java, processor.getTargetItemType())
+    return objectMapper.convertValue(chunk, type) as List<Any>
   }
 
   val retryExecution: BatchJobChunkExecution by lazy {
@@ -256,5 +258,6 @@ open class ChunkProcessingUtil(
 
   companion object {
     private const val MAX_STACK_TRACE_LENGTH = 65535
+    private val objectMapper = jacksonObjectMapper()
   }
 }

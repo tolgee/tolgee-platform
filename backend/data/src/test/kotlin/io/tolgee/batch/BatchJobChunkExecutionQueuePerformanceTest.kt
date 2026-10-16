@@ -4,7 +4,10 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.ExecutionQueueItem
+import io.tolgee.batch.data.QueueEventType
+import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -126,6 +129,30 @@ class BatchJobChunkExecutionQueuePerformanceTest {
 
     assertThat(elapsedMs)
       .withFailMessage("removeJobExecutions × 1000 took ${elapsedMs}ms — O(total) scan may have been re-introduced")
+      .isLessThan(500)
+  }
+
+  /**
+   * With Redis, every node receives a REMOVE event for each chunk another node started. Those chunks are at the
+   * head of the local job queue, so handling an event must not scan the whole queue.
+   */
+  @Test
+  fun `REMOVE events for consumed items are fast with 1 large job`() {
+    val items = (1L..110_000L).map { makeItem(it, jobId = 1L) }
+    executionQueue.addItemsToLocalQueue(items)
+
+    val removed = items.take(20_000)
+    val elapsed =
+      measureTime {
+        removed.forEach { executionQueue.onJobItemEvent(JobQueueItemsEvent(listOf(it), QueueEventType.REMOVE)) }
+      }
+    val elapsedMs = elapsed.inWholeMilliseconds
+
+    logger.info("20k REMOVE events with 110k-item job queue → ${elapsedMs}ms")
+
+    executionQueue.size.assert.isEqualTo(90_000)
+    elapsedMs.assert
+      .withFailMessage("20k REMOVE events took ${elapsedMs}ms — O(n) scan may have been re-introduced")
       .isLessThan(500)
   }
 

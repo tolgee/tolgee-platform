@@ -6107,4 +6107,37 @@
             <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="key-meta-tags-tags-id-index" runInTransaction="false">
+        <comment>
+            Lookups of keys by tag (unused tag cleanup after untagging, tag filters) otherwise scan the whole
+            key_meta_tags table. An interrupted CONCURRENTLY build leaves an INVALID index that
+            CREATE ... IF NOT EXISTS would skip on retry, so such a leftover is dropped first.
+        </comment>
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            BEGIN
+              SET LOCAL lock_timeout = '5s';
+              IF EXISTS (
+                SELECT 1
+                FROM pg_class c
+                JOIN pg_index i ON i.indexrelid = c.oid
+                WHERE c.relname = 'ix_key_meta_tags_tags_id'
+                  AND NOT i.indisvalid
+              ) THEN
+                DROP INDEX ix_key_meta_tags_tags_id;
+              END IF;
+            END $$;
+        ]]></sql>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_key_meta_tags_tags_id ON key_meta_tags (tags_id);
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_key_meta_tags_tags_id;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="batch-job-target-product">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="target_product" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

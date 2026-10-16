@@ -111,7 +111,7 @@ class QaCheckBatchServiceImpl(
     val keyById = keyRepository.findAllByIdIn(keyIds).associateBy { it.id }
 
     val enabledCheckTypesByLanguage: Map<Long, Set<QaCheckType>> =
-      languageIds.associateWith { projectQaConfigService.getEnabledCheckTypesForLanguage(project.id, it) }
+      projectQaConfigService.getEnabledCheckTypesForLanguages(project.id, languageIds)
 
     return enabledItems.mapNotNull { item ->
       // If the key has been deleted between job enqueue and processing, skip it
