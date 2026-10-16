@@ -6323,4 +6323,23 @@
             <sql>DROP INDEX IF EXISTS IDX_translation_ai_review_pending_run_batch_job_id;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-28">
+        <createTable tableName="ai_review_project_settings">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_project_settingsPK"/>
+            </column>
+            <column name="on_source_change_ai_approved" type="VARCHAR(255)" defaultValue="RETRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="on_source_change_human_edited" type="VARCHAR(255)" defaultValue="KEEP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="on_source_change_human_reviewed" type="VARCHAR(255)" defaultValue="KEEP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-29">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_review_project_settings" constraintName="FK_ai_review_project_settings_project" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

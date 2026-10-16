@@ -56,8 +56,8 @@ class AiReviewResultParser(
     node: JsonNode?,
     severity: AiReviewIssueSeverity,
   ): Int {
-    val number = node?.toPointsNumber()?.takeIf { it.isFinite() } ?: return severity.defaultPoints
-    return number.coerceIn(0.0, MAX_SCORE.toDouble()).roundToInt()
+    val number = node?.toPointsNumber()?.takeIf { it.isFinite() } ?: return severity.minPoints
+    return severity.clampPoints(number.coerceIn(0.0, MAX_SCORE.toDouble()).roundToInt())
   }
 
   private fun JsonNode.toPointsNumber(): Double? {

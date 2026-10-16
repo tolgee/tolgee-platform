@@ -495,6 +495,11 @@ export interface paths {
     /** Counts which of the selected translations an AI review run would review and why the others are skipped. Makes no LLM calls. */
     post: operations["previewAiReviewRun"];
   };
+  "/v2/projects/{projectId}/ai-review/settings": {
+    get: operations["getAiReviewSettings"];
+    /** Sets what happens to existing translations when their source text changes. Re-translating needs machine translation enabled in the auto translation settings of the language. */
+    put: operations["updateAiReviewSettings"];
+  };
   "/v2/projects/{projectId}/ai-review/translations/{translationId}": {
     get: operations["getTranslationAiReview"];
   };
@@ -1604,6 +1609,31 @@ export interface components {
        * @description Limits the run to translations matched by this rule. Without keyIds, all keys of the project.
        */
       ruleId?: number;
+    };
+    AiReviewSettingsModel: {
+      /** @enum {string} */
+      onSourceChangeAiApproved: "RETRANSLATE" | "KEEP";
+      /** @enum {string} */
+      onSourceChangeHumanEdited: "RETRANSLATE" | "KEEP";
+      /** @enum {string} */
+      onSourceChangeHumanReviewed: "RETRANSLATE" | "KEEP";
+    };
+    AiReviewSettingsRequest: {
+      /**
+       * @description What happens to machine translations approved by AI when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeAiApproved: "RETRANSLATE" | "KEEP";
+      /**
+       * @description What happens to translations edited by a human when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeHumanEdited: "RETRANSLATE" | "KEEP";
+      /**
+       * @description What happens to translations reviewed by a human when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeHumanReviewed: "RETRANSLATE" | "KEEP";
     };
     AnnouncementDto: {
       /** @enum {string} */
@@ -16843,6 +16873,106 @@ export interface operations {
       };
     };
   };
+  getAiReviewSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets what happens to existing translations when their source text changes. Re-translating needs machine translation enabled in the auto translation settings of the language. */
+  updateAiReviewSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewSettingsRequest"];
+      };
+    };
+  };
   getTranslationAiReview: {
     parameters: {
       path: {
@@ -21307,10 +21437,6 @@ export interface operations {
           | "FAILED"
           | "NOT_REVIEWED"
         )[];
-        /** Filter keys with an AI review score lower than this value in the AI review filter languages */
-        filterAiReviewScoreBelow?: number;
-        /** Filter keys whose AI review result in the AI review filter languages comes from one of these rules */
-        filterAiReviewRuleId?: number[];
         /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
         filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21610,10 +21736,6 @@ export interface operations {
           | "FAILED"
           | "NOT_REVIEWED"
         )[];
-        /** Filter keys with an AI review score lower than this value in the AI review filter languages */
-        filterAiReviewScoreBelow?: number;
-        /** Filter keys whose AI review result in the AI review filter languages comes from one of these rules */
-        filterAiReviewRuleId?: number[];
         /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
         filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21957,10 +22079,6 @@ export interface operations {
           | "FAILED"
           | "NOT_REVIEWED"
         )[];
-        /** Filter keys with an AI review score lower than this value in the AI review filter languages */
-        filterAiReviewScoreBelow?: number;
-        /** Filter keys whose AI review result in the AI review filter languages comes from one of these rules */
-        filterAiReviewRuleId?: number[];
         /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
         filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -28073,10 +28191,6 @@ export interface operations {
           | "FAILED"
           | "NOT_REVIEWED"
         )[];
-        /** Filter keys with an AI review score lower than this value in the AI review filter languages */
-        filterAiReviewScoreBelow?: number;
-        /** Filter keys whose AI review result in the AI review filter languages comes from one of these rules */
-        filterAiReviewRuleId?: number[];
         /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
         filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -28588,10 +28702,6 @@ export interface operations {
           | "FAILED"
           | "NOT_REVIEWED"
         )[];
-        /** Filter keys with an AI review score lower than this value in the AI review filter languages */
-        filterAiReviewScoreBelow?: number;
-        /** Filter keys whose AI review result in the AI review filter languages comes from one of these rules */
-        filterAiReviewRuleId?: number[];
         /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
         filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */

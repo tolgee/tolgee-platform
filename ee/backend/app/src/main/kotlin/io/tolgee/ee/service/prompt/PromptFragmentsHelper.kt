@@ -275,13 +275,15 @@ class PromptFragmentsHelper {
       Variable(
         "reviewScoring",
         """
-        Classify every problem you find by severity and use these default penalty points:
-        - critical (75 points): wrong or lost meaning, missing or broken placeholders, offensive content, wrong language.
-        - major (25 points): grammar error, terminology or glossary violation, exceeded character limit, inconsistency with the provided context.
-        - minor (5 points): style, punctuation or casing nits.
+        The translation starts at 100 points. Classify every problem you find by severity and deduct points
+        within the range of its severity, more for a more serious problem:
+        - critical (75 to 100 points): wrong or lost meaning, missing or broken placeholders, offensive content, wrong language.
+        - major (25 to 50 points): grammar error, terminology or glossary violation, exceeded character limit, inconsistency with the provided context.
+        - minor (5 to 15 points): style, punctuation or casing nits.
+        All deductions together never exceed 100 points.
         Text inside curly braces `{}` is an ICU placeholder or a plural/select structure. Placeholder names must match the source exactly;
         only the human-readable text inside plural/select branches is translated.
-        Report each problem once. Use the points listed unless the criteria above say otherwise.
+        Report each problem once. The criteria above can change the severity of a problem, not the point ranges.
         An empty list means the translation is correct.
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,

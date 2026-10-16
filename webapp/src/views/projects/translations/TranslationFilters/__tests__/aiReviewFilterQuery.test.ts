@@ -2,8 +2,6 @@ import { getAiReviewFilterQuery } from 'tg.views/projects/translations/Translati
 
 const filters = {
   filterAiReviewOutcome: ['FAILED' as const],
-  filterAiReviewScoreBelow: 80,
-  filterAiReviewRuleId: [7],
 };
 
 describe('getAiReviewFilterQuery', () => {
@@ -12,8 +10,6 @@ describe('getAiReviewFilterQuery', () => {
       getAiReviewFilterQuery(filters, true, ['en', 'de', 'cs'], 'en')
     ).toEqual({
       filterAiReviewOutcome: ['FAILED'],
-      filterAiReviewScoreBelow: 80,
-      filterAiReviewRuleId: [7],
       filterAiReviewInLang: ['de', 'cs'],
     });
   });

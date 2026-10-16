@@ -74,7 +74,6 @@ class AiReviewFilterPerfTest :
       "filterAiReviewOutcome=NOT_REVIEWED",
       "filterAiReviewOutcome=AUTO_REVIEWED",
       "filterAiReviewOutcome=BELOW_THRESHOLD&filterAiReviewOutcome=FAILED",
-      "filterAiReviewScoreBelow=80",
     ).forEach { query ->
       statements.clear()
       val url = "/v2/projects/$projectId/translations?languages=en,de,cs,fr&size=20&$query"

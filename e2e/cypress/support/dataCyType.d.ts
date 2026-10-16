@@ -169,6 +169,9 @@ declare namespace DataCy {
         "ai-review-run-skipped": true;
         "ai-review-run-skipped-reason": true;
         "ai-review-run-will-review": true;
+        "ai-review-source-change-option": true;
+        "ai-review-source-change-select": true;
+        "ai-review-source-change-settings": true;
         "api-key-expiry-info": true;
         "api-key-list-item": true;
         "api-key-list-item-delete-button": true;
@@ -1062,14 +1065,8 @@ declare namespace DataCy {
         "translations-comments-input": true;
         "translations-comments-load-more-button": true;
         "translations-filter-ai-review": true;
-        "translations-filter-ai-review-by-rule": true;
         "translations-filter-ai-review-menu": true;
         "translations-filter-ai-review-outcome": true;
-        "translations-filter-ai-review-rule": true;
-        "translations-filter-ai-review-rule-menu": true;
-        "translations-filter-ai-review-score-below": true;
-        "translations-filter-ai-review-score-menu": true;
-        "translations-filter-ai-review-score-option": true;
         "translations-filter-apply-for-all": true;
         "translations-filter-apply-for-expand": true;
         "translations-filter-apply-for-language": true;

@@ -17,6 +17,7 @@ import { AiReviewRuleItem } from 'tg.ee.module/aiReview/components/AiReviewRuleI
 import { AiReviewRuleModel } from 'tg.ee.module/aiReview/utils/types';
 import { getRuleRunLanguageIds } from 'tg.ee.module/aiReview/utils/ruleLanguages';
 import { AiReviewRunDialog } from 'tg.ee.module/aiReview/components/AiReviewRunDialog';
+import { AiReviewSourceChangeSettings } from 'tg.ee.module/aiReview/components/AiReviewSourceChangeSettings';
 import { useAiReviewRuleBacklogs } from 'tg.ee.module/aiReview/hooks/useAiReviewRuleBacklogs';
 import { useAiReviewRunPermission } from 'tg.ee.module/aiReview/hooks/useAiReviewRunPermission';
 import { useAiReviewRuleDisplayName } from 'tg.ee.module/aiReview/hooks/useAiReviewRuleDisplayName';
@@ -200,6 +201,8 @@ export const AiReviewRulesView = () => {
           </Box>
         </EmptyState>
       )}
+
+      <AiReviewSourceChangeSettings projectId={project.id} canEdit={canEdit} />
 
       {dialog && (
         <AiReviewRuleDialog

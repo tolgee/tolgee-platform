@@ -310,8 +310,9 @@ class AutoTranslationService(
     usedService: MtServiceType?,
     promptId: Long? = null,
   ) {
+    val replacesMachineText = this.auto
     this.resetFlags()
-    if (project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
+    if (replacesMachineText || project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
       this.state = TranslationState.TRANSLATED
     }
     this.auto = true

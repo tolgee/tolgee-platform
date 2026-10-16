@@ -114,24 +114,6 @@ export class E2TranslationsView {
     return this.closeFilterMenus();
   }
 
-  selectAiReviewRule(ruleName: string) {
-    gcy('translations-filter-ai-review-by-rule').click();
-    gcyAdvanced({
-      value: 'translations-filter-ai-review-rule',
-      rule: ruleName,
-    }).click();
-    return this;
-  }
-
-  selectAiReviewScoreBelow(score: number) {
-    gcy('translations-filter-ai-review-score-below').click();
-    gcyAdvanced({
-      value: 'translations-filter-ai-review-score-option',
-      score: String(score),
-    }).click();
-    return this;
-  }
-
   applyAiReviewFilterForLanguage(languageTag: string) {
     gcyAdvanced({
       value: 'translations-filter-apply-for-language',

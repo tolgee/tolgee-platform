@@ -102,17 +102,37 @@ class AiReviewResultParserTest {
   }
 
   @Test
-  fun `negative points count as zero`() {
-    val result = parse("""{"issues":[{"severity":"minor","message":"a","points":-30}]}""")
-    result.score.assert.isEqualTo(100)
+  fun `points outside the severity range are clamped into it`() {
+    val result =
+      parse(
+        """{"issues":[""" +
+          """{"severity":"minor","message":"a","points":-30},""" +
+          """{"severity":"major","message":"b","points":90},""" +
+          """{"severity":"critical","message":"c","points":10}""" +
+          """]}""",
+      )
     result.issues
-      .single()
-      .points.assert
-      .isEqualTo(0)
+      .map { it.points }
+      .assert
+      .containsExactly(5, 50, 75)
+    result.score.assert.isEqualTo(0)
   }
 
   @Test
-  fun `missing points use the severity default`() {
+  fun `points within the severity range are kept`() {
+    val result =
+      parse(
+        """{"issues":[{"severity":"major","message":"a","points":40},{"severity":"minor","message":"b","points":12}]}""",
+      )
+    result.issues
+      .map { it.points }
+      .assert
+      .containsExactly(40, 12)
+    result.score.assert.isEqualTo(48)
+  }
+
+  @Test
+  fun `missing points use the lowest points of the severity`() {
     val result =
       parse(
         """{"issues":[{"severity":"MAJOR","message":"a"},{"severity":"Minor","message":"b"}]}""",
@@ -128,13 +148,13 @@ class AiReviewResultParserTest {
   fun `float and string points are accepted`() {
     val result =
       parse(
-        """{"issues":[{"severity":"minor","message":"a","points":2.6},{"severity":"minor","message":"b","points":"4"}]}""",
+        """{"issues":[{"severity":"minor","message":"a","points":7.6},{"severity":"minor","message":"b","points":"12"}]}""",
       )
     result.issues
       .map { it.points }
       .assert
-      .containsExactly(3, 4)
-    result.score.assert.isEqualTo(93)
+      .containsExactly(8, 12)
+    result.score.assert.isEqualTo(80)
   }
 
   @Test

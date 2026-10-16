@@ -47,21 +47,9 @@ describe('AI review filters', () => {
     translationsView.assertVisibleKeys('ui-key');
   });
 
-  it('filters by rule and by score', () => {
-    translationsView
-      .openAiReviewFilter()
-      .selectAiReviewRule('Legal dry run')
-      .closeFilterMenus();
-    cy.get('body').type('{esc}');
-    translationsView.assertVisibleKeys('legal-key');
-
-    gcy('translations-filter-select-clear').click();
-    translationsView
-      .openAiReviewFilter()
-      .selectAiReviewScoreBelow(80)
-      .closeFilterMenus();
-    cy.get('body').type('{esc}');
-    translationsView.assertVisibleKeys('ui-key');
+  it('offers only the outcome filters', () => {
+    translationsView.openAiReviewFilter();
+    gcy('translations-filter-ai-review-outcome').should('have.length', 6);
   });
 
   it('is combined with the translation state filter', () => {

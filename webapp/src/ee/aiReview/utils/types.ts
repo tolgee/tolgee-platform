@@ -13,3 +13,7 @@ export type AiReviewOutcome = TranslationAiReviewModel['outcome'];
 export type AiReviewIssueSeverity = AiReviewIssueModel['severity'];
 export type AiReviewRuleMode = AiReviewRuleModel['mode'];
 export type AiReviewRunCounts = components['schemas']['AiReviewRunCounts'];
+export type AiReviewSettingsModel =
+  components['schemas']['AiReviewSettingsModel'];
+export type SourceChangeAction =
+  AiReviewSettingsModel['onSourceChangeAiApproved'];

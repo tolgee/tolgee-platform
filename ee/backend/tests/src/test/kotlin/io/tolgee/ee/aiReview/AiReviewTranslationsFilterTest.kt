@@ -68,22 +68,13 @@ class AiReviewTranslationsFilterTest : AbstractAiReviewTest() {
 
   @Test
   fun `ignores results for an older text and below threshold results of reviewed translations`() {
-    keyNames("filterAiReviewScoreBelow=65").assert.containsExactly("checkout-key")
-  }
-
-  @Test
-  fun `filters by score and rule`() {
-    keyNames("filterAiReviewScoreBelow=75").assert.containsExactly("checkout-key", "ui-key")
-    keyNames("filterAiReviewRuleId=${data.legalRule.self.id}").assert.containsExactly("checkout-key", "legal-key")
-    keyNames("filterAiReviewRuleId=${data.legalRule.self.id}&filterAiReviewOutcome=WOULD_AUTO_REVIEW")
-      .assert
-      .containsExactly("legal-key")
+    keyNames("filterAiReviewOutcome=BELOW_THRESHOLD&filterAiReviewInLang=de").assert.isEmpty()
+    keyNames("filterAiReviewOutcome=BELOW_THRESHOLD&filterAiReviewInLang=fr").assert.isEmpty()
   }
 
   @Test
   fun `not reviewed yet needs an enabled rule that reviews the language and no current result`() {
     keyNames("filterAiReviewOutcome=NOT_REVIEWED").assert.containsExactly("ui-new", "ui-pending", "ui-stale")
-    keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewRuleId=${data.legalRule.self.id}").assert.isEmpty()
     keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewOutcome=FAILED")
       .assert
       .containsExactly("plain-key", "ui-new", "ui-pending", "ui-stale")
@@ -120,14 +111,6 @@ class AiReviewTranslationsFilterTest : AbstractAiReviewTest() {
     val all = keyNames("")
     enabledFeaturesProvider.forceEnabled = setOf()
     keyNames("filterAiReviewOutcome=FAILED").assert.isEqualTo(all)
-  }
-
-  @Test
-  fun `not reviewed yet is ignored together with score below`() {
-    keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewScoreBelow=75").assert.isEmpty()
-    keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewOutcome=BELOW_THRESHOLD&filterAiReviewScoreBelow=75")
-      .assert
-      .containsExactly("ui-key")
   }
 
   private fun JsonNode.items(): List<JsonNode> = (0 until size()).map { get(it) }

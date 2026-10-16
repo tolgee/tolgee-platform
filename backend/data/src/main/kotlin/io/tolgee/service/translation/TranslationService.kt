@@ -79,6 +79,10 @@ class TranslationService(
   @set:Lazy
   lateinit var projectService: ProjectService
 
+  @set:Autowired
+  @set:Lazy
+  lateinit var sourceChangeRetranslationPolicy: SourceChangeRetranslationPolicy
+
   @Transactional(readOnly = true)
   @Suppress("UNCHECKED_CAST")
   fun getTranslations(
@@ -361,6 +365,21 @@ class TranslationService(
     return this.save(translation)
   }
 
+  /**
+   * Unlike [setStateBatch], keeps the machine translation flags, so auto translation still replaces the text
+   * when its source changes.
+   */
+  fun setStateByAiReview(
+    translation: Translation,
+    state: TranslationState,
+  ): Translation {
+    translation.state = state
+    if (state == TranslationState.REVIEWED) {
+      translation.outdated = false
+    }
+    return this.save(translation)
+  }
+
   fun setStateBatch(states: Map<Translation, TranslationState>) {
     states.forEach { (translation, newState) ->
       translation.state = newState
@@ -390,25 +409,46 @@ class TranslationService(
     excludeTranslationIds: Set<Long> = emptySet(),
   ) {
     val baseLanguage = key.project.baseLanguage
-    key.translations.forEach {
-      val isBase = it.language.id == baseLanguage?.id
-      val isEmpty = it.text.isNullOrEmpty()
-      val isExcluded = excludeTranslationIds.contains(it.id)
+    val translations =
+      key.translations.filter {
+        it.language.id != baseLanguage?.id && !it.text.isNullOrEmpty() && !excludeTranslationIds.contains(it.id)
+      }
+    val protectReviewed = projectHolder.projectOrNull?.translationProtection == TranslationProtection.PROTECT_REVIEWED
+    markSourceChanged(key.project.id, translations, changeStateOfKept = !protectReviewed)
+  }
 
-      if (!isBase && !isEmpty && !isExcluded) {
-        val project = projectHolder.projectOrNull
-        it.outdated = true
-        if (project?.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
-          it.state = TranslationState.TRANSLATED
-        }
-        save(it)
+  fun setOutdatedBatch(
+    projectId: Long,
+    keyIds: List<Long>,
+  ) {
+    val customSourceChangeBehavior = sourceChangeRetranslationPolicy.hasCustomBehavior(projectId)
+    keyIds.chunked(1000).forEach { chunk ->
+      translationRepository.setOutdated(chunk)
+      if (customSourceChangeBehavior) {
+        markSourceChanged(
+          projectId,
+          translationRepository.findNonBaseWithTextByKeyIds(chunk),
+          changeStateOfKept = false,
+        )
       }
     }
   }
 
-  fun setOutdatedBatch(keyIds: List<Long>) {
-    keyIds.chunked(1000).forEach { chunk ->
-      translationRepository.setOutdated(chunk)
+  private fun markSourceChanged(
+    projectId: Long,
+    translations: List<Translation>,
+    changeStateOfKept: Boolean,
+  ) {
+    if (translations.isEmpty()) return
+    val retranslatedIds = sourceChangeRetranslationPolicy.selectForRetranslation(projectId, translations)
+    translations.forEach {
+      val retranslate = it.id in retranslatedIds
+      it.outdated = true
+      it.auto = retranslate
+      if (retranslate || changeStateOfKept) {
+        it.state = TranslationState.TRANSLATED
+      }
+      save(it)
     }
   }
 

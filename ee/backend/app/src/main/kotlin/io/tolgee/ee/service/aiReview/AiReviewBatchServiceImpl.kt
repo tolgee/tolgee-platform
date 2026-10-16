@@ -296,11 +296,11 @@ class AiReviewBatchServiceImpl(
 
     when {
       row.outcome == AiReviewOutcome.AUTO_REVIEWED -> {
-        translationService.setStateBatch(translation, TranslationState.REVIEWED)
+        translationService.setStateByAiReview(translation, TranslationState.REVIEWED)
       }
 
       rereview -> {
-        translationService.setStateBatch(translation, TranslationState.TRANSLATED)
+        translationService.setStateByAiReview(translation, TranslationState.TRANSLATED)
       }
     }
     translationAiReviewRepository.save(row)
@@ -331,7 +331,7 @@ class AiReviewBatchServiceImpl(
 
     val lockedRow = lockRowIfStillCurrent(translation, hash, listOf(row.outcome)) ?: return
     if (lockedRow.outcome == AiReviewOutcome.AUTO_REVIEWED && translation.state == TranslationState.REVIEWED) {
-      translationService.setStateBatch(translation, TranslationState.TRANSLATED)
+      translationService.setStateByAiReview(translation, TranslationState.TRANSLATED)
     }
     lockedRow.outcome = AiReviewOutcome.BELOW_THRESHOLD
     lockedRow.rule = demotion.rule

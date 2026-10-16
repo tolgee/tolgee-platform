@@ -52,8 +52,6 @@ export type FiltersInternal = {
   filterTaskStatus?: TaskStatusByType;
   filterDeletedByUserId?: number[];
   filterAiReviewOutcome?: AiReviewFilterOutcome[];
-  filterAiReviewScoreBelow?: number;
-  filterAiReviewRuleId?: number[];
 
   /*
    * Specifies which languages will be considered when filtering by translation state
@@ -99,8 +97,7 @@ export type AddParams =
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
   | ['filterDeletedByUserId', number]
-  | ['filterAiReviewOutcome', AiReviewFilterOutcome]
-  | ['filterAiReviewRuleId', number];
+  | ['filterAiReviewOutcome', AiReviewFilterOutcome];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;

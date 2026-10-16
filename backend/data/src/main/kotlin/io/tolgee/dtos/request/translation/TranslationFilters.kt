@@ -286,24 +286,13 @@ Combined with the other translation filters with logical AND. Ignored when AI re
   var filterAiReviewOutcome: List<AiReviewFilterOutcome>? = null
 
   @field:Parameter(
-    description = "Filter keys with an AI review score lower than this value in the AI review filter languages",
-  )
-  var filterAiReviewScoreBelow: Int? = null
-
-  @field:Parameter(
-    description = "Filter keys whose AI review result in the AI review filter languages comes from one of these rules",
-  )
-  var filterAiReviewRuleId: List<Long>? = null
-
-  @field:Parameter(
     description =
       "Languages (tags) the AI review filters apply to. " +
         "When omitted, all returned languages except the base language.",
   )
   var filterAiReviewInLang: List<String>? = null
 
-  fun hasAiReviewFilter(): Boolean =
-    !filterAiReviewOutcome.isNullOrEmpty() || filterAiReviewScoreBelow != null || !filterAiReviewRuleId.isNullOrEmpty()
+  fun hasAiReviewFilter(): Boolean = !filterAiReviewOutcome.isNullOrEmpty()
 
   @field:Parameter(
     description = "Filter keys with any suggestions in lang",

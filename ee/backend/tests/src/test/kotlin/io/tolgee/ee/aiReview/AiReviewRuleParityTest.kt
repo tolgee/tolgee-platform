@@ -72,28 +72,6 @@ class AiReviewRuleParityTest : AbstractAiReviewTest() {
   }
 
   @Test
-  fun `rule backlog equals the not reviewed yet filter for that rule`() {
-    val rules = listOf(data.uiOrUntaggedRule, data.taggedOutsideAdminRule, data.checkoutDryRunRule)
-    val json =
-      jsonMapper.readTree(
-        performAuthGet("/v2/projects/$projectId/ai-review/rules/backlog").andIsOk.andGetContentAsString,
-      )
-    val backlogs =
-      (0 until json.path("backlogs").size()).associate {
-        val backlog = json.path("backlogs").get(it)
-        backlog.path("ruleId").asLong() to backlog.path("notReviewed").asLong()
-      }
-    rules.forEach { rule ->
-      val filtered =
-        nonBaseLanguages.sumOf { notReviewedKeyNames(it.tag, "&filterAiReviewRuleId=${rule.self.id}").size }
-      backlogs[rule.self.id]
-        .assert
-        .describedAs(rule.self.name)
-        .isEqualTo(filtered.toLong())
-    }
-  }
-
-  @Test
   fun `sql text hash equals the stored hash for non-ascii text`() {
     val text = data.autoReviewedNonAscii.self.text
     jdbcTemplate
@@ -126,10 +104,8 @@ class AiReviewRuleParityTest : AbstractAiReviewTest() {
       }.groupBy({ (_, translation) -> translation.language.tag }, { (key, _) -> key.self.name })
   }
 
-  private fun notReviewedKeyNames(
-    languageTag: String,
-    extra: String = "",
-  ): List<String> = keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewInLang=$languageTag$extra")
+  private fun notReviewedKeyNames(languageTag: String): List<String> =
+    keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewInLang=$languageTag")
 
   private fun keyNames(query: String): List<String> {
     val url = "/v2/projects/$projectId/translations?languages=en,de,cs,fr&sort=keyName&size=1000&$query"

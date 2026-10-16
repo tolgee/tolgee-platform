@@ -1,22 +1,16 @@
 import { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Divider, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { CompactListSubheader } from 'tg.component/ListComponents';
-import { useProject } from 'tg.hooks/useProject';
 import {
   AiReviewFilterOutcome,
   FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
 import { SubfilterAiReviewProps } from 'eeSetup/EeModuleType';
-import { aiReviewSubmenuProps } from 'tg.ee.module/aiReview/components/AiReviewFilterSubmenuProps';
-import { AiReviewScoreBelowSubmenu } from 'tg.ee.module/aiReview/components/AiReviewScoreBelowSubmenu';
-import { AiReviewRuleSubmenu } from 'tg.ee.module/aiReview/components/AiReviewRuleSubmenu';
-import { useAiReviewRules } from 'tg.ee.module/aiReview/hooks/useAiReviewRules';
-import { useAiReviewRuleDisplayName } from 'tg.ee.module/aiReview/hooks/useAiReviewRuleDisplayName';
 import { useAiReviewFilterOutcomeLabel } from 'tg.ee.module/aiReview/hooks/useAiReviewLabels';
 import { AiReviewOutcomeIndicator } from 'tg.ee.module/aiReview/components/AiReviewOutcomeIndicator';
 
@@ -74,7 +68,8 @@ export const SubfilterAiReview = ({
         <Menu
           open={open}
           anchorEl={anchorEl.current!}
-          {...aiReviewSubmenuProps}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           onClose={() => setOpen(false)}
           slotProps={{ paper: { style: { minWidth: 300 } } }}
         >
@@ -92,13 +87,6 @@ export const SubfilterAiReview = ({
                 data-cy-outcome={outcome}
               />
             ))}
-            <Divider />
-            <AiReviewScoreBelowSubmenu value={value} actions={actions} />
-            <AiReviewRuleSubmenu
-              value={value}
-              actions={actions}
-              selectedLanguages={selectedLanguages}
-            />
             <CompactListSubheader>
               <Box display="flex" justifyContent="space-between">
                 <Box>{t('translations_filter_languages_select_title')}</Box>
@@ -149,11 +137,7 @@ export const SubfilterAiReview = ({
 };
 
 export function getAiReviewFiltersLength(value: FiltersInternal) {
-  return (
-    (value.filterAiReviewOutcome?.length ?? 0) +
-    (value.filterAiReviewScoreBelow !== undefined ? 1 : 0) +
-    (value.filterAiReviewRuleId?.length ?? 0)
-  );
+  return value.filterAiReviewOutcome?.length ?? 0;
 }
 
 const OutcomeFilterName = ({ outcome }: { outcome: AiReviewFilterOutcome }) => {
@@ -171,32 +155,4 @@ export function getAiReviewFiltersName(value: FiltersInternal) {
   if (value.filterAiReviewOutcome?.length) {
     return <OutcomeFilterName outcome={value.filterAiReviewOutcome[0]} />;
   }
-  if (value.filterAiReviewScoreBelow !== undefined) {
-    return (
-      <T
-        keyName="translations_filter_ai_review_summary_score_below"
-        defaultValue="AI review: score below {score}"
-        params={{ score: value.filterAiReviewScoreBelow }}
-      />
-    );
-  }
-  if (value.filterAiReviewRuleId?.length) {
-    return <RuleFilterName ruleId={value.filterAiReviewRuleId[0]} />;
-  }
 }
-
-const RuleFilterName = ({ ruleId }: { ruleId: number }) => {
-  const project = useProject();
-  const rulesLoadable = useAiReviewRules(project.id);
-  const getRuleDisplayName = useAiReviewRuleDisplayName();
-  const rule = rulesLoadable.data?._embedded?.rules?.find(
-    (r) => r.id === ruleId
-  );
-  return (
-    <T
-      keyName="translations_filter_ai_review_summary"
-      defaultValue="AI review: {filter}"
-      params={{ filter: rule ? getRuleDisplayName(rule, []) : '' }}
-    />
-  );
-};

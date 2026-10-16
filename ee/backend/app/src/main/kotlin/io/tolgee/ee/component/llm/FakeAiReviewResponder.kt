@@ -29,7 +29,7 @@ class FakeAiReviewResponder(
             "category" to "fake",
             "message" to "Fake ${severity.name.lowercase()} issue",
             "suggestion" to null,
-            "points" to severity.defaultPoints,
+            "points" to severity.minPoints,
           )
         }
     return objectMapper.writeValueAsString(mapOf("issues" to issues))

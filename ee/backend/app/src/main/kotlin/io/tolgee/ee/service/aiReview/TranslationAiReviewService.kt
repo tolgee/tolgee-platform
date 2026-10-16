@@ -53,6 +53,7 @@ class TranslationAiReviewService(
     review.resolvedBy = user
     review.resolvedAt = currentDateProvider.date
     translationAiReviewRepository.save(review)
+    translationService.setStateBatch(translation, TranslationState.REVIEWED)
     publishResolved(projectId, translation, review)
     return review
   }

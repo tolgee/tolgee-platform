@@ -193,11 +193,6 @@ export const useTranslationFilters = ({
           ...filters,
           filterAiReviewOutcome: add(filters.filterAiReviewOutcome, value),
         });
-      case 'filterAiReviewRuleId':
-        return setFilters({
-          ...filters,
-          filterAiReviewRuleId: add(filters.filterAiReviewRuleId, value),
-        });
       default:
         exhaustiveMatchingGuard(type);
     }
@@ -305,11 +300,6 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterAiReviewOutcome: remove(filters.filterAiReviewOutcome, value),
-        });
-      case 'filterAiReviewRuleId':
-        return setFilters({
-          ...filters,
-          filterAiReviewRuleId: remove(filters.filterAiReviewRuleId, value),
         });
       default:
         exhaustiveMatchingGuard(type);

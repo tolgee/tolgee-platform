@@ -207,6 +207,16 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
+    from Translation t
+    join fetch t.key k
+    join fetch t.language
+    where k.id in :keyIds and t.language.id <> k.project.baseLanguage.id and t.text is not null and t.text <> ''
+  """,
+  )
+  fun findNonBaseWithTextByKeyIds(keyIds: Collection<Long>): List<Translation>
+
+  @Query(
+    """
     select t from Translation t
     join t.language l on l.tag in :languageTags
     where t.key.id in :keys

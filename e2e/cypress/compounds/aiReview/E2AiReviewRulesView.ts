@@ -4,10 +4,36 @@ import { components } from '../../../../webapp/src/service/apiSchema.generated';
 
 type AiReviewRuleMode = components['schemas']['AiReviewRuleModel']['mode'];
 type LanguageOverrideMode = 'default' | 'custom' | 'never';
+type AiReviewSettings = components['schemas']['AiReviewSettingsModel'];
+type SourceChangeSetting = keyof AiReviewSettings;
+type SourceChangeAction = AiReviewSettings[SourceChangeSetting];
 
 export class E2AiReviewRulesView {
   visit(projectId: number) {
     return cy.visit(`${HOST}/projects/${projectId}/ai/review`);
+  }
+
+  getSourceChangeSelect(setting: SourceChangeSetting) {
+    return gcyAdvanced({ value: 'ai-review-source-change-select', setting });
+  }
+
+  setSourceChangeAction(
+    setting: SourceChangeSetting,
+    action: SourceChangeAction
+  ) {
+    this.getSourceChangeSelect(setting).click();
+    gcyAdvanced({ value: 'ai-review-source-change-option', action })
+      .should('be.visible')
+      .click();
+  }
+
+  assertSourceChangeAction(
+    setting: SourceChangeSetting,
+    action: SourceChangeAction
+  ) {
+    this.getSourceChangeSelect(setting)
+      .find('input')
+      .should('have.value', action);
   }
 
   getRuleItem(name: string) {

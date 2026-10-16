@@ -27,8 +27,6 @@ export const getAiReviewFilterQuery = (
   }
   return {
     filterAiReviewOutcome: filters.filterAiReviewOutcome,
-    filterAiReviewScoreBelow: filters.filterAiReviewScoreBelow,
-    filterAiReviewRuleId: filters.filterAiReviewRuleId,
     filterAiReviewInLang: languages,
   };
 };

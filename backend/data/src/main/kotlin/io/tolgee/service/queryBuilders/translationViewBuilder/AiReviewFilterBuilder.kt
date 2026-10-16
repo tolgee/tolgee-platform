@@ -4,7 +4,6 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.aiReview.AiReviewRule
-import io.tolgee.model.aiReview.AiReviewRule_
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.aiReview.TranslationAiReview_
 import io.tolgee.model.enums.TranslationState
@@ -46,19 +45,17 @@ internal class AiReviewFilterBuilder(
   fun build(): Predicate? {
     if (!params.hasAiReviewFilter()) return null
     val outcomes = params.filterAiReviewOutcome.orEmpty().toSet()
-    val scoreBelow = params.filterAiReviewScoreBelow
-    val ruleIds = params.filterAiReviewRuleId.orEmpty()
 
     val languageIds = resolveLanguageIds()
     if (languageIds.isEmpty()) return cb.disjunction()
 
     val resultOutcomes = outcomes - AiReviewFilterOutcome.NOT_REVIEWED
     val predicates = mutableListOf<Predicate>()
-    if (resultOutcomes.isNotEmpty() || outcomes.isEmpty()) {
-      predicates.add(buildResultExists(languageIds, resultOutcomes.ifEmpty { RESULT_OUTCOMES }, scoreBelow, ruleIds))
+    if (resultOutcomes.isNotEmpty()) {
+      predicates.add(buildResultExists(languageIds, resultOutcomes))
     }
-    if (AiReviewFilterOutcome.NOT_REVIEWED in outcomes && scoreBelow == null) {
-      buildNotReviewedExists(languageIds, ruleIds)?.let { predicates.add(it) }
+    if (AiReviewFilterOutcome.NOT_REVIEWED in outcomes) {
+      buildNotReviewedExists(languageIds)?.let { predicates.add(it) }
     }
     if (predicates.isEmpty()) return cb.disjunction()
     return cb.or(*predicates.toTypedArray())
@@ -75,8 +72,6 @@ internal class AiReviewFilterBuilder(
   private fun buildResultExists(
     languageIds: List<Long>,
     outcomes: Set<AiReviewFilterOutcome>,
-    scoreBelow: Int?,
-    ruleIds: List<Long>,
   ): Predicate {
     val subquery = queryBase.query.subquery(Long::class.java)
     val review = subquery.from(TranslationAiReview::class.java)
@@ -89,10 +84,6 @@ internal class AiReviewFilterBuilder(
         cb.equal(review.get(TranslationAiReview_.textHash), cb.aiReviewTextHash(translation.get(Translation_.text))),
         cb.or(*outcomes.map { outcomePredicate(it, review, translation) }.toTypedArray()),
       )
-    scoreBelow?.let { conditions.add(cb.lessThan(review.get(TranslationAiReview_.score), it)) }
-    if (ruleIds.isNotEmpty()) {
-      conditions.add(review.get(TranslationAiReview_.rule).get(AiReviewRule_.id).`in`(ruleIds))
-    }
     return matchesRowKey(subquery, key.get(Key_.id), conditions)
   }
 
@@ -118,13 +109,9 @@ internal class AiReviewFilterBuilder(
     return cb.and(*conditions.toTypedArray())
   }
 
-  private fun buildNotReviewedExists(
-    languageIds: List<Long>,
-    ruleIds: List<Long>,
-  ): Predicate? {
+  private fun buildNotReviewedExists(languageIds: List<Long>): Predicate? {
     val candidateLanguageIds = languageIds.filter { it != context.baseLanguageId }
-    val reviewingRules = context.enabledRules.filter { ruleIds.isEmpty() || it.id in ruleIds }
-    if (candidateLanguageIds.isEmpty() || reviewingRules.isEmpty()) return null
+    if (candidateLanguageIds.isEmpty() || context.enabledRules.isEmpty()) return null
 
     val subquery = queryBase.query.subquery(Long::class.java)
     val translation = subquery.from(Translation::class.java)
@@ -142,7 +129,9 @@ internal class AiReviewFilterBuilder(
     }
 
     val reviewPredicates =
-      reviewingRules.mapNotNull { rule -> rulePredicate(rule, splitRuleLanguages(rule, candidateLanguageIds).reviewed) }
+      context.enabledRules.mapNotNull { rule ->
+        rulePredicate(rule, splitRuleLanguages(rule, candidateLanguageIds).reviewed)
+      }
     if (reviewPredicates.isEmpty()) return null
     val neverPredicates =
       context.enabledRules.mapNotNull { rule ->
@@ -261,13 +250,5 @@ internal class AiReviewFilterBuilder(
 
   companion object {
     private const val NO_TAG = ""
-    private val RESULT_OUTCOMES =
-      setOf(
-        AiReviewFilterOutcome.AUTO_REVIEWED,
-        AiReviewFilterOutcome.BELOW_THRESHOLD,
-        AiReviewFilterOutcome.WOULD_AUTO_REVIEW,
-        AiReviewFilterOutcome.WOULD_NOT_AUTO_REVIEW,
-        AiReviewFilterOutcome.FAILED,
-      )
   }
 }
