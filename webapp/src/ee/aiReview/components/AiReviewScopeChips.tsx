@@ -77,7 +77,9 @@ export const AiReviewScopeChips = ({ rule, languages }: Props) => {
     !rule.tagIn.length &&
     !rule.tagNotIn.length &&
     !rule.namespaceIn.length &&
-    !rule.namespaceNotIn.length;
+    !rule.namespaceNotIn.length &&
+    !rule.branchIn.length &&
+    !rule.branchNotIn.length;
 
   return (
     <StyledChips data-cy="ai-review-rule-scope">

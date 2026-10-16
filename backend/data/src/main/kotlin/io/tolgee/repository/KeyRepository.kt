@@ -586,7 +586,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       k.id,
       ns.name,
       tag.name,
-      coalesce(br.name, (select db.name from Branch db where db.project = k.project and db.isDefault = true))
+      coalesce(br.name, (select db.name from Branch db where db.project = k.project and db.isDefault = true and db.deletedAt is null))
     )
     from Key k
     left join k.namespace ns

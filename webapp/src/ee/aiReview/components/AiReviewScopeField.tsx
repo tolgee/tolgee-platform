@@ -18,7 +18,7 @@ export type AiReviewScopeValue = {
   languageTags: string[];
 };
 
-const StyledFields = styled('div')`
+export const StyledFields = styled('div')`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: ${({ theme }) => theme.spacing(1.5)};

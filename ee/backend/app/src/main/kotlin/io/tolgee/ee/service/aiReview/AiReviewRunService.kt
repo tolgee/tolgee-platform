@@ -328,7 +328,7 @@ class AiReviewRunService(
     private val NOT_IN_BACKLOG = setOf(Category.PENDING, Category.FAILED)
 
     private const val BRANCH_SQL =
-      "coalesce(br.name, (SELECT db.name FROM branch db WHERE db.project_id = k.project_id AND db.is_default))"
+      "coalesce(br.name, (SELECT db.name FROM branch db WHERE db.project_id = k.project_id AND db.is_default AND db.deleted_at IS NULL))"
 
     private const val TAGS_SQL =
       """ARRAY(

@@ -18,6 +18,8 @@ const scope = {
   tagNotIn: [] as string[],
   namespaceIn: [] as string[],
   namespaceNotIn: [] as string[],
+  branchIn: [] as string[],
+  branchNotIn: [] as string[],
   languageIds: [] as number[],
 };
 
@@ -41,6 +43,8 @@ describe('formatAiReviewRuleDisplayName', () => {
           tagNotIn: ['legal'],
           namespaceIn: ['checkout'],
           namespaceNotIn: [],
+          branchIn: [],
+          branchNotIn: [],
           languageIds: [1, 2],
         },
         languages,

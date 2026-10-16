@@ -21,8 +21,12 @@ import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 
 class AiReviewTranslationControllerTest : AbstractAiReviewTest() {
+  @Autowired
+  lateinit var jdbcTemplate: JdbcTemplate
+
   @Autowired
   lateinit var activityRevisionRepository: ActivityRevisionRepository
 
@@ -91,6 +95,19 @@ class AiReviewTranslationControllerTest : AbstractAiReviewTest() {
       node("issues[0].message").isEqualTo("Nit")
       node("issues[0].suggestion").isAbsent()
       node("issues[0].points").isEqualTo(5)
+    }
+  }
+
+  @Test
+  fun `stored issues with the removed suggestion field still load`() {
+    jdbcTemplate.update(
+      "UPDATE translation_ai_review SET issues = ?::jsonb WHERE translation_id = ?",
+      """[{"severity":"MINOR","category":"style","message":"Nit","suggestion":"Better","points":5}]""",
+      germanId,
+    )
+    performAuthGet(url(germanId)).andIsOk.andAssertThatJson {
+      node("issues[0].message").isEqualTo("Nit")
+      node("issues[0].suggestion").isAbsent()
     }
   }
 

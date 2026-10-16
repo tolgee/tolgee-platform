@@ -97,6 +97,9 @@ export const AiReviewRuleDialog = ({
     branchIn: rule?.branchIn ?? [],
     branchNotIn: rule?.branchNotIn ?? [],
   }));
+  const hasBranchPatterns =
+    branches.branchIn.length > 0 || branches.branchNotIn.length > 0;
+  const showBranches = branchingEnabled || hasBranchPatterns;
   const [scope, setScope] = useState<AiReviewScopeValue>(() => ({
     filters: {
       filterTag: nonEmpty(rule?.tagIn),
@@ -220,8 +223,7 @@ export const AiReviewRuleDialog = ({
           value={scope}
           onChange={setScope}
         />
-        {(branchingEnabled ||
-          Boolean(branches.branchIn.length + branches.branchNotIn.length)) && (
+        {showBranches && (
           <AiReviewBranchField
             projectId={projectId}
             value={branches}

@@ -108,7 +108,21 @@ class AiReviewRuleMatcherTest {
   }
 
   @Test
-  fun `stricter branch rule wins like other scope parts`() {
+  fun `include and exclude both apply and wildcards can sit anywhere`() {
+    val rule =
+      rule {
+        branchIn = mutableListOf("feature/*")
+        branchNotIn = mutableListOf("feature/legacy-*", "*/tmp/*")
+      }
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "feature/new"), LANGUAGE).assert.isTrue()
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "feature/legacy-x"), LANGUAGE).assert.isFalse()
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "feature/tmp/x"), LANGUAGE).assert.isFalse()
+    val everything = rule { branchIn = mutableListOf("*") }
+    AiReviewRuleMatcher.matches(everything, ui.copy(branch = "any/branch"), LANGUAGE).assert.isTrue()
+  }
+
+  @Test
+  fun `a stricter rule for draft branches wins there and the general rule applies elsewhere`() {
     val general = rule { threshold = 80 }
     val draftRule =
       rule {
@@ -118,7 +132,9 @@ class AiReviewRuleMatcherTest {
     val rules = listOf(general, draftRule)
     val match = AiReviewRuleMatcher.match(rules, ui.copy(branch = "draft/x"), LANGUAGE)
     (match as Match.Review).rule.assert.isEqualTo(draftRule)
-    (AiReviewRuleMatcher.match(rules, ui, LANGUAGE) as Match.Review).threshold.assert.isEqualTo(80)
+    (AiReviewRuleMatcher.match(rules, ui.copy(branch = "main"), LANGUAGE) as Match.Review)
+      .threshold.assert
+      .isEqualTo(80)
   }
 
   @Test

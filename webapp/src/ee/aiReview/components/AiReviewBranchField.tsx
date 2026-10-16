@@ -1,33 +1,14 @@
-import {
-  Autocomplete,
-  Box,
-  Chip,
-  styled,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Autocomplete, Box, Chip, TextField, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { StyledInputLabel } from 'tg.component/common/TextField';
+import { StyledFields } from 'tg.ee.module/aiReview/components/AiReviewScopeField';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 export type AiReviewBranchValue = {
   branchIn: string[];
   branchNotIn: string[];
 };
-
-const StyledFields = styled('div')`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${({ theme }) => theme.spacing(1.5)};
-  align-items: start;
-
-  & .field {
-    display: grid;
-    gap: ${({ theme }) => theme.spacing(0.5)};
-    min-width: 0;
-  }
-`;
 
 type Props = {
   projectId: number;
@@ -39,10 +20,6 @@ export const AiReviewBranchField = ({ projectId, value, onChange }: Props) => {
   const { t } = useTranslate();
   const { branches } = useBranchesService({ projectId });
   const options = branches.map((b) => b.name);
-  const hint = t(
-    'ai_review_rule_branches_hint',
-    'Type a branch name or a pattern like feature/*'
-  );
 
   const patternInput = (
     patterns: string[],
@@ -53,6 +30,7 @@ export const AiReviewBranchField = ({ projectId, value, onChange }: Props) => {
     <Autocomplete
       multiple
       freeSolo
+      autoSelect
       size="small"
       options={options}
       value={patterns}
@@ -105,7 +83,10 @@ export const AiReviewBranchField = ({ projectId, value, onChange }: Props) => {
         </Box>
       </StyledFields>
       <Typography variant="caption" color="text.secondary">
-        {hint}
+        {t(
+          'ai_review_rule_branches_hint',
+          'Type a branch name or a pattern like feature/*'
+        )}
       </Typography>
     </Box>
   );

@@ -5,7 +5,13 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 export type AiReviewRuleNameSource = Pick<
   AiReviewRuleModel,
-  'tagIn' | 'tagNotIn' | 'namespaceIn' | 'namespaceNotIn' | 'languageIds'
+  | 'tagIn'
+  | 'tagNotIn'
+  | 'namespaceIn'
+  | 'namespaceNotIn'
+  | 'languageIds'
+  | 'branchIn'
+  | 'branchNotIn'
 > & { name?: string | null };
 
 export type RuleNameTranslate = (
@@ -71,6 +77,20 @@ export const formatAiReviewRuleDisplayName = (
     parts.push(
       t('ai_review_rule_name_not_namespaces', 'Not in namespace {namespaces}', {
         namespaces: list(rule.namespaceNotIn.map(namespaceLabel)),
+      })
+    );
+  }
+  if (rule.branchIn.length) {
+    parts.push(
+      t('ai_review_rule_name_branches', 'Branches {branches}', {
+        branches: list(rule.branchIn),
+      })
+    );
+  }
+  if (rule.branchNotIn.length) {
+    parts.push(
+      t('ai_review_rule_name_not_branches', 'Not branches {branches}', {
+        branches: list(rule.branchNotIn),
       })
     );
   }
