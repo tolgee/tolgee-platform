@@ -180,6 +180,21 @@ class TagService(
     return projectIds.single()
   }
 
+  fun createMissingTags(
+    projectId: Long,
+    names: Collection<String>,
+  ) {
+    val existing = getFromProject(projectId, names).map { it.name }.toSet()
+    names.distinct().filter { it !in existing }.forEach { name ->
+      tagRepository.save(
+        Tag().apply {
+          project = entityManager.getReference(Project::class.java, projectId)
+          this.name = name
+        },
+      )
+    }
+  }
+
   private fun getFromProject(
     projectId: Long,
     tags: Collection<String>,

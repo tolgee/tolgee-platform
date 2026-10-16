@@ -6,6 +6,7 @@ import io.tolgee.batch.MtProviderCatching
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
@@ -79,11 +80,7 @@ class AiPlaygroundChunkProcessor(
   }
 
   override fun getTarget(data: MachineTranslationRequest): List<BatchTranslationTargetItem> {
-    return data.keyIds.flatMap { keyId ->
-      data.targetLanguageIds.map { languageId ->
-        BatchTranslationTargetItem(keyId, languageId)
-      }
-    }
+    return TranslationTargetProduct(data.keyIds, data.targetLanguageIds)
   }
 
   override fun getMaxPerJobConcurrency(): Int {

@@ -22,6 +22,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentHashMap
 
 @Transactional
 @Service
@@ -38,11 +39,47 @@ class LanguageStatsService(
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val languageQaConfigRepository: LanguageQaConfigRepository,
 ) : Logging {
+  private val waitingRefreshes: MutableSet<Pair<Long, Long?>> = ConcurrentHashMap.newKeySet()
+
+  /**
+   * Skips the refresh when another one for the same project and branch is still waiting for the lock: that one
+   * opens its transaction only after this caller's changes were committed, so it already covers them.
+   */
+  fun refreshLanguageStatsCoalesced(
+    projectId: Long,
+    branchId: Long? = null,
+  ) {
+    val refreshKey = projectId to branchId
+    if (!waitingRefreshes.add(refreshKey)) {
+      return
+    }
+    var lockAcquired = false
+    try {
+      refreshLanguageStatsUnderLock(projectId, branchId) {
+        lockAcquired = true
+        waitingRefreshes.remove(refreshKey)
+      }
+    } finally {
+      if (!lockAcquired) {
+        waitingRefreshes.remove(refreshKey)
+      }
+    }
+  }
+
   fun refreshLanguageStats(
     projectId: Long,
     branchId: Long? = null,
   ) {
+    refreshLanguageStatsUnderLock(projectId, branchId) {}
+  }
+
+  private fun refreshLanguageStatsUnderLock(
+    projectId: Long,
+    branchId: Long?,
+    onLockAcquired: () -> Unit,
+  ) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId-${branchId ?: "default"}") {
+      onLockAcquired()
       executeInNewRepeatableTransaction(platformTransactionManager) tx@{
         val languages = languageService.findAll(projectId)
         val allRawLanguageStats = getLanguageStatsRaw(projectId, branchId)

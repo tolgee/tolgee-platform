@@ -18,7 +18,7 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.Timeouts
 import org.springframework.context.ApplicationContext
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
 import java.util.Date
 import kotlin.collections.sorted
 import kotlin.coroutines.CoroutineContext
@@ -175,8 +175,16 @@ open class ChunkProcessingUtil(
     batchJobService.getProcessor(job.type)
   }
 
+  private val batchJobTargetProvider by lazy {
+    applicationContext.getBean(BatchJobTargetProvider::class.java)
+  }
+
   private val projectService by lazy {
     applicationContext.getBean(ProjectService::class.java)
+  }
+
+  private val objectMapper by lazy {
+    applicationContext.getBean(ObjectMapper::class.java)
   }
 
   private val metrics by lazy {
@@ -207,15 +215,13 @@ open class ChunkProcessingUtil(
    * we actually need a list of Long
    */
   private val chunk by lazy {
-    val chunked = job.chunkedTarget
-    val chunk = chunked[execution.chunkNumber]
-    convertChunkToItsType(chunk)
+    convertChunkToItsType(batchJobTargetProvider.getChunk(job, execution.chunkNumber))
   }
 
   private fun convertChunkToItsType(chunk: List<Any>): List<Any> {
     val type =
-      jacksonObjectMapper().typeFactory.constructCollectionType(List::class.java, processor.getTargetItemType())
-    return jacksonObjectMapper().convertValue(chunk, type) as List<Any>
+      objectMapper.typeFactory.constructCollectionType(List::class.java, processor.getTargetItemType())
+    return objectMapper.convertValue(chunk, type) as List<Any>
   }
 
   val retryExecution: BatchJobChunkExecution by lazy {

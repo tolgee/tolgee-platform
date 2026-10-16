@@ -4,6 +4,7 @@ import io.tolgee.batch.data.AllIncompleteJobsResult
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.JobUnlockedChunk
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.events.OnBatchJobCreated
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
@@ -59,6 +60,7 @@ class BatchJobService(
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
+  private val batchJobTargetProvider: BatchJobTargetProvider,
 ) : Logging {
   companion object {
     private const val DEBOUNCE_MAX_WAITING_TIME_MULTIPLIER = 4
@@ -94,11 +96,13 @@ class BatchJobService(
       }
     }
 
+    val targetProduct = target as? TranslationTargetProduct
     val job =
       BatchJob().apply {
         this.project = project
         this.author = author
-        this.target = target
+        this.targetProduct = targetProduct?.spec
+        this.target = targetStoredInColumn(target, targetProduct)
         this.totalItems = target.size
         this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
         this.jobCharacter = processor.getJobCharacter(request = request, projectId = project?.id)
@@ -108,30 +112,38 @@ class BatchJobService(
         this.debounceDurationInMs = debounceDuration?.toMillis()
         this.debounceMaxWaitTimeInMs = debounceDuration?.let { it.toMillis() * DEBOUNCE_MAX_WAITING_TIME_MULTIPLIER }
         this.debouncingKey = debouncingKey
+        this.params = processor.getParams(request)
       }
 
-    val chunked = job.chunkedTarget
-    job.totalChunks = chunked.size
+    job.totalChunks = BatchJob.chunkCount(job.chunkSize, job.totalItems)
     cachingBatchJobService.saveJob(job)
-
-    job.params = processor.getParams(request)
+    batchJobTargetProvider.cacheTarget(job.id, target)
 
     entityManager.flushAndClear()
 
-    val executions = storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
+    val executions =
+      storeExecutions(chunkCount = job.totalChunks, job = job, executeAfter = processor.getExecuteAfter(request))
 
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
   }
 
+  private fun targetStoredInColumn(
+    target: List<Any>,
+    targetProduct: TranslationTargetProduct?,
+  ): List<Any> {
+    if (targetProduct != null) return emptyList()
+    return target
+  }
+
   private fun storeExecutions(
-    chunked: List<List<Any>>,
+    chunkCount: Int,
     job: BatchJob,
     executeAfter: Date?,
   ): List<BatchJobChunkExecution> {
     val executions =
-      List(chunked.size) { chunkNumber ->
+      List(chunkCount) { chunkNumber ->
         BatchJobChunkExecution().apply {
           batchJob = job
           this.chunkNumber = chunkNumber

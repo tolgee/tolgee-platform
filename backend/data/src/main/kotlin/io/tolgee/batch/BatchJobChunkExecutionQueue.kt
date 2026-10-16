@@ -129,9 +129,10 @@ class BatchJobChunkExecutionQueue(
 
       QueueEventType.REMOVE -> {
         event.items.forEach { item ->
+          if (!queuedExecutionIds.contains(item.chunkExecutionId)) return@forEach
           jobQueues.compute(item.jobId) { _, deque ->
             if (deque == null) return@compute null
-            val removed = deque.removeIf { it.chunkExecutionId == item.chunkExecutionId }
+            val removed = deque.removeFirstMatching { it.chunkExecutionId == item.chunkExecutionId }
             if (removed) {
               queuedExecutionIds.remove(item.chunkExecutionId)
               decrementCharacterCount(item.jobCharacter)
@@ -148,6 +149,17 @@ class BatchJobChunkExecutionQueue(
         }
       }
     }
+  }
+
+  private inline fun <T> ConcurrentLinkedDeque<T>.removeFirstMatching(predicate: (T) -> Boolean): Boolean {
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+      if (predicate(iterator.next())) {
+        iterator.remove()
+        return true
+      }
+    }
+    return false
   }
 
   @Scheduled(fixedDelay = 60000)

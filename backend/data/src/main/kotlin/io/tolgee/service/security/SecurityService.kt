@@ -527,28 +527,32 @@ class SecurityService(
         .chunked(KEY_ID_LOOKUP_CHUNK_SIZE)
         .flatMap { keyRepository.getProjectIdsForKeyIds(it) }
 
-    if (projectIds.size != keyIds.size) {
-      throw NotFoundException(Message.KEY_NOT_FOUND)
-    }
-
-    val firstProjectId = projectIds[0]
-
-    if (projectIds.any { it != firstProjectId }) {
-      throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
-    }
-
-    if (firstProjectId != projectId) {
-      throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
-    }
+    assertKeysExistInSingleProject(projectIds, keyIds.size, projectId)
   }
 
   fun checkSoftDeletedKeyIdsExistAndIsFromProject(
     keyIds: List<Long>,
     projectId: Long,
   ) {
-    val projectIds = keyRepository.getSoftDeletedProjectIdsForKeyIds(keyIds)
+    val projectIds =
+      keyIds
+        .chunked(KEY_ID_LOOKUP_CHUNK_SIZE)
+        .flatMap { chunk ->
+          keyRepository
+            .getProjectIdsAndDeletedAtForKeyIds(chunk)
+            .filter { it.deletedAt != null }
+            .map { it.projectId }
+        }
 
-    if (projectIds.size != keyIds.size) {
+    assertKeysExistInSingleProject(projectIds, keyIds.size, projectId)
+  }
+
+  private fun assertKeysExistInSingleProject(
+    projectIds: List<Long>,
+    expectedKeyCount: Int,
+    projectId: Long,
+  ) {
+    if (projectIds.size != expectedKeyCount) {
       throw NotFoundException(Message.KEY_NOT_FOUND)
     }
 

@@ -3,6 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.model.batch.params.PreTranslationByTmJobParams
 import org.springframework.stereotype.Component
@@ -35,11 +36,7 @@ class PreTranslationByTmChunkProcessor(
   }
 
   override fun getTarget(data: PreTranslationByTmRequest): List<BatchTranslationTargetItem> {
-    return data.keyIds.flatMap { keyId ->
-      data.targetLanguageIds.map { languageId ->
-        BatchTranslationTargetItem(keyId, languageId)
-      }
-    }
+    return TranslationTargetProduct(data.keyIds, data.targetLanguageIds)
   }
 
   override fun getParamsType(): Class<PreTranslationByTmJobParams> {

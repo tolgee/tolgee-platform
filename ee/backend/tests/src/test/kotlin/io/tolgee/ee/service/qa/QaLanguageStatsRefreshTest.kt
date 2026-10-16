@@ -1,9 +1,11 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.batch.BatchJobTargetProvider
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.LanguageStatsListener
 import io.tolgee.constants.Feature
@@ -31,6 +33,9 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
+  @Autowired
+  lateinit var batchJobTargetProvider: BatchJobTargetProvider
+
   lateinit var testData: QaLanguageStatsBranchTestData
 
   @BeforeEach
@@ -44,6 +49,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   @AfterEach
   fun cleanup() {
     testDataService.cleanTestData(testData.root)
+    batchJobTargetProvider.evict(JOB_ID)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
   }
@@ -72,18 +78,35 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 0)
   }
 
+  @Test
+  fun `refreshes language stats when the job target is a key and language product`() {
+    cacheStaleStatsForBothBranches()
+    clearStaleFlag(testData.mainFrTranslation.id)
+
+    fireQaBatchJobFinalizedWithTarget(
+      TranslationTargetProduct(listOf(testData.mainKey.id), listOf(testData.frenchLanguage.id)),
+    )
+
+    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 0)
+  }
+
   private fun fireQaBatchJobFinalized(targetKeyIds: List<Long>) {
-    val target =
+    fireQaBatchJobFinalizedWithTarget(
       targetKeyIds.map { keyId ->
         BatchTranslationTargetItem(keyId = keyId, languageId = testData.frenchLanguage.id)
-      }
+      },
+    )
+  }
+
+  private fun fireQaBatchJobFinalizedWithTarget(target: List<Any>) {
+    batchJobTargetProvider.cacheTarget(JOB_ID, target)
     languageStatsListener.onQaBatchJobFinalized(
       OnBatchJobFinalized(
         job =
           createBatchJobDto(
             status = BatchJobStatus.SUCCESS,
             type = BatchJobType.QA_CHECK,
-            target = target,
+            totalItems = target.size,
           ),
         activityRevisionId = -1L,
       ),
@@ -138,13 +161,12 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   private fun createBatchJobDto(
     status: BatchJobStatus,
     type: BatchJobType = BatchJobType.QA_CHECK,
-    target: List<Any> = emptyList(),
+    totalItems: Int,
   ) = BatchJobDto(
-    id = -1,
+    id = JOB_ID,
     projectId = testData.project.id,
     authorId = testData.user.id,
-    target = target,
-    totalItems = target.size,
+    totalItems = totalItems,
     totalChunks = 0,
     chunkSize = 10,
     status = status,
@@ -155,4 +177,8 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     hidden = true,
     debouncingKey = null,
   )
+
+  companion object {
+    private const val JOB_ID = -1L
+  }
 }

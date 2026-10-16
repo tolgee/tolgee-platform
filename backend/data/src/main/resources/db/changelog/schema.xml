@@ -6107,4 +6107,17 @@
             <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="key-meta-tags-tags-id-index" runInTransaction="false">
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_key_meta_tags_tags_id ON key_meta_tags (tags_id);
+        </sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_key_meta_tags_tags_id;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="batch-job-target-product">
+        <addColumn tableName="tolgee_batch_job">
+            <column name="target_product" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

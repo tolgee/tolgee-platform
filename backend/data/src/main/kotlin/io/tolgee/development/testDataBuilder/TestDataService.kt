@@ -673,6 +673,9 @@ class TestDataService(
       it.targetProvider?.let { provider ->
         it.self.target = provider()
       }
+      it.targetProductProvider?.let { provider ->
+        it.self.targetProduct = provider()
+      }
       entityManager.persist(it.self)
       saveChunkExecutions(it)
     }
