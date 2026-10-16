@@ -5,6 +5,7 @@ import {
   clickGlobalSave,
   confirmHardMode,
   gcy,
+  gcyAdvanced,
   switchToOrganization,
 } from '../../common/shared';
 import { login } from '../../common/apiCalls/common';
@@ -69,9 +70,9 @@ describe('Organization Settings', () => {
     cy.gcy('settings-menu-item')
       .contains('Organization profile')
       .should('be.visible');
-    cy.gcy('settings-menu-item')
-      .contains('Organization members')
-      .should('not.exist');
+    gcyAdvanced({ value: 'settings-menu-item', item: 'members' }).should(
+      'be.visible'
+    );
     cy.gcy('settings-menu-item')
       .contains('Member permissions')
       .should('not.exist');
