@@ -217,7 +217,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageTags: List<String>,
   ): List<Translation>
 
-  @EntityGraph(attributePaths = ["key"])
+  @EntityGraph(attributePaths = ["key", "language"])
   fun findAllByKeyIdInAndLanguageIdIn(
     keysIds: List<Long>,
     languagesIds: List<Long>,
