@@ -26,6 +26,7 @@ class BatchJobActivityFinalizer(
   private val activityHolder: ActivityHolder,
   private val batchJobStateProvider: BatchJobStateProvider,
   private val applicationEventPublisher: ApplicationEventPublisher,
+  private val batchJobTargetProvider: BatchJobTargetProvider,
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
   fun finalizeActivityWhenJobSucceeded(event: OnBatchJobSucceeded) {
@@ -57,6 +58,7 @@ class BatchJobActivityFinalizer(
           setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
         }
         applicationEventPublisher.publishEvent(OnBatchJobFinalized(job, activityRevisionIdToMergeInto))
+        batchJobTargetProvider.evict(job.id)
       } catch (e: Exception) {
         Sentry.captureException(e)
         throw CannotFinalizeActivityException(e)
@@ -166,10 +168,6 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
-  /**
-   * Keeps one describing entity per (entity_class, entity_id) among the job's revisions - the one with the lowest
-   * revision id - so the merge into a single revision cannot violate the primary key.
-   */
   private fun removeDuplicityDescribingEntities(jobId: Long) {
     entityManager
       .createNativeQuery(

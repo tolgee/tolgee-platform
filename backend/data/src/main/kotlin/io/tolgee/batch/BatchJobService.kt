@@ -102,7 +102,7 @@ class BatchJobService(
         this.project = project
         this.author = author
         this.targetProduct = targetProduct?.spec
-        this.target = targetProduct?.let { listOf() } ?: target
+        this.target = targetStoredInColumn(target, targetProduct)
         this.totalItems = target.size
         this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
         this.jobCharacter = processor.getJobCharacter(request = request, projectId = project?.id)
@@ -127,6 +127,14 @@ class BatchJobService(
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
+  }
+
+  private fun targetStoredInColumn(
+    target: List<Any>,
+    targetProduct: TranslationTargetProduct?,
+  ): List<Any> {
+    if (targetProduct != null) return emptyList()
+    return target
   }
 
   private fun storeExecutions(

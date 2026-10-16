@@ -51,6 +51,8 @@ class BatchJobConcurrentLauncher(
 
   private val slotFreedSignal = Semaphore(0)
 
+  private val notReadyPassTracker = NotReadyPassTracker()
+
   /**
    * O(1) counter for running jobs by character - avoids O(n) iteration on every chunk
    */
@@ -94,11 +96,10 @@ class BatchJobConcurrentLauncher(
     while (run) {
       try {
         val startTime = System.currentTimeMillis()
-        val somethingHandled = fn()
-        val sleepTime = getSleepTime(startTime, somethingHandled)
+        val pollAgainImmediately = fn()
+        val sleepTime = getSleepTime(startTime, pollAgainImmediately)
         if (sleepTime > 0) {
-          slotFreedSignal.tryAcquire(sleepTime, TimeUnit.MILLISECONDS)
-          slotFreedSignal.drainPermits()
+          waitForFreedSlot(sleepTime)
         }
       } catch (e: Throwable) {
         Sentry.captureException(e)
@@ -107,11 +108,16 @@ class BatchJobConcurrentLauncher(
     }
   }
 
+  private fun waitForFreedSlot(maxWaitMs: Long) {
+    slotFreedSignal.tryAcquire(maxWaitMs, TimeUnit.MILLISECONDS)
+    slotFreedSignal.drainPermits()
+  }
+
   private fun getSleepTime(
     startTime: Long,
-    somethingHandled: Boolean,
+    pollAgainImmediately: Boolean,
   ): Long {
-    if (!batchJobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0 && somethingHandled) {
+    if (!batchJobChunkExecutionQueue.isEmpty() && jobsToLaunch > 0 && pollAgainImmediately) {
       return 0
     }
     return MIN_TIME_BETWEEN_OPERATIONS - (System.currentTimeMillis() - startTime)
@@ -139,11 +145,8 @@ class BatchJobConcurrentLauncher(
 
           logItemsPulled(items)
 
-          // when something handled, return true
-          items
-            .map { executionItem ->
-              handleItem(executionItem)
-            }.any { it }
+          val somethingHandled = items.map { executionItem -> handleItem(executionItem) }.any { it }
+          notReadyPassTracker.shouldPollAgainImmediately(somethingHandled, items.size, batchJobChunkExecutionQueue.size)
         }
       }
   }

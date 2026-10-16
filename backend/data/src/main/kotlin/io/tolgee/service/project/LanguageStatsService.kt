@@ -53,17 +53,30 @@ class LanguageStatsService(
     if (!waitingRefreshes.add(refreshKey)) {
       return
     }
+    var lockAcquired = false
     try {
-      refreshLanguageStats(projectId, branchId) { waitingRefreshes.remove(refreshKey) }
+      refreshLanguageStatsUnderLock(projectId, branchId) {
+        lockAcquired = true
+        waitingRefreshes.remove(refreshKey)
+      }
     } finally {
-      waitingRefreshes.remove(refreshKey)
+      if (!lockAcquired) {
+        waitingRefreshes.remove(refreshKey)
+      }
     }
   }
 
   fun refreshLanguageStats(
     projectId: Long,
     branchId: Long? = null,
-    onLockAcquired: () -> Unit = {},
+  ) {
+    refreshLanguageStatsUnderLock(projectId, branchId) {}
+  }
+
+  private fun refreshLanguageStatsUnderLock(
+    projectId: Long,
+    branchId: Long?,
+    onLockAcquired: () -> Unit,
   ) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId-${branchId ?: "default"}") {
       onLockAcquired()

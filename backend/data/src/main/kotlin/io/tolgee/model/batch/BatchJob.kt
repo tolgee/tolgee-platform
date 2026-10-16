@@ -47,7 +47,7 @@ class BatchJob :
   var target: List<Any> = listOf()
 
   /**
-   * Set instead of [target] for jobs whose target is a [io.tolgee.batch.data.TranslationTargetProduct].
+   * A single Postgres jsonb value is limited to 256 MB, which a materialized [target] of millions of items exceeds.
    */
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
@@ -99,7 +99,10 @@ class BatchJob :
     fun chunkCount(
       chunkSize: Int,
       targetSize: Int,
-    ): Int = if (chunkSize == 0) 1 else (targetSize + chunkSize - 1) / chunkSize
+    ): Int {
+      if (chunkSize == 0) return 1
+      return (targetSize + chunkSize - 1) / chunkSize
+    }
 
     fun <T> getChunk(
       chunkSize: Int,

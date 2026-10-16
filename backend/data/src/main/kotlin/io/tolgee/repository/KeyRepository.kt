@@ -353,15 +353,15 @@ interface KeyRepository : JpaRepository<Key, Long> {
   fun getSoftDeletedProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
 
   /**
-   * Returns (projectId, deletedAt) pairs. Filtering on deletedAt in SQL would let Postgres combine the lookup with
-   * the partial index of all deleted keys of the project, which costs O(deleted keys) per call.
+   * Filtering on deletedAt in SQL would let Postgres combine the lookup with the partial index of all deleted keys
+   * of the project, which costs O(deleted keys) per call.
    */
   @Query(
     """
-    select k.project.id, k.deletedAt from Key k where k.id in :keysIds
+    select k.project.id as projectId, k.deletedAt as deletedAt from Key k where k.id in :keysIds
   """,
   )
-  fun getProjectIdsAndDeletedAtForKeyIds(keysIds: List<Long>): List<Array<Any?>>
+  fun getProjectIdsAndDeletedAtForKeyIds(keysIds: List<Long>): List<KeyProjectAndDeletion>
 
   @Query(
     """
@@ -589,4 +589,9 @@ interface KeyRepository : JpaRepository<Key, Long> {
     ids: Collection<Long>,
     projectId: Long,
   ): List<Key>
+}
+
+interface KeyProjectAndDeletion {
+  val projectId: Long
+  val deletedAt: Date?
 }

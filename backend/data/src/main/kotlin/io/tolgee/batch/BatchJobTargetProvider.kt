@@ -32,6 +32,8 @@ class BatchJobTargetProvider(
 
   fun getTarget(jobId: Long): List<Any> = cache.get(jobId) { load(it) }
 
+  fun getTargetWithoutCaching(jobId: Long): List<Any> = cache.getIfPresent(jobId) ?: load(jobId)
+
   fun getChunk(
     job: BatchJobDto,
     chunkNumber: Int,
