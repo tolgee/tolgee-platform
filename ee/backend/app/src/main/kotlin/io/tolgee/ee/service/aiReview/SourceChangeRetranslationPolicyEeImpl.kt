@@ -34,8 +34,10 @@ class SourceChangeRetranslationPolicyEeImpl(
   override fun selectForRetranslation(
     projectId: Long,
     translations: Collection<Translation>,
+    includeHumanText: Boolean,
   ): Set<Long> {
-    val settings = getCustomSettings(projectId) ?: return ossPolicy.selectForRetranslation(projectId, translations)
+    val settings =
+      getCustomSettings(projectId) ?: return ossPolicy.selectForRetranslation(projectId, translations, includeHumanText)
     val aiApprovedIds = getAiApprovedIds(translations)
     val machineTranslatedLanguageIds by lazy { getMachineTranslatedLanguageIds(projectId, translations) }
     return translations
@@ -44,10 +46,12 @@ class SourceChangeRetranslationPolicyEeImpl(
           Kind.MACHINE_TRANSLATED -> true
           Kind.AI_APPROVED -> settings.onSourceChangeAiApproved == SourceChangeAction.RETRANSLATE
           Kind.HUMAN_EDITED ->
-            settings.onSourceChangeHumanEdited == SourceChangeAction.RETRANSLATE &&
+            includeHumanText &&
+              settings.onSourceChangeHumanEdited == SourceChangeAction.RETRANSLATE &&
               translation.language.id in machineTranslatedLanguageIds
           Kind.HUMAN_REVIEWED ->
-            settings.onSourceChangeHumanReviewed == SourceChangeAction.RETRANSLATE &&
+            includeHumanText &&
+              settings.onSourceChangeHumanReviewed == SourceChangeAction.RETRANSLATE &&
               translation.language.id in machineTranslatedLanguageIds
         }
       }.map { it.id }

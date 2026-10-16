@@ -8,6 +8,7 @@ class SourceChangeRetranslationPolicyOssImpl : SourceChangeRetranslationPolicy {
   override fun selectForRetranslation(
     projectId: Long,
     translations: Collection<Translation>,
+    includeHumanText: Boolean,
   ): Set<Long> = translations.filter { it.auto }.map { it.id }.toSet()
 
   override fun hasCustomBehavior(projectId: Long): Boolean = false

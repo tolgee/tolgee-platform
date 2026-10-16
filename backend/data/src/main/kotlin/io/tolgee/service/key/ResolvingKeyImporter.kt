@@ -125,7 +125,7 @@ class ResolvingKeyImporter(
       }
 
     translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
-    translationService.setOutdatedBatch(projectEntity.id, outdatedKeys)
+    translationService.applySourceChangeOfKeys(projectEntity.id, outdatedKeys)
 
     return result
   }

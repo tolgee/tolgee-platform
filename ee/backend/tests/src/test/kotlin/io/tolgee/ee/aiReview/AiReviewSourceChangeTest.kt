@@ -194,7 +194,7 @@ class AiReviewSourceChangeTest : AbstractAiReviewTest() {
   }
 
   @Test
-  fun `import applies the source change settings`() {
+  fun `import applies the source change settings to machine text only`() {
     testData.enableAutoTranslation()
     testData.uiGerman.approvedByAi()
     testData.uiCzech.self.state = TranslationState.REVIEWED
@@ -207,7 +207,7 @@ class AiReviewSourceChangeTest : AbstractAiReviewTest() {
     )
 
     executeInNewTransaction(platformTransactionManager) {
-      translationService.setOutdatedBatch(projectId, listOf(testData.uiKey.self.id))
+      translationService.applySourceChangeOfKeys(projectId, listOf(testData.uiKey.self.id))
     }
 
     val german = getTranslation(testData.uiGerman.self.id)
@@ -216,8 +216,8 @@ class AiReviewSourceChangeTest : AbstractAiReviewTest() {
     german.state.assert.isEqualTo(TranslationState.REVIEWED)
     val czech = getTranslation(testData.uiCzech.self.id)
     czech.outdated.assert.isTrue()
-    czech.auto.assert.isTrue()
-    czech.state.assert.isEqualTo(TranslationState.TRANSLATED)
+    czech.auto.assert.isFalse()
+    czech.state.assert.isEqualTo(TranslationState.REVIEWED)
   }
 
   @Test

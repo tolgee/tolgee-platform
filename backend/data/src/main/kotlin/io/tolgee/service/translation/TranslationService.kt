@@ -400,7 +400,11 @@ class TranslationService(
     save(translation)
   }
 
-  fun setOutdated(
+  /**
+   * Besides the outdated flag this changes the machine translation flag and the state of the key's translations:
+   * the ones chosen by [SourceChangeRetranslationPolicy] are left for auto translation to replace.
+   */
+  fun applySourceChange(
     key: Key,
     excludeTranslationIds: Set<Long> = emptySet(),
   ) {
@@ -410,10 +414,14 @@ class TranslationService(
         it.language.id != baseLanguage?.id && !it.text.isNullOrEmpty() && !excludeTranslationIds.contains(it.id)
       }
     val protectReviewed = projectHolder.projectOrNull?.translationProtection == TranslationProtection.PROTECT_REVIEWED
-    markSourceChanged(key.project.id, translations, changeStateOfKept = !protectReviewed)
+    markSourceChanged(key.project.id, translations, changeStateOfKept = !protectReviewed, includeHumanText = true)
   }
 
-  fun setOutdatedBatch(
+  /**
+   * Import variant of [applySourceChange]. Translations written by the same import cannot be told apart here,
+   * so text a human wrote is never selected for translating again.
+   */
+  fun applySourceChangeOfKeys(
     projectId: Long,
     keyIds: List<Long>,
   ) {
@@ -425,6 +433,7 @@ class TranslationService(
           projectId,
           translationRepository.findNonBaseWithTextByKeyIds(chunk),
           changeStateOfKept = false,
+          includeHumanText = false,
         )
       }
     }
@@ -434,9 +443,11 @@ class TranslationService(
     projectId: Long,
     translations: List<Translation>,
     changeStateOfKept: Boolean,
+    includeHumanText: Boolean,
   ) {
     if (translations.isEmpty()) return
-    val retranslatedIds = sourceChangeRetranslationPolicy.selectForRetranslation(projectId, translations)
+    val retranslatedIds =
+      sourceChangeRetranslationPolicy.selectForRetranslation(projectId, translations, includeHumanText)
     translations.forEach {
       val retranslate = it.id in retranslatedIds
       it.outdated = true
