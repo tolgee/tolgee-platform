@@ -1,5 +1,6 @@
 package io.tolgee.mcp
 
+import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
 import io.tolgee.component.KeyGenerator
 import io.tolgee.development.testDataBuilder.data.McpOAuthTestData
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.databind.JsonNode
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -76,14 +78,68 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `a tool outside the project-scoped surface is refused for any OAuth token`() {
-    val token = tokenFor(Scope.entries.map { it.value }, testData.project.id)
+  fun `an OAuth client is not offered create_project`() {
+    val token = tokenFor(Scope.entries.map { it.value }, null)
+
+    val toolNames = listedToolNames(createMcpClientWithBearer(token))
+
+    assertThat(toolNames).contains("list_projects")
+    assertThat(toolNames).doesNotContain("create_project")
+  }
+
+  @Test
+  fun `create_project cannot be called with an OAuth token`() {
+    val token = tokenFor(Scope.entries.map { it.value }, null)
 
     assertToolFails(
       createMcpClientWithBearer(token),
-      "list_projects",
-      expectedError = "oauth_access_not_allowed",
+      "create_project",
+      mapOf(
+        "name" to "OAuth project",
+        "organizationId" to testData.project.organizationOwner.id,
+        "languages" to listOf(mapOf("name" to "English", "tag" to "en")),
+      ),
+      expectedError = "create_project",
     )
+  }
+
+  @Test
+  fun `a client that has not logged in is not offered create_project`() {
+    assertThat(listedToolNames(createMcpClientWithoutAuth())).doesNotContain("create_project")
+  }
+
+  @Test
+  fun `a personal access token client is offered create_project`() {
+    val patData = createTestDataWithPat()
+    try {
+      assertThat(listedToolNames(createMcpClientWithPat(patData.pat.token!!))).contains("create_project")
+    } finally {
+      testDataService.cleanTestData(patData.testData.root)
+    }
+  }
+
+  @Test
+  fun `list_projects returns only the project a token is bound to`() {
+    val token = tokenFor(listOf(Scope.KEYS_VIEW.value), testData.project.id)
+
+    val result = callToolAndGetJson(createMcpClientWithBearer(token), "list_projects")
+
+    assertThat(listedProjectIds(result)).isEqualTo(listOf(testData.project.id))
+  }
+
+  @Test
+  fun `list_projects returns every project the user can reach for an all-projects token`() {
+    val token =
+      oauth2Tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.KEYS_VIEW.value),
+        projectIds = null,
+        audience = OAuth2Audience.MCP,
+      )
+
+    val result = callToolAndGetJson(createMcpClientWithBearer(token), "list_projects")
+
+    assertThat(listedProjectIds(result).containsAll(listOf(testData.project.id, testData.otherProject.id))).isTrue()
   }
 
   @Test
@@ -145,6 +201,11 @@ class McpOAuthAccessTest : AbstractMcpTest() {
       .contains("invalid_token")
   }
 
+  private fun listedProjectIds(result: JsonNode): List<Long> {
+    val items = result["items"]
+    return (0 until items.size()).map { items[it]["id"].asLong() }
+  }
+
   private fun projectArgument() = mapOf("projectId" to testData.project.id)
 
   private fun mcpInitializeWith(token: String): HttpResponse<String> {
@@ -162,14 +223,16 @@ class McpOAuthAccessTest : AbstractMcpTest() {
     return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
   }
 
+  private fun listedToolNames(client: McpSyncClient): List<String> = client.listTools().tools().map { it.name() }
+
   private fun tokenFor(
     scopes: List<String>,
-    projectId: Long,
+    projectId: Long?,
   ): String =
     oauth2Tokens.issue(
       subject = testData.user.id,
       scopes = scopes,
-      projectIds = listOf(projectId),
+      projectIds = projectId?.let { listOf(it) },
       audience = OAuth2Audience.MCP,
     )
 }

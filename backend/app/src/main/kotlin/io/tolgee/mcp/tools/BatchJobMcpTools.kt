@@ -37,6 +37,8 @@ class BatchJobMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "get_batch_job_status",
+      "Get batch job status",
+      McpToolEffect.READ_ONLY,
       "Get the status of a batch job (e.g. machine translation) by its ID. Use to poll for completion.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -64,6 +66,8 @@ class BatchJobMcpTools(
 
     server.addTool(
       "machine_translate",
+      "Machine translate keys",
+      McpToolEffect.DESTRUCTIVE,
       "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")

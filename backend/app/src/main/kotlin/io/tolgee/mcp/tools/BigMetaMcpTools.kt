@@ -27,6 +27,8 @@ class BigMetaMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "store_big_meta",
+      "Store key relationships",
+      McpToolEffect.DESTRUCTIVE,
       "Store key relationships so Tolgee can use translations of related keys as context during machine translation, " +
         "producing more consistent results. Keys that appear near each other in source code " +
         "(e.g. on the same page or component) should be stored as related.",
