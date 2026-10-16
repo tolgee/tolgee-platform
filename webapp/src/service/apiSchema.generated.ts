@@ -1429,7 +1429,6 @@ export interface components {
       points: number;
       /** @enum {string} */
       severity: "CRITICAL" | "MAJOR" | "MINOR";
-      suggestion?: string;
     };
     /** @description Per-language threshold overrides. Each entry has either a threshold or never = true. */
     AiReviewLanguageThreshold: {
@@ -1461,6 +1460,8 @@ export interface components {
       backlogs: components["schemas"]["AiReviewRuleBacklogModel"][];
     };
     AiReviewRuleModel: {
+      branchIn: string[];
+      branchNotIn: string[];
       enabled: boolean;
       /** Format: int64 */
       id: number;
@@ -1482,6 +1483,10 @@ export interface components {
       threshold: number;
     };
     AiReviewRuleRequest: {
+      /** @description Branch name patterns the rule applies to, `*` matches any text. Empty list = all branches. */
+      branchIn: string[];
+      /** @description Branch name patterns the rule does not apply to, `*` matches any text. */
+      branchNotIn: string[];
       enabled: boolean;
       /** @description Languages the rule applies to. Empty list = all non-base languages. */
       languageIds: number[];
@@ -1517,6 +1522,8 @@ export interface components {
     };
     /** @description Keys and languages the rule applies to, used to label rules without a name */
     AiReviewRuleScopeModel: {
+      branchIn: string[];
+      branchNotIn: string[];
       languageIds: number[];
       namespaceIn: string[];
       namespaceNotIn: string[];

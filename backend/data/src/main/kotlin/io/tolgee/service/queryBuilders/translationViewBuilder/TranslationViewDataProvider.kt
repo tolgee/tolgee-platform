@@ -4,6 +4,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.Project
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
@@ -16,6 +17,8 @@ import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.aiReview.AiReviewAvailability
+import io.tolgee.service.aiReview.appliesToBranch
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
@@ -45,6 +48,7 @@ class TranslationViewDataProvider(
   private val translationAiReviewRepository: TranslationAiReviewRepository,
   private val aiReviewRuleRepository: AiReviewRuleRepository,
   @Lazy private val languageService: LanguageService,
+  @Lazy private val branchService: BranchService,
 ) {
   companion object {
     private const val IN_CLAUSE_CHUNK_SIZE = 10_000
@@ -399,8 +403,9 @@ class TranslationViewDataProvider(
     params: TranslationFilters,
   ): AiReviewFilterContext? {
     if (!params.hasAiReviewFilter() || !aiReviewAvailability.isAvailable(project.organizationOwner.id)) return null
+    val branch = params.branch ?: branchService.getDefaultBranch(project.id)?.name ?: Branch.DEFAULT_BRANCH_NAME
     return AiReviewFilterContext(
-      enabledRules = aiReviewRuleRepository.findAllEnabledByProjectId(project.id),
+      enabledRules = aiReviewRuleRepository.findAllEnabledByProjectId(project.id).filter { it.appliesToBranch(branch) },
       baseLanguageId = languageService.getProjectBaseLanguage(project.id).id,
     )
   }

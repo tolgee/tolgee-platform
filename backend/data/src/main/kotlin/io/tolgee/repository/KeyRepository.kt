@@ -582,9 +582,15 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-    select new io.tolgee.dtos.queryResults.aiReview.AiReviewKeyScopeRowView(k.id, ns.name, tag.name)
+    select new io.tolgee.dtos.queryResults.aiReview.AiReviewKeyScopeRowView(
+      k.id,
+      ns.name,
+      tag.name,
+      coalesce(br.name, (select db.name from Branch db where db.project = k.project and db.isDefault = true))
+    )
     from Key k
     left join k.namespace ns
+    left join k.branch br
     left join k.keyMeta km
     left join km.tags tag
     where k.id in :keyIds

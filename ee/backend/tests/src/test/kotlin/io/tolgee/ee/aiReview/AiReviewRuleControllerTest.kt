@@ -47,6 +47,8 @@ class AiReviewRuleControllerTest : AbstractAiReviewTest() {
       namespaceIn = listOf(""),
       namespaceNotIn = listOf("checkout"),
       languageIds = listOf(testData.german.self.id, testData.czech.self.id),
+      branchIn = listOf(" feature/* ", "main", "main"),
+      branchNotIn = listOf("feature/legacy-*", " "),
     )
 
   @Test
@@ -69,6 +71,8 @@ class AiReviewRuleControllerTest : AbstractAiReviewTest() {
       node("namespaceIn").isEqualTo(listOf(""))
       node("namespaceNotIn").isEqualTo(listOf("checkout"))
       node("languageIds").isEqualTo(listOf(testData.german.self.id, testData.czech.self.id))
+      node("branchIn").isEqualTo(listOf("feature/*", "main"))
+      node("branchNotIn").isEqualTo(listOf("feature/legacy-*"))
       node("stats.scored").isEqualTo(0)
     }
   }

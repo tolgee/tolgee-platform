@@ -36,6 +36,14 @@ export class E2AiReviewRulesView {
       .should('have.value', action);
   }
 
+  getBranchInput(kind: 'include' | 'exclude') {
+    return gcyAdvanced({ value: 'ai-review-rule-branch-input', kind });
+  }
+
+  addBranchPattern(kind: 'include' | 'exclude', pattern: string) {
+    this.getBranchInput(kind).find('input').type(`${pattern}{enter}`);
+  }
+
   getRuleItem(name: string) {
     return gcyAdvanced({ value: 'ai-review-rule-item', name });
   }

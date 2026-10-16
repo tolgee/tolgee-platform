@@ -15,6 +15,7 @@ import io.tolgee.model.SEQUENCE_NAME
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewOutcome
 import io.tolgee.repository.KeyRepository
@@ -254,6 +255,7 @@ class AiReviewTriggerService(
         AiReviewRuleMatcher.KeyScope(
           tags = keyRows.mapNotNull { it.tag }.toSet(),
           namespace = keyRows.first().namespace,
+          branch = keyRows.first().branch ?: Branch.DEFAULT_BRANCH_NAME,
         )
       }
   }

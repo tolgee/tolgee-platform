@@ -52,13 +52,6 @@ const StyledPoints = styled('span')`
   flex-shrink: 0;
 `;
 
-const StyledSuggestion = styled('div')`
-  font-size: 13px;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  white-space: pre-wrap;
-  word-break: break-word;
-`;
-
 type Props = {
   issues: AiReviewIssueModel[];
 };
@@ -113,13 +106,6 @@ export const AiReviewIssuesList = ({ issues }: Props) => {
             <Box sx={{ fontSize: 14, wordBreak: 'break-word' }}>
               {issue.message}
             </Box>
-            {issue.suggestion && (
-              <StyledSuggestion>
-                {t('ai_review_issue_suggestion', 'Suggestion: {suggestion}', {
-                  suggestion: issue.suggestion,
-                })}
-              </StyledSuggestion>
-            )}
           </StyledIssue>
         );
       })}

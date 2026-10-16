@@ -7,7 +7,6 @@ data class AiReviewIssueModel(
   val severity: AiReviewIssueSeverity,
   val category: String,
   val message: String,
-  val suggestion: String?,
   val points: Int,
 ) {
   companion object {
@@ -16,7 +15,6 @@ data class AiReviewIssueModel(
         severity = issue.severity,
         category = issue.category,
         message = issue.message,
-        suggestion = issue.suggestion,
         points = issue.points,
       )
   }

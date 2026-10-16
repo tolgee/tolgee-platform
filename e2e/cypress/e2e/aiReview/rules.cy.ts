@@ -95,6 +95,26 @@ describe('AI review rules', () => {
     });
   });
 
+  it('scopes rule to branches with wildcard patterns', () => {
+    rulesView
+      .getRuleItem('Legal dry run')
+      .findDcy('ai-review-rule-scope')
+      .should('contain', 'draft/*');
+    rulesView
+      .getRuleItem('Legal dry run')
+      .findDcy('ai-review-rule-edit')
+      .click();
+    rulesView.getBranchInput('exclude').should('contain', 'draft/*');
+    rulesView.addBranchPattern('include', 'main');
+    rulesView.addBranchPattern('include', 'feature/*');
+    rulesView.saveRule();
+    runDialog.later();
+    getRule(projectId, 'Legal dry run').then((rule) => {
+      expect(rule.branchIn).to.deep.eq(['main', 'feature/*']);
+      expect(rule.branchNotIn).to.deep.eq(['draft/*']);
+    });
+  });
+
   it('disables and enables rule', () => {
     rulesView.getRuleEnabledSwitch('UI rule').should('be.checked').click();
     rulesView.getRuleEnabledSwitch('UI rule').should('not.be.checked');

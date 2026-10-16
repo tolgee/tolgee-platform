@@ -121,6 +121,8 @@ declare namespace DataCy {
         "ai-review-retry": true;
         "ai-review-rule-backlog": true;
         "ai-review-rule-backlog-run": true;
+        "ai-review-rule-branch-input": true;
+        "ai-review-rule-branches": true;
         "ai-review-rule-cancel": true;
         "ai-review-rule-delete": true;
         "ai-review-rule-dialog": true;

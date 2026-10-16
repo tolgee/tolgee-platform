@@ -31,7 +31,7 @@ class AiReviewInvalidationTest : AbstractAiReviewTest() {
       this.rule = rule.self
       score = 95
       threshold = 85
-      issues = mutableListOf(AiReviewIssue(AiReviewIssueSeverity.MINOR, "style", "Nit", null, 5))
+      issues = mutableListOf(AiReviewIssue(AiReviewIssueSeverity.MINOR, "style", "Nit", 5))
     }
   }
 

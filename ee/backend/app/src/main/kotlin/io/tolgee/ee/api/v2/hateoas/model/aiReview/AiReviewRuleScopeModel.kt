@@ -9,4 +9,6 @@ data class AiReviewRuleScopeModel(
   val namespaceIn: List<String>,
   val namespaceNotIn: List<String>,
   val languageIds: List<Long>,
+  val branchIn: List<String>,
+  val branchNotIn: List<String>,
 )

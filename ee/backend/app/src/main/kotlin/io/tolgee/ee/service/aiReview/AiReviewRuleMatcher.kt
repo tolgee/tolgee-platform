@@ -1,11 +1,14 @@
 package io.tolgee.ee.service.aiReview
 
 import io.tolgee.model.aiReview.AiReviewRule
+import io.tolgee.model.branching.Branch
+import io.tolgee.service.aiReview.appliesToBranch
 
 object AiReviewRuleMatcher {
   data class KeyScope(
     val tags: Set<String>,
     val namespace: String?,
+    val branch: String = Branch.DEFAULT_BRANCH_NAME,
   )
 
   sealed interface Match {
@@ -45,6 +48,7 @@ object AiReviewRuleMatcher {
     if (rule.languageIds.isNotEmpty() && languageId !in rule.languageIds) return false
     if (!matchesTagIn(rule.tagIn, scope.tags)) return false
     if (!matchesTagNotIn(rule.tagNotIn, scope.tags)) return false
+    if (!rule.appliesToBranch(scope.branch)) return false
     val namespace = scope.namespace ?: ""
     if (rule.namespaceIn.isNotEmpty() && namespace !in rule.namespaceIn) return false
     return namespace !in rule.namespaceNotIn

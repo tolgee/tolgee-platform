@@ -308,7 +308,7 @@ class PromptFragmentsHelper {
         """
         $REVIEW_JSON_MARK in exactly this format:
         ```
-        {"issues":[{"severity":"critical|major|minor","category":"<short category>","message":"<what is wrong>","suggestion":"<corrected translation or null>","points":<integer>}]}
+        {"issues":[{"severity":"critical|major|minor","category":"<short category>","message":"<what is wrong>","points":<integer>}]}
         ```
         $LLM_MARK_JSON
         """.trimIndent(),

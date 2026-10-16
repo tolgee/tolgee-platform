@@ -25,6 +25,8 @@ class TranslationAiReviewModelAssembler {
             namespaceIn = it.namespaceIn.toList(),
             namespaceNotIn = it.namespaceNotIn.toList(),
             languageIds = it.languageIds.toList(),
+            branchIn = it.branchIn.toList(),
+            branchNotIn = it.branchNotIn.toList(),
           )
         },
       promptId = review.prompt?.id,

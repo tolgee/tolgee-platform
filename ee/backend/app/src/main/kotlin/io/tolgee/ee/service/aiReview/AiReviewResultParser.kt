@@ -37,12 +37,10 @@ class AiReviewResultParser(
     val severity = parseSeverity(node.get("severity"))
     val message = node.get("message")?.scalarText()?.takeIf { it.isNotBlank() } ?: throw InvalidOutput()
     val category = node.get("category")?.scalarText()?.takeIf { it.isNotBlank() } ?: DEFAULT_CATEGORY
-    val suggestion = node.get("suggestion")?.scalarText()?.takeIf { it.isNotBlank() }
     return AiReviewIssue(
       severity = severity,
       category = category.take(MAX_CATEGORY_LENGTH),
       message = message.take(MAX_TEXT_LENGTH),
-      suggestion = suggestion?.take(MAX_TEXT_LENGTH),
       points = parsePoints(node.get("points"), severity),
     )
   }

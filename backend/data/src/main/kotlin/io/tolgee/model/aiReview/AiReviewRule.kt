@@ -66,4 +66,10 @@ class AiReviewRule(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb", nullable = false)
   var languageIds: MutableList<Long> = mutableListOf(),
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb", nullable = false)
+  var branchIn: MutableList<String> = mutableListOf(),
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb", nullable = false)
+  var branchNotIn: MutableList<String> = mutableListOf(),
 ) : StandardAuditModel()

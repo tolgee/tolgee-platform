@@ -133,6 +133,8 @@ class AiReviewRuleService(
     rule.namespaceIn = request.namespaceIn.distinct().toMutableList()
     rule.namespaceNotIn = request.namespaceNotIn.distinct().toMutableList()
     rule.languageIds = request.languageIds.distinct().toMutableList()
+    rule.branchIn = request.branchIn.cleanPatterns()
+    rule.branchNotIn = request.branchNotIn.cleanPatterns()
   }
 
   private fun findReviewPrompt(
@@ -183,4 +185,6 @@ class AiReviewRuleService(
   companion object {
     private val THRESHOLD_RANGE = 0..100
   }
+
+  private fun List<String>.cleanPatterns() = map { it.trim() }.filter { it.isNotEmpty() }.distinct().toMutableList()
 }

@@ -28,7 +28,6 @@ class FakeAiReviewResponder(
             "severity" to severity.name.lowercase(),
             "category" to "fake",
             "message" to "Fake ${severity.name.lowercase()} issue",
-            "suggestion" to null,
             "points" to severity.minPoints,
           )
         }

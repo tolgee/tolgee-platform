@@ -34,4 +34,14 @@ data class AiReviewRuleRequest(
   val namespaceNotIn: List<String> = emptyList(),
   @Schema(description = "Languages the rule applies to. Empty list = all non-base languages.")
   val languageIds: List<Long> = emptyList(),
+  @Schema(description = "Branch name patterns the rule applies to, `*` matches any text. Empty list = all branches.")
+  val branchIn: List<
+    @Size(max = 200)
+    String,
+  > = emptyList(),
+  @Schema(description = "Branch name patterns the rule does not apply to, `*` matches any text.")
+  val branchNotIn: List<
+    @Size(max = 200)
+    String,
+  > = emptyList(),
 )

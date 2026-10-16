@@ -27,6 +27,8 @@ class AiReviewRuleModelAssembler {
       namespaceIn = rule.namespaceIn.toList(),
       namespaceNotIn = rule.namespaceNotIn.toList(),
       languageIds = rule.languageIds.toList(),
+      branchIn = rule.branchIn.toList(),
+      branchNotIn = rule.branchNotIn.toList(),
       stats = (stats ?: AiReviewRuleStats()).toModel(),
     )
 

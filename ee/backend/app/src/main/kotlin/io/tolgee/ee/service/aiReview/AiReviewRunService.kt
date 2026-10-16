@@ -16,6 +16,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
@@ -234,9 +235,9 @@ class AiReviewRunService(
     val sql =
       """
       SELECT ns.name AS namespace, $TAGS_SQL AS tags, t.language_id, $CATEGORY_SQL AS category,
-        $OPEN_QA_SQL AS has_open_qa, count(*) AS cnt
+        $OPEN_QA_SQL AS has_open_qa, $BRANCH_SQL AS branch, count(*) AS cnt
       ${fromSql(scope)}
-      GROUP BY 1, 2, 3, 4, 5
+      GROUP BY 1, 2, 3, 4, 5, 6
       """.trimIndent()
     return jdbcTemplate.query(sql, { ps -> setScopeParams(ps, scope) }) { rs, _ ->
       Group(
@@ -263,7 +264,7 @@ class AiReviewRunService(
     val sql =
       """
       SELECT t.id, t.key_id, t.text, ns.name AS namespace, $TAGS_SQL AS tags, t.language_id,
-        $CATEGORY_SQL AS category, $OPEN_QA_SQL AS has_open_qa
+        $CATEGORY_SQL AS category, $OPEN_QA_SQL AS has_open_qa, $BRANCH_SQL AS branch
       ${fromSql(scope)}
       """.trimIndent()
     return jdbcTemplate.query(sql, { ps -> setScopeParams(ps, scope) }) { rs, _ ->
@@ -312,7 +313,12 @@ class AiReviewRunService(
     return AiReviewRunClassifier.Candidate(
       category = Category.valueOf(getString("category")),
       hasOpenQaIssues = getBoolean("has_open_qa"),
-      scope = AiReviewRuleMatcher.KeyScope(tags = tags, namespace = getString("namespace")),
+      scope =
+        AiReviewRuleMatcher.KeyScope(
+          tags = tags,
+          namespace = getString("namespace"),
+          branch = getString("branch") ?: Branch.DEFAULT_BRANCH_NAME,
+        ),
       languageId = getLong("language_id"),
     )
   }
@@ -320,6 +326,9 @@ class AiReviewRunService(
   companion object {
     private const val KEY_CHUNK_SIZE = 10_000
     private val NOT_IN_BACKLOG = setOf(Category.PENDING, Category.FAILED)
+
+    private const val BRANCH_SQL =
+      "coalesce(br.name, (SELECT db.name FROM branch db WHERE db.project_id = k.project_id AND db.is_default))"
 
     private const val TAGS_SQL =
       """ARRAY(

@@ -6342,4 +6342,14 @@
     <changeSet author="jancizmar" id="1792000000000-29">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_review_project_settings" constraintName="FK_ai_review_project_settings_project" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-30">
+        <addColumn tableName="ai_review_rule">
+            <column name="branch_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branch_not_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

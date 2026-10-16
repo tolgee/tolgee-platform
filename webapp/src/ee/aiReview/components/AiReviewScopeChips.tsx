@@ -1,6 +1,6 @@
 import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Folder, Tag01 } from '@untitled-ui/icons-react';
+import { Folder, GitBranch01, Tag01 } from '@untitled-ui/icons-react';
 
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { components } from 'tg.service/apiSchema.generated';
@@ -50,7 +50,13 @@ const StyledChip = styled('div')`
 type Props = {
   rule: Pick<
     AiReviewRuleModel,
-    'tagIn' | 'tagNotIn' | 'namespaceIn' | 'namespaceNotIn' | 'languageIds'
+    | 'tagIn'
+    | 'tagNotIn'
+    | 'namespaceIn'
+    | 'namespaceNotIn'
+    | 'languageIds'
+    | 'branchIn'
+    | 'branchNotIn'
   >;
   languages: LanguageModel[];
 };
@@ -115,6 +121,24 @@ export const AiReviewScopeChips = ({ rule, languages }: Props) => {
           <StyledChip className="excluded">
             <Folder />
             <span className="label">{namespaceLabel(ns)}</span>
+          </StyledChip>
+        </Tooltip>
+      ))}
+      {rule.branchIn.map((branch) => (
+        <StyledChip key={`branch-in-${branch}`}>
+          <GitBranch01 />
+          <span className="label">{branch}</span>
+        </StyledChip>
+      ))}
+      {rule.branchNotIn.map((branch) => (
+        <Tooltip
+          key={`branch-out-${branch}`}
+          title={t('ai_review_rule_scope_excluded', 'Excluded')}
+          disableInteractive
+        >
+          <StyledChip className="excluded">
+            <GitBranch01 />
+            <span className="label">{branch}</span>
           </StyledChip>
         </Tooltip>
       ))}

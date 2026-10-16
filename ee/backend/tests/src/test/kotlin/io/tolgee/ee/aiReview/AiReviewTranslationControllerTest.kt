@@ -59,7 +59,7 @@ class AiReviewTranslationControllerTest : AbstractAiReviewTest() {
       providerName = "gpt-test"
       this.score = score
       threshold = 85
-      issues = mutableListOf(AiReviewIssue(AiReviewIssueSeverity.MINOR, "style", "Nit", "Better", 5))
+      issues = mutableListOf(AiReviewIssue(AiReviewIssueSeverity.MINOR, "style", "Nit", 5))
     }
   }
 
@@ -89,7 +89,7 @@ class AiReviewTranslationControllerTest : AbstractAiReviewTest() {
       node("issues[0].severity").isEqualTo("MINOR")
       node("issues[0].category").isEqualTo("style")
       node("issues[0].message").isEqualTo("Nit")
-      node("issues[0].suggestion").isEqualTo("Better")
+      node("issues[0].suggestion").isAbsent()
       node("issues[0].points").isEqualTo(5)
     }
   }

@@ -37,20 +37,21 @@ class AiReviewE2eTestData : AiReviewTestData() {
         mode = AiReviewRuleMode.DRY_RUN
         threshold = 80
         tagIn = mutableListOf("legal")
+        branchNotIn = mutableListOf("draft/*")
       }
 
     uiGerman.self.state = TranslationState.REVIEWED
     uiGerman.seedReview(uiRule, AiReviewOutcome.AUTO_REVIEWED) {
       score = 95
-      issues = mutableListOf(issue(AiReviewIssueSeverity.MINOR, "Slightly formal", "Jetzt bezahlen", 5))
+      issues = mutableListOf(issue(AiReviewIssueSeverity.MINOR, "Slightly formal", 5))
     }
 
     uiCzech.seedReview(uiRule, AiReviewOutcome.BELOW_THRESHOLD) {
       score = 70
       issues =
         mutableListOf(
-          issue(AiReviewIssueSeverity.MAJOR, "Wrong verb form", "Zaplaťte", 25),
-          issue(AiReviewIssueSeverity.MINOR, "Missing emphasis", null, 5),
+          issue(AiReviewIssueSeverity.MAJOR, "Wrong verb form", 25),
+          issue(AiReviewIssueSeverity.MINOR, "Missing emphasis", 5),
         )
     }
 
@@ -89,13 +90,11 @@ class AiReviewE2eTestData : AiReviewTestData() {
   private fun issue(
     severity: AiReviewIssueSeverity,
     message: String,
-    suggestion: String?,
     points: Int,
   ) = AiReviewIssue(
     severity = severity,
     category = "style",
     message = message,
-    suggestion = suggestion,
     points = points,
   )
 }

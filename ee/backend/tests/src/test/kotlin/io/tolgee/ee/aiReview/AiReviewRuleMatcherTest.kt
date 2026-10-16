@@ -88,6 +88,40 @@ class AiReviewRuleMatcherTest {
   }
 
   @Test
+  fun `branch patterns support wildcards and exclusions`() {
+    val features = rule { branchIn = mutableListOf("feature/*", "main") }
+    AiReviewRuleMatcher.matches(features, ui.copy(branch = "main"), LANGUAGE).assert.isTrue()
+    AiReviewRuleMatcher.matches(features, ui.copy(branch = "feature/checkout"), LANGUAGE).assert.isTrue()
+    AiReviewRuleMatcher.matches(features, ui.copy(branch = "draft/checkout"), LANGUAGE).assert.isFalse()
+
+    val notDrafts = rule { branchNotIn = mutableListOf("draft/*") }
+    AiReviewRuleMatcher.matches(notDrafts, ui.copy(branch = "draft/new-ui"), LANGUAGE).assert.isFalse()
+    AiReviewRuleMatcher.matches(notDrafts, ui.copy(branch = "main"), LANGUAGE).assert.isTrue()
+  }
+
+  @Test
+  fun `branch patterns match the whole name literally apart from the wildcard`() {
+    val rule = rule { branchIn = mutableListOf("release.1") }
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "release.1"), LANGUAGE).assert.isTrue()
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "releasex1"), LANGUAGE).assert.isFalse()
+    AiReviewRuleMatcher.matches(rule, ui.copy(branch = "release.10"), LANGUAGE).assert.isFalse()
+  }
+
+  @Test
+  fun `stricter branch rule wins like other scope parts`() {
+    val general = rule { threshold = 80 }
+    val draftRule =
+      rule {
+        branchIn = mutableListOf("draft/*")
+        threshold = 95
+      }
+    val rules = listOf(general, draftRule)
+    val match = AiReviewRuleMatcher.match(rules, ui.copy(branch = "draft/x"), LANGUAGE)
+    (match as Match.Review).rule.assert.isEqualTo(draftRule)
+    (AiReviewRuleMatcher.match(rules, ui, LANGUAGE) as Match.Review).threshold.assert.isEqualTo(80)
+  }
+
+  @Test
   fun `language include list restricts languages`() {
     val rule = rule { languageIds = mutableListOf(LANGUAGE) }
     AiReviewRuleMatcher.matches(rule, ui, LANGUAGE).assert.isTrue()

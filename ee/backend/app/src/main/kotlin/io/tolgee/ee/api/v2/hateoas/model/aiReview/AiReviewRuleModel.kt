@@ -21,5 +21,7 @@ data class AiReviewRuleModel(
   val namespaceIn: List<String>,
   val namespaceNotIn: List<String>,
   val languageIds: List<Long>,
+  val branchIn: List<String>,
+  val branchNotIn: List<String>,
   val stats: AiReviewRuleStatsModel,
 ) : RepresentationModel<AiReviewRuleModel>()

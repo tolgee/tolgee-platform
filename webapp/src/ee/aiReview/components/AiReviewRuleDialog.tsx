@@ -29,6 +29,11 @@ import {
   AiReviewScopeValue,
 } from 'tg.ee.module/aiReview/components/AiReviewScopeField';
 import {
+  AiReviewBranchField,
+  AiReviewBranchValue,
+} from 'tg.ee.module/aiReview/components/AiReviewBranchField';
+import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
+import {
   AiReviewThresholdField,
   getEffectiveOverrides,
   parseThreshold,
@@ -87,6 +92,11 @@ export const AiReviewRuleDialog = ({
   const [skipWithOpenQaIssues, setSkipWithOpenQaIssues] = useState(
     rule?.skipWithOpenQaIssues ?? true
   );
+  const branchingEnabled = useIsBranchingEnabled();
+  const [branches, setBranches] = useState<AiReviewBranchValue>(() => ({
+    branchIn: rule?.branchIn ?? [],
+    branchNotIn: rule?.branchNotIn ?? [],
+  }));
   const [scope, setScope] = useState<AiReviewScopeValue>(() => ({
     filters: {
       filterTag: nonEmpty(rule?.tagIn),
@@ -137,6 +147,8 @@ export const AiReviewRuleDialog = ({
       tagNotIn: scope.filters.filterNoTag ?? [],
       namespaceIn: scope.filters.filterNamespace ?? [],
       namespaceNotIn: scope.filters.filterNoNamespace ?? [],
+      branchIn: branches.branchIn,
+      branchNotIn: branches.branchNotIn,
       languageIds,
       languageThresholds: getEffectiveOverrides(
         overrides,
@@ -208,6 +220,14 @@ export const AiReviewRuleDialog = ({
           value={scope}
           onChange={setScope}
         />
+        {(branchingEnabled ||
+          Boolean(branches.branchIn.length + branches.branchNotIn.length)) && (
+          <AiReviewBranchField
+            projectId={projectId}
+            value={branches}
+            onChange={setBranches}
+          />
+        )}
         <AiReviewThresholdField
           threshold={threshold}
           initialThreshold={rule?.threshold ?? DEFAULT_THRESHOLD}

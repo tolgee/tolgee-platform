@@ -17,6 +17,8 @@ export const ruleToRequest = (
   tagNotIn: rule.tagNotIn,
   namespaceIn: rule.namespaceIn,
   namespaceNotIn: rule.namespaceNotIn,
+  branchIn: rule.branchIn,
+  branchNotIn: rule.branchNotIn,
   languageIds: rule.languageIds.filter((id) => existingLanguageIds.has(id)),
   languageThresholds: rule.languageThresholds.filter((override) =>
     existingLanguageIds.has(override.languageId)

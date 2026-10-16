@@ -30,8 +30,8 @@ class AiReviewResultParserTest {
       )
     result.score.assert.isEqualTo(70)
     result.issues.assert.containsExactly(
-      AiReviewIssue(AiReviewIssueSeverity.MAJOR, "grammar", "Wrong case", "Jetzt zahlen", 25),
-      AiReviewIssue(AiReviewIssueSeverity.MINOR, "punctuation", "Missing dot", null, 5),
+      AiReviewIssue(AiReviewIssueSeverity.MAJOR, "grammar", "Wrong case", 25),
+      AiReviewIssue(AiReviewIssueSeverity.MINOR, "punctuation", "Missing dot", 5),
     )
   }
 
