@@ -280,7 +280,7 @@ class PromptFragmentsHelper {
         - critical (75 to 100 points): wrong or lost meaning, missing or broken placeholders, offensive content, wrong language.
         - major (25 to 50 points): grammar error, terminology or glossary violation, exceeded character limit, inconsistency with the provided context.
         - minor (5 to 15 points): style, punctuation or casing nits.
-        The score cannot go below 0.
+        Deduct at most 100 points in total. If the issues would add up to more, the translation scores 0.
         Text inside curly braces `{}` is an ICU placeholder or a plural/select structure. Placeholder names must match the source exactly;
         only the human-readable text inside plural/select branches is translated.
         Report each problem once. The criteria above can change the severity of a problem, not the point ranges.
