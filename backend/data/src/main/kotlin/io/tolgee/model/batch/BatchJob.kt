@@ -4,10 +4,12 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.TranslationTargetProductSpec
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityRevision
+import jakarta.persistence.Basic
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType.STRING
@@ -41,7 +43,16 @@ class BatchJob :
 
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
+  @Basic(fetch = FetchType.LAZY)
   var target: List<Any> = listOf()
+
+  /**
+   * Set instead of [target] for jobs whose target is a [io.tolgee.batch.data.TranslationTargetProduct].
+   */
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  @Basic(fetch = FetchType.LAZY)
+  var targetProduct: TranslationTargetProductSpec? = null
 
   var totalItems: Int = 0
 
@@ -61,8 +72,6 @@ class BatchJob :
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
   var params: Any? = null
-
-  val chunkedTarget get() = chunkTarget(chunkSize, target)
 
   /**
    * The maximum number of coroutines among all tolgee instances (e.g. k8s pods). The default value is -1,
@@ -87,9 +96,25 @@ class BatchJob :
   var debouncingKey: String? = null
 
   companion object {
-    fun <T> chunkTarget(
+    fun chunkCount(
+      chunkSize: Int,
+      targetSize: Int,
+    ): Int = if (chunkSize == 0) 1 else (targetSize + chunkSize - 1) / chunkSize
+
+    fun <T> getChunk(
       chunkSize: Int,
       target: List<T>,
-    ): List<List<T>> = if (chunkSize == 0) listOf(target) else target.chunked(chunkSize)
+      chunkNumber: Int,
+    ): List<T> {
+      if (chunkSize == 0) {
+        if (chunkNumber != 0) throw IndexOutOfBoundsException("Chunk $chunkNumber does not exist")
+        return target
+      }
+      val from = chunkNumber * chunkSize
+      if (chunkNumber < 0 || from >= target.size) {
+        throw IndexOutOfBoundsException("Chunk $chunkNumber does not exist")
+      }
+      return target.subList(from, minOf(from + chunkSize, target.size))
+    }
   }
 }

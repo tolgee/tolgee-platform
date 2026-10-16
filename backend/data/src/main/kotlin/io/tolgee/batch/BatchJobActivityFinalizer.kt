@@ -48,16 +48,12 @@ class BatchJobActivityFinalizer(
       try {
         logger.debug("Finalizing activity for job ${job.id} (after flush)")
         waitForOtherChunksToComplete(job)
-        val revisionIds = getRevisionIds(job.id)
-        logger.debug("Merging revisions (${revisionIds.size})")
-
-        val activityRevisionIdToMergeInto = revisionIds.firstOrNull()
+        val activityRevisionIdToMergeInto = getRevisionIdToMergeInto(job.id)
         if (activityRevisionIdToMergeInto != null) {
-          revisionIds.remove(activityRevisionIdToMergeInto)
-
-          mergeDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
-          mergeModifiedEntities(activityRevisionIdToMergeInto, revisionIds)
-          deleteUnusedRevisions(revisionIds)
+          removeDuplicityDescribingEntities(job.id)
+          mergeDescribingEntities(activityRevisionIdToMergeInto, job.id)
+          mergeModifiedEntities(activityRevisionIdToMergeInto, job.id)
+          deleteUnusedRevisions(activityRevisionIdToMergeInto, job.id)
           setJobIdAndAuthorIdToRevision(activityRevisionIdToMergeInto, job)
         }
         applicationEventPublisher.publishEvent(OnBatchJobFinalized(job, activityRevisionIdToMergeInto))
@@ -123,88 +119,90 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
-  private fun deleteUnusedRevisions(revisionIds: MutableList<Long>) {
+  private fun deleteUnusedRevisions(
+    activityRevisionIdToMergeInto: Long,
+    jobId: Long,
+  ) {
     entityManager
       .createNativeQuery(
         """
-          delete from activity_revision where id in (:revisionIds)
+        delete from activity_revision
+        where id in ($JOB_REVISION_IDS_QUERY) and id <> :activityRevisionIdToMergeInto
         """,
-      ).setParameter("revisionIds", revisionIds)
+      ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
+      .setParameter("jobId", jobId)
       .executeUpdate()
   }
 
   private fun mergeModifiedEntities(
     activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>,
+    jobId: Long,
   ) {
     entityManager
       .createNativeQuery(
         """
         update activity_modified_entity set activity_revision_id = :activityRevisionIdToMergeInto
-        where activity_revision_id in (:revisionIds)
+        where activity_revision_id in ($JOB_REVISION_IDS_QUERY)
+          and activity_revision_id <> :activityRevisionIdToMergeInto
         """,
       ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
-      .setParameter("revisionIds", revisionIds)
+      .setParameter("jobId", jobId)
       .executeUpdate()
   }
 
   private fun mergeDescribingEntities(
     activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>,
+    jobId: Long,
   ) {
-    removeDuplicityDescribingEntities(activityRevisionIdToMergeInto, revisionIds)
-
     entityManager
       .createNativeQuery(
         """
         update activity_describing_entity set activity_revision_id = :activityRevisionIdToMergeInto
-        where activity_revision_id in (:revisionIds)
+        where activity_revision_id in ($JOB_REVISION_IDS_QUERY)
+          and activity_revision_id <> :activityRevisionIdToMergeInto
         """,
       ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
-      .setParameter("revisionIds", revisionIds)
+      .setParameter("jobId", jobId)
       .executeUpdate()
   }
 
-  private fun removeDuplicityDescribingEntities(
-    activityRevisionIdToMergeInto: Long,
-    revisionIds: MutableList<Long>,
-  ) {
+  /**
+   * Keeps one describing entity per (entity_class, entity_id) among the job's revisions - the one with the lowest
+   * revision id - so the merge into a single revision cannot violate the primary key.
+   */
+  private fun removeDuplicityDescribingEntities(jobId: Long) {
     entityManager
       .createNativeQuery(
         """
-        delete from activity_describing_entity
-        where (activity_revision_id in (:revisionIds) or activity_revision_id = :activityRevisionIdToMergeInto)
-        and (entity_class, entity_id) in
-              (select entity_class, entity_id
-               from activity_describing_entity
-               where activity_revision_id in (:revisionIds)
-                  or activity_revision_id = :activityRevisionIdToMergeInto
-               group by entity_class, entity_id
-               having count(*) > 1)
-        and
-            (activity_revision_id, entity_class, entity_id) not in (
-            select min(activity_revision_id), entity_class, entity_id
-                from activity_describing_entity
-                where activity_revision_id in (:revisionIds)
-                    or activity_revision_id = :activityRevisionIdToMergeInto
-                group by entity_class, entity_id
-                having count(*) > 1)
+        delete from activity_describing_entity ade
+        using (
+          select activity_revision_id, entity_class, entity_id,
+            row_number() over (partition by entity_class, entity_id order by activity_revision_id) as rn
+          from activity_describing_entity
+          where activity_revision_id in ($JOB_REVISION_IDS_QUERY)
+        ) duplicate
+        where duplicate.rn > 1
+          and ade.activity_revision_id = duplicate.activity_revision_id
+          and ade.entity_class = duplicate.entity_class
+          and ade.entity_id = duplicate.entity_id
         """.trimIndent(),
-      ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
-      .setParameter("revisionIds", revisionIds)
+      ).setParameter("jobId", jobId)
       .executeUpdate()
   }
 
-  private fun getRevisionIds(jobId: Long): MutableList<Long> =
+  private fun getRevisionIdToMergeInto(jobId: Long): Long? =
     entityManager
-      .createQuery(
-        """
-        select ar.id
-        from ActivityRevision ar
-        join ar.batchJobChunkExecution b
-        where b.batchJob.id = :jobId
-      """,
-        Long::class.javaObjectType,
-      ).setParameter("jobId", jobId)
-      .resultList
+      .createNativeQuery("select min(id) from ($JOB_REVISION_IDS_QUERY) revision_ids(id)")
+      .setParameter("jobId", jobId)
+      .singleResult
+      ?.let { (it as Number).toLong() }
+
+  companion object {
+    private const val JOB_REVISION_IDS_QUERY = """
+      select ar.id
+      from activity_revision ar
+      join tolgee_batch_job_chunk_execution bjce on bjce.id = ar.batch_job_chunk_execution_id
+      where bjce.batch_job_id = :jobId
+    """
+  }
 }

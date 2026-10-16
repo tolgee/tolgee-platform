@@ -546,7 +546,15 @@ class SecurityService(
     keyIds: List<Long>,
     projectId: Long,
   ) {
-    val projectIds = keyRepository.getSoftDeletedProjectIdsForKeyIds(keyIds)
+    val projectIds =
+      keyIds
+        .chunked(KEY_ID_LOOKUP_CHUNK_SIZE)
+        .flatMap { chunk ->
+          keyRepository
+            .getProjectIdsAndDeletedAtForKeyIds(chunk)
+            .filter { it[1] != null }
+            .map { it[0] as Long }
+        }
 
     if (projectIds.size != keyIds.size) {
       throw NotFoundException(Message.KEY_NOT_FOUND)

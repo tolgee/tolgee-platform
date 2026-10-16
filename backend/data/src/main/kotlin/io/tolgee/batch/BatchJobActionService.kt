@@ -56,6 +56,8 @@ class BatchJobActionService(
   @Lazy
   private val projectService: ProjectService,
 ) : Logging {
+  private val queueEventMapper = jacksonObjectMapper()
+
   @WithSpan
   suspend fun handleItem(
     executionItem: ExecutionQueueItem,
@@ -265,7 +267,7 @@ class BatchJobActionService(
   fun publishRemoveConsuming(item: ExecutionQueueItem) {
     if (usingRedisProvider.areWeUsingRedis) {
       val message =
-        jacksonObjectMapper()
+        queueEventMapper
           .writeValueAsString(JobQueueItemsEvent(listOf(item), QueueEventType.REMOVE))
       redisTemplate.convertAndSend(RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC, message)
     }

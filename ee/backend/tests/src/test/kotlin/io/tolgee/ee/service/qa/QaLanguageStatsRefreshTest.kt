@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.batch.BatchJobTargetProvider
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -31,6 +32,9 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
+  @Autowired
+  lateinit var batchJobTargetProvider: BatchJobTargetProvider
+
   lateinit var testData: QaLanguageStatsBranchTestData
 
   @BeforeEach
@@ -44,6 +48,7 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   @AfterEach
   fun cleanup() {
     testDataService.cleanTestData(testData.root)
+    batchJobTargetProvider.evict(JOB_ID)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
   }
@@ -77,13 +82,14 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
       targetKeyIds.map { keyId ->
         BatchTranslationTargetItem(keyId = keyId, languageId = testData.frenchLanguage.id)
       }
+    batchJobTargetProvider.cacheTarget(JOB_ID, target)
     languageStatsListener.onQaBatchJobFinalized(
       OnBatchJobFinalized(
         job =
           createBatchJobDto(
             status = BatchJobStatus.SUCCESS,
             type = BatchJobType.QA_CHECK,
-            target = target,
+            totalItems = target.size,
           ),
         activityRevisionId = -1L,
       ),
@@ -138,13 +144,12 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
   private fun createBatchJobDto(
     status: BatchJobStatus,
     type: BatchJobType = BatchJobType.QA_CHECK,
-    target: List<Any> = emptyList(),
+    totalItems: Int,
   ) = BatchJobDto(
-    id = -1,
+    id = JOB_ID,
     projectId = testData.project.id,
     authorId = testData.user.id,
-    target = target,
-    totalItems = target.size,
+    totalItems = totalItems,
     totalChunks = 0,
     chunkSize = 10,
     status = status,
@@ -155,4 +160,8 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     hidden = true,
     debouncingKey = null,
   )
+
+  companion object {
+    private const val JOB_ID = -1L
+  }
 }

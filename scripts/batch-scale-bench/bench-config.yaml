@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${BENCH_PG_PORT:54715}/tolgee
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: ${BENCH_DB_POOL:40}
+  data:
+    redis:
+      host: localhost
+      port: ${BENCH_REDIS_PORT:53715}
+tolgee:
+  postgres-autostart:
+    enabled: false
+  authentication:
+    enabled: false
+  internal:
+    controller-enabled: true
+    fake-mt-providers: true
+    fake-llm-providers: true
+  rate-limits:
+    global-limits: false
+    endpoint-limits: false
+    authentication-limits: false
+  cache:
+    enabled: true
+    use-redis: ${BENCH_USE_REDIS:false}
+  websocket:
+    use-redis: ${BENCH_USE_REDIS:false}
+  machine-translation:
+    google:
+      api-key: mock
+  review-ask:
+    enabled: false
+  batch:
+    concurrency: ${BENCH_BATCH_CONCURRENCY:10}
+  telemetry:
+    enabled: false
+server:
+  port: ${BENCH_APP_PORT:18715}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
