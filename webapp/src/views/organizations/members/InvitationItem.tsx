@@ -7,6 +7,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrgRoleTranslation } from 'tg.translationTools/useOrgRoleTranslation';
 import { messageService } from 'tg.service/MessageService';
+import copy from 'copy-to-clipboard';
 
 type OrganizationInvitationModel =
   components['schemas']['OrganizationInvitationModel'];
@@ -68,7 +69,7 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
   };
 
   const handleGetLink = () => {
-    navigator.clipboard.writeText(
+    copy(
       LINKS.ACCEPT_INVITATION.buildWithOrigin({
         [PARAMS.INVITATION_CODE]: invitation.code,
       })
