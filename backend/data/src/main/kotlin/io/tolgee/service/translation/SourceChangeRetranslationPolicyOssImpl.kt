@@ -4,7 +4,7 @@ import io.tolgee.model.translation.Translation
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultSourceChangeRetranslationPolicy : SourceChangeRetranslationPolicy {
+class SourceChangeRetranslationPolicyOssImpl : SourceChangeRetranslationPolicy {
   override fun selectForRetranslation(
     projectId: Long,
     translations: Collection<Translation>,

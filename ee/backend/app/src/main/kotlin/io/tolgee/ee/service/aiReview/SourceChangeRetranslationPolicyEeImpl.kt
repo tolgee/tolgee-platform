@@ -11,6 +11,7 @@ import io.tolgee.service.aiReview.AiReviewAvailability
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.SourceChangeRetranslationPolicy
+import io.tolgee.service.translation.SourceChangeRetranslationPolicyOssImpl
 import io.tolgee.util.aiReviewTextHash
 import jakarta.persistence.EntityManager
 import org.springframework.context.annotation.Lazy
@@ -19,7 +20,8 @@ import org.springframework.stereotype.Service
 
 @Primary
 @Service
-class AiReviewSourceChangeRetranslationPolicy(
+class SourceChangeRetranslationPolicyEeImpl(
+  private val ossPolicy: SourceChangeRetranslationPolicyOssImpl,
   private val aiReviewSettingsService: AiReviewSettingsService,
   private val aiReviewAvailability: AiReviewAvailability,
   private val projectService: ProjectService,
@@ -33,7 +35,7 @@ class AiReviewSourceChangeRetranslationPolicy(
     projectId: Long,
     translations: Collection<Translation>,
   ): Set<Long> {
-    val settings = getCustomSettings(projectId) ?: return translations.filter { it.auto }.map { it.id }.toSet()
+    val settings = getCustomSettings(projectId) ?: return ossPolicy.selectForRetranslation(projectId, translations)
     val aiApprovedIds = getAiApprovedIds(translations)
     val machineTranslatedLanguageIds by lazy { getMachineTranslatedLanguageIds(projectId, translations) }
     return translations
@@ -57,12 +59,9 @@ class AiReviewSourceChangeRetranslationPolicy(
     aiApprovedIds: Set<Long>,
   ): Kind {
     val aiApproved = translation.id in aiApprovedIds
-    return when {
-      translation.auto && aiApproved -> Kind.AI_APPROVED
-      translation.auto -> Kind.MACHINE_TRANSLATED
-      aiApproved || translation.state != TranslationState.REVIEWED -> Kind.HUMAN_EDITED
-      else -> Kind.HUMAN_REVIEWED
-    }
+    if (translation.auto) return if (aiApproved) Kind.AI_APPROVED else Kind.MACHINE_TRANSLATED
+    val reviewedByHuman = translation.state == TranslationState.REVIEWED && !aiApproved
+    return if (reviewedByHuman) Kind.HUMAN_REVIEWED else Kind.HUMAN_EDITED
   }
 
   private fun getCustomSettings(projectId: Long): AiReviewProjectSettings? {

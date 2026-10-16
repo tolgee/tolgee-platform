@@ -365,11 +365,7 @@ class TranslationService(
     return this.save(translation)
   }
 
-  /**
-   * Unlike [setStateBatch], keeps the machine translation flags, so auto translation still replaces the text
-   * when its source changes.
-   */
-  fun setStateByAiReview(
+  fun setStateKeepingMachineTranslationFlags(
     translation: Translation,
     state: TranslationState,
   ): Translation {

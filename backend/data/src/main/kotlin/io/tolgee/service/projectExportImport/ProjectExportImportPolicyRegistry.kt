@@ -30,6 +30,7 @@ import io.tolgee.model.UserPreferences
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.aiReview.AiReviewProjectSettings
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.automations.Automation
@@ -162,6 +163,7 @@ object ProjectExportImportPolicyRegistry {
         Prompt::class,
         AiPlaygroundResult::class,
         AiReviewRule::class,
+        AiReviewProjectSettings::class,
         TranslationAiReview::class,
         MtCreditBucket::class,
         LlmProvider::class,

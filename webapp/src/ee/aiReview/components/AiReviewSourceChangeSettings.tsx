@@ -26,7 +26,7 @@ const StyledRow = styled('div')`
     border-top: 1px solid ${({ theme }) => theme.palette.divider1};
   }
 
-  @media (max-width: 600px) {
+  ${({ theme }) => theme.breakpoints.down('sm')} {
     grid-template-columns: 1fr;
   }
 `;

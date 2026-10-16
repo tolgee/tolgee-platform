@@ -3,6 +3,7 @@ package io.tolgee.ee.aiReview
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
 import io.tolgee.ee.data.aiReview.AiReviewSettingsRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
@@ -130,6 +131,53 @@ class AiReviewSourceChangeTest : AbstractAiReviewTest() {
 
     val translation = waitForGermanTranslationOf("ui-key") { it.text.assert.contains("Pay later") }
     translation.state.assert.isEqualTo(TranslationState.TRANSLATED)
+  }
+
+  @Test
+  fun `ignores the settings when AI review is not available`() {
+    testData.enableAutoTranslation()
+    saveTestData()
+    updateSettings(AiReviewSettingsRequest(onSourceChangeHumanEdited = SourceChangeAction.RETRANSLATE))
+    tolgeeProperties.featureFlags.enabledForAll = emptyList()
+
+    setText("ui-key", "en", "Pay later")
+    waitForProjectJobsCompleted()
+
+    val translation = getTranslation(testData.uiGerman.self.id)
+    translation.text.assert.isEqualTo("Jetzt zahlen")
+    translation.outdated.assert.isTrue()
+  }
+
+  @Test
+  fun `a human translation approved by AI follows the human edited setting`() {
+    testData.enableAutoTranslation()
+    testData.uiGerman.approvedByAi()
+    testData.uiGerman.self.auto = false
+    testData.uiGerman.self.mtProvider = null
+    saveTestData()
+    updateSettings(AiReviewSettingsRequest(onSourceChangeHumanEdited = SourceChangeAction.RETRANSLATE))
+
+    setText("ui-key", "en", "Pay later")
+
+    waitForGermanTranslationOf("ui-key") { it.text.assert.contains("Pay later") }
+  }
+
+  @Test
+  fun `demoting an AI approval keeps the machine translation mark`() {
+    val rule = testData.addRule { tagIn = mutableListOf("ui") }
+    testData.uiGerman.approvedByAi()
+    saveTestData()
+    val translationId = testData.uiGerman.self.id
+
+    performAuthPut(
+      "/v2/projects/$projectId/ai-review/rules/${rule.self.id}",
+      AiReviewRuleRequest(tagIn = listOf("ui"), mode = AiReviewRuleMode.ACTIVE, threshold = 100),
+    ).andIsOk
+
+    waitForReview(translationId) { it!!.outcome.assert.isEqualTo(AiReviewOutcome.BELOW_THRESHOLD) }
+    val translation = getTranslation(translationId)
+    translation.state.assert.isEqualTo(TranslationState.TRANSLATED)
+    translation.auto.assert.isTrue()
   }
 
   @Test
