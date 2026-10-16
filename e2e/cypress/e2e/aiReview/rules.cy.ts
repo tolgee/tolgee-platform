@@ -108,7 +108,6 @@ describe('AI review rules', () => {
     rulesView.addBranchPattern('include', 'main');
     rulesView.addBranchPattern('include', 'feature/*');
     rulesView.saveRule();
-    runDialog.later();
     getRule(projectId, 'Legal dry run').then((rule) => {
       expect(rule.branchIn).to.deep.eq(['main', 'feature/*']);
       expect(rule.branchNotIn).to.deep.eq(['draft/*']);

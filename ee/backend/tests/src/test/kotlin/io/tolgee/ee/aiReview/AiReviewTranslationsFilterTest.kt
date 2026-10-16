@@ -3,7 +3,9 @@ package io.tolgee.ee.aiReview
 import io.tolgee.development.testDataBuilder.data.AiReviewFilterTestData
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.testing.assert
+import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,6 +15,9 @@ import tools.jackson.databind.ObjectMapper
 class AiReviewTranslationsFilterTest : AbstractAiReviewTest() {
   @Autowired
   lateinit var jsonMapper: ObjectMapper
+
+  @Autowired
+  lateinit var aiReviewRuleRepository: AiReviewRuleRepository
 
   override fun createTestData() = AiReviewFilterTestData()
 
@@ -78,6 +83,17 @@ class AiReviewTranslationsFilterTest : AbstractAiReviewTest() {
     keyNames("filterAiReviewOutcome=NOT_REVIEWED&filterAiReviewOutcome=FAILED")
       .assert
       .containsExactly("plain-key", "ui-new", "ui-pending", "ui-stale")
+  }
+
+  @Test
+  fun `not reviewed yet ignores rules that exclude the viewed branch`() {
+    executeInNewTransaction(platformTransactionManager) {
+      aiReviewRuleRepository.findAllByProjectId(projectId).forEach {
+        it.branchNotIn = mutableListOf("main")
+        aiReviewRuleRepository.save(it)
+      }
+    }
+    keyNames("filterAiReviewOutcome=NOT_REVIEWED").assert.isEmpty()
   }
 
   @Test

@@ -262,6 +262,16 @@ class AiReviewRunTest : AbstractAiReviewTest() {
   }
 
   @Test
+  fun `rule run skips translations whose branch the rule excludes`() {
+    data.limitLegalRuleToGermanOnDefaultBranch()
+    data.legalRule.self.branchNotIn = mutableListOf("ma*")
+    saveTestData()
+    performAuthPost(previewUrl, AiReviewRunRequest(ruleId = data.legalRule.self.id)).andIsOk.andAssertThatJson {
+      node("withoutRereview.willReview").isEqualTo(0)
+    }
+  }
+
+  @Test
   fun `queued translations are counted, reviewed once and stay out of the backlog`() {
     data.addQueuedReviews()
     saveTestData()
