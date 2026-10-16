@@ -180,19 +180,28 @@ class TagService(
     return projectIds.single()
   }
 
-  fun createMissingTags(
+  /**
+   * Parallel transactions that each insert the same missing tag fail on the unique (project_id, name) index. The
+   * first one takes the exclusive lock and creates the tags; the others wait on the shared lock until it commits and
+   * then reuse its tags, without blocking each other. Both locks are held until the transaction ends, so a tag
+   * created by a transaction that rolls back is never seen without its keys.
+   */
+  fun lockCreationOfMissingTags(
     projectId: Long,
     names: Collection<String>,
   ) {
-    val existing = getFromProject(projectId, names).map { it.name }.toSet()
-    names.distinct().filter { it !in existing }.forEach { name ->
-      tagRepository.save(
-        Tag().apply {
-          project = entityManager.getReference(Project::class.java, projectId)
-          this.name = name
-        },
-      )
-    }
+    if (getFromProject(projectId, names).size == names.distinct().size) return
+    val lockKey = "tag-creation-$projectId"
+    val creatingTags =
+      entityManager
+        .createNativeQuery("select pg_try_advisory_xact_lock(hashtextextended(:lockKey, 0))")
+        .setParameter("lockKey", lockKey)
+        .singleResult as Boolean
+    if (creatingTags) return
+    entityManager
+      .createNativeQuery("select pg_advisory_xact_lock_shared(hashtextextended(:lockKey, 0))")
+      .setParameter("lockKey", lockKey)
+      .singleResult
   }
 
   private fun getFromProject(

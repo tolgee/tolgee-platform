@@ -1,12 +1,5 @@
 package io.tolgee.batch.data
 
-/**
- * Every (key, language) combination of [keyIds] and [languageIds], materialized lazily.
- *
- * Jobs with this target store only the two id lists ([TranslationTargetProductSpec]) instead of one json item
- * per combination, which keeps the stored target small (a json value is limited to 256 MB) and lets chunks be
- * sliced without building the whole list.
- */
 class TranslationTargetProduct(
   val keyIds: List<Long>,
   val languageIds: List<Long>,
@@ -33,10 +26,7 @@ class TranslationTargetProduct(
 }
 
 enum class TranslationTargetProductOrder {
-  /** All languages of the first key, then all languages of the second key... */
   KEY_MAJOR,
-
-  /** All keys of the first language, then all keys of the second language... */
   LANGUAGE_MAJOR,
 }
 

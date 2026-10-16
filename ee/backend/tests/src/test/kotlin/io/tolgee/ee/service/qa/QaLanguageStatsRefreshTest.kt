@@ -5,6 +5,7 @@ import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.LanguageStatsListener
 import io.tolgee.constants.Feature
@@ -77,11 +78,27 @@ class QaLanguageStatsRefreshTest : AuthorizedControllerTest() {
     assertStaleCountEquals(branchId = testData.featureBranch.id, expected = 0)
   }
 
+  @Test
+  fun `refreshes language stats when the job target is a key and language product`() {
+    cacheStaleStatsForBothBranches()
+    clearStaleFlag(testData.mainFrTranslation.id)
+
+    fireQaBatchJobFinalizedWithTarget(
+      TranslationTargetProduct(listOf(testData.mainKey.id), listOf(testData.frenchLanguage.id)),
+    )
+
+    assertStaleCountEquals(branchId = testData.mainBranch.id, expected = 0)
+  }
+
   private fun fireQaBatchJobFinalized(targetKeyIds: List<Long>) {
-    val target =
+    fireQaBatchJobFinalizedWithTarget(
       targetKeyIds.map { keyId ->
         BatchTranslationTargetItem(keyId = keyId, languageId = testData.frenchLanguage.id)
-      }
+      },
+    )
+  }
+
+  private fun fireQaBatchJobFinalizedWithTarget(target: List<Any>) {
     batchJobTargetProvider.cacheTarget(JOB_ID, target)
     languageStatsListener.onQaBatchJobFinalized(
       OnBatchJobFinalized(

@@ -81,7 +81,7 @@ class LanguageStatsListener(
     runSentryCatching {
       projectService.findDto(projectId) ?: return@runSentryCatching
 
-      val keyIds = extractKeyIdsFromQaJobTarget(batchJobTargetProvider.getTarget(event.job.id))
+      val keyIds = extractKeyIdsFromQaJobTarget(batchJobTargetProvider.getTargetWithoutCaching(event.job.id))
       if (keyIds.isEmpty()) {
         return@runSentryCatching
       }
