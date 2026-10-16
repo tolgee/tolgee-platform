@@ -406,6 +406,7 @@ class TranslationService(
    */
   fun applySourceChange(
     key: Key,
+    newBaseText: String?,
     excludeTranslationIds: Set<Long> = emptySet(),
   ) {
     val baseLanguage = key.project.baseLanguage
@@ -414,12 +415,11 @@ class TranslationService(
         it.language.id != baseLanguage?.id && !it.text.isNullOrEmpty() && !excludeTranslationIds.contains(it.id)
       }
     val protectReviewed = projectHolder.projectOrNull?.translationProtection == TranslationProtection.PROTECT_REVIEWED
-    val baseText = key.translations.firstOrNull { it.language.id == baseLanguage?.id }?.text
     markSourceChanged(
       key.project.id,
       translations,
       changeStateOfKept = !protectReviewed,
-      includeHumanText = !baseText.isNullOrBlank(),
+      includeHumanText = !newBaseText.isNullOrBlank(),
     )
   }
 

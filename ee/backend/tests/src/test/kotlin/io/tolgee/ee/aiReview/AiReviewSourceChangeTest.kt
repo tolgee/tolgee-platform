@@ -181,6 +181,20 @@ class AiReviewSourceChangeTest : AbstractAiReviewTest() {
   }
 
   @Test
+  fun `clearing the source keeps human translations`() {
+    testData.enableAutoTranslation()
+    saveTestData()
+    updateSettings(AiReviewSettingsRequest(onSourceChangeHumanEdited = SourceChangeAction.RETRANSLATE))
+
+    setText("ui-key", "en", "")
+    waitForProjectJobsCompleted()
+
+    val translation = getTranslation(testData.uiGerman.self.id)
+    translation.text.assert.isEqualTo("Jetzt zahlen")
+    translation.auto.assert.isFalse()
+  }
+
+  @Test
   fun `keeps human translations of languages without machine translation`() {
     saveTestData()
     updateSettings(AiReviewSettingsRequest(onSourceChangeHumanEdited = SourceChangeAction.RETRANSLATE))
