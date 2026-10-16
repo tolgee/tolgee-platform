@@ -294,6 +294,8 @@ class BatchJobChunkExecutionQueue(
 
   val size get() = totalSize.get()
 
+  val jobCount get() = jobQueues.size
+
   fun joinToString(
     separator: String = ", ",
     transform: (item: ExecutionQueueItem) -> String,

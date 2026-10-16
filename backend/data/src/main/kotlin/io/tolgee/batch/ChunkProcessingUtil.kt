@@ -18,7 +18,7 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.Timeouts
 import org.springframework.context.ApplicationContext
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
 import java.util.Date
 import kotlin.collections.sorted
 import kotlin.coroutines.CoroutineContext
@@ -183,6 +183,10 @@ open class ChunkProcessingUtil(
     applicationContext.getBean(ProjectService::class.java)
   }
 
+  private val objectMapper by lazy {
+    applicationContext.getBean(ObjectMapper::class.java)
+  }
+
   private val metrics by lazy {
     applicationContext.getBean(Metrics::class.java)
   }
@@ -258,6 +262,5 @@ open class ChunkProcessingUtil(
 
   companion object {
     private const val MAX_STACK_TRACE_LENGTH = 65535
-    private val objectMapper = jacksonObjectMapper()
   }
 }

@@ -43,9 +43,12 @@ class LanguageStatsService(
 ) : Logging {
   private val waitingRefreshes: MutableSet<Pair<Long, Long?>> = ConcurrentHashMap.newKeySet()
 
+  private val skippedRefreshes: MutableSet<Pair<Long, Long?>> = ConcurrentHashMap.newKeySet()
+
   /**
    * Skips the refresh when another one for the same project and branch is still waiting for the lock: that one
-   * opens its transaction only after this caller's changes were committed, so it already covers them.
+   * opens its transaction only after this caller's changes were committed, so it already covers them. When that
+   * one fails, it refreshes once more for the callers it skipped.
    */
   fun refreshLanguageStatsCoalesced(
     projectId: Long,
@@ -53,19 +56,36 @@ class LanguageStatsService(
   ) {
     val refreshKey = projectId to branchId
     if (!waitingRefreshes.add(refreshKey)) {
+      skippedRefreshes.add(refreshKey)
       return
     }
+    var lockAcquired = false
     try {
-      refreshLanguageStats(projectId, branchId) { waitingRefreshes.remove(refreshKey) }
+      refreshLanguageStatsUnderLock(projectId, branchId) {
+        lockAcquired = true
+        waitingRefreshes.remove(refreshKey)
+      }
+    } catch (e: Exception) {
+      if (!skippedRefreshes.remove(refreshKey)) throw e
+      refreshLanguageStats(projectId, branchId)
     } finally {
-      waitingRefreshes.remove(refreshKey)
+      if (!lockAcquired) {
+        waitingRefreshes.remove(refreshKey)
+      }
     }
   }
 
   fun refreshLanguageStats(
     projectId: Long,
     branchId: Long? = null,
-    onLockAcquired: () -> Unit = {},
+  ) {
+    refreshLanguageStatsUnderLock(projectId, branchId) {}
+  }
+
+  private fun refreshLanguageStatsUnderLock(
+    projectId: Long,
+    branchId: Long?,
+    onLockAcquired: () -> Unit,
   ) {
     lockingProvider.withLocking("refresh-lang-stats-$projectId-${branchId ?: "default"}") {
       onLockAcquired()
