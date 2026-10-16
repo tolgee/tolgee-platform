@@ -35,10 +35,11 @@ class PluralTranslationUtil(
 
   private val result: MtTranslatorResult by lazy {
     val result =
-      translated.map { (form, result) ->
-        result.translatedText = result.translatedText?.replaceNumberTags()
-        form to result
-      }
+      translated
+        .map { (form, result) ->
+          result.translatedText = result.translatedText?.replaceNumberTags()
+          form to result
+        }.toList()
 
     val resultForms = result.map { it.first to (it.second.translatedText ?: "") }.toMap()
 
