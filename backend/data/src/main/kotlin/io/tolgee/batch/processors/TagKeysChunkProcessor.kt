@@ -6,9 +6,12 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.model.batch.params.TagKeysParams
 import io.tolgee.service.key.TagService
+import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 import tools.jackson.databind.ObjectMapper
 import kotlin.coroutines.CoroutineContext
 
@@ -17,6 +20,7 @@ class TagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService,
   private val progressManager: ProgressManager,
+  private val transactionManager: PlatformTransactionManager,
   objectMapper: ObjectMapper,
 ) : AbstractChunkProcessor<TagKeysRequest, TagKeysParams, Long>(objectMapper) {
   override fun process(
@@ -28,12 +32,28 @@ class TagKeysChunkProcessor(
     val params = getParams(job)
 
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
+    createMissingTags(projectId, params.tags)
 
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       tagService.tagKeysById(projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
       progressManager.reportSingleChunkProgress(job.id, subChunk.size)
+    }
+  }
+
+  /**
+   * Chunks of one job run in parallel; creating a new tag inside each chunk transaction makes all but one of them
+   * fail on the unique constraint and retry.
+   */
+  private fun createMissingTags(
+    projectId: Long,
+    tags: List<String>,
+  ) {
+    tryUntilItDoesntBreakConstraint(maxRepeats = 10) {
+      executeInNewTransaction(transactionManager) {
+        tagService.createMissingTags(projectId, tags)
+      }
     }
   }
 

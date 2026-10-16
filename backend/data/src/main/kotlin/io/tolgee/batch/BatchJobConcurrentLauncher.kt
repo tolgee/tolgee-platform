@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.ceil
@@ -46,6 +48,8 @@ class BatchJobConcurrentLauncher(
   val runningJobs: ConcurrentHashMap<Long, Pair<BatchJobDto, Job>> = ConcurrentHashMap()
 
   private val launchIdProvider = AtomicLong()
+
+  private val slotFreedSignal = Semaphore(0)
 
   /**
    * O(1) counter for running jobs by character - avoids O(n) iteration on every chunk
@@ -93,7 +97,8 @@ class BatchJobConcurrentLauncher(
         val somethingHandled = fn()
         val sleepTime = getSleepTime(startTime, somethingHandled)
         if (sleepTime > 0) {
-          Thread.sleep(sleepTime)
+          slotFreedSignal.tryAcquire(sleepTime, TimeUnit.MILLISECONDS)
+          slotFreedSignal.drainPermits()
         }
       } catch (e: Throwable) {
         Sentry.captureException(e)
@@ -138,7 +143,7 @@ class BatchJobConcurrentLauncher(
           items
             .map { executionItem ->
               handleItem(executionItem)
-            }.any()
+            }.any { it }
         }
       }
   }
@@ -267,6 +272,7 @@ class BatchJobConcurrentLauncher(
     decrementRunningCharacterCount(jobCharacter)
     // Decrement running count when coroutine actually finishes to align with runningJobs
     progressManager.onExecutionCoroutineComplete(executionItem.jobId)
+    slotFreedSignal.release()
     logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
     logger.debug("Running jobs: ${runningJobs.size}")
   }

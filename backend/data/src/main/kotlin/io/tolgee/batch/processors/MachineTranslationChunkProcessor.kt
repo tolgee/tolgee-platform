@@ -4,6 +4,7 @@ import io.tolgee.batch.AbstractChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.params.MachineTranslationJobParams
@@ -39,11 +40,7 @@ class MachineTranslationChunkProcessor(
   }
 
   override fun getTarget(data: MachineTranslationRequest): List<BatchTranslationTargetItem> {
-    return data.keyIds.flatMap { keyId ->
-      data.targetLanguageIds.map { languageId ->
-        BatchTranslationTargetItem(keyId, languageId)
-      }
-    }
+    return TranslationTargetProduct(data.keyIds, data.targetLanguageIds)
   }
 
   override fun getMaxPerJobConcurrency(): Int {

@@ -54,6 +54,7 @@ class BatchJobManagementControllerCancellationTest :
       val keyIds = keys.map { it.id }.toList()
 
       val count = AtomicInteger(0)
+      val finishedRealRuns = AtomicInteger(0)
 
       doAnswer {
         if (count.incrementAndGet() > 5) {
@@ -64,7 +65,7 @@ class BatchJobManagementControllerCancellationTest :
             Thread.sleep(10)
           }
         }
-        it.callRealMethod()
+        it.callRealMethod().also { finishedRealRuns.incrementAndGet() }
       }.whenever(machineTranslationChunkProcessor).process(any(), any(), any())
 
       performProjectAuthPost(
@@ -81,7 +82,7 @@ class BatchJobManagementControllerCancellationTest :
       ).andIsOk
 
       waitFor {
-        batchJobConcurrentLauncher.runningJobs.size >= 5
+        batchJobConcurrentLauncher.runningJobs.size >= 5 && finishedRealRuns.get() >= 5
       }
 
       val job = util.getSingleJob()
