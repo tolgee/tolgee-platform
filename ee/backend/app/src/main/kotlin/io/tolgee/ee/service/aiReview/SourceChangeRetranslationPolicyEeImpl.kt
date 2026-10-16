@@ -42,17 +42,16 @@ class SourceChangeRetranslationPolicyEeImpl(
     val machineTranslatedLanguageIds by lazy { getMachineTranslatedLanguageIds(projectId, translations) }
     return translations
       .filter { translation ->
+        fun retranslatesHumanText(action: SourceChangeAction) =
+          includeHumanText &&
+            action == SourceChangeAction.RETRANSLATE &&
+            translation.language.id in machineTranslatedLanguageIds
+
         when (classify(translation, aiApprovedIds)) {
           Kind.MACHINE_TRANSLATED -> true
           Kind.AI_APPROVED -> settings.onSourceChangeAiApproved == SourceChangeAction.RETRANSLATE
-          Kind.HUMAN_EDITED ->
-            includeHumanText &&
-              settings.onSourceChangeHumanEdited == SourceChangeAction.RETRANSLATE &&
-              translation.language.id in machineTranslatedLanguageIds
-          Kind.HUMAN_REVIEWED ->
-            includeHumanText &&
-              settings.onSourceChangeHumanReviewed == SourceChangeAction.RETRANSLATE &&
-              translation.language.id in machineTranslatedLanguageIds
+          Kind.HUMAN_EDITED -> retranslatesHumanText(settings.onSourceChangeHumanEdited)
+          Kind.HUMAN_REVIEWED -> retranslatesHumanText(settings.onSourceChangeHumanReviewed)
         }
       }.map { it.id }
       .toSet()
@@ -63,9 +62,10 @@ class SourceChangeRetranslationPolicyEeImpl(
     aiApprovedIds: Set<Long>,
   ): Kind {
     val aiApproved = translation.id in aiApprovedIds
-    if (translation.auto) return if (aiApproved) Kind.AI_APPROVED else Kind.MACHINE_TRANSLATED
-    val reviewedByHuman = translation.state == TranslationState.REVIEWED && !aiApproved
-    return if (reviewedByHuman) Kind.HUMAN_REVIEWED else Kind.HUMAN_EDITED
+    if (translation.auto && aiApproved) return Kind.AI_APPROVED
+    if (translation.auto) return Kind.MACHINE_TRANSLATED
+    if (translation.state == TranslationState.REVIEWED && !aiApproved) return Kind.HUMAN_REVIEWED
+    return Kind.HUMAN_EDITED
   }
 
   private fun getCustomSettings(projectId: Long): AiReviewProjectSettings? {

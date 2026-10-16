@@ -414,7 +414,13 @@ class TranslationService(
         it.language.id != baseLanguage?.id && !it.text.isNullOrEmpty() && !excludeTranslationIds.contains(it.id)
       }
     val protectReviewed = projectHolder.projectOrNull?.translationProtection == TranslationProtection.PROTECT_REVIEWED
-    markSourceChanged(key.project.id, translations, changeStateOfKept = !protectReviewed, includeHumanText = true)
+    val baseText = key.translations.firstOrNull { it.language.id == baseLanguage?.id }?.text
+    markSourceChanged(
+      key.project.id,
+      translations,
+      changeStateOfKept = !protectReviewed,
+      includeHumanText = !baseText.isNullOrBlank(),
+    )
   }
 
   /**
