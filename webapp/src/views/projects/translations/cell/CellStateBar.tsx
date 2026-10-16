@@ -32,7 +32,10 @@ export const CellStateBar: React.FC<React.PropsWithChildren<Props>> = ({
   onResize,
 }) => {
   const getContent = () => (
-    <StyledStateHover data-cy="translations-state-indicator">
+    <StyledStateHover
+      data-cy="translations-state-indicator"
+      data-cy-state={state}
+    >
       <StyledState
         onMouseDown={stopAndPrevent(onResize)}
         onClick={stopAndPrevent()}

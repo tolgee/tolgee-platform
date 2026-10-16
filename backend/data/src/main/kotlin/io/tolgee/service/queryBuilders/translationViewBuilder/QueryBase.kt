@@ -64,6 +64,7 @@ class QueryBase<T>(
   val qaDisabledLanguageIds: Set<Long>,
   private val tasksEnabled: Boolean,
   val isCountQuery: Boolean = false,
+  private val aiReviewFilterContext: AiReviewFilterContext? = null,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
 
@@ -108,9 +109,17 @@ class QueryBase<T>(
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     applyTranslationFilters()
+    applyAiReviewFilters()
     queryGlobalFiltering.apply()
     if (tasksEnabled) {
       queryGlobalFiltering.applyTaskHistoryFilters()
+    }
+  }
+
+  private fun applyAiReviewFilters() {
+    val context = aiReviewFilterContext ?: return
+    AiReviewFilterBuilder(params, this, cb, projectId, context, isCountQuery).build()?.let {
+      whereConditions.add(it)
     }
   }
 

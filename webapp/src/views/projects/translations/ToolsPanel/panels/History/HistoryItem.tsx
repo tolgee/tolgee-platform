@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Box, styled, Tooltip } from '@mui/material';
+import { Box, styled, Tooltip, useTheme } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 import { DotsVertical } from '@untitled-ui/icons-react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -15,6 +16,7 @@ import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 import { UserName } from 'tg.component/common/UserName';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { Stars } from 'tg.component/CustomIcons';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -49,6 +51,16 @@ const StyledAvatar = styled('div')`
   grid-area: avatar;
   margin: ${({ theme }) => theme.spacing(0.5, 1, 0.5, 0)};
   align-self: start;
+`;
+
+const StyledAiAvatar = styled('div')`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
 `;
 
 const StyledChanges = styled('div')`
@@ -97,6 +109,9 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
   languageTag,
 }) => {
   const lang = useCurrentLanguage();
+  const { t } = useTranslate();
+  const theme = useTheme();
+  const isAiReview = entry.activityType === 'AI_REVIEW' && !entry.author;
   const [detailOpen, setDetailOpen] = useState(false);
 
   const date = new Date(entry.timestamp);
@@ -118,18 +133,32 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
 
   return textDiff || stateDiff || mtProviderDiff ? (
     <StyledContainer data-cy="translation-history-item">
-      <Tooltip title={<UserName {...entry.author} />}>
-        <StyledAvatar>
-          <AvatarImg
-            owner={{
-              ...entry.author,
-              type: 'USER',
-              id: entry.author?.id as number,
-            }}
-            size={24}
-          />
-        </StyledAvatar>
-      </Tooltip>
+      {isAiReview ? (
+        <Tooltip title={t('translation_history_ai_review', 'AI review')}>
+          <StyledAvatar data-cy="translation-history-ai-review-avatar">
+            <StyledAiAvatar>
+              <Stars
+                width={16}
+                height={16}
+                color={theme.palette.secondary.main}
+              />
+            </StyledAiAvatar>
+          </StyledAvatar>
+        </Tooltip>
+      ) : (
+        <Tooltip title={<UserName {...entry.author} />}>
+          <StyledAvatar>
+            <AvatarImg
+              owner={{
+                ...entry.author,
+                type: 'USER',
+                id: entry.author?.id as number,
+              }}
+              size={24}
+            />
+          </StyledAvatar>
+        </Tooltip>
+      )}
 
       <StyledChanges>
         {textDiff && (

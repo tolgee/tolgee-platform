@@ -111,6 +111,7 @@ class TolgeeProperties(
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var languageTool: LanguageToolProperties = LanguageToolProperties(),
+  var featureFlags: FeatureFlagsProperties = FeatureFlagsProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
   @DocProperty(hidden = true)

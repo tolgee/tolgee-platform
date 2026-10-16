@@ -321,6 +321,7 @@ class PromptVariablesHelper(
     projectId: Long,
     keyId: Long?,
     targetLanguageId: Long?,
+    reviewCriteria: String? = null,
   ): MutableList<Variable> {
     var key: Key? = null
     if (keyId !== null) {
@@ -389,6 +390,20 @@ class PromptVariablesHelper(
     )
 
     variables.add(getScreenshotVar(key))
+
+    variables.add(
+      Variable(
+        "review",
+        props =
+          mutableListOf(
+            Variable(
+              "criteria",
+              reviewCriteria?.takeIf { it.isNotBlank() },
+              description = "Review criteria of the review prompt",
+            ),
+          ),
+      ),
+    )
 
     val fragments = Variable("fragment", props = promptFragmentsHelper.getAllFragments())
     variables.add(fragments)

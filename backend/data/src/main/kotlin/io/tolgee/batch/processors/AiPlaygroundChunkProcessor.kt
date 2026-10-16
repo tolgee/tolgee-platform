@@ -7,14 +7,18 @@ import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
+import io.tolgee.exceptions.AiReviewInvalidOutputException
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.model.batch.params.AiPlaygroundJobParams
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.key.Key
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.PromptService
+import io.tolgee.service.aiReview.AiPlaygroundReviewRunner
 import io.tolgee.service.key.KeyService
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -27,6 +31,8 @@ class AiPlaygroundChunkProcessor(
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val mtProviderCatching: MtProviderCatching,
   private val progressManager: ProgressManager,
+  private val aiPlaygroundReviewRunner: AiPlaygroundReviewRunner,
+  private val batchProperties: BatchProperties,
   objectMapper: ObjectMapper,
 ) : AbstractChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem>(objectMapper) {
   override fun process(
@@ -40,7 +46,10 @@ class AiPlaygroundChunkProcessor(
       val (keyId, languageId) = item
       val key = keys[keyId] ?: return@iterateCatching
       val llmPrompt = getParams(job).llmPrompt ?: throw InvalidStateException()
-      translateAndSetResult(job, llmPrompt, key, languageId)
+      when (llmPrompt.type) {
+        PromptType.REVIEW -> reviewAndSetResult(job, llmPrompt, key, languageId)
+        PromptType.TRANSLATE -> translateAndSetResult(job, llmPrompt, key, languageId)
+      }
       progressManager.reportSingleChunkProgress(job.id)
     }
   }
@@ -74,6 +83,23 @@ class AiPlaygroundChunkProcessor(
     )
   }
 
+  fun reviewAndSetResult(
+    job: BatchJobDto,
+    llmPrompt: PromptDto,
+    key: Key,
+    languageId: Long,
+  ) {
+    try {
+      aiPlaygroundReviewRunner.reviewAndStoreResult(
+        projectId = job.projectId!!,
+        userId = job.authorId!!,
+        data = llmPrompt.toReviewRunDto(key.id, languageId),
+        priority = LlmProviderPriority.LOW,
+      )
+    } catch (_: AiReviewInvalidOutputException) {
+    }
+  }
+
   override fun getParamsType(): Class<AiPlaygroundJobParams> {
     return AiPlaygroundJobParams::class.java
   }
@@ -87,7 +113,7 @@ class AiPlaygroundChunkProcessor(
   }
 
   override fun getMaxPerJobConcurrency(): Int {
-    return 1
+    return batchProperties.maxPerMtJobConcurrency
   }
 
   override fun getJobCharacter(

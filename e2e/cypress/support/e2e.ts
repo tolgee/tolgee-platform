@@ -62,4 +62,5 @@ before(() => {
   setFeature('BRANCHING', true);
   setFeature('QA_CHECKS', true);
   setFeature('TRANSLATION_MEMORY', true);
+  setFeature('AI_REVIEW', true);
 });

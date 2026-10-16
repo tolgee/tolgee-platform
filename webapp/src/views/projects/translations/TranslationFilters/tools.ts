@@ -8,6 +8,10 @@ export type LanguageModel = components['schemas']['LanguageModel'];
 
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
+export type AiReviewFilterOutcome = NonNullable<
+  FiltersType['filterAiReviewOutcome']
+>[number];
+
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
 export type TaskStatusFilter =
@@ -47,6 +51,7 @@ export type FiltersInternal = {
   filterHasNoSuggestions?: boolean;
   filterTaskStatus?: TaskStatusByType;
   filterDeletedByUserId?: number[];
+  filterAiReviewOutcome?: AiReviewFilterOutcome[];
 
   /*
    * Specifies which languages will be considered when filtering by translation state
@@ -58,6 +63,8 @@ export type FiltersInternal = {
   // same for suggestions and tasks
   filterSuggestionLanguage?: true | string;
   filterTaskLanguage?: true | string;
+  // same for AI review
+  filterAiReviewApplyLanguage?: true | string;
 
   /*
    * this one differs from the others above
@@ -89,7 +96,8 @@ export type AddParams =
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
-  | ['filterDeletedByUserId', number];
+  | ['filterDeletedByUserId', number]
+  | ['filterAiReviewOutcome', AiReviewFilterOutcome];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
@@ -100,6 +108,7 @@ export type FilterActions = {
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
   showDeletedBy?: boolean;
+  scopeOnly?: boolean;
   /** The view is already scoped to one task, which leaves nothing for the task filter to say. */
   taskPrefiltered?: boolean;
   taskCreation?: boolean;

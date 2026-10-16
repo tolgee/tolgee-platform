@@ -24,7 +24,7 @@ type Props = {
   actions: FilterActions;
   value: FiltersType;
   selectedLanguages: LanguageModel[];
-  placeholder?: React.ReactNode;
+  placeholder?: string;
   projectId: number;
   sx?: SxProps;
   className?: string;
@@ -37,6 +37,7 @@ export const TranslationFilters = ({
   selectedLanguages,
   projectId,
   filterOptions,
+  placeholder,
   sx,
   className,
 }: Props) => {
@@ -69,7 +70,7 @@ export const TranslationFilters = ({
         variant="outlined"
         data-cy="translations-filter-select"
         minHeight={false}
-        placeholder={t('task_filter_placeholder')}
+        placeholder={placeholder ?? t('task_filter_placeholder')}
         InputProps={{
           onClick: handleClick,
           ref: anchorEl,

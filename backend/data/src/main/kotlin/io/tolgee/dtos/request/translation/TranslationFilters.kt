@@ -2,6 +2,7 @@ package io.tolgee.dtos.request.translation
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.tolgee.model.enums.aiReview.AiReviewFilterOutcome
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 
 open class TranslationFilters(
@@ -269,6 +270,29 @@ A key matches if any of the selected check types is present in any of the select
         "languages are returned.",
   )
   var filterQaChecksStaleInLang: List<String>? = null
+
+  @field:Parameter(
+    description = """Filter keys by the AI review result of their translations in the languages
+from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+
+AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+
+Combined with the other translation filters with logical AND. Ignored when AI review is not available.""",
+  )
+  var filterAiReviewOutcome: List<AiReviewFilterOutcome>? = null
+
+  @field:Parameter(
+    description =
+      "Languages (tags) the AI review filters apply to. " +
+        "When omitted, all returned languages except the base language.",
+  )
+  var filterAiReviewInLang: List<String>? = null
+
+  fun hasAiReviewFilter(): Boolean = !filterAiReviewOutcome.isNullOrEmpty()
 
   @field:Parameter(
     description = "Filter keys with any suggestions in lang",

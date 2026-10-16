@@ -5,6 +5,7 @@
  */
 
 import {
+  FeatureFlagStateModel,
   QaSettingsRequest,
   QaIssueModel,
   SelfHostedEePlanModel,
@@ -12,6 +13,7 @@ import {
 } from 'tg.service/apiSchemaTypes.generated';
 
 export type Feature = SelfHostedEePlanModel['enabledFeatures'][number];
+export type FeatureFlag = FeatureFlagStateModel['flag'];
 export type QaCheckType = QaIssueModel['type'];
 export type TaskType = TaskModel['type'];
 const TASK_TYPE_KEYS: Record<TaskType, true> = {

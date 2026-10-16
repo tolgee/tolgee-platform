@@ -1,5 +1,6 @@
 package io.tolgee.dtos.queryResults
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import java.util.Date
@@ -13,4 +14,5 @@ interface TranslationHistoryView {
   var authorDeletedAt: Date?
   var authorId: Long?
   var revisionType: RevisionType
+  var activityType: ActivityType?
 }

@@ -67,6 +67,7 @@ export const SubfilterTranslations = ({
         onClick={() => setOpen(true)}
         selected={Boolean(getTranslationFiltersLength(value))}
         open={open}
+        data-cy-submenu="translations"
       />
       {open && (
         <Menu
@@ -96,6 +97,7 @@ export const SubfilterTranslations = ({
                   )}
                   onClick={() => toggleFilterState(state)}
                   indicator={<StateIndicator state={state} />}
+                  data-cy-state={state}
                 />
               );
             })}

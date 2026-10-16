@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
+import { getAiReviewFiltersLength } from 'tg.ee';
+import { getAiReviewFilterQuery } from 'tg.views/projects/translations/TranslationFilters/aiReviewFilterQuery';
 import { AddParams, FiltersInternal, FiltersType } from './tools';
 
 function remove<T extends string | number>(list: T[] | undefined, value: T) {
@@ -186,6 +188,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterDeletedByUserId: add(filters.filterDeletedByUserId, value),
         });
+      case 'filterAiReviewOutcome':
+        return setFilters({
+          ...filters,
+          filterAiReviewOutcome: add(filters.filterAiReviewOutcome, value),
+        });
       default:
         exhaustiveMatchingGuard(type);
     }
@@ -289,6 +296,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterDeletedByUserId: remove(filters.filterDeletedByUserId, value),
         });
+      case 'filterAiReviewOutcome':
+        return setFilters({
+          ...filters,
+          filterAiReviewOutcome: remove(filters.filterAiReviewOutcome, value),
+        });
       default:
         exhaustiveMatchingGuard(type);
     }
@@ -319,6 +331,12 @@ export const useTranslationFilters = ({
     filterIsPlural: filters.filterIsPlural,
     filterIsNotPlural: filters.filterIsNotPlural,
     filterDeletedByUserId: filters.filterDeletedByUserId,
+    ...getAiReviewFilterQuery(
+      filters,
+      Boolean(getAiReviewFiltersLength(filters)),
+      selectedLanguages,
+      baseLang
+    ),
   };
 
   // filters dependant on selected languages

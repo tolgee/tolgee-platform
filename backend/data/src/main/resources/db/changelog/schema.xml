@@ -6107,4 +6107,249 @@
             <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-1">
+        <createTable tableName="organization_feature_grant">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_feature_grantPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="kind" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-2">
+        <addUniqueConstraint columnNames="organization_id, kind, name" constraintName="organization_feature_grant_org_kind_name" tableName="organization_feature_grant"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-3">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_feature_grant" constraintName="FK_organization_feature_grant_organization" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-4">
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="organization_feature_grant" constraintName="FK_organization_feature_grant_created_by" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-5">
+        <addColumn tableName="prompt">
+            <column name="type" type="VARCHAR(255)" defaultValue="TRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="review_criteria" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-6">
+        <addColumn tableName="ai_playground_result">
+            <column name="type" type="VARCHAR(255)" defaultValue="TRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="review_score" type="INTEGER"/>
+            <column name="review_issues" type="JSONB"/>
+            <column name="review_error" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-7">
+        <createTable tableName="ai_review_rule">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_rulePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mode" type="VARCHAR(255)" defaultValue="DRY_RUN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="threshold" type="INTEGER" defaultValueNumeric="85">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_thresholds" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="skip_with_open_qa_issues" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_not_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="namespace_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="namespace_not_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_ids" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_review_rule" constraintName="FK_ai_review_rule_project" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-9">
+        <addForeignKeyConstraint baseColumnNames="prompt_id" baseTableName="ai_review_rule" constraintName="FK_ai_review_rule_prompt" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="prompt" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-10">
+        <createIndex indexName="IDX_ai_review_rule_project_id" tableName="ai_review_rule">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-11">
+        <createIndex indexName="IDX_ai_review_rule_prompt_id" tableName="ai_review_rule">
+            <column name="prompt_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-12">
+        <createTable tableName="translation_ai_review">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_ai_reviewPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="outcome" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_hash" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_id" type="BIGINT"/>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="provider_name" type="VARCHAR(255)"/>
+            <column name="score" type="INTEGER"/>
+            <column name="threshold" type="INTEGER"/>
+            <column name="dry_run" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issues" type="JSONB"/>
+            <column name="error_code" type="VARCHAR(255)"/>
+            <column name="error_detail" type="TEXT"/>
+            <column name="reviewed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="resolved_by_id" type="BIGINT"/>
+            <column name="resolved_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-13">
+        <addUniqueConstraint columnNames="translation_id" constraintName="translation_ai_review_translation_id_unique" tableName="translation_ai_review"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-14">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_translation" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-15">
+        <addForeignKeyConstraint baseColumnNames="rule_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_rule" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="ai_review_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-16">
+        <addForeignKeyConstraint baseColumnNames="prompt_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_prompt" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="prompt" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-17">
+        <addForeignKeyConstraint baseColumnNames="resolved_by_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_resolved_by" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-18">
+        <createIndex indexName="IDX_translation_ai_review_rule_id" tableName="translation_ai_review">
+            <column name="rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-19">
+        <addColumn tableName="translation_ai_review">
+            <column name="claimed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-20">
+        <sql>CREATE INDEX IDX_translation_ai_review_pending ON translation_ai_review (translation_id) WHERE outcome = 'PENDING'</sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS IDX_translation_ai_review_pending;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-23">
+        <addColumn tableName="translation_ai_review">
+            <column name="run_batch_job_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-25">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="translation_ai_review" columnName="previous_outcome"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="translation_ai_review">
+            <column name="previous_outcome" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-26">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="translation_ai_review" columnName="rereview_of_auto_reviewed"/>
+        </preConditions>
+        <sql>
+            UPDATE translation_ai_review SET previous_outcome = 'AUTO_REVIEWED'
+            WHERE outcome = 'PENDING' AND rereview_of_auto_reviewed;
+            ALTER TABLE translation_ai_review DROP COLUMN rereview_of_auto_reviewed;
+        </sql>
+        <rollback/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-27">
+        <sql>
+            CREATE INDEX IF NOT EXISTS IDX_translation_ai_review_pending_run_batch_job_id
+            ON translation_ai_review (run_batch_job_id) WHERE outcome = 'PENDING';
+        </sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS IDX_translation_ai_review_pending_run_batch_job_id;</sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-28">
+        <createTable tableName="ai_review_project_settings">
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_project_settingsPK"/>
+            </column>
+            <column name="on_source_change_ai_approved" type="VARCHAR(255)" defaultValue="RETRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="on_source_change_human_edited" type="VARCHAR(255)" defaultValue="KEEP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="on_source_change_human_reviewed" type="VARCHAR(255)" defaultValue="KEEP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-29">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_review_project_settings" constraintName="FK_ai_review_project_settings_project" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jancizmar" id="1792000000000-30">
+        <addColumn tableName="ai_review_rule">
+            <column name="branch_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branch_not_in" type="JSONB" defaultValueComputed="'[]'::jsonb">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

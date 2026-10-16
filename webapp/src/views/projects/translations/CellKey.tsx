@@ -192,6 +192,7 @@ export const CellKey: React.FC<React.PropsWithChildren<Props>> = ({
         style={{ width: widthPercent }}
         onClick={editEnabled ? () => handleOpen() : undefined}
         data-cy="translations-table-cell"
+        data-cy-key={data.keyName}
         tabIndex={0}
         ref={cellRef}
       >

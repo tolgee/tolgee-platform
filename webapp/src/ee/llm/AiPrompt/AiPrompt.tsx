@@ -10,7 +10,6 @@ import {
 import { useTranslate } from '@tolgee/react';
 import { Edit01, X } from '@untitled-ui/icons-react';
 
-import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
 import { components } from 'tg.service/apiSchema.generated';
 import { DeletableKeyWithTranslationsModelType } from 'tg.views/projects/translations/context/types';
 
@@ -29,6 +28,9 @@ import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { usePromptState } from './usePromptState';
 import { useState } from 'react';
+import { LabelHint } from 'tg.component/common/LabelHint';
+import { Label } from 'tg.ee.module/llm/AiPrompt/Label';
+import { PromptTypeSwitch } from 'tg.ee.module/llm/AiPrompt/PromptTypeSwitch';
 
 type ProjectModel = components['schemas']['ProjectModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -78,6 +80,11 @@ const StyledPromptName = styled('div')`
   gap: 8px;
 `;
 
+const StyledModelField = styled('div')`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+`;
+
 const StyledTab = styled(Tab)`
   padding: 9px 16px;
   min-height: 42px;
@@ -114,7 +121,6 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
   keyData,
 }) => {
   const { t } = useTranslate();
-  const { refetchTranslations } = useTranslationsActions();
   const [renameOpen, setRenameOpen] = useState(false);
   const isAdminAccess = useIsAdminAccess(project.computedPermission);
   const cellSelected = Boolean(keyData && language);
@@ -144,10 +150,51 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
     runIsLoading,
     usage,
     unsavedChanges,
+    isReview,
+    promptType,
+    reviewVisible,
+    reviewFeatureEnabled,
+    switchType,
+    reviewCriteria,
+    setReviewCriteria,
   } = usePromptState({
     language,
     keyData,
   });
+
+  const providerSelect = (
+    <Select
+      size="small"
+      value={provider}
+      onChange={(e) => setProvider(e.target.value)}
+      sx={{ width: '50%' }}
+      data-cy="ai-prompt-provider-select"
+    >
+      {providers?._embedded?.providers?.map((i) => (
+        <MenuItem key={i.name} value={i.name} data-cy="ai-prompt-provider-item">
+          {i.resolvesToName
+            ? t('ai_prompt_provider_server_default', 'default ({name})', {
+                name: i.resolvesToName,
+              })
+            : i.name}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+
+  const closeButton = (
+    <IconButton
+      data-cy="ai-prompt-playground-close"
+      onClick={() =>
+        confirmUnsaved(() => {
+          setAiPlayground(undefined);
+          setOpenPrompt(undefined);
+        })
+      }
+    >
+      <X />
+    </IconButton>
+  );
 
   if (isLoading && !openPromptData) {
     return (
@@ -161,11 +208,23 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
     <StyledContainer>
       <StyledMainContent>
         <StyledHeader>
+          {reviewVisible && (
+            <PromptTypeSwitch
+              value={isReview ? 'review' : 'translate'}
+              onChange={switchType}
+              trailing={closeButton}
+            />
+          )}
           <StyledTitle>
             <StyledPromptName>
               <StyledTitleText data-cy="ai-prompt-name">
                 {openPromptData?.id === undefined
-                  ? t('ai_prompt_default_name')
+                  ? isReview
+                    ? t(
+                        'ai_prompt_default_review_name',
+                        'Default review prompt'
+                      )
+                    : t('ai_prompt_default_name')
                   : openPromptData.name}
               </StyledTitleText>
               {canBeRenamed && openPromptData && (
@@ -181,6 +240,7 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             <Box display="flex" alignItems="center">
               <PromptLoadMenu
                 projectId={project.id}
+                type={promptType}
                 onSelect={(data) =>
                   confirmUnsaved(() => {
                     updateForm(data, true);
@@ -189,40 +249,28 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
                 }
               />
 
-              <IconButton
-                data-cy="ai-prompt-playground-close"
-                onClick={() =>
-                  confirmUnsaved(() => {
-                    setAiPlayground(undefined);
-                    setOpenPrompt(undefined);
-                  })
-                }
-              >
-                <X />
-              </IconButton>
+              {!reviewVisible && closeButton}
             </Box>
           </StyledTitle>
-          <Select
-            size="small"
-            value={provider}
-            onChange={(e) => setProvider(e.target.value)}
-            sx={{ width: '50%' }}
-            data-cy="ai-prompt-provider-select"
-          >
-            {providers?._embedded?.providers?.map((i) => (
-              <MenuItem
-                key={i.name}
-                value={i.name}
-                data-cy="ai-prompt-provider-item"
-              >
-                {i.resolvesToName
-                  ? t('ai_prompt_provider_server_default', 'default ({name})', {
-                      name: i.resolvesToName,
-                    })
-                  : i.name}
-              </MenuItem>
-            ))}
-          </Select>
+          {reviewVisible ? (
+            <StyledModelField>
+              <Label>
+                <LabelHint
+                  title={t(
+                    'ai_prompt_model_hint',
+                    "Model that runs this prompt. Default uses your organization's default provider, or Tolgee's default model if you haven't set one."
+                  )}
+                >
+                  <span data-cy="ai-prompt-model-label">
+                    {t('ai_prompt_model_label', 'Model')}
+                  </span>
+                </LabelHint>
+              </Label>
+              {providerSelect}
+            </StyledModelField>
+          ) : (
+            providerSelect
+          )}
           {isAdminAccess && (
             <AdminAccessAlert data-cy="ai-playground-admin-access-info" />
           )}
@@ -251,17 +299,24 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             />
           )
         ) : (
-          <TabBasic value={options} onChange={setOptions} />
+          <TabBasic
+            value={options}
+            onChange={setOptions}
+            reviewCriteria={isReview ? reviewCriteria : undefined}
+            onReviewCriteriaChange={isReview ? setReviewCriteria : undefined}
+          />
         )}
         {featureEnabled && (
           <Box sx={{ margin: '20px', display: 'grid', gap: 1.5 }}>
-            <AiResult
-              raw={runData?.result}
-              json={runData?.parsedJson as any}
-              isPlural={keyData?.keyIsPlural}
-              locale={language?.tag}
-              loading={runIsLoading}
-            />
+            {!isReview && (
+              <AiResult
+                raw={runData?.result}
+                json={runData?.parsedJson as any}
+                isPlural={keyData?.keyIsPlural}
+                locale={language?.tag}
+                loading={runIsLoading}
+              />
+            )}
             {usage && <AiResultUsage usage={usage} price={runData?.price} />}
           </Box>
         )}
@@ -273,7 +328,14 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
         {!featureEnabled && (
           <Box sx={{ margin: '20px', display: 'grid' }}>
             <DisabledFeatureBanner
-              customMessage={t('ai_customization_not_enabled_message')}
+              customMessage={
+                reviewFeatureEnabled
+                  ? t('ai_customization_not_enabled_message')
+                  : t(
+                      'ai_review_not_enabled_message',
+                      'AI review checks translations with an LLM and marks the good ones as reviewed automatically.'
+                    )
+              }
             />
           </Box>
         )}
@@ -284,10 +346,9 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
           languageId={language?.id}
           templateValue={tab === 'advanced' ? value : undefined}
           options={tab === 'basic' ? options : undefined}
+          type={promptType}
+          reviewCriteria={isReview ? reviewCriteria || undefined : undefined}
           providerName={provider}
-          onBatchFinished={() => {
-            refetchTranslations();
-          }}
           onTestPrompt={handleTestPrompt}
           loading={runIsLoading}
           disabled={!featureEnabled}
@@ -298,6 +359,8 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             providerName: provider,
             template: tab === 'advanced' ? value : undefined,
             basicPromptOptions: tab === 'basic' ? options : undefined,
+            type: promptType,
+            reviewCriteria: isReview ? reviewCriteria || undefined : undefined,
           }}
           existingPrompt={openPromptData}
           unsavedChanges={unsavedChanges}

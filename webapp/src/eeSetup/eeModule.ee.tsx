@@ -80,6 +80,9 @@ import { OperationUnassignTranslationLabel } from '../ee/batchOperations/Operati
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { OperationQaRecheck } from '../ee/qa/components/OperationQaRecheck';
+import { OperationAiReview } from 'tg.ee.module/aiReview/components/OperationAiReview';
+import { useAiReviewEnabled as useAiReviewEnabledHook } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
+import { useAiReviewRunPermission } from 'tg.ee.module/aiReview/hooks/useAiReviewRunPermission';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -103,6 +106,15 @@ export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
+export { AiReviewRulesView } from 'tg.ee.module/aiReview/views/AiReviewRulesView';
+export { AiReviewBadge } from 'tg.ee.module/aiReview/components/AiReviewBadge';
+export { AiReviewPlaygroundPreview } from 'tg.ee.module/aiReview/components/AiReviewPlaygroundPreview';
+export { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
+export {
+  SubfilterAiReview,
+  getAiReviewFiltersLength,
+  getAiReviewFiltersName,
+} from 'tg.ee.module/aiReview/components/SubfilterAiReview';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
@@ -218,9 +230,23 @@ export const useAddBatchOperations = () => {
   const isAdminOrSupporter = useIsAdminOrSupporter();
   const isBeingImpersonated = useIsBeingImpersonated();
   const hasPrivilegedAccess = isAdminOrSupporter || isBeingImpersonated;
+  const aiReview = useAiReviewEnabledHook();
+  const canRunAiReview = useAiReviewRunPermission();
   const { t } = useTranslate();
 
   return addOperations([
+    {
+      items: [
+        {
+          id: 'ai_review',
+          label: t('batch_operations_ai_review', 'AI review'),
+          enabled: canRunAiReview,
+          hidden: !aiReview.available,
+          component: OperationAiReview,
+        },
+      ],
+      placement: { position: 'after', value: 'pre_translate' },
+    },
     {
       items: [
         {

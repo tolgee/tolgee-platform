@@ -5,6 +5,7 @@ enum class WebsocketEventType {
   BATCH_JOB_PROGRESS,
   NOTIFICATIONS_CHANGED,
   QA_ISSUES_UPDATED,
+  AI_REVIEW_UPDATED,
   ;
 
   val typeName get() = name.lowercase().replace("_", "-")

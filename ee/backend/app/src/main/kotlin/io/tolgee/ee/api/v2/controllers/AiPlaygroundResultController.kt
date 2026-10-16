@@ -5,11 +5,14 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.AiPlaygroundResultModelAssembler
 import io.tolgee.ee.data.AiPlaygroundResultRequest
 import io.tolgee.ee.service.AiPlaygroundResultServiceEeImpl
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.AiPlaygroundResultModel
+import io.tolgee.model.enums.PromptType
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.aiReview.AiReviewAvailability
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -33,6 +36,7 @@ class AiPlaygroundResultController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val aiPlaygroundResultModelAssembler: AiPlaygroundResultModelAssembler,
+  private val aiReviewAvailability: AiReviewAvailability,
 ) {
   @PostMapping("")
   @RequiresProjectPermissions([io.tolgee.model.enums.Scope.PROMPTS_EDIT])
@@ -41,12 +45,16 @@ class AiPlaygroundResultController(
     @RequestBody @Valid
     body: AiPlaygroundResultRequest,
   ): CollectionModel<AiPlaygroundResultModel> {
+    if (body.type == PromptType.REVIEW && !aiReviewAvailability.isVisible(projectHolder.project.organizationOwnerId)) {
+      throw NotFoundException()
+    }
     val result =
       aiPlaygroundResultService.getResult(
         projectHolder.project.id,
         authenticationFacade.authenticatedUser.id,
         body.keys!!,
         body.languages!!,
+        body.type,
       )
     return aiPlaygroundResultModelAssembler.toCollectionModel(result)
   }

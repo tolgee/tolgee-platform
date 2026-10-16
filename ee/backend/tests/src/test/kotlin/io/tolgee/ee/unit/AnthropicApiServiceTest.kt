@@ -2,10 +2,12 @@ package io.tolgee.ee.unit
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -178,6 +180,38 @@ class AnthropicApiServiceTest {
     assertThat(bodyMap).doesNotContainKey("output_config")
   }
 
+  @Test
+  fun `sends the translation schema for translation prompts`() {
+    service.translate(
+      createParams(shouldOutputJson = true),
+      createConfig(format = "json_schema"),
+      createCapturingRestTemplate(),
+    )
+    sentSchema().assert.isEqualTo(LlmResponseSchema.TRANSLATION.schema)
+  }
+
+  @Test
+  fun `sends the review schema for review prompts`() {
+    service.translate(
+      createParams(shouldOutputJson = true, responseSchema = LlmResponseSchema.AI_REVIEW),
+      createConfig(format = "json_schema"),
+      createCapturingRestTemplate(),
+    )
+    sentSchema().assert.isEqualTo(LlmResponseSchema.AI_REVIEW.schema)
+  }
+
+  private fun sentSchema(): Map<String, Any?> {
+    val body = objectMapper.readValue<Map<String, Any?>>(capturedRequestBody!!)
+
+    @Suppress("UNCHECKED_CAST")
+    val outputConfig = body["output_config"] as Map<String, Any?>
+
+    @Suppress("UNCHECKED_CAST")
+    val format = outputConfig["format"] as Map<String, Any?>
+    @Suppress("UNCHECKED_CAST")
+    return format["schema"] as Map<String, Any?>
+  }
+
   private fun createConfig(format: String? = null): LlmProviderInterface {
     return object : LlmProviderInterface {
       override var name = "test-anthropic"
@@ -196,7 +230,10 @@ class AnthropicApiServiceTest {
     }
   }
 
-  private fun createParams(shouldOutputJson: Boolean): LlmParams {
+  private fun createParams(
+    shouldOutputJson: Boolean,
+    responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION,
+  ): LlmParams {
     return LlmParams(
       messages =
         listOf(
@@ -207,6 +244,7 @@ class AnthropicApiServiceTest {
         ),
       shouldOutputJson = shouldOutputJson,
       priority = LlmProviderPriority.HIGH,
+      responseSchema = responseSchema,
     )
   }
 

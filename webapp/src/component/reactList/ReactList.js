@@ -154,6 +154,9 @@ export class ReactList extends Component {
   }
 
   componentDidMount() {
+    // StrictMode remounts the same instance; a kept scrollParent makes updateScrollParent skip re-adding the
+    // listener. Not reset on unmount: parents still call getVisibleRange on the unmounted instance.
+    this.scrollParent = null;
     this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
     window.addEventListener('resize', this.updateFrameAndClearCache);
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));

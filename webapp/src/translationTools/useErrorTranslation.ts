@@ -583,6 +583,50 @@ export function useErrorTranslation() {
       case 'no_llm_provider_configured':
         return t('no_llm_provider_configured');
 
+      // AI review
+      case 'ai_review_rule_not_found':
+        return t('ai_review_rule_not_found', 'AI review rule not found');
+      case 'ai_review_not_found':
+        return t(
+          'ai_review_not_found',
+          'This translation has no AI review result'
+        );
+      case 'ai_review_invalid_output':
+        return t(
+          'ai_review_invalid_output',
+          "The AI reviewer's response could not be read"
+        );
+      case 'ai_review_cannot_be_resolved':
+        return t(
+          'ai_review_cannot_be_resolved',
+          'Only translations reviewed by AI can be confirmed or rejected'
+        );
+      case 'ai_review_cannot_be_retried':
+        return t(
+          'ai_review_cannot_be_retried',
+          'Only failed AI reviews can be retried'
+        );
+      case 'ai_review_invalid_threshold':
+        return t(
+          'ai_review_invalid_threshold',
+          'Threshold must be a number from 0 to 100'
+        );
+      case 'prompt_type_cannot_be_changed':
+        return t(
+          'prompt_type_cannot_be_changed',
+          "Prompt type can't be changed"
+        );
+      case 'prompt_type_not_supported':
+        return t(
+          'prompt_type_not_supported',
+          "This prompt type can't be used here"
+        );
+      case 'plan_feature_grants_not_allowed':
+        return t(
+          'plan_feature_grants_not_allowed',
+          'Plan features can only be granted on Tolgee Cloud'
+        );
+
       // Glossary
       case 'glossary_not_found':
         return t('glossary_not_found');

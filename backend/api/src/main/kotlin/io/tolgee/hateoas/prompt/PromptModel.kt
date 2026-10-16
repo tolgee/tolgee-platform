@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.prompt
 
 import io.tolgee.model.enums.BasicPromptOption
+import io.tolgee.model.enums.PromptType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -12,4 +13,6 @@ open class PromptModel(
   val projectId: Long,
   val providerName: String,
   val basicPromptOptions: List<BasicPromptOption>?,
+  val type: PromptType = PromptType.TRANSLATE,
+  val reviewCriteria: String? = null,
 ) : RepresentationModel<PromptModel>()

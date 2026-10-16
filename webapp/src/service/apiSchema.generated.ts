@@ -53,6 +53,12 @@ export interface paths {
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
   };
+  "/v2/administration/organizations/{organizationId}/features": {
+    /** Returns feature flags and plan features of the organization, including those granted by a server administrator. */
+    get: operations["getOrganizationFeatures"];
+    /** Sets feature flags enabled for the organization and plan features granted to it regardless of its plan. */
+    put: operations["setOrganizationFeatures"];
+  };
   "/v2/administration/project-batch-locks": {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
@@ -464,6 +470,50 @@ export interface paths {
   "/v2/projects/{projectId}/ai-prompt-customization": {
     get: operations["getPromptProjectCustomization"];
     put: operations["setPromptProjectCustomization"];
+  };
+  "/v2/projects/{projectId}/ai-review/rules": {
+    get: operations["getAiReviewRules"];
+    post: operations["createAiReviewRule"];
+  };
+  "/v2/projects/{projectId}/ai-review/rules/backlog": {
+    /** Number of existing translations each enabled rule covers that have not been reviewed yet, counted only in the languages where the caller can change the translation state. */
+    get: operations["getAiReviewRuleBacklogs"];
+  };
+  "/v2/projects/{projectId}/ai-review/rules/{ruleId}": {
+    put: operations["updateAiReviewRule"];
+    delete: operations["deleteAiReviewRule"];
+  };
+  "/v2/projects/{projectId}/ai-review/rules/{ruleId}/retry-failed": {
+    /** Runs the AI review again for the rule's failed reviews of translations that are still translated. */
+    post: operations["retryFailedAiReviews"];
+  };
+  "/v2/projects/{projectId}/ai-review/run": {
+    /** Starts an AI_REVIEW batch job that reviews the selected keys, or all translations a rule covers, using the same rules, order and checks as automatic AI review. Returns the batch job; track and cancel it with the batch job endpoints like any other batch operation. */
+    post: operations["startAiReviewRun"];
+  };
+  "/v2/projects/{projectId}/ai-review/run/preview": {
+    /** Counts which of the selected translations an AI review run would review and why the others are skipped. Makes no LLM calls. */
+    post: operations["previewAiReviewRun"];
+  };
+  "/v2/projects/{projectId}/ai-review/settings": {
+    get: operations["getAiReviewSettings"];
+    /** Sets what happens to existing translations when their source text changes. Re-translating needs machine translation enabled in the auto translation settings of the language. */
+    put: operations["updateAiReviewSettings"];
+  };
+  "/v2/projects/{projectId}/ai-review/translations/{translationId}": {
+    get: operations["getTranslationAiReview"];
+  };
+  "/v2/projects/{projectId}/ai-review/translations/{translationId}/confirm": {
+    /** Keeps the translation reviewed and turns the AI review into a regular review. */
+    post: operations["confirmTranslationAiReview"];
+  };
+  "/v2/projects/{projectId}/ai-review/translations/{translationId}/reject": {
+    /** Sets the translation back to translated and records the rejection. */
+    post: operations["rejectTranslationAiReview"];
+  };
+  "/v2/projects/{projectId}/ai-review/translations/{translationId}/retry": {
+    /** Runs the AI review again for a translation whose last review failed. */
+    post: operations["retryTranslationAiReview"];
   };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
@@ -1354,11 +1404,243 @@ export interface components {
       keyId: number;
       /** Format: int64 */
       languageId: number;
+      reviewError?: string;
+      reviewIssues?: components["schemas"]["AiReviewIssueModel"][];
+      /** Format: int32 */
+      reviewScore?: number;
       translation?: string;
+      /** @enum {string} */
+      type: "TRANSLATE" | "REVIEW";
     };
     AiPlaygroundResultRequest: {
       keys: number[];
       languages: number[];
+      /**
+       * @description Result type, TRANSLATE when omitted
+       * @enum {string}
+       */
+      type?: "TRANSLATE" | "REVIEW";
+    };
+    /** @description Issues returned by the reviewer (review prompts only) */
+    AiReviewIssueModel: {
+      category: string;
+      message: string;
+      /** Format: int32 */
+      points: number;
+      /** @enum {string} */
+      severity: "CRITICAL" | "MAJOR" | "MINOR";
+    };
+    /** @description Per-language threshold overrides. Each entry has either a threshold or never = true. */
+    AiReviewLanguageThreshold: {
+      /** Format: int64 */
+      languageId: number;
+      never: boolean;
+      /** Format: int32 */
+      threshold?: number;
+    };
+    AiReviewRetryFailedModel: {
+      /**
+       * Format: int32
+       * @description Number of failed reviews queued to run again
+       */
+      queued: number;
+    };
+    /** @description One entry per enabled rule */
+    AiReviewRuleBacklogModel: {
+      /**
+       * Format: int64
+       * @description Existing translations the rule covers that a run would review now
+       */
+      notReviewed: number;
+      /** Format: int64 */
+      ruleId: number;
+    };
+    AiReviewRuleBacklogsModel: {
+      /** @description One entry per enabled rule */
+      backlogs: components["schemas"]["AiReviewRuleBacklogModel"][];
+    };
+    AiReviewRuleModel: {
+      branchIn: string[];
+      branchNotIn: string[];
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      languageIds: number[];
+      languageThresholds: components["schemas"]["AiReviewLanguageThreshold"][];
+      /** @enum {string} */
+      mode: "DRY_RUN" | "ACTIVE";
+      name?: string;
+      namespaceIn: string[];
+      namespaceNotIn: string[];
+      /** Format: int64 */
+      promptId?: number;
+      promptName?: string;
+      skipWithOpenQaIssues: boolean;
+      stats: components["schemas"]["AiReviewRuleStatsModel"];
+      tagIn: string[];
+      tagNotIn: string[];
+      /** Format: int32 */
+      threshold: number;
+    };
+    AiReviewRuleRequest: {
+      /** @description Branch name patterns the rule applies to, `*` matches any text. Empty list = all branches. */
+      branchIn: string[];
+      /** @description Branch name patterns the rule does not apply to, `*` matches any text. */
+      branchNotIn: string[];
+      enabled: boolean;
+      /** @description Languages the rule applies to. Empty list = all non-base languages. */
+      languageIds: number[];
+      /** @description Per-language threshold overrides. Each entry has either a threshold or never = true. */
+      languageThresholds: components["schemas"]["AiReviewLanguageThreshold"][];
+      /**
+       * @description DRY_RUN only stores the result, ACTIVE marks passing translations as reviewed
+       * @enum {string}
+       */
+      mode: "DRY_RUN" | "ACTIVE";
+      /** @description Optional rule name */
+      name?: string;
+      /** @description Keys in these namespaces match. Empty string means the default namespace. Empty list = all. */
+      namespaceIn: string[];
+      /** @description Keys in these namespaces don't match. Empty string means the default namespace. */
+      namespaceNotIn: string[];
+      /**
+       * Format: int64
+       * @description Review prompt id. Null uses the built-in default review prompt.
+       */
+      promptId?: number;
+      /** @description Don't auto-review translations with open QA issues */
+      skipWithOpenQaIssues: boolean;
+      /** @description Keys with any of these tags match. Empty string means keys without tags. Empty list = all. */
+      tagIn: string[];
+      /** @description Keys with any of these tags don't match. Empty string excludes keys without tags. */
+      tagNotIn: string[];
+      /**
+       * Format: int32
+       * @description Translations scoring this or more are marked as reviewed
+       */
+      threshold: number;
+    };
+    /** @description Keys and languages the rule applies to, used to label rules without a name */
+    AiReviewRuleScopeModel: {
+      branchIn: string[];
+      branchNotIn: string[];
+      languageIds: number[];
+      namespaceIn: string[];
+      namespaceNotIn: string[];
+      tagIn: string[];
+      tagNotIn: string[];
+    };
+    AiReviewRuleStatsModel: {
+      /**
+       * Format: int64
+       * @description Translations auto-reviewed by the rule in active mode (including later confirmed or rejected)
+       */
+      autoReviewed: number;
+      /**
+       * Format: int64
+       * @description Failed reviews of translations that are still in the translated state
+       */
+      failed: number;
+      /**
+       * Format: int64
+       * @description Auto-reviewed translations rejected by a user
+       */
+      rejected: number;
+      /**
+       * Format: int64
+       * @description Dry run results (scored translations)
+       */
+      scored: number;
+      /**
+       * Format: int64
+       * @description Dry run results that would be auto-reviewed
+       */
+      wouldAutoReview: number;
+    };
+    /** @description Counts when translations that already have a result are reviewed again */
+    AiReviewRunCounts: {
+      /**
+       * Format: int64
+       * @description Skipped: an AI review result for the current text exists
+       */
+      alreadyHasResult: number;
+      /**
+       * Format: int64
+       * @description Of willReview, translations matched only by Dry run rules (scored, state unchanged)
+       */
+      dryRunOnly: number;
+      /**
+       * Format: int64
+       * @description Skipped: reviewed by a human or AI review confirmed
+       */
+      humanReviewed: number;
+      /**
+       * Format: int64
+       * @description Skipped: the strictest matching rule sets the language to Never
+       */
+      never: number;
+      /**
+       * Format: int64
+       * @description Skipped: no enabled rule matches
+       */
+      noRule: number;
+      /**
+       * Format: int64
+       * @description Skipped: open QA issues and the rule skips these
+       */
+      openQaIssues: number;
+      /**
+       * Format: int64
+       * @description Translations that will be reviewed
+       */
+      willReview: number;
+    };
+    AiReviewRunPreviewModel: {
+      /**
+       * Format: int64
+       * @description Selected translations counted by the run: non-base, not empty, translated or reviewed (and matched by the rule when the run is scoped to a rule)
+       */
+      total: number;
+      withRereview: components["schemas"]["AiReviewRunCounts"];
+      withoutRereview: components["schemas"]["AiReviewRunCounts"];
+    };
+    AiReviewRunRequest: {
+      /** @description Keys to review. Required unless ruleId is set. */
+      keyIds?: number[];
+      /** @description Languages to review. Null means all languages except the base language. */
+      languageIds?: number[];
+      /** @description Review again translations that already have an AI review result for their current text */
+      rereview: boolean;
+      /**
+       * Format: int64
+       * @description Limits the run to translations matched by this rule. Without keyIds, all keys of the project.
+       */
+      ruleId?: number;
+    };
+    AiReviewSettingsModel: {
+      /** @enum {string} */
+      onSourceChangeAiApproved: "RETRANSLATE" | "KEEP";
+      /** @enum {string} */
+      onSourceChangeHumanEdited: "RETRANSLATE" | "KEEP";
+      /** @enum {string} */
+      onSourceChangeHumanReviewed: "RETRANSLATE" | "KEEP";
+    };
+    AiReviewSettingsRequest: {
+      /**
+       * @description What happens to machine translations approved by AI when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeAiApproved: "RETRANSLATE" | "KEEP";
+      /**
+       * @description What happens to translations edited by a human when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeHumanEdited: "RETRANSLATE" | "KEEP";
+      /**
+       * @description What happens to translations reviewed by a human when their source text changes
+       * @enum {string}
+       */
+      onSourceChangeHumanReviewed: "RETRANSLATE" | "KEEP";
     };
     AnnouncementDto: {
       /** @enum {string} */
@@ -1737,6 +2019,7 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
+        | "AI_REVIEW"
         | "NO_OP";
       /**
        * Format: int64
@@ -1957,6 +2240,11 @@ export interface components {
     CollectionModelAiPlaygroundResultModel: {
       _embedded?: {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
+      };
+    };
+    CollectionModelAiReviewRuleModel: {
+      _embedded?: {
+        rules?: components["schemas"]["AiReviewRuleModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -2920,6 +3208,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -3342,7 +3631,18 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "ai_review_rule_not_found"
+        | "ai_review_not_found"
+        | "ai_review_invalid_output"
+        | "ai_review_cannot_be_resolved"
+        | "prompt_type_cannot_be_changed"
+        | "prompt_type_not_supported"
+        | "ai_review_invalid_threshold"
+        | "plan_feature_grants_not_allowed"
+        | "ai_review_cannot_be_retried"
+        | "ai_review_nothing_to_review"
+        | "ai_review_run_scope_required";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3495,6 +3795,14 @@ export interface components {
        */
       supportArrays: boolean;
       zip: boolean;
+    };
+    FeatureFlagStateModel: {
+      /** @description Whether the flag is enabled for all organizations by the server configuration */
+      enabledForAll: boolean;
+      /** @enum {string} */
+      flag: "AI_REVIEW";
+      /** @description Whether the flag is enabled for this organization by a server administrator */
+      granted: boolean;
     };
     GenerateSlugDto: {
       name: string;
@@ -3925,6 +4233,7 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
+        | "AI_REVIEW"
         | "NO_OP";
     };
     JsonNode: {
@@ -4748,6 +5057,12 @@ export interface components {
       /** @example btforg */
       slug?: string;
     };
+    OrganizationFeaturesModel: {
+      featureFlags: components["schemas"]["FeatureFlagStateModel"][];
+      /** @description Whether plan features can be granted on this server. Self-hosted instances get plan features only from their license. */
+      planFeatureGrantsAllowed: boolean;
+      planFeatures: components["schemas"]["PlanFeatureStateModel"][];
+    };
     OrganizationInvitationModel: {
       code: string;
       /** Format: date-time */
@@ -5370,6 +5685,38 @@ export interface components {
        */
       viewLanguageIds?: number[];
     };
+    PlanFeatureStateModel: {
+      /** @enum {string} */
+      feature:
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY"
+        | "TRANSLATION_LABELS"
+        | "BRANCHING"
+        | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
+        | "AI_REVIEW";
+      /** @description Whether the organization's plan or license includes the feature */
+      fromPlan: boolean;
+      /** @description Whether the feature is granted to the organization regardless of its plan */
+      granted: boolean;
+    };
     PlanIncludedUsageModel: {
       /** Format: int64 */
       keys: number;
@@ -5425,6 +5772,8 @@ export interface components {
       currentUserRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       /** @example This is a beautiful organization full of beautiful and clever people */
       description?: string;
+      /** @description Feature flags enabled for the organization */
+      enabledFeatureFlags: "AI_REVIEW"[];
       /** @example Features organization has enabled */
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -5450,6 +5799,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       /** Format: int64 */
       id: number;
@@ -5610,7 +5960,8 @@ export interface components {
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
         | "QA_ISSUE_IGNORE"
-        | "QA_ISSUE_UNIGNORE";
+        | "QA_ISSUE_UNIGNORE"
+        | "AI_REVIEW";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -5828,7 +6179,13 @@ export interface components {
       )[];
       name: string;
       providerName: string;
+      reviewCriteria?: string;
       template?: string;
+      /**
+       * @description Prompt type, TRANSLATE when omitted
+       * @enum {string}
+       */
+      type?: "TRANSLATE" | "REVIEW";
     };
     PromptModel: {
       basicPromptOptions?: (
@@ -5847,7 +6204,10 @@ export interface components {
       /** Format: int64 */
       projectId: number;
       providerName: string;
+      reviewCriteria?: string;
       template?: string;
+      /** @enum {string} */
+      type: "TRANSLATE" | "REVIEW";
     };
     PromptResponseModel: {
       parsedJson?: components["schemas"]["JsonNode"];
@@ -5855,6 +6215,15 @@ export interface components {
       price?: number;
       prompt: string;
       result: string;
+      /** @description Error code when the review output could not be parsed (review prompts only) */
+      reviewError?: string;
+      /** @description Issues returned by the reviewer (review prompts only) */
+      reviewIssues?: components["schemas"]["AiReviewIssueModel"][];
+      /**
+       * Format: int32
+       * @description Score computed from the returned issues (review prompts only)
+       */
+      reviewScore?: number;
       usage?: components["schemas"]["PromptResponseUsageModel"];
     };
     PromptResponseUsageModel: {
@@ -5879,9 +6248,15 @@ export interface components {
       /** Format: int64 */
       keyId: number;
       provider: string;
+      reviewCriteria?: string;
       /** Format: int64 */
       targetLanguageId: number;
       template?: string;
+      /**
+       * @description Prompt type, TRANSLATE when omitted
+       * @enum {string}
+       */
+      type?: "TRANSLATE" | "REVIEW";
     };
     PromptVariableDto: {
       description?: string;
@@ -5928,6 +6303,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -6521,6 +6897,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -6567,6 +6944,37 @@ export interface components {
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
+    };
+    SetOrganizationFeaturesRequest: {
+      /** @description Feature flags enabled for the organization. Replaces the current set. */
+      featureFlags: "AI_REVIEW"[];
+      /** @description Plan features granted to the organization regardless of its plan. Replaces the current set. */
+      grantedFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY"
+        | "TRANSLATION_LABELS"
+        | "BRANCHING"
+        | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
+      )[];
     };
     SetOrganizationRoleDto: {
       /** @enum {string} */
@@ -7345,7 +7753,18 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "ai_review_rule_not_found"
+        | "ai_review_not_found"
+        | "ai_review_invalid_output"
+        | "ai_review_cannot_be_resolved"
+        | "prompt_type_cannot_be_changed"
+        | "prompt_type_not_supported"
+        | "ai_review_invalid_threshold"
+        | "plan_feature_grants_not_allowed"
+        | "ai_review_cannot_be_retried"
+        | "ai_review_nothing_to_review"
+        | "ai_review_run_scope_required";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -7557,6 +7976,66 @@ export interface components {
       name: string;
       url?: string;
     };
+    TranslationAiReviewModel: {
+      dryRun: boolean;
+      errorCode?: string;
+      errorDetail?: string;
+      issues: components["schemas"]["AiReviewIssueModel"][];
+      /** @enum {string} */
+      outcome:
+        | "PENDING"
+        | "AUTO_REVIEWED"
+        | "WOULD_AUTO_REVIEW"
+        | "BELOW_THRESHOLD"
+        | "FAILED"
+        | "CONFIRMED"
+        | "REJECTED";
+      /** Format: int64 */
+      promptId?: number;
+      promptName?: string;
+      providerName?: string;
+      /** Format: int64 */
+      resolvedAt?: number;
+      /** Format: int64 */
+      reviewedAt?: number;
+      /** Format: int64 */
+      ruleId?: number;
+      ruleName?: string;
+      ruleScope?: components["schemas"]["AiReviewRuleScopeModel"];
+      /** Format: int32 */
+      score?: number;
+      /** Format: int32 */
+      threshold?: number;
+      /** Format: int64 */
+      translationId: number;
+    };
+    /** @description AI review result for the current text, present only when AI review is available */
+    TranslationAiReviewSummaryModel: {
+      /** @description Whether the rule ran in dry run mode (the state was not changed) */
+      dryRun: boolean;
+      /**
+       * @description Result of the AI review of the current translation text
+       * @enum {string}
+       */
+      outcome:
+        | "PENDING"
+        | "AUTO_REVIEWED"
+        | "WOULD_AUTO_REVIEW"
+        | "BELOW_THRESHOLD"
+        | "FAILED"
+        | "CONFIRMED"
+        | "REJECTED";
+      /**
+       * Format: int32
+       * @description Score 0-100 computed from the issues the reviewer reported
+       */
+      score?: number;
+      /**
+       * Format: int32
+       * @description Threshold the score was compared with. Null when the rule never auto-reviews this language.
+       */
+      threshold?: number;
+    };
     TranslationCommentDto: {
       /** @enum {string} */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
@@ -7597,6 +8076,113 @@ export interface components {
       text: string;
     };
     TranslationHistoryModel: {
+      /**
+       * @description Type of the activity that made the change. Changes made by AI review have no author.
+       * @enum {string}
+       */
+      activityType?:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_CHARACTER_LIMIT_EDIT"
+        | "KEY_DELETE"
+        | "KEY_SOFT_DELETE"
+        | "KEY_RESTORE"
+        | "KEY_HARD_DELETE"
+        | "BATCH_KEY_RESTORE"
+        | "BATCH_KEY_HARD_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "BATCH_ASSIGN_TRANSLATION_LABEL"
+        | "BATCH_UNASSIGN_TRANSLATION_LABEL"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION"
+        | "TASKS_CREATE"
+        | "TASK_CREATE"
+        | "TASK_UPDATE"
+        | "TASK_KEYS_UPDATE"
+        | "TASK_FINISH"
+        | "TASK_CLOSE"
+        | "TASK_REOPEN"
+        | "TASK_KEY_UPDATE"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_IMPORT"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "TRANSLATION_MEMORY_CREATE"
+        | "TRANSLATION_MEMORY_UPDATE"
+        | "TRANSLATION_MEMORY_DELETE"
+        | "TRANSLATION_MEMORY_ASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UNASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG"
+        | "TRANSLATION_MEMORY_ENTRY_CREATE"
+        | "TRANSLATION_MEMORY_ENTRY_UPDATE"
+        | "TRANSLATION_MEMORY_ENTRY_DELETE"
+        | "TRANSLATION_MEMORY_IMPORT"
+        | "TRANSLATION_MEMORY_COPY_FROM_PROJECT"
+        | "TRANSLATION_LABELS_EDIT"
+        | "TRANSLATION_LABEL_ASSIGN"
+        | "TRANSLATION_LABEL_CREATE"
+        | "TRANSLATION_LABEL_UPDATE"
+        | "TRANSLATION_LABEL_DELETE"
+        | "CREATE_SUGGESTION"
+        | "DECLINE_SUGGESTION"
+        | "ACCEPT_SUGGESTION"
+        | "REVERSE_SUGGESTION"
+        | "DELETE_SUGGESTION"
+        | "SUGGESTION_SET_ACTIVE"
+        | "AI_PROMPT_CREATE"
+        | "AI_PROMPT_UPDATE"
+        | "AI_PROMPT_DELETE"
+        | "BRANCH_CREATE"
+        | "BRANCH_RENAME"
+        | "BRANCH_DELETE"
+        | "BRANCH_PROTECTION_CHANGE"
+        | "BRANCH_MERGE"
+        | "QA_ISSUE_IGNORE"
+        | "QA_ISSUE_UNIGNORE"
+        | "AI_REVIEW";
       author?: components["schemas"]["SimpleUserAccountModel"];
       /** @description Modified fields */
       modifications?: {
@@ -7862,6 +8448,7 @@ export interface components {
        * @description Number of active suggestions
        */
       activeSuggestionCount: number;
+      aiReview?: components["schemas"]["TranslationAiReviewSummaryModel"];
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /**
@@ -8856,6 +9443,107 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Returns feature flags and plan features of the organization, including those granted by a server administrator. */
+  getOrganizationFeatures: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationFeaturesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets feature flags enabled for the organization and plan features granted to it regardless of its plan. */
+  setOrganizationFeatures: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationFeaturesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetOrganizationFeaturesRequest"];
       };
     };
   };
@@ -15793,6 +16481,696 @@ export interface operations {
       };
     };
   };
+  getAiReviewRules: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createAiReviewRule: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRuleRequest"];
+      };
+    };
+  };
+  /** Number of existing translations each enabled rule covers that have not been reviewed yet, counted only in the languages where the caller can change the translation state. */
+  getAiReviewRuleBacklogs: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleBacklogsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updateAiReviewRule: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRuleRequest"];
+      };
+    };
+  };
+  deleteAiReviewRule: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Runs the AI review again for the rule's failed reviews of translations that are still translated. */
+  retryFailedAiReviews: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRetryFailedModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Starts an AI_REVIEW batch job that reviews the selected keys, or all translations a rule covers, using the same rules, order and checks as automatic AI review. Returns the batch job; track and cancel it with the batch job endpoints like any other batch operation. */
+  startAiReviewRun: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRunRequest"];
+      };
+    };
+  };
+  /** Counts which of the selected translations an AI review run would review and why the others are skipped. Makes no LLM calls. */
+  previewAiReviewRun: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRunPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRunRequest"];
+      };
+    };
+  };
+  getAiReviewSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets what happens to existing translations when their source text changes. Re-translating needs machine translation enabled in the auto translation settings of the language. */
+  updateAiReviewSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewSettingsRequest"];
+      };
+    };
+  };
+  getTranslationAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAiReviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Keeps the translation reviewed and turns the AI review into a regular review. */
+  confirmTranslationAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAiReviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets the translation back to translated and records the rejection. */
+  rejectTranslationAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Runs the AI review again for a translation whose last review failed. */
+  retryTranslationAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getAllKeys: {
     parameters: {
       query: {
@@ -20046,6 +21424,28 @@ export interface operations {
         filterQaCheckType?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
+        /**
+         * Filter keys by the AI review result of their translations in the languages
+         * from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+         *
+         * AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+         * threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+         * FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+         * no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+         * WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+         *
+         * Combined with the other translation filters with logical AND. Ignored when AI review is not available.
+         */
+        filterAiReviewOutcome?: (
+          | "AUTO_REVIEWED"
+          | "BELOW_THRESHOLD"
+          | "WOULD_AUTO_REVIEW"
+          | "WOULD_NOT_AUTO_REVIEW"
+          | "FAILED"
+          | "NOT_REVIEWED"
+        )[];
+        /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
+        filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20323,6 +21723,28 @@ export interface operations {
         filterQaCheckType?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
+        /**
+         * Filter keys by the AI review result of their translations in the languages
+         * from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+         *
+         * AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+         * threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+         * FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+         * no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+         * WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+         *
+         * Combined with the other translation filters with logical AND. Ignored when AI review is not available.
+         */
+        filterAiReviewOutcome?: (
+          | "AUTO_REVIEWED"
+          | "BELOW_THRESHOLD"
+          | "WOULD_AUTO_REVIEW"
+          | "WOULD_NOT_AUTO_REVIEW"
+          | "FAILED"
+          | "NOT_REVIEWED"
+        )[];
+        /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
+        filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20644,6 +22066,28 @@ export interface operations {
         filterQaCheckType?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
+        /**
+         * Filter keys by the AI review result of their translations in the languages
+         * from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+         *
+         * AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+         * threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+         * FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+         * no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+         * WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+         *
+         * Combined with the other translation filters with logical AND. Ignored when AI review is not available.
+         */
+        filterAiReviewOutcome?: (
+          | "AUTO_REVIEWED"
+          | "BELOW_THRESHOLD"
+          | "WOULD_AUTO_REVIEW"
+          | "WOULD_NOT_AUTO_REVIEW"
+          | "FAILED"
+          | "NOT_REVIEWED"
+        )[];
+        /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
+        filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -22979,6 +24423,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        type?: "TRANSLATE" | "REVIEW";
       };
       path: {
         projectId: number;
@@ -23079,6 +24524,9 @@ export interface operations {
   };
   getDefaultPrompt: {
     parameters: {
+      query: {
+        type?: "TRANSLATE" | "REVIEW";
+      };
       path: {
         projectId: number;
       };
@@ -26730,6 +28178,28 @@ export interface operations {
         filterQaCheckType?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
+        /**
+         * Filter keys by the AI review result of their translations in the languages
+         * from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+         *
+         * AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+         * threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+         * FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+         * no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+         * WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+         *
+         * Combined with the other translation filters with logical AND. Ignored when AI review is not available.
+         */
+        filterAiReviewOutcome?: (
+          | "AUTO_REVIEWED"
+          | "BELOW_THRESHOLD"
+          | "WOULD_AUTO_REVIEW"
+          | "WOULD_NOT_AUTO_REVIEW"
+          | "FAILED"
+          | "NOT_REVIEWED"
+        )[];
+        /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
+        filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -27219,6 +28689,28 @@ export interface operations {
         filterQaCheckType?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
+        /**
+         * Filter keys by the AI review result of their translations in the languages
+         * from `filterAiReviewInLang`. Multiple values are applied with logical OR.
+         *
+         * AUTO_REVIEWED: reviewed by AI, not confirmed by a human. BELOW_THRESHOLD: scored below the
+         * threshold of an Active rule. WOULD_AUTO_REVIEW / WOULD_NOT_AUTO_REVIEW: Dry run results.
+         * FAILED: the review failed. NOT_REVIEWED: an enabled rule would review the translation and it has
+         * no result for its current text yet. Results for an older text are ignored, BELOW_THRESHOLD,
+         * WOULD_NOT_AUTO_REVIEW and FAILED count only while the translation is translated.
+         *
+         * Combined with the other translation filters with logical AND. Ignored when AI review is not available.
+         */
+        filterAiReviewOutcome?: (
+          | "AUTO_REVIEWED"
+          | "BELOW_THRESHOLD"
+          | "WOULD_AUTO_REVIEW"
+          | "WOULD_NOT_AUTO_REVIEW"
+          | "FAILED"
+          | "NOT_REVIEWED"
+        )[];
+        /** Languages (tags) the AI review filters apply to. When omitted, all returned languages except the base language. */
+        filterAiReviewInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */

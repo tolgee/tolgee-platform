@@ -24,6 +24,7 @@ import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.publicBilling.MetricType
 import io.tolgee.service.InstanceIdService
+import io.tolgee.service.featureFlags.OrganizationFeatureGrantService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.security.UserAccountService
@@ -59,6 +60,8 @@ class EeSubscriptionServiceImpl(
   private val applicationEventPublisher: ApplicationEventPublisher,
   @Lazy
   private val usageToReportService: UsageToReportService,
+  @Lazy
+  private val organizationFeatureGrantService: OrganizationFeatureGrantService,
 ) : EeSubscriptionProvider,
   Logging {
   var bypassSeatCountCheck = false
@@ -76,6 +79,9 @@ class EeSubscriptionServiceImpl(
   fun findSubscriptionEntity(): EeSubscription? {
     return eeSubscriptionRepository.findById(1).orElse(null)
   }
+
+  fun getGrantedFeatures(organizationId: Long?): Set<Feature> =
+    organizationFeatureGrantService.getGrantedPlanFeatures(organizationId)
 
   fun isSubscribed(): Boolean {
     return self.findSubscriptionDto() != null

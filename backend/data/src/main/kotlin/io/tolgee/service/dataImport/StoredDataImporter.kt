@@ -200,7 +200,7 @@ class StoredDataImporter(
 
     reportStatus(ImportApplicationStatusItem(ImportApplicationStatus.FINALIZING))
 
-    translationService.setOutdatedBatch(outdatedFlagKeys)
+    translationService.applySourceChangeOfKeys(import.project.id, outdatedFlagKeys)
 
     entityManager.flush()
 

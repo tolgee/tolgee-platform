@@ -119,7 +119,7 @@ class BatchJobActivityFinalizer(
         """,
       ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("jobId", job.id)
-      .setParameter("authorId", TypedParameterValue(StandardBasicTypes.LONG, job.authorId))
+      .setParameter("authorId", TypedParameterValue(StandardBasicTypes.LONG, job.activityAuthorId))
       .executeUpdate()
   }
 

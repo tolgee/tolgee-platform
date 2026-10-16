@@ -1,8 +1,9 @@
 import { Box, styled, Tab, Tabs } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { BaseProjectView } from '../BaseProjectView';
 import { useAiViewItems } from './aiViewItems';
 
@@ -19,6 +20,19 @@ export const AiView = () => {
   const { t } = useTranslate();
 
   const { ActiveComponent, items, value } = useAiViewItems();
+  const { preferredOrganization } = usePreferredOrganization();
+  const projectOrganizationLoaded =
+    preferredOrganization?.id === project.organizationOwner?.id;
+
+  if (!ActiveComponent && projectOrganizationLoaded) {
+    return (
+      <Redirect
+        to={LINKS.PROJECT_CONTEXT_DATA.build({
+          [PARAMS.PROJECT_ID]: project.id,
+        })}
+      />
+    );
+  }
 
   return (
     <BaseProjectView
@@ -35,7 +49,7 @@ export const AiView = () => {
       ]}
     >
       <StyledTabWrapper>
-        <StyledTabs value={value}>
+        <StyledTabs value={value ?? false}>
           {items.map((item) => {
             if (!item.tab.condition) {
               return null;

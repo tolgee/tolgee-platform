@@ -20,6 +20,8 @@ import { useProject } from 'tg.hooks/useProject';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { TextField } from 'tg.component/common/TextField';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
 export type BasicPromptOption = NonNullable<
   components['schemas']['PromptRunDto']['basicPromptOptions']
@@ -35,9 +37,16 @@ type PromptItem = {
 type Props = {
   value: BasicPromptOption[];
   onChange: (value: BasicPromptOption[]) => void;
+  reviewCriteria?: string;
+  onReviewCriteriaChange?: (value: string) => void;
 };
 
-export const TabBasic = ({ value, onChange }: Props) => {
+export const TabBasic = ({
+  value,
+  onChange,
+  reviewCriteria,
+  onReviewCriteriaChange,
+}: Props) => {
   const { t } = useTranslate();
   const project = useProject();
   const [projectDescription, setProjectDescription] = useState(false);
@@ -189,6 +198,28 @@ export const TabBasic = ({ value, onChange }: Props) => {
           );
         })}
       </Box>
+      {onReviewCriteriaChange && (
+        <Box sx={{ pt: 3 }}>
+          <Label>
+            {t('ai_prompt_review_criteria_label', 'Review criteria')}
+          </Label>
+          <TextField
+            multiline
+            minRows={3}
+            fullWidth
+            minHeight={false}
+            value={reviewCriteria ?? ''}
+            onChange={(e) => onReviewCriteriaChange(e.target.value)}
+            onKeyDown={stopBubble()}
+            placeholder={t(
+              'ai_prompt_review_criteria_placeholder',
+              'What should the reviewer pay attention to? E.g. "Use informal tone. Product names stay in English."'
+            )}
+            inputProps={{ 'data-cy': 'ai-prompt-review-criteria-input' }}
+            data-cy="ai-prompt-review-criteria"
+          />
+        </Box>
+      )}
       {projectDescription && descriptionLoadable.isSuccess && (
         <AiProjectDescriptionDialog
           onClose={() => setProjectDescription(false)}

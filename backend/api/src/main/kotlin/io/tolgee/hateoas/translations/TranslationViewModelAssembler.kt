@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.translations
 
 import io.tolgee.api.v2.controllers.translation.TranslationsController
+import io.tolgee.hateoas.aiReview.TranslationAiReviewSummaryModel
 import io.tolgee.hateoas.label.LabelModelAssembler
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionSimpleModelAssembler
@@ -34,6 +35,15 @@ class TranslationViewModelAssembler(
       qaChecksStale = view.qaChecksStale,
       suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) },
       qaIssues = view.qaIssues.takeIf { it.isNotEmpty() }?.map { qaIssueModelAssembler.toModel(it) },
+      aiReview =
+        view.aiReview?.let {
+          TranslationAiReviewSummaryModel(
+            outcome = it.outcome,
+            score = it.score,
+            threshold = it.threshold,
+            dryRun = it.dryRun,
+          )
+        },
     )
   }
 }

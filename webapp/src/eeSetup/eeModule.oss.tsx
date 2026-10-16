@@ -1,5 +1,7 @@
 import React, { ReactElement } from 'react';
 import {
+  AiReviewBadgeProps,
+  AiReviewPlaygroundPreviewProps,
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
@@ -8,6 +10,7 @@ import {
   QaBadgeProps,
   QaIssueHighlightProps,
   SubfilterQaChecksProps,
+  SubfilterAiReviewProps,
   OnboardingSurveyGateProps,
   SubfilterTasksProps,
 } from './EeModuleType';
@@ -97,6 +100,23 @@ export const usePastDueBanner = Empty;
 export const AiPrompt = Empty;
 export const AiContextData = Empty;
 export const AiPromptsList = Empty;
+export const AiReviewRulesView = Empty;
+export const AiReviewBadge = (_props: AiReviewBadgeProps) =>
+  Empty() as JSX.Element | null;
+export const AiReviewPlaygroundPreview = (
+  _props: AiReviewPlaygroundPreviewProps
+) => Empty() as JSX.Element;
+export const SubfilterAiReview = (_props: SubfilterAiReviewProps) =>
+  Empty() as JSX.Element;
+export const getAiReviewFiltersLength = (_value: FiltersInternal) => 0;
+export const getAiReviewFiltersName = (
+  _value: FiltersInternal
+): JSX.Element | undefined => undefined;
+export const useAiReviewEnabled = () => ({
+  visible: false,
+  organizationLoaded: true,
+  available: false,
+});
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps

@@ -71,7 +71,7 @@ open class ChunkProcessingUtil(
       activityRevision.organizationId = project.organizationOwnerId
     }
     activityHolder.activity = job.type.activityType
-    activityRevision.authorId = job.authorId
+    activityRevision.authorId = job.activityAuthorId
   }
 
   private fun handleException(exception: Throwable) {

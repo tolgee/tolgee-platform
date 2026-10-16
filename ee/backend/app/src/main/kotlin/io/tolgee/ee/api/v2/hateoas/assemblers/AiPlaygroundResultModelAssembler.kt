@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.hateoas.assemblers
 
 import io.tolgee.ee.api.v2.controllers.AiPlaygroundResultController
 import io.tolgee.hateoas.AiPlaygroundResultModel
+import io.tolgee.hateoas.aiReview.AiReviewIssueModel
 import io.tolgee.model.AiPlaygroundResult
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -18,6 +19,10 @@ class AiPlaygroundResultModelAssembler :
       languageId = entity.language!!.id,
       translation = entity.translation,
       contextDescription = entity.contextDescription,
+      type = entity.type,
+      reviewScore = entity.reviewScore,
+      reviewIssues = entity.reviewIssues?.map { AiReviewIssueModel.of(it) },
+      reviewError = entity.reviewError,
     )
   }
 }

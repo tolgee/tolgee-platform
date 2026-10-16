@@ -2,14 +2,18 @@ package io.tolgee.ee.unit
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class OpenaiApiServiceTest {
   private lateinit var service: OpenaiApiService
@@ -79,6 +83,38 @@ class OpenaiApiServiceTest {
       .isInstanceOf(LlmEmptyResponseException::class.java)
   }
 
+  @Test
+  fun `sends the translation schema for translation prompts`() {
+    val schema = sentJsonSchema(createParams())
+    schema["name"].assert.isEqualTo("simple_response")
+    schema["strict"].assert.isEqualTo(true)
+    schema["schema"].assert.isEqualTo(LlmResponseSchema.TRANSLATION.schema)
+  }
+
+  @Test
+  fun `sends the review schema for review prompts`() {
+    val schema = sentJsonSchema(createParams(LlmResponseSchema.AI_REVIEW))
+    schema["name"].assert.isEqualTo("ai_review_response")
+    schema["strict"].assert.isEqualTo(true)
+    schema["schema"].assert.isEqualTo(LlmResponseSchema.AI_REVIEW.schema)
+  }
+
+  private fun sentJsonSchema(params: LlmParams): Map<String, Any?> {
+    var requestBody: String? = null
+    val restTemplate =
+      stubLlmRestTemplate(
+        """{"choices": [{"message": {"content": "{}"}}], "usage": {"prompt_tokens": 1, "completion_tokens": 1}}""",
+      ) { requestBody = it }
+    service.translate(params, createConfig(), restTemplate)
+    val body = jacksonObjectMapper().readValue<Map<String, Any?>>(requestBody!!)
+
+    @Suppress("UNCHECKED_CAST")
+    val responseFormat = body["response_format"] as Map<String, Any?>
+    responseFormat["type"].assert.isEqualTo("json_schema")
+    @Suppress("UNCHECKED_CAST")
+    return responseFormat["json_schema"] as Map<String, Any?>
+  }
+
   private fun createConfig(): LlmProviderInterface {
     return object : LlmProviderInterface {
       override var name = "test-openai"
@@ -97,7 +133,7 @@ class OpenaiApiServiceTest {
     }
   }
 
-  private fun createParams(): LlmParams {
+  private fun createParams(responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION): LlmParams {
     return LlmParams(
       messages =
         listOf(
@@ -108,6 +144,7 @@ class OpenaiApiServiceTest {
         ),
       shouldOutputJson = true,
       priority = LlmProviderPriority.HIGH,
+      responseSchema = responseSchema,
     )
   }
 }

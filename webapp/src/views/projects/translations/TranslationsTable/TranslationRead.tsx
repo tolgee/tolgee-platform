@@ -6,6 +6,7 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
+import { AiReviewPlaygroundPreview } from 'tg.ee';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
 import { useQaChecksEnabled, useQaDisabledLanguageIds } from 'tg.ee';
@@ -127,7 +128,10 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
             onShowAll={cellClickable ? () => handleOpen() : undefined}
           />
         )}
-        {aiPlaygroundData && (
+        {aiPlaygroundData?.type === 'REVIEW' && (
+          <AiReviewPlaygroundPreview data={aiPlaygroundData} />
+        )}
+        {aiPlaygroundData && aiPlaygroundData.type !== 'REVIEW' && (
           <AiPlaygroundPreview
             translation={aiPlaygroundData.translation}
             tooltip={aiPlaygroundData.contextDescription}
@@ -166,6 +170,10 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}
           qaChecksStale={translation?.qaChecksStale}
+          aiReview={translation?.aiReview}
+          translationId={translation?.id}
+          keyId={keyData.keyId}
+          languageTag={language.tag}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

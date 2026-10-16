@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
 import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
@@ -206,6 +207,16 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
+    from Translation t
+    join fetch t.key k
+    join fetch t.language
+    where k.id in :keyIds and t.language.id <> k.project.baseLanguage.id and t.text is not null and t.text <> ''
+  """,
+  )
+  fun findNonBaseWithTextByKeyIds(keyIds: Collection<Long>): List<Translation>
+
+  @Query(
+    """
     select t from Translation t
     join t.language l on l.tag in :languageTags
     where t.key.id in :keys
@@ -372,4 +383,10 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     translationIds: LongArray,
     baseLanguageId: Long,
   )
+
+  @Query("select t.id from Translation t where t.id in :ids and t.state = :state")
+  fun findIdsByIdInAndState(
+    ids: Collection<Long>,
+    state: TranslationState,
+  ): List<Long>
 }

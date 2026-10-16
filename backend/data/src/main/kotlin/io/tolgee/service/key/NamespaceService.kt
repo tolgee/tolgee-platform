@@ -7,16 +7,21 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Namespace
 import io.tolgee.repository.NamespaceRepository
+import io.tolgee.service.aiReview.AiReviewRuleNamespaceRenamer
 import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class NamespaceService(
   private val entityManager: EntityManager,
   private val namespaceRepository: NamespaceRepository,
+  @Lazy
+  private val aiReviewRuleNamespaceRenamer: AiReviewRuleNamespaceRenamer,
 ) {
   private fun getKeysInNamespaceCount(namespace: Namespace?): Long? {
     namespace ?: return null
@@ -147,6 +152,7 @@ class NamespaceService(
     return namespaceRepository.findOneByProjectIdAndId(projectId, namespaceId)
   }
 
+  @Transactional
   fun update(
     namespace: Namespace,
     dto: UpdateNamespaceDto,
@@ -154,7 +160,9 @@ class NamespaceService(
     this.find(dto.name, namespace.project.id)?.let {
       throw BadRequestException(Message.NAMESPACE_EXISTS)
     }
+    val oldName = namespace.name
     namespace.name = dto.name!!
+    aiReviewRuleNamespaceRenamer.renameNamespace(namespace.project.id, oldName, namespace.name)
     return save(namespace)
   }
 

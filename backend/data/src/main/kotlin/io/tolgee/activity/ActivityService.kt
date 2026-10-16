@@ -161,6 +161,7 @@ class ActivityService(
       translationId = translationId,
       pageable = pageable,
       ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD),
+      systemActivityTypes = listOf(ActivityType.AI_REVIEW),
     )
   }
 

@@ -5,14 +5,20 @@ import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
+import io.tolgee.dtos.PromptResult
+import io.tolgee.dtos.aiReview.AiReviewRunResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderResolver
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.ee.service.aiReview.AiReviewResultParser
+import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
+import io.tolgee.exceptions.AiReviewInvalidOutputException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.LlmProviderNotFoundException
@@ -22,6 +28,7 @@ import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.repository.PromptRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.PromptService
@@ -55,13 +62,16 @@ class PromptServiceEeImpl(
   private val objectMapper: ObjectMapper,
   private val llmProviderResolver: LlmProviderResolver,
   private val entityManager: EntityManager,
+  @Lazy
+  private val aiReviewRuleService: AiReviewRuleService,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
     pageable: Pageable,
     search: String?,
+    type: PromptType? = null,
   ): Page<Prompt> {
-    return promptRepository.getAllPaged(projectId, pageable, search).map { withResolvedProviderName(it) }
+    return promptRepository.getAllPaged(projectId, pageable, search, type).map { withResolvedProviderName(it) }
   }
 
   fun createPrompt(
@@ -76,6 +86,8 @@ class PromptServiceEeImpl(
         providerName = dto.providerName,
         basicPromptOptions = dto.basicPromptOptions?.toTypedArray(),
       )
+    prompt.type = dto.type
+    prompt.reviewCriteria = dto.reviewCriteria
     promptRepository.save(prompt)
     return withResolvedProviderName(prompt)
   }
@@ -83,18 +95,23 @@ class PromptServiceEeImpl(
   override fun findPromptOrDefaultDto(
     projectId: Long,
     promptId: Long?,
+    type: PromptType,
   ): PromptDto {
-    if (promptId != null) {
-      val prompt = promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
-      return PromptDto(
-        prompt.name,
-        template = prompt.template,
-        providerName = prompt.providerName,
-        basicPromptOptions = prompt.basicPromptOptions?.toList(),
-      )
-    } else {
-      return getDefaultPrompt()
+    if (promptId == null) {
+      return getDefaultPrompt(type)
     }
+    val prompt = promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
+    if (prompt.type != type) {
+      throw BadRequestException(Message.PROMPT_TYPE_NOT_SUPPORTED)
+    }
+    return PromptDto(
+      prompt.name,
+      template = prompt.template,
+      providerName = prompt.providerName,
+      basicPromptOptions = prompt.basicPromptOptions?.toList(),
+      type = prompt.type,
+      reviewCriteria = prompt.reviewCriteria,
+    )
   }
 
   override fun findPrompt(
@@ -121,13 +138,30 @@ class PromptServiceEeImpl(
     dto: PromptDto,
   ): Prompt {
     val prompt = findPrompt(projectId, promptId)
+    if (dto.type != prompt.type) {
+      throw BadRequestException(Message.PROMPT_TYPE_CANNOT_BE_CHANGED)
+    }
+    val behaviourChanged = isBehaviourChanged(prompt, dto)
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
     prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
+    prompt.reviewCriteria = dto.reviewCriteria
     promptRepository.save(prompt)
+    if (prompt.type == PromptType.REVIEW && behaviourChanged) {
+      aiReviewRuleService.switchRulesUsingPromptToDryRun(prompt.id)
+    }
     return withResolvedProviderName(prompt)
   }
+
+  private fun isBehaviourChanged(
+    prompt: Prompt,
+    dto: PromptDto,
+  ): Boolean =
+    prompt.template != dto.template ||
+      prompt.providerName != dto.providerName ||
+      prompt.basicPromptOptions?.toSet() != dto.basicPromptOptions?.toSet() ||
+      prompt.reviewCriteria != dto.reviewCriteria
 
   fun deletePrompt(
     projectId: Long,
@@ -136,6 +170,9 @@ class PromptServiceEeImpl(
     val prompt = this.findPrompt(projectId, promptId)
     val project = projectService.get(projectId)
     mtServiceConfigService.removePrompt(project, prompt.id)
+    if (prompt.type == PromptType.REVIEW) {
+      aiReviewRuleService.detachPromptFromRulesAndSwitchToDryRun(prompt.id)
+    }
     promptRepository.delete(prompt)
   }
 
@@ -146,9 +183,10 @@ class PromptServiceEeImpl(
     keyId: Long?,
     targetLanguageId: Long,
     options: List<BasicPromptOption>?,
+    reviewCriteria: String? = null,
   ): String {
     try {
-      val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId)
+      val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId, reviewCriteria)
 
       val handlebars = PromptHandlebarsHelper.register(Handlebars())
 
@@ -193,13 +231,14 @@ class PromptServiceEeImpl(
     prompt: String,
     keyId: Long?,
     priority: LlmProviderPriority,
+    responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION,
   ): LlmParams {
     val key =
       keyId?.let {
         keyService.find(it)
           ?: throw NotFoundException(Message.KEY_NOT_FOUND)
       }
-    return promptParamsHelper.getParamsFromPrompt(prompt, key, priority)
+    return promptParamsHelper.getParamsFromPrompt(prompt, key, priority, responseSchema)
   }
 
   fun runPromptWithoutChargingCredits(
@@ -207,16 +246,89 @@ class PromptServiceEeImpl(
     params: LlmParams,
     provider: String,
     attempts: List<Int>? = null,
-  ): ParsedResult {
-    val result =
-      try {
-        providerService.callProvider(organizationId, provider, params, attempts)
-      } catch (e: RestClientException) {
-        throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
-      }
+  ): ParsedResult =
+    PromptResultParser(callProviderOrFail(organizationId, provider, params, attempts), objectMapper).parse()
 
-    return PromptResultParser(result, objectMapper).parse()
+  private fun callProviderOrFail(
+    organizationId: Long,
+    provider: String,
+    params: LlmParams,
+    attempts: List<Int>? = null,
+  ): PromptResult =
+    try {
+      providerService.callProvider(organizationId, provider, params, attempts)
+    } catch (e: RestClientException) {
+      throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
+    }
+
+  @Transactional(noRollbackFor = [Exception::class])
+  override fun review(
+    projectId: Long,
+    data: PromptRunDto,
+    priority: LlmProviderPriority?,
+  ): AiReviewRunResult {
+    val organizationId = projectService.get(projectId).organizationOwner.id
+    val prompt =
+      getPrompt(
+        projectId,
+        data.template ?: defaultPromptHelper.getDefaultReviewPrompt().template!!,
+        data.keyId,
+        data.targetLanguageId,
+        data.basicPromptOptions,
+        data.reviewCriteria,
+      )
+    val params =
+      getLlmParamsFromPrompt(
+        prompt,
+        data.keyId,
+        priority ?: LlmProviderPriority.HIGH,
+        LlmResponseSchema.AI_REVIEW,
+      )
+    val result = runRawPromptAndChargeCredits(organizationId, params, data.provider)
+    val providerName = resolveProviderNameOrKeep(organizationId, data.provider)
+    val parsed =
+      try {
+        AiReviewResultParser(objectMapper).parse(result.response)
+      } catch (_: AiReviewResultParser.InvalidOutput) {
+        throw AiReviewInvalidOutputException(
+          rawResponse = result.response,
+          prompt = prompt,
+          providerName = providerName,
+          price = result.price,
+          usage = result.usage,
+        )
+      }
+    return AiReviewRunResult(
+      score = parsed.score,
+      issues = parsed.issues,
+      providerName = providerName,
+      prompt = prompt,
+      rawResponse = result.response,
+      price = result.price,
+      usage = result.usage,
+    )
   }
+
+  private fun runRawPromptAndChargeCredits(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+  ): PromptResult {
+    publishBeforeEvent(organizationId)
+    val result = callProviderOrFail(organizationId, provider, params)
+    publishAfterEvent(organizationId, result.price)
+    return result
+  }
+
+  private fun resolveProviderNameOrKeep(
+    organizationId: Long,
+    provider: String,
+  ): String =
+    try {
+      llmProviderResolver.resolveProviderName(organizationId, provider)
+    } catch (_: LlmProviderNotFoundException) {
+      provider
+    }
 
   fun runPromptAndChargeCredits(
     organizationId: Long,
@@ -267,8 +379,8 @@ class PromptServiceEeImpl(
     return getTranslationFromPromptResult(result)
   }
 
-  fun getDefaultPrompt(): PromptDto {
-    return defaultPromptHelper.getDefaultPrompt()
+  fun getDefaultPrompt(type: PromptType = PromptType.TRANSLATE): PromptDto {
+    return defaultPromptHelper.getDefaultPrompt(type)
   }
 
   private fun publishBeforeEvent(organizationId: Long) {

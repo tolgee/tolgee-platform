@@ -3,8 +3,18 @@ import { E2KeyCreateDialog, KeyDialogFillProps } from './E2KeyCreateDialog';
 import { getTranslationCell } from '../common/translations';
 import { gcy, gcyAdvanced } from '../common/shared';
 import { E2GlossaryPanel } from './glossaries/E2GlossaryPanel';
-import { components } from '../../../webapp/src/service/apiSchema.generated';
+import {
+  components,
+  operations,
+} from '../../../webapp/src/service/apiSchema.generated';
+import { waitForGlobalLoading } from '../common/loading';
 
+type AiReviewOutcome =
+  components['schemas']['TranslationAiReviewModel']['outcome'];
+type TranslationState = components['schemas']['TranslationViewModel']['state'];
+export type AiReviewFilterOutcome = NonNullable<
+  operations['getTranslations']['parameters']['query']['filterAiReviewOutcome']
+>[number];
 type TaskType = components['schemas']['TaskModel']['type'];
 
 type TaskStatusFilter =
@@ -76,6 +86,52 @@ export class E2TranslationsView {
     return this;
   }
 
+  closeFilterMenus() {
+    cy.get('body').type('{esc}');
+    cy.get('body').type('{esc}');
+    waitForGlobalLoading();
+    return this;
+  }
+
+  openAiReviewFilter() {
+    this.openFilterSelect();
+    gcy('translations-filter-ai-review').click();
+    gcy('translations-filter-ai-review-menu').should('be.visible');
+    return this;
+  }
+
+  selectAiReviewOutcome(outcome: AiReviewFilterOutcome) {
+    gcyAdvanced({
+      value: 'translations-filter-ai-review-outcome',
+      outcome,
+    }).click();
+    return this;
+  }
+
+  filterByAiReviewOutcomes(...outcomes: AiReviewFilterOutcome[]) {
+    this.openAiReviewFilter();
+    outcomes.forEach((outcome) => this.selectAiReviewOutcome(outcome));
+    return this.closeFilterMenus();
+  }
+
+  applyAiReviewFilterForLanguage(languageTag: string) {
+    gcyAdvanced({
+      value: 'translations-filter-apply-for-language',
+      language: languageTag,
+    }).click();
+    return this;
+  }
+
+  selectRowCheckbox(key: string) {
+    this.getKeyCell(key).findDcy('translations-row-checkbox').click();
+    return this;
+  }
+
+  assertVisibleKeys(...keys: string[]) {
+    this.assertTranslationsRowsCount(keys.length);
+    keys.forEach((key) => this.getKeyCell(key).should('exist'));
+  }
+
   getTaskTypeFilter(type: TaskType) {
     return gcyAdvanced({ value: 'translations-filter-task-type', type });
   }
@@ -136,6 +192,56 @@ export class E2TranslationsView {
 
   getKeyCell(key: string) {
     return gcyAdvanced({ value: 'translations-table-cell', key });
+  }
+
+  getKeyLanguageCell(key: string, languageTag: string) {
+    return gcyAdvanced({
+      value: 'translations-table-cell',
+      key,
+      language: languageTag,
+    });
+  }
+
+  getAiReviewBadge(key: string, languageTag: string) {
+    return this.getKeyLanguageCell(key, languageTag).findDcy(
+      'translations-cell-ai-review-badge'
+    );
+  }
+
+  assertAiReviewBadge(
+    key: string,
+    languageTag: string,
+    outcome: AiReviewOutcome,
+    score?: number
+  ) {
+    this.getAiReviewBadge(key, languageTag)
+      .should('be.visible')
+      .should('have.attr', 'data-cy-outcome', outcome)
+      .should('have.attr', 'data-cy-score', score === undefined ? '' : score);
+  }
+
+  openAiReviewPopover(key: string, languageTag: string) {
+    this.getAiReviewBadge(key, languageTag).click();
+    return gcy('ai-review-popover').should('be.visible');
+  }
+
+  assertTranslationState(
+    key: string,
+    languageTag: string,
+    state: TranslationState
+  ) {
+    this.getKeyLanguageCell(key, languageTag)
+      .closestDcy('translations-table-cell-translation')
+      .findDcy('translations-state-indicator')
+      .should('have.attr', 'data-cy-state', state);
+  }
+
+  clickStateButton(key: string, languageTag: string) {
+    this.getKeyLanguageCell(key, languageTag)
+      .closestDcy('translations-table-cell-translation')
+      .trigger('mouseover')
+      .findDcy('translation-state-button')
+      .click();
   }
 
   searchFor(query: string) {

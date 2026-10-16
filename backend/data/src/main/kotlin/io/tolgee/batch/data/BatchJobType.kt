@@ -3,6 +3,7 @@ package io.tolgee.batch.data
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
+import io.tolgee.batch.processors.AiReviewChunkProcessor
 import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.AutoTranslateChunkProcessor
 import io.tolgee.batch.processors.AutoUpgradeNoticeProcessor
@@ -41,6 +42,7 @@ enum class BatchJobType(
    * Use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] to get the effective value.
    */
   val defaultExclusive: Boolean = true,
+  val activityAuthoredBySystem: Boolean = false,
 ) {
   AI_PLAYGROUND_TRANSLATE(
     maxRetries = 3,
@@ -142,6 +144,13 @@ enum class BatchJobType(
     maxRetries = 3,
     processor = QaCheckChunkProcessor::class,
     defaultExclusive = false,
+  ),
+  AI_REVIEW(
+    activityType = ActivityType.AI_REVIEW,
+    maxRetries = 3,
+    processor = AiReviewChunkProcessor::class,
+    defaultExclusive = false,
+    activityAuthoredBySystem = true,
   ),
   NO_OP(
     activityType = null,

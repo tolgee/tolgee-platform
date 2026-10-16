@@ -547,6 +547,18 @@ export const actionsConfiguration: Partial<
         ?.translation as any as string;
     },
   },
+  AI_REVIEW: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review"
+          defaultValue="AI review"
+          params={params}
+        />
+      );
+    },
+    entities: { Translation: true },
+  },
   QA_ISSUE_IGNORE: {
     label(params) {
       return <T keyName="activity_qa_issue_ignore" params={params} />;

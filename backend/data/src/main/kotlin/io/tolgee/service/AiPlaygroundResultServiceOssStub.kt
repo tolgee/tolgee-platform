@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.model.aiReview.AiReviewIssue
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,6 +15,16 @@ class AiPlaygroundResultServiceOssStub : AiPlaygroundResultService {
   ) {
     // No-op: OSS doesn't have AI Playground functionality, so there are no results to set
   }
+
+  override fun setReviewResult(
+    projectId: Long,
+    userId: Long,
+    keyId: Long,
+    languageId: Long,
+    score: Int?,
+    issues: List<AiReviewIssue>?,
+    error: String?,
+  ) = Unit
 
   override fun removeResults(
     projectId: Long,

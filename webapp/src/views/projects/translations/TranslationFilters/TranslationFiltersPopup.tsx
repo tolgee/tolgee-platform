@@ -20,10 +20,13 @@ import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilte
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
 import {
+  getAiReviewFiltersLength,
   getQaChecksFiltersLength,
+  getTaskFiltersLength,
+  SubfilterAiReview,
   SubfilterQaChecks,
   SubfilterTasks,
-  getTaskFiltersLength,
+  useAiReviewEnabled,
 } from 'tg.ee';
 
 type Props = {
@@ -49,11 +52,13 @@ export const TranslationFiltersPopup = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const aiReview = useAiReviewEnabled();
   const { isEnabled } = useEnabledFeatures();
   const tasksEnabled = isEnabled('TASKS') || isEnabled('ORDER_TRANSLATION');
   const tasksFilterAvailable =
     tasksEnabled || Boolean(getTaskFiltersLength(value));
   const surfaceShowsTaskFilter =
+    !filterOptions?.scopeOnly &&
     !filterOptions?.taskPrefiltered &&
     (!filterOptions?.keyRelatedOnly || filterOptions?.taskCreation);
   return (
@@ -77,18 +82,22 @@ export const TranslationFiltersPopup = ({
             projectId={projectId}
           />
         )}
-        <SubfilterScreenshots
-          value={value}
-          actions={actions}
-          projectId={projectId}
-        />
-        <SubfilterDescription
-          value={value}
-          actions={actions}
-          projectId={projectId}
-        />
-        <SubfilterPlurals value={value} actions={actions} />
-        {!filterOptions?.keyRelatedOnly && (
+        {!filterOptions?.scopeOnly && (
+          <>
+            <SubfilterScreenshots
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+            <SubfilterDescription
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+            <SubfilterPlurals value={value} actions={actions} />
+          </>
+        )}
+        {!filterOptions?.keyRelatedOnly && !filterOptions?.scopeOnly && (
           <>
             <SubfilterTranslations
               value={value}
@@ -115,6 +124,14 @@ export const TranslationFiltersPopup = ({
                 selectedLanguages={selectedLanguages}
               />
             )}
+            {(aiReview.available ||
+              Boolean(getAiReviewFiltersLength(value))) && (
+              <SubfilterAiReview
+                value={value}
+                actions={actions}
+                selectedLanguages={selectedLanguages}
+              />
+            )}
           </>
         )}
         {tasksFilterAvailable && surfaceShowsTaskFilter && (
@@ -126,15 +143,16 @@ export const TranslationFiltersPopup = ({
             pinnedTaskType={filterOptions?.pinnedTaskType}
           />
         )}
-        {project.suggestionsMode !== 'DISABLED' && (
-          <SubfilterSuggestions
-            value={value}
-            actions={actions}
-            projectId={projectId}
-            selectedLanguages={selectedLanguages}
-            taskCreation={filterOptions?.taskCreation}
-          />
-        )}
+        {project.suggestionsMode !== 'DISABLED' &&
+          !filterOptions?.scopeOnly && (
+            <SubfilterSuggestions
+              value={value}
+              actions={actions}
+              projectId={projectId}
+              selectedLanguages={selectedLanguages}
+              taskCreation={filterOptions?.taskCreation}
+            />
+          )}
         {filterOptions?.showDeletedBy && (
           <SubfilterDeletedBy
             value={value}

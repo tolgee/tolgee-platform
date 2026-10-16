@@ -37,6 +37,8 @@ import {
   getDeletedByFiltersName,
 } from './SubfilterDeletedBy';
 import {
+  getAiReviewFiltersLength,
+  getAiReviewFiltersName,
   getQaChecksFiltersLength,
   getQaChecksFiltersName,
   getTaskFiltersLength,
@@ -59,7 +61,8 @@ export function countFilters(value: FiltersInternal) {
     getSuggestionsFiltersLength(value) +
     getDeletedByFiltersLength(value) +
     getTaskFiltersLength(value) +
-    getQaChecksFiltersLength(value)
+    getQaChecksFiltersLength(value) +
+    getAiReviewFiltersLength(value)
   );
 }
 
@@ -76,6 +79,7 @@ export function getFilterName(value: FiltersInternal, labels?: LabelModel[]) {
     getSuggestionsFiltersName(value) ||
     getDeletedByFiltersName(value) ||
     getTaskFiltersName(value) ||
-    getQaChecksFiltersName(value)
+    getQaChecksFiltersName(value) ||
+    getAiReviewFiltersName(value)
   );
 }

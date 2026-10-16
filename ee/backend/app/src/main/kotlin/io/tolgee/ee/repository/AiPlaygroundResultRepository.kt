@@ -1,6 +1,7 @@
 package io.tolgee.ee.repository
 
 import io.tolgee.model.AiPlaygroundResult
+import io.tolgee.model.enums.PromptType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -15,6 +16,7 @@ interface AiPlaygroundResultRepository : JpaRepository<AiPlaygroundResult, Long>
       and k.project.id = :projectId
       and r.user.id = :userId
       and r.language.id in :languageIds
+      and r.type = :type
     """,
   )
   fun getResults(
@@ -22,7 +24,28 @@ interface AiPlaygroundResultRepository : JpaRepository<AiPlaygroundResult, Long>
     userId: Long,
     keyIds: List<Long>,
     languageIds: List<Long>,
+    type: PromptType,
   ): Collection<AiPlaygroundResult>
+
+  @Modifying
+  @Query(
+    """
+    delete from AiPlaygroundResult r
+    where
+      r.project.id = :projectId
+      and r.user.id = :userId
+      and r.key.id = :keyId
+      and r.language.id = :languageId
+      and r.type = :type
+    """,
+  )
+  fun removeResult(
+    projectId: Long,
+    userId: Long,
+    keyId: Long,
+    languageId: Long,
+    type: PromptType,
+  )
 
   @Modifying
   @Query(

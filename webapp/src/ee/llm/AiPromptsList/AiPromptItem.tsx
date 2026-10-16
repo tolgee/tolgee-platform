@@ -1,4 +1,4 @@
-import { Box, IconButton, Menu, MenuItem, styled } from '@mui/material';
+import { Box, Chip, IconButton, Menu, MenuItem, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { DotsVertical } from '@untitled-ui/icons-react';
 import { Link, useHistory } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { PromptRename } from '../AiPrompt/PromptRename';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
 
 type PromptModel = components['schemas']['PromptModel'];
 
@@ -60,6 +61,7 @@ export const AiPromptItem = ({ prompt }: Props) => {
   const { t } = useTranslate();
   const history = useHistory();
   const { satisfiesPermission } = useProjectPermissions();
+  const { visible: aiReviewVisible } = useAiReviewEnabled();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/{promptId}',
@@ -69,7 +71,10 @@ export const AiPromptItem = ({ prompt }: Props) => {
 
   const linkProps = {
     component: Link,
-    to: getAiPlaygroundUrl(prompt.projectId, prompt.id),
+    to: getAiPlaygroundUrl(prompt.projectId, {
+      promptId: prompt.id,
+      type: prompt.type === 'REVIEW' ? 'review' : undefined,
+    }),
   };
 
   function handleRename() {
@@ -106,6 +111,20 @@ export const AiPromptItem = ({ prompt }: Props) => {
     <StyledContainer>
       <StyledName {...linkProps} data-cy="ai-prompt-item-name">
         {prompt.name}
+        {aiReviewVisible && (
+          <Chip
+            size="small"
+            variant="outlined"
+            label={
+              prompt.type === 'REVIEW'
+                ? t('ai_prompt_type_review', 'Review')
+                : t('ai_prompt_type_translate', 'Translate')
+            }
+            data-cy="ai-prompt-item-type"
+            data-cy-type={prompt.type}
+            sx={{ cursor: 'inherit' }}
+          />
+        )}
       </StyledName>
       <StyledModel {...linkProps}>{prompt.providerName}</StyledModel>
       <StyledAction sx={{ pr: 1 }}>

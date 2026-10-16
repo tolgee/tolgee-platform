@@ -18,7 +18,8 @@ export type BatchActions =
   | 'export_translations'
   | 'assign_translation_labels'
   | 'unassign_translation_labels'
-  | 'qa_recheck';
+  | 'qa_recheck'
+  | 'ai_review';
 
 export type BatchJobModel = components['schemas']['BatchJobModel'];
 

@@ -1,6 +1,11 @@
 spring:
   jpa:
     show-sql: true
+  datasource:
+    # Must exceed tolgee.batch.concurrency: AI review items open a second connection (claim, credits)
+    # while their chunk transaction holds the first one. Not under `hikari:`: the postgres-autostart
+    # data source binds `spring.datasource.*` straight onto the pool and ignores `spring.datasource.hikari`.
+    maximum-pool-size: 30
 tolgee:
   llm:
     enabled: true
@@ -12,6 +17,9 @@ tolgee:
         token-price-in-credits-output: 1.5
   billing:
     enabled: false
+  feature-flags:
+    enabled-for-all:
+      - AI_REVIEW
   frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
   oauth2:
     browser-extension-enabled: true
@@ -64,6 +72,7 @@ tolgee:
     verify-sso-account-available-bypass: true
     fake-llm-providers: true
     disable-url-ssrf-protection: true
+    allow-plan-feature-grants: true
   smtp:
     host: localhost
     port: ${TOLGEE_E2E_SMTP_PORT:21025}

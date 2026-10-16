@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
@@ -12,6 +13,7 @@ class OrganizationTestData : BaseTestData() {
   lateinit var milan: UserAccount
 
   lateinit var pepaOrg: Organization
+  val pepaOrgBuilder: OrganizationBuilder
   lateinit var jirinaOrg: Organization
 
   init {
@@ -37,15 +39,16 @@ class OrganizationTestData : BaseTestData() {
         project = projectBuilder.self
       }
 
-      addOrganization {
-        name = "Organizacion"
-        pepaOrg = this
-      }.build {
-        addRole {
-          user = pepa
-          type = OrganizationRoleType.OWNER
+      pepaOrgBuilder =
+        addOrganization {
+          name = "Organizacion"
+          pepaOrg = this
+        }.build {
+          addRole {
+            user = pepa
+            type = OrganizationRoleType.OWNER
+          }
         }
-      }
 
       pepaBuilder.build {
         setUserPreferences {

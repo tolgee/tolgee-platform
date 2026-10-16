@@ -282,3 +282,5 @@ export function getInvitationsByProjectIdFromTestData(
 }
 
 export const qaTestData = generateTestDataObject('qa');
+
+export const aiReviewTestData = generateTestDataObject('ai-review');

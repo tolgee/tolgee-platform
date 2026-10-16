@@ -2,6 +2,7 @@ package io.tolgee.ee.service.prompt
 
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSize
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
@@ -21,6 +22,7 @@ class PromptParamsHelper(
     prompt: String,
     key: Key?,
     priority: LlmProviderPriority,
+    responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION,
   ): LlmParams {
     val pattern = Regex("\\[\\[screenshot_(${ScreenshotSize.FULL.value}|${ScreenshotSize.SMALL.value})_(\\d+)]]")
 
@@ -58,7 +60,7 @@ class PromptParamsHelper(
           )
         }
       }
-    return LlmParams(messages, shouldOutputJson, priority)
+    return LlmParams(messages, shouldOutputJson, priority, responseSchema)
   }
 
   fun getHighlightedScreenshot(

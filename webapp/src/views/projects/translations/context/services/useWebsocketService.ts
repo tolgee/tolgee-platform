@@ -5,10 +5,15 @@ import {
   Modification,
   TranslationsModifiedData,
   QaIssuesUpdatedData,
+  AiReviewUpdatedData,
 } from 'tg.websocket-client/WebsocketClient';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useQaChecksEnabled } from 'tg.ee';
+import { useAiReviewEnabled, useQaChecksEnabled } from 'tg.ee';
 import { useDebouncedCallback } from 'use-debounce';
+
+type TranslationDataEvent =
+  | { type: 'translations'; event: TranslationsModifiedData }
+  | { type: 'aiReview'; event: AiReviewUpdatedData };
 
 export const useWebsocketService = (
   translationService: ReturnType<typeof useTranslationsService>
@@ -17,6 +22,7 @@ export const useWebsocketService = (
   const project = useProject();
   const client = useGlobalContext((c) => c.wsClient.client);
   const qaChecksEnabled = useQaChecksEnabled();
+  const { available: aiReviewAvailable } = useAiReviewEnabled();
 
   function updateTranslations(event: TranslationsModifiedData) {
     const translationUpdates = event.data?.translations?.map((translation) => ({
@@ -24,6 +30,7 @@ export const useWebsocketService = (
       language: translation.relations.language.data.tag,
       value: {
         ...getModifyingObject(translation.modifications),
+        ...(translation.modifications?.text ? { aiReview: undefined } : {}),
         id: translation.id,
       },
     }));
@@ -72,13 +79,31 @@ export const useWebsocketService = (
     );
   }
 
-  const eventQueue = useRef([] as TranslationsModifiedData[]);
+  function updateAiReviews(event: AiReviewUpdatedData) {
+    translationService.changeTranslations(
+      event.data.map((update) => ({
+        keyId: update.keyId,
+        language: update.languageTag,
+        value: {
+          id: update.translationId,
+          state: update.state,
+          aiReview: update.aiReview ?? undefined,
+        },
+      }))
+    );
+  }
+
+  const eventQueue = useRef([] as TranslationDataEvent[]);
   const qaEventQueue = useRef([] as QaIssuesUpdatedData[]);
 
   const handleQueue = () => {
     if (eventBlockers <= 0) {
       eventQueue.current.forEach((e) => {
-        updateTranslations(e);
+        if (e.type === 'aiReview') {
+          updateAiReviews(e.event);
+        } else {
+          updateTranslations(e.event);
+        }
       });
       eventQueue.current = [];
       if (qaEventQueue.current.length > 0) {
@@ -111,7 +136,7 @@ export const useWebsocketService = (
         (event) => {
           // arbitrary delay, so the socket event is not faster
           // than response of http request
-          eventQueue.current.push(event);
+          eventQueue.current.push({ type: 'translations', event });
           handleQueueDelayed();
         }
       );
@@ -129,6 +154,18 @@ export const useWebsocketService = (
       );
     }
   }, [project, client, qaChecksEnabled]);
+
+  useEffect(() => {
+    if (client && aiReviewAvailable) {
+      return client.subscribe(
+        `/projects/${project.id}/ai-review-updated`,
+        (event) => {
+          eventQueue.current.push({ type: 'aiReview', event });
+          handleQueueDelayed();
+        }
+      );
+    }
+  }, [project, client, aiReviewAvailable]);
 
   return {
     setEventBlockers,

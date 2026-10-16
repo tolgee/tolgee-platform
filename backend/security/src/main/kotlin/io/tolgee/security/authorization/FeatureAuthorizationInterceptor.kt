@@ -1,6 +1,7 @@
 package io.tolgee.security.authorization
 
 import io.tolgee.security.OrganizationHolder
+import io.tolgee.service.featureFlags.FeatureFlagService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.annotation.AnnotationUtils
@@ -16,12 +17,15 @@ import org.springframework.web.method.HandlerMethod
 class FeatureAuthorizationInterceptor(
   private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val organizationHolder: OrganizationHolder,
+  private val featureFlagService: FeatureFlagService,
 ) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    checkFeatureFlags(handler)
+
     val requiresFeatures = AnnotationUtils.getAnnotation(handler.method, RequiresFeatures::class.java)
     val requiresOneOfFeatures = AnnotationUtils.getAnnotation(handler.method, RequiresOneOfFeatures::class.java)
 
@@ -48,5 +52,15 @@ class FeatureAuthorizationInterceptor(
     }
 
     return true
+  }
+
+  private fun checkFeatureFlags(handler: HandlerMethod) {
+    val requiresFeatureFlag =
+      AnnotationUtils.findAnnotation(handler.method, RequiresFeatureFlag::class.java)
+        ?: AnnotationUtils.findAnnotation(handler.beanType, RequiresFeatureFlag::class.java)
+        ?: return
+
+    val orgId = organizationHolder.organization.id
+    requiresFeatureFlag.flags.forEach { featureFlagService.checkEnabled(orgId, it) }
   }
 }

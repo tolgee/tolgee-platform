@@ -375,6 +375,8 @@ export class LINKS {
 
   static PROJECT_AI_PROMPTS = Link.ofParent(LINKS.PROJECT_AI, 'prompts');
 
+  static PROJECT_AI_REVIEW = Link.ofParent(LINKS.PROJECT_AI, 'review');
+
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
   /**
@@ -477,6 +479,7 @@ export enum QUERY {
   TASKS_FILTERS_SHOW_ALL = 'showAll',
   TRANSLATIONS_AI_PLAYGROUND = 'aiPlayground',
   TRANSLATIONS_AI_PLAYGROUND_PROMPT = 'prompt',
+  TRANSLATIONS_AI_PLAYGROUND_TYPE = 'aiPlaygroundType',
 }
 
 export const getProjectTranslationsUrl = (
@@ -508,8 +511,11 @@ export const getTaskUrl = (projectId: number, taskNumber: number) => {
 
 export const getAiPlaygroundUrl = (
   projectId: number,
-  promptId?: number,
-  view?: 'TABLE'
+  {
+    promptId,
+    view,
+    type,
+  }: { promptId?: number; view?: 'TABLE'; type?: 'review' } = {}
 ) => {
   let link = `${LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: projectId,
@@ -519,6 +525,9 @@ export const getAiPlaygroundUrl = (
   }
   if (view === 'TABLE') {
     link += `&${QUERY.TRANSLATIONS_VIEW}=${view}`;
+  }
+  if (type === 'review') {
+    link += `&${QUERY.TRANSLATIONS_AI_PLAYGROUND_TYPE}=${type}`;
   }
   return link;
 };
