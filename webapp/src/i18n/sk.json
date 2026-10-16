@@ -28,6 +28,8 @@
   "export_translations_tags_pattern_option": "Zhoda s \"{pattern}\"",
   "export_translations_tags_placeholder": "Pridať štítok...",
   "export_translations_tags_title": "Štítky",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# deň zostávajúci do konca fakturačného roka, účtované {date}} few {# dni zostávajúce do konca fakturačného roka, účtované {date}} many {# dňa zostávajúceho do konca fakturačného roka, účtované {date}} other {# dní zostávajúcich do konca fakturačného roka, účtované {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Prechod na {words, number} slov",
   "oauth2_consent_deselect_all": "Zrušiť výber všetkých",
   "oauth2_consent_local_app_notice": "Prístup bude odovzdaný aplikácii bežiacej na tomto počítači. Pokračujte len v prípade, že ste ju práve sami spustili.",
   "oauth2_consent_scope_all": "Všetky povolenia",

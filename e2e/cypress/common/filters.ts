@@ -1,4 +1,5 @@
 import { waitForGlobalLoading } from './loading';
+import { dismissMenu } from './shared';
 
 export const assertFilter = ({
   submenu,
@@ -39,4 +40,22 @@ export const assertFilter = ({
 
   checkAfter?.();
   cy.gcy('translations-filter-select-clear').click();
+};
+
+/**
+ * The task filter nests three menus deep, one more than assertFilter's fixed two escapes,
+ * so the dismissal is spelled out here.
+ */
+export const assertTaskFilter = (and: () => void, toSeeAfter: string[]) => {
+  cy.gcy('translations-filter-select').click();
+  cy.waitForDom();
+  cy.gcy('submenu-item').contains('Tasks').click();
+  cy.waitForDom();
+  and();
+  dismissMenu();
+  dismissMenu();
+  dismissMenu();
+  waitForGlobalLoading();
+  toSeeAfter.forEach((i) => cy.contains(i).should('be.visible'));
+  cy.gcy('translations-key-name').should('have.length', toSeeAfter.length);
 };

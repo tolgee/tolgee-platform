@@ -62,6 +62,7 @@ class QueryBase<T>(
   private val entityManager: EntityManager,
   private val qaEnabled: Boolean,
   val qaDisabledLanguageIds: Set<Long>,
+  private val tasksEnabled: Boolean,
   val isCountQuery: Boolean = false,
   private val aiReviewFilterContext: AiReviewFilterContext? = null,
 ) {
@@ -110,6 +111,9 @@ class QueryBase<T>(
     applyTranslationFilters()
     applyAiReviewFilters()
     queryGlobalFiltering.apply()
+    if (tasksEnabled) {
+      queryGlobalFiltering.applyTaskHistoryFilters()
+    }
   }
 
   private fun applyAiReviewFilters() {

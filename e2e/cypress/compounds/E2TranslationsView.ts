@@ -15,6 +15,14 @@ type TranslationState = components['schemas']['TranslationViewModel']['state'];
 export type AiReviewFilterOutcome = NonNullable<
   operations['getTranslations']['parameters']['query']['filterAiReviewOutcome']
 >[number];
+type TaskType = components['schemas']['TaskModel']['type'];
+
+type TaskStatusFilter =
+  | 'ANY'
+  | 'IN_OPEN_TASK'
+  | 'NOT_IN_OPEN_TASK'
+  | 'HAS_BEEN_IN_TASK'
+  | 'NEVER_IN_TASK';
 
 export class E2TranslationsView {
   visit(projectId: number) {
@@ -140,6 +148,37 @@ export class E2TranslationsView {
   assertVisibleKeys(...keys: string[]) {
     this.assertTranslationsRowsCount(keys.length);
     keys.forEach((key) => this.getKeyCell(key).should('exist'));
+  }
+
+  getTaskTypeFilter(type: TaskType) {
+    return gcyAdvanced({ value: 'translations-filter-task-type', type });
+  }
+
+  /** Opens the condition submenu of one task type; it stays open across selections. */
+  openTaskTypeFilter(type: TaskType) {
+    this.getTaskTypeFilter(type).click();
+    cy.waitForDom();
+    return this;
+  }
+
+  getTaskStatusFilter(status: TaskStatusFilter) {
+    return gcyAdvanced({
+      value: 'translations-filter-task-status',
+      status,
+    });
+  }
+
+  selectTaskStatus(type: TaskType, status: TaskStatusFilter) {
+    this.openTaskTypeFilter(type);
+    this.getTaskStatusFilter(status).click();
+    return this;
+  }
+
+  assertTaskStatusChecked(status: TaskStatusFilter, checked = true) {
+    this.getTaskStatusFilter(status)
+      .find('input')
+      .should(checked ? 'be.checked' : 'not.be.checked');
+    return this;
   }
 
   getTranslationsRows() {

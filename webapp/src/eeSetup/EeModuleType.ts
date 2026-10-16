@@ -9,6 +9,7 @@ import {
   FilterActions,
   FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { TaskType } from 'tg.service/apiSchemaTypes';
 
 export type PermissionsAdvancedEeProps = {
   dependencies: HierarchyItem;
@@ -118,4 +119,12 @@ export type AiReviewBadgeProps = {
 
 export type AiReviewPlaygroundPreviewProps = {
   data: components['schemas']['AiPlaygroundResultModel'];
+};
+
+export type SubfilterTasksProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+  taskCreation?: boolean;
+  pinnedTaskType?: TaskType;
 };

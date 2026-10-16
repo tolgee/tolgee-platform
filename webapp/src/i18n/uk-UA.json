@@ -1363,6 +1363,8 @@
   "invoice_usage_dialog_table_subtotal": "Проміжний підсумок",
   "invoice_usage_dialog_table_total": "Всього",
   "invoice_usage_dialog_table_translations_item": "Рядки",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {залишився # день до кінця платіжного року, стягнуто {date}} few {залишилося # дні до кінця платіжного року, стягнуто {date}} many {залишилося # днів до кінця платіжного року, стягнуто {date}} other {залишилося # дня до кінця платіжного року, стягнуто {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Оновлення до {words, number} слів",
   "invoice_usage_dialog_table_vat": "ПДВ",
   "invoice_usage_dialog_table_vat_rate": "Ставка ПДВ",
   "invoice_usage_dialog_title": "Деталі використання",

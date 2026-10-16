@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { getAiReviewFiltersLength } from 'tg.ee';
 import { getAiReviewFilterQuery } from 'tg.views/projects/translations/TranslationFilters/aiReviewFilterQuery';
@@ -10,6 +12,38 @@ function remove<T extends string | number>(list: T[] | undefined, value: T) {
 
 function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
+}
+
+const LANGUAGE_SCOPES = [
+  'filterTranslationLanguage',
+  'filterSuggestionLanguage',
+  'filterTaskLanguage',
+  'filterQaCheckTypeLanguage',
+] as const satisfies readonly (keyof FiltersInternal)[];
+
+/**
+ * Drops every language-scoped filter whose language is no longer selected, or returns undefined
+ * when there is nothing to drop.
+ */
+export function withoutDanglingLanguageScopes(
+  filters: FiltersInternal,
+  newLanguages: string[] | undefined
+): FiltersInternal | undefined {
+  if (!newLanguages) {
+    return undefined;
+  }
+  const dangling = LANGUAGE_SCOPES.filter((scope) => {
+    const value = filters[scope];
+    return typeof value === 'string' && !newLanguages.includes(value);
+  });
+  if (!dangling.length) {
+    return undefined;
+  }
+  const updated = { ...filters };
+  dangling.forEach((scope) => {
+    updated[scope] = undefined;
+  });
+  return updated;
 }
 
 type Props = {
@@ -25,15 +59,20 @@ export const useTranslationFilters = ({
   selectedLanguages,
   baseLang,
 }: Props) => {
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+
   // adjusts filters to newly incoming languages
   // so in next render it's already correct
-  function updateSelectedLanguages(newLanguages: string[] | undefined) {
-    if (
-      typeof filters.filterTranslationLanguage === 'string' &&
-      newLanguages &&
-      newLanguages.includes(filters.filterTranslationLanguage)
-    ) {
-      setFilters({ filterTranslationLanguage: undefined });
+  function clearFiltersForRemovedLanguages(newLanguages: string[] | undefined) {
+    // the caller runs this from a debounce, so `filters` from that render can be several edits
+    // behind by now and writing it back would undo them
+    const updated = withoutDanglingLanguageScopes(
+      filtersRef.current,
+      newLanguages
+    );
+    if (updated) {
+      setFilters(updated);
     }
   }
 
@@ -277,6 +316,19 @@ export const useTranslationFilters = ({
     }
   }
 
+  function inLanguageScope(scope: true | string | undefined) {
+    return (tag: string) => {
+      switch (scope) {
+        case undefined:
+          return tag !== baseLang;
+        case true:
+          return true;
+        default:
+          return tag === scope;
+      }
+    };
+  }
+
   const filtersQuery: Partial<FiltersType> = {
     filterTag: filters.filterTag,
     filterNoTag: filters.filterNoTag,
@@ -340,16 +392,7 @@ export const useTranslationFilters = ({
         });
       });
     selectedLanguages
-      .filter((tag) => {
-        switch (filters.filterTranslationLanguage) {
-          case undefined:
-            return tag !== baseLang;
-          case true:
-            return true;
-          default:
-            return tag === filters.filterTranslationLanguage;
-        }
-      })
+      .filter(inLanguageScope(filters.filterTranslationLanguage))
       .forEach((tag) => {
         filters.filterTranslationState?.forEach((state) => {
           if (state === 'OUTDATED') {
@@ -378,16 +421,7 @@ export const useTranslationFilters = ({
       });
 
     selectedLanguages
-      .filter((tag) => {
-        switch (filters.filterSuggestionLanguage) {
-          case undefined:
-            return tag !== baseLang;
-          case true:
-            return true;
-          default:
-            return tag === filters.filterSuggestionLanguage;
-        }
-      })
+      .filter(inLanguageScope(filters.filterSuggestionLanguage))
       .forEach((tag) => {
         if (filters.filterHasSuggestions) {
           filtersQuery.filterHasSuggestionsInLang = add(
@@ -402,12 +436,25 @@ export const useTranslationFilters = ({
           );
         }
       });
+
+    const taskLanguages = selectedLanguages.filter(
+      inLanguageScope(filters.filterTaskLanguage)
+    );
+    const taskStatuses = Object.entries(filters.filterTaskStatus ?? {});
+    taskLanguages.forEach((tag) => {
+      taskStatuses.forEach(([type, status]) => {
+        filtersQuery.filterTaskInLang = add(
+          filtersQuery.filterTaskInLang,
+          `${tag},${type},${status}`
+        );
+      });
+    });
   }
 
   return {
     filters,
     filtersQuery,
-    updateSelectedLanguages,
+    clearFiltersForRemovedLanguages,
     addFilter,
     removeFilter,
     setFilters,

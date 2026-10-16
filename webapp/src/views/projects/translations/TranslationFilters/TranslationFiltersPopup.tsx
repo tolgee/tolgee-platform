@@ -1,6 +1,7 @@
 import { Box, Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 import { FilterActions, FilterOptions } from './tools';
 import { FiltersType, LanguageModel } from './tools';
@@ -21,8 +22,10 @@ import { SubfilterDeletedBy } from './SubfilterDeletedBy';
 import {
   getAiReviewFiltersLength,
   getQaChecksFiltersLength,
+  getTaskFiltersLength,
   SubfilterAiReview,
   SubfilterQaChecks,
+  SubfilterTasks,
   useAiReviewEnabled,
 } from 'tg.ee';
 
@@ -50,6 +53,14 @@ export const TranslationFiltersPopup = ({
   const { t } = useTranslate();
   const project = useProject();
   const aiReview = useAiReviewEnabled();
+  const { isEnabled } = useEnabledFeatures();
+  const tasksEnabled = isEnabled('TASKS') || isEnabled('ORDER_TRANSLATION');
+  const tasksFilterAvailable =
+    tasksEnabled || Boolean(getTaskFiltersLength(value));
+  const surfaceShowsTaskFilter =
+    !filterOptions?.scopeOnly &&
+    !filterOptions?.taskPrefiltered &&
+    (!filterOptions?.keyRelatedOnly || filterOptions?.taskCreation);
   return (
     <Menu
       open={true}
@@ -123,6 +134,15 @@ export const TranslationFiltersPopup = ({
             )}
           </>
         )}
+        {tasksFilterAvailable && surfaceShowsTaskFilter && (
+          <SubfilterTasks
+            value={value}
+            actions={actions}
+            selectedLanguages={selectedLanguages}
+            taskCreation={filterOptions?.taskCreation}
+            pinnedTaskType={filterOptions?.pinnedTaskType}
+          />
+        )}
         {project.suggestionsMode !== 'DISABLED' &&
           !filterOptions?.scopeOnly && (
             <SubfilterSuggestions
@@ -130,6 +150,7 @@ export const TranslationFiltersPopup = ({
               actions={actions}
               projectId={projectId}
               selectedLanguages={selectedLanguages}
+              taskCreation={filterOptions?.taskCreation}
             />
           )}
         {filterOptions?.showDeletedBy && (

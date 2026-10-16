@@ -62,6 +62,7 @@ class TranslationViewDataProvider(
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
     val aiReviewFilterContext = resolveAiReviewFilterContext(project, params)
+    val tasksEnabled = areTasksEnabled(project)
 
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
 
@@ -75,6 +76,7 @@ class TranslationViewDataProvider(
         qaEnabled,
         qaDisabledLanguageIds,
         aiReviewFilterContext,
+        tasksEnabled,
       )
     val count = em.createQuery(newQueryBuilder().countQuery).singleResult
 
@@ -236,6 +238,10 @@ class TranslationViewDataProvider(
       qaChecksStale = false,
     )
 
+  private fun areTasksEnabled(project: Project) =
+    projectFeatureGuard.isFeatureEnabled(Feature.TASKS, project) ||
+      projectFeatureGuard.isFeatureEnabled(Feature.ORDER_TRANSLATION, project)
+
   private fun resolveQaDisabledLanguageIds(
     projectId: Long,
     qaEnabled: Boolean,
@@ -344,6 +350,7 @@ class TranslationViewDataProvider(
     val project = projectService.get(projectId)
     val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     val qaDisabledLanguageIds = resolveQaDisabledLanguageIds(projectId, qaEnabled)
+    val tasksEnabled = areTasksEnabled(project)
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
@@ -356,6 +363,7 @@ class TranslationViewDataProvider(
         qaEnabled = qaEnabled,
         qaDisabledLanguageIds = qaDisabledLanguageIds,
         aiReviewFilterContext = resolveAiReviewFilterContext(project, params),
+        tasksEnabled = tasksEnabled,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -371,6 +379,7 @@ class TranslationViewDataProvider(
     qaEnabled: Boolean,
     qaDisabledLanguageIds: Set<Long>,
     aiReviewFilterContext: AiReviewFilterContext?,
+    tasksEnabled: Boolean,
   ) = TranslationsViewQueryBuilder(
     cb = em.criteriaBuilder,
     projectId = projectId,
@@ -382,6 +391,7 @@ class TranslationViewDataProvider(
     qaEnabled = qaEnabled,
     qaDisabledLanguageIds = qaDisabledLanguageIds,
     aiReviewFilterContext = aiReviewFilterContext,
+    tasksEnabled = tasksEnabled,
   )
 
   private fun resolveAiReviewFilterContext(

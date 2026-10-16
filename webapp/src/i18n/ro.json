@@ -1553,6 +1553,8 @@
   "invoice_usage_dialog_table_subtotal": "Subtotal",
   "invoice_usage_dialog_table_total": "Total",
   "invoice_usage_dialog_table_translations_item": "Șiruri de caractere",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# zi rămasă din anul de facturare, taxată {date}} few {# zile rămase din anul de facturare, taxate {date}} other {# de zile rămase din anul de facturare, taxate {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Actualizare la {words, number} cuvinte",
   "invoice_usage_dialog_table_vat": "TVA",
   "invoice_usage_dialog_table_vat_rate": "Rată TVA",
   "invoice_usage_dialog_title": "Detalii utilizare",

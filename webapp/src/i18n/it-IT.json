@@ -1537,6 +1537,8 @@
   "invoice_usage_dialog_table_subtotal": "Totale parziale",
   "invoice_usage_dialog_table_total": "Totale",
   "invoice_usage_dialog_table_translations_item": "Stringhe",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# giorno rimanente dell'anno di fatturazione, addebitato il {date}} other {# giorni rimanenti dell'anno di fatturazione, addebitato il {date}} }",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgrade a {words, number} parole",
   "invoice_usage_dialog_table_vat": "IVA",
   "invoice_usage_dialog_table_vat_rate": "Aliquota IVA",
   "invoice_usage_dialog_title": "Dettagli di utilizzo",

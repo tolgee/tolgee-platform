@@ -1555,6 +1555,8 @@
   "invoice_usage_dialog_table_subtotal": "Zwischensumme",
   "invoice_usage_dialog_table_total": "Gesamt",
   "invoice_usage_dialog_table_translations_item": "Übersetzungen",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# Tag im Abrechnungsjahr verbleibend, berechnet am {date}} other {# Tage im Abrechnungsjahr verbleibend, berechnet am {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgrade auf {words, number} Wörter",
   "invoice_usage_dialog_table_vat": "MwSt",
   "invoice_usage_dialog_table_vat_rate": "Mehrwertsteuersatz",
   "invoice_usage_dialog_title": "Nutzungsdetails",

@@ -1,3 +1,24 @@
+## [3.236.1](https://github.com/tolgee/tolgee-platform/compare/v3.236.0...v3.236.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* stop batch operation dialog hanging on "Finalizing…" ([#3959](https://github.com/tolgee/tolgee-platform/issues/3959)) ([ae52e5c](https://github.com/tolgee/tolgee-platform/commit/ae52e5c21f5b63fa8911fde3d35d6fa799811ce4)), closes [#3948](https://github.com/tolgee/tolgee-platform/issues/3948) [#3892](https://github.com/tolgee/tolgee-platform/issues/3892)
+
+# [3.236.0](https://github.com/tolgee/tolgee-platform/compare/v3.235.0...v3.236.0) (2026-10-15)
+
+
+### Features
+
+* add an error for picking a plan tier below the organization's word count ([#3968](https://github.com/tolgee/tolgee-platform/issues/3968)) ([f5f2948](https://github.com/tolgee/tolgee-platform/commit/f5f294880bbd01cabac9c8ad7dde186f043aceb0))
+
+# [3.235.0](https://github.com/tolgee/tolgee-platform/compare/v3.234.2...v3.235.0) (2026-10-15)
+
+
+### Features
+
+* add language-scoped filter for translations never included in a task ([#3871](https://github.com/tolgee/tolgee-platform/issues/3871)) ([abfab54](https://github.com/tolgee/tolgee-platform/commit/abfab5441451fc9f9f052728cffb40a513e64272)), closes [#3848](https://github.com/tolgee/tolgee-platform/issues/3848) [tolgee/billing#299](https://github.com/tolgee/billing/issues/299)
+
 ## [3.234.2](https://github.com/tolgee/tolgee-platform/compare/v3.234.1...v3.234.2) (2026-10-14)
 
 

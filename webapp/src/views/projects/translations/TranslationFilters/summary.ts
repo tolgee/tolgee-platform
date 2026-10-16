@@ -41,6 +41,8 @@ import {
   getAiReviewFiltersName,
   getQaChecksFiltersLength,
   getQaChecksFiltersName,
+  getTaskFiltersLength,
+  getTaskFiltersName,
 } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -58,6 +60,7 @@ export function countFilters(value: FiltersInternal) {
     getLabelFiltersLength(value) +
     getSuggestionsFiltersLength(value) +
     getDeletedByFiltersLength(value) +
+    getTaskFiltersLength(value) +
     getQaChecksFiltersLength(value) +
     getAiReviewFiltersLength(value)
   );
@@ -75,6 +78,7 @@ export function getFilterName(value: FiltersInternal, labels?: LabelModel[]) {
     getLabelFiltersName(value, labels) ||
     getSuggestionsFiltersName(value) ||
     getDeletedByFiltersName(value) ||
+    getTaskFiltersName(value) ||
     getQaChecksFiltersName(value) ||
     getAiReviewFiltersName(value)
   );

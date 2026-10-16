@@ -1559,6 +1559,8 @@
   "invoice_usage_dialog_table_subtotal": "Subtotal",
   "invoice_usage_dialog_table_total": "Total",
   "invoice_usage_dialog_table_translations_item": "Strings",
+  "invoice_usage_dialog_table_upgrade_proration_detail": "{days, plural, one {# day left of the billing year, charged {date}} other {# days left of the billing year, charged {date}}}",
+  "invoice_usage_dialog_table_upgrade_proration_item": "Upgrade to {words, number} words",
   "invoice_usage_dialog_table_vat": "VAT",
   "invoice_usage_dialog_table_vat_rate": "VAT rate",
   "invoice_usage_dialog_title": "Usage details",
