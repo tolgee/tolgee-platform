@@ -1,3 +1,10 @@
+## [3.236.1](https://github.com/tolgee/tolgee-platform/compare/v3.236.0...v3.236.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* stop batch operation dialog hanging on "Finalizing…" ([#3959](https://github.com/tolgee/tolgee-platform/issues/3959)) ([ae52e5c](https://github.com/tolgee/tolgee-platform/commit/ae52e5c21f5b63fa8911fde3d35d6fa799811ce4)), closes [#3948](https://github.com/tolgee/tolgee-platform/issues/3948) [#3892](https://github.com/tolgee/tolgee-platform/issues/3892)
+
 # [3.236.0](https://github.com/tolgee/tolgee-platform/compare/v3.235.0...v3.236.0) (2026-10-15)
 
 
