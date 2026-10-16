@@ -64,6 +64,7 @@ class BatchJobService(
 ) : Logging {
   companion object {
     private const val DEBOUNCE_MAX_WAITING_TIME_MULTIPLIER = 4
+    private const val MAX_DUAL_WRITTEN_PRODUCT_ITEMS = 1_000_000
   }
 
   @Transactional
@@ -102,7 +103,7 @@ class BatchJobService(
         this.project = project
         this.author = author
         this.targetProduct = targetProduct?.spec
-        this.target = targetProduct?.let { listOf() } ?: target
+        this.target = targetStoredInColumn(target, targetProduct)
         this.totalItems = target.size
         this.chunkSize = processor.getChunkSize(projectId = project?.id, request = request)
         this.jobCharacter = processor.getJobCharacter(request = request, projectId = project?.id)
@@ -127,6 +128,16 @@ class BatchJobService(
     applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     return job
+  }
+
+  private fun targetStoredInColumn(
+    target: List<Any>,
+    targetProduct: TranslationTargetProduct?,
+  ): List<Any> {
+    // ponytail: nodes on the previous release read only `target`; drop this dual write once they are gone
+    if (targetProduct == null) return target
+    if (targetProduct.size > MAX_DUAL_WRITTEN_PRODUCT_ITEMS) return emptyList()
+    return targetProduct.toList()
   }
 
   private fun storeExecutions(

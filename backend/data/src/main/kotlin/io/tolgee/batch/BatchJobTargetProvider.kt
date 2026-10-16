@@ -25,12 +25,14 @@ class BatchJobTargetProvider(
   private val cache: Cache<Long, List<Any>> =
     Caffeine
       .newBuilder()
-      .maximumWeight(MAX_CACHED_ITEMS)
-      .weigher<Long, List<Any>> { _, target -> weight(target) }
+      .maximumWeight(MAX_CACHED_BYTES)
+      .weigher<Long, List<Any>> { _, target -> estimatedBytes(target) }
       .expireAfterAccess(Duration.ofMinutes(30))
       .build()
 
   fun getTarget(jobId: Long): List<Any> = cache.get(jobId) { load(it) }
+
+  fun getTargetWithoutCaching(jobId: Long): List<Any> = cache.getIfPresent(jobId) ?: load(jobId)
 
   fun getChunk(
     job: BatchJobDto,
@@ -68,14 +70,27 @@ class BatchJobTargetProvider(
     return objectMapper.readValue(target, List::class.java) as List<Any>
   }
 
-  private fun weight(target: List<Any>): Int {
+  internal fun estimatedBytes(target: List<Any>): Int {
     if (target is TranslationTargetProduct) {
-      return target.keyIds.size + target.languageIds.size
+      return ((target.keyIds.size + target.languageIds.size).toLong() * BYTES_PER_NUMBER).toIntWeight()
     }
-    return target.size.coerceAtLeast(1)
+    return (target.size.toLong() * bytesPerItem(target)).toIntWeight()
   }
 
+  private fun bytesPerItem(target: List<Any>): Long {
+    if (target.firstOrNull() is Map<*, *>) return BYTES_PER_MAP_ITEM
+    return BYTES_PER_NUMBER
+  }
+
+  private fun Long.toIntWeight() = coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+
   companion object {
-    private const val MAX_CACHED_ITEMS = 20_000_000L
+    private const val MAX_CACHED_BYTES = 512L * 1024 * 1024
+    private const val BYTES_PER_NUMBER = 24L
+
+    /**
+     * A list target loaded from the database decodes every item into its own LinkedHashMap.
+     */
+    private const val BYTES_PER_MAP_ITEM = 256L
   }
 }

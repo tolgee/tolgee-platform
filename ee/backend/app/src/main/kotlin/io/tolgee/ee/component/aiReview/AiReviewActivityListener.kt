@@ -143,7 +143,7 @@ class AiReviewActivityListener(
     if (!isAiReviewOn(projectId)) return
     val items =
       batchJobTargetProvider
-        .getTarget(event.job.id)
+        .getTargetWithoutCaching(event.job.id)
         .map { objectMapper.convertValue(it, BatchTranslationTargetItem::class.java) }
     if (items.isEmpty()) return
     val translationIds =

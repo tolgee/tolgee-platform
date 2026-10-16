@@ -4,20 +4,40 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.language.LanguageService
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.opentest4j.AssertionFailedError
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class LanguageStatsListenerTest : AbstractControllerTest() {
   @Autowired
   private lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  private lateinit var lockingProvider: LockingProvider
+
+  @MockitoSpyBean
+  @Autowired
+  private lateinit var spiedLanguageService: LanguageService
 
   lateinit var testData: TranslationsTestData
 
@@ -25,6 +45,11 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
   fun setup() {
     testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -40,6 +65,65 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
       assertThat(newStats.translationsUpdatedAt!!.after(stats!!.translationsUpdatedAt))
     }
   }
+
+  @Test
+  fun `coalesced refresh is skipped while another refresh waits for the lock`() {
+    val lock = lockingProvider.getLock(languageStatsLockName()) as ReentrantLock
+    lock.lock()
+    val waitingRefresh: CompletableFuture<Void>
+    try {
+      waitingRefresh = startCoalescedRefresh()
+      waitFor { lock.hasQueuedThreads() }
+      startCoalescedRefresh().get(5, TimeUnit.SECONDS)
+      waitingRefresh.assert.matches({ !it.isDone }, "not done")
+    } finally {
+      lock.unlock()
+    }
+    waitingRefresh.get(30, TimeUnit.SECONDS)
+  }
+
+  @Test
+  fun `coalesced refresh runs again once the waiting one has taken the lock`() {
+    startCoalescedRefresh().get(30, TimeUnit.SECONDS)
+
+    val lock = lockingProvider.getLock(languageStatsLockName()) as ReentrantLock
+    lock.lock()
+    val refresh: CompletableFuture<Void>
+    try {
+      refresh = startCoalescedRefresh()
+      waitFor { lock.hasQueuedThreads() }
+    } finally {
+      lock.unlock()
+    }
+    refresh.get(30, TimeUnit.SECONDS)
+  }
+
+  @Test
+  fun `a failed waiting refresh is retried for the callers it skipped`() {
+    val lock = lockingProvider.getLock(languageStatsLockName()) as ReentrantLock
+    lock.lock()
+    val waitingRefresh: CompletableFuture<Void>
+    try {
+      waitingRefresh = startCoalescedRefresh()
+      waitFor { lock.hasQueuedThreads() }
+      startCoalescedRefresh().get(5, TimeUnit.SECONDS)
+      clearInvocations(spiedLanguageService)
+      doThrow(RuntimeException("transient failure"))
+        .doCallRealMethod()
+        .whenever(spiedLanguageService)
+        .findAll(testData.project.id)
+    } finally {
+      lock.unlock()
+    }
+
+    waitingRefresh.get(30, TimeUnit.SECONDS)
+    verify(spiedLanguageService, times(2)).findAll(testData.project.id)
+  }
+
+  private fun languageStatsLockName() = "refresh-lang-stats-${testData.project.id}-default"
+
+  private fun startCoalescedRefresh() =
+    CompletableFuture.runAsync { languageStatsService.refreshLanguageStatsCoalesced(testData.project.id) }
 
   private fun getProjectStats(languageTag: String): LanguageStatsDto? {
     val projectLanguages = languageService.getProjectLanguages(testData.project.id).associateBy { it.id }

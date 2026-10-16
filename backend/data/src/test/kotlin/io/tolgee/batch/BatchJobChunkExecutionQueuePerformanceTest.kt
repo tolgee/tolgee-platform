@@ -132,12 +132,8 @@ class BatchJobChunkExecutionQueuePerformanceTest {
       .isLessThan(500)
   }
 
-  /**
-   * With Redis, every node receives a REMOVE event for each chunk another node started. Those chunks are at the
-   * head of the local job queue, so handling an event must not scan the whole queue.
-   */
   @Test
-  fun `REMOVE events for consumed items are fast with 1 large job`() {
+  fun `REMOVE events for chunks at the queue head do not scan the whole queue`() {
     val items = (1L..110_000L).map { makeItem(it, jobId = 1L) }
     executionQueue.addItemsToLocalQueue(items)
 

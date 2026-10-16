@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.batch.data.TranslationTargetProductSpec
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
@@ -626,6 +627,26 @@ class TranslationsTestData {
           status = BatchJobChunkExecutionStatus.FAILED
         }.build {
           this.successfulTargetsProvider = { emptyList() }
+        }
+      }.self
+  }
+
+  fun addFailedProductBatchJob(keySucceeded: Boolean = false): BatchJob {
+    return projectBuilder
+      .addBatchJob {
+        status = BatchJobStatus.FAILED
+      }.build {
+        this.targetProductProvider = {
+          TranslationTargetProductSpec(listOf(aKey.id), listOf(germanLanguage.id))
+        }
+        addChunkExecution {
+          this.retry = false
+          status = BatchJobChunkExecutionStatus.FAILED
+        }.build {
+          this.successfulTargetsProvider = successfulTargets@{
+            if (!keySucceeded) return@successfulTargets emptyList()
+            listOf(mapOf("keyId" to aKey.id, "languageId" to germanLanguage.id))
+          }
         }
       }.self
   }
