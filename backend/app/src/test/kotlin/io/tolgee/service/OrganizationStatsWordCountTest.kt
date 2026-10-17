@@ -75,17 +75,20 @@ class OrganizationStatsWordCountTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `getTranslationAndWordCount agrees with the single-figure queries`() {
-    listOf(
-      testData.multiLangOrg,
-      testData.branchDedupOrg,
-      testData.noBranchingOrg,
-      testData.emptyTranslationOrg,
-      testData.nullBranchDedupOrg,
-    ).forEach { organization ->
-      val both = organizationStatsService.getTranslationAndWordCount(organization.id)
-      assertThat(both.words).isEqualTo(organizationStatsService.getWordCount(organization.id))
-      assertThat(both.translations).isEqualTo(organizationStatsService.getTranslationCount(organization.id))
-    }
+  fun `counts skip deleted branches and branches a project without branching ignores`() {
+    val both = organizationStatsService.getTranslationAndWordCount(testData.singleBranchOrg.id)
+
+    assertThat(both.translations).isEqualTo(2)
+    assertThat(both.words).isEqualTo(5)
+    assertThat(organizationStatsService.getKeyCount(testData.singleBranchOrg.id)).isEqualTo(2)
+  }
+
+  @Test
+  fun `counts a name on no branch and on the default branch once when branching is off`() {
+    val both = organizationStatsService.getTranslationAndWordCount(testData.defaultBranchDedupOrg.id)
+
+    assertThat(both.translations).isEqualTo(1)
+    assertThat(both.words).isEqualTo(3)
+    assertThat(organizationStatsService.getKeyCount(testData.defaultBranchDedupOrg.id)).isEqualTo(1)
   }
 }

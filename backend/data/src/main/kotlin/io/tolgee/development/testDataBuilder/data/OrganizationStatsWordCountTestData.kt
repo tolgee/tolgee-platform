@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
+import java.util.Date
 
 class OrganizationStatsWordCountTestData {
   val root = TestDataBuilder()
@@ -20,6 +21,10 @@ class OrganizationStatsWordCountTestData {
 
   lateinit var nullBranchDedupOrg: Organization
 
+  lateinit var singleBranchOrg: Organization
+
+  lateinit var defaultBranchDedupOrg: Organization
+
   init {
     root.apply {
       addMultiLangScenario()
@@ -27,6 +32,8 @@ class OrganizationStatsWordCountTestData {
       addNoBranchingScenario()
       addEmptyTranslationScenario()
       addNullBranchDedupScenario()
+      addSingleBranchScenario()
+      addDefaultBranchDedupScenario()
     }
   }
 
@@ -233,6 +240,135 @@ class OrganizationStatsWordCountTestData {
         branch = featureBranch
       }.build {
         addTranslation("en", "hello world there")
+      }
+    }
+  }
+
+  private fun TestDataBuilder.addSingleBranchScenario() {
+    val userBuilder =
+      addUserAccount {
+        username = "wc-single-branch-user"
+      }
+
+    singleBranchOrg = userBuilder.defaultOrganizationBuilder.self
+
+    addProject {
+      name = "Deleted Branch WC Project"
+      organizationOwner = singleBranchOrg
+      useBranching = true
+    }.build {
+      addLanguage {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        this@build.self.baseLanguage = this
+      }
+
+      val mainBranch =
+        addBranch {
+          name = "main"
+          project = self
+          isDefault = true
+        }.build { self }.self
+
+      val deletedBranch =
+        addBranch {
+          name = "deleted"
+          project = self
+          originBranch = mainBranch
+          deletedAt = Date()
+        }.build { self }.self
+
+      addKey {
+        name = "sb-key1"
+        branch = mainBranch
+      }.build {
+        addTranslation("en", "one two")
+      }
+      addKey {
+        name = "sb-key1"
+        branch = deletedBranch
+      }.build {
+        addTranslation("en", "one two three four")
+      }
+    }
+
+    addProject {
+      name = "Ignored Branch WC Project"
+      organizationOwner = singleBranchOrg
+      useBranching = false
+    }.build {
+      addLanguage {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        this@build.self.baseLanguage = this
+      }
+
+      val mainBranch =
+        addBranch {
+          name = "main"
+          project = self
+          isDefault = true
+        }.build { self }.self
+
+      val ignoredBranch =
+        addBranch {
+          name = "ignored"
+          project = self
+          originBranch = mainBranch
+        }.build { self }.self
+
+      addKey {
+        name = "sb-key2"
+        branch = mainBranch
+      }.build {
+        addTranslation("en", "x y z")
+      }
+      addKey {
+        name = "sb-key3"
+        branch = ignoredBranch
+      }.build {
+        addTranslation("en", "ignored")
+      }
+    }
+  }
+
+  private fun TestDataBuilder.addDefaultBranchDedupScenario() {
+    val userBuilder =
+      addUserAccount {
+        username = "wc-default-branch-dedup-user"
+      }
+
+    defaultBranchDedupOrg = userBuilder.defaultOrganizationBuilder.self
+
+    addProject {
+      name = "Default Branch Dedup WC Project"
+      organizationOwner = defaultBranchDedupOrg
+      useBranching = false
+    }.build {
+      addLanguage {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        this@build.self.baseLanguage = this
+      }
+
+      val mainBranch =
+        addBranch {
+          name = "main"
+          project = self
+          isDefault = true
+        }.build { self }.self
+
+      addKey { name = "dbd-key1" }.build {
+        addTranslation("en", "one")
+      }
+      addKey {
+        name = "dbd-key1"
+        branch = mainBranch
+      }.build {
+        addTranslation("en", "one two three")
       }
     }
   }
