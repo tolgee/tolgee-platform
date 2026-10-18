@@ -3350,7 +3350,8 @@ export interface components {
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
         | "project_storage_too_many_fields"
-        | "plan_feature_grants_not_allowed";
+        | "plan_feature_grants_not_allowed"
+        | "hidden_feature_cannot_be_in_plan";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7425,7 +7426,8 @@ export interface components {
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
         | "project_storage_too_many_fields"
-        | "plan_feature_grants_not_allowed";
+        | "plan_feature_grants_not_allowed"
+        | "hidden_feature_cannot_be_in_plan";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
