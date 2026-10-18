@@ -53,6 +53,12 @@ export interface paths {
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
   };
+  "/v2/administration/organizations/{organizationId}/features": {
+    /** Returns plan features of the organization, including those granted by a server administrator. */
+    get: operations["getOrganizationFeatures"];
+    /** Sets plan features granted to the organization regardless of its plan. */
+    put: operations["setOrganizationFeatures"];
+  };
   "/v2/administration/project-batch-locks": {
     /** Returns current project batch job locks from Redis or local storage based on configuration */
     get: operations["getProjectLocks"];
@@ -2920,6 +2926,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -3342,7 +3349,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "plan_feature_grants_not_allowed";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4748,6 +4756,11 @@ export interface components {
       /** @example btforg */
       slug?: string;
     };
+    OrganizationFeaturesModel: {
+      /** @description Whether plan features can be granted on this server. Self-hosted instances get plan features only from their license. */
+      planFeatureGrantsAllowed: boolean;
+      planFeatures: components["schemas"]["PlanFeatureStateModel"][];
+    };
     OrganizationInvitationModel: {
       code: string;
       /** Format: date-time */
@@ -5370,6 +5383,40 @@ export interface components {
        */
       viewLanguageIds?: number[];
     };
+    PlanFeatureStateModel: {
+      /** @enum {string} */
+      feature:
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY"
+        | "TRANSLATION_LABELS"
+        | "BRANCHING"
+        | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
+        | "AI_REVIEW";
+      /** @description Whether the organization's plan or license includes the feature */
+      fromPlan: boolean;
+      /** @description Whether the feature is granted to the organization regardless of its plan */
+      granted: boolean;
+      /** @description Whether the feature is still in development and invisible to users */
+      hidden: boolean;
+    };
     PlanIncludedUsageModel: {
       /** Format: int64 */
       keys: number;
@@ -5450,6 +5497,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       /** Format: int64 */
       id: number;
@@ -5928,6 +5976,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -6521,6 +6570,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -6567,6 +6617,35 @@ export interface components {
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
+    };
+    SetOrganizationFeaturesRequest: {
+      /** @description Plan features granted to the organization regardless of its plan. Replaces the current set. */
+      grantedFeatures: (
+        | "GRANULAR_PERMISSIONS"
+        | "PRIORITIZED_FEATURE_REQUESTS"
+        | "PREMIUM_SUPPORT"
+        | "DEDICATED_SLACK_CHANNEL"
+        | "ASSISTED_UPDATES"
+        | "DEPLOYMENT_ASSISTANCE"
+        | "BACKUP_CONFIGURATION"
+        | "TEAM_TRAINING"
+        | "ACCOUNT_MANAGER"
+        | "STANDARD_SUPPORT"
+        | "PROJECT_LEVEL_CONTENT_STORAGES"
+        | "WEBHOOKS"
+        | "MULTIPLE_CONTENT_DELIVERY_CONFIGS"
+        | "AI_PROMPT_CUSTOMIZATION"
+        | "SLACK_INTEGRATION"
+        | "TASKS"
+        | "SSO"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY"
+        | "TRANSLATION_LABELS"
+        | "BRANCHING"
+        | "QA_CHECKS"
+        | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
+      )[];
     };
     SetOrganizationRoleDto: {
       /** @enum {string} */
@@ -7345,7 +7424,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "plan_feature_grants_not_allowed";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8856,6 +8936,107 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  /** Returns plan features of the organization, including those granted by a server administrator. */
+  getOrganizationFeatures: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationFeaturesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets plan features granted to the organization regardless of its plan. */
+  setOrganizationFeatures: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrganizationFeaturesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetOrganizationFeaturesRequest"];
       };
     };
   };

@@ -20,6 +20,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.QuickStartService
+import io.tolgee.service.organization.OrganizationFeatureGrantChangeService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.testing.AuthorizedControllerTest
@@ -69,6 +70,9 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  private lateinit var organizationFeatureGrantChangeService: OrganizationFeatureGrantChangeService
 
   lateinit var testData: QaTestData
   private var demoProjectId: Long? = null
@@ -165,6 +169,86 @@ class QaEventListenerTest : AuthorizedControllerTest() {
         val project = projectService.get(testData.project.id)
         assertThat(project.useQaChecks).isFalse()
       }
+    }
+  }
+
+  @Test
+  fun `license-wide QA loss disables QA only for organizations without a grant`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
+    withPlanFeatureGrantsAllowed {
+      assertQaChecksLossMaskedByGrant(publishedOrganizationId = null)
+    }
+  }
+
+  @Test
+  fun `organization's QA loss from billing disables QA only when no grant masks it`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
+    withPlanFeatureGrantsAllowed {
+      assertQaChecksLossMaskedByGrant(publishedOrganizationId = orgId)
+    }
+  }
+
+  @Test
+  fun `granting QA_CHECKS disables QA for the organization's projects`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    withPlanFeatureGrantsAllowed {
+      organizationFeatureGrantChangeService.setGrants(orgId, setOf(Feature.QA_CHECKS), null)
+
+      assertQaGetsDisabled()
+    }
+  }
+
+  private val orgId: Long
+    get() = testData.userAccountBuilder.defaultOrganizationBuilder.self.id
+
+  private fun withPlanFeatureGrantsAllowed(block: () -> Unit) {
+    internalProperties.allowPlanFeatureGrants = true
+    try {
+      block()
+    } finally {
+      internalProperties.allowPlanFeatureGrants = false
+    }
+  }
+
+  private fun assertQaChecksLossMaskedByGrant(publishedOrganizationId: Long?) {
+    organizationFeatureGrantChangeService.setGrants(orgId, setOf(Feature.QA_CHECKS), null)
+
+    publishQaChecksLoss(publishedOrganizationId)
+    giveAsyncListenerTimeToRun()
+    executeInNewTransaction(platformTransactionManager) {
+      assertThat(projectService.get(testData.project.id).useQaChecks).isTrue()
+    }
+
+    organizationFeatureGrantChangeService.setGrants(orgId, emptySet(), null)
+    publishQaChecksLoss(publishedOrganizationId)
+    assertQaGetsDisabled()
+  }
+
+  /**
+   * Proving a negative: a too-short wait makes the "did not disable" assertion pass before a buggy
+   * listener would have run.
+   */
+  private fun giveAsyncListenerTimeToRun() {
+    Thread.sleep(3_000)
+  }
+
+  private fun assertQaGetsDisabled() {
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        assertThat(projectService.get(testData.project.id).useQaChecks).isFalse()
+      }
+    }
+  }
+
+  private fun publishQaChecksLoss(organizationId: Long?) {
+    executeInNewTransaction(platformTransactionManager) {
+      applicationEventPublisher.publishEvent(
+        OnOrganizationFeaturesChanged(
+          organizationId = organizationId,
+          gainedFeatures = emptySet(),
+          lostFeatures = setOf(Feature.QA_CHECKS),
+        ),
+      )
     }
   }
 

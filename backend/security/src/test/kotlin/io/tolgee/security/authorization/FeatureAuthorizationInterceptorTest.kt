@@ -19,14 +19,16 @@ package io.tolgee.security.authorization
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.OrganizationDto
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.security.OrganizationHolder
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
-import org.mockito.kotlin.whenever
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -34,7 +36,15 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 
 class FeatureAuthorizationInterceptorTest {
-  private val enabledFeaturesProvider = Mockito.mock(EnabledFeaturesProvider::class.java)
+  class FakeEnabledFeaturesProvider : EnabledFeaturesProvider {
+    var enabled: Set<Feature> = emptySet()
+
+    override fun get(organizationId: Long?): Array<Feature> = enabled.toTypedArray()
+
+    override fun getPlanFeatures(organizationId: Long?): Array<Feature> = enabled.toTypedArray()
+  }
+
+  private val enabledFeaturesProvider = FakeEnabledFeaturesProvider()
   private val organizationFeatureGuard = OrganizationFeatureGuard(enabledFeaturesProvider)
   private val organizationHolder = Mockito.mock(OrganizationHolder::class.java)
   private val organization = Mockito.mock(OrganizationDto::class.java)
@@ -59,8 +69,8 @@ class FeatureAuthorizationInterceptorTest {
 
   @AfterEach
   fun resetMocks() {
+    enabledFeaturesProvider.enabled = emptySet()
     Mockito.reset(
-      enabledFeaturesProvider,
       organizationHolder,
       organization,
     )
@@ -78,35 +88,56 @@ class FeatureAuthorizationInterceptorTest {
 
   @Test
   fun `it allows access when all required features are enabled`() {
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(true)
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(true)
+    enabledFeaturesProvider.enabled = setOf(Feature.GLOSSARY, Feature.TASKS)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-features")).andIsOk
   }
 
   @Test
   fun `it denies access when any required feature is not enabled`() {
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(true)
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(false)
+    enabledFeaturesProvider.enabled = setOf(Feature.GLOSSARY)
 
-    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-features")) }
+    val thrown = assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-features")) }
+    assertThat(thrown.rootCause()).isInstanceOf(BadRequestException::class.java)
   }
 
   @Test
   fun `it allows access when at least one of the required features is enabled`() {
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(false)
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(true)
+    enabledFeaturesProvider.enabled = setOf(Feature.TASKS)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-one-of-features")).andIsOk
   }
 
   @Test
   fun `it denies access when none of the required features are enabled`() {
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(false)
-    whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(false)
-
-    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-one-of-features")) }
+    val thrown = assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-one-of-features")) }
+    assertThat(thrown.rootCause()).isInstanceOf(BadRequestException::class.java)
   }
+
+  @Test
+  fun `it responds with not found when a required hidden feature is not enabled`() {
+    mockMvc.perform(get("/v2/organizations/1337/requires-hidden-feature")).andIsNotFound
+  }
+
+  @Test
+  fun `it allows access to a hidden-feature endpoint when the feature is enabled`() {
+    enabledFeaturesProvider.enabled = setOf(Feature.AI_REVIEW)
+
+    mockMvc.perform(get("/v2/organizations/1337/requires-hidden-feature")).andIsOk
+  }
+
+  @Test
+  fun `it leaves hidden features out of the error params`() {
+    val thrown =
+      assertThrows<Exception> {
+        mockMvc.perform(get("/v2/organizations/1337/requires-one-of-hidden-and-visible"))
+      }
+    val cause = thrown.rootCause()
+    assertThat(cause).isInstanceOf(BadRequestException::class.java)
+    assertThat((cause as BadRequestException).params).containsExactly(Feature.GLOSSARY)
+  }
+
+  private fun Throwable.rootCause(): Throwable = generateSequence(this) { it.cause }.last()
 
   @RestController
   class TestController {
@@ -126,6 +157,18 @@ class FeatureAuthorizationInterceptorTest {
     fun requiresOneOfFeatures(
       @PathVariable id: Long,
     ) = "Requires either GLOSSARY or TASKS feature for org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/requires-hidden-feature")
+    @RequiresFeatures(features = [Feature.AI_REVIEW])
+    fun requiresHiddenFeature(
+      @PathVariable id: Long,
+    ) = "Requires the hidden AI_REVIEW feature for org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/requires-one-of-hidden-and-visible")
+    @RequiresOneOfFeatures(features = [Feature.AI_REVIEW, Feature.GLOSSARY])
+    fun requiresOneOfHiddenAndVisible(
+      @PathVariable id: Long,
+    ) = "Requires either AI_REVIEW or GLOSSARY feature for org #$id!"
 
     @GetMapping("/v2/organizations/{id}/both-annotations")
     @RequiresFeatures(features = [Feature.GLOSSARY])

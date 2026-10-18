@@ -16,7 +16,8 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { BaseAdministrationView } from './components/BaseAdministrationView';
+import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
+import { OrganizationFeaturesDialog } from 'tg.views/administration/components/OrganizationFeaturesDialog';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -36,6 +37,10 @@ export const AdministrationOrganizations = ({
   setSearch: (str: string) => void;
 }) => {
   const [page, setPage] = useState(0);
+  const [featuresOrganization, setFeaturesOrganization] = useState<{
+    id: number;
+    name: string;
+  }>();
   const { preferredOrganization, updatePreferredOrganization } =
     usePreferredOrganization();
 
@@ -80,12 +85,15 @@ export const AdministrationOrganizations = ({
             searchText={search}
             loadable={listPermitted}
             renderItem={(o) => (
-              <ListItem data-cy="administration-organizations-list-item">
+              <ListItem
+                data-cy="administration-organizations-list-item"
+                data-cy-slug={o.slug}
+              >
                 <ListItemText>
                   {o.name} <Chip size="small" label={o.id} />
                 </ListItemText>
                 <ListItemSecondaryAction>
-                  <Box display="flex">
+                  <Box display="flex" gap={1}>
                     <Button
                       data-cy="administration-organizations-projects-button"
                       variant="contained"
@@ -96,24 +104,42 @@ export const AdministrationOrganizations = ({
                     >
                       <T keyName="administration_organization_projects" />
                     </Button>
-                    <Box ml={1}>
-                      <Button
-                        data-cy="administration-organizations-settings-button"
-                        variant="contained"
-                        component={Link}
-                        to={LINKS.ORGANIZATION_PROFILE.build({
-                          [PARAMS.ORGANIZATION_SLUG]: o.slug,
-                        })}
-                      >
-                        <T keyName="administration_organizations_settings" />
-                      </Button>
-                    </Box>
+                    <Button
+                      data-cy="administration-organizations-features-button"
+                      data-cy-slug={o.slug}
+                      variant="contained"
+                      onClick={() =>
+                        setFeaturesOrganization({ id: o.id, name: o.name })
+                      }
+                    >
+                      <T
+                        keyName="administration_organizations_features"
+                        defaultValue="Features"
+                      />
+                    </Button>
+                    <Button
+                      data-cy="administration-organizations-settings-button"
+                      variant="contained"
+                      component={Link}
+                      to={LINKS.ORGANIZATION_PROFILE.build({
+                        [PARAMS.ORGANIZATION_SLUG]: o.slug,
+                      })}
+                    >
+                      <T keyName="administration_organizations_settings" />
+                    </Button>
                   </Box>
                 </ListItemSecondaryAction>
               </ListItem>
             )}
           />
         </BaseAdministrationView>
+        {featuresOrganization && (
+          <OrganizationFeaturesDialog
+            organizationId={featuresOrganization.id}
+            organizationName={featuresOrganization.name}
+            onClose={() => setFeaturesOrganization(undefined)}
+          />
+        )}
       </DashboardPage>
     </StyledWrapper>
   );
