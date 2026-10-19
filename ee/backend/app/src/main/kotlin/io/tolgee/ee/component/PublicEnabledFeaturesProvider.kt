@@ -1,8 +1,9 @@
 package io.tolgee.ee.component
 
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.component.enabledFeaturesProvider.GrantAwareEnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.service.organization.OrganizationFeatureGrantService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -17,9 +18,13 @@ import org.springframework.stereotype.Component
 @ConditionalOnMissingBean(name = ["billingEnabledFeaturesProvider"])
 class PublicEnabledFeaturesProvider(
   private val eeSubscriptionService: EeSubscriptionServiceImpl,
-) : EnabledFeaturesProvider {
+  organizationFeatureGrantService: OrganizationFeatureGrantService,
+) : GrantAwareEnabledFeaturesProvider(organizationFeatureGrantService) {
   var forceEnabled: Set<Feature>? = null
 
-  override fun get(organizationId: Long?): Array<Feature> =
-    forceEnabled?.toTypedArray() ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures ?: emptyArray()
+  override fun getPlanFeatures(organizationId: Long?): Array<Feature> {
+    return forceEnabled?.toTypedArray()
+      ?: eeSubscriptionService.findSubscriptionEntity()?.enabledFeatures
+      ?: emptyArray()
+  }
 }

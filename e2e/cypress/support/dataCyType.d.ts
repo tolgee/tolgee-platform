@@ -26,6 +26,13 @@ declare namespace DataCy {
         "administration-ee-license-key-input": true;
         "administration-ee-license-release-key-button": true;
         "administration-frame": true;
+        "administration-organization-features-dialog": true;
+        "administration-organization-features-save": true;
+        "administration-organization-hidden-feature-checkbox": true;
+        "administration-organization-plan-feature-checkbox": true;
+        "administration-organization-plan-feature-from-plan": true;
+        "administration-organization-plan-feature-granted": true;
+        "administration-organizations-features-button": true;
         "administration-organizations-list-item": true;
         "administration-organizations-projects-button": true;
         "administration-organizations-settings-button": true;

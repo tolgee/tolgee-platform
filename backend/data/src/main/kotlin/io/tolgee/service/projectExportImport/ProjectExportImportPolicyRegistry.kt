@@ -14,6 +14,7 @@ import io.tolgee.model.LanguageStats
 import io.tolgee.model.LlmProvider
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
+import io.tolgee.model.OrganizationFeatureGrant
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Pat
 import io.tolgee.model.Permission
@@ -132,6 +133,7 @@ object ProjectExportImportPolicyRegistry {
 
       ignored(
         Organization::class,
+        OrganizationFeatureGrant::class,
         OrganizationRole::class,
         Permission::class,
         ApiKey::class,

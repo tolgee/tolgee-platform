@@ -4,7 +4,10 @@ import { components } from 'tg.service/apiSchema.generated';
 type Feature =
   components['schemas']['SelfHostedEePlanModel']['enabledFeatures'][number];
 
-export function useFeatures() {
+// Must match the backend features with Feature.hidden = true.
+type HiddenFeature = 'AI_REVIEW';
+
+export function useFeatures(): Partial<Record<Feature, string>> {
   const { t } = useTranslate();
   return {
     GRANULAR_PERMISSIONS: t(
@@ -41,5 +44,5 @@ export function useFeatures() {
     BRANCHING: t('billing_subscriptions_branching'),
     QA_CHECKS: t('billing_subscriptions_qa_checks'),
     TRANSLATION_MEMORY: t('billing_subscriptions_translation_memory'),
-  } as const satisfies Record<Feature, string>;
+  } as const satisfies Record<Exclude<Feature, HiddenFeature>, string>;
 }
