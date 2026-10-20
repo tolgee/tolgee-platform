@@ -1,5 +1,12 @@
 FROM eclipse-temurin:25-jre-alpine AS jre
 
+# The postgres base image ships /usr/local/bin/gosu. Security scanners (Snyk)
+# flag Go stdlib CVEs in that binary. They are false positives: gosu only drops
+# privileges and execs, and never calls the flagged APIs (HTTP, TLS, archives).
+# Our cmd.sh does not use gosu at all. There is also no fixed build to move to:
+# the latest gosu release ships the same Go stdlib, and gosu's SECURITY.md says
+# the maintainer does not rebuild for CVEs that do not apply. For this reason
+# the Snyk project for this binary is deactivated.
 FROM postgres:13.23-alpine3.22
 
 ENTRYPOINT []
