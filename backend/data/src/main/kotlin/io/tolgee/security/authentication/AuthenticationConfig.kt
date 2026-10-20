@@ -16,14 +16,14 @@
 
 package io.tolgee.security.authentication
 
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.security.Key
+import javax.crypto.SecretKey
 
 @Configuration
 class AuthenticationConfig(
@@ -33,7 +33,7 @@ class AuthenticationConfig(
   @Bean("jwt_signing_key")
   fun jwtSigningKey(
     @Qualifier("jwt_signing_secret") bytes: ByteArray,
-  ): Key {
+  ): SecretKey {
     return Keys.hmacShaKeyFor(bytes)
   }
 
@@ -45,7 +45,11 @@ class AuthenticationConfig(
 
   private fun getOrGenerateJwtSecretFromFile(): ByteArray {
     if (!fileStorage.fileExists(GENERATED_JWT_SECRET_FILE_NAME)) {
-      val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
+      val generated =
+        Jwts.SIG.HS512
+          .key()
+          .build()
+          .encoded
       fileStorage.storeFile(GENERATED_JWT_SECRET_FILE_NAME, generated)
       return generated
     }

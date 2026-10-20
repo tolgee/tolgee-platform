@@ -1,7 +1,6 @@
 package io.tolgee.ee.security.thirdParty
 
-import io.jsonwebtoken.JwtParser
-import io.jsonwebtoken.Jwts
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -40,6 +39,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.util.Base64
 import java.util.Date
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -59,14 +59,9 @@ class SsoDelegateEe(
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val objectMapper: ObjectMapper,
 ) : SsoDelegate,
   Logging {
-  private val jwtParser: JwtParser =
-    Jwts
-      .parserBuilder()
-      .setClock { currentDateProvider.date }
-      .build()
-
   override fun getTokenResponse(
     receivedCode: String?,
     invitationCode: String?,
@@ -131,25 +126,45 @@ class SsoDelegateEe(
   private fun decodeIdTokenUnsafe(idToken: String): GenericUserResponse {
     // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {
-      val jwt = idToken.substring(0, idToken.lastIndexOf('.') + 1)
-      val claims = jwtParser.parseClaimsJwt(jwt).body
+      val payload = idToken.split('.')[1]
+      val claims = objectMapper.readValue(Base64.getUrlDecoder().decode(payload), Map::class.java)
 
-      val expirationTime: Date? = claims.expiration
+      val expirationTime = epochSecondsClaimToDate(claims["exp"])
       if (expirationTime?.before(currentDateProvider.date) == true) {
         throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
+      val notBeforeTime = epochSecondsClaimToDate(claims["nbf"])
+      if (notBeforeTime?.after(currentDateProvider.date) == true) {
+        throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
+      }
+
       return GenericUserResponse().apply {
-        sub = claims.subject
-        name = claims.get("name", String::class.java)
-        given_name = claims.get("given_name", String::class.java)
-        family_name = claims.get("family_name", String::class.java)
-        email = claims.get("email", String::class.java)
+        sub = claims["sub"] as? String
+        name = claims["name"] as? String
+        given_name = claims["given_name"] as? String
+        family_name = claims["family_name"] as? String
+        email = claims["email"] as? String
       }
     } catch (e: Exception) {
       logger.warn(e.stackTraceToString())
       throw SsoAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, cause = e)
     }
+  }
+
+  /**
+   * RFC 7519 wants date claims as epoch seconds in a JSON number, but some providers
+   * send them as a numeric string, and jjwt used to accept that too.
+   */
+  private fun epochSecondsClaimToDate(claim: Any?): Date? {
+    val seconds =
+      when (claim) {
+        null -> return null
+        is Number -> claim.toLong()
+        is String -> claim.toLong()
+        else -> throw IllegalArgumentException("Unsupported date claim: $claim")
+      }
+    return Date(seconds * 1000)
   }
 
   private fun getTokenResponseForUser(
