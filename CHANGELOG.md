@@ -1,3 +1,10 @@
+## [3.237.1](https://github.com/tolgee/tolgee-platform/compare/v3.237.0...v3.237.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* Snyk findings — upgrade jjwt to 0.12.6, document gosu false positives ([#3991](https://github.com/tolgee/tolgee-platform/issues/3991)) ([64a192d](https://github.com/tolgee/tolgee-platform/commit/64a192d2b4414c57bc18782a5d69576eb880de02))
+
 # [3.237.0](https://github.com/tolgee/tolgee-platform/compare/v3.236.1...v3.237.0) (2026-10-19)
 
 
