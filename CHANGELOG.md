@@ -1,3 +1,10 @@
+## [3.237.2](https://github.com/tolgee/tolgee-platform/compare/v3.237.1...v3.237.2) (2026-10-21)
+
+
+### Performance Improvements
+
+* count usage words and keys without grouping projects that cannot repeat a key name ([#3989](https://github.com/tolgee/tolgee-platform/issues/3989)) ([2713112](https://github.com/tolgee/tolgee-platform/commit/2713112e5fc6e6d673d631278041e2dca93411b7))
+
 ## [3.237.1](https://github.com/tolgee/tolgee-platform/compare/v3.237.0...v3.237.1) (2026-10-20)
 
 

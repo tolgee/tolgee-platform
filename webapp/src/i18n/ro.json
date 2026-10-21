@@ -563,6 +563,7 @@
   "already_impersonating_user": "Deja personifici un utilizator",
   "announcement_branching": "Am lansat Branching!",
   "announcement_cli_2": "CLI 2.0 este disponibil cu suport pentru noi formate!",
+  "announcement_community_translation": "Am lansat <link>Traducerea comunitară</link>!",
   "announcement_feature_ai_customization": "Personalizări pentru traducătorul Tolgee AI lansate",
   "announcement_feature_batch_operations": "Am lansat operațiuni în lot",
   "announcement_feature_content_delivery_and_webhooks": "Accelerati procesul de localizare cu <link-delivery>Livrarea de conținut</link-delivery> și <link-webhooks>Webhooks</link-webhooks> lansate recent!",

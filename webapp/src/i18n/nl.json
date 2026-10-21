@@ -563,6 +563,7 @@
   "already_impersonating_user": "Je imiteert al een gebruiker",
   "announcement_branching": "We hebben Branching uitgebracht!",
   "announcement_cli_2": "CLI 2.0 is uit met ondersteuning voor nieuwe formaten!",
+  "announcement_community_translation": "We hebben <link>Community-vertaling</link> uitgebracht!",
   "announcement_feature_ai_customization": "Aanpassingen voor Tolgee AI-vertaler uitgebracht",
   "announcement_feature_batch_operations": "We hebben batchbewerkingen uitgebracht",
   "announcement_feature_content_delivery_and_webhooks": "Versnel uw lokalisatie met de zojuist uitgebrachte <link-delivery>Content Delivery</link-delivery> en <link-webhooks>Webhooks</link-webhooks>!",

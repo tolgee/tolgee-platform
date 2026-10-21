@@ -563,6 +563,7 @@
   "already_impersonating_user": "既にユーザーになりすましています",
   "announcement_branching": "ブランチ機能 をリリースしました！",
   "announcement_cli_2": "新しいフォーマットをサポートする CLI 2.0 がリリースされました！",
+  "announcement_community_translation": "<link>コミュニティ翻訳</link> をリリースしました",
   "announcement_feature_ai_customization": "Tolgee AI Translator のカスタマイズがリリースされました。",
   "announcement_feature_batch_operations": "一括操作をリリースしました",
   "announcement_feature_content_delivery_and_webhooks": "新しくリリースされた <link-delivery>コンテンツ配信</link-delivery> と <link-webhooks>Webhook</link-webhooks> でローカリゼーションを加速しましょう！",

@@ -562,6 +562,7 @@
   "already_impersonating_user": "Már megszemélyesítesz egy felhasználót",
   "announcement_branching": "Kiadtuk a Branchinget!",
   "announcement_cli_2": "A CLI 2.0 elérhető új formátumok támogatásával!",
+  "announcement_community_translation": "Megjelent a <link>Közösségi fordítás</link>!",
   "announcement_feature_ai_customization": "Tolgee AI Fordítóhoz testreszabási lehetőségek elérhetőek",
   "announcement_feature_batch_operations": "Kötegelt műveletek kiadva",
   "announcement_feature_content_delivery_and_webhooks": "Gyorsítsd fel a lokalizációt a frissen kiadott <link-delivery>Tartalom szállítás</link-delivery> és <link-webhooks>Webhooks</link-webhooks> segítségével!",

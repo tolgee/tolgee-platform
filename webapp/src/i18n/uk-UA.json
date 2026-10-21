@@ -479,6 +479,7 @@
   "already_impersonating_user": "Ви вже діє від імені користувача",
   "announcement_branching": "Ми випустили Branching!",
   "announcement_cli_2": "CLI 2.0 вийшов з підтримкою нових форматів!",
+  "announcement_community_translation": "Ми випустили <link>Спільний переклад</link>!",
   "announcement_feature_ai_customization": "Випущено налаштування для перекладача Tolgee AI",
   "announcement_feature_batch_operations": "Ми випустили пакетні операції",
   "announcement_feature_content_delivery_and_webhooks": "Прискорте вашу локалізацію за допомогою свіжих оновлень <link-delivery>Доставки вмісту</link-delivery> та <link-webhooks>Вебхуків</link-webhooks>!",

@@ -562,6 +562,7 @@
   "already_impersonating_user": "Du etterligner allerede en bruker",
   "announcement_branching": "Vi har lansert Branching!",
   "announcement_cli_2": "CLI 2.0 er ute med støtte for nye formater!",
+  "announcement_community_translation": "Vi har lansert <link>Fellesskapsoversettelse</link>!",
   "announcement_feature_ai_customization": "Tilpasninger for Tolgee AI-oversetter er lansert",
   "announcement_feature_batch_operations": "Vi har lansert batch-operasjoner",
   "announcement_feature_content_delivery_and_webhooks": "Øk hastigheten på lokaliseringen din med nylig utgitte <link-delivery>Content Delivery</link-delivery> og <link-webhooks>Webhooks</link-webhooks>!",

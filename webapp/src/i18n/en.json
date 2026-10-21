@@ -563,6 +563,7 @@
   "already_impersonating_user": "You are already impersonating a user",
   "announcement_branching": "We've released Branching!",
   "announcement_cli_2": "CLI 2.0 is out with support for new formats!",
+  "announcement_community_translation": "We've released <link>Community Translation</link>!",
   "announcement_feature_ai_customization": "Customizations for Tolgee AI Translator released",
   "announcement_feature_batch_operations": "We've released batch operations",
   "announcement_feature_content_delivery_and_webhooks": "Accelerate your localization with freshly released <link-delivery>Content Delivery</link-delivery> and <link-webhooks>Webhooks</link-webhooks>!",

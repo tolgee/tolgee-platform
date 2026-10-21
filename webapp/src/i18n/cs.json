@@ -563,6 +563,7 @@
   "already_impersonating_user": "Již se vydáváte za uživatele",
   "announcement_branching": "Vydali jsme Branching!",
   "announcement_cli_2": "Vydali jsme CLI 2.0 s podporou nových formátů!",
+  "announcement_community_translation": "Vydali jsme <link>Komunitní překlad</link>!",
   "announcement_feature_ai_customization": "Vydali jsme funkci přizpůsobení pro Tolgee AI překladač",
   "announcement_feature_batch_operations": "Byly vydány hromadné operace",
   "announcement_feature_content_delivery_and_webhooks": "Zrychlete své lokalizace s novým <link-delivery>Doručováním obsahu</link-delivery> a <link-webhooks>Webhooks</link-webhooks>!",
