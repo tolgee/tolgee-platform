@@ -1385,7 +1385,8 @@ export interface components {
         | "FEATURE_BRANCHING"
         | "FEATURE_TRANSLATION_MEMORY_MANAGEMENT"
         | "FEATURE_QA_CHECKS_AND_TRANSLATION_MEMORY"
-        | "FEATURE_FIGMA_PLUGIN_NEW_VERSION";
+        | "FEATURE_FIGMA_PLUGIN_NEW_VERSION"
+        | "FEATURE_COMMUNITY_TRANSLATION";
     };
     ApiKeyModel: {
       /** @description Description */

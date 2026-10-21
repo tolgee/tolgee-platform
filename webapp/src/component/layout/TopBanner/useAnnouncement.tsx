@@ -227,6 +227,21 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_COMMUNITY_TRANSLATION':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_community_translation"
+                defaultValue="We've released <link>Community Translation</link>!"
+                params={{
+                  link: <BannerLink href={DOCS_LINKS.communityTranslation} />,
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }
