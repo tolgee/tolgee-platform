@@ -101,6 +101,7 @@ class LanguageStatsService(
                 translatedPercentage = rawLanguageStats.translatedWords.toDouble() / baseWords * 100
                 reviewedKeys = rawLanguageStats.reviewedKeys
                 reviewedWords = rawLanguageStats.reviewedWords
+                hostedWords = rawLanguageStats.hostedWords
                 reviewedPercentage = rawLanguageStats.reviewedWords.toDouble() / baseWords * 100
                 untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
