@@ -40,8 +40,20 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
         isArray.hasSize(2)
-        node("[0].id").isEqualTo(testData.otherOrgPublicProject.id)
-        node("[1].id").isEqualTo(testData.publicProject.id)
+        node("[0].id").isEqualTo(testData.publicProject.id)
+        node("[1].id").isEqualTo(testData.otherOrgPublicProject.id)
+      }
+    }
+  }
+
+  @Test
+  fun `orders by live key count on the default branch, biggest first, ignoring the client sort`() {
+    performGet("/v2/public/projects/with-stats?sort=doesNotExist,asc").andIsOk.andAssertThatJson {
+      node("_embedded.projects") {
+        node("[0].id").isEqualTo(testData.publicProject.id)
+        node("[0].stats.keyCount").isEqualTo(2)
+        node("[1].id").isEqualTo(testData.otherOrgPublicProject.id)
+        node("[1].stats.keyCount").isEqualTo(0)
       }
     }
   }
@@ -49,11 +61,11 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `a public row carries stats, org and NONE permission for an anonymous visitor`() {
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
-      node("_embedded.projects[1]") {
+      node("_embedded.projects[0]") {
         node("id").isEqualTo(testData.publicProject.id)
         node("public").isEqualTo(true)
         node("organizationOwner.name").isEqualTo("test_username")
-        node("stats.keyCount").isEqualTo(0)
+        node("stats.keyCount").isEqualTo(2)
         node("languages").isArray.hasSize(1)
         node("directPermission").isEqualTo(null)
         node("organizationRole").isEqualTo(null)
@@ -110,13 +122,13 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     userAccount = testData.user
     performAuthGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
-        node("[0].id").isEqualTo(testData.otherOrgPublicProject.id)
-        node("[0].organizationRole").isEqualTo(null)
-        node("[0].computedPermission.type").isEqualTo("VIEW")
-        node("[0].computedPermission.origin").isEqualTo("COMMUNITY")
-        node("[1].id").isEqualTo(testData.publicProject.id)
-        node("[1].organizationRole").isEqualTo("OWNER")
-        node("[1].computedPermission.type").isEqualTo("MANAGE")
+        node("[0].id").isEqualTo(testData.publicProject.id)
+        node("[0].organizationRole").isEqualTo("OWNER")
+        node("[0].computedPermission.type").isEqualTo("MANAGE")
+        node("[1].id").isEqualTo(testData.otherOrgPublicProject.id)
+        node("[1].organizationRole").isEqualTo(null)
+        node("[1].computedPermission.type").isEqualTo("VIEW")
+        node("[1].computedPermission.origin").isEqualTo("COMMUNITY")
       }
     }
   }
@@ -125,7 +137,7 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   fun `a logged-in user sees their direct project permission on a public row`() {
     userAccount = testData.directPermissionUser
     performAuthGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
-      node("_embedded.projects[0]") {
+      node("_embedded.projects[1]") {
         node("id").isEqualTo(testData.otherOrgPublicProject.id)
         node("organizationRole").isEqualTo(null)
         node("directPermission.type").isEqualTo("TRANSLATE")
@@ -147,11 +159,11 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
         isArray.hasSize(2)
-        node("[1].id").isEqualTo(testData.publicProject.id)
-        node("[1].directPermission").isEqualTo(null)
-        node("[1].organizationRole").isEqualTo(null)
-        node("[1].computedPermission.type").isEqualTo("VIEW")
-        node("[1].computedPermission.origin").isEqualTo("COMMUNITY")
+        node("[0].id").isEqualTo(testData.publicProject.id)
+        node("[0].directPermission").isEqualTo(null)
+        node("[0].organizationRole").isEqualTo(null)
+        node("[0].computedPermission.type").isEqualTo("VIEW")
+        node("[0].computedPermission.origin").isEqualTo("COMMUNITY")
       }
     }
   }
@@ -241,6 +253,8 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
     userAccount = testData.nonMember
     performAuthGet("/v2/public/projects/with-stats?filterContributed=true").andIsOk.andAssertThatJson {
       node("page.totalElements").isEqualTo(2)
+      node("_embedded.projects[0].id").isEqualTo(testData.publicProject.id)
+      node("_embedded.projects[1].id").isEqualTo(testData.otherOrgPublicProject.id)
     }
 
     performAuthGet(
