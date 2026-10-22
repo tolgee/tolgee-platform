@@ -214,6 +214,21 @@ class ImportTestData {
     return user.self
   }
 
+  fun addImportSettingsOfTwoMembers() {
+    val secondMember =
+      this.root.addUserAccount {
+        name = "Second manager"
+        username = "second_manager"
+      }
+    this.projectBuilder.addPermission {
+      this.user = secondMember.self
+      type = ProjectPermissionType.MANAGE
+    }
+    listOf(userAccount, secondMember.self).forEach { member ->
+      this.projectBuilder.addImportSettings { userAccount = member }
+    }
+  }
+
   fun addKeyWithTag(keyTag: String): io.tolgee.model.key.Key {
     return this.projectBuilder
       .addKey {

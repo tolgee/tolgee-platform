@@ -84,7 +84,7 @@ class ProjectBuilder(
     var contentStorages = mutableListOf<ContentStorageBuilder>()
     var contentDeliveryConfigs = mutableListOf<ContentDeliveryContentBuilder>()
     var webhookConfigs = mutableListOf<WebhookConfigBuilder>()
-    var importSettings: ImportSettings? = null
+    val importSettings = mutableListOf<ImportSettings>()
     var qaConfig: ProjectQaConfigBuilder? = null
     var slackConfigs = mutableListOf<SlackConfigBuilder>()
     val batchJobs: MutableList<BatchJobBuilder> = mutableListOf()
@@ -264,8 +264,8 @@ class ProjectBuilder(
 
   fun addBatchJob(ft: FT<BatchJob>) = addOperation(data.batchJobs, ft)
 
-  fun setImportSettings(ft: FT<ImportSettings>) {
-    data.importSettings = ImportSettings(this.self).apply(ft)
+  fun addImportSettings(ft: FT<ImportSettings>) {
+    data.importSettings.add(ImportSettings(this.self).apply(ft))
   }
 
   fun setQaConfig(ft: FT<ProjectQaConfig> = {}): ProjectQaConfigBuilder {

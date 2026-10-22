@@ -41,7 +41,7 @@ class ImportSettingsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @ProjectJWTAuthTestMethod
   fun `returns settings`() {
     val testData = BaseTestData()
-    testData.projectBuilder.setImportSettings {
+    testData.projectBuilder.addImportSettings {
       userAccount = testData.user
       overrideKeyDescriptions = true
       createNewKeys = false

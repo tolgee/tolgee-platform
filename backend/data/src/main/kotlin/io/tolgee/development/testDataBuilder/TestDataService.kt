@@ -416,7 +416,7 @@ class TestDataService(
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
-    builder.data.importSettings?.let {
+    builder.data.importSettings.forEach {
       entityManager.merge(it.userAccount)
       entityManager.persist(it)
     }

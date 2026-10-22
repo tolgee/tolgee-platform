@@ -36,7 +36,7 @@ class ImportNamespaceSelectionTestData {
         addKey {
           name = "existing key"
         }.setNamespace("web")
-        setImportSettings {
+        addImportSettings {
           userAccount = this@ImportNamespaceSelectionTestData.userAccount
           createNewKeys = false
         }
