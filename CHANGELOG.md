@@ -1,3 +1,11 @@
+## [3.238.1](https://github.com/tolgee/tolgee-platform/compare/v3.238.0...v3.238.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* bill plural machine translation correctly ([#3978](https://github.com/tolgee/tolgee-platform/issues/3978)) ([0bdb05c](https://github.com/tolgee/tolgee-platform/commit/0bdb05c3aa8206f8ded4d0f6396149905a17f2c4)), closes [#2145](https://github.com/tolgee/tolgee-platform/issues/2145)
+* duplicated rows in import translations preview ([#3994](https://github.com/tolgee/tolgee-platform/issues/3994)) ([96d5112](https://github.com/tolgee/tolgee-platform/commit/96d51124c96c0757d0e259640b9f2331793b9a1d))
+
 # [3.238.0](https://github.com/tolgee/tolgee-platform/compare/v3.237.2...v3.238.0) (2026-10-22)
 
 
