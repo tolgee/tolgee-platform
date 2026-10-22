@@ -1,7 +1,6 @@
 package io.tolgee.component
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.hateoas.organization.PrivateOrganizationModel
 import io.tolgee.hateoas.organization.PrivateOrganizationModelAssembler
@@ -40,20 +39,9 @@ class PreferredOrganizationFacade(
       !user.isSupporterOrAdmin() && !organizationRoleService.canUserViewStrict(user.id, organizationId)
     return privateOrganizationModelAssembler.toModel(
       view,
-      getVisibleEnabledFeatures(view.organization.id, limitedView),
+      enabledFeaturesProvider.get(view.organization.id),
       isAtLeastMember,
       limitedView,
     )
-  }
-
-  private fun getVisibleEnabledFeatures(
-    organizationId: Long,
-    limitedView: Boolean,
-  ): Array<Feature> {
-    val features = enabledFeaturesProvider.get(organizationId)
-    if (!limitedView) {
-      return features
-    }
-    return features.filter { !it.hidden }.toTypedArray()
   }
 }

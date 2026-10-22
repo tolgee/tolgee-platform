@@ -6107,33 +6107,4 @@
             <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS ix_translation_lang_text_md5;</sql>
         </rollback>
     </changeSet>
-    <changeSet author="bdshadow" id="1792137213000-1">
-        <createTable tableName="organization_feature_grant">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_feature_grantPK"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="organization_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="feature" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_by_id" type="BIGINT"/>
-        </createTable>
-    </changeSet>
-    <changeSet author="bdshadow" id="1792137213000-2">
-        <addUniqueConstraint columnNames="organization_id, feature" constraintName="organization_feature_grant_org_feature" tableName="organization_feature_grant"/>
-    </changeSet>
-    <changeSet author="bdshadow" id="1792137213000-3">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_feature_grant" constraintName="FK_organization_feature_grant_organization" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
-    </changeSet>
-    <changeSet author="bdshadow" id="1792137213000-4">
-        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="organization_feature_grant" constraintName="FK_organization_feature_grant_created_by" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
-    </changeSet>
 </databaseChangeLog>

@@ -2,13 +2,7 @@
 
 package io.tolgee.constants
 
-// Persisted by name in several tables (in billing too); removing a constant needs a data
-// migration deleting those rows, or loading them fails.
-enum class Feature(
-  // In development: invisible to users unless granted to their organization.
-  // Mirrored in webapp useFeatures.tsx (HiddenFeature).
-  val hidden: Boolean = false,
-) {
+enum class Feature {
   GRANULAR_PERMISSIONS,
   PRIORITIZED_FEATURE_REQUESTS,
   PREMIUM_SUPPORT,
@@ -32,7 +26,6 @@ enum class Feature(
   BRANCHING,
   QA_CHECKS,
   TRANSLATION_MEMORY,
-  AI_REVIEW(hidden = true),
   ;
 
   companion object {
