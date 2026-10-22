@@ -1,3 +1,10 @@
+# [3.238.0](https://github.com/tolgee/tolgee-platform/compare/v3.237.2...v3.238.0) (2026-10-22)
+
+
+### Features
+
+* revert "per-organization plan feature grants and hidden features ([#3990](https://github.com/tolgee/tolgee-platform/issues/3990))" ([#3995](https://github.com/tolgee/tolgee-platform/issues/3995)) ([562ebe0](https://github.com/tolgee/tolgee-platform/commit/562ebe0b639f2725ecd44129b388eaa905addc42)), closes [tolgee/billing#339](https://github.com/tolgee/billing/issues/339)
+
 ## [3.237.2](https://github.com/tolgee/tolgee-platform/compare/v3.237.1...v3.237.2) (2026-10-21)
 
 
