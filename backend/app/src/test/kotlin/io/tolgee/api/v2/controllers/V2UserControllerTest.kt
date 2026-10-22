@@ -16,6 +16,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.fixtures.satisfies
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.notifications.NotificationType.PASSWORD_CHANGED
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -71,6 +72,20 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
     val fromDb = userAccountService.findActive(requestDTO.email)
     Assertions.assertThat(fromDb!!.name).isEqualTo(requestDTO.name)
+  }
+
+  @Test
+  fun `it updates the profile visibility and leaves it alone when omitted`() {
+    performAuthGet("/v2/user").andIsOk.andAssertThatJson { node("profileVisibility").isEqualTo("DEFAULT") }
+
+    performAuthPut(
+      "/v2/user",
+      UserUpdateRequestDto(email = initialUsername, name = "Ben", profileVisibility = ProfileVisibility.PRIVATE),
+    ).andIsOk.andAssertThatJson { node("profileVisibility").isEqualTo("PRIVATE") }
+
+    performAuthPut("/v2/user", UserUpdateRequestDto(email = initialUsername, name = "Ben"))
+      .andIsOk
+      .andAssertThatJson { node("profileVisibility").isEqualTo("PRIVATE") }
   }
 
   @Test
