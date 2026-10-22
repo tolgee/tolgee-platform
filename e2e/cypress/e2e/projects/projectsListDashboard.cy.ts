@@ -50,7 +50,7 @@ describe('Projects Dashboard', () => {
       .closestDcy('dashboard-projects-list-item')
       .findDcy('project-list-public-badge')
       .should('be.visible')
-      .and('contain', 'public');
+      .and('contain', 'community');
     cy.contains('Project 2')
       .closestDcy('dashboard-projects-list-item')
       .findDcy('project-list-org-name')
