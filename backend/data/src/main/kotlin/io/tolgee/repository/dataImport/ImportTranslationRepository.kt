@@ -44,9 +44,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
     """ select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
         itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash,
         it.isPlural as plural, ek.isPlural as existingKeyPlural, it.conflictType as conflictType,
-        (case when is.overrideKeyDescriptions or (ekm.description is null or ekm.description = '')
-            then ikm.description else ikm.description end) as keyDescription,
-        ekm.description as existingKeyDescription
+        ikm.description as keyDescription, ekm.description as existingKeyDescription
         from ImportTranslation it
         left join it.conflict itc 
         join it.key ik
@@ -56,7 +54,6 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         left join ek.branch ekb
         left join ik.keyMeta ikm
         left join ek.keyMeta ekm
-        left join ImportSettings is on is.project = ik.file.importData.project
         left join ik.file.importData.branch b
         where (itc.id is not null or :onlyConflicts = false)
         and ((b is null and (ekb is null or ekb.isDefault)) or (b.id = ekb.id))
