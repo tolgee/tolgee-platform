@@ -174,7 +174,7 @@ class LanguageStatsService(
   ): List<LanguageStatsDto> {
     val data = getLanguageStats(projectId, branchId)
     val missingStats = expectedLangs.minus(data.map { it.languageId }.toSet())
-    if (missingStats.isEmpty()) {
+    if (missingStats.isEmpty() && data.none { it.hostedWords == null }) {
       return data
     }
 

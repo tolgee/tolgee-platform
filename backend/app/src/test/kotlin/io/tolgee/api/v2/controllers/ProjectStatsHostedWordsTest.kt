@@ -33,4 +33,15 @@ class ProjectStatsHostedWordsTest : ProjectAuthControllerTest("/v2/projects/") {
       node("baseWordsCount").isEqualTo(5)
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `refreshes stats saved before hosted words existed`() {
+    executeInNewTransaction {
+      entityManager.createNativeQuery("update language_stats set hosted_words = null").executeUpdate()
+    }
+    performProjectAuthGet("stats").andIsOk.andAssertThatJson {
+      node("hostedWordsCount").isEqualTo(6)
+    }
+  }
 }
