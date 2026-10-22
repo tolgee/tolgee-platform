@@ -9,6 +9,7 @@ import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
@@ -27,6 +28,7 @@ class ProjectMcpTools(
   private val projectCreationService: ProjectCreationService,
   private val languageStatsService: LanguageStatsService,
   private val languageService: LanguageService,
+  private val branchService: BranchService,
   private val organizationRoleService: OrganizationRoleService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
@@ -130,7 +132,8 @@ class ProjectMcpTools(
       mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {
         val languages = languageService.findAll(projectHolder.project.id)
         val languageIds = languages.map { it.id }.toSet()
-        val stats = languageStatsService.getLanguageStats(projectHolder.project.id, languageIds)
+        val branch = branchService.getActiveOrDefault(projectHolder.project.id, null)
+        val stats = languageStatsService.getLanguageStats(projectHolder.project.id, languageIds, branch?.id)
         val languageById = languages.associateBy { it.id }
 
         val result =
