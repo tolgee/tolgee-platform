@@ -450,7 +450,7 @@ export interface paths {
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/activity": {
-    get: operations["getActivity"];
+    get: operations["getActivity_1"];
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
     get: operations["getSingleRevision"];
@@ -550,6 +550,14 @@ export interface paths {
   };
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
+  };
+  "/v2/projects/{projectId}/community/activity": {
+    /** Suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+    get: operations["getActivity"];
+  };
+  "/v2/projects/{projectId}/community/contributors": {
+    /** Users who suggested translations in the project, with suggested / accepted / declined totals, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by suggested, accepted and declined; default accepted desc, suggested desc. */
+    get: operations["getContributors_1"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
@@ -1341,6 +1349,10 @@ export interface paths {
     /** Returns information about sso configuration affecting the user. */
     get: operations["getSso"];
   };
+  "/v2/users/{userId}/community-profile": {
+    /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+    get: operations["getProfile"];
+  };
 }
 
 export interface components {
@@ -2124,6 +2136,39 @@ export interface components {
         workspaces?: components["schemas"]["WorkspaceModel"][];
       };
     };
+    CommunityActivity: {
+      weeks: components["schemas"]["WeekBucket"][];
+    };
+    CommunityContributorModel: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["LanguageCounts"][];
+      name?: string;
+      /** Format: int64 */
+      suggested: number;
+      weeks: components["schemas"]["WeekBucket"][];
+    };
+    CommunityProfile: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      days: components["schemas"]["DayCounts"][];
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["ProfileLanguage"][];
+      name?: string;
+      projects: components["schemas"]["ProfileProject"][];
+      recent: components["schemas"]["RecentContribution"][];
+      /** Format: int64 */
+      suggested: number;
+    };
     ComplexEditKeyDto: {
       /** @description Branch of the key. If not provided, default branch will be used */
       branch?: string;
@@ -2818,6 +2863,15 @@ export interface components {
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
       words?: components["schemas"]["CurrentUsageItemModel"];
+    };
+    DayCounts: {
+      /** Format: int64 */
+      accepted: number;
+      day: string;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      suggested: number;
     };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
@@ -4381,6 +4435,16 @@ export interface components {
       /** @description When null, its a default configuration applied to not configured languages */
       targetLanguageTag?: string;
     };
+    LanguageCounts: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      languageId: number;
+      /** Format: int64 */
+      suggested: number;
+    };
     LanguageInfoModel: {
       /** Format: int64 */
       languageId?: number;
@@ -4867,6 +4931,12 @@ export interface components {
     PagedModelBranchModel: {
       _embedded?: {
         branches?: components["schemas"]["BranchModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelCommunityContributorModel: {
+      _embedded?: {
+        contributors?: components["schemas"]["CommunityContributorModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5487,6 +5557,28 @@ export interface components {
         | "SSO"
         | "SSO_GLOBAL";
       username: string;
+    };
+    ProfileLanguage: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      declined: number;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
+      tag: string;
+    };
+    ProfileProject: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      id: number;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
     };
     ProjectActivityAuthorModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -6349,6 +6441,19 @@ export interface components {
       completedSteps: string[];
       finished: boolean;
       open: boolean;
+    };
+    RecentContribution: {
+      /** Format: int64 */
+      accepted: number;
+      day: string;
+      /** Format: int64 */
+      declined: number;
+      languageTag: string;
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+      /** Format: int64 */
+      suggested: number;
     };
     RegenerateApiKeyDto: {
       /**
@@ -8191,6 +8296,15 @@ export interface components {
     };
     WebhookTestResponse: {
       success: boolean;
+    };
+    WeekBucket: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      suggested: number;
+      weekStart: string;
     };
     WorkspaceModel: {
       /** Format: int64 */
@@ -15476,7 +15590,7 @@ export interface operations {
       };
     };
   };
-  getActivity: {
+  getActivity_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -17207,6 +17321,114 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetBranchProtectedModel"];
+      };
+    };
+  };
+  /** Suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+  getActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        weeks?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityActivity"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Users who suggested translations in the project, with suggested / accepted / declined totals, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by suggested, accepted and declined; default accepted desc, suggested desc. */
+  getContributors_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        weeks?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelCommunityContributorModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -30892,6 +31114,54 @@ export interface operations {
       };
       /** No SSO configuration available for this user */
       204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+  getProfile: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityProfile"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
