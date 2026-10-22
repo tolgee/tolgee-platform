@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem, styled } from '@mui/material';
@@ -14,44 +14,73 @@ import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { StringsHint } from 'tg.component/common/StringsHint';
+import {
+  KeysHint,
+  StringsHint,
+  WordsHint,
+} from 'tg.component/common/StringsHint';
 
-const StyledTiles = styled(Box)`
+const StyledGroups = styled(Box)`
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-areas: 'languages text text strings progress progress users tags';
+  grid-template-columns: 4fr 2fr 2fr;
   gap: 10px;
 
-  @container (max-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-areas:
-      'languages text     text     tags'
-      'strings   progress progress users';
+  @container (max-width: 1000px) {
+    grid-template-columns: 1fr 1fr;
+
+    & > :first-child {
+      grid-column: 1 / -1;
+    }
   }
 
-  @container (max-width: 800px) {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-areas:
-      'languages tags'
-      'text      text'
-      'progress  progress'
-      'strings   users';
+  @container (max-width: 600px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-const StyledTile = styled(Box)`
+const StyledGroup = styled(Box)`
   background-color: ${({ theme }) => theme.palette.tile.background};
   border-radius: 20px;
-  height: 120px;
+  padding: 12px 10px 10px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  color: ${({ theme }) => theme.palette.text.primary};
+`;
+
+const StyledGroupTitle = styled('div')`
+  padding: 0px 10px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledRow = styled(Box)`
   display: grid;
   gap: 10px;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  position: relative;
-  text-align: center;
+`;
 
-  align-items: stretch;
-  color: ${({ theme: { palette } }) => palette.text.primary};
+const StyledContentRow = styled(StyledRow)`
+  @container (max-width: 600px) {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const StyledNumber = styled(Box)`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 8px 0px;
+  border-radius: 14px;
+  text-align: center;
 
   &.clickable {
     transition: background-color 0.1s ease-out;
@@ -62,40 +91,17 @@ const StyledTile = styled(Box)`
       transition: background-color 0.2s ease-in;
     }
   }
-
-  @container (max-width: 1200px) {
-    height: 100px;
-  }
-
-  @container (max-width: 800px) {
-    height: 80px;
-  }
-`;
-
-const StyledTileDataItem = styled(Box)`
-  display: grid;
-  grid-template-rows: 1fr auto auto auto 1fr;
-  grid-template-areas:
-    '.'
-    'data'
-    'label'
-    'sublabel'
-    'menu';
-  border-radius: 20px;
 `;
 
 const StyledTileValue = styled(Box)`
-  grid-area: data;
   font-size: 28px;
-  display: flex;
-  justify-content: center;
   @container (max-width: 800px) {
     font-size: 24px;
   }
 `;
 
 const StyledTileDescription = styled('div')`
-  grid-area: label;
+  max-width: 100%;
   padding: 0px 8px;
   font-size: 18px;
   @container (max-width: 800px) {
@@ -113,6 +119,32 @@ const StyledTileEdit = styled(Box)`
   padding: 10px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
+
+type StatProps = {
+  dataCy: string;
+  value: ReactNode;
+  label: ReactNode;
+} & Omit<React.ComponentProps<typeof StyledNumber>, 'label'>;
+
+const Stat = ({
+  dataCy,
+  value,
+  label,
+  onClick,
+  children,
+  ...rest
+}: StatProps) => (
+  <StyledNumber
+    {...rest}
+    onClick={onClick}
+    className={clsx({ clickable: Boolean(onClick) })}
+    data-cy={dataCy}
+  >
+    <StyledTileValue>{value}</StyledTileValue>
+    <StyledTileDescription>{label}</StyledTileDescription>
+    {children}
+  </StyledNumber>
+);
 
 export const ProjectTotals: React.FC<
   React.PropsWithChildren<{
@@ -196,171 +228,148 @@ export const ProjectTotals: React.FC<
   const membersAccessible = config.authentication && canViewMembers;
   const membersEditable = membersAccessible && canEditMembers;
 
-  const stringsCount = stats.languageStats
-    .map((i) => i.reviewedKeyCount + i.translatedKeyCount)
-    .reduce((prev, curr) => prev + curr, 0);
+  const stringsCount = stats.languageStats.reduce(
+    (sum, i) => sum + i.reviewedKeyCount + i.translatedKeyCount,
+    0
+  );
 
   return (
-    <>
-      <StyledTiles data-cy="project-dashboard-project-totals">
-        <StyledTile
-          gridArea="languages"
-          onClick={canViewTasks ? redirectToTasks : undefined}
-          className={clsx({ clickable: canViewTasks })}
-          data-cy="project-dashboard-task-count"
-        >
-          <StyledTileDataItem>
-            <StyledTileValue>
-              {Number(stats.taskCount).toLocaleString(locale)}
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_task_count_plural', {
-                value: stats.taskCount,
-              })}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-        </StyledTile>
-
-        <StyledTile
-          gridArea="text"
-          onClick={canViewKeys ? redirectToTranslations : undefined}
-          className={clsx({ clickable: canViewKeys })}
-          data-cy="project-dashboard-text"
-        >
-          <StyledTileDataItem data-cy="project-dashboard-key-count">
-            <StyledTileValue>
-              {Number(stats.keyCount).toLocaleString(locale)}
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_key_count_plural', 'Keys', {
-                value: stats.keyCount,
-              })}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-          <StyledTileDataItem data-cy="project-dashboard-base-word-count">
-            <StyledTileValue>
-              {Number(stats.baseWordsCount).toLocaleString(locale)}
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_base_words_count_plural', {
-                value: stats.baseWordsCount,
-              })}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-        </StyledTile>
-
-        <StyledTile
-          gridArea="progress"
-          onClick={canViewKeys ? redirectToTranslations : undefined}
-          className={clsx({ clickable: canViewKeys })}
-          data-cy="project-dashboard-progress"
-        >
-          <StyledTileDataItem data-cy="project-dashboard-translated-percentage">
-            <StyledTileValue>
-              <PercentFormat number={stats.translatedPercentage} />
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_translated_percent')}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-          <StyledTileDataItem data-cy="project-dashboard-reviewed-percentage">
-            <StyledTileValue>
-              <PercentFormat number={stats.reviewedPercentage} />
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_reviewed_percent', 'Reviewed')}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-        </StyledTile>
-
-        <StyledTile
-          gridArea="strings"
-          data-cy="project-dashboard-strings"
-          onClick={canGoToBilling ? redirectToBilling : undefined}
-          className={clsx({ clickable: canGoToBilling })}
-        >
-          <StyledTileDataItem data-cy="project-dashboard-strings-count">
-            <StyledTileValue>
-              {Number(stringsCount).toLocaleString(locale)}
-            </StyledTileValue>
-            <StyledTileDescription>
+    <StyledGroups data-cy="project-dashboard-project-totals">
+      <StyledGroup data-cy="project-dashboard-content">
+        <StyledGroupTitle>
+          {t('project_dashboard_group_content', 'Content')}
+        </StyledGroupTitle>
+        <StyledContentRow>
+          <Stat
+            dataCy="project-dashboard-key-count"
+            onClick={canViewKeys ? redirectToTranslations : undefined}
+            value={Number(stats.keyCount).toLocaleString(locale)}
+            label={
+              <KeysHint>
+                {t('project_dashboard_key_count_plural', 'Keys', {
+                  value: stats.keyCount,
+                })}
+              </KeysHint>
+            }
+          />
+          <Stat
+            dataCy="project-dashboard-strings-count"
+            onClick={canGoToBilling ? redirectToBilling : undefined}
+            value={Number(stringsCount).toLocaleString(locale)}
+            label={
               <StringsHint>
                 {t('project_dashboard_strings_count_plural', {
                   value: Number(stringsCount),
                 })}
               </StringsHint>
-            </StyledTileDescription>
-          </StyledTileDataItem>
-        </StyledTile>
+            }
+          />
+          <Stat
+            dataCy="project-dashboard-words-count"
+            onClick={canGoToBilling ? redirectToBilling : undefined}
+            value={Number(stats.hostedWordsCount).toLocaleString(locale)}
+            label={
+              <WordsHint>
+                {t(
+                  'project_dashboard_words_count_plural',
+                  '{value, plural, one {Word} other {Words}}',
+                  { value: Number(stats.hostedWordsCount) }
+                )}
+              </WordsHint>
+            }
+          />
+          <Stat
+            dataCy="project-dashboard-tags"
+            onClick={tagsClickable ? handleMenuOpen : undefined}
+            aria-controls={open ? 'basic-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            value={Number(stats.tagCount).toLocaleString(locale)}
+            label={t('project_dashboard_tag_count_plural', {
+              value: Number(stats.tagCount),
+            })}
+          />
+        </StyledContentRow>
+      </StyledGroup>
 
-        <StyledTile
-          gridArea="users"
-          data-cy="project-dashboard-members"
-          onClick={membersAccessible ? redirectToPermissions : undefined}
-          className={clsx({ clickable: membersAccessible })}
-        >
-          <StyledTileDataItem data-cy="project-dashboard-members-count">
-            <StyledTileValue>
-              {canViewMembers
+      <StyledGroup data-cy="project-dashboard-progress">
+        <StyledGroupTitle>
+          {t('project_dashboard_group_progress', 'Progress')}
+        </StyledGroupTitle>
+        <StyledRow>
+          <Stat
+            dataCy="project-dashboard-translated-percentage"
+            onClick={canViewKeys ? redirectToTranslations : undefined}
+            value={<PercentFormat number={stats.translatedPercentage} />}
+            label={t('project_dashboard_translated_percent')}
+          />
+          <Stat
+            dataCy="project-dashboard-reviewed-percentage"
+            onClick={canViewKeys ? redirectToTranslations : undefined}
+            value={<PercentFormat number={stats.reviewedPercentage} />}
+            label={t('project_dashboard_reviewed_percent', 'Reviewed')}
+          />
+        </StyledRow>
+      </StyledGroup>
+
+      <StyledGroup data-cy="project-dashboard-team">
+        <StyledGroupTitle>
+          {t('project_dashboard_group_team', 'Team')}
+        </StyledGroupTitle>
+        <StyledRow>
+          <Stat
+            dataCy="project-dashboard-task-count"
+            onClick={canViewTasks ? redirectToTasks : undefined}
+            value={Number(stats.taskCount).toLocaleString(locale)}
+            label={t('project_dashboard_task_count_plural', {
+              value: stats.taskCount,
+            })}
+          />
+          <Stat
+            dataCy="project-dashboard-members-count"
+            onClick={membersAccessible ? redirectToPermissions : undefined}
+            value={
+              canViewMembers
                 ? Number(stats.membersCount).toLocaleString(locale)
-                : '—'}
-            </StyledTileValue>
-            <StyledTileDescription>
-              {canViewMembers
+                : '—'
+            }
+            label={
+              canViewMembers
                 ? t('project_dashboard_member_count_plural', {
                     value: Number(stats.membersCount),
                   })
-                : t('project_menu_members')}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-          {membersEditable && (
-            <StyledTileEdit>
-              <Edit02 width={20} height={20} />
-            </StyledTileEdit>
-          )}
-        </StyledTile>
+                : t('project_menu_members')
+            }
+          >
+            {membersEditable && (
+              <StyledTileEdit>
+                <Edit02 width={20} height={20} />
+              </StyledTileEdit>
+            )}
+          </Stat>
+        </StyledRow>
+      </StyledGroup>
 
-        <StyledTile
-          gridArea="tags"
-          className={clsx({ clickable: tagsClickable })}
-          onClick={tagsClickable ? handleMenuOpen : undefined}
-          aria-controls={open ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          data-cy="project-dashboard-tags"
-        >
-          <StyledTileDataItem>
-            <StyledTileValue>
-              {Number(stats.tagCount).toLocaleString(locale)}
-            </StyledTileValue>
-            <StyledTileDescription>
-              {t('project_dashboard_tag_count_plural', {
-                value: Number(stats.tagCount),
-              })}
-            </StyledTileDescription>
-          </StyledTileDataItem>
-        </StyledTile>
-        <Menu
-          PaperProps={{ sx: { minWidth: anchorWidth.current } }}
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleMenuClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-        >
-          {tags.data?._embedded?.tags?.map((tag) => (
-            <MenuItem key={tag.id} onClick={redirectToTag(tag.name)}>
-              {tag.name}
-            </MenuItem>
-          ))}
-        </Menu>
-      </StyledTiles>
-    </>
+      <Menu
+        PaperProps={{ sx: { minWidth: anchorWidth.current } }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        {tags.data?._embedded?.tags?.map((tag) => (
+          <MenuItem key={tag.id} onClick={redirectToTag(tag.name)}>
+            {tag.name}
+          </MenuItem>
+        ))}
+      </Menu>
+    </StyledGroups>
   );
 };

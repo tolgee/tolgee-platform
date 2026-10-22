@@ -72,9 +72,7 @@ describe('Project stats', () => {
       .should('be.visible');
 
     cy.gcy('project-dashboard-key-count').contains('5').should('be.visible');
-    cy.gcy('project-dashboard-base-word-count')
-      .contains('4')
-      .should('be.visible');
+    cy.gcy('project-dashboard-words-count').contains('12').should('be.visible');
     cy.gcy('project-dashboard-translated-percentage')
       .contains('75%')
       .should('be.visible');

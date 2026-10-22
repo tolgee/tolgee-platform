@@ -5755,6 +5755,8 @@ export interface components {
       /** Format: int64 */
       baseWordsCount: number;
       /** Format: int64 */
+      hostedWordsCount: number;
+      /** Format: int64 */
       keyCount: number;
       /** Format: int32 */
       languageCount: number;

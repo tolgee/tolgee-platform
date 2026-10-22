@@ -610,7 +610,7 @@ declare namespace DataCy {
         "project-contributor-item-last-contribution": true;
         "project-dashboard-activity-chart": true;
         "project-dashboard-activity-list": true;
-        "project-dashboard-base-word-count": true;
+        "project-dashboard-content": true;
         "project-dashboard-description": true;
         "project-dashboard-key-count": true;
         "project-dashboard-language-bar": true;
@@ -623,17 +623,16 @@ declare namespace DataCy {
         "project-dashboard-language-menu-export": true;
         "project-dashboard-language-menu-settings": true;
         "project-dashboard-languages-edit": true;
-        "project-dashboard-members": true;
         "project-dashboard-members-count": true;
         "project-dashboard-progress": true;
         "project-dashboard-project-totals": true;
         "project-dashboard-reviewed-percentage": true;
-        "project-dashboard-strings": true;
         "project-dashboard-strings-count": true;
         "project-dashboard-tags": true;
         "project-dashboard-task-count": true;
-        "project-dashboard-text": true;
+        "project-dashboard-team": true;
         "project-dashboard-translated-percentage": true;
+        "project-dashboard-words-count": true;
         "project-delete-button": true;
         "project-leave-button": true;
         "project-list-languages": true;
