@@ -12,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Prompt
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
@@ -99,6 +100,7 @@ class ProjectBuilder(
     val branchMergeChanges = mutableListOf<BranchMergeChangeBuilder>()
     val keySnapshots = mutableListOf<KeySnapshotBuilder>()
     val tags = mutableListOf<TagBuilder>()
+    val aiReviewRules = mutableListOf<AiReviewRuleBuilder>()
   }
 
   var data = DATA()
@@ -277,6 +279,8 @@ class ProjectBuilder(
   fun addPrompt(ft: FT<Prompt>) = addOperation(data.prompts, ft)
 
   fun addAiPlaygroundResult(ft: FT<AiPlaygroundResult>) = addOperation(data.aiPlaygroundResults, ft)
+
+  fun addAiReviewRule(ft: FT<AiReviewRule>) = addOperation(data.aiReviewRules, ft)
 
   val onlyUser
     get() =
