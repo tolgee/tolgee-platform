@@ -2921,6 +2921,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -5396,6 +5397,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       /** Format: int64 */
       id: number;
@@ -5876,6 +5878,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -6469,6 +6472,7 @@ export interface components {
         | "BRANCHING"
         | "QA_CHECKS"
         | "TRANSLATION_MEMORY"
+        | "AI_REVIEW"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;

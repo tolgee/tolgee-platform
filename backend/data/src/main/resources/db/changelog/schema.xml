@@ -6339,4 +6339,55 @@
             <column name="manual_run_batch_job_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-1">
+        <addColumn tableName="prompt">
+            <column name="type" type="VARCHAR(255)" defaultValue="TRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-2">
+        <addColumn tableName="prompt">
+            <column name="review_criteria" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-3">
+        <addColumn tableName="prompt">
+            <column name="revision" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-4">
+        <addColumn tableName="activity_revision">
+            <column name="system_actor" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-5">
+        <addColumn tableName="project">
+            <column name="ai_approved_source_change_action" type="VARCHAR(255)" defaultValue="RETRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-6">
+        <addColumn tableName="project">
+            <column name="human_edited_source_change_action" type="VARCHAR(255)" defaultValue="MARK_OUTDATED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-7">
+        <addColumn tableName="project">
+            <column name="human_reviewed_source_change_action" type="VARCHAR(255)" defaultValue="MARK_OUTDATED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-8">
+        <addColumn tableName="ai_playground_result">
+            <column name="score" type="INTEGER"/>
+            <column name="issues" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.model.enums.SystemActor
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -66,6 +67,9 @@ class ActivityRevision : java.io.Serializable {
 
   @Enumerated(EnumType.STRING)
   var type: ActivityType? = null
+
+  @Enumerated(EnumType.STRING)
+  var systemActor: SystemActor? = null
 
   /**
    * Project of the change

@@ -7,6 +7,7 @@ import io.tolgee.model.automations.Automation
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.enums.SourceChangeAction
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.glossary.Glossary
@@ -183,6 +184,21 @@ class Project(
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)
   var translationProtection: TranslationProtection = TranslationProtection.NONE
+
+  @Column(nullable = false)
+  @ColumnDefault("RETRANSLATE")
+  @Enumerated(EnumType.STRING)
+  var aiApprovedSourceChangeAction: SourceChangeAction = SourceChangeAction.RETRANSLATE
+
+  @Column(nullable = false)
+  @ColumnDefault("MARK_OUTDATED")
+  @Enumerated(EnumType.STRING)
+  var humanEditedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED
+
+  @Column(nullable = false)
+  @ColumnDefault("MARK_OUTDATED")
+  @Enumerated(EnumType.STRING)
+  var humanReviewedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED
 
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0
