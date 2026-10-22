@@ -53,6 +53,7 @@ import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
+import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -402,6 +403,23 @@ class TestDataService(
     saveLabels(builder)
     saveTags(builder)
     saveSuggestions(builder)
+    saveAiReviewRules(builder)
+    saveAiReviews(builder)
+  }
+
+  private fun saveAiReviewRules(builder: ProjectBuilder) {
+    builder.data.aiReviewRules.forEach { entityManager.persist(it.self) }
+  }
+
+  private fun saveAiReviews(builder: ProjectBuilder) {
+    builder.data.translations
+      .flatMap { it.data.aiReviews }
+      .forEach {
+        if (it.self.textHash.isEmpty()) {
+          it.self.textHash = sha256Hex(it.self.translation.text ?: "")
+        }
+        entityManager.persist(it.self)
+      }
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
