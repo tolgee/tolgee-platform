@@ -1350,7 +1350,7 @@ export interface paths {
     get: operations["getSso"];
   };
   "/v2/users/{userId}/community-profile": {
-    /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+    /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted. 404 community_profile_private when the profile is private or the user has no public contributions and has not set the profile public; the owner always sees their own profile. Unknown, deleted or disabled users are 404 user_not_found. */
     get: operations["getProfile"];
   };
 }
@@ -3396,7 +3396,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "community_profile_private";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5550,6 +5551,8 @@ export interface components {
       name?: string;
       needsSuperJwtToken: boolean;
       /** @enum {string} */
+      profileVisibility: "PUBLIC" | "PRIVATE" | "DEFAULT";
+      /** @enum {string} */
       thirdPartyAuthType?:
         | "GOOGLE"
         | "GITHUB"
@@ -7450,7 +7453,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "community_profile_private";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -8262,6 +8266,11 @@ export interface components {
       currentPassword?: string;
       email: string;
       name: string;
+      /**
+       * @description Who can open the user's community profile. Omitted = unchanged.
+       * @enum {string}
+       */
+      profileVisibility?: "PUBLIC" | "PRIVATE" | "DEFAULT";
     };
     V2EditApiKeyDto: {
       description?: string;
@@ -31148,7 +31157,7 @@ export interface operations {
       };
     };
   };
-  /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+  /** Contribution totals, languages, per-day counts for the last 365 days, recent contributions and the public projects contributed to. Only contributions to public projects are counted. 404 community_profile_private when the profile is private or the user has no public contributions and has not set the profile public; the owner always sees their own profile. Unknown, deleted or disabled users are 404 user_not_found. */
   getProfile: {
     parameters: {
       path: {

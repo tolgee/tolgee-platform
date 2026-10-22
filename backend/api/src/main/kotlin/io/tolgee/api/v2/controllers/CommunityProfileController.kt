@@ -2,9 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.Message
 import io.tolgee.dtos.community.CommunityProfile
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.service.contributor.CommunityStatsService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,10 +25,12 @@ class CommunityProfileController(
     summary = "Get community profile",
     description =
       "Contribution totals, languages, per-day counts for the last 365 days, recent contributions and " +
-        "the public projects contributed to. Only contributions to public projects are counted; " +
-        "a user without any is 404.",
+        "the public projects contributed to. Only contributions to public projects are counted. " +
+        "404 community_profile_private when the profile is private or the user has no public contributions " +
+        "and has not set the profile public; the owner always sees their own profile. " +
+        "Unknown, deleted or disabled users are 404 user_not_found.",
   )
   fun getProfile(
     @PathVariable userId: Long,
-  ): CommunityProfile = communityStatsService.getProfile(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+  ): CommunityProfile = communityStatsService.getProfile(userId)
 }
