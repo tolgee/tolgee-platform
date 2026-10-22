@@ -6136,4 +6136,7 @@
     <changeSet author="bdshadow" id="1792137213000-4">
         <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="organization_feature_grant" constraintName="FK_organization_feature_grant_created_by" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="bdshadow" id="1792660129000-1">
+        <dropTable tableName="organization_feature_grant"/>
+    </changeSet>
 </databaseChangeLog>

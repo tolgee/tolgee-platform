@@ -232,15 +232,6 @@ class TestDataService(
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
     saveLlmProviders(builder)
-    saveOrganizationFeatureGrants(builder)
-  }
-
-  private fun saveOrganizationFeatureGrants(builder: TestDataBuilder) {
-    builder.data.organizations.forEach { organizationBuilder ->
-      organizationBuilder.data.featureGrants.forEach {
-        entityManager.persist(it.self)
-      }
-    }
   }
 
   private fun saveLlmProviders(builder: TestDataBuilder) {
