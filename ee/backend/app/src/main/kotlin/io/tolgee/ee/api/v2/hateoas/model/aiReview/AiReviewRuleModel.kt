@@ -22,10 +22,20 @@ class AiReviewRuleModel(
   val promptId: Long?,
   val skipOpenQaIssues: Boolean,
   val overrides: List<AiReviewRuleOverrideModel>,
+  val counts: AiReviewRuleCountsModel,
 ) : RepresentationModel<AiReviewRuleModel>()
 
 class AiReviewRuleOverrideModel(
   val languageId: Long,
   val threshold: Int,
   val never: Boolean,
+)
+
+class AiReviewRuleCountsModel(
+  val autoReviewed: Long,
+  val rejected: Long,
+  val failed: Long,
+  val scored: Long,
+  val wouldBeAutoReviewed: Long,
+  val backlog: Long,
 )
