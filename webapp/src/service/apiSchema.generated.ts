@@ -1372,12 +1372,27 @@ export interface components {
       keys: number[];
       languages: number[];
     };
+    AiReviewRuleCountsModel: {
+      /** Format: int64 */
+      autoReviewed: number;
+      /** Format: int64 */
+      backlog: number;
+      /** Format: int64 */
+      failed: number;
+      /** Format: int64 */
+      rejected: number;
+      /** Format: int64 */
+      scored: number;
+      /** Format: int64 */
+      wouldBeAutoReviewed: number;
+    };
     AiReviewRuleEnabledRequest: {
       enabled: boolean;
     };
     AiReviewRuleModel: {
       branchIn: string[];
       branchNotIn: string[];
+      counts: components["schemas"]["AiReviewRuleCountsModel"];
       enabled: boolean;
       /** Format: int64 */
       id: number;

@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.aiReview
 
+import io.tolgee.ee.service.aiReview.AiReviewKeyScopeSql.toKeyScope
 import io.tolgee.ee.service.aiReview.matching.KeyScope
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Tuple
@@ -40,7 +41,7 @@ class AiReviewKeyScopeQuery(
 
     var current: KeyScope? = null
     query.resultStream.forEach { row ->
-      val keyId = row.get(0, java.lang.Long::class.java).toLong()
+      val keyId = row.get(0, Long::class.javaObjectType)
       val tag = row.get(3, String::class.java)
       val previous = current
       if (previous != null && previous.keyId == keyId) {
@@ -69,16 +70,7 @@ class AiReviewKeyScopeQuery(
       entityManager
         .createNativeQuery(
           """
-          select coalesce(n.name, '') as namespace_name,
-                 coalesce(b.name, :defaultBranch) as branch_name,
-                 coalesce(
-                   (select string_agg(tg.name, chr(31) order by tg.name)
-                    from key_meta km
-                    join key_meta_tags kmt on kmt.key_metas_id = km.id
-                    join tag tg on tg.id = kmt.tags_id
-                    where km.key_id = k.id),
-                   ''
-                 ) as tag_names,
+          select ${AiReviewKeyScopeSql.COLUMNS},
                  count(*) as key_count
           from key k
           left join namespace n on n.id = k.namespace_id
@@ -94,21 +86,7 @@ class AiReviewKeyScopeQuery(
 
     @Suppress("UNCHECKED_CAST")
     return (query.resultList as List<Tuple>).map { row ->
-      val tagNames = row.get("tag_names", String::class.java)
-      ScopeGroup(
-        scope =
-          KeyScope(
-            keyId = 0,
-            namespace = row.get("namespace_name", String::class.java),
-            branchName = row.get("branch_name", String::class.java),
-            tags = tagNames.split(TAG_SEPARATOR).filter { it.isNotEmpty() }.toSet(),
-          ),
-        keyCount = (row.get("key_count") as Number).toLong(),
-      )
+      ScopeGroup(scope = row.toKeyScope(keyId = 0), keyCount = (row.get("key_count") as Number).toLong())
     }
-  }
-
-  companion object {
-    private const val TAG_SEPARATOR = '\u001F'
   }
 }

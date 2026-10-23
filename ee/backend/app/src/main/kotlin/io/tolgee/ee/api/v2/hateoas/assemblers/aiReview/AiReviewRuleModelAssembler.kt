@@ -1,13 +1,18 @@
 package io.tolgee.ee.api.v2.hateoas.assemblers.aiReview
 
+import io.tolgee.ee.api.v2.hateoas.model.aiReview.AiReviewRuleCountsModel
 import io.tolgee.ee.api.v2.hateoas.model.aiReview.AiReviewRuleModel
 import io.tolgee.ee.api.v2.hateoas.model.aiReview.AiReviewRuleOverrideModel
+import io.tolgee.ee.service.aiReview.AiReviewRuleStatsService.AiReviewRuleCounts
 import io.tolgee.model.aiReview.AiReviewRule
 import org.springframework.stereotype.Component
 
 @Component
 class AiReviewRuleModelAssembler {
-  fun toModel(rule: AiReviewRule): AiReviewRuleModel =
+  fun toModel(
+    rule: AiReviewRule,
+    counts: AiReviewRuleCounts?,
+  ): AiReviewRuleModel =
     AiReviewRuleModel(
       id = rule.id,
       name = rule.name,
@@ -28,5 +33,16 @@ class AiReviewRuleModelAssembler {
         rule.overrides
           .sortedBy { it.language.id }
           .map { AiReviewRuleOverrideModel(it.language.id, it.threshold, it.never) },
+      counts = (counts ?: AiReviewRuleCounts(ruleId = rule.id)).toModel(),
+    )
+
+  private fun AiReviewRuleCounts.toModel() =
+    AiReviewRuleCountsModel(
+      autoReviewed = autoReviewed,
+      rejected = rejected,
+      failed = failed,
+      scored = scored,
+      wouldBeAutoReviewed = wouldBeAutoReviewed,
+      backlog = backlog,
     )
 }

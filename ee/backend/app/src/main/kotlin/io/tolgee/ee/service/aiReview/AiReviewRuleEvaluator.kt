@@ -29,34 +29,51 @@ class AiReviewRuleEvaluator(
     val keyCount: Long,
   )
 
+  class ProjectRules(
+    val rules: List<RuleSnapshot>,
+    private val branchingEnabled: Boolean,
+    private val defaultBranchName: String,
+  ) {
+    fun evaluate(
+      translation: Translation,
+      activeOnly: Boolean = false,
+    ): RuleDecision {
+      val key = translation.key
+      val scope =
+        KeyScope(
+          keyId = key.id,
+          namespace = key.namespace?.name ?: "",
+          branchName = key.branch?.name ?: defaultBranchName,
+          tags =
+            key.keyMeta
+              ?.tags
+              ?.map { it.name }
+              ?.toSet() ?: emptySet(),
+        )
+      return StrictestRuleSelector.decide(
+        rules = rules,
+        key = scope,
+        languageId = translation.language.id,
+        branchingEnabled = branchingEnabled,
+        activeOnly = activeOnly,
+      )
+    }
+  }
+
   fun loadRules(projectId: Long): List<RuleSnapshot> = aiReviewRuleCache.get(projectId)
+
+  @Transactional(readOnly = true)
+  fun forProject(projectId: Long): ProjectRules =
+    ProjectRules(loadRules(projectId), isBranchingEnabled(projectId), defaultBranchName(projectId))
 
   @Transactional(readOnly = true)
   fun evaluate(
     translation: Translation,
     activeOnly: Boolean = false,
-  ): RuleDecision {
-    val key = translation.key
-    val projectId = key.project.id
-    val scope =
-      KeyScope(
-        keyId = key.id,
-        namespace = key.namespace?.name ?: "",
-        branchName = key.branch?.name ?: defaultBranchName(projectId),
-        tags =
-          key.keyMeta
-            ?.tags
-            ?.map { it.name }
-            ?.toSet() ?: emptySet(),
-      )
-    return StrictestRuleSelector.decide(
-      rules = loadRules(projectId),
-      key = scope,
-      languageId = translation.language.id,
-      branchingEnabled = isBranchingEnabled(projectId),
-      activeOnly = activeOnly,
-    )
-  }
+  ): RuleDecision =
+    forProject(
+      translation.key.project.id,
+    ).evaluate(translation, activeOnly)
 
   @Transactional(readOnly = true)
   fun forEachDecision(
@@ -101,6 +118,12 @@ class AiReviewRuleEvaluator(
     }
   }
 
+  fun decider(projectId: Long): (KeyScope, Long) -> RuleDecision {
+    val rules = loadRules(projectId)
+    val branchingEnabled = isBranchingEnabled(projectId)
+    return { scope, languageId -> StrictestRuleSelector.decide(rules, scope, languageId, branchingEnabled) }
+  }
+
   private fun targetLanguageIds(
     projectId: Long,
     languageIds: Collection<Long>?,
@@ -111,7 +134,7 @@ class AiReviewRuleEvaluator(
       .map { it.id }
       .filter { languageIds == null || it in languageIds }
 
-  private fun defaultBranchName(projectId: Long): String =
+  fun defaultBranchName(projectId: Long): String =
     branchService.getDefaultBranch(projectId)?.name ?: Branch.DEFAULT_BRANCH_NAME
 
   private fun isBranchingEnabled(projectId: Long): Boolean =
