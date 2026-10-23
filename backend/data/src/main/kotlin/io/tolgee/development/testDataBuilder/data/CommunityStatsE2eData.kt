@@ -2,7 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.enums.TranslationSuggestionState
 
-/** Dates are spread over past weeks afterwards by `CommunityStatsE2eDataController`. */
+/** Dates are spread over past weeks and the activity is replayed afterwards by `CommunityStatsE2eDataController`. */
 class CommunityStatsE2eData : CommunityStatsTestData() {
   init {
     val extraContributors =
@@ -43,6 +43,24 @@ class CommunityStatsE2eData : CommunityStatsTestData() {
             suggest(keys[i % keys.size], author, language, state)
             i++
           }
+        }
+      }
+      var commentsAdded = 0
+      publicKeys.drop(1).forEach { key ->
+        listOf(german, french).forEachIndexed { translationIndex, language ->
+          key
+            .addTranslation {
+              this.language = language
+              text = "${language.tag} translation of ${key.self.name}"
+            }.build {
+              repeat(1 + translationIndex % 2) {
+                addComment {
+                  text = "Comment ${commentsAdded + 1}"
+                  author = authors[commentsAdded % authors.size]
+                }
+                commentsAdded++
+              }
+            }
         }
       }
     }
