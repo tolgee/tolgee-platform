@@ -465,6 +465,18 @@ export interface paths {
     get: operations["getPromptProjectCustomization"];
     put: operations["setPromptProjectCustomization"];
   };
+  "/v2/projects/{projectId}/ai-review-rules": {
+    get: operations["listAiReviewRules"];
+    post: operations["createAiReviewRule"];
+  };
+  "/v2/projects/{projectId}/ai-review-rules/{ruleId}": {
+    get: operations["getAiReviewRule"];
+    put: operations["updateAiReviewRule"];
+    delete: operations["deleteAiReviewRule"];
+  };
+  "/v2/projects/{projectId}/ai-review-rules/{ruleId}/enabled": {
+    put: operations["setAiReviewRuleEnabled"];
+  };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
@@ -1361,6 +1373,65 @@ export interface components {
       keys: number[];
       languages: number[];
     };
+    AiReviewRuleEnabledRequest: {
+      enabled: boolean;
+    };
+    AiReviewRuleModel: {
+      branchIn: string[];
+      branchNotIn: string[];
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      languageIds: number[];
+      /** @enum {string} */
+      mode: "DRY_RUN" | "ACTIVE";
+      name?: string;
+      namespaceIn: string[];
+      namespaceNotIn: string[];
+      never: boolean;
+      overrides: components["schemas"]["AiReviewRuleOverrideModel"][];
+      /** Format: int64 */
+      promptId?: number;
+      skipOpenQaIssues: boolean;
+      tagIn: string[];
+      tagNotIn: string[];
+      /** Format: int32 */
+      threshold: number;
+    };
+    AiReviewRuleOverrideModel: {
+      /** Format: int64 */
+      languageId: number;
+      never: boolean;
+      /** Format: int32 */
+      threshold: number;
+    };
+    AiReviewRuleOverrideRequest: {
+      /** Format: int64 */
+      languageId: number;
+      never: boolean;
+      /** Format: int32 */
+      threshold: number;
+    };
+    AiReviewRuleRequest: {
+      branchIn: string[];
+      branchNotIn: string[];
+      enabled: boolean;
+      languageIds: number[];
+      /** @enum {string} */
+      mode: "DRY_RUN" | "ACTIVE";
+      name?: string;
+      namespaceIn: string[];
+      namespaceNotIn: string[];
+      never: boolean;
+      overrides: components["schemas"]["AiReviewRuleOverrideRequest"][];
+      /** Format: int64 */
+      promptId?: number;
+      skipOpenQaIssues: boolean;
+      tagIn: string[];
+      tagNotIn: string[];
+      /** Format: int32 */
+      threshold: number;
+    };
     AnnouncementDto: {
       /** @enum {string} */
       type:
@@ -1959,6 +2030,11 @@ export interface components {
     CollectionModelAiPlaygroundResultModel: {
       _embedded?: {
         results?: components["schemas"]["AiPlaygroundResultModel"][];
+      };
+    };
+    CollectionModelAiReviewRuleModel: {
+      _embedded?: {
+        rules?: components["schemas"]["AiReviewRuleModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -3290,7 +3366,11 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "ai_review_rule_not_found"
+        | "ai_review_prompt_must_be_review_type"
+        | "ai_review_rule_base_language"
+        | "ai_review_duplicate_language_override";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5553,6 +5633,9 @@ export interface components {
         | "AI_PROMPT_CREATE"
         | "AI_PROMPT_UPDATE"
         | "AI_PROMPT_DELETE"
+        | "AI_REVIEW_RULE_CREATE"
+        | "AI_REVIEW_RULE_UPDATE"
+        | "AI_REVIEW_RULE_DELETE"
         | "BRANCH_CREATE"
         | "BRANCH_RENAME"
         | "BRANCH_DELETE"
@@ -7243,7 +7326,11 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "ai_review_rule_not_found"
+        | "ai_review_prompt_must_be_review_type"
+        | "ai_review_rule_base_language"
+        | "ai_review_duplicate_language_override";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -15690,6 +15777,303 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetProjectPromptCustomizationRequest"];
+      };
+    };
+  };
+  listAiReviewRules: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelAiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createAiReviewRule: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRuleRequest"];
+      };
+    };
+  };
+  getAiReviewRule: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updateAiReviewRule: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRuleRequest"];
+      };
+    };
+  };
+  deleteAiReviewRule: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  setAiReviewRuleEnabled: {
+    parameters: {
+      path: {
+        ruleId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRuleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRuleEnabledRequest"];
       };
     };
   };

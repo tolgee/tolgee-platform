@@ -7,8 +7,12 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.Language
 import io.tolgee.model.Prompt
+import io.tolgee.model.UserAccount
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.PromptType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.key.Key
@@ -22,6 +26,10 @@ class AiReviewTestData : BaseTestData() {
   lateinit var frTranslationBuilder: TranslationBuilder
   lateinit var ruleBuilder: AiReviewRuleBuilder
   lateinit var translatePrompt: Prompt
+  lateinit var reviewPrompt: Prompt
+  lateinit var otherProjectLanguage: Language
+  lateinit var translator: UserAccount
+  lateinit var promptsViewer: UserAccount
   lateinit var englishTranslationBuilder: TranslationBuilder
 
   val deTranslation: Translation get() = deTranslationBuilder.self
@@ -46,6 +54,34 @@ class AiReviewTestData : BaseTestData() {
           name = "Translate"
           providerName = "default"
         }.self
+      reviewPrompt =
+        addPrompt {
+          name = "Brand voice review"
+          providerName = "default"
+          type = PromptType.REVIEW
+          reviewCriteria = "Use informal German."
+        }.self
+      translator =
+        root
+          .addUserAccount { username = "ai_review_translator" }
+          .self
+          .also { user ->
+            addPermission {
+              this.user = user
+              type = ProjectPermissionType.TRANSLATE
+            }
+          }
+      promptsViewer =
+        root
+          .addUserAccount { username = "ai_review_prompts_viewer" }
+          .self
+          .also { user ->
+            addPermission {
+              this.user = user
+              type = null
+              scopes = arrayOf(Scope.PROMPTS_VIEW)
+            }
+          }
       ruleBuilder =
         addAiReviewRule {
           name = "UI"
@@ -54,6 +90,11 @@ class AiReviewTestData : BaseTestData() {
           tagIn = mutableListOf("ui")
         }
     }
+    root
+      .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "Other project" }
+      .build {
+        otherProjectLanguage = addGerman().self
+      }
   }
 
   fun addRule(ft: FT<AiReviewRule>): AiReviewRuleBuilder = projectBuilder.addAiReviewRule(ft)

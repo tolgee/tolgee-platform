@@ -1,9 +1,11 @@
 package io.tolgee.ee.aiReview
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRuleCache
 import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
+import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.testing.assert
@@ -28,6 +30,9 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var aiReviewRuleRepository: AiReviewRuleRepository
+
+  @Autowired
+  lateinit var aiReviewRuleService: AiReviewRuleService
 
   lateinit var testData: AiReviewTestData
 
@@ -55,6 +60,27 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
 
     aiReviewRuleCache.evict(testData.project.id)
     threshold().assert.isEqualTo(99)
+  }
+
+  @Test
+  fun `create, update, enable and delete evict the rule cache`() {
+    threshold().assert.isEqualTo(85)
+    val projectId = testData.project.id
+
+    val created = aiReviewRuleService.create(projectId, AiReviewRuleRequest(tagIn = listOf("ui"), threshold = 90))
+    threshold().assert.isEqualTo(90)
+
+    aiReviewRuleService.update(projectId, created.id, AiReviewRuleRequest(tagIn = listOf("ui"), threshold = 93))
+    threshold().assert.isEqualTo(93)
+
+    aiReviewRuleService.setEnabled(projectId, created.id, false)
+    threshold().assert.isEqualTo(85)
+
+    aiReviewRuleService.setEnabled(projectId, created.id, true)
+    threshold().assert.isEqualTo(93)
+
+    aiReviewRuleService.delete(projectId, created.id)
+    threshold().assert.isEqualTo(85)
   }
 
   private fun threshold(): Int =
