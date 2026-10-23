@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.Length
 
 @Entity
 @ActivityLoggedEntity
-@ActivityEntityDescribingPaths(paths = ["translation"])
+@ActivityEntityDescribingPaths(paths = ["translation", "language=translation.language"])
 @Table(
   indexes = [
     Index(columnList = "state"),
