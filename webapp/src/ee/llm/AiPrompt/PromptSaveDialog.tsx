@@ -24,7 +24,7 @@ type PromptModel = components['schemas']['PromptModel'];
 type Props = {
   projectId: number;
   onClose: () => void;
-  data: Omit<PromptModel, 'projectId' | 'id' | 'name'>;
+  data: Omit<PromptModel, 'projectId' | 'id' | 'name' | 'revision'>;
   onSuccess: (prompt: PromptItem) => void;
 };
 

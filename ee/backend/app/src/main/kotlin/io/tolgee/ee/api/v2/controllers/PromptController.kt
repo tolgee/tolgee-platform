@@ -20,6 +20,7 @@ import io.tolgee.ee.service.prompt.PromptVariablesHelper
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -70,8 +71,10 @@ class PromptController(
   fun getAllPaged(
     @ParameterObject pageable: Pageable,
     @RequestParam search: String?,
+    @RequestParam type: PromptType?,
   ): PagedModel<PromptModel> {
-    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search)
+    if (type == PromptType.REVIEW) checkAiReviewEnabled()
+    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search, visibleTypes(type))
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
 
@@ -103,6 +106,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+    if (dto.type == PromptType.REVIEW) checkAiReviewEnabled()
 
     val result = promptService.createPrompt(projectHolder.project.id, dto)
     return promptModelAssembler.toModel(result)
@@ -115,6 +119,7 @@ class PromptController(
     @PathVariable promptId: Long,
   ): PromptModel {
     val result = promptService.findPromptWithResolvedProvider(projectHolder.project.id, promptId)
+    if (result.type == PromptType.REVIEW) checkAiReviewEnabled()
     return promptModelAssembler.toModel(result)
   }
 
@@ -140,6 +145,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+    if (promptService.findPrompt(projectHolder.project.id, promptId).type == PromptType.REVIEW) checkAiReviewEnabled()
     val result = promptService.updatePrompt(projectHolder.project.id, promptId, dto)
     return promptModelAssembler.toModel(result)
   }
@@ -221,5 +227,18 @@ class PromptController(
         .map { it.toPromptVariableDto() }
         .toMutableList(),
     )
+  }
+
+  private fun isAiReviewEnabled(): Boolean =
+    enabledFeaturesProvider.isFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
+
+  private fun checkAiReviewEnabled() {
+    enabledFeaturesProvider.checkFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
+  }
+
+  private fun visibleTypes(type: PromptType?): List<PromptType> {
+    if (type != null) return listOf(type)
+    if (isAiReviewEnabled()) return PromptType.entries
+    return listOf(PromptType.TRANSLATE)
   }
 }
