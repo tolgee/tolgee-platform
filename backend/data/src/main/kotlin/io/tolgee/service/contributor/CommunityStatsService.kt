@@ -1,8 +1,10 @@
 package io.tolgee.service.contributor
 
+import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.community.CommunityActivity
+import io.tolgee.dtos.community.CommunityActivityItem
 import io.tolgee.dtos.community.CommunityContributorStats
 import io.tolgee.dtos.community.CommunityProfile
 import io.tolgee.dtos.community.DayCounts
@@ -15,6 +17,7 @@ import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
 import io.tolgee.service.AvatarService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -28,8 +31,10 @@ import java.time.temporal.TemporalAdjusters
 @Service
 class CommunityStatsService(
   private val repository: CommunityContributionDayRepository,
+  private val activityService: ActivityService,
   private val avatarService: AvatarService,
   private val userAccountService: UserAccountService,
+  private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
 ) {
   fun getContributors(
@@ -91,6 +96,17 @@ class CommunityStatsService(
       projects = profileProjects(rows),
       days = profileDays(rows),
     )
+  }
+
+  fun getActivityFeed(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<CommunityActivityItem>? {
+    if (userAccountService.findActive(userId) == null || !isProfileVisible(userId)) return null
+    val newestFirst = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+    val page = activityService.findPublicContributionsOfUser(userId, CONTRIBUTION_TYPES, newestFirst)
+    val projects = projectService.findAll(page.content.mapNotNull { it.projectId }.toSet()).associateBy { it.id }
+    return page.map { CommunityActivityItem(projects.getValue(it.projectId!!), it) }
   }
 
   private fun isProfileVisible(userId: Long): Boolean =

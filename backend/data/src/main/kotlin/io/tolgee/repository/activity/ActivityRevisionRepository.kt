@@ -3,6 +3,7 @@ package io.tolgee.repository.activity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.queryResults.ActivityRevisionInfo
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.repository.ProjectRepository.Companion.PUBLIC_PROJECT_VISIBILITY
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -48,6 +49,30 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     types: List<ActivityType>,
     branchId: Long? = null,
     defaultBranchId: Long? = null,
+  ): Page<ActivityRevision>
+
+  @Query(
+    """
+      from ActivityRevision ar
+      join Project r on r.id = ar.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      where ar.authorId = :userId and ar.type in :types and $PUBLIC_PROJECT_VISIBILITY
+      order by ar.timestamp desc, ar.id desc
+    """,
+    countQuery = """
+      select count(ar.id)
+      from ActivityRevision ar
+      join Project r on r.id = ar.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      where ar.authorId = :userId and ar.type in :types and $PUBLIC_PROJECT_VISIBILITY
+    """,
+  )
+  fun getPublicContributionsOfUser(
+    userId: Long,
+    types: Collection<ActivityType>,
+    pageable: Pageable,
   ): Page<ActivityRevision>
 
   @Query(

@@ -1,6 +1,8 @@
 package io.tolgee.dtos.community
 
 import io.tolgee.dtos.Avatar
+import io.tolgee.model.Project
+import io.tolgee.model.views.activity.ProjectActivityView
 import java.util.Date
 
 data class WeekBucket(
@@ -79,4 +81,9 @@ data class CommunityProfile(
   val languages: List<ProfileLanguage>,
   val projects: List<ProfileProject>,
   val days: List<DayCounts>,
+)
+
+data class CommunityActivityItem(
+  val project: Project,
+  val activity: ProjectActivityView,
 )
