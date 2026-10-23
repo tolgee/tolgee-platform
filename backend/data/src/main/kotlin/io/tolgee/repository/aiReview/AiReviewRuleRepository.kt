@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface AiReviewRuleRepository : JpaRepository<AiReviewRule, Long> {
-  fun findAllByProjectId(projectId: Long): List<AiReviewRule>
+  fun findAllByProjectIdOrderById(projectId: Long): List<AiReviewRule>
 
   fun findByProjectIdAndId(
     projectId: Long,
