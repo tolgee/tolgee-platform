@@ -1,6 +1,7 @@
 package io.tolgee.ee.aiReview
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.dtos.request.key.UpdateNamespaceDto
 import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRuleCache
@@ -82,6 +83,48 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
     aiReviewRuleService.delete(projectId, created.id)
     threshold().assert.isEqualTo(85)
   }
+
+  @Test
+  fun `language delete and namespace rename evict the rule cache`() {
+    executeInNewTransaction(platformTransactionManager) {
+      val rule = aiReviewRuleRepository.findById(testData.rule.id).get()
+      rule.languages = mutableSetOf(languageService.getEntity(testData.german.id))
+      rule.namespaceIn = mutableListOf("")
+      aiReviewRuleRepository.save(rule)
+    }
+    aiReviewRuleCache.evict(testData.project.id)
+    rules()
+      .single()
+      .languageIds.assert
+      .containsExactly(testData.german.id)
+
+    executeInNewTransaction(platformTransactionManager) { languageService.deleteLanguage(testData.german.id) }
+    rules().assert.isEmpty()
+
+    executeInNewTransaction(platformTransactionManager) {
+      aiReviewRuleService.setEnabled(testData.project.id, testData.rule.id, true)
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      val namespace = namespaceService.create("checkout", testData.project.id)!!
+      namespaceService.update(namespace, UpdateNamespaceDto(name = "cart"))
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      val rule = aiReviewRuleRepository.findById(testData.rule.id).get()
+      rule.namespaceIn = mutableListOf("checkout")
+      aiReviewRuleRepository.save(rule)
+    }
+    aiReviewRuleCache.evict(testData.project.id)
+    executeInNewTransaction(platformTransactionManager) {
+      val namespace = namespaceService.find("cart", testData.project.id)!!
+      namespaceService.update(namespace, UpdateNamespaceDto(name = "checkout"))
+    }
+    rules()
+      .single()
+      .namespaceIn.assert
+      .containsExactly("checkout")
+  }
+
+  private fun rules() = evaluator.loadRules(testData.project.id)
 
   private fun threshold(): Int =
     executeInNewTransaction(platformTransactionManager) {
