@@ -1,11 +1,12 @@
 package io.tolgee.ee.service.aiReview.matching
 
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
+import java.io.Serializable
 
 data class EffectiveValue(
   val threshold: Int,
   val never: Boolean,
-)
+) : Serializable
 
 data class RuleSnapshot(
   val id: Long,
@@ -22,7 +23,7 @@ data class RuleSnapshot(
   val mode: AiReviewRuleMode,
   val promptId: Long?,
   val skipOpenQaIssues: Boolean,
-) {
+) : Serializable {
   fun valueFor(languageId: Long): EffectiveValue = overrides[languageId] ?: value
 }
 

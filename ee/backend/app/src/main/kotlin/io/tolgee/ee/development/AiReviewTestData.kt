@@ -22,6 +22,7 @@ class AiReviewTestData : BaseTestData() {
   lateinit var frTranslationBuilder: TranslationBuilder
   lateinit var ruleBuilder: AiReviewRuleBuilder
   lateinit var translatePrompt: Prompt
+  lateinit var englishTranslationBuilder: TranslationBuilder
 
   val deTranslation: Translation get() = deTranslationBuilder.self
   val frTranslation: Translation get() = frTranslationBuilder.self
@@ -36,7 +37,7 @@ class AiReviewTestData : BaseTestData() {
         addKey { name = "checkout.pay" }
           .build {
             addTag("ui")
-            addTranslation("en", "Pay now")
+            englishTranslationBuilder = addTranslation("en", "Pay now")
             deTranslationBuilder = addTranslation("de", "Jetzt bezahlen")
             frTranslationBuilder = addTranslation("fr", "Payer maintenant")
           }.self
@@ -68,4 +69,30 @@ class AiReviewTestData : BaseTestData() {
       this.score = score
       ft(this)
     }
+
+  class KeyTranslations(
+    val key: Key,
+    val de: TranslationBuilder,
+    val fr: TranslationBuilder,
+  )
+
+  fun addKeyWithTranslations(
+    name: String,
+    tags: List<String> = listOf("ui"),
+    deText: String = "Deutscher Text",
+    frText: String = "Texte français",
+  ): KeyTranslations {
+    lateinit var de: TranslationBuilder
+    lateinit var fr: TranslationBuilder
+    val key =
+      projectBuilder
+        .addKey { this.name = name }
+        .build {
+          tags.forEach { addTag(it) }
+          addTranslation("en", "English text")
+          de = addTranslation("de", deText)
+          fr = addTranslation("fr", frText)
+        }.self
+    return KeyTranslations(key, de, fr)
+  }
 }
