@@ -18,6 +18,6 @@ data class LanguageStatsDto(
   override val translationsUpdatedAt: Date?,
   override val qaIssueCount: Long,
   override val qaChecksStaleCount: Long,
-  val hostedWords: Long?,
+  override val hostedWords: Long?,
   val isDefaultBranch: Boolean?,
 ) : ILanguageStats

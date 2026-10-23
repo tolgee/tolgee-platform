@@ -16,4 +16,5 @@ interface ILanguageStats {
   val translationsUpdatedAt: Date?
   val qaIssueCount: Long
   val qaChecksStaleCount: Long
+  val hostedWords: Long?
 }

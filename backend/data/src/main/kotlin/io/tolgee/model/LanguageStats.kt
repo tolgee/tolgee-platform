@@ -49,7 +49,7 @@ class LanguageStats(
   @ColumnDefault("0")
   override var qaChecksStaleCount: Long = 0
 
-  var hostedWords: Long? = null
+  override var hostedWords: Long? = null
 
   override val languageId: Long
     get() = language.id
