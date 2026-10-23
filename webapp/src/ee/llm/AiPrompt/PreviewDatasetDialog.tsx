@@ -92,6 +92,7 @@ export const PreviewDatasetDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type: 'TRANSLATE',
             },
           },
         },

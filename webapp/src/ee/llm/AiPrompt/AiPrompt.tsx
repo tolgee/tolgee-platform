@@ -298,6 +298,7 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             providerName: provider,
             template: tab === 'advanced' ? value : undefined,
             basicPromptOptions: tab === 'basic' ? options : undefined,
+            type: 'TRANSLATE',
           }}
           existingPrompt={openPromptData}
           unsavedChanges={unsavedChanges}

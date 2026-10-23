@@ -3385,7 +3385,9 @@ export interface components {
         | "ai_review_rule_not_found"
         | "ai_review_prompt_must_be_review_type"
         | "ai_review_rule_base_language"
-        | "ai_review_duplicate_language_override";
+        | "ai_review_duplicate_language_override"
+        | "prompt_type_cannot_be_changed"
+        | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5877,7 +5879,10 @@ export interface components {
       )[];
       name: string;
       providerName: string;
+      reviewCriteria?: string;
       template?: string;
+      /** @enum {string} */
+      type: "TRANSLATE" | "REVIEW";
     };
     PromptModel: {
       basicPromptOptions?: (
@@ -5896,7 +5901,12 @@ export interface components {
       /** Format: int64 */
       projectId: number;
       providerName: string;
+      reviewCriteria?: string;
+      /** Format: int32 */
+      revision: number;
       template?: string;
+      /** @enum {string} */
+      type: "TRANSLATE" | "REVIEW";
     };
     PromptResponseModel: {
       parsedJson?: components["schemas"]["JsonNode"];
@@ -7345,7 +7355,9 @@ export interface components {
         | "ai_review_rule_not_found"
         | "ai_review_prompt_must_be_review_type"
         | "ai_review_rule_base_language"
-        | "ai_review_duplicate_language_override";
+        | "ai_review_duplicate_language_override"
+        | "prompt_type_cannot_be_changed"
+        | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -23279,6 +23291,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        type?: "TRANSLATE" | "REVIEW";
       };
       path: {
         projectId: number;

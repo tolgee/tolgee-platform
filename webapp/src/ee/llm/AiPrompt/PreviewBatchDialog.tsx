@@ -76,6 +76,7 @@ export const PreviewBatchDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type: 'TRANSLATE',
             },
           },
         },

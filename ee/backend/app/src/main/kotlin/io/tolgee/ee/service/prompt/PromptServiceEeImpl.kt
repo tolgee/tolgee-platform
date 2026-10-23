@@ -22,6 +22,7 @@ import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.repository.PromptRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.PromptService
@@ -60,8 +61,9 @@ class PromptServiceEeImpl(
     projectId: Long,
     pageable: Pageable,
     search: String?,
+    types: Collection<PromptType>,
   ): Page<Prompt> {
-    return promptRepository.getAllPaged(projectId, pageable, search).map { withResolvedProviderName(it) }
+    return promptRepository.getAllPaged(projectId, pageable, search, types).map { withResolvedProviderName(it) }
   }
 
   fun createPrompt(
@@ -75,6 +77,8 @@ class PromptServiceEeImpl(
         project = projectService.get(projectId),
         providerName = dto.providerName,
         basicPromptOptions = dto.basicPromptOptions?.toTypedArray(),
+        type = dto.type,
+        reviewCriteria = dto.reviewCriteria.takeIf { dto.type == PromptType.REVIEW },
       )
     promptRepository.save(prompt)
     return withResolvedProviderName(prompt)
@@ -91,6 +95,8 @@ class PromptServiceEeImpl(
         template = prompt.template,
         providerName = prompt.providerName,
         basicPromptOptions = prompt.basicPromptOptions?.toList(),
+        type = prompt.type,
+        reviewCriteria = prompt.reviewCriteria,
       )
     } else {
       return getDefaultPrompt()
@@ -121,10 +127,12 @@ class PromptServiceEeImpl(
     dto: PromptDto,
   ): Prompt {
     val prompt = findPrompt(projectId, promptId)
+    if (dto.type != prompt.type) throw BadRequestException(Message.PROMPT_TYPE_CANNOT_BE_CHANGED)
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
     prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
+    prompt.reviewCriteria = dto.reviewCriteria.takeIf { prompt.type == PromptType.REVIEW }
     promptRepository.save(prompt)
     return withResolvedProviderName(prompt)
   }

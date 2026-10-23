@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Prompt
+import io.tolgee.model.enums.PromptType
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -17,6 +18,7 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     from Prompt p
     where
       p.project.id = :projectId
+      and p.type in :types
       and (
         :search is null or (lower(p.name) like lower(concat('%', cast(:search as string), '%'))
         or lower(p.name) like lower(concat('%', cast(:search as string),'%')))
@@ -27,6 +29,7 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     projectId: Long,
     pageable: Pageable,
     search: String?,
+    types: Collection<PromptType>,
   ): Page<Prompt>
 
   @Query(
