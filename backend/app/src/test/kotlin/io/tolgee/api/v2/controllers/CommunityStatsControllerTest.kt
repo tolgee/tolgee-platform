@@ -29,6 +29,7 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
     currentDateProvider.forcedDate = Date.from(wednesday.atTime(12, 0).toInstant(ZoneOffset.UTC))
     testData = CommunityStatsTestData()
     testDataService.saveTestData(testData.root)
+    executeInNewTransaction { testData.replayActivity(entityManager) }
     jdbcTemplate.update(
       "update community_contribution_day set day = ? where project_id = ? and user_id = ?",
       sundayOfPreviousIsoWeek,
@@ -45,53 +46,63 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `contributors carry totals, languages and weekly buckets, best accepted first, disabled users excluded`() {
+  fun `contributors carry counts, dates, languages and weeks, most contributions first, disabled users excluded`() {
     performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors?weeks=3")
       .andIsOk
       .andAssertThatJson {
         node("_embedded.contributors") {
-          isArray.hasSize(2)
-          node("[0].id").isEqualTo(testData.alice.id)
-          node("[0].name").isEqualTo("Alice Adams")
-          node("[0].username").isAbsent()
-          node("[0].suggested").isEqualTo(4)
-          node("[0].accepted").isEqualTo(2)
-          node("[0].declined").isEqualTo(1)
-          node("[0].languages") {
+          isArray.hasSize(3)
+          node("[0].id").isEqualTo(testData.user.id)
+          node("[0].contributions").isEqualTo(6)
+          node("[0].suggested").isEqualTo(0)
+          node("[1].id").isEqualTo(testData.alice.id)
+          node("[1].name").isEqualTo("Alice Adams")
+          node("[1].username").isAbsent()
+          node("[1].contributions").isEqualTo(5)
+          node("[1].suggested").isEqualTo(4)
+          node("[1].accepted").isEqualTo(2)
+          node("[1].declined").isEqualTo(1)
+          node("[1].firstContributionAt").isEqualTo(currentDateProvider.date.time)
+          node("[1].lastContributionAt").isEqualTo(currentDateProvider.date.time)
+          node("[1].languages") {
             isArray.hasSize(2)
             node("[0].languageId").isEqualTo(testData.czech.id)
+            node("[0].contributions").isEqualTo(4)
             node("[0].suggested").isEqualTo(3)
             node("[0].accepted").isEqualTo(2)
             node("[0].declined").isEqualTo(0)
             node("[1].languageId").isEqualTo(testData.german.id)
+            node("[1].contributions").isEqualTo(1)
             node("[1].declined").isEqualTo(1)
           }
-          node("[0].weeks") {
+          node("[1].weeks") {
             isArray.hasSize(3)
             node("[0].weekStart").isEqualTo("2026-02-16")
-            node("[0].suggested").isEqualTo(0)
+            node("[0].contributions").isEqualTo(0)
             node("[2].weekStart").isEqualTo("2026-03-02")
+            node("[2].contributions").isEqualTo(5)
             node("[2].suggested").isEqualTo(4)
             node("[2].accepted").isEqualTo(2)
             node("[2].declined").isEqualTo(1)
           }
-          node("[1].id").isEqualTo(testData.bob.id)
-          node("[1].suggested").isEqualTo(2)
-          node("[1].accepted").isEqualTo(1)
-          node("[1].weeks[0].weekStart").isEqualTo("2026-02-16")
-          node("[1].weeks[0].suggested").isEqualTo(2)
-          node("[1].weeks[2].suggested").isEqualTo(0)
+          node("[2].id").isEqualTo(testData.bob.id)
+          node("[2].contributions").isEqualTo(2)
+          node("[2].suggested").isEqualTo(2)
+          node("[2].accepted").isEqualTo(1)
+          node("[2].weeks[0].weekStart").isEqualTo("2026-02-16")
+          node("[2].weeks[0].contributions").isEqualTo(2)
+          node("[2].weeks[2].contributions").isEqualTo(0)
         }
-        node("page.totalElements").isEqualTo(2)
+        node("page.totalElements").isEqualTo(3)
       }
   }
 
   @Test
   fun `contributors can be sorted by another counter`() {
-    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors?sort=suggested,asc")
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors?sort=accepted,desc")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.contributors[0].id").isEqualTo(testData.bob.id)
+        node("_embedded.contributors[0].id").isEqualTo(testData.alice.id)
       }
   }
 
@@ -100,7 +111,7 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors?sort=name,asc")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.contributors[0].id").isEqualTo(testData.alice.id)
+        node("_embedded.contributors[0].id").isEqualTo(testData.user.id)
       }
   }
 
@@ -118,12 +129,14 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
         node("weeks") {
           isArray.hasSize(3)
           node("[0].weekStart").isEqualTo("2026-02-16")
+          node("[0].contributions").isEqualTo(2)
           node("[0].suggested").isEqualTo(2)
           node("[0].accepted").isEqualTo(1)
           node("[0].declined").isEqualTo(0)
           node("[1].weekStart").isEqualTo("2026-02-23")
-          node("[1].suggested").isEqualTo(0)
+          node("[1].contributions").isEqualTo(0)
           node("[2].weekStart").isEqualTo("2026-03-02")
+          node("[2].contributions").isEqualTo(11)
           node("[2].suggested").isEqualTo(4)
           node("[2].accepted").isEqualTo(2)
           node("[2].declined").isEqualTo(1)
@@ -134,18 +147,21 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `a soft-deleted language drops out of totals, languages and activity alike`() {
     jdbcTemplate.update("update language set deleted_at = now() where id = ?", testData.german.id)
-
     performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.contributors[0].id").isEqualTo(testData.alice.id)
-        node("_embedded.contributors[0].suggested").isEqualTo(3)
-        node("_embedded.contributors[0].declined").isEqualTo(0)
-        node("_embedded.contributors[0].languages").isArray.hasSize(1)
+        node("_embedded.contributors[0].id").isEqualTo(testData.user.id)
+        node("_embedded.contributors[0].contributions").isEqualTo(5)
+        node("_embedded.contributors[1].id").isEqualTo(testData.alice.id)
+        node("_embedded.contributors[1].contributions").isEqualTo(4)
+        node("_embedded.contributors[1].suggested").isEqualTo(3)
+        node("_embedded.contributors[1].declined").isEqualTo(0)
+        node("_embedded.contributors[1].languages").isArray.hasSize(1)
       }
     performAuthGet("/v2/projects/${testData.publicProject.id}/community/activity?weeks=1")
       .andIsOk
       .andAssertThatJson {
+        node("weeks[0].contributions").isEqualTo(9)
         node("weeks[0].suggested").isEqualTo(3)
         node("weeks[0].accepted").isEqualTo(2)
         node("weeks[0].declined").isEqualTo(0)

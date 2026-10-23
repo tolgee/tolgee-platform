@@ -34,9 +34,11 @@ class CommunityStatsController(
   @Operation(
     summary = "Get community contributors",
     description =
-      "Users who suggested translations in the project, with suggested / accepted / declined totals, " +
-        "per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). " +
-        "Sortable by suggested, accepted and declined; default accepted desc, suggested desc.",
+      "Users with translation contributions in the project (translations, state changes, comments, " +
+        "suggestions and their moderation), with contributions / suggested / accepted / declined totals, " +
+        "first and last contribution dates, per-language counts and weekly buckets for the last `weeks` " +
+        "ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; " +
+        "default contributions desc, suggested desc.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
@@ -53,7 +55,7 @@ class CommunityStatsController(
   @Operation(
     summary = "Get community activity",
     description =
-      "Suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), " +
+      "Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), " +
         "oldest first, zero-filled.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])

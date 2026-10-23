@@ -6178,4 +6178,41 @@
         <sqlFile path="classpath:db/changelog/communityContributionDayBackfill.sql" splitStatements="false"/>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-1">
+        <sqlFile path="classpath:db/changelog/isTranslationContribution.sql" splitStatements="false"/>
+        <rollback>
+            DROP FUNCTION IF EXISTS is_translation_contribution(text);
+        </rollback>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-2">
+        <addColumn tableName="community_contribution_day">
+            <column name="contributions" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-3">
+        <sqlFile path="classpath:db/changelog/projectContributorTranslationTrigger.sql" splitStatements="false"/>
+        <rollback>
+            <sqlFile path="classpath:db/changelog/projectContributorTrigger.sql" splitStatements="false"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-4">
+        <sqlFile path="classpath:db/changelog/communityContributionTrigger.sql" splitStatements="false"/>
+        <rollback>
+            <sql>
+                DROP TRIGGER IF EXISTS track_community_contribution_day ON activity_revision;
+                DROP FUNCTION IF EXISTS community_contribution_counts(bigint);
+            </sql>
+            <sqlFile path="classpath:db/changelog/communityContributionDayTrigger.sql" splitStatements="false"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-5">
+        <sqlFile path="classpath:db/changelog/translationCommentActivityLanguage.sql" splitStatements="false"/>
+        <rollback/>
+    </changeSet>
+    <changeSet author="jirikuchynka" id="1792900000000-6">
+        <sqlFile path="classpath:db/changelog/communityContributionBackfill.sql" splitStatements="false"/>
+        <rollback/>
+    </changeSet>
 </databaseChangeLog>
