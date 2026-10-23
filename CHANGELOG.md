@@ -1,3 +1,11 @@
+# [3.239.0](https://github.com/tolgee/tolgee-platform/compare/v3.238.1...v3.239.0) (2026-10-23)
+
+
+### Features
+
+* add Community Translation announcement banner ([#3993](https://github.com/tolgee/tolgee-platform/issues/3993)) ([347cc5c](https://github.com/tolgee/tolgee-platform/commit/347cc5cdd81a9fe3b4ab290b10971f9c9f043629))
+* add project switcher dropdown to the project breadcrumb ([#3873](https://github.com/tolgee/tolgee-platform/issues/3873)) ([b4b0f9d](https://github.com/tolgee/tolgee-platform/commit/b4b0f9d021744cfb2fab7831b3d3b6076a552ae6)), closes [#2150](https://github.com/tolgee/tolgee-platform/issues/2150) [#2737](https://github.com/tolgee/tolgee-platform/issues/2737) [/github.com/tolgee/tolgee-platform/issues/2737#issuecomment-2511611777](https://github.com//github.com/tolgee/tolgee-platform/issues/2737/issues/issuecomment-2511611777) [#2737](https://github.com/tolgee/tolgee-platform/issues/2737)
+
 ## [3.238.1](https://github.com/tolgee/tolgee-platform/compare/v3.238.0...v3.238.1) (2026-10-22)
 
 
