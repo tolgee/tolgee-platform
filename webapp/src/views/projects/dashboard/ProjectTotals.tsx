@@ -14,11 +14,7 @@ import { useConfig, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PercentFormat } from './PercentFormat';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import {
-  KeysHint,
-  StringsHint,
-  WordsHint,
-} from 'tg.component/common/StringsHint';
+import { StringsHint, WordsHint } from 'tg.component/common/StringsHint';
 
 const StyledGroups = styled(Box)`
   display: grid;
@@ -244,13 +240,9 @@ export const ProjectTotals: React.FC<
             dataCy="project-dashboard-key-count"
             onClick={canViewKeys ? redirectToTranslations : undefined}
             value={Number(stats.keyCount).toLocaleString(locale)}
-            label={
-              <KeysHint>
-                {t('project_dashboard_key_count_plural', 'Keys', {
-                  value: stats.keyCount,
-                })}
-              </KeysHint>
-            }
+            label={t('project_dashboard_key_count_plural', 'Keys', {
+              value: stats.keyCount,
+            })}
           />
           <Stat
             dataCy="project-dashboard-strings-count"

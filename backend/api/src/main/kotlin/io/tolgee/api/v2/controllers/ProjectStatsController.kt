@@ -82,7 +82,7 @@ class ProjectStatsController(
       keyCount = projectStats.keyCount,
       taskCount = projectStats.taskCount,
       baseWordsCount = totals.baseWordsCount,
-      hostedWordsCount = languageStats.sumOf { it.hostedWords ?: 0 },
+      hostedWordsCount = totals.hostedWordsCount,
       translatedPercentage = totals.translatedPercent,
       reviewedPercentage = totals.reviewedPercent,
       membersCount = visibleMembersCount(projectStats.memberCount),
