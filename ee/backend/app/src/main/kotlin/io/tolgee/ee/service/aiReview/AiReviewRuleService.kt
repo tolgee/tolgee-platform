@@ -92,6 +92,46 @@ class AiReviewRuleService(
     aiReviewRuleCache.evict(projectId)
   }
 
+  @Transactional
+  fun removeLanguage(
+    projectId: Long,
+    languageId: Long,
+  ) {
+    val rules = aiReviewRuleRepository.findAllByProjectIdOrderById(projectId)
+    rules.forEach { rule ->
+      val hadLanguages = rule.languages.isNotEmpty()
+      rule.languages.removeIf { it.id == languageId }
+      rule.overrides.removeIf { it.language.id == languageId }
+      // An empty language list means "all languages", so a delete must never leave a scoped rule enabled
+      if (hadLanguages && rule.languages.isEmpty()) rule.enabled = false
+    }
+    aiReviewRuleRepository.saveAll(rules)
+    aiReviewRuleCache.evict(projectId)
+  }
+
+  @Transactional
+  fun renameNamespace(
+    projectId: Long,
+    oldName: String,
+    newName: String,
+  ) {
+    val rules =
+      aiReviewRuleRepository
+        .findAllByProjectIdOrderById(projectId)
+        .filter { oldName in it.namespaceIn || oldName in it.namespaceNotIn }
+    rules.forEach {
+      it.namespaceIn = it.namespaceIn.renamed(oldName, newName)
+      it.namespaceNotIn = it.namespaceNotIn.renamed(oldName, newName)
+    }
+    aiReviewRuleRepository.saveAll(rules)
+    aiReviewRuleCache.evict(projectId)
+  }
+
+  private fun List<String>.renamed(
+    oldName: String,
+    newName: String,
+  ): MutableList<String> = map { if (it == oldName) newName else it }.distinct().toMutableList()
+
   private fun applyRequest(
     projectId: Long,
     rule: AiReviewRule,

@@ -2,6 +2,7 @@ package io.tolgee.ee.development
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.development.testDataBuilder.builders.AiReviewRuleBuilder
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationAiReviewBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -112,10 +113,12 @@ class AiReviewTestData : BaseTestData() {
     }
 
   class KeyTranslations(
-    val key: Key,
+    val keyBuilder: KeyBuilder,
     val de: TranslationBuilder,
     val fr: TranslationBuilder,
-  )
+  ) {
+    val key: Key get() = keyBuilder.self
+  }
 
   fun addKeyWithTranslations(
     name: String,
@@ -125,7 +128,7 @@ class AiReviewTestData : BaseTestData() {
   ): KeyTranslations {
     lateinit var de: TranslationBuilder
     lateinit var fr: TranslationBuilder
-    val key =
+    val keyBuilder =
       projectBuilder
         .addKey { this.name = name }
         .build {
@@ -133,7 +136,7 @@ class AiReviewTestData : BaseTestData() {
           addTranslation("en", "English text")
           de = addTranslation("de", deText)
           fr = addTranslation("fr", frText)
-        }.self
-    return KeyTranslations(key, de, fr)
+        }
+    return KeyTranslations(keyBuilder, de, fr)
   }
 }
