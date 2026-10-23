@@ -74,6 +74,9 @@ export const exportTagFilterTestData =
 
 export const exportSettingsTestData = generateTestDataObject('export-settings');
 
+export const projectSwitchingTestData =
+  generateTestDataObject('project-switching');
+
 export const apiKeysTestData = generateTestDataObject('api-keys');
 
 export const patsTestData = generateTestDataObject('pat');
