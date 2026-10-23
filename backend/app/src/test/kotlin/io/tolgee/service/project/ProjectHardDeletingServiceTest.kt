@@ -10,6 +10,7 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.development.testDataBuilder.data.CommunityStatsTestData
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigBranchingTestData
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
@@ -249,6 +250,32 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
       remaining.assert.isEqualTo(0)
     }
   }
+
+  @Test
+  fun `deletes project with community contribution counters`() {
+    val testData = CommunityStatsTestData()
+    testDataToClean = testData
+    testDataService.saveTestData(testData.root)
+    executeInNewTransaction(platformTransactionManager) { testData.replayActivity(entityManager) }
+    val projectId = testData.publicProject.id
+    countersOf(projectId).assert.isGreaterThan(0)
+
+    executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(projectService.get(projectId))
+    }
+
+    countersOf(projectId).assert.isEqualTo(0)
+  }
+
+  private fun countersOf(projectId: Long) =
+    executeInNewTransaction {
+      (
+        entityManager
+          .createNativeQuery("select count(*) from community_contribution_day where project_id = :projectId")
+          .setParameter("projectId", projectId)
+          .singleResult as Number
+      ).toLong()
+    }
 
   @Test
   fun `deletes project with tasks`() {

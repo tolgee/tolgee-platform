@@ -10,12 +10,12 @@ class CommunityProfileModelAssembler {
       id = communityProfile.id,
       name = communityProfile.name,
       avatar = communityProfile.avatar,
+      contributions = communityProfile.contributions,
       suggested = communityProfile.suggested,
       accepted = communityProfile.accepted,
       declined = communityProfile.declined,
       languages = communityProfile.languages,
       projects = communityProfile.projects,
       days = communityProfile.days,
-      recent = communityProfile.recent,
     )
 }

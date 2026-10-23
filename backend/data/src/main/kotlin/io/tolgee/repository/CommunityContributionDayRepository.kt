@@ -17,12 +17,15 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
   @Query(
     """
       select c.userId as id, u.name as name, u.avatarHash as avatarHash,
-        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined
+        sum(c.contributions) as contributions,
+        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
+      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
       where c.projectId = :projectId and $LIVE_USER_AND_LANGUAGE
-      group by c.userId, u.name, u.avatarHash
+      group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt
     """,
     countQuery = """
       select count(distinct c.userId)
@@ -39,7 +42,7 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   @Query(
     """
-      select c.userId as userId, c.languageId as languageId, c.day as day,
+      select c.userId as userId, c.languageId as languageId, c.day as day, c.contributions as contributions,
         c.suggested as suggested, c.accepted as accepted, c.declined as declined
       from CommunityContributionDay c
       join Language l on l.id = c.languageId
@@ -53,7 +56,8 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   @Query(
     """
-      select c.day as day, sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined
+      select c.day as day, sum(c.contributions) as contributions,
+        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
@@ -68,9 +72,25 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   @Query(
     """
-      select c.day as day, c.suggested as suggested, c.accepted as accepted, c.declined as declined,
+      select c.day as day, c.contributions as contributions,
+        c.suggested as suggested, c.accepted as accepted, c.declined as declined,
         l.tag as languageTag, l.name as languageName,
-        r.id as projectId, r.name as projectName, r.avatarHash as projectAvatarHash
+        r.id as projectId, r.name as projectName, r.avatarHash as projectAvatarHash,
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
+      from CommunityContributionDay c
+      join Language l on l.id = c.languageId
+      join Project r on r.id = c.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
+      where c.userId = :userId and l.deletedAt is null and $PUBLIC_PROJECT_VISIBILITY
+    """,
+  )
+  fun findPublicRowsOfUser(userId: Long): List<CommunityProfileRowView>
+
+  @Query(
+    """
+      select distinct c.projectId
       from CommunityContributionDay c
       join Language l on l.id = c.languageId
       join Project r on r.id = c.projectId
@@ -79,7 +99,10 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       where c.userId = :userId and l.deletedAt is null and $PUBLIC_PROJECT_VISIBILITY
     """,
   )
-  fun findPublicRowsOfUser(userId: Long): List<CommunityProfileRowView>
+  fun findPublicProjectIds(
+    userId: Long,
+    pageable: Pageable,
+  ): List<Long>
 
   companion object {
     const val LIVE_USER_AND_LANGUAGE = "u.deletedAt is null and u.disabledAt is null and l.deletedAt is null"

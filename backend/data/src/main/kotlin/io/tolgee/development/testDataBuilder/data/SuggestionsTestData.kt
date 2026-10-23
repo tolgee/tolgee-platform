@@ -17,6 +17,7 @@ import io.tolgee.model.enums.TranslationSuggestionState
 
 class SuggestionsTestData(
   suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
+  public: Boolean = false,
 ) : BaseTestData("suggestionsuggestionsTestUser", "Project with suggestions") {
   var projectReviewer: UserAccountBuilder
   var orgAdmin: UserAccountBuilder
@@ -148,6 +149,7 @@ class SuggestionsTestData(
       relatedProject = this
 
       this.self.suggestionsMode = suggestionsMode
+      this.self.public = public
 
       ownAccessApiKey =
         addApiKey {
