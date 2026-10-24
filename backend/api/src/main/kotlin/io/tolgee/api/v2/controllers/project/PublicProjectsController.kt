@@ -9,7 +9,6 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.service.project.ProjectService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
-import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -35,7 +34,7 @@ class PublicProjectsController(
   @GetMapping("/with-stats")
   @Transactional(readOnly = true)
   fun getAllPublicWithStatistics(
-    @ParameterObject @SortDefault("name") pageable: Pageable,
+    @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?,
     @RequestParam("filterContributed", defaultValue = "false") filterContributed: Boolean,
   ): PagedModel<ProjectWithStatsModel> {
