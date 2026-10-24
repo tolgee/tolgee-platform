@@ -1,9 +1,4 @@
-import {
-  createKey,
-  createProject,
-  deleteProject,
-  login,
-} from './apiCalls/common';
+import { createKey, createProject, login } from './apiCalls/common';
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import { waitForGlobalLoading } from './loading';
@@ -241,16 +236,9 @@ export const create4Translations = (projectId: number) => {
   waitForGlobalLoading();
 };
 
-export const forEachView = (
-  projectIdProvider: () => number,
-  testFn: () => void
-) => {
+export const forEachView = (testFn: () => void) => {
   ['list', 'table'].forEach((viewType) => {
     describe(`with ${viewType} view`, () => {
-      afterEach(() => {
-        deleteProject(projectIdProvider());
-      });
-
       beforeEach(() => {
         if (viewType === 'table') {
           cy.gcy('translations-view-table-button').click();
