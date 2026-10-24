@@ -1,3 +1,10 @@
+## [3.239.1](https://github.com/tolgee/tolgee-platform/compare/v3.239.0...v3.239.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* remove vulnerable eMudhra root certificates from the Java trust store ([#4003](https://github.com/tolgee/tolgee-platform/issues/4003)) ([4e8e34d](https://github.com/tolgee/tolgee-platform/commit/4e8e34d67e4bd6aa57743f655ad1ca3d29ebf669))
+
 # [3.239.0](https://github.com/tolgee/tolgee-platform/compare/v3.238.1...v3.239.0) (2026-10-23)
 
 
