@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
+  private var permissionsTestData: PermissionsTestData? = null
+
   @Test
   fun testGetAllUsers() {
     val users = dbPopulator.createUsersAndOrganizations()
@@ -64,6 +66,7 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
           node("[1]") {
             node("organizationRole").isEqualTo(null)
             node("username").isEqualTo("member@member.com")
+            node("mfaEnabled").isEqualTo(false)
             node("projectsWithDirectPermission") {
               isArray.hasSize(1)
               node("[0]") {
@@ -80,6 +83,28 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
           node("[3]") {
             node("organizationRole").isEqualTo("MEMBER")
             node("username").isEqualTo("org@org.org")
+            node("projectsWithDirectPermission").isArray.isEmpty()
+          }
+        }
+      }
+  }
+
+  @Test
+  fun `hides MFA status and project access from non-owner members`() {
+    val testData = PermissionsTestData()
+    testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
+    testDataService.saveTestData(testData.root)
+    permissionsTestData = testData
+    userAccount = userAccountService.findActive("org@org.org")
+
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/users")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.usersInOrganization") {
+          isArray.hasSize(4)
+          node("[1]") {
+            node("username").isEqualTo("member@member.com")
+            node("mfaEnabled").isEqualTo(null)
             node("projectsWithDirectPermission").isArray.isEmpty()
           }
         }
@@ -108,6 +133,8 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
   @AfterEach
   fun resetProps() {
     tolgeeProperties.authentication.userCanCreateOrganizations = true
+    permissionsTestData?.let { testDataService.cleanTestData(it.root) }
+    permissionsTestData = null
   }
 
   @Test

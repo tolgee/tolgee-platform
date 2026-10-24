@@ -214,7 +214,7 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{id}/users": {
-    /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
+    /** Returns all users in organization. The result also contains users who are only members of projects in the organization. MFA status and projects with direct permission are only returned to organization owners. */
     get: operations["getAllUsers_1"];
   };
   "/v2/organizations/{organizationId}/base-languages": {
@@ -8121,7 +8121,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       managed: boolean;
-      mfaEnabled: boolean;
+      mfaEnabled?: boolean;
       name: string;
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
@@ -11323,7 +11323,7 @@ export interface operations {
       };
     };
   };
-  /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
+  /** Returns all users in organization. The result also contains users who are only members of projects in the organization. MFA status and projects with direct permission are only returned to organization owners. */
   getAllUsers_1: {
     parameters: {
       path: {
