@@ -11,4 +11,5 @@ data class ProjectLanguageStatsResultView(
   val translatedWords: Long,
   val reviewedKeys: Long,
   val reviewedWords: Long,
+  val hostedWords: Long,
 )

@@ -10,6 +10,7 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.branching.BranchRepositoryOss
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.qa.TranslationQaIssueService
@@ -37,6 +38,7 @@ class LanguageStatsService(
   private val translationQaIssueService: TranslationQaIssueService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val languageQaConfigRepository: LanguageQaConfigRepository,
+  private val branchRepository: BranchRepositoryOss,
 ) : Logging {
   fun refreshLanguageStats(
     projectId: Long,
@@ -101,6 +103,7 @@ class LanguageStatsService(
                 translatedPercentage = rawLanguageStats.translatedWords.toDouble() / baseWords * 100
                 reviewedKeys = rawLanguageStats.reviewedKeys
                 reviewedWords = rawLanguageStats.reviewedWords
+                hostedWords = rawLanguageStats.hostedWords
                 reviewedPercentage = rawLanguageStats.reviewedWords.toDouble() / baseWords * 100
                 untranslatedKeys = projectStats.keyCount - translatedOrReviewedKeys
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
@@ -171,14 +174,15 @@ class LanguageStatsService(
     expectedLangs: Set<Long>,
     branchId: Long? = null,
   ): List<LanguageStatsDto> {
-    val data = getLanguageStats(projectId, branchId)
+    val resolvedBranchId = branchId ?: branchRepository.findDefaultByProjectId(projectId)?.id
+    val data = getLanguageStats(projectId, resolvedBranchId)
     val missingStats = expectedLangs.minus(data.map { it.languageId }.toSet())
-    if (missingStats.isEmpty()) {
+    if (missingStats.isEmpty() && data.none { it.hostedWords == null }) {
       return data
     }
 
-    refreshLanguageStats(projectId, branchId)
-    return languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, branchId)
+    refreshLanguageStats(projectId, resolvedBranchId)
+    return languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, resolvedBranchId)
   }
 
   private fun getLanguageStatsRaw(

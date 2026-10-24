@@ -36,7 +36,8 @@ class LanguageStatsProvider(
             COUNT(CASE WHEN t.state = 1 THEN 1 END)                        AS translated_keys,
             COALESCE(SUM(CASE WHEN t.state = 1 THEN kw.word_count END), 0) AS translated_words,
             COUNT(CASE WHEN t.state = 2 THEN 1 END)                        AS reviewed_keys,
-            COALESCE(SUM(CASE WHEN t.state = 2 THEN kw.word_count END), 0) AS reviewed_words
+            COALESCE(SUM(CASE WHEN t.state = 2 THEN kw.word_count END), 0) AS reviewed_words,
+            COALESCE(SUM(t.word_count), 0)                                 AS hosted_words
           FROM key_base_words kw
           JOIN translation t ON kw.key_id = t.key_id AND t.state IN (1, 2)
           JOIN language l ON t.language_id = l.id AND l.project_id = :projectId
@@ -52,7 +53,8 @@ class LanguageStatsProvider(
           COALESCE(s.translated_keys, 0),
           COALESCE(s.translated_words, 0),
           COALESCE(s.reviewed_keys, 0),
-          COALESCE(s.reviewed_words, 0)
+          COALESCE(s.reviewed_words, 0),
+          COALESCE(s.hosted_words, 0)
         FROM project p
         JOIN language l ON p.id = l.project_id
         LEFT JOIN lang_stats s ON s.language_id = l.id
@@ -77,6 +79,7 @@ class LanguageStatsProvider(
         translatedWords = (row[7] as Number).toLong(),
         reviewedKeys = (row[8] as Number).toLong(),
         reviewedWords = (row[9] as Number).toLong(),
+        hostedWords = (row[10] as Number).toLong(),
       )
     }
   }
