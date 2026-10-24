@@ -30,5 +30,11 @@ open class UsageModel(
         "Total amount deferred from previous billing periods that is included in this invoice.",
   )
   val carryOverTotal: BigDecimal? = null,
+  @Schema(
+    description =
+      "Relevant for expected usage only. One-time charge for moving a yearly subscription to a " +
+        "higher tier for the rest of its billing year, included in the total.",
+  )
+  val upgradeProrationTotal: BigDecimal? = null,
 ) : RepresentationModel<UsageModel>(),
   Serializable
