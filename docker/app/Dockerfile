@@ -1,5 +1,18 @@
 FROM eclipse-temurin:25-jre-alpine AS jre
 
+# The JDK trust store still trusts the emSign/eMudhra roots, whose intermediate
+# CA keys were compromised (October 2026). Remove the roots so the JVM rejects
+# certificates chained to them. Drop this workaround once the base image ships
+# Temurin 25.0.5+8 or later, which distrusts them itself (the delete then fails
+# the build if the aliases are gone, which is the signal to remove this block).
+RUN for alias in \
+      'cn_emsign_ecc_root_ca__c3,o_emudhra_inc,ou_emsign_pki,c_us [jdk]' \
+      'cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]' \
+      'cn_emsign_root_ca__c1,o_emudhra_inc,ou_emsign_pki,c_us [jdk]' \
+      'cn_emsign_root_ca__g1,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]'; \
+    do keytool -delete -cacerts -storepass changeit -alias "$alias" || exit 1; done \
+    && ! keytool -list -cacerts -storepass changeit | grep -iE 'emsign|emudhra'
+
 # The postgres base image ships /usr/local/bin/gosu. Security scanners (Snyk)
 # flag Go stdlib CVEs in that binary. They are false positives: gosu only drops
 # privileges and execs, and never calls the flagged APIs (HTTP, TLS, archives).
