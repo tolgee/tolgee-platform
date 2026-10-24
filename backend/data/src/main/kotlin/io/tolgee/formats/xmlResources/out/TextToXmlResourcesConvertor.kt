@@ -185,15 +185,13 @@ class TextToXmlResourcesConvertor(
     quoteMoreWhitespaces: Boolean,
   ): String {
     return this.textContent.escape(
-      escapeApos = isParentRoot(),
+      // Apostrophes need escaping regardless of whether the text sits directly under the
+      // wrapping root or is nested inside a supported tag (e.g. <b>) - see #3206.
+      escapeApos = true,
       keepPercentSignEscaped = keepPercentSignEscaped,
       quoteMoreWhitespaces = quoteMoreWhitespaces,
       escapeNewLines = !analysisResult.containsXml,
     )
-  }
-
-  private fun Node.isParentRoot(): Boolean {
-    return this.parentNode.nodeName == "root" && this.parentNode.parentNode === this.ownerDocument
   }
 
   private val documentBuilder: DocumentBuilder by lazy { documentBuilderFactory.newDocumentBuilder() }
