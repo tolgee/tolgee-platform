@@ -450,7 +450,7 @@ export interface paths {
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/activity": {
-    get: operations["getActivity"];
+    get: operations["getActivity_1"];
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
     get: operations["getSingleRevision"];
@@ -551,6 +551,14 @@ export interface paths {
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
   };
+  "/v2/projects/{projectId}/community/activity": {
+    /** Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+    get: operations["getActivity"];
+  };
+  "/v2/projects/{projectId}/community/contributors": {
+    /** Users with translation contributions in the project (translations, state changes, comments, suggestions and their moderation), with contributions / suggested / accepted / declined totals, first and last contribution dates, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; default contributions desc, suggested desc. */
+    get: operations["getContributors_1"];
+  };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
     post: operations["create_10"];
@@ -579,7 +587,7 @@ export interface paths {
     post: operations["testExisting"];
   };
   "/v2/projects/{projectId}/contributors": {
-    /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+    /** Returns users with translation contributions on the project (translations, state changes, comments, suggestions and their moderation) who are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
     get: operations["getContributors"];
   };
   "/v2/projects/{projectId}/current-batch-jobs": {
@@ -1340,6 +1348,14 @@ export interface paths {
   "/v2/user/sso": {
     /** Returns information about sso configuration affecting the user. */
     get: operations["getSso"];
+  };
+  "/v2/users/{userId}/community-activity": {
+    /** The user's translation-related activity in public projects, always newest first (the sort parameter is ignored), in the shape of the project activity log plus the project and without the author. Visible under the same rule as the community profile. */
+    get: operations["getActivityFeed"];
+  };
+  "/v2/users/{userId}/community-profile": {
+    /** Contribution totals, languages, per-day counts for the last 365 days and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+    get: operations["getProfile"];
   };
 }
 
@@ -2125,6 +2141,162 @@ export interface components {
         workspaces?: components["schemas"]["WorkspaceModel"][];
       };
     };
+    CommunityActivity: {
+      weeks: components["schemas"]["WeekBucket"][];
+    };
+    CommunityActivityModel: {
+      counts?: { [key: string]: number };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      params?: { [key: string]: unknown };
+      project: components["schemas"]["SimpleProjectModel"];
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      /** @enum {string} */
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_CHARACTER_LIMIT_EDIT"
+        | "KEY_DELETE"
+        | "KEY_SOFT_DELETE"
+        | "KEY_RESTORE"
+        | "KEY_HARD_DELETE"
+        | "BATCH_KEY_RESTORE"
+        | "BATCH_KEY_HARD_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "BATCH_ASSIGN_TRANSLATION_LABEL"
+        | "BATCH_UNASSIGN_TRANSLATION_LABEL"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION"
+        | "TASKS_CREATE"
+        | "TASK_CREATE"
+        | "TASK_UPDATE"
+        | "TASK_KEYS_UPDATE"
+        | "TASK_FINISH"
+        | "TASK_CLOSE"
+        | "TASK_REOPEN"
+        | "TASK_KEY_UPDATE"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_IMPORT"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "TRANSLATION_MEMORY_CREATE"
+        | "TRANSLATION_MEMORY_UPDATE"
+        | "TRANSLATION_MEMORY_DELETE"
+        | "TRANSLATION_MEMORY_ASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UNASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG"
+        | "TRANSLATION_MEMORY_ENTRY_CREATE"
+        | "TRANSLATION_MEMORY_ENTRY_UPDATE"
+        | "TRANSLATION_MEMORY_ENTRY_DELETE"
+        | "TRANSLATION_MEMORY_IMPORT"
+        | "TRANSLATION_MEMORY_COPY_FROM_PROJECT"
+        | "TRANSLATION_LABELS_EDIT"
+        | "TRANSLATION_LABEL_ASSIGN"
+        | "TRANSLATION_LABEL_CREATE"
+        | "TRANSLATION_LABEL_UPDATE"
+        | "TRANSLATION_LABEL_DELETE"
+        | "CREATE_SUGGESTION"
+        | "DECLINE_SUGGESTION"
+        | "ACCEPT_SUGGESTION"
+        | "REVERSE_SUGGESTION"
+        | "DELETE_SUGGESTION"
+        | "SUGGESTION_SET_ACTIVE"
+        | "AI_PROMPT_CREATE"
+        | "AI_PROMPT_UPDATE"
+        | "AI_PROMPT_DELETE"
+        | "BRANCH_CREATE"
+        | "BRANCH_RENAME"
+        | "BRANCH_DELETE"
+        | "BRANCH_PROTECTION_CHANGE"
+        | "BRANCH_MERGE"
+        | "QA_ISSUE_IGNORE"
+        | "QA_ISSUE_UNIGNORE";
+    };
+    CommunityContributorModel: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: date-time */
+      firstContributionAt?: string;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["LanguageCounts"][];
+      /** Format: date-time */
+      lastContributionAt?: string;
+      name?: string;
+      /** Format: int64 */
+      suggested: number;
+      weeks: components["schemas"]["WeekBucket"][];
+    };
+    CommunityProfile: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      contributions: number;
+      days: components["schemas"]["DayCounts"][];
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["ProfileLanguage"][];
+      name?: string;
+      projects: components["schemas"]["ProfileProject"][];
+      /** Format: int64 */
+      suggested: number;
+    };
     ComplexEditKeyDto: {
       /** @description Branch of the key. If not provided, default branch will be used */
       branch?: string;
@@ -2819,6 +2991,17 @@ export interface components {
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
       words?: components["schemas"]["CurrentUsageItemModel"];
+    };
+    DayCounts: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      day: string;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      suggested: number;
     };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
@@ -4382,6 +4565,18 @@ export interface components {
       /** @description When null, its a default configuration applied to not configured languages */
       targetLanguageTag?: string;
     };
+    LanguageCounts: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      languageId: number;
+      /** Format: int64 */
+      suggested: number;
+    };
     LanguageInfoModel: {
       /** Format: int64 */
       languageId?: number;
@@ -4868,6 +5063,18 @@ export interface components {
     PagedModelBranchModel: {
       _embedded?: {
         branches?: components["schemas"]["BranchModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelCommunityActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["CommunityActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelCommunityContributorModel: {
+      _embedded?: {
+        contributors?: components["schemas"]["CommunityContributorModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5489,6 +5696,36 @@ export interface components {
         | "SSO_GLOBAL";
       username: string;
     };
+    ProfileLanguage: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
+      tag: string;
+    };
+    ProfileProject: {
+      /** Format: int64 */
+      accepted: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: date-time */
+      firstContributionAt?: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      lastContributionAt?: string;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
+    };
     ProjectActivityAuthorModel: {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
@@ -5893,7 +6130,6 @@ export interface components {
       type: "FRAGMENT" | "OBJECT" | "STRING";
       value?: string;
     };
-    /** @description Modified fields */
     PropertyModification: {
       new?: { [key: string]: unknown };
       old?: { [key: string]: unknown };
@@ -8192,6 +8428,17 @@ export interface components {
     };
     WebhookTestResponse: {
       success: boolean;
+    };
+    WeekBucket: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      suggested: number;
+      weekStart: string;
     };
     WorkspaceModel: {
       /** Format: int64 */
@@ -15477,7 +15724,7 @@ export interface operations {
       };
     };
   };
-  getActivity: {
+  getActivity_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -17211,6 +17458,114 @@ export interface operations {
       };
     };
   };
+  /** Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+  getActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        weeks?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityActivity"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Users with translation contributions in the project (translations, state changes, comments, suggestions and their moderation), with contributions / suggested / accepted / declined totals, first and last contribution dates, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; default contributions desc, suggested desc. */
+  getContributors_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        weeks?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelCommunityContributorModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   list_2: {
     parameters: {
       query: {
@@ -17866,7 +18221,7 @@ export interface operations {
       };
     };
   };
-  /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+  /** Returns users with translation contributions on the project (translations, state changes, comments, suggestions and their moderation) who are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
   getContributors: {
     parameters: {
       path: {
@@ -30893,6 +31248,110 @@ export interface operations {
       };
       /** No SSO configuration available for this user */
       204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** The user's translation-related activity in public projects, always newest first (the sort parameter is ignored), in the shape of the project activity log plus the project and without the author. Visible under the same rule as the community profile. */
+  getActivityFeed: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelCommunityActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Contribution totals, languages, per-day counts for the last 365 days and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+  getProfile: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityProfile"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

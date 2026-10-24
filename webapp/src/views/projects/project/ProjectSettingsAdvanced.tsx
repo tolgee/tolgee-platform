@@ -60,18 +60,26 @@ export const ProjectSettingsAdvanced = () => {
     const value = !project.public;
     confirmation({
       title: value ? (
-        <T keyName="project_settings_make_public_dialog_title" />
+        <T
+          keyName="community_settings_open_dialog_title"
+          defaultValue="Open to community translation?"
+        />
       ) : (
-        <T keyName="project_settings_make_private_dialog_title" />
+        <T
+          keyName="community_settings_close_dialog_title"
+          defaultValue="Close community translation?"
+        />
       ),
       message: value ? (
         <T
-          keyName="project_settings_make_public_confirmation"
+          keyName="community_settings_open_confirmation"
+          defaultValue="Anyone signed in will be able to find “{name}” in the community translations list and suggest translations. They won’t become members and can’t edit existing translations."
           params={{ name: project.name }}
         />
       ) : (
         <T
-          keyName="project_settings_make_private_confirmation"
+          keyName="community_settings_close_confirmation"
+          defaultValue="“{name}” will disappear from the community translations list and community members will lose access to it."
           params={{ name: project.name }}
         />
       ),
@@ -132,13 +140,19 @@ export const ProjectSettingsAdvanced = () => {
   return (
     <Box display="grid" mb={8}>
       <Typography variant="h5" mt={4} mb="20px">
-        {t('project_settings_public_section_title')}
+        {t('community_settings_section_title', 'Community translation')}
       </Typography>
 
       <SwitchWithDescription
         data-cy="project-settings-public-switch"
-        title={t('project_settings_public_label')}
-        description={t('project_settings_public_hint')}
+        title={t(
+          'community_settings_switch_label',
+          'Open this project to community translation'
+        )}
+        description={t(
+          'community_settings_switch_hint',
+          'Anyone can find this project in the community translations list and suggest translations. Only the organization owner can change this.'
+        )}
         checked={project.public}
         onSwitch={handlePublicSwitch}
         disabled={publishingLoadable.isLoading || !canChangePublic}
