@@ -135,6 +135,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.name.assert.isEqualTo(other.name)
     this.isPlural.assert.isEqualTo(other.isPlural)
     this.pluralArgName.assert.isEqualTo(other.pluralArgName)
+    this.maxCharLimit.assert.isEqualTo(other.maxCharLimit)
     this.createdAt.assert.isEqualTo(this.branch!!.createdAt)
 
     // translations are the same

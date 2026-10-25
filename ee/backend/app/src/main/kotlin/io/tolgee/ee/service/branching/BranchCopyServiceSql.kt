@@ -290,7 +290,7 @@ class BranchCopyServiceSql(
   ) {
     val sql = """
       WITH source_keys AS (
-        SELECT k.id AS old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name
+        SELECT k.id AS old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name, k.max_char_limit
         FROM key k
         WHERE k.project_id = :projectId
           AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
@@ -309,10 +309,10 @@ class BranchCopyServiceSql(
           AND coalesce(et.namespace_id,-1) = coalesce(sk.namespace_id,-1)
         WHERE et.id IS NULL
       )
-      INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, created_at, updated_at)
+      INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, max_char_limit, created_at, updated_at)
       SELECT nextval('hibernate_sequence') AS id,
              ti.name, :projectId, ti.namespace_id, :targetBranchId,
-             ti.is_plural, ti.plural_arg_name,
+             ti.is_plural, ti.plural_arg_name, ti.max_char_limit,
              :targetBranchCreatedAt, :targetBranchCreatedAt
       FROM to_insert ti
     """
