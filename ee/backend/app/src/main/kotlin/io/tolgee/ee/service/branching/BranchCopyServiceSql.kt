@@ -1,7 +1,6 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.model.branching.Branch
-import io.tolgee.repository.KeyRepository
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service
 @Service
 class BranchCopyServiceSql(
   private val entityManager: EntityManager,
-  private val keyRepository: KeyRepository,
 ) : BranchCopyService,
   Logging {
   companion object {
@@ -41,32 +39,30 @@ class BranchCopyServiceSql(
   ) {
     require(sourceBranch.id != targetBranch.id) { "Source and target branch must differ" }
 
-    // Get total key count for batching
-    val totalKeys =
-      keyRepository.countByProjectAndBranchIncludingOrphan(
-        projectId,
-        sourceBranch.id,
-        sourceBranch.isDefault,
-      )
-
     // Create empty temporary key mapping table once (reused across batches)
     traceLogMeasureTime("branchCopyService: createKeyMappingTable") {
       createKeyMappingTable()
     }
 
+    val totalKeys =
+      traceLogMeasureTime("branchCopyService: createSourceKeysTable") {
+        createSourceKeysTable(projectId, sourceBranch)
+      }
+
     // Process keys in batches
     val totalBatches = (totalKeys + BATCH_SIZE - 1) / BATCH_SIZE
     for (batchIndex in 0 until totalBatches) {
-      val offset = batchIndex * BATCH_SIZE
-
-      // Copy keys for this batch
-      traceLogMeasureTime("branchCopyService: copyKeys batch $batchIndex") {
-        copyKeys(projectId, sourceBranch, targetBranch, offset, BATCH_SIZE)
-      }
+      val firstRow = batchIndex * BATCH_SIZE + 1
+      val lastRow = firstRow + BATCH_SIZE - 1
 
       // Populate key mapping for this batch (truncates and refills)
       traceLogMeasureTime("branchCopyService: createKeyMapping batch $batchIndex") {
-        createKeyMapping(projectId, sourceBranch, targetBranch, offset, BATCH_SIZE)
+        createKeyMapping(firstRow, lastRow)
+      }
+
+      // Copy keys for this batch
+      traceLogMeasureTime("branchCopyService: copyKeys batch $batchIndex") {
+        copyKeys(projectId, targetBranch)
       }
 
       // Copy all related entities for this batch
@@ -127,48 +123,57 @@ class BranchCopyServiceSql(
   }
 
   /**
+   * Numbers all source keys and reserves an id for each key copy.
+   * Returns the number of source keys.
+   */
+  private fun createSourceKeysTable(
+    projectId: Long,
+    sourceBranch: Branch,
+  ): Int {
+    val createTableSql = """
+      CREATE TEMPORARY TABLE temp_source_keys (
+        row_num BIGINT NOT NULL PRIMARY KEY,
+        source_key_id BIGINT NOT NULL,
+        target_key_id BIGINT NOT NULL
+      ) ON COMMIT DROP
+    """
+    entityManager.createNativeQuery(createTableSql).executeUpdate()
+
+    val insertSql = """
+      INSERT INTO temp_source_keys (row_num, source_key_id, target_key_id)
+      SELECT row_number() OVER (ORDER BY k.id), k.id, nextval('hibernate_sequence')
+      FROM key k
+      WHERE k.project_id = :projectId
+        AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
+    """
+    return entityManager
+      .createNativeQuery(insertSql)
+      .setParameter("projectId", projectId)
+      .setParameter("sourceBranchId", sourceBranch.id)
+      .executeUpdate()
+  }
+
+  /**
    * Truncates and populates the key mapping table for a batch.
    * Maps source key IDs to target key IDs.
    */
   private fun createKeyMapping(
-    projectId: Long,
-    sourceBranch: Branch,
-    targetBranch: Branch,
-    offset: Long,
-    limit: Int,
+    firstRow: Int,
+    lastRow: Int,
   ) {
     // Truncate the table for the new batch
     entityManager.createNativeQuery("TRUNCATE TABLE temp_key_mapping").executeUpdate()
 
-    // Insert source->target key mapping for this batch.
-    // MATERIALIZED forces the project filter before ORDER BY/LIMIT; without it Postgres walks the whole key PK.
     val insertSql = """
-      WITH project_source_keys AS MATERIALIZED (
-        SELECT k.id, k.name, k.namespace_id
-        FROM key k
-        WHERE k.project_id = :projectId
-          AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
-      )
       INSERT INTO temp_key_mapping (source_key_id, target_key_id)
-      SELECT sk.id AS source_key_id, tk.id AS target_key_id
-      FROM (
-        SELECT psk.id, psk.name, psk.namespace_id
-        FROM project_source_keys psk
-        ORDER BY psk.id
-        OFFSET :offset LIMIT :limit
-      ) sk
-      JOIN key tk ON tk.project_id = :projectId
-                 AND tk.branch_id = :targetBranchId
-                 AND tk.name = sk.name
-                 AND coalesce(tk.namespace_id,-1) = coalesce(sk.namespace_id,-1)
+      SELECT s.source_key_id, s.target_key_id
+      FROM temp_source_keys s
+      WHERE s.row_num BETWEEN :firstRow AND :lastRow
     """
     entityManager
       .createNativeQuery(insertSql)
-      .setParameter("projectId", projectId)
-      .setParameter("sourceBranchId", sourceBranch.id)
-      .setParameter("targetBranchId", targetBranch.id)
-      .setParameter("offset", offset)
-      .setParameter("limit", limit)
+      .setParameter("firstRow", firstRow)
+      .setParameter("lastRow", lastRow)
       .executeUpdate()
 
     // Temp tables are never auto-analyzed; without stats the planner picks full-table joins.
@@ -291,50 +296,22 @@ class BranchCopyServiceSql(
 
   private fun copyKeys(
     projectId: Long,
-    sourceBranch: Branch,
     targetBranch: Branch,
-    offset: Long,
-    limit: Int,
   ) {
-    // MATERIALIZED: see createKeyMapping
     val sql = """
-      WITH project_source_keys AS MATERIALIZED (
-        SELECT k.id AS old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name, k.max_char_limit
-        FROM key k
-        WHERE k.project_id = :projectId
-          AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
-      ), source_keys AS (
-        SELECT * FROM project_source_keys
-        ORDER BY old_id
-        OFFSET :offset LIMIT :limit
-      ), existing_target AS (
-        SELECT tk.id, tk.name, tk.namespace_id
-        FROM key tk
-        WHERE tk.project_id = :projectId
-          AND tk.branch_id = :targetBranchId
-      ), to_insert AS (
-        SELECT sk.*
-        FROM source_keys sk
-        LEFT JOIN existing_target et
-          ON et.name = sk.name
-          AND coalesce(et.namespace_id,-1) = coalesce(sk.namespace_id,-1)
-        WHERE et.id IS NULL
-      )
       INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, max_char_limit, created_at, updated_at)
-      SELECT nextval('hibernate_sequence') AS id,
-             ti.name, :projectId, ti.namespace_id, :targetBranchId,
-             ti.is_plural, ti.plural_arg_name, ti.max_char_limit,
+      SELECT m.target_key_id,
+             k.name, :projectId, k.namespace_id, :targetBranchId,
+             k.is_plural, k.plural_arg_name, k.max_char_limit,
              :targetBranchCreatedAt, :targetBranchCreatedAt
-      FROM to_insert ti
+      FROM temp_key_mapping m
+      JOIN key k ON k.id = m.source_key_id
     """
     entityManager
       .createNativeQuery(sql)
       .setParameter("projectId", projectId)
-      .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("targetBranchId", targetBranch.id)
       .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
-      .setParameter("offset", offset)
-      .setParameter("limit", limit)
       .executeUpdate()
   }
 

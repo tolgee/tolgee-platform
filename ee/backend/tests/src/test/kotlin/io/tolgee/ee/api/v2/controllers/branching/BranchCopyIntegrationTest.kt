@@ -15,6 +15,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -55,6 +56,12 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
   }
 
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+    enabledFeaturesProvider.forceEnabled = null
+  }
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `copies keys and translations to new branch`() {
@@ -84,6 +91,26 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     // branch should be ready
     val branch = branchRepository.findByIdOrNull(newBranchId)!!
     branch.pending.assert.isFalse()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `copies keys in multiple batches`() {
+    testData.generateBunchData(1000)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    val projectId = testData.project.id
+
+    performBranchCreation().andIsOk
+
+    val newBranchId = branchRepository.findActiveByProjectIdAndName(projectId, "feature-x")!!.id
+    keyRepository.countByProjectAndBranch(projectId, newBranchId).assert.isEqualTo(1051)
+
+    listOf("branched key 1", "branched additional key 1000").forEach { name ->
+      val mainKey = keyRepository.findPrefetchedByNameAndBranch(projectId, name, "main")
+      val branchKey = keyRepository.findPrefetchedByNameAndBranch(projectId, name, "feature-x")
+      branchKey!!.assertIsCopyOf(mainKey!!)
+    }
   }
 
   @Test
