@@ -140,16 +140,21 @@ class BranchCopyServiceSql(
     // Truncate the table for the new batch
     entityManager.createNativeQuery("TRUNCATE TABLE temp_key_mapping").executeUpdate()
 
-    // Insert source->target key mapping for this batch
+    // Insert source->target key mapping for this batch.
+    // MATERIALIZED forces the project filter before ORDER BY/LIMIT; without it Postgres walks the whole key PK.
     val insertSql = """
-      INSERT INTO temp_key_mapping (source_key_id, target_key_id)
-      SELECT sk.id AS source_key_id, tk.id AS target_key_id
-      FROM (
+      WITH project_source_keys AS MATERIALIZED (
         SELECT k.id, k.name, k.namespace_id
         FROM key k
         WHERE k.project_id = :projectId
           AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
-        ORDER BY k.id
+      )
+      INSERT INTO temp_key_mapping (source_key_id, target_key_id)
+      SELECT sk.id AS source_key_id, tk.id AS target_key_id
+      FROM (
+        SELECT psk.id, psk.name, psk.namespace_id
+        FROM project_source_keys psk
+        ORDER BY psk.id
         OFFSET :offset LIMIT :limit
       ) sk
       JOIN key tk ON tk.project_id = :projectId
@@ -165,6 +170,9 @@ class BranchCopyServiceSql(
       .setParameter("offset", offset)
       .setParameter("limit", limit)
       .executeUpdate()
+
+    // Temp tables are never auto-analyzed; without stats the planner picks full-table joins.
+    entityManager.createNativeQuery("ANALYZE temp_key_mapping").executeUpdate()
   }
 
   private fun getSourceBranchFilter(
@@ -288,13 +296,16 @@ class BranchCopyServiceSql(
     offset: Long,
     limit: Int,
   ) {
+    // MATERIALIZED: see createKeyMapping
     val sql = """
-      WITH source_keys AS (
+      WITH project_source_keys AS MATERIALIZED (
         SELECT k.id AS old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name, k.max_char_limit
         FROM key k
         WHERE k.project_id = :projectId
           AND ${getSourceBranchFilter("k", sourceBranch.isDefault)}
-        ORDER BY k.id
+      ), source_keys AS (
+        SELECT * FROM project_source_keys
+        ORDER BY old_id
         OFFSET :offset LIMIT :limit
       ), existing_target AS (
         SELECT tk.id, tk.name, tk.namespace_id
