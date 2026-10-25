@@ -3269,6 +3269,8 @@
   "translations_tag_label": "タグ",
   "translations_tags_no_results": "何も見つかりませんでした",
   "translation_state_auto_translated": "自動翻訳済み",
+  "translation_state_auto_translated_by_mt": "機械翻訳",
+  "translation_state_auto_translated_by_tm": "翻訳メモリー",
   "translation_state_change": "{newState}としてマーク",
   "translation_state_disabled": "無効",
   "translation_state_outdated": "古い",

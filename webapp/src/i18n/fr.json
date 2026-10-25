@@ -3251,6 +3251,8 @@
   "translations_tag_label": "étiquette",
   "translations_tags_no_results": "Rien n'a été trouvé",
   "translation_state_auto_translated": "Traduit automatiquement",
+  "translation_state_auto_translated_by_mt": "Traduction automatique",
+  "translation_state_auto_translated_by_tm": "Mémoire de traduction",
   "translation_state_change": "Marquer comme {newState}",
   "translation_state_disabled": "Désactivé",
   "translation_state_outdated": "Obsolète",

@@ -3264,6 +3264,8 @@
   "translations_tag_label": "label",
   "translations_tags_no_results": "Niets gevonden",
   "translation_state_auto_translated": "Automatisch vertaald",
+  "translation_state_auto_translated_by_mt": "Machinevertaling",
+  "translation_state_auto_translated_by_tm": "Vertaalgeheugen",
   "translation_state_change": "Markeer als {newState}",
   "translation_state_disabled": "Uitgeschakeld",
   "translation_state_outdated": "Verouderd",

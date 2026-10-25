@@ -3244,6 +3244,8 @@
   "translations_tag_label": "tagg",
   "translations_tags_no_results": "Fant ingenting",
   "translation_state_auto_translated": "Oversatt automatisk",
+  "translation_state_auto_translated_by_mt": "Maskinoversettelse",
+  "translation_state_auto_translated_by_tm": "Oversettelseshukommelse",
   "translation_state_change": "Merk som {newState}",
   "translation_state_disabled": "Deaktivert",
   "translation_state_outdated": "Utdatert",

@@ -2996,6 +2996,8 @@
   "translations_tag_label": "тег",
   "translations_tags_no_results": "Нічого не знайдено",
   "translation_state_auto_translated": "Перекладено автоматично",
+  "translation_state_auto_translated_by_mt": "Машинний переклад",
+  "translation_state_auto_translated_by_tm": "Пам'ять перекладів",
   "translation_state_change": "Позначити як {newState}",
   "translation_state_disabled": "Вимкнено",
   "translation_state_outdated": "Застаріле",

@@ -3257,6 +3257,8 @@
   "translations_tag_label": "tag",
   "translations_tags_no_results": "什么都没有找到",
   "translation_state_auto_translated": "自动翻译",
+  "translation_state_auto_translated_by_mt": "机器翻译",
+  "translation_state_auto_translated_by_tm": "翻译记忆",
   "translation_state_change": "标记为 {newState}",
   "translation_state_disabled": "已禁用",
   "translation_state_outdated": "已过时",

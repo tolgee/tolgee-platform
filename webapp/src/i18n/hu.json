@@ -3244,6 +3244,8 @@
   "translations_tag_label": "címke",
   "translations_tags_no_results": "Nincs találat",
   "translation_state_auto_translated": "Automatikusan lefordítva",
+  "translation_state_auto_translated_by_mt": "Gépi fordítás",
+  "translation_state_auto_translated_by_tm": "Fordítási memória",
   "translation_state_change": "Jelölje {newState}-ként",
   "translation_state_disabled": "Letiltva",
   "translation_state_outdated": "Elavult",

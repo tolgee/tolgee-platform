@@ -3247,6 +3247,8 @@
   "translations_tag_label": "Tag",
   "translations_tags_no_results": "Nichts gefunden",
   "translation_state_auto_translated": "Automatisch übersetzt",
+  "translation_state_auto_translated_by_mt": "Maschinelle Übersetzung",
+  "translation_state_auto_translated_by_tm": "Translation Memory",
   "translation_state_change": "Markieren als {newState}",
   "translation_state_disabled": "Deaktiviert",
   "translation_state_outdated": "Veraltet",

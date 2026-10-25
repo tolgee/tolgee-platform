@@ -3260,6 +3260,8 @@
   "translations_tag_label": "Tag",
   "translations_tags_no_results": "Intet fundet",
   "translation_state_auto_translated": "Oversat automatisk",
+  "translation_state_auto_translated_by_mt": "Maskinoversættelse",
+  "translation_state_auto_translated_by_tm": "Oversættelseshukommelse",
   "translation_state_change": "Marker som {newState}",
   "translation_state_disabled": "Deaktiveret",
   "translation_state_outdated": "Forældet",

@@ -1,3 +1,11 @@
+## [3.239.2](https://github.com/tolgee/tolgee-platform/compare/v3.239.1...v3.239.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* list each translation once in the Slack new key message ([#3949](https://github.com/tolgee/tolgee-platform/issues/3949)) ([ce078f0](https://github.com/tolgee/tolgee-platform/commit/ce078f0fbb87a17a9d3e3f8970dff6c2134edddc)), closes [#3946](https://github.com/tolgee/tolgee-platform/issues/3946)
+* parse multiple options and any language tag in Slack slash commands ([#3950](https://github.com/tolgee/tolgee-platform/issues/3950)) ([3f36120](https://github.com/tolgee/tolgee-platform/commit/3f361208b8aca11efefca0e19f105716dc433775)), closes [#3947](https://github.com/tolgee/tolgee-platform/issues/3947)
+
 ## [3.239.1](https://github.com/tolgee/tolgee-platform/compare/v3.239.0...v3.239.1) (2026-10-24)
 
 

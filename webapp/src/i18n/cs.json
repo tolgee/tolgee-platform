@@ -3269,6 +3269,8 @@
   "translations_tag_label": "tag",
   "translations_tags_no_results": "Nic nenalezeno",
   "translation_state_auto_translated": "Přeloženo automaticky",
+  "translation_state_auto_translated_by_mt": "Strojový překlad",
+  "translation_state_auto_translated_by_tm": "Překladová paměť",
   "translation_state_change": "Označit jako {newState}",
   "translation_state_disabled": "Deaktivováno",
   "translation_state_outdated": "Zastaralé",

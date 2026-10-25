@@ -3232,6 +3232,8 @@
   "translations_tag_label": "etichetă",
   "translations_tags_no_results": "Nimic găsit",
   "translation_state_auto_translated": "Tradus automat",
+  "translation_state_auto_translated_by_mt": "Traducere automată",
+  "translation_state_auto_translated_by_tm": "Memorie de traducere",
   "translation_state_change": "Marchează ca {newState}",
   "translation_state_disabled": "Dezactivat",
   "translation_state_outdated": "Depășit",

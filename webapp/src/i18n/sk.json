@@ -92,6 +92,8 @@
   "translations_filter_non_plural_keys": "Nemnožné kľúče",
   "translations_filter_plural_keys": "Množné kľúče",
   "translations_filters_heading_plurals": "Množné čísla",
+  "translation_state_auto_translated_by_mt": "Strojový preklad",
+  "translation_state_auto_translated_by_tm": "Prekladová pamäť",
   "user_profile_visibility_default": "Predvolené (verejné, keď prispejete do komunitného projektu)",
   "user_profile_visibility_label": "Viditeľnosť profilu komunity",
   "user_profile_visibility_private": "Súkromný",

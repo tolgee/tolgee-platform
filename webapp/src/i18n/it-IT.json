@@ -3205,6 +3205,8 @@
   "translations_tag_label": "tag",
   "translations_tags_no_results": "Niente trovato",
   "translation_state_auto_translated": "Tradotto automaticamente",
+  "translation_state_auto_translated_by_mt": "Traduzione automatica",
+  "translation_state_auto_translated_by_tm": "Memoria di traduzione",
   "translation_state_change": "Segna come {newState}",
   "translation_state_disabled": "Disabilitato",
   "translation_state_outdated": "Obsoleto",

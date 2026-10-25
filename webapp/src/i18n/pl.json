@@ -2978,6 +2978,8 @@
   "translations_tag_label": "tag",
   "translations_tags_no_results": "Nie znaleziono",
   "translation_state_auto_translated": "Przetłumaczone automatycznie",
+  "translation_state_auto_translated_by_mt": "Tłumaczenie maszynowe",
+  "translation_state_auto_translated_by_tm": "Pamięć tłumaczeń",
   "translation_state_change": "Oznacz jako {newState}",
   "translation_state_disabled": "Wyłączone",
   "translation_state_outdated": "Nieaktualne",
