@@ -28,7 +28,10 @@ const StyledArrowButton = styled(Button)`
 
 type Props = {
   projectId: number;
-  data: Omit<PromptModel, 'projectId' | 'id' | 'name' | 'revision'>;
+  data: Omit<
+    PromptModel,
+    'projectId' | 'id' | 'name' | 'revision' | 'activeRuleCount'
+  >;
   existingPrompt?: PromptItem;
   disabled?: boolean;
   unsavedChanges?: boolean;

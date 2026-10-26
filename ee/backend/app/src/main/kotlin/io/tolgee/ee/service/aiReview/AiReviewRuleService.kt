@@ -11,8 +11,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.AiReviewRuleLanguageOverride
 import io.tolgee.model.enums.PromptType
+import io.tolgee.model.enums.aiReview.AiReviewRuleMode
+import io.tolgee.repository.PromptRepository
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
-import io.tolgee.service.PromptService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 import jakarta.persistence.EntityManager
@@ -24,7 +25,7 @@ class AiReviewRuleService(
   private val aiReviewRuleRepository: AiReviewRuleRepository,
   private val aiReviewRuleCache: AiReviewRuleCache,
   private val languageService: LanguageService,
-  private val promptService: PromptService,
+  private val promptRepository: PromptRepository,
   private val entityManager: EntityManager,
 ) {
   class RuleChange(
@@ -91,6 +92,36 @@ class AiReviewRuleService(
     aiReviewRuleRepository.delete(get(projectId, ruleId))
     aiReviewRuleCache.evict(projectId)
   }
+
+  @Transactional
+  fun switchRulesUsingPromptToDryRun(
+    projectId: Long,
+    promptId: Long,
+  ) {
+    val rules = aiReviewRuleRepository.findAllByProjectIdAndPromptId(projectId, promptId)
+    rules.forEach { it.mode = AiReviewRuleMode.DRY_RUN }
+    aiReviewRuleRepository.saveAll(rules)
+    aiReviewRuleCache.evict(projectId)
+  }
+
+  @Transactional
+  fun detachPrompt(
+    projectId: Long,
+    promptId: Long,
+  ) {
+    val rules = aiReviewRuleRepository.findAllByProjectIdAndPromptId(projectId, promptId)
+    rules.forEach {
+      it.prompt = null
+      it.mode = AiReviewRuleMode.DRY_RUN
+    }
+    aiReviewRuleRepository.saveAll(rules)
+    aiReviewRuleCache.evict(projectId)
+  }
+
+  fun countActiveRulesUsingPrompt(
+    projectId: Long,
+    promptId: Long,
+  ): Long = aiReviewRuleRepository.countByProjectIdAndPromptIdAndMode(projectId, promptId, AiReviewRuleMode.ACTIVE)
 
   @Transactional
   fun removeLanguage(
@@ -193,7 +224,7 @@ class AiReviewRuleService(
   private fun reviewPrompt(
     projectId: Long,
     promptId: Long,
-  ) = promptService.findPrompt(projectId, promptId).also {
+  ) = (promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)).also {
     if (it.type != PromptType.REVIEW) throw BadRequestException(Message.AI_REVIEW_PROMPT_MUST_BE_REVIEW_TYPE)
   }
 }

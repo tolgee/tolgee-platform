@@ -5884,6 +5884,8 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     PromptModel: {
+      /** Format: int64 */
+      activeRuleCount: number;
       basicPromptOptions?: (
         | "KEY_NAME"
         | "KEY_DESCRIPTION"
