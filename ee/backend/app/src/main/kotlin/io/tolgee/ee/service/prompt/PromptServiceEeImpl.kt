@@ -5,6 +5,7 @@ import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
@@ -167,9 +168,10 @@ class PromptServiceEeImpl(
     keyId: Long?,
     targetLanguageId: Long,
     options: List<BasicPromptOption>?,
+    reviewCriteria: String? = null,
   ): String {
     try {
-      val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId)
+      val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId, reviewCriteria)
 
       val handlebars = PromptHandlebarsHelper.register(Handlebars())
 
@@ -229,14 +231,32 @@ class PromptServiceEeImpl(
     provider: String,
     attempts: List<Int>? = null,
   ): ParsedResult {
-    val result =
-      try {
-        providerService.callProvider(organizationId, provider, params, attempts)
-      } catch (e: RestClientException) {
-        throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
-      }
-
+    val result = callProvider(organizationId, params, provider, attempts)
     return PromptResultParser(result, objectMapper).parse()
+  }
+
+  fun callProviderAndChargeCredits(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+  ): PromptResult {
+    publishBeforeEvent(organizationId)
+    val result = callProvider(organizationId, params, provider, null)
+    publishAfterEvent(organizationId, result.price)
+    return result
+  }
+
+  private fun callProvider(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+    attempts: List<Int>?,
+  ): PromptResult {
+    try {
+      return providerService.callProvider(organizationId, provider, params, attempts)
+    } catch (e: RestClientException) {
+      throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
+    }
   }
 
   fun runPromptAndChargeCredits(

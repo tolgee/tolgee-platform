@@ -1373,6 +1373,13 @@ export interface components {
       keys: number[];
       languages: number[];
     };
+    AiReviewIssueModel: {
+      category?: string;
+      message: string;
+      /** Format: int32 */
+      points: number;
+      severity: string;
+    };
     AiReviewRuleCountsModel: {
       /** Format: int64 */
       autoReviewed: number;
@@ -5911,11 +5918,14 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     PromptResponseModel: {
+      issues?: components["schemas"]["AiReviewIssueModel"][];
       parsedJson?: components["schemas"]["JsonNode"];
       /** Format: int32 */
       price?: number;
       prompt: string;
       result: string;
+      /** Format: int32 */
+      score?: number;
       usage?: components["schemas"]["PromptResponseUsageModel"];
     };
     PromptResponseUsageModel: {
@@ -5940,9 +5950,12 @@ export interface components {
       /** Format: int64 */
       keyId: number;
       provider: string;
+      reviewCriteria?: string;
       /** Format: int64 */
       targetLanguageId: number;
       template?: string;
+      /** @enum {string} */
+      type: "TRANSLATE" | "REVIEW";
     };
     PromptVariableDto: {
       description?: string;
@@ -23394,6 +23407,9 @@ export interface operations {
   };
   getDefaultPrompt: {
     parameters: {
+      query: {
+        type?: "TRANSLATE" | "REVIEW";
+      };
       path: {
         projectId: number;
       };

@@ -2,6 +2,7 @@ package io.tolgee.ee.unit
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.model.enums.LlmProviderPriority
@@ -10,6 +11,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class OpenaiApiServiceTest {
   private lateinit var service: OpenaiApiService
@@ -79,6 +82,37 @@ class OpenaiApiServiceTest {
       .isInstanceOf(LlmEmptyResponseException::class.java)
   }
 
+  @Test
+  fun `sends the response schema from params when json_schema format is configured`() {
+    var body: String? = null
+    val restTemplate = stubLlmRestTemplate(OK_RESPONSE) { body = it }
+
+    service.translate(createParams(responseSchema = REVIEW_SCHEMA), createConfig(), restTemplate)
+
+    val jsonSchema = responseFormatSchema(body!!)
+    assertThat(jsonSchema["name"]).isEqualTo("review_response")
+    assertThat(jsonSchema["schema"]).isEqualTo(REVIEW_SCHEMA.schema)
+    assertThat(jsonSchema["strict"]).isEqualTo(true)
+  }
+
+  @Test
+  fun `sends the translation schema when params have no response schema`() {
+    var body: String? = null
+    val restTemplate = stubLlmRestTemplate(OK_RESPONSE) { body = it }
+
+    service.translate(createParams(), createConfig(), restTemplate)
+
+    val jsonSchema = responseFormatSchema(body!!)
+    assertThat(jsonSchema["name"]).isEqualTo("simple_response")
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun responseFormatSchema(body: String): Map<String, Any> {
+    val bodyMap = jacksonObjectMapper().readValue<Map<String, Any>>(body)
+    val responseFormat = bodyMap["response_format"] as Map<String, Any>
+    return responseFormat["json_schema"] as Map<String, Any>
+  }
+
   private fun createConfig(): LlmProviderInterface {
     return object : LlmProviderInterface {
       override var name = "test-openai"
@@ -97,7 +131,7 @@ class OpenaiApiServiceTest {
     }
   }
 
-  private fun createParams(): LlmParams {
+  private fun createParams(responseSchema: LlmResponseSchema? = null): LlmParams {
     return LlmParams(
       messages =
         listOf(
@@ -108,6 +142,18 @@ class OpenaiApiServiceTest {
         ),
       shouldOutputJson = true,
       priority = LlmProviderPriority.HIGH,
+      responseSchema = responseSchema,
     )
+  }
+
+  companion object {
+    private const val OK_RESPONSE =
+      """{"choices": [{"message": {"role": "assistant", "content": "{}"}}], "usage": {"prompt_tokens": 1, "completion_tokens": 1}}"""
+
+    val REVIEW_SCHEMA =
+      LlmResponseSchema(
+        name = "review_response",
+        schema = mapOf("type" to "object", "properties" to mapOf("issues" to mapOf("type" to "array"))),
+      )
   }
 }

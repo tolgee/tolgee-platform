@@ -11,10 +11,13 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.aiReview.AiReviewIssueModel
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseModel
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
+import io.tolgee.ee.service.aiReview.AiReviewPromptService
 import io.tolgee.ee.service.prompt.DefaultPromptHelper
+import io.tolgee.ee.service.prompt.DefaultReviewPromptHelper
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.ee.service.prompt.PromptVariablesHelper
 import io.tolgee.hateoas.prompt.PromptModel
@@ -64,6 +67,7 @@ class PromptController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val authenticationFacade: AuthenticationFacade,
   private val promptResponseUsageModelAssembler: PromptResponseUsageModelAssembler,
+  private val aiReviewPromptService: AiReviewPromptService,
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
@@ -81,8 +85,12 @@ class PromptController(
   @GetMapping("default")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
   @Operation(summary = "Get default prompt")
-  fun getDefaultPrompt(): PromptDto {
-    return promptService.getDefaultPrompt()
+  fun getDefaultPrompt(
+    @RequestParam type: PromptType?,
+  ): PromptDto {
+    if (type != PromptType.REVIEW) return promptService.getDefaultPrompt()
+    checkAiReviewEnabled()
+    return DefaultReviewPromptHelper.get()
   }
 
   @PostMapping("")
@@ -188,6 +196,8 @@ class PromptController(
       )
     }
 
+    if (data.type == PromptType.REVIEW) return runReviewPrompt(data)
+
     val projectId = projectHolder.project.id
     val prompt =
       promptService.getPrompt(
@@ -229,9 +239,6 @@ class PromptController(
     )
   }
 
-  private fun isAiReviewEnabled(): Boolean =
-    enabledFeaturesProvider.isFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
-
   private fun checkAiReviewEnabled() {
     enabledFeaturesProvider.checkFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
   }
@@ -240,5 +247,27 @@ class PromptController(
     if (type != null) return listOf(type)
     if (isAiReviewEnabled()) return PromptType.entries
     return listOf(PromptType.TRANSLATE)
+  }
+
+  private fun isAiReviewEnabled(): Boolean =
+    enabledFeaturesProvider.isFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
+
+  private fun runReviewPrompt(data: PromptRunDto): PromptResponseModel {
+    checkAiReviewEnabled()
+    val result =
+      aiReviewPromptService.runReview(
+        projectHolder.project.organizationOwnerId,
+        projectHolder.project.id,
+        data,
+      )
+    return PromptResponseModel(
+      prompt = result.renderedPrompt,
+      result = result.rawResponse,
+      parsedJson = null,
+      price = result.price,
+      usage = result.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
+      issues = result.issues.map { AiReviewIssueModel.of(it) },
+      score = result.score,
+    )
   }
 }

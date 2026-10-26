@@ -4,6 +4,8 @@ class PromptResult(
   val response: String,
   val usage: Usage?,
   var price: Int = 0,
+  var providerName: String? = null,
+  var model: String? = null,
 ) {
   data class DiagnosticInfo(
     val request: Any,

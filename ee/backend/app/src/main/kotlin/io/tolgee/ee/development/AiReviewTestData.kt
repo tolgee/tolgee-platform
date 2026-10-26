@@ -139,4 +139,21 @@ class AiReviewTestData : BaseTestData() {
         }
     return KeyTranslations(keyBuilder, de, fr)
   }
+
+  fun addPluralKey(
+    name: String,
+    deText: String,
+  ): TranslationBuilder {
+    lateinit var de: TranslationBuilder
+    projectBuilder
+      .addKey {
+        this.name = name
+        isPlural = true
+      }.build {
+        addTag("ui")
+        addTranslation("en", "{count, plural, one {# item} other {# items}}")
+        de = addTranslation("de", deText)
+      }
+    return de
+  }
 }
