@@ -1,3 +1,10 @@
+## [3.240.2](https://github.com/tolgee/tolgee-platform/compare/v3.240.1...v3.240.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* bump Spring Boot to 4.1.2 and Hibernate to 7.4.10 for security fixes ([#4007](https://github.com/tolgee/tolgee-platform/issues/4007)) ([42a952d](https://github.com/tolgee/tolgee-platform/commit/42a952d205ea6675c574b80894acc87186db4add))
+
 ## [3.240.1](https://github.com/tolgee/tolgee-platform/compare/v3.240.0...v3.240.1) (2026-10-26)
 
 
