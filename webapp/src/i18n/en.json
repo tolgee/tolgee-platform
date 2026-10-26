@@ -2713,7 +2713,7 @@
   "sign_up_submit_button": "Submit",
   "sign_up_subtitle": "Already have an account? <link>Log in here</link>",
   "sign_up_success_message": "Thank you for signing up!",
-  "sign-up-terms-and-conditions-message": "By clicking Submit, I agree that I have read and accepted the Tolgee \n                  <Link>\n                    Terms of Use\n                  </Link>",
+  "sign-up-terms-and-conditions-message": "By clicking Submit, I agree that I have read and accepted the Tolgee \n                  <Link>\n                    Terms of Service\n                  </Link>",
   "sign_up_title": "Sign up",
   "simple_paginated_list_error_message": "Cannot load data",
   "slack_app_description": "The Slack app notifies you about the changes in your localization data.",

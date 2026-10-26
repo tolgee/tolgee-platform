@@ -83,6 +83,7 @@
   "project_storage_invalid_field_name": "Názov poľa môže obsahovať iba písmená, číslice, bodky, pomlčky a podčiarkovníky (max. 64 znakov)",
   "project_storage_too_many_fields": "Príliš veľa uložených polí pre tento projekt (max {0})",
   "project_storage_value_too_large": "Uložená hodnota je príliš veľká (max {0} bajtov)",
+  "sign-up-terms-and-conditions-message": "Kliknutím na tlačidlo Odoslať súhlasím, že som si prečítal a akceptujem Tolgee \n                  <Link>\n                    Podmienky používania\n                  </Link>",
   "storage_form_s3_public_read": "Nahrávať súbory ako verejné",
   "storage_form_s3_public_read_hint": "Nahráva súbory ako public-read. Potrebné pre úložiská, ktoré nové súbory nastavujú ako súkromné, napríklad DigitalOcean Spaces. Na AWS musí mať prístupový kľúč aj oprávnenie „s3:PutObjectAcl“. Pre AWS buckety s vypnutými ACL túto možnosť nezapínajte.",
   "suggestions_disabled": "Návrhy sú pre tento projekt vypnuté",

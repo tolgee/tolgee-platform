@@ -2476,7 +2476,7 @@
   "sign_up_submit_button": "Надіслати",
   "sign_up_subtitle": "Вже маєте обліковий запис? <link>Увійдіть тут</link>",
   "sign_up_success_message": "Дякуємо за реєстрацію!",
-  "sign-up-terms-and-conditions-message": "Натискаючи Надіслати, я погоджуюся, що прочитав і прийняв \n                  <Link>\n                    Умови використання\n                  </Link> Tolgee",
+  "sign-up-terms-and-conditions-message": "Натискаючи «Надіслати», я погоджуюся, що прочитав(ла) та прийняв(ла) Умови надання послуг Tolgee \n                  <Link>\n                    Умови надання послуг\n                  </Link>",
   "sign_up_title": "Зареєструватися",
   "simple_paginated_list_error_message": "Не вдалося завантажити дані",
   "slack_app_description": "Додаток Slack повідомляє вас про зміни у ваших даних локалізації.",

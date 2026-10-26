@@ -2656,7 +2656,7 @@
   "sign_up_submit_button": "Invia",
   "sign_up_subtitle": "Hai già un account? <link>Accedi qui</link>",
   "sign_up_success_message": "Grazie per esserti registrato!",
-  "sign-up-terms-and-conditions-message": "Cliccando su Invia, confermo di aver letto e accettato i \n                  <Link>\n                    Termini di utilizzo\n                  </Link> di Tolgee",
+  "sign-up-terms-and-conditions-message": "Cliccando su Invia, dichiaro di aver letto e accettato i \n                  <Link>\n                    Termini di Servizio\n                  </Link>\n                  di Tolgee",
   "sign_up_title": "Iscriviti",
   "simple_paginated_list_error_message": "Impossibile caricare i dati",
   "slack_app_description": "L'app Slack ti notifica delle modifiche nei tuoi dati di localizzazione.",

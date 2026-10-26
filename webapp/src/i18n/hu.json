@@ -2694,7 +2694,7 @@
   "sign_up_submit_button": "Küldés",
   "sign_up_subtitle": "Már van fiókja? <link>Jelentkezzen be itt</link>",
   "sign_up_success_message": "Köszönjük a regisztrációt!",
-  "sign-up-terms-and-conditions-message": "A Küldés gombra kattintva elfogadom, hogy elolvastam és elfogadom a Tolgee \n                  <Link>\n                    Felhasználási feltételeit\n                  </Link>",
+  "sign-up-terms-and-conditions-message": "A Küldés gombra kattintva elfogadom, hogy elolvastam és elfogadtam a Tolgee \n                  <Link>\n                    Felhasználási feltételeket\n                  </Link>",
   "sign_up_title": "Regisztráció",
   "simple_paginated_list_error_message": "Az adatok betöltése sikertelen",
   "slack_app_description": "A Slack alkalmazás értesíti Önt a lokalizációs adatok változásairól.",

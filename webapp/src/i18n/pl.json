@@ -2463,7 +2463,7 @@
   "sign_up_submit_button": "Prześlij",
   "sign_up_subtitle": "Masz już konto? <link>Zaloguj się tutaj</link>",
   "sign_up_success_message": "Dziękujemy za rejestrację!",
-  "sign-up-terms-and-conditions-message": "Klikając Prześlij, zgadzam się, że przeczytałem i zaakceptowałem \n                  <Link>\n                    Warunki użytkowania\n                  </Link> Tolgee",
+  "sign-up-terms-and-conditions-message": "Klikając Prześlij, wyrażam zgodę na to, że przeczytałem/am i akceptuję Tolgee \n                  <Link>\n                    Warunki korzystania z usługi\n                  </Link>",
   "sign_up_title": "Zarejestruj się",
   "simple_paginated_list_error_message": "Nie można załadować danych",
   "slack_app_description": "Aplikacja Slack powiadamia Cię o zmianach w Twoich danych lokalizacyjnych.",

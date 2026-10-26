@@ -1,3 +1,10 @@
+## [3.240.3](https://github.com/tolgee/tolgee-platform/compare/v3.240.2...v3.240.3) (2026-10-26)
+
+
+### Bug Fixes
+
+* send emails with the standard UTF-8 charset name ([#4008](https://github.com/tolgee/tolgee-platform/issues/4008)) ([d171a08](https://github.com/tolgee/tolgee-platform/commit/d171a080f267c71758aa006f0cfad6bef6da086e))
+
 ## [3.240.2](https://github.com/tolgee/tolgee-platform/compare/v3.240.1...v3.240.2) (2026-10-26)
 
 
