@@ -247,6 +247,26 @@ class EmailServiceTest {
       .doesNotContain("[DEFAULT]")
   }
 
+  @Test
+  fun `non-ASCII subject is encoded with the standard UTF-8 charset name`() {
+    emailService.sendEmailTemplate(
+      "test@tolgee.test",
+      "default",
+      Locale.ENGLISH,
+      mapOf("content" to "Some notification text."),
+      subject = "Your 🐁 trial will expire tomorrow",
+    )
+    verify(mailSender).send(emailCaptor.capture())
+
+    val email = emailCaptor.value
+    email
+      .getHeader("Subject")
+      .single()
+      .assert
+      .startsWith("=?UTF-8?")
+    email.subject.assert.isEqualTo("Your 🐁 trial will expire tomorrow")
+  }
+
   private fun MimeMessage.assertContents(): AbstractStringAssert<*> {
     return this.content
       .let { it as MimeMultipart }

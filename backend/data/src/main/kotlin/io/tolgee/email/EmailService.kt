@@ -89,7 +89,7 @@ class EmailService(
     replyTo: String? = null,
   ) {
     val message = mailSender.createMimeMessage()
-    val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
+    val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8")
 
     helper.setFrom(smtpFrom)
     helper.setTo(recipient)
