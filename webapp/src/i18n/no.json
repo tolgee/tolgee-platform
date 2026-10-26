@@ -2979,6 +2979,7 @@
   "translation_failed": "Oversettelse mislyktes",
   "translation_filter_item_exclude": "Ekskluder",
   "translation_filter_item_excluded": "Ekskludert",
+  "translation_filters_auto_translated_by": "{state}: {source}",
   "translation_filters_comments_any": "Alle kommentarer",
   "translation_filters_comments_unresolved": "Uløste kommentarer",
   "translation_filters_has_no_suggestions": "Ingen forslag",

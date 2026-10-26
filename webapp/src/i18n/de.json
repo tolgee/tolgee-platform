@@ -2987,6 +2987,7 @@
   "translation_failed": "Übersetzung fehlgeschlagen",
   "translation_filter_item_exclude": "Ausschließen",
   "translation_filter_item_excluded": "Ausgeschlossen",
+  "translation_filters_auto_translated_by": "{state}: {source}",
   "translation_filters_comments_any": "Alle Kommentare",
   "translation_filters_comments_unresolved": "Ungelöste Kommentare",
   "translation_filters_has_no_suggestions": "Keine Vorschläge",

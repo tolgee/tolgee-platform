@@ -86,6 +86,7 @@
   "storage_form_s3_public_read": "Nahrávať súbory ako verejné",
   "storage_form_s3_public_read_hint": "Nahráva súbory ako public-read. Potrebné pre úložiská, ktoré nové súbory nastavujú ako súkromné, napríklad DigitalOcean Spaces. Na AWS musí mať prístupový kľúč aj oprávnenie „s3:PutObjectAcl“. Pre AWS buckety s vypnutými ACL túto možnosť nezapínajte.",
   "suggestions_disabled": "Návrhy sú pre tento projekt vypnuté",
+  "translation_filters_auto_translated_by": "{state}: {source}",
   "translation_filters_in_open_task": "V otvorenej úlohe",
   "translation_filters_task_status_any": "Akýkoľvek",
   "translation_filters_task_type_status": "{taskType}: {status}",

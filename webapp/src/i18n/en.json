@@ -3004,6 +3004,7 @@
   "translation_failed": "Translation failed",
   "translation_filter_item_exclude": "Exclude",
   "translation_filter_item_excluded": "Excluded",
+  "translation_filters_auto_translated_by": "{state}: {source}",
   "translation_filters_comments_any": "Any comments",
   "translation_filters_comments_unresolved": "Unresolved comments",
   "translation_filters_has_no_suggestions": "No suggestions",

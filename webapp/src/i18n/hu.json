@@ -2984,6 +2984,7 @@
   "translation_failed": "Fordítás sikertelen",
   "translation_filter_item_exclude": "Kizárás",
   "translation_filter_item_excluded": "Kizárva",
+  "translation_filters_auto_translated_by": "{state}: {source}",
   "translation_filters_comments_any": "Bármilyen megjegyzés",
   "translation_filters_comments_unresolved": "Megoldatlan megjegyzések",
   "translation_filters_has_no_suggestions": "Nincs javaslat",

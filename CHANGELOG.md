@@ -1,3 +1,15 @@
+# [3.240.0](https://github.com/tolgee/tolgee-platform/compare/v3.239.2...v3.240.0) (2026-10-26)
+
+
+### Bug Fixes
+
+* keep the key character limit when creating a branch ([#4006](https://github.com/tolgee/tolgee-platform/issues/4006)) ([0615ba4](https://github.com/tolgee/tolgee-platform/commit/0615ba454d52c11e858e56a905bad906cc34d72a))
+
+
+### Features
+
+* carry a one-time upgrade proration in the usage estimate ([#3985](https://github.com/tolgee/tolgee-platform/issues/3985)) ([db37032](https://github.com/tolgee/tolgee-platform/commit/db37032c32cd52c78948cb473574ca4e2b50cc01))
+
 ## [3.239.2](https://github.com/tolgee/tolgee-platform/compare/v3.239.1...v3.239.2) (2026-10-25)
 
 
