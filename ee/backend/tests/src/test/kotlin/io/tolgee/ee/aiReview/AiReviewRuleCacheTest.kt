@@ -2,12 +2,16 @@ package io.tolgee.ee.aiReview
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.dtos.request.key.UpdateNamespaceDto
+import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRuleCache
 import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
 import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
+import io.tolgee.ee.service.prompt.PromptServiceEeImpl
+import io.tolgee.model.enums.PromptType
+import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
@@ -34,6 +38,9 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var aiReviewRuleService: AiReviewRuleService
+
+  @Autowired
+  lateinit var promptService: PromptServiceEeImpl
 
   lateinit var testData: AiReviewTestData
 
@@ -85,6 +92,27 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `a concurrent read during an update cannot pin the old rules in the cache`() {
+    threshold().assert.isEqualTo(85)
+    val projectId = testData.project.id
+
+    executeInNewTransaction(platformTransactionManager) {
+      aiReviewRuleService.update(
+        projectId,
+        testData.rule.id,
+        AiReviewRuleRequest(tagIn = listOf("ui"), threshold = 99),
+      )
+      // A reader on another connection still sees the old committed rules here and writes
+      // them back into the cache after the in-transaction evict.
+      val reader = Thread { aiReviewRuleCache.get(projectId) }
+      reader.start()
+      reader.join()
+    }
+
+    threshold().assert.isEqualTo(99)
+  }
+
+  @Test
   fun `language delete and namespace rename evict the rule cache`() {
     executeInNewTransaction(platformTransactionManager) {
       val rule = aiReviewRuleRepository.findById(testData.rule.id).get()
@@ -122,6 +150,42 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
       .single()
       .namespaceIn.assert
       .containsExactly("checkout")
+  }
+
+  @Test
+  fun `prompt change and prompt delete evict the rule cache`() {
+    val projectId = testData.project.id
+    executeInNewTransaction(platformTransactionManager) {
+      val rule = aiReviewRuleRepository.findById(testData.rule.id).get()
+      rule.prompt = promptService.findPrompt(projectId, testData.reviewPrompt.id)
+      aiReviewRuleRepository.save(rule)
+    }
+    aiReviewRuleCache.evict(projectId)
+    rules()
+      .single()
+      .mode.assert
+      .isEqualTo(AiReviewRuleMode.ACTIVE)
+
+    promptService.updatePrompt(
+      projectId,
+      testData.reviewPrompt.id,
+      PromptDto(
+        name = "Brand voice review",
+        providerName = "default",
+        type = PromptType.REVIEW,
+        reviewCriteria = "New",
+      ),
+    )
+    rules()
+      .single()
+      .mode.assert
+      .isEqualTo(AiReviewRuleMode.DRY_RUN)
+
+    promptService.deletePrompt(projectId, testData.reviewPrompt.id)
+    rules()
+      .single()
+      .promptId.assert
+      .isNull()
   }
 
   private fun rules() = evaluator.loadRules(testData.project.id)

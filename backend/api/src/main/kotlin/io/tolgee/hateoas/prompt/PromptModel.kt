@@ -16,4 +16,5 @@ open class PromptModel(
   val type: PromptType = PromptType.TRANSLATE,
   val reviewCriteria: String? = null,
   val revision: Int = 0,
+  val activeRuleCount: Long = 0,
 ) : RepresentationModel<PromptModel>()

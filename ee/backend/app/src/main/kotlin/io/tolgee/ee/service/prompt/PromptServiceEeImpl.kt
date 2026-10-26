@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderResolver
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
@@ -56,6 +57,7 @@ class PromptServiceEeImpl(
   private val objectMapper: ObjectMapper,
   private val llmProviderResolver: LlmProviderResolver,
   private val entityManager: EntityManager,
+  private val aiReviewRuleService: AiReviewRuleService,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -128,12 +130,22 @@ class PromptServiceEeImpl(
   ): Prompt {
     val prompt = findPrompt(projectId, promptId)
     if (dto.type != prompt.type) throw BadRequestException(Message.PROMPT_TYPE_CANNOT_BE_CHANGED)
+    val reviewCriteria = dto.reviewCriteria.takeIf { prompt.type == PromptType.REVIEW }
+    val outputChanges =
+      prompt.template != dto.template ||
+        prompt.providerName != dto.providerName ||
+        prompt.basicPromptOptions?.toList() != dto.basicPromptOptions ||
+        prompt.reviewCriteria != reviewCriteria
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
     prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
-    prompt.reviewCriteria = dto.reviewCriteria.takeIf { prompt.type == PromptType.REVIEW }
+    prompt.reviewCriteria = reviewCriteria
+    if (outputChanges) prompt.revision += 1
     promptRepository.save(prompt)
+    if (outputChanges && prompt.type == PromptType.REVIEW) {
+      aiReviewRuleService.switchRulesUsingPromptToDryRun(projectId, prompt.id)
+    }
     return withResolvedProviderName(prompt)
   }
 
@@ -144,6 +156,7 @@ class PromptServiceEeImpl(
     val prompt = this.findPrompt(projectId, promptId)
     val project = projectService.get(projectId)
     mtServiceConfigService.removePrompt(project, prompt.id)
+    if (prompt.type == PromptType.REVIEW) aiReviewRuleService.detachPrompt(projectId, prompt.id)
     promptRepository.delete(prompt)
   }
 
