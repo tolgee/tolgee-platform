@@ -3,6 +3,7 @@ package io.tolgee.ee.component.llm
 import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.dtos.PromptResult
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -15,6 +16,22 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
 val DEFAULT_ATTEMPTS = listOf(30)
+
+val TRANSLATION_RESPONSE_SCHEMA =
+  LlmResponseSchema(
+    name = "simple_response",
+    schema =
+      mapOf(
+        "type" to "object",
+        "properties" to
+          mapOf(
+            "output" to mapOf("type" to "string"),
+            "contextDescription" to mapOf("type" to "string"),
+          ),
+        "required" to listOf("output", "contextDescription"),
+        "additionalProperties" to false,
+      ),
+  )
 
 abstract class AbstractLlmApiService {
   private val logger = LoggerFactory.getLogger(AbstractLlmApiService::class.java)

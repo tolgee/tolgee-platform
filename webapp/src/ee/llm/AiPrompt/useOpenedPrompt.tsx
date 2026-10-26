@@ -17,6 +17,9 @@ export const useOpenedPrompt = ({ projectId }: Props) => {
     path: {
       projectId,
     },
+    query: {
+      type: 'TRANSLATE',
+    },
   });
 
   const openPromptLoadable = useApiQuery({

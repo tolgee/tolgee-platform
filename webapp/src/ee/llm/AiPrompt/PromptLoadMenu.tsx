@@ -38,6 +38,9 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
     path: {
       projectId,
     },
+    query: {
+      type: 'TRANSLATE',
+    },
   });
 
   const prompts: (PromptDto & { id?: number })[] = [];

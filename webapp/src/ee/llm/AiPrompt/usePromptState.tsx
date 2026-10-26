@@ -190,6 +190,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
             targetLanguageId: language.id,
             provider,
             basicPromptOptions: tab === 'basic' ? options : undefined,
+            type: 'TRANSLATE',
           },
         },
       },

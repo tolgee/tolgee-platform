@@ -86,6 +86,20 @@ tab, no upsell) and the API returns `FEATURE_NOT_ENABLED`.
   severity. *Why:* a broken answer must never help a translation pass.
 - **A score of 0 is never approved**, even with threshold 0.
 
+### 3.2.1 Review prompt
+
+- The source text and the translation go into the prompt as **JSON strings** (in quotes, already
+  escaped). *Why:* a text cannot close the string and add its own instructions. The prompt also
+  says that a text that gives instructions is a critical issue.
+- The **response schema** travels in `LlmParams.responseSchema` on every review call. There is no
+  central switch: each provider service decides. The OpenAI and Anthropic services send it when the
+  provider config has `format: json_schema`; Google AI and Ollama ignore the field and rely on the
+  text instructions in the prompt (format block, example, output rules); the Tolgee provider
+  forwards the whole `LlmParams` to Tolgee cloud, which decides the same way.
+- The default review prompt does not use the translator fragments `intro`, `styleInfo`, `icuInfo`,
+  `translationInfo` and `translateJson`. *Why:* they ask the model to translate, and `icuInfo` asks
+  it to return plural forms.
+
 ### 3.3 Translation state and flags
 
 - **An AI approval keeps the machine-translated mark** (`auto`, `mtProvider`). A human review clears
