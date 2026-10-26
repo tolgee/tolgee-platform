@@ -19865,6 +19865,8 @@ export interface operations {
         filterTranslatedInLang?: string;
         /** Selects only keys, where translation was auto translated for specified languages. */
         filterAutoTranslatedInLang?: string[];
+        /** Narrows `filterAutoTranslatedInLang` to translations auto translated by translation memory or by machine translation. Has no effect without `filterAutoTranslatedInLang`. */
+        filterAutoTranslatedBy?: "TRANSLATION_MEMORY" | "MACHINE_TRANSLATION";
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -20142,6 +20144,8 @@ export interface operations {
         filterTranslatedInLang?: string;
         /** Selects only keys, where translation was auto translated for specified languages. */
         filterAutoTranslatedInLang?: string[];
+        /** Narrows `filterAutoTranslatedInLang` to translations auto translated by translation memory or by machine translation. Has no effect without `filterAutoTranslatedInLang`. */
+        filterAutoTranslatedBy?: "TRANSLATION_MEMORY" | "MACHINE_TRANSLATION";
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -20463,6 +20467,8 @@ export interface operations {
         filterTranslatedInLang?: string;
         /** Selects only keys, where translation was auto translated for specified languages. */
         filterAutoTranslatedInLang?: string[];
+        /** Narrows `filterAutoTranslatedInLang` to translations auto translated by translation memory or by machine translation. Has no effect without `filterAutoTranslatedInLang`. */
+        filterAutoTranslatedBy?: "TRANSLATION_MEMORY" | "MACHINE_TRANSLATION";
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -26549,6 +26555,8 @@ export interface operations {
         filterTranslatedInLang?: string;
         /** Selects only keys, where translation was auto translated for specified languages. */
         filterAutoTranslatedInLang?: string[];
+        /** Narrows `filterAutoTranslatedInLang` to translations auto translated by translation memory or by machine translation. Has no effect without `filterAutoTranslatedInLang`. */
+        filterAutoTranslatedBy?: "TRANSLATION_MEMORY" | "MACHINE_TRANSLATION";
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
@@ -27038,6 +27046,8 @@ export interface operations {
         filterTranslatedInLang?: string;
         /** Selects only keys, where translation was auto translated for specified languages. */
         filterAutoTranslatedInLang?: string[];
+        /** Narrows `filterAutoTranslatedInLang` to translations auto translated by translation memory or by machine translation. Has no effect without `filterAutoTranslatedInLang`. */
+        filterAutoTranslatedBy?: "TRANSLATION_MEMORY" | "MACHINE_TRANSLATION";
         /** Selects only keys with screenshots */
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
