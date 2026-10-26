@@ -5,6 +5,7 @@ import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewEligibility
 import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
+import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
@@ -162,9 +163,31 @@ class AiReviewRuleEvaluatorTest : AbstractSpringTest() {
         it.self.state = TranslationState.REVIEWED
         testData.addReview(it, AiReviewStatus.APPROVED, 90) { textHash = "old" }
       }
+    val bulkReviewedMachineTranslation =
+      testData.addKeyWithTranslations("k.bulk").de.also {
+        it.self.state = TranslationState.REVIEWED
+        it.self.auto = true
+      }
+    val bulkReviewedAfterDryRun =
+      testData.addKeyWithTranslations("k.bulk.dry").de.also {
+        it.self.state = TranslationState.REVIEWED
+        it.self.auto = true
+        testData.addReview(it, AiReviewStatus.DRY_RUN_PASS, 90)
+      }
     testDataService.saveTestData(testData.root)
 
-    listOf(base, empty, blank, disabled, outdated, humanReviewed, confirmed, staleApproval).forEach {
+    listOf(
+      base,
+      empty,
+      blank,
+      disabled,
+      outdated,
+      humanReviewed,
+      confirmed,
+      staleApproval,
+      bulkReviewedMachineTranslation,
+      bulkReviewedAfterDryRun,
+    ).forEach {
       isEligible(it.self.id).assert.describedAs(it.self.text).isFalse()
     }
   }
@@ -181,6 +204,31 @@ class AiReviewRuleEvaluatorTest : AbstractSpringTest() {
     isEligible(testData.deTranslation.id).assert.isTrue()
     isEligible(approved.self.id).assert.isTrue()
     isAiApproval(approved.self.id).assert.isTrue()
+  }
+
+  @Test
+  fun `reviewed machine translation the AI still manages is not human-reviewed`() {
+    val approvalOverwrittenByMt =
+      aiManagedMachineTranslation("k.mt.over", AiReviewStatus.APPROVED) { textHash = "old" }
+    val reReviewQueued = aiManagedMachineTranslation("k.mt.queued", AiReviewStatus.PENDING)
+    val reReviewFailedUnderProtection = aiManagedMachineTranslation("k.mt.failed", AiReviewStatus.BELOW_THRESHOLD)
+    testDataService.saveTestData(testData.root)
+
+    listOf(approvalOverwrittenByMt, reReviewQueued, reReviewFailedUnderProtection).forEach {
+      isHumanReviewed(it.self.id).assert.describedAs(it.self.key.name).isFalse()
+      isAiApproval(it.self.id).assert.describedAs(it.self.key.name).isFalse()
+      isEligible(it.self.id).assert.describedAs(it.self.key.name).isTrue()
+    }
+  }
+
+  private fun aiManagedMachineTranslation(
+    keyName: String,
+    status: AiReviewStatus,
+    ft: TranslationAiReview.() -> Unit = {},
+  ) = testData.addKeyWithTranslations(keyName).de.also {
+    it.self.state = TranslationState.REVIEWED
+    it.self.auto = true
+    testData.addReview(it, status, 60, ft)
   }
 
   @Test
@@ -209,6 +257,14 @@ class AiReviewRuleEvaluatorTest : AbstractSpringTest() {
       AiReviewEligibility.isEligible(
         translation,
         testData.englishLanguage.id,
+        translationAiReviewRepository.findByTranslationId(translationId),
+      )
+    }
+
+  private fun isHumanReviewed(translationId: Long): Boolean =
+    executeInNewTransaction(platformTransactionManager) {
+      AiReviewEligibility.isHumanReviewed(
+        loadTranslation(translationId),
         translationAiReviewRepository.findByTranslationId(translationId),
       )
     }
