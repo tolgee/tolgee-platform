@@ -60,9 +60,18 @@ tab, no upsell) and the API returns `FEATURE_NOT_ENABLED`.
 - **A threshold override is an exception to a rule-level Never** ("Legal: Never, but German at 98").
   *Why:* a separate rule can never beat a Never, so this is the only way to write an exception, and
   new languages stay protected.
-- **Re-reviews of an existing AI approval use Active rules only.**
-  *Why:* a Dry run rule must never change state. If it took over an approval, the row would stop
-  saying `APPROVED` while the state stays Reviewed, and the system would read it as a human review.
+- **Re-reviews of an AI approval use Active rules only.** This includes the re-review of an
+  AI-managed review after MT replaced its text under Protect reviewed, where the state stays Reviewed
+  whatever the result is. *Why:*
+  - The re-review decides whether the text may be "Approved by AI" again. Only an Active rule can
+    approve. A Dry run result would replace the approval.
+  - A Reviewed translation with a Dry run row is not an AI-managed review, so the system would read
+    it as a human review. The AI would stop checking it, and the next MT text would stay Reviewed
+    unseen. Counting Dry run rows as AI-managed is not safe either: a bulk-reviewed text can have a
+    leftover Dry run row.
+  - "Strictest wins" includes Dry run rules. A stricter rule tested in Dry run would take over the
+    approvals after the next source change. Dry run must never change anything live.
+  The cost: these translations get no Dry run scores.
 - **Deleting a language never widens a rule.** If a rule's language list becomes empty, the rule is
   disabled. *Why:* an empty list means "all languages".
 - **Tags and namespaces match exactly; only branches have `*` patterns.** `""` means "without tags"
@@ -86,17 +95,35 @@ tab, no upsell) and the API returns `FEATURE_NOT_ENABLED`.
 - **"Approved by AI" means `auto` + an AI approval.** A human-written text that the AI approved counts
   as "Edited by a human". *Why:* otherwise a translator's own text would be silently replaced by MT
   when the source changes.
-- **"Keep, mark as outdated" on an AI approval clears `auto`.** *Why:* otherwise auto translation
-  would still replace the text, and "Keep" would not keep it.
+- **"Keep, mark as outdated" on an AI approval clears `auto`** (only without Protect reviewed; with
+  it, Keep is not offered for AI approvals). *Why:* otherwise auto translation would still replace
+  the text, and "Keep" would not keep it. Open point: after this the text is still machine
+  translated, so the missing mark is not true. A better way is not decided yet.
 - **Any human un-review of an AI approval counts as a rejection.** That includes the popover's Reject,
   the normal state button and the batch "Mark as translated". The flags follow what that path does
   today (Reject and the state button clear `auto`, the batch path does not). *Why:* the "rejected"
   count is the success metric of the pilot, so every way of saying "the AI was wrong" must count.
 - **Confirm turns the AI approval into a normal human review** (flags cleared, row `CONFIRMED`).
-- **Protect reviewed:** AI approvals are protected like any review. But when an AI-approved text is
-  translated again, it becomes Translated even in protected projects. "Reviewed by a human →
-  Translate again" is locked while protection is on. *Why:* a string must never be Reviewed with text
-  nobody (human or AI) has seen, and protection exists to keep human reviews.
+- **Protect reviewed keeps the Reviewed state, also for AI approvals.** Under protection the AI never
+  sets a Reviewed translation to Translated: not when the source text changes, not after a failed
+  re-review, not on demotion. *Why:* the team rule is that a protected Reviewed translation stays
+  Reviewed no matter what. Human actions (Reject, the state button) still work as today.
+- **Under protection an AI-approved machine translation is translated again like in main.** It keeps
+  `auto`, so MT writes new text when the source changes, and the state stays Reviewed. The setting
+  "Approved by AI" is locked to "Translate again". The old row is replaced by a `PENDING` row, and
+  the AI reviews the new text with Active rules only. Passed: "Approved by AI" again. Failed: stays
+  Reviewed, the row is `BELOW_THRESHOLD`, and the badge shows the score and the issues. *Why:* main
+  translates Reviewed `auto` texts again, and clients rely on that. Clearing `auto` or blocking MT
+  would change main. The re-review makes sure "Approved by AI" is never shown for text the AI has
+  not seen.
+- **"AI-managed review"** (`AiReviewEligibility.isAiManagedReview`): a Reviewed translation with
+  `auto` and an AI row that is not `CONFIRMED`, `REJECTED` or Dry run. It is not human-reviewed, so
+  the AI may review it again. *Why:* after MT replaced an approval, or after a failed re-review under
+  protection, the row is no longer an approval, but the state is still the AI's. A human review
+  clears `auto`, so it never matches. (The bulk "Change state" does not clear `auto` today. That is
+  a bug in main, and a fix is planned outside this feature.)
+- **"Reviewed by a human → Translate again" is locked while protection is on.** *Why:* a human
+  "Translate again" sets Translated, which protection does not allow.
 - **Outdated translations are not reviewed.** *Why:* the text no longer matches its source, so the
   tokens would be wasted. It is reviewed again after someone edits it.
 
