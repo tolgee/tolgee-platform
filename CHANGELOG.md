@@ -1,3 +1,10 @@
+## [3.240.1](https://github.com/tolgee/tolgee-platform/compare/v3.240.0...v3.240.1) (2026-10-26)
+
+
+### Performance Improvements
+
+* speed up branch creation ([#4004](https://github.com/tolgee/tolgee-platform/issues/4004)) ([8a2ee62](https://github.com/tolgee/tolgee-platform/commit/8a2ee6290acf96e31001dde2d8ee826d058f861b))
+
 # [3.240.0](https://github.com/tolgee/tolgee-platform/compare/v3.239.2...v3.240.0) (2026-10-26)
 
 
