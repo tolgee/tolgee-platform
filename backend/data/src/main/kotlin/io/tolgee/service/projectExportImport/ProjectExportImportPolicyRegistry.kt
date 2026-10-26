@@ -44,6 +44,7 @@ import io.tolgee.model.contentDelivery.AzureContentStorageConfig
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.S3ContentStorageConfig
+import io.tolgee.model.contributor.CommunityContributionDay
 import io.tolgee.model.contributor.ProjectContributor
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
@@ -150,6 +151,7 @@ object ProjectExportImportPolicyRegistry {
         ActivityModifiedEntity::class,
         ActivityDescribingEntity::class,
         ProjectContributor::class,
+        CommunityContributionDay::class,
         BranchMerge::class,
         BranchMergeChange::class,
         LanguageStats::class,

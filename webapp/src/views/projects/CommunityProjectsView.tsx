@@ -80,7 +80,10 @@ const CommunityProjects = () => {
                 {myContributionsOnly ? (
                   <T keyName="global_nothing_found" />
                 ) : (
-                  <T keyName="public_projects_empty" />
+                  <T
+                    keyName="community_projects_empty"
+                    defaultValue="No community projects yet"
+                  />
                 )}
               </EmptyListMessage>
             }

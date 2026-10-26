@@ -33,7 +33,7 @@ class EntityDescriptionProvider(
         realDescribingEntity = member.call(realDescribingEntity) ?: return@pathsForEach
       }
       (realDescribingEntity as? EntityWithId)?.let {
-        relations[path.raw] = getDescriptionWithRelations(it) ?: return@pathsForEach
+        relations[path.relationName] = getDescriptionWithRelations(it) ?: return@pathsForEach
       }
     }
 
@@ -59,7 +59,7 @@ class EntityDescriptionProvider(
       it.kotlin
         .findAnnotation<ActivityEntityDescribingPaths>()
         ?.paths
-        ?.map { p -> Path(p, p.split(".")) }
+        ?.map { p -> Path(p.substringBefore("="), p.substringAfter("=").split(".")) }
         ?: emptyList()
     }
 
@@ -93,7 +93,7 @@ class EntityDescriptionProvider(
   private val pathMemberCache = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Optional>>()
 
   private data class Path(
-    val raw: String,
+    val relationName: String,
     val steps: List<String>,
   )
 
