@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { withoutDanglingLanguageScopes } from './useTranslationFilters';
+import {
+  toggleAutoTranslated,
+  toggleAutoTranslatedBy,
+  withoutDanglingLanguageScopes,
+} from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
 describe('withoutDanglingLanguageScopes', () => {
   it('drops only the scopes whose language is gone', () => {
@@ -45,5 +49,95 @@ describe('withoutDanglingLanguageScopes', () => {
     const updated = withoutDanglingLanguageScopes(filters, ['de']);
     expect(updated).not.toBe(filters);
     expect(filters.filterTaskLanguage).toBe('fr');
+  });
+});
+
+describe('toggleAutoTranslatedBy', () => {
+  it('selects auto-translated narrowed to the source when nothing was selected', () => {
+    expect(
+      toggleAutoTranslatedBy(
+        { filterTranslationState: ['REVIEWED'] },
+        'TRANSLATION_MEMORY'
+      )
+    ).toEqual({
+      filterTranslationState: ['REVIEWED', 'AUTO_TRANSLATED'],
+      filterAutoTranslatedBy: 'TRANSLATION_MEMORY',
+    });
+  });
+
+  it('widens back to any source when the other source is checked too', () => {
+    expect(
+      toggleAutoTranslatedBy(
+        {
+          filterTranslationState: ['AUTO_TRANSLATED'],
+          filterAutoTranslatedBy: 'TRANSLATION_MEMORY',
+        },
+        'MACHINE_TRANSLATION'
+      )
+    ).toEqual({
+      filterTranslationState: ['AUTO_TRANSLATED'],
+      filterAutoTranslatedBy: undefined,
+    });
+  });
+
+  it('narrows to the other source when one is unchecked from any source', () => {
+    expect(
+      toggleAutoTranslatedBy(
+        { filterTranslationState: ['AUTO_TRANSLATED'] },
+        'MACHINE_TRANSLATION'
+      )
+    ).toEqual({
+      filterTranslationState: ['AUTO_TRANSLATED'],
+      filterAutoTranslatedBy: 'TRANSLATION_MEMORY',
+    });
+  });
+
+  it('drops the auto-translated filter when its only source is unchecked', () => {
+    expect(
+      toggleAutoTranslatedBy(
+        {
+          filterTranslationState: ['REVIEWED', 'AUTO_TRANSLATED'],
+          filterAutoTranslatedBy: 'TRANSLATION_MEMORY',
+        },
+        'TRANSLATION_MEMORY'
+      )
+    ).toEqual({
+      filterTranslationState: ['REVIEWED'],
+      filterAutoTranslatedBy: undefined,
+    });
+  });
+});
+
+describe('toggleAutoTranslated', () => {
+  it('selects any source when it was off', () => {
+    expect(
+      toggleAutoTranslated({ filterAutoTranslatedBy: 'TRANSLATION_MEMORY' })
+    ).toEqual({
+      filterTranslationState: ['AUTO_TRANSLATED'],
+      filterAutoTranslatedBy: undefined,
+    });
+  });
+
+  it('selects any source when only one source was selected', () => {
+    expect(
+      toggleAutoTranslated({
+        filterTranslationState: ['AUTO_TRANSLATED'],
+        filterAutoTranslatedBy: 'MACHINE_TRANSLATION',
+      })
+    ).toEqual({
+      filterTranslationState: ['AUTO_TRANSLATED'],
+      filterAutoTranslatedBy: undefined,
+    });
+  });
+
+  it('clears it when any source was selected', () => {
+    expect(
+      toggleAutoTranslated({
+        filterTranslationState: ['REVIEWED', 'AUTO_TRANSLATED'],
+      })
+    ).toEqual({
+      filterTranslationState: ['REVIEWED'],
+      filterAutoTranslatedBy: undefined,
+    });
   });
 });

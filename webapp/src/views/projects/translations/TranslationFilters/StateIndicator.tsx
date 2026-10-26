@@ -12,7 +12,7 @@ const StyledDot = styled('div')`
   border-radius: 4px;
 `;
 
-const StyledIcon = styled('div')`
+export const StyledIcon = styled('div')`
   margin-left: 8px;
   display: flex;
   align-items: center;
