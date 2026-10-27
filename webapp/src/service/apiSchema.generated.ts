@@ -1812,6 +1812,7 @@ export interface components {
        * @enum {string}
        */
       type:
+        | "AI_REVIEW"
         | "AI_PLAYGROUND_TRANSLATE"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
@@ -3957,6 +3958,7 @@ export interface components {
       status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
       /** @enum {string} */
       type:
+        | "AI_REVIEW"
         | "AI_PLAYGROUND_TRANSLATE"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
