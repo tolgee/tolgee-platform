@@ -6139,4 +6139,9 @@
     <changeSet author="bdshadow" id="1792660129000-1">
         <dropTable tableName="organization_feature_grant"/>
     </changeSet>
+    <changeSet author="dkrizan" id="1792680000000-1">
+        <addColumn tableName="language_stats">
+            <column name="hosted_words" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -49,6 +49,8 @@ class LanguageStats(
   @ColumnDefault("0")
   override var qaChecksStaleCount: Long = 0
 
+  override var hostedWords: Long? = null
+
   override val languageId: Long
     get() = language.id
 
@@ -68,6 +70,7 @@ class LanguageStats(
       translationsUpdatedAt = translationsUpdatedAt,
       qaIssueCount = qaIssueCount,
       qaChecksStaleCount = qaChecksStaleCount,
+      hostedWords = hostedWords,
       isDefaultBranch = branch?.isDefault,
     )
 }

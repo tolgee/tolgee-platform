@@ -47,6 +47,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.translationsUpdatedAt,
       ls.qaIssueCount,
       ls.qaChecksStaleCount,
+      ls.hostedWords,
       b.isDefault
     )
     from LanguageStats ls

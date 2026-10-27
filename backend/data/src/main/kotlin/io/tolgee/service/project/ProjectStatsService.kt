@@ -74,9 +74,10 @@ class ProjectStatsService(
     baseLanguage: ILanguage,
     languageStats: List<LanguageStatsDto>,
   ): ProjectStateTotals {
+    val hostedWordsCount = languageStats.sumOf { it.hostedWords ?: 0 }
     val baseStats =
       languageStats.find { it.languageId == baseLanguage.id }
-        ?: return ProjectStateTotals(0, 0.0, 0.0)
+        ?: return ProjectStateTotals(0, hostedWordsCount, 0.0, 0.0)
 
     val baseWordsCount = baseStats.translatedWords + baseStats.reviewedWords
     val nonBaseLanguages = languageStats.filterNot { it.languageId == baseLanguage.id }
@@ -84,6 +85,7 @@ class ProjectStatsService(
     if (nonBaseLanguages.isEmpty()) {
       return ProjectStateTotals(
         baseWordsCount = baseWordsCount,
+        hostedWordsCount = hostedWordsCount,
         translatedPercent = baseStats.translatedPercentage,
         reviewedPercent = baseStats.reviewedPercentage,
       )
@@ -98,6 +100,7 @@ class ProjectStatsService(
 
     return ProjectStateTotals(
       baseWordsCount = baseWordsCount,
+      hostedWordsCount = hostedWordsCount,
       translatedPercent = translatedPercent,
       reviewedPercent = reviewedPercent,
     )
@@ -105,6 +108,7 @@ class ProjectStatsService(
 
   data class ProjectStateTotals(
     val baseWordsCount: Long,
+    val hostedWordsCount: Long,
     val translatedPercent: Double,
     val reviewedPercent: Double,
   )
