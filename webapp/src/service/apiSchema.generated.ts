@@ -2848,6 +2848,11 @@ export interface components {
        * @description Source branch id
        */
       sourceBranchId: number;
+      /**
+       * Format: int64
+       * @description Target branch id. Defaults to the origin of the source branch. Pass a direct child of the source branch to update that child from its origin.
+       */
+      targetBranchId?: number;
     };
     EditKeyDto: {
       /** @description The branch of the key. (When empty or null default branch will be used) */
@@ -3327,6 +3332,7 @@ export interface components {
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
+        | "branch_merge_branches_not_related"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
@@ -7332,6 +7338,7 @@ export interface components {
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
+        | "branch_merge_branches_not_related"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
