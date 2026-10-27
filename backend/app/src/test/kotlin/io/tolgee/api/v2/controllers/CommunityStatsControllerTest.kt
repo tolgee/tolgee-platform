@@ -116,6 +116,49 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a single contributor carries the same totals, languages and weeks as the list`() {
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors/${testData.alice.id}?weeks=3")
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isEqualTo(testData.alice.id)
+        node("name").isEqualTo("Alice Adams")
+        node("contributions").isEqualTo(5)
+        node("suggested").isEqualTo(4)
+        node("accepted").isEqualTo(2)
+        node("declined").isEqualTo(1)
+        node("firstContributionAt").isEqualTo(currentDateProvider.date.time)
+        node("lastContributionAt").isEqualTo(currentDateProvider.date.time)
+        node("languages") {
+          isArray.hasSize(2)
+          node("[0].languageId").isEqualTo(testData.czech.id)
+          node("[0].contributions").isEqualTo(4)
+          node("[0].suggested").isEqualTo(3)
+        }
+        node("weeks") {
+          isArray.hasSize(3)
+          node("[2].weekStart").isEqualTo("2026-03-02")
+          node("[2].contributions").isEqualTo(5)
+          node("[2].suggested").isEqualTo(4)
+        }
+      }
+  }
+
+  @Test
+  fun `a user the list does not show is not found`() {
+    val base = "/v2/projects/${testData.publicProject.id}/community/contributors"
+    performAuthGet("$base/${testData.carol.id}").andIsNotFound
+    performAuthGet("$base/${testData.dave.id}").andIsNotFound
+    performAuthGet("$base/999999999").andIsNotFound
+  }
+
+  @Test
+  fun `a single contributor of a private project is hidden from a non-member`() {
+    userAccount = testData.bob
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors/${testData.alice.id}")
+      .andIsNotFound
+  }
+
+  @Test
   fun `a private project is hidden from a non-member`() {
     userAccount = testData.bob
     performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors").andIsNotFound
@@ -157,6 +200,13 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
         node("_embedded.contributors[1].suggested").isEqualTo(3)
         node("_embedded.contributors[1].declined").isEqualTo(0)
         node("_embedded.contributors[1].languages").isArray.hasSize(1)
+      }
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors/${testData.alice.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(4)
+        node("suggested").isEqualTo(3)
+        node("languages").isArray.hasSize(1)
       }
     performAuthGet("/v2/projects/${testData.publicProject.id}/community/activity?weeks=1")
       .andIsOk

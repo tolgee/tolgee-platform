@@ -12,6 +12,7 @@ import io.tolgee.dtos.community.LanguageCounts
 import io.tolgee.dtos.community.ProfileLanguage
 import io.tolgee.dtos.community.ProfileProject
 import io.tolgee.dtos.community.WeekBucket
+import io.tolgee.model.views.CommunityContributorTotalsView
 import io.tolgee.model.views.CommunityDayRowView
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
@@ -52,22 +53,36 @@ class CommunityStatsService(
         .orEmpty()
     val weekStarts = weekStarts(weeks)
     return totals.map { total ->
-      val dayRows = dayRowsByUser[total.id].orEmpty()
-      CommunityContributorStats(
-        id = total.id,
-        name = total.name,
-        avatar = avatarService.getAvatarLinks(total.avatarHash),
-        contributions = total.contributions,
-        suggested = total.suggested,
-        accepted = total.accepted,
-        declined = total.declined,
-        firstContributionAt = total.firstContributionAt,
-        lastContributionAt = total.lastContributionAt,
-        languages = languageCounts(dayRows),
-        weeks = weeklyBuckets(weekStarts, dayRows.map { it.day to it.counts() }),
-      )
+      contributorStats(total, dayRowsByUser[total.id].orEmpty(), weekStarts)
     }
   }
+
+  fun getContributor(
+    projectId: Long,
+    userId: Long,
+    weeks: Int,
+  ): CommunityContributorStats? {
+    val total = repository.findContributorTotal(projectId, userId) ?: return null
+    return contributorStats(total, repository.findDayRows(projectId, listOf(userId)), weekStarts(weeks))
+  }
+
+  private fun contributorStats(
+    total: CommunityContributorTotalsView,
+    dayRows: List<CommunityDayRowView>,
+    weekStarts: List<LocalDate>,
+  ) = CommunityContributorStats(
+    id = total.id,
+    name = total.name,
+    avatar = avatarService.getAvatarLinks(total.avatarHash),
+    contributions = total.contributions,
+    suggested = total.suggested,
+    accepted = total.accepted,
+    declined = total.declined,
+    firstContributionAt = total.firstContributionAt,
+    lastContributionAt = total.lastContributionAt,
+    languages = languageCounts(dayRows),
+    weeks = weeklyBuckets(weekStarts, dayRows.map { it.day to it.counts() }),
+  )
 
   fun getActivity(
     projectId: Long,

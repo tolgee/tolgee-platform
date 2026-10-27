@@ -124,6 +124,11 @@ export class LINKS {
 
   static USER_SETTINGS = Link.ofRoot('account');
 
+  static USER_COMMUNITY_PROFILE = Link.ofParent(
+    Link.ofRoot('users'),
+    p(PARAMS.USER_ID)
+  );
+
   static USER_ACCOUNT_NOTIFICATIONS = Link.ofParent(
     LINKS.USER_SETTINGS,
     'notifications'

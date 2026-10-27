@@ -559,6 +559,10 @@ export interface paths {
     /** Users with translation contributions in the project (translations, state changes, comments, suggestions and their moderation), with contributions / suggested / accepted / declined totals, first and last contribution dates, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; default contributions desc, suggested desc. */
     get: operations["getContributors_1"];
   };
+  "/v2/projects/{projectId}/community/contributors/{userId}": {
+    /** Stats of one contributor of this project, in the shape of a contributors list item. Returns 404 when the user has no contributions here, or the account is deleted or disabled. */
+    get: operations["getContributor"];
+  };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
     post: operations["create_10"];
@@ -17529,6 +17533,58 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelCommunityContributorModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Stats of one contributor of this project, in the shape of a contributors list item. Returns 404 when the user has no contributions here, or the account is deleted or disabled. */
+  getContributor: {
+    parameters: {
+      path: {
+        projectId: number;
+        userId: number;
+      };
+      query: {
+        weeks?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityContributorModel"];
         };
       };
       /** Bad Request */
