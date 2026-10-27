@@ -27,6 +27,8 @@ export const communityContributionData = generateTestDataObject(
 
 export const membersCommunityData = generateTestDataObject('members-community');
 
+export const communityStatsTestData = generateTestDataObject('community-stats');
+
 export const organizationNewTestData =
   generateTestDataObject('organization-new');
 

@@ -2,8 +2,10 @@ package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Message
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityContributorStats
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.community.CommunityContributorModel
 import io.tolgee.hateoas.community.CommunityContributorModelAssembler
 import io.tolgee.model.enums.Scope
@@ -49,6 +51,26 @@ class CommunityStatsController(
   ): PagedModel<CommunityContributorModel> {
     val page = communityStatsService.getContributors(projectId, pageable, weeks)
     return pagedResourcesAssembler.toModel(page, communityContributorModelAssembler)
+  }
+
+  @GetMapping("/contributors/{userId:[0-9]+}")
+  @Operation(
+    summary = "Get one community contributor",
+    description =
+      "Stats of one contributor of this project, in the shape of a contributors list item. " +
+        "Returns 404 when the user has no contributions here, or the account is deleted or disabled.",
+  )
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @AllowApiAccess
+  fun getContributor(
+    @PathVariable projectId: Long,
+    @PathVariable userId: Long,
+    @RequestParam(defaultValue = CommunityStatsService.DEFAULT_WEEKS.toString()) weeks: Int,
+  ): CommunityContributorModel {
+    val stats =
+      communityStatsService.getContributor(projectId, userId, weeks)
+        ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    return communityContributorModelAssembler.toModel(stats)
   }
 
   @GetMapping("/activity")

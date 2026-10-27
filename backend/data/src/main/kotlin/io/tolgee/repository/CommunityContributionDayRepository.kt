@@ -16,16 +16,9 @@ import java.time.LocalDate
 interface CommunityContributionDayRepository : Repository<CommunityContributionDay, CommunityContributionDayId> {
   @Query(
     """
-      select c.userId as id, u.name as name, u.avatarHash as avatarHash,
-        sum(c.contributions) as contributions,
-        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
-        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
-      from CommunityContributionDay c
-      join UserAccount u on u.id = c.userId
-      join Language l on l.id = c.languageId
-      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
+      $CONTRIBUTOR_TOTALS
       where c.projectId = :projectId and $LIVE_USER_AND_LANGUAGE
-      group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt
+      $CONTRIBUTOR_TOTALS_GROUP_BY
     """,
     countQuery = """
       select count(distinct c.userId)
@@ -39,6 +32,18 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
     projectId: Long,
     pageable: Pageable,
   ): Page<CommunityContributorTotalsView>
+
+  @Query(
+    """
+      $CONTRIBUTOR_TOTALS
+      where c.projectId = :projectId and c.userId = :userId and $LIVE_USER_AND_LANGUAGE
+      $CONTRIBUTOR_TOTALS_GROUP_BY
+    """,
+  )
+  fun findContributorTotal(
+    projectId: Long,
+    userId: Long,
+  ): CommunityContributorTotalsView?
 
   @Query(
     """
@@ -106,5 +111,18 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   companion object {
     const val LIVE_USER_AND_LANGUAGE = "u.deletedAt is null and u.disabledAt is null and l.deletedAt is null"
+    const val CONTRIBUTOR_TOTALS =
+      """
+      select c.userId as id, u.name as name, u.avatarHash as avatarHash,
+        sum(c.contributions) as contributions,
+        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
+      from CommunityContributionDay c
+      join UserAccount u on u.id = c.userId
+      join Language l on l.id = c.languageId
+      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
+      """
+    const val CONTRIBUTOR_TOTALS_GROUP_BY =
+      "group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt"
   }
 }

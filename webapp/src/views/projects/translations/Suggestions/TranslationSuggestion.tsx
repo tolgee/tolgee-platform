@@ -20,7 +20,9 @@ import {
   Trash01,
   XClose,
 } from '@untitled-ui/icons-react';
+import { useProject } from 'tg.hooks/useProject';
 import { SuggestionAction } from './SuggestionAction';
+import { SuggestionAuthorCard } from 'tg.views/projects/translations/Suggestions/SuggestionAuthorCard';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { useRef, useState } from 'react';
 import React from 'react';
@@ -121,12 +123,19 @@ export const TranslationSuggestion = ({
   isLoading,
 }: Props) => {
   const theme = useTheme();
+  const project = useProject();
   const formatDate = useTimeDistance();
   const { t } = useTranslate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
+  const popperRef = useRef<any>(null);
 
   const active = suggestion.state === 'ACTIVE';
+  const dimSx = { opacity: active ? 1 : 0.5 };
+  const authorName =
+    suggestion.author.name ||
+    suggestion.author.username ||
+    t('translation_suggestion_unnamed_user');
 
   const inlineActions: ActionItem[] = [];
   if (active) {
@@ -194,26 +203,32 @@ export const TranslationSuggestion = ({
         ),
       }}
       data-cy="translation-suggestion"
+      data-cy-author-id={suggestion.author.id}
     >
       <Tooltip
+        PopperProps={{ popperRef }}
         title={
-          <T
-            keyName="suggestion_author_tooltip"
-            params={{
-              user:
-                suggestion.author.name ||
-                suggestion.author.username ||
-                t('translation_suggestion_unnamed_user'),
-              b: <b />,
-            }}
-          />
+          project.public ? (
+            <SuggestionAuthorCard
+              author={suggestion.author}
+              displayName={authorName}
+              onContentChange={() => popperRef.current?.update()}
+            />
+          ) : (
+            <span data-cy="suggestion-author-tooltip">
+              <T
+                keyName="suggestion_author_tooltip"
+                params={{ user: authorName, b: <b /> }}
+              />
+            </span>
+          )
         }
       >
-        <Box sx={{ opacity: active ? 1 : 0.5 }}>
+        <Box sx={dimSx} data-cy="suggestion-author">
           <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
         </Box>
       </Tooltip>
-      <StyledContent sx={{ opacity: active ? 1 : 0.5 }}>
+      <StyledContent sx={dimSx}>
         <TranslationVisual
           text={suggestion.translation}
           isPlural={suggestion.isPlural}
