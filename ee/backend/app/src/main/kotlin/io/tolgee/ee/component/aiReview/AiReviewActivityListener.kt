@@ -11,6 +11,7 @@ import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.ee.service.aiReview.AiReviewQueueService
 import io.tolgee.events.OnProjectActivityEvent
+import io.tolgee.events.OnQaIssuesIgnored
 import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.params.AiReviewJobParams
@@ -65,6 +66,14 @@ class AiReviewActivityListener(
       val activityRevisionId = event.activityRevisionId ?: return
       val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
       process(projectId, entities)
+    }
+  }
+
+  @EventListener
+  fun onQaIssuesIgnored(event: OnQaIssuesIgnored) {
+    if (bypass) return
+    runSentryCatching {
+      aiReviewQueueService.onQaIssuesIgnored(event.projectId, event.translationIds)
     }
   }
 

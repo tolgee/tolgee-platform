@@ -9,8 +9,10 @@ import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.aiReview.AiReviewStatus
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
@@ -26,6 +28,7 @@ class AiReviewQueueService(
   private val projectService: ProjectService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectQaConfigService: ProjectQaConfigService,
+  private val qaIssueRepository: TranslationQaIssueRepository,
   private val languageService: LanguageService,
   private val batchJobService: BatchJobService,
   private val entityManager: EntityManager,
@@ -133,6 +136,34 @@ class AiReviewQueueService(
 
     val ready = findReady(projectId, translationIds, isQaOn(project))
     startJob(projectId, ready, handlingStuckItems)
+  }
+
+  /**
+   * A row skipped for open QA issues becomes reviewable again when the last OPEN issue of its
+   * translation is ignored. A text change that fixes the issues goes through the normal path.
+   */
+  @Transactional
+  fun onQaIssuesIgnored(
+    projectId: Long,
+    translationIds: Collection<Long>,
+  ) {
+    if (translationIds.isEmpty()) return
+    val project = projectService.getDto(projectId)
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+
+    val requeued = mutableListOf<Long>()
+    translationIds.forEach { translationId ->
+      val row = reviewRepository.findByTranslationId(translationId) ?: return@forEach
+      if (row.status != AiReviewStatus.SKIPPED_QA_ISSUES) return@forEach
+      if (qaIssueRepository.findAllByTranslationId(translationId).any { it.state == QaIssueState.OPEN }) {
+        return@forEach
+      }
+      row.status = AiReviewStatus.PENDING
+      requeued += translationId
+    }
+    if (requeued.isEmpty()) return
+    entityManager.flush()
+    startJobsForReady(projectId, requeued)
   }
 
   /**

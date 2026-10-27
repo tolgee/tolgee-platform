@@ -3,16 +3,19 @@ package io.tolgee.ee.service.aiReview
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
 import io.tolgee.ee.service.aiReview.scoring.AiReviewScoring
 import io.tolgee.ee.service.aiReview.scoring.ReviewParseException
 import io.tolgee.ee.service.prompt.DefaultReviewPromptHelper
+import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.model.Project
 import io.tolgee.model.aiReview.AiReviewIssue
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.LlmProviderPriority
@@ -28,6 +31,7 @@ import io.tolgee.repository.PromptRepository
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.aiReview.AiReviewBatchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.util.executeInNewTransaction
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
@@ -44,6 +48,8 @@ class AiReviewBatchServiceImpl(
   private val reviewRepository: TranslationAiReviewRepository,
   private val promptRepository: PromptRepository,
   private val qaIssueRepository: TranslationQaIssueRepository,
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val projectQaConfigService: ProjectQaConfigService,
   private val websocketPublisher: AiReviewWebsocketPublisher,
   private val currentDateProvider: CurrentDateProvider,
   private val transactionManager: PlatformTransactionManager,
@@ -115,7 +121,7 @@ class AiReviewBatchServiceImpl(
         return@executeInNewTransaction null
       }
 
-      if (project.useQaChecks) {
+      if (isQaOnForLanguage(project, translation.language.id)) {
         if (translation.qaChecksStale) return@executeInNewTransaction null
         if (decision.rule.skipOpenQaIssues && hasOpenQaIssues(translationId)) {
           row.status = AiReviewStatus.SKIPPED_QA_ISSUES
@@ -326,6 +332,19 @@ class AiReviewBatchServiceImpl(
   private fun deleteUnlessResolved(row: TranslationAiReview) {
     if (row.status == AiReviewStatus.CONFIRMED || row.status == AiReviewStatus.REJECTED) return
     reviewRepository.delete(row)
+  }
+
+  /**
+   * Matches the readiness check of AiReviewQueueService: for a language with QA off,
+   * qaChecksStale never clears, so gating on it would leave the row queued forever.
+   */
+  private fun isQaOnForLanguage(
+    project: Project,
+    languageId: Long,
+  ): Boolean {
+    if (!project.useQaChecks) return false
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return false
+    return languageId in projectQaConfigService.getEnabledLanguageIds(project.id)
   }
 
   private fun hasOpenQaIssues(translationId: Long): Boolean =
