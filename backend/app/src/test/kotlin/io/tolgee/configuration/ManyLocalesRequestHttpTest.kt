@@ -41,13 +41,13 @@ class ManyLocalesRequestHttpTest {
 
   @Test
   fun `request with more locales than the raised cap is still rejected`() {
-    val fiftyOneLocales =
+    val tooManyLocales =
       ('a'..'z')
         .flatMap { first -> ('a'..'z').map { second -> "$first$second" } }
-        .take(51)
+        .take(TomcatMaxLocaleCountConfiguration.MAX_LOCALE_COUNT + 1)
         .joinToString(",")
 
-    val response = get(fiftyOneLocales)
+    val response = get(tooManyLocales)
 
     response.statusCode().assert.isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value())
   }

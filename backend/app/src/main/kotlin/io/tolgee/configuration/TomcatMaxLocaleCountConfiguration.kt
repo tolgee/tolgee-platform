@@ -18,7 +18,11 @@ class TomcatMaxLocaleCountConfiguration {
   fun tomcatMaxLocaleCountCustomizer(): WebServerFactoryCustomizer<TomcatServletWebServerFactory> =
     WebServerFactoryCustomizer { factory ->
       factory.addConnectorCustomizers(
-        TomcatConnectorCustomizer { connector -> connector.maxLocaleCount = 50 },
+        TomcatConnectorCustomizer { connector -> connector.maxLocaleCount = MAX_LOCALE_COUNT },
       )
     }
+
+  companion object {
+    const val MAX_LOCALE_COUNT = 50
+  }
 }
