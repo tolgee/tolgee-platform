@@ -2,6 +2,7 @@ package io.tolgee.hateoas.activity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.IProjectActivityModel
+import io.tolgee.model.enums.SystemActor
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -13,6 +14,7 @@ class ProjectActivityModel(
   override val timestamp: Long,
   override val type: ActivityType,
   override val author: ProjectActivityAuthorModel?,
+  val systemActor: SystemActor?,
   override val modifiedEntities: Map<String, List<ModifiedEntityModel>>?,
   override val meta: Map<String, Any?>?,
   override val counts: MutableMap<String, Long>?,

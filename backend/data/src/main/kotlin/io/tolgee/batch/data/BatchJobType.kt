@@ -23,6 +23,7 @@ import io.tolgee.batch.processors.TagKeysChunkProcessor
 import io.tolgee.batch.processors.TrialExpirationNoticeProcessor
 import io.tolgee.batch.processors.UnassignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.UntagKeysChunkProcessor
+import io.tolgee.model.enums.SystemActor
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
@@ -41,6 +42,10 @@ enum class BatchJobType(
    * Use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] to get the effective value.
    */
   val defaultExclusive: Boolean = true,
+  /**
+   * Recorded on the activity revisions of the job. The author stays the user who started it.
+   */
+  val systemActor: SystemActor? = null,
 ) {
   AI_PLAYGROUND_TRANSLATE(
     maxRetries = 3,
