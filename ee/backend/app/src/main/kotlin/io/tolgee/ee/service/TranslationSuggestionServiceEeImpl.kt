@@ -120,7 +120,7 @@ class TranslationSuggestionServiceEeImpl(
       ?: throw NotFoundException(Message.SUGGESTION_NOT_FOUND)
   }
 
-  fun declineSuggestion(
+  override fun declineSuggestion(
     projectId: Long,
     languageId: Long,
     keyId: Long,
@@ -148,7 +148,7 @@ class TranslationSuggestionServiceEeImpl(
   // on the same key+language concurrently can both end ACCEPTED (last accept wins the live translation).
   // Do not assume an at-most-one-ACCEPTED invariant holds.
   @Transactional
-  fun acceptSuggestion(
+  override fun acceptSuggestion(
     projectId: Long,
     languageId: Long,
     keyId: Long,
@@ -197,7 +197,7 @@ class TranslationSuggestionServiceEeImpl(
     return toDecline.map { it.id }
   }
 
-  fun getSuggestionsPaged(
+  override fun getSuggestionsPaged(
     pageable: Pageable,
     projectId: Long,
     languageId: Long,
