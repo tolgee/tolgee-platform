@@ -13,6 +13,7 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.mapResponseTo
@@ -496,5 +497,31 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       .findAll()
       .first { it.branchMerge.id == mergeId && it.change == BranchKeyMergeChangeType.CONFLICT }
       .id
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview with target branch builds an update from origin`() {
+    performProjectAuthPost(
+      "branches/merge/preview",
+      mapOf("sourceBranchId" to testData.mainBranch.id, "targetBranchId" to testData.featureBranch.id),
+    ).andIsOk.andAssertThatJson { node("targetBranchName").isEqualTo("feature") }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview without target branch still merges into the origin`() {
+    performProjectAuthPost("branches/merge/preview", mapOf("sourceBranchId" to testData.featureBranch.id))
+      .andIsOk
+      .andAssertThatJson { node("targetBranchName").isEqualTo("main") }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview rejects two branches that are not origin and child`() {
+    performProjectAuthPost(
+      "branches/merge/preview",
+      mapOf("sourceBranchId" to testData.featureBranch.id, "targetBranchId" to testData.conflictsBranch.id),
+    ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_MERGE_BRANCHES_NOT_RELATED)
   }
 }
