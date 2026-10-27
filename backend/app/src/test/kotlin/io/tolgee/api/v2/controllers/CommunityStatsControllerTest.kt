@@ -5,12 +5,15 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
@@ -205,6 +208,67 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a single contributor is the list's entry for the same range and languages`() {
+    assertAliceEqualsListEntry("from=2026-02-16")
+    assertAliceEqualsListEntry("from=2026-03-01&languageIds=${testData.czech.id}")
+    performAuthGet("$contributors/${testData.alice.id}?from=2026-02-16")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(5)
+        node("active").isEqualTo(1)
+        node("firstContributionAt").isEqualTo(1772625600000)
+      }
+  }
+
+  private fun assertAliceEqualsListEntry(query: String) {
+    val list = jsonOf("$contributors?$query")
+    val single = jsonOf("$contributors/${testData.alice.id}?$query")
+    val alice =
+      list
+        .path("_embedded")
+        .path("contributors")
+        .path(1)
+    alice
+      .path("id")
+      .asLong()
+      .assert
+      .isEqualTo(testData.alice.id)
+    single.assert.isEqualTo(alice)
+  }
+
+  private fun jsonOf(url: String) = performAuthGet(url).andIsOk.getContent<JsonNode>()
+
+  @Test
+  fun `a user the list does not show for the range and languages is not found`() {
+    performAuthGet("$contributors/${testData.carol.id}").andIsNotFound
+    performAuthGet("$contributors/${testData.dave.id}").andIsNotFound
+    performAuthGet("$contributors/999999999").andIsNotFound
+    performAuthGet("$contributors/${testData.bob.id}?from=2026-03-01").andIsNotFound
+    performAuthGet("$contributors/${testData.bob.id}?languageIds=${testData.german.id}").andIsNotFound
+  }
+
+  @Test
+  fun `a single contributor without from covers the whole history`() {
+    executeInNewTransaction {
+      testData.moveCounterDays(entityManager, testData.bob, testData.publicProject, LocalDate.of(2023, 6, 1))
+    }
+    performAuthGet("$contributors/${testData.bob.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(2)
+      }
+    performAuthGet("$contributors/${testData.bob.id}?to=$wednesday").andIsOk
+    performAuthGet("$contributors/${testData.bob.id}?from=${wednesday.minusYears(3)}").andIsNotFound
+  }
+
+  @Test
+  fun `a single contributor of a private project is hidden from a non-member`() {
+    userAccount = testData.bob
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors/${testData.alice.id}")
+      .andIsNotFound
+  }
+
+  @Test
   fun `a private project is hidden from a non-member`() {
     userAccount = testData.bob
     performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors").andIsNotFound
@@ -240,6 +304,17 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
           node("[2].profilePublic").isEqualTo(true)
         }
       }
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors/${testData.carol.id}")
+      .andIsOk
+      .andAssertThatJson { node("profilePublic").isEqualTo(false) }
+  }
+
+  @Test
+  fun `the single contributor's profilePublic follows a PRIVATE profile setting`() {
+    executeInNewTransaction { testData.setProfileVisibility(entityManager, testData.alice, ProfileVisibility.PRIVATE) }
+    performAuthGet("$contributors/${testData.alice.id}")
+      .andIsOk
+      .andAssertThatJson { node("profilePublic").isEqualTo(false) }
   }
 
   @Test
@@ -332,6 +407,13 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
         node("_embedded.contributors[1].declined").isEqualTo(0)
         node("_embedded.contributors[1].active").isEqualTo(1)
         node("_embedded.contributors[1].languages").isArray.hasSize(1)
+      }
+    performAuthGet("$contributors/${testData.alice.id}")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(4)
+        node("suggested").isEqualTo(3)
+        node("languages").isArray.hasSize(1)
       }
     jdbcTemplate.update(
       "update translation_suggestion set state = 'ACTIVE' where language_id = ?",

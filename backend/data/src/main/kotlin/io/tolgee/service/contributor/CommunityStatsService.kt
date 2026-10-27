@@ -79,6 +79,22 @@ class CommunityStatsService(
     }
   }
 
+  fun getContributor(
+    projectId: Long,
+    userId: Long,
+    params: RangeParams,
+    languageIds: Collection<Long>?,
+  ): CommunityContributorStats? {
+    val (from, to) = range(params, defaultFrom = { LocalDate.EPOCH })
+    val languages = languageFilter(languageIds)
+    val total = repository.findContributorTotal(projectId, userId, from, to, languages) ?: return null
+    // ponytail: without `from` this is the user's whole-history rows (active days × languages), read only to sum
+    // them per language; group by language in SQL if a contributor's row count ever shows.
+    val dayRows = repository.findDayRows(projectId, listOf(userId), from, to, languages)
+    val profilePublic = isProfilePublic(total.profileVisibility) { hasPublicContribution(userId) }
+    return contributorStats(total, dayRows, profilePublic)
+  }
+
   private fun contributorStats(
     total: CommunityContributorTotalsView,
     dayRows: List<CommunityDayRowView>,
@@ -234,7 +250,7 @@ class CommunityStatsService(
   ): Pair<LocalDate, LocalDate> {
     val today = currentDateProvider.localDate
     val to = (params.to ?: today).coerceIn(LocalDate.EPOCH, today.plusYears(1))
-    val from = (params.from ?: defaultFrom(to)).coerceIn(to.minusYears(MAX_YEARS), to)
+    val from = params.from?.coerceIn(to.minusYears(MAX_YEARS), to) ?: defaultFrom(to)
     return Pair(from, to)
   }
 

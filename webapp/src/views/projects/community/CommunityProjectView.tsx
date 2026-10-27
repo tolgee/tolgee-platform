@@ -62,22 +62,33 @@ export const CommunityProjectView = () => {
     method: 'get',
     path: { projectId: project.id },
     query: {
-      size: 100,
+      size: 1,
       sort: ['lastContributionAt,desc'],
       from: twoYearsAgo,
     },
   });
 
-  const contributorList = contributors.data?._embedded?.contributors ?? [];
+  const lastActivity =
+    contributors.data?._embedded?.contributors?.[0]?.lastContributionAt;
 
-  const myLanguageIds = useMemo(() => {
-    const me = contributorList.find((c) => c.id === user?.id);
-    return new Set(
-      me?.languages.filter((l) => l.contributions > 0).map((l) => l.languageId)
-    );
-  }, [contributorList, user?.id]);
+  const me = useApiQuery({
+    url: '/v2/projects/{projectId}/community/contributors/{userId}',
+    method: 'get',
+    path: { projectId: project.id, userId: user?.id ?? 0 },
+    query: {},
+    fetchOptions: { disable404Redirect: true, disableErrorNotification: true },
+    options: { enabled: !!user, retry: false },
+  });
 
-  const lastActivity = contributorList[0]?.lastContributionAt;
+  const myLanguageIds = useMemo(
+    () =>
+      new Set(
+        me.data?.languages
+          .filter((l) => l.contributions > 0)
+          .map((l) => l.languageId)
+      ),
+    [me.data]
+  );
 
   const header = (
     <Box

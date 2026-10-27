@@ -1,12 +1,13 @@
 import {
   Box,
   Chip,
+  Link as MuiLink,
   Tooltip,
   Typography,
   styled,
   useTheme,
 } from '@mui/material';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
@@ -20,6 +21,7 @@ import { Calendar, InfoCircle } from '@untitled-ui/icons-react';
 import { StatesBarContainer } from 'tg.views/projects/TranslationStatesBar';
 import { PercentFormat } from 'tg.views/projects/dashboard/PercentFormat';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
@@ -67,6 +69,14 @@ const StyledCard = styled(Link)`
   }
 `;
 
+const StyledPopover = styled('div')`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(1.5)};
+  padding: ${({ theme }) => theme.spacing(1)};
+  width: 340px;
+  color: ${({ theme }) => theme.palette.text.primary};
+`;
+
 export type ContributorCardProps = {
   id: number;
   name?: string;
@@ -79,10 +89,14 @@ export type ContributorCardProps = {
   firstContributionAt?: number;
   lastContributionAt?: number;
   isMe: boolean;
+  variant?: 'card' | 'popover';
+  status?: ReactNode;
+  loading?: boolean;
   profilePublic: boolean;
 };
 
 export const ContributorCard = ({
+  variant = 'card',
   languages = [],
   profilePublic,
   ...props
@@ -220,11 +234,26 @@ export const ContributorCard = ({
         <Typography variant="body2" fontWeight={500} noWrap component="span">
           <UserName name={props.name} />
         </Typography>
-        {props.isMe && (
+        {props.isMe && variant === 'card' && (
           <Chip size="small" label={t('community_contributor_you', 'You')} />
         )}
       </Box>
-      {profilePublic && (
+      {variant === 'popover' && hasStats && profilePublic && (
+        <MuiLink
+          href={profileUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          underline="hover"
+          variant="body2"
+          display="flex"
+          alignItems="center"
+          justifySelf="end"
+          data-cy="community-contributor-card-profile-link"
+        >
+          {profileLabel}
+        </MuiLink>
+      )}
+      {variant === 'card' && profilePublic && (
         <Box
           className="profileLink"
           display="flex"
@@ -239,31 +268,33 @@ export const ContributorCard = ({
         </Box>
       )}
       <Box gridColumn={2} minWidth={0}>
-        <Box display="flex" alignItems="center" gap={0.5} height={16}>
-          {shownLanguages.map((l) => (
-            <Tooltip key={l.id} title={l.name} {...delayedTooltip}>
-              <Box display="flex" data-cy="community-contributor-card-flag">
-                <FlagImage flagEmoji={l.flagEmoji || ''} height={16} />
-              </Box>
-            </Tooltip>
-          ))}
-          {hiddenLanguages.length > 0 && (
-            <Tooltip
-              title={hiddenLanguages.map((l) => l.name).join(', ')}
-              {...delayedTooltip}
-            >
-              <div>
-                <StyledCircledPill
-                  height={16}
-                  width={36}
-                  wrapperProps={{ className: 'wrapped' }}
-                >
-                  +{hiddenLanguages.length}
-                </StyledCircledPill>
-              </div>
-            </Tooltip>
-          )}
-        </Box>
+        {props.status ?? (
+          <Box display="flex" alignItems="center" gap={0.5} height={16}>
+            {shownLanguages.map((l) => (
+              <Tooltip key={l.id} title={l.name} {...delayedTooltip}>
+                <Box display="flex" data-cy="community-contributor-card-flag">
+                  <FlagImage flagEmoji={l.flagEmoji || ''} height={16} />
+                </Box>
+              </Tooltip>
+            ))}
+            {hiddenLanguages.length > 0 && (
+              <Tooltip
+                title={hiddenLanguages.map((l) => l.name).join(', ')}
+                {...delayedTooltip}
+              >
+                <div>
+                  <StyledCircledPill
+                    height={16}
+                    width={36}
+                    wrapperProps={{ className: 'wrapped' }}
+                  >
+                    +{hiddenLanguages.length}
+                  </StyledCircledPill>
+                </div>
+              </Tooltip>
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );
@@ -392,13 +423,37 @@ export const ContributorCard = ({
     </Box>
   );
 
+  const loadingPlaceholder = (
+    <>
+      <Box display="grid" gap={1}>
+        <LoadingSkeleton sx={{ height: 22, width: '45%' }} />
+        <LoadingSkeleton sx={{ height: 8, width: '100%' }} />
+      </Box>
+      <LoadingSkeleton sx={{ height: 23, width: '55%' }} />
+    </>
+  );
+
   const content = (
     <>
       {header}
-      {suggestions}
-      {hasStats && footer}
+      {props.loading ? (
+        loadingPlaceholder
+      ) : (
+        <>
+          {suggestions}
+          {hasStats && footer}
+        </>
+      )}
     </>
   );
+
+  if (variant === 'popover') {
+    return (
+      <StyledPopover data-cy="community-contributor-card">
+        {content}
+      </StyledPopover>
+    );
+  }
 
   if (!profilePublic) {
     return (

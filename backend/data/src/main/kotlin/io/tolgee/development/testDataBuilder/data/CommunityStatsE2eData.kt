@@ -70,5 +70,15 @@ class CommunityStatsE2eData : CommunityStatsTestData() {
         }
       }
     }
+    publicKeys[2].addTranslation {
+      language = czech
+      text = "Překlad key-3"
+    }
+    projectBuilder.apply {
+      data.keys.single { it.self.name == "private-key" }.addTranslation {
+        language = data.languages.single { it.self.tag == "cs" }.self
+        text = "Překlad private-key"
+      }
+    }
   }
 }

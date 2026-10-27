@@ -905,6 +905,10 @@ declare namespace DataCy {
         "storage-subtitle": true;
         "submenu-item": true;
         "suggestion-action": true;
+        "suggestion-author": true;
+        "suggestion-author-card": true;
+        "suggestion-author-card-no-stats": true;
+        "suggestion-author-tooltip": true;
         "suggestions-list": true;
         "suggestions-show-all": true;
         "switch-popover-footer-action": true;
