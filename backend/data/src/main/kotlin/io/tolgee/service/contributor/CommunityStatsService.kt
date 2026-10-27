@@ -54,7 +54,7 @@ class CommunityStatsService(
     search: String?,
   ): Page<CommunityContributorStats> {
     val period = period(params)
-    val languages = languageIds?.takeIf { it.isNotEmpty() }
+    val languages = languageFilter(languageIds)
     val totals =
       repository.findContributorTotals(
         projectId,
@@ -73,15 +73,33 @@ class CommunityStatsService(
         .orEmpty()
     val publicUsers = userIds?.let { repository.findUserIdsWithPublicRows(it) }.orEmpty().toSet()
     return totals.map { total ->
+      val dayRows = dayRowsByUser[total.id].orEmpty()
       val profilePublic = isProfilePublic(total.profileVisibility) { total.id in publicUsers }
-      contributorStats(total, dayRowsByUser[total.id].orEmpty(), period, profilePublic)
+      contributorStats(total, dayRows, dayRowBuckets(period, dayRows), profilePublic)
     }
+  }
+
+  fun getContributor(
+    projectId: Long,
+    userId: Long,
+    params: PeriodParams,
+    languageIds: Collection<Long>?,
+  ): CommunityContributorStats? {
+    val period = period(params, defaultFrom = { LocalDate.EPOCH })
+    val languages = languageFilter(languageIds)
+    val total = repository.findContributorTotal(projectId, userId, period.from, period.to, languages) ?: return null
+    // ponytail: without `from` this is the user's whole-history rows (active days × languages), read only to sum
+    // them per language; group by language in SQL if a contributor's row count ever shows.
+    val dayRows = repository.findDayRows(projectId, listOf(userId), period.from, period.to, languages)
+    val buckets = params.from?.let { dayRowBuckets(period, dayRows) }.orEmpty()
+    val profilePublic = isProfilePublic(total.profileVisibility) { hasPublicContribution(userId) }
+    return contributorStats(total, dayRows, buckets, profilePublic)
   }
 
   private fun contributorStats(
     total: CommunityContributorTotalsView,
     dayRows: List<CommunityDayRowView>,
-    period: Period,
+    buckets: List<Bucket>,
     profilePublic: Boolean,
   ) = CommunityContributorStats(
     id = total.id,
@@ -96,7 +114,7 @@ class CommunityStatsService(
     firstContributionAt = total.firstContributionAt,
     lastContributionAt = total.lastContributionAt,
     languages = languageCounts(dayRows),
-    buckets = buckets(period, dayRows.map { it.day to it.counts() }),
+    buckets = buckets,
   )
 
   fun getActivity(
@@ -105,7 +123,7 @@ class CommunityStatsService(
     languageIds: Collection<Long>?,
   ): CommunityActivity {
     val period = period(params)
-    val languages = languageIds?.takeIf { it.isNotEmpty() }
+    val languages = languageFilter(languageIds)
     val days = repository.findDailyTotals(projectId, period.from, period.to, languages).map { it.day to it.counts() }
     val tiles = repository.countSuggestedTranslations(projectId, period.from, period.to, languages)
     return CommunityActivity(
@@ -213,15 +231,22 @@ class CommunityStatsService(
         )
       }.sortedWith(compareByDescending<ProfileProject> { it.contributions }.thenBy { it.id })
 
+  private fun languageFilter(languageIds: Collection<Long>?) = languageIds?.takeIf { it.isNotEmpty() }
+
   private fun period(
     params: PeriodParams,
     defaultFrom: (LocalDate) -> LocalDate = { to -> Granularity.WEEK.start(to).minusWeeks(DEFAULT_WEEKS - 1) },
     defaultGranularity: Granularity = Granularity.WEEK,
   ): Period {
     val to = params.to ?: currentDateProvider.localDate
-    val from = (params.from ?: defaultFrom(to)).coerceIn(to.minusYears(MAX_YEARS), to)
+    val from = params.from?.coerceIn(to.minusYears(MAX_YEARS), to) ?: defaultFrom(to)
     return Period(from, to, params.granularity ?: defaultGranularity)
   }
+
+  private fun dayRowBuckets(
+    period: Period,
+    dayRows: List<CommunityDayRowView>,
+  ) = buckets(period, dayRows.map { it.day to it.counts() })
 
   private fun buckets(
     period: Period,

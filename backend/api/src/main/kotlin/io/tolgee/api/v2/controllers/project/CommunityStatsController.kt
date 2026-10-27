@@ -3,9 +3,11 @@ package io.tolgee.api.v2.controllers.project
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Message
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityContributorStats
 import io.tolgee.dtos.request.community.PeriodParams
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.community.CommunityContributorModel
 import io.tolgee.hateoas.community.CommunityContributorModelAssembler
 import io.tolgee.model.enums.Scope
@@ -39,10 +41,8 @@ class CommunityStatsController(
       "Users who worked on translations in the project within the range: translating, changing translation " +
         "states, commenting, suggesting, and accepting or declining suggestions. For each user: the number of " +
         "contributions, suggestions, accepted and declined suggestions, the counts per language, and one bucket " +
-        "of counts per day or week, all within the range. The dates of the first and last contribution are not " +
-        "limited by the range or the languages: they cover the user's whole history in the project. " +
-        DEFAULT_RANGE + PeriodParams.RANGE_LIMITS + " " + APPROXIMATE +
-        "`active` is exact: the number of the user's suggestions that are pending right now. " +
+        "of counts per day or week, all within the range. " + WHOLE_HISTORY_DATES +
+        DEFAULT_RANGE + PeriodParams.RANGE_LIMITS + " " + APPROXIMATE + ACTIVE_EXACT +
         "Sort by contributions, suggested, accepted, declined, active or lastContributionAt; users without a " +
         "lastContributionAt come last. By default, most contributions come first, then most suggestions.",
   )
@@ -65,6 +65,35 @@ class CommunityStatsController(
   ): PagedModel<CommunityContributorModel> {
     val page = communityStatsService.getContributors(projectId, pageable, period, languageIds, excludeEmpty, search)
     return pagedResourcesAssembler.toModel(page, communityContributorModelAssembler)
+  }
+
+  @GetMapping("/contributors/{userId:[0-9]+}")
+  @Operation(
+    summary = "Get one community contributor",
+    description =
+      "One user of the contributors list, with the same counts, languages and buckets. " + WHOLE_HISTORY_DATES +
+        "Without `from`, the counts and languages cover the user's whole history in the project up to `to` " +
+        "(today, unless given) and `buckets` is empty. With `from`, the range works as on the list, with one " +
+        "bucket per week (or per day with `granularity=DAY`): " + PeriodParams.RANGE_LIMITS + " " +
+        APPROXIMATE + ACTIVE_EXACT +
+        "Returns 404 when the user has no contributions in the project within the range and languages, " +
+        "or the account is deleted or disabled.",
+  )
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @AllowApiAccess
+  fun getContributor(
+    @PathVariable projectId: Long,
+    @PathVariable userId: Long,
+    @ParameterObject period: PeriodParams,
+    @Parameter(
+      description = "Count only these languages, in the totals, the buckets, the counts per language and `active`.",
+    )
+    @RequestParam(required = false) languageIds: List<Long>?,
+  ): CommunityContributorModel {
+    val stats =
+      communityStatsService.getContributor(projectId, userId, period, languageIds)
+        ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    return communityContributorModelAssembler.toModel(stats)
   }
 
   @GetMapping("/activity")
@@ -97,5 +126,10 @@ class CommunityStatsController(
       "The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they " +
         "come from the activity log and never go down, so a suggestion made in one period and accepted or " +
         "declined in a later one counts in both. "
+    private const val ACTIVE_EXACT =
+      "`active` is exact: the number of the user's suggestions that are pending right now. "
+    private const val WHOLE_HISTORY_DATES =
+      "The dates of the first and last contribution are not limited by the range or the languages: they cover " +
+        "the user's whole history in the project. "
   }
 }

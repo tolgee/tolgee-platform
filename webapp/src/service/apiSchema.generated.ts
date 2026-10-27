@@ -563,6 +563,10 @@ export interface paths {
     /** Users who worked on translations in the project within the range: translating, changing translation states, commenting, suggesting, and accepting or declining suggestions. For each user: the number of contributions, suggestions, accepted and declined suggestions, the counts per language, and one bucket of counts per day or week, all within the range. The dates of the first and last contribution are not limited by the range or the languages: they cover the user's whole history in the project. By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. `active` is exact: the number of the user's suggestions that are pending right now. Sort by contributions, suggested, accepted, declined, active or lastContributionAt; users without a lastContributionAt come last. By default, most contributions come first, then most suggestions. */
     get: operations["getContributors_1"];
   };
+  "/v2/projects/{projectId}/community/contributors/{userId}": {
+    /** One user of the contributors list, with the same counts, languages and buckets. The dates of the first and last contribution are not limited by the range or the languages: they cover the user's whole history in the project. Without `from`, the counts and languages cover the user's whole history in the project up to `to` (today, unless given) and `buckets` is empty. With `from`, the range works as on the list, with one bucket per week (or per day with `granularity=DAY`): The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. `active` is exact: the number of the user's suggestions that are pending right now. Returns 404 when the user has no contributions in the project within the range and languages, or the account is deleted or disabled. */
+    get: operations["getContributor"];
+  };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
     post: operations["create_10"];
@@ -17657,6 +17661,65 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelCommunityContributorModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** One user of the contributors list, with the same counts, languages and buckets. The dates of the first and last contribution are not limited by the range or the languages: they cover the user's whole history in the project. Without `from`, the counts and languages cover the user's whole history in the project up to `to` (today, unless given) and `buckets` is empty. With `from`, the range works as on the list, with one bucket per week (or per day with `granularity=DAY`): The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. `active` is exact: the number of the user's suggestions that are pending right now. Returns 404 when the user has no contributions in the project within the range and languages, or the account is deleted or disabled. */
+  getContributor: {
+    parameters: {
+      path: {
+        projectId: number;
+        userId: number;
+      };
+      query: {
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. */
+        to?: string;
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
+        /** Count only these languages, in the totals, the buckets, the counts per language and `active`. */
+        languageIds?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityContributorModel"];
         };
       };
       /** Bad Request */

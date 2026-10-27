@@ -18,18 +18,9 @@ import java.time.LocalDate
 interface CommunityContributionDayRepository : Repository<CommunityContributionDay, CommunityContributionDayId> {
   @Query(
     """
-      select c.userId as id, u.name as name, u.avatarHash as avatarHash, u.profileVisibility as profileVisibility,
-        sum(c.contributions) as contributions,
-        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
-        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt,
-        (select count(s) from TranslationSuggestion s
-          where s.author.id = c.userId and s.project.id = :projectId and $LIVE_ACTIVE_S and $LANGUAGE_FILTER_S) as active
-      from CommunityContributionDay c
-      join UserAccount u on u.id = c.userId
-      join Language l on l.id = c.languageId
-      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
-      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE and $NAME_SEARCH
-      group by c.userId, u.name, u.avatarHash, u.profileVisibility, pc.firstContributionAt, pc.lastContributionAt
+      $CONTRIBUTOR_TOTALS
+      where $CONTRIBUTOR_SCOPE and $NAME_SEARCH
+      $CONTRIBUTOR_TOTALS_GROUP_BY
       having (:excludeEmpty = false or sum(c.suggested) > 0)
     """,
     countQuery = """
@@ -37,7 +28,7 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
-      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE and $NAME_SEARCH
+      where $CONTRIBUTOR_SCOPE and $NAME_SEARCH
         and (:excludeEmpty = false or c.suggested > 0)
     """,
   )
@@ -50,6 +41,21 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
     search: String?,
     pageable: Pageable,
   ): Page<CommunityContributorTotalsView>
+
+  @Query(
+    """
+      $CONTRIBUTOR_TOTALS
+      where $CONTRIBUTOR_SCOPE and c.userId = :userId
+      $CONTRIBUTOR_TOTALS_GROUP_BY
+    """,
+  )
+  fun findContributorTotal(
+    projectId: Long,
+    userId: Long,
+    from: LocalDate,
+    to: LocalDate,
+    languageIds: Collection<Long>?,
+  ): CommunityContributorTotalsView?
 
   @Query(
     """
@@ -156,5 +162,22 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
     const val ACTIVE = "io.tolgee.model.enums.TranslationSuggestionState.ACTIVE"
     const val LIVE_ACTIVE_S = "s.state = $ACTIVE and s.language.deletedAt is null"
     const val TRANSLATION_KEY = "concat(cast(s.key.id as string), ':', cast(s.language.id as string))"
+    const val CONTRIBUTOR_TOTALS =
+      """
+      select c.userId as id, u.name as name, u.avatarHash as avatarHash, u.profileVisibility as profileVisibility,
+        sum(c.contributions) as contributions,
+        sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt,
+        (select count(s) from TranslationSuggestion s
+          where s.author.id = c.userId and s.project.id = :projectId and $LIVE_ACTIVE_S and $LANGUAGE_FILTER_S) as active
+      from CommunityContributionDay c
+      join UserAccount u on u.id = c.userId
+      join Language l on l.id = c.languageId
+      left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
+      """
+    const val CONTRIBUTOR_SCOPE =
+      "c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE"
+    const val CONTRIBUTOR_TOTALS_GROUP_BY =
+      "group by c.userId, u.name, u.avatarHash, u.profileVisibility, pc.firstContributionAt, pc.lastContributionAt"
   }
 }
