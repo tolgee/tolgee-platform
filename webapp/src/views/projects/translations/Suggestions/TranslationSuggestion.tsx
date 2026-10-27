@@ -23,6 +23,7 @@ import {
 import { useProject } from 'tg.hooks/useProject';
 import { SuggestionAction } from './SuggestionAction';
 import { SuggestionAuthorCard } from 'tg.views/projects/translations/Suggestions/SuggestionAuthorCard';
+import { useUserName } from 'tg.component/common/UserName';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { useRef, useState } from 'react';
 import React from 'react';
@@ -132,10 +133,8 @@ export const TranslationSuggestion = ({
 
   const active = suggestion.state === 'ACTIVE';
   const dimSx = { opacity: active ? 1 : 0.5 };
-  const authorName =
-    suggestion.author.name ||
-    suggestion.author.username ||
-    t('translation_suggestion_unnamed_user');
+  const getUserName = useUserName();
+  const authorName = getUserName(suggestion.author);
 
   const inlineActions: ActionItem[] = [];
   if (active) {
@@ -211,7 +210,6 @@ export const TranslationSuggestion = ({
           project.public ? (
             <SuggestionAuthorCard
               author={suggestion.author}
-              displayName={authorName}
               onContentChange={() => popperRef.current?.update()}
             />
           ) : (

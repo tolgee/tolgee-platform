@@ -560,7 +560,7 @@ export interface paths {
     get: operations["getContributors_1"];
   };
   "/v2/projects/{projectId}/community/contributors/{userId}": {
-    /** One item of the contributors list for the given user; zeros when the user has not suggested in the project. Unknown, deleted and disabled users are 404. */
+    /** Stats of one contributor of this project, in the shape of a contributors list item. Returns 404 when the user has no contributions here, or the account is deleted or disabled. */
     get: operations["getContributor"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
@@ -17569,7 +17569,7 @@ export interface operations {
       };
     };
   };
-  /** One item of the contributors list for the given user; zeros when the user has not suggested in the project. Unknown, deleted and disabled users are 404. */
+  /** Stats of one contributor of this project, in the shape of a contributors list item. Returns 404 when the user has no contributions here, or the account is deleted or disabled. */
   getContributor: {
     parameters: {
       path: {

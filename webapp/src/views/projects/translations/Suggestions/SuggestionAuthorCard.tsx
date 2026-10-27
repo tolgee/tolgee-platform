@@ -7,10 +7,12 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 import { LoadingSkeleton } from 'tg.component/LoadingSkeleton';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
+import { useUserName } from 'tg.component/common/UserName';
 
 type SimpleUserAccountModel = components['schemas']['SimpleUserAccountModel'];
 
@@ -37,7 +39,7 @@ const StyledIdentity = styled(Box)`
 `;
 
 const StyledName = styled('div')`
-  font-weight: 500;
+  font-weight: ${({ theme }) => theme.typography.fontWeightMedium};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -51,12 +53,13 @@ const StyledSecondary = styled('div')`
 const StyledLanguages = styled(Box)`
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 const StyledRateTrack = styled('div')`
   height: 6px;
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
   overflow: hidden;
   background: ${({ theme }) =>
     theme.palette.tokens._components.progressbar.background};
@@ -64,24 +67,21 @@ const StyledRateTrack = styled('div')`
 
 const StyledRateFill = styled('div')`
   height: 100%;
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
   background: ${({ theme }) => theme.palette.tokens.success.main};
 `;
 
 type Props = {
   author: SimpleUserAccountModel;
-  displayName: string;
   onContentChange: () => void;
 };
 
-export const SuggestionAuthorCard = ({
-  author,
-  displayName,
-  onContentChange,
-}: Props) => {
+export const SuggestionAuthorCard = ({ author, onContentChange }: Props) => {
   const project = useProject();
+  const getUserName = useUserName();
   const projectLanguages = useTranslationsSelector((c) => c.languages);
-  const { data, isLoading, isError } = useApiQuery({
+  const formatDate = useDateFormatter();
+  const { data, isLoading, error } = useApiQuery({
     url: '/v2/projects/{projectId}/community/contributors/{userId}',
     method: 'get',
     path: { projectId: project.id, userId: author.id },
@@ -92,7 +92,7 @@ export const SuggestionAuthorCard = ({
 
   useLayoutEffect(() => {
     if (!isLoading) onContentChange();
-  }, [isLoading, data, isError]);
+  }, [isLoading, data, error]);
 
   const languages =
     data?.languages
@@ -107,19 +107,34 @@ export const SuggestionAuthorCard = ({
       <StyledHeader>
         <AvatarImg owner={{ ...author, type: 'USER' }} size={32} />
         <StyledIdentity>
-          <StyledName>{displayName}</StyledName>
+          <StyledName>{getUserName(author)}</StyledName>
           {isLoading && <LoadingSkeleton sx={{ height: 14, width: 120 }} />}
-          {isError && (
-            <StyledSecondary data-cy="suggestion-author-card-unavailable">
+          {error?.code === 'user_not_found' && (
+            <StyledSecondary data-cy="suggestion-author-card-private">
               <T
-                keyName="community_contributor_card_unavailable"
-                defaultValue="Contribution stats not available"
+                keyName="community_contributor_card_private"
+                defaultValue="Private profile"
               />
             </StyledSecondary>
           )}
-          {languages.length > 0 && (
+          {data && (
             <StyledLanguages>
               <CircledLanguageIconList languages={languages} />
+              {data.firstContributionAt && (
+                <StyledSecondary data-cy="suggestion-author-card-since">
+                  {languages.length > 0 && '· '}
+                  <T
+                    keyName="community_contributor_card_since"
+                    defaultValue="since {date}"
+                    params={{
+                      date: formatDate(new Date(data.firstContributionAt), {
+                        month: 'long',
+                        year: 'numeric',
+                      }),
+                    }}
+                  />
+                </StyledSecondary>
+              )}
             </StyledLanguages>
           )}
         </StyledIdentity>
@@ -132,7 +147,7 @@ export const SuggestionAuthorCard = ({
           <div data-cy="suggestion-author-card-stats">
             <T
               keyName="community_contributor_card_stats"
-              defaultValue="{accepted, plural, one {<b>#</b> of {suggested, plural, one {# suggestion} other {# suggestions}} accepted · {declined, plural, one {# declined} other {# declined}}} other {<b>#</b> of {suggested, plural, one {# suggestion} other {# suggestions}} accepted · {declined, plural, one {# declined} other {# declined}}}}"
+              defaultValue="<b>{accepted}</b> of {suggested, plural, one {# suggestion} other {# suggestions}} accepted · {declined, plural, one {# declined} other {# declined}}"
               params={{
                 accepted: data.accepted,
                 suggested: data.suggested,
@@ -141,6 +156,13 @@ export const SuggestionAuthorCard = ({
               }}
             />
           </div>
+          <StyledSecondary data-cy="suggestion-author-card-contributions">
+            <T
+              keyName="community_contributor_card_contributions"
+              defaultValue="{contributions, plural, one {# contribution} other {# contributions}}"
+              params={{ contributions: data.contributions }}
+            />
+          </StyledSecondary>
           <MuiLink
             component={Link}
             to={LINKS.USER_COMMUNITY_PROFILE.build({
