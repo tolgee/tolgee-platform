@@ -131,19 +131,52 @@ class AiReviewQueueService(
     val project = projectService.getDto(projectId)
     if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
 
-    val qaOn =
-      project.useQaChecks && projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
-    val ready = findReady(projectId, translationIds, qaOn)
-    if (ready.isEmpty()) return
+    val ready = findReady(projectId, translationIds, isQaOn(project))
+    startJob(projectId, ready, handlingStuckItems)
+  }
 
+  /**
+   * Covers a pod crash during an LLM call: stale claims are released and one hidden self-heal job
+   * reviews what is still queued. Skipped while another AI review job runs — that job's own
+   * finalize triggers the next self-heal.
+   */
+  @Transactional
+  fun selfHeal(projectId: Long) {
+    val project = projectService.getDto(projectId)
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    if (batchJobService.hasActiveJobForProject(projectId, BatchJobType.AI_REVIEW)) return
+    reviewRepository.releaseStaleClaims(projectId)
+    val ready = findReadyProjectWide(projectId, isQaOn(project))
+    startJob(projectId, ready, handlingStuckItems = true)
+  }
+
+  private fun startJob(
+    projectId: Long,
+    translationIds: List<Long>,
+    handlingStuckItems: Boolean,
+  ) {
+    if (translationIds.isEmpty()) return
     val projectRef = entityManager.getReference(Project::class.java, projectId)
     batchJobService.startJob(
-      request = AiReviewRequest(translationIds = ready, handlingStuckItems = handlingStuckItems),
+      request = AiReviewRequest(translationIds = translationIds, handlingStuckItems = handlingStuckItems),
       project = projectRef,
       author = null,
       type = BatchJobType.AI_REVIEW,
       isHidden = true,
     )
+  }
+
+  private fun isQaOn(project: io.tolgee.dtos.cacheable.ProjectDto): Boolean =
+    project.useQaChecks && projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
+
+  private fun findReadyProjectWide(
+    projectId: Long,
+    qaOn: Boolean,
+  ): List<Long> {
+    if (!qaOn) return reviewRepository.findClaimableTranslationIds(projectId)
+    val qaLanguageIds = projectQaConfigService.getEnabledLanguageIds(projectId)
+    if (qaLanguageIds.isEmpty()) return reviewRepository.findClaimableTranslationIds(projectId)
+    return reviewRepository.findReadyTranslationIds(projectId, qaLanguageIds)
   }
 
   private fun findReady(

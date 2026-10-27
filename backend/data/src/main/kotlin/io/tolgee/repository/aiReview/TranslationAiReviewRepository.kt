@@ -75,6 +75,54 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
     translationIds: Collection<Long>,
   ): List<Long>
 
+  /**
+   * Clears the claim of rows whose job finished, failed, was cancelled or is missing — a pod can
+   * crash between the claim and the save.
+   */
+  @Modifying
+  @Query(
+    nativeQuery = true,
+    value = """
+    update translation_ai_review r
+    set batch_job_id = null
+    from translation t
+    join key k on k.id = t.key_id
+    where t.id = r.translation_id
+      and k.project_id = :projectId
+      and r.batch_job_id is not null
+      and (r.status = 'PENDING' or r.re_review_requested)
+      and not exists (
+        select 1 from tolgee_batch_job b
+        where b.id = r.batch_job_id and b.status in ('PENDING', 'RUNNING')
+      )
+    """,
+  )
+  fun releaseStaleClaims(projectId: Long): Int
+
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where t.key.project.id = :projectId
+      and (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true)
+      and (t.language.id not in :qaLanguageIds or t.qaChecksStale = false)
+    """,
+  )
+  fun findReadyTranslationIds(
+    projectId: Long,
+    qaLanguageIds: Collection<Long>,
+  ): List<Long>
+
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where t.key.project.id = :projectId
+      and (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true)
+    """,
+  )
+  fun findClaimableTranslationIds(projectId: Long): List<Long>
+
   @Modifying
   @Query("delete from TranslationAiReview r where r.translation.id in :translationIds")
   fun deleteAllByTranslationIds(translationIds: Collection<Long>): Int
