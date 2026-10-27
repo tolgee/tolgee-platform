@@ -1,3 +1,10 @@
+## [3.241.1](https://github.com/tolgee/tolgee-platform/compare/v3.241.0...v3.241.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* don't reject requests with more than 10 Accept-Language locales ([#4010](https://github.com/tolgee/tolgee-platform/issues/4010)) ([4594a27](https://github.com/tolgee/tolgee-platform/commit/4594a277af785d56d2d9fd7c167e0fd614c93fc1)), closes [#4007](https://github.com/tolgee/tolgee-platform/issues/4007)
+
 # [3.241.0](https://github.com/tolgee/tolgee-platform/compare/v3.240.3...v3.241.0) (2026-10-27)
 
 
