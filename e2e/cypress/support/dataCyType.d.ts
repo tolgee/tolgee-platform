@@ -805,9 +805,11 @@ declare namespace DataCy {
         "suggestion-action": true;
         "suggestion-author": true;
         "suggestion-author-card": true;
+        "suggestion-author-card-contributions": true;
+        "suggestion-author-card-private": true;
         "suggestion-author-card-profile-link": true;
+        "suggestion-author-card-since": true;
         "suggestion-author-card-stats": true;
-        "suggestion-author-card-unavailable": true;
         "suggestion-author-tooltip": true;
         "suggestions-list": true;
         "suggestions-show-all": true;

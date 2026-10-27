@@ -29,14 +29,17 @@ describe('Suggestion author card', () => {
     communityStatsTestData.clean();
   });
 
+  function translateCellAsOwner(projectId: number, key: string) {
+    login('communityStatsOwner').then(() => {
+      setTranslations(projectId, key, { cs: 'Překlad' });
+    });
+  }
+
   function hoverSuggestionAuthor(
     projectId: number,
     key: string,
     authorId: number
   ) {
-    login('communityStatsOwner').then(() => {
-      setTranslations(projectId, key, { cs: 'Překlad' });
-    });
     selectLangsInLocalstorage(projectId, ['en', 'cs']);
     visitTranslations(projectId);
     getTranslationCell(key, 'cs').click();
@@ -51,18 +54,29 @@ describe('Suggestion author card', () => {
   }
 
   it('shows the contributor card with a profile link on a community project', () => {
+    translateCellAsOwner(publicProjectId, 'key-1');
     hoverSuggestionAuthor(publicProjectId, 'key-1', alice.id);
     gcy('suggestion-author-card')
       .should('be.visible')
       .and('contain', alice.name);
-    // Alice in the community-stats seed: 15 suggested, 6 accepted, 4 declined
+    const aliceCountsInSeed = { accepted: 6, suggested: 15, declined: 4 };
+    const aliceContributionsInSeed = 17;
     gcy('suggestion-author-card-stats')
       .invoke('text')
-      .should('match', /^6 .*\b15\b.*\b4\b/);
-    gcy('suggestion-author-card-stats').find('b').should('have.text', '6');
+      .should((text) => {
+        Object.entries(aliceCountsInSeed).forEach(([name, count]) =>
+          expect(text, name).to.match(new RegExp(`\\b${count}\\b`))
+        );
+      });
+    gcy('suggestion-author-card-contributions')
+      .invoke('text')
+      .should('match', new RegExp(`\\b${aliceContributionsInSeed}\\b`));
     gcy('suggestion-author-card')
       .findDcy('language-icon-list-item')
       .should('have.length', 3);
+    gcy('suggestion-author-card-since')
+      .invoke('text')
+      .should('match', /\b20\d\d\b/);
     gcy('suggestion-author-card-profile-link').should(
       'have.attr',
       'href',
@@ -70,18 +84,21 @@ describe('Suggestion author card', () => {
     );
   });
 
-  it('shows only a not-available line for an author the endpoint rejects', () => {
+  it('shows only a private-profile line and stays on the page for an author the endpoint rejects', () => {
+    translateCellAsOwner(publicProjectId, 'key-3');
     hoverSuggestionAuthor(publicProjectId, 'key-3', dave.id);
     gcy('suggestion-author-card')
       .should('be.visible')
       .and('contain', dave.name);
-    gcy('suggestion-author-card-unavailable').should('be.visible');
+    gcy('suggestion-author-card-private').should('be.visible');
     gcy('suggestion-author-card-stats').should('not.exist');
+    gcy('suggestion-author-card-contributions').should('not.exist');
     gcy('suggestion-author-card-profile-link').should('not.exist');
     cy.location('pathname').should('contain', '/translations');
   });
 
   it('keeps the plain author tooltip on a private project', () => {
+    translateCellAsOwner(privateProjectId, 'private-key');
     hoverSuggestionAuthor(privateProjectId, 'private-key', alice.id);
     gcy('suggestion-author-tooltip').should('be.visible');
     gcy('suggestion-author-card').should('not.exist');
