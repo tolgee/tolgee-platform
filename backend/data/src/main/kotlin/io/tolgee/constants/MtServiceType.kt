@@ -21,11 +21,18 @@ enum class MtServiceType(
   val providerClass: Class<out MtValueProvider>,
   val usesMetadata: Boolean = false,
   val supportsPlurals: Boolean = false,
+  /**
+   * The engine is switched into an HTML/XML parsing mode when the plural number tag is present, so
+   * text sent to it must be markup-escaped and its answer unescaped. Engines without this receive
+   * and return plain text; escaping for them would store entities in the translation.
+   */
+  val escapesMarkup: Boolean = false,
   val order: Int = 0,
 ) {
   GOOGLE(
     propertyClass = GoogleMachineTranslationProperties::class.java,
     providerClass = GoogleTranslationProvider::class.java,
+    escapesMarkup = true,
     order = 1,
   ),
   AWS(
@@ -36,11 +43,13 @@ enum class MtServiceType(
   DEEPL(
     propertyClass = DeeplMachineTranslationProperties::class.java,
     providerClass = DeeplTranslationProvider::class.java,
+    escapesMarkup = true,
     order = 3,
   ),
   AZURE(
     propertyClass = AzureCognitiveTranslationProperties::class.java,
     providerClass = AzureCognitiveTranslationProvider::class.java,
+    escapesMarkup = true,
     order = 4,
   ),
   BAIDU(

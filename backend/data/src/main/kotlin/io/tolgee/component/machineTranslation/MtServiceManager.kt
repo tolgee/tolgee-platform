@@ -98,6 +98,7 @@ class MtServiceManager(
         isBatch = params.isBatch,
         pluralFormExamples = params.pluralFormExamples,
         pluralForms = params.pluralForms,
+        containsNumberTag = params.containsNumberTag,
       )
 
     return translateParams
