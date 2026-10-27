@@ -9,6 +9,7 @@ import {
 import { Fragment, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -18,6 +19,7 @@ import { UserName } from 'tg.component/common/UserName';
 import { Calendar, InfoCircle } from '@untitled-ui/icons-react';
 import { StatesBarContainer } from 'tg.views/projects/TranslationStatesBar';
 import { PercentFormat } from 'tg.views/projects/dashboard/PercentFormat';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
@@ -32,20 +34,36 @@ const delayedTooltip = {
   disableInteractive: true,
 };
 
-const StyledCard = styled('div')`
+const StyledCard = styled(Link)`
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   border-radius: 10px;
   padding: ${({ theme }) => theme.spacing(2.5)};
   display: grid;
   gap: ${({ theme }) => theme.spacing(1.5)};
   align-content: start;
+  text-decoration: none;
   color: ${({ theme }) => theme.palette.text.primary};
+  &:not(.static):hover,
+  &:not(.static):focus-visible {
+    background: ${({ theme }) => theme.palette.tokens.background.hover};
+  }
+  & .profileLink {
+    visibility: hidden;
+  }
+  &:hover .profileLink,
+  &:focus-visible .profileLink {
+    visibility: visible;
+  }
   &.me {
     background: ${({ theme }) => theme.palette.tile.background};
     border-color: ${({ theme }) =>
       theme.palette.mode === 'dark'
         ? theme.palette.tokens.secondary.main
         : theme.palette.tokens.border.secondary};
+  }
+  &.me:not(.static):hover,
+  &.me:not(.static):focus-visible {
+    background: ${({ theme }) => theme.palette.tile.backgroundHover};
   }
 `;
 
@@ -61,10 +79,12 @@ export type ContributorCardProps = {
   firstContributionAt?: number;
   lastContributionAt?: number;
   isMe: boolean;
+  profilePublic: boolean;
 };
 
 export const ContributorCard = ({
   languages = [],
+  profilePublic,
   ...props
 }: ContributorCardProps) => {
   const { t } = useTranslate();
@@ -78,6 +98,13 @@ export const ContributorCard = ({
     return () => clearTimeout(timer);
   }, []);
 
+  const profileLabel = t(
+    'community_contributor_card_profile_link',
+    'View profile'
+  );
+  const profileUrl = LINKS.USER_COMMUNITY_PROFILE.build({
+    [PARAMS.USER_ID]: props.id,
+  });
   const shownLanguages = languages.slice(0, MAX_FLAGS);
   const hiddenLanguages = languages.slice(MAX_FLAGS);
   const hasStats = props.suggested !== undefined;
@@ -197,6 +224,20 @@ export const ContributorCard = ({
           <Chip size="small" label={t('community_contributor_you', 'You')} />
         )}
       </Box>
+      {profilePublic && (
+        <Box
+          className="profileLink"
+          display="flex"
+          color="primary.main"
+          justifySelf="end"
+          alignItems="center"
+          typography="body2"
+          aria-hidden
+          data-cy="community-contributor-card-profile-link"
+        >
+          {profileLabel}
+        </Box>
+      )}
       <Box gridColumn={2} minWidth={0}>
         <Box display="flex" alignItems="center" gap={0.5} height={16}>
           {shownLanguages.map((l) => (
@@ -359,8 +400,21 @@ export const ContributorCard = ({
     </>
   );
 
+  if (!profilePublic) {
+    return (
+      <StyledCard
+        as="div"
+        className={clsx('static', { me: props.isMe })}
+        data-cy="community-contributor-card"
+      >
+        {content}
+      </StyledCard>
+    );
+  }
+
   return (
     <StyledCard
+      to={profileUrl}
       className={props.isMe ? 'me' : undefined}
       data-cy="community-contributor-card"
     >

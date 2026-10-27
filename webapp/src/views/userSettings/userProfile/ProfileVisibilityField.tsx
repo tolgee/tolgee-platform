@@ -6,11 +6,13 @@ import { ChevronRight } from '@untitled-ui/icons-react';
 
 import { Switch } from 'tg.component/common/Switch';
 import { LabelHint } from 'tg.component/common/LabelHint';
-import { LINKS } from 'tg.constants/links';
-import { useHasPublicContribution } from 'tg.globalContext/helpers';
+import { LinkExternal } from 'tg.component/LinkExternal';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useHasPublicContribution, useUser } from 'tg.globalContext/helpers';
 
 export const ProfileVisibilityField = () => {
   const { t } = useTranslate();
+  const user = useUser();
   const formik = useFormikContext();
   const visibility = formik.getFieldMeta('profileVisibility');
   const hasPublicContribution = useHasPublicContribution();
@@ -22,6 +24,18 @@ export const ProfileVisibilityField = () => {
   const isOn = !savedAsWaiting && visibility.value !== 'PRIVATE';
   const savesAsWaiting =
     !hasPublicContribution && visibility.value === 'DEFAULT';
+
+  const profileLink = (
+    <LinkExternal
+      href={LINKS.USER_COMMUNITY_PROFILE.build({
+        [PARAMS.USER_ID]: user!.id,
+      })}
+      underline="hover"
+      data-cy="user-profile-visibility-view-link"
+    >
+      {t('community_profile_visibility_open_link', 'Open profile')}
+    </LinkExternal>
+  );
 
   const findProjectLink = (
     <MuiLink
@@ -51,7 +65,7 @@ export const ProfileVisibilityField = () => {
         'community_profile_visibility_status_private',
         'Only you can see your profile.'
       );
-  const link = savesAsWaiting ? findProjectLink : null;
+  const link = savesAsWaiting ? findProjectLink : profileLink;
 
   return (
     <Box mb={2}>

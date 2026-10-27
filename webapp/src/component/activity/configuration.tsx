@@ -137,6 +137,18 @@ export const actionsConfiguration: Partial<
     },
     entities: { TranslationComment: ['text'] },
   },
+  TRANSLATION_COMMENT_EDIT: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_translation_comment_edit"
+          defaultValue="Comment edited"
+          params={params}
+        />
+      );
+    },
+    entities: { TranslationComment: ['text'] },
+  },
   TRANSLATION_COMMENT_SET_STATE: {
     label(params) {
       return (
