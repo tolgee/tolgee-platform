@@ -13,6 +13,7 @@ import { visitTranslations } from '../../common/translations';
 describe('Community project browsed without an account', () => {
   let publicProjectId: number;
   let privateProjectId: number;
+  let aliceId: number;
 
   beforeEach(() => {
     communityStatsData.clean();
@@ -24,6 +25,9 @@ describe('Community project browsed without an account', () => {
       privateProjectId = projects.find(
         (p) => p.name === 'Community Stats Private'
       )!.id;
+      aliceId = res.body.users.find(
+        (u) => u.username === 'alice@community.test'
+      ).id;
     });
   });
 
@@ -148,5 +152,12 @@ describe('Community project browsed without an account', () => {
     waitForGlobalLoading();
     gcy('community-contributor-card').should('have.length.at.least', 2);
     gcy('guest-login-button').should('be.visible');
+  });
+
+  it('shows a contributor profile to a guest', () => {
+    cy.visit(`${HOST}/users/${aliceId}`);
+    waitForGlobalLoading();
+    gcy('community-profile-page').should('be.visible');
+    gcy('community-profile-calendar').should('be.visible');
   });
 });

@@ -314,6 +314,7 @@ export const ContributorsContent = () => {
               firstContributionAt={p.firstContributionAt}
               lastContributionAt={p.lastContributionAt}
               isMe={p.id === user?.id}
+              profilePublic={p.profilePublic}
             />
           ))}
           {contributors.hasNextPage && (

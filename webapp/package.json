@@ -51,6 +51,7 @@
     "posthog-js": "^1.261.0",
     "prism-react-renderer": "1.2.1",
     "react": "^18.3.1",
+    "react-activity-calendar": "^3.2.1",
     "react-cropper": "2.1.8",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.3",

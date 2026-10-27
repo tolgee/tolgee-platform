@@ -31,6 +31,10 @@ describe('Community contributors page', () => {
     visitPage();
     gcy('community-activity-chart').should('be.visible');
     gcy('community-contributor-card').should('have.length.at.least', 2);
+    gcy('community-contributor-card')
+      .first()
+      .should('have.attr', 'href')
+      .and('include', '/users/');
   });
 
   it('switches the chart between suggestions, accepted and contributions', () => {

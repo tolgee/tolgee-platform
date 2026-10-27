@@ -130,6 +130,7 @@ describe('User profile', () => {
       .should('be.disabled')
       .and('not.be.checked');
     cy.gcy('user-profile-visibility-find-link').should('be.visible');
+    cy.gcy('user-profile-visibility-view-link').should('not.exist');
   });
 
   it('will fail when user exists', () => {
@@ -160,6 +161,7 @@ describe('Profile visibility of a contributor', () => {
 
   it('turns the profile private and back on as default', () => {
     profile.getVisibilitySwitchInput().should('be.enabled').and('be.checked');
+    cy.gcy('user-profile-visibility-view-link').should('be.visible');
     cy.gcy('user-profile-visibility-find-link').should('not.exist');
 
     profile.getVisibilitySwitch().click();
@@ -172,6 +174,7 @@ describe('Profile visibility of a contributor', () => {
       .getVisibilitySwitchInput()
       .should('be.enabled')
       .and('not.be.checked');
+    cy.gcy('user-profile-visibility-view-link').should('be.visible');
 
     cy.intercept('PUT', '**/v2/user').as('saveUser');
     profile.getVisibilitySwitch().click();
