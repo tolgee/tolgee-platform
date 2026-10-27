@@ -1,7 +1,12 @@
 import { useRef } from 'react';
 
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
-import { AddParams, FiltersInternal, FiltersType } from './tools';
+import {
+  AddParams,
+  AutoTranslatedBy,
+  FiltersInternal,
+  FiltersType,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
 
 function remove<T extends string | number>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];
@@ -42,6 +47,63 @@ export function withoutDanglingLanguageScopes(
     updated[scope] = undefined;
   });
   return updated;
+}
+
+export const AUTO_TRANSLATED_SOURCES: readonly AutoTranslatedBy[] = [
+  'TRANSLATION_MEMORY',
+  'MACHINE_TRANSLATION',
+];
+
+export function selectedAutoTranslatedSources(
+  filters: FiltersInternal
+): readonly AutoTranslatedBy[] {
+  if (!filters.filterTranslationState?.includes('AUTO_TRANSLATED')) {
+    return [];
+  }
+  if (!filters.filterAutoTranslatedBy) {
+    return AUTO_TRANSLATED_SOURCES;
+  }
+  return [filters.filterAutoTranslatedBy];
+}
+
+function withAutoTranslatedSources(
+  filters: FiltersInternal,
+  sources: readonly AutoTranslatedBy[]
+): FiltersInternal {
+  let states = filters.filterTranslationState;
+  if (!sources.length) {
+    states = remove(states, 'AUTO_TRANSLATED');
+  } else if (!states?.includes('AUTO_TRANSLATED')) {
+    states = add(states, 'AUTO_TRANSLATED');
+  }
+  return {
+    ...filters,
+    filterTranslationState: states,
+    filterAutoTranslatedBy: sources.length === 1 ? sources[0] : undefined,
+  };
+}
+
+export function toggleAutoTranslated(filters: FiltersInternal) {
+  const allSelected =
+    selectedAutoTranslatedSources(filters).length ===
+    AUTO_TRANSLATED_SOURCES.length;
+  return withAutoTranslatedSources(
+    filters,
+    allSelected ? [] : AUTO_TRANSLATED_SOURCES
+  );
+}
+
+export function toggleAutoTranslatedBy(
+  filters: FiltersInternal,
+  source: AutoTranslatedBy
+) {
+  const selected = selectedAutoTranslatedSources(filters);
+  return withAutoTranslatedSources(
+    filters,
+    selected.includes(source)
+      ? selected.filter((s) => s !== source)
+      : [...selected, source]
+  );
 }
 
 type Props = {
@@ -377,6 +439,8 @@ export const useTranslationFilters = ({
               filtersQuery.filterAutoTranslatedInLang,
               tag
             );
+            filtersQuery.filterAutoTranslatedBy =
+              filters.filterAutoTranslatedBy;
           } else {
             filtersQuery.filterState = add(
               filtersQuery.filterState,
