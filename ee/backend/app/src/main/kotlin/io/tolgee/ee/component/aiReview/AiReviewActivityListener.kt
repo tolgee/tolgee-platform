@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
@@ -12,6 +13,8 @@ import io.tolgee.ee.service.aiReview.AiReviewQueueService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.batch.params.AiReviewJobParams
+import io.tolgee.model.batch.params.QaCheckJobParams
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.language.LanguageService
@@ -63,6 +66,25 @@ class AiReviewActivityListener(
       val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
       process(projectId, entities)
     }
+  }
+
+  @EventListener
+  fun onSelfHeal(event: OnBatchJobFinalized) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.QA_CHECK && event.job.type != BatchJobType.AI_REVIEW) return
+    val projectId = event.job.projectId ?: return
+    if (isSelfHealJob(event.job)) return
+    runSentryCatching {
+      aiReviewQueueService.selfHeal(projectId)
+    }
+  }
+
+  private fun isSelfHealJob(job: BatchJobDto): Boolean {
+    val params = job.params ?: return false
+    if (job.type == BatchJobType.AI_REVIEW) {
+      return objectMapper.convertValue(params, AiReviewJobParams::class.java).handlingStuckItems
+    }
+    return objectMapper.convertValue(params, QaCheckJobParams::class.java).handlingStuckStaleItems
   }
 
   private fun process(
