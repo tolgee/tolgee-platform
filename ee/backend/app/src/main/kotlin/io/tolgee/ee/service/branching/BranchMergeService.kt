@@ -227,11 +227,11 @@ class BranchMergeService(
         keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
       }
 
-    val snapshotOriginalKeyIds = changes.mapNotNull { it.targetBranchKeyId }.toSet()
+    val targetKeyIds = changes.mapNotNull { it.targetBranchKeyId }.toSet()
     val snapshotByTargetKeyId =
       branchSnapshotService
-        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
-        .associateBy { it.originalKeyId }
+        .getSnapshotKeysForTargetKeys(merge, targetKeyIds)
+        .associateBy { merge.targetKeyIdOf(it) }
 
     changes.forEach { change ->
       change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = keysById[id] }
@@ -292,11 +292,11 @@ class BranchMergeService(
     merge: BranchMerge,
     allowedLanguageTags: Set<String>,
   ) {
-    val snapshotOriginalKeyIds = conflicts.map { it.targetBranchKeyId }.toSet()
+    val targetKeyIds = conflicts.map { it.targetBranchKeyId }.toSet()
     val snapshotByTargetKeyId =
       branchSnapshotService
-        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
-        .associateBy { it.originalKeyId }
+        .getSnapshotKeysForTargetKeys(merge, targetKeyIds)
+        .associateBy { merge.targetKeyIdOf(it) }
     conflicts.forEach { conflict ->
       conflict.effectiveResolutionType = conflict.resolutionType
       conflict.changedTranslations =
