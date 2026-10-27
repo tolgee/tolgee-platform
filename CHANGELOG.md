@@ -1,3 +1,10 @@
+# [3.241.0](https://github.com/tolgee/tolgee-platform/compare/v3.240.3...v3.241.0) (2026-10-27)
+
+
+### Features
+
+* show hosted words on the project dashboard ([#4000](https://github.com/tolgee/tolgee-platform/issues/4000)) ([514c6e7](https://github.com/tolgee/tolgee-platform/commit/514c6e7f48b440764be8c8629c2887fcab777eac))
+
 ## [3.240.3](https://github.com/tolgee/tolgee-platform/compare/v3.240.2...v3.240.3) (2026-10-26)
 
 
