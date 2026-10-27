@@ -1,7 +1,11 @@
 package io.tolgee.service.translation
 
+import io.tolgee.dtos.request.suggestion.SuggestionFilters
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.views.TranslationSuggestionView
 import jakarta.persistence.EntityManager
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +20,29 @@ open class TranslationSuggestionServiceOssImpl(
   ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
     return mutableMapOf()
   }
+
+  override fun getSuggestionsPaged(
+    pageable: Pageable,
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    filters: SuggestionFilters,
+  ): Page<TranslationSuggestion> = Page.empty()
+
+  override fun acceptSuggestion(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    suggestionId: Long,
+    declineOther: Boolean,
+  ): Pair<TranslationSuggestion, List<Long>>? = null
+
+  override fun declineSuggestion(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    suggestionId: Long,
+  ): TranslationSuggestion? = null
 
   @Transactional
   override fun deleteAllByLanguage(id: Long) {

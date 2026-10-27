@@ -42,11 +42,15 @@ class McpWithoutEeTest : AbstractMcpTest() {
       "store_big_meta",
     )
 
-  private val eeBranchTools =
+  private val eeTools =
     setOf(
       "list_branches",
       "create_branch",
       "delete_branch",
+      "list_keys_with_suggestions",
+      "list_suggestions",
+      "accept_suggestion",
+      "decline_suggestion",
     )
 
   @BeforeEach
@@ -67,7 +71,7 @@ class McpWithoutEeTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `branch tools are only available with EE module`() {
+  fun `ee tools are only available with EE module`() {
     val client = createMcpClientWithPak(data.apiKey.encodedKey!!)
     val toolNames =
       client
@@ -76,9 +80,9 @@ class McpWithoutEeTest : AbstractMcpTest() {
         .map { it.name() }
         .toSet()
     if (eePresent) {
-      assertThat(toolNames).containsAll(eeBranchTools)
+      assertThat(toolNames).containsAll(eeTools)
     } else {
-      assertThat(toolNames).doesNotContainAnyElementsOf(eeBranchTools)
+      assertThat(toolNames).doesNotContainAnyElementsOf(eeTools)
     }
   }
 }
