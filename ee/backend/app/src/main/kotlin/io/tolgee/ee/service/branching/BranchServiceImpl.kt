@@ -197,9 +197,23 @@ class BranchServiceImpl(
     request: DryRunMergeBranchRequest,
   ): BranchMerge {
     val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
-    val origin = sourceBranch.originBranch ?: throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
-    val targetBranch = getActiveBranch(projectId, origin.id)
-    return dryRunMerge(sourceBranch, targetBranch)
+    return dryRunMerge(sourceBranch, resolveMergeTarget(projectId, sourceBranch, request.targetBranchId))
+  }
+
+  private fun resolveMergeTarget(
+    projectId: Long,
+    source: Branch,
+    targetBranchId: Long?,
+  ): Branch {
+    if (targetBranchId == null) {
+      val origin = source.originBranch ?: throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
+      return getActiveBranch(projectId, origin.id)
+    }
+    val target = getActiveBranch(projectId, targetBranchId)
+    if (source.originBranch?.id == target.id || target.originBranch?.id == source.id) {
+      return target
+    }
+    throw BadRequestException(Message.BRANCH_MERGE_BRANCHES_NOT_RELATED)
   }
 
   @Transactional
