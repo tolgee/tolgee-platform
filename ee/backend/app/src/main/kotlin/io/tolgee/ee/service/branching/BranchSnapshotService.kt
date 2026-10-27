@@ -2,6 +2,7 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -208,14 +209,17 @@ class BranchSnapshotService(
 
   fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
 
-  fun getSnapshotKeysByOriginalKeyIdIn(
-    branchId: Long,
-    originalKeyIds: Collection<Long>,
+  fun getSnapshotKeysForTargetKeys(
+    merge: BranchMerge,
+    targetKeyIds: Collection<Long>,
   ): List<KeySnapshot> {
-    if (originalKeyIds.isEmpty()) {
+    if (targetKeyIds.isEmpty()) {
       return emptyList()
     }
-    return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(branchId, originalKeyIds)
+    if (merge.isUpdate) {
+      return keySnapshotRepository.findAllByBranchIdAndBranchKeyIdIn(merge.childBranch.id, targetKeyIds)
+    }
+    return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(merge.childBranch.id, targetKeyIds)
   }
 
   fun deleteSnapshots(branchId: Long) {

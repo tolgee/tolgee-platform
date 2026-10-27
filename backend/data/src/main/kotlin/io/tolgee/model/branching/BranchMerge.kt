@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -60,6 +61,25 @@ class BranchMerge :
 
   val isReadyToMerge: Boolean
     get() = isRevisionValid && isResolved
+
+  val isUpdate: Boolean
+    get() = targetBranch.originBranch?.id == sourceBranch.id
+
+  val childBranch: Branch
+    get() {
+      if (isUpdate) return targetBranch
+      return sourceBranch
+    }
+
+  fun sourceKeyIdOf(snapshot: KeySnapshot): Long {
+    if (isUpdate) return snapshot.originalKeyId
+    return snapshot.branchKeyId
+  }
+
+  fun targetKeyIdOf(snapshot: KeySnapshot): Long {
+    if (isUpdate) return snapshot.branchKeyId
+    return snapshot.originalKeyId
+  }
 
   val isMerged: Boolean
     get() = mergedAt != null

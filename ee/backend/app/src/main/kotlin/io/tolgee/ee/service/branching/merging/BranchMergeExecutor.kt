@@ -35,7 +35,7 @@ class BranchMergeExecutor(
   fun execute(merge: BranchMerge): BranchMerge {
     attachKeysForMerge(merge)
     val snapshotKeys by lazy {
-      branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
+      branchSnapshotService.getSnapshotKeys(merge.childBranch.id).associateBy { merge.targetKeyIdOf(it) }
     }
     applyChanges(merge, snapshotKeys)
     return finalizeMerge(merge)

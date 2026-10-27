@@ -16,5 +16,11 @@ interface KeySnapshotRepository : KeySnapshotRepositoryOss {
     originalKeyIds: Collection<Long>,
   ): List<KeySnapshot>
 
+  @EntityGraph(attributePaths = ["translations", "keyMetaSnapshot"])
+  fun findAllByBranchIdAndBranchKeyIdIn(
+    branchId: Long,
+    branchKeyIds: Collection<Long>,
+  ): List<KeySnapshot>
+
   fun deleteAllByBranchId(branchId: Long)
 }

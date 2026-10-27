@@ -29,6 +29,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,6 +90,48 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       testData.mainBranch,
       testData.featureBranch,
     )
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+  }
+
+  @Test
+  fun `dry-run update from origin offers the origin change as an update on the child`() {
+    updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
+    val merge = dryRunUpdateFromMain()
+    merge.isUpdate.assert.isTrue()
+    val updates = merge.changes.filter { it.change == BranchKeyMergeChangeType.UPDATE }
+    updates.assert.hasSize(1)
+    updates
+      .single()
+      .sourceKey!!
+      .id.assert
+      .isEqualTo(testData.mainKeyToUpdate.id)
+    updates
+      .single()
+      .targetKey!!
+      .id.assert
+      .isEqualTo(testData.featureKeyToUpdate.id)
+    merge.changes
+      .filter { it.change != BranchKeyMergeChangeType.UPDATE }
+      .assert
+      .isEmpty()
+  }
+
+  @Test
+  fun `dry-run update from origin leaves a child-only key alone`() {
+    createFeatureOnlyKey()
+    val merge = dryRunUpdateFromMain()
+    merge.changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `dry-run update from origin does not resurrect a key deleted on the child`() {
+    deleteFeatureKey()
+    val merge = dryRunUpdateFromMain()
+    merge.changes.assert.isEmpty()
   }
 
   @Test
@@ -584,6 +627,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       testData.mainBranch.refresh()!!,
     )
   }
+
+  private fun dryRunUpdateFromMain() =
+    branchService.dryRunMerge(testData.mainBranch.refresh()!!, testData.featureBranch.refresh()!!)
 
   private fun applyMerge(merge: BranchMerge) = branchService.applyMerge(testData.project.id, merge.id)
 
