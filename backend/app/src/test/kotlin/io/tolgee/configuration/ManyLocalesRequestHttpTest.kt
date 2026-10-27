@@ -34,15 +34,32 @@ class ManyLocalesRequestHttpTest {
       "en-US,en;q=0.9,de-DE;q=0.8,de;q=0.8,fr-FR;q=0.7,fr;q=0.7,it-IT;q=0.6," +
         "it;q=0.6,es-ES;q=0.5,es;q=0.5,cs-CZ;q=0.4,cs;q=0.4,pl;q=0.3,ru;q=0.2,uk;q=0.1"
 
+    val response = get(fifteenLocales)
+
+    response.statusCode().assert.isEqualTo(HttpStatus.OK.value())
+  }
+
+  @Test
+  fun `request with more locales than the raised cap is still rejected`() {
+    val fiftyOneLocales =
+      ('a'..'z')
+        .flatMap { first -> ('a'..'z').map { second -> "$first$second" } }
+        .take(51)
+        .joinToString(",")
+
+    val response = get(fiftyOneLocales)
+
+    response.statusCode().assert.isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value())
+  }
+
+  private fun get(acceptLanguage: String): HttpResponse<String> {
     val request =
       HttpRequest
         .newBuilder(URI("http://localhost:$port/websocket/info"))
-        .header("Accept-Language", fifteenLocales)
+        .header("Accept-Language", acceptLanguage)
         .GET()
         .build()
 
-    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-
-    response.statusCode().assert.isEqualTo(HttpStatus.OK.value())
+    return client.send(request, HttpResponse.BodyHandlers.ofString())
   }
 }
