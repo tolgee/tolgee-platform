@@ -5559,6 +5559,8 @@ export interface components {
       params?: { [key: string]: unknown };
       /** Format: int64 */
       revisionId: number;
+      /** @enum {string} */
+      systemActor?: "AI_REVIEWER";
       /** Format: int64 */
       timestamp: number;
       /** @enum {string} */
@@ -7631,6 +7633,11 @@ export interface components {
       };
       /** @enum {string} */
       revisionType: "ADD" | "MOD" | "DEL";
+      /**
+       * @description System actor of the change, when the platform itself made it
+       * @enum {string}
+       */
+      systemActor?: "AI_REVIEWER";
       /**
        * Format: int64
        * @description Unix timestamp of the revision

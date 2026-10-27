@@ -12,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Prompt
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
@@ -89,6 +90,7 @@ class ProjectBuilder(
     var qaConfig: ProjectQaConfigBuilder? = null
     var slackConfigs = mutableListOf<SlackConfigBuilder>()
     val batchJobs: MutableList<BatchJobBuilder> = mutableListOf()
+    val activityRevisions: MutableList<ActivityRevisionBuilder> = mutableListOf()
     val tasks = mutableListOf<TaskBuilder>()
     val taskKeys = mutableListOf<TaskKeyBuilder>()
     val prompts = mutableListOf<PromptBuilder>()
@@ -265,6 +267,8 @@ class ProjectBuilder(
   fun addSlackConfig(ft: FT<SlackConfig>) = addOperation(data.slackConfigs, ft)
 
   fun addBatchJob(ft: FT<BatchJob>) = addOperation(data.batchJobs, ft)
+
+  fun addActivityRevision(ft: FT<ActivityRevision>) = addOperation(data.activityRevisions, ft)
 
   fun addImportSettings(ft: FT<ImportSettings>) {
     data.importSettings.add(ImportSettings(this.self).apply(ft))
