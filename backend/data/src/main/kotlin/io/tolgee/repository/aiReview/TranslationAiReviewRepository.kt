@@ -1,6 +1,7 @@
 package io.tolgee.repository.aiReview
 
 import io.tolgee.model.aiReview.TranslationAiReview
+import io.tolgee.model.enums.aiReview.AiReviewStatus
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -42,6 +43,72 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
     promptName: String,
     promptRevision: Int?,
     threshold: Int,
+  ): Int
+
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where t.key.project.id = :projectId
+      and t.id in :translationIds
+      and (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true)
+      and (t.language.id not in :qaLanguageIds or t.qaChecksStale = false)
+    """,
+  )
+  fun findReadyTranslationIds(
+    projectId: Long,
+    translationIds: Collection<Long>,
+    qaLanguageIds: Collection<Long>,
+  ): List<Long>
+
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where t.key.project.id = :projectId
+      and t.id in :translationIds
+      and (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true)
+    """,
+  )
+  fun findClaimableTranslationIds(
+    projectId: Long,
+    translationIds: Collection<Long>,
+  ): List<Long>
+
+  @Modifying
+  @Query("delete from TranslationAiReview r where r.translation.id in :translationIds")
+  fun deleteAllByTranslationIds(translationIds: Collection<Long>): Int
+
+  @Modifying
+  @Query(
+    """
+    delete from TranslationAiReview r
+    where r.translation.id in (
+      select t.id from Translation t
+      where t.key.id in :keyIds and t.language.id <> :baseLanguageId
+    )
+    and r.status in :statuses
+    """,
+  )
+  fun deleteSiblingRows(
+    keyIds: Collection<Long>,
+    baseLanguageId: Long,
+    statuses: Collection<AiReviewStatus>,
+  ): Int
+
+  @Modifying
+  @Query(
+    """
+    delete from TranslationAiReview r
+    where r.translation.id in (
+      select t.id from Translation t where t.language.id = :languageId
+    )
+    and r.status not in :keptStatuses
+    """,
+  )
+  fun deleteByLanguage(
+    languageId: Long,
+    keptStatuses: Collection<AiReviewStatus>,
   ): Int
 
   @Query(
