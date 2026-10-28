@@ -1,6 +1,9 @@
 package io.tolgee.ee.service
 
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.ComputedPermissionOrigin
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
@@ -12,6 +15,7 @@ import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.normalizePlurals
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
@@ -19,6 +23,7 @@ import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.SetTranslationTextUtil
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionServiceOssImpl
@@ -39,6 +44,8 @@ class TranslationSuggestionServiceEeImpl(
   private val authenticationFacade: AuthenticationFacade,
   private val translationService: TranslationService,
   private val tolgeeProperties: TolgeeProperties,
+  private val permissionService: PermissionService,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) : TranslationSuggestionServiceOssImpl(entityManager) {
   override fun getKeysWithSuggestions(
     projectId: Long,
@@ -96,18 +103,35 @@ class TranslationSuggestionServiceEeImpl(
       throw BadRequestException(Message.DUPLICATE_SUGGESTION)
     }
 
+    val author = authenticationFacade.authenticatedUserEntity
+    val isAuthorsFirstSuggestionAnywhere = !translationSuggestionRepository.existsByAuthorId(author.id)
     val suggestion =
       TranslationSuggestion(
         project = project,
         language = language,
-        author = authenticationFacade.authenticatedUserEntity,
+        author = author,
         translation = normalizedTranslation,
         isPlural = key.isPlural,
       )
     suggestion.key = key
 
     translationSuggestionRepository.save(suggestion)
+    publishCommunityEvents(project, author, isAuthorsFirstSuggestionAnywhere)
     return suggestion
+  }
+
+  private fun publishCommunityEvents(
+    project: Project,
+    author: UserAccount,
+    isAuthorsFirstSuggestionAnywhere: Boolean,
+  ) {
+    val origin = permissionService.getProjectPermissionData(project.id, author.id).computedPermissions.origin
+    if (origin != ComputedPermissionOrigin.COMMUNITY) return
+
+    fun report(eventName: String) =
+      businessEventPublisher.publish(OnBusinessEventToCaptureEvent(eventName = eventName, projectId = project.id))
+    report("COMMUNITY_SUGGESTION_NON_MEMBER")
+    if (isAuthorsFirstSuggestionAnywhere) report("COMMUNITY_FIRST_SUGGESTION")
   }
 
   fun getSuggestion(
