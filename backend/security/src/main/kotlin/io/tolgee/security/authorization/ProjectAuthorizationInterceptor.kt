@@ -16,9 +16,12 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectContextService
 import io.tolgee.security.RequestContextService
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.tracing.TolgeeTracingContext
 import jakarta.servlet.http.HttpServletRequest
@@ -35,18 +38,18 @@ class ProjectAuthorizationInterceptor(
   private val requestContextService: RequestContextService,
   private val projectContextService: ProjectContextService,
   private val tracingContext: TolgeeTracingContext,
-) : AbstractAuthorizationInterceptor() {
+  private val authenticationFacade: AuthenticationFacade,
+) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    if (isGlobal(handler)) return continueUnlessGuest()
     val project =
       requestContextService.getTargetProject(request)
-        // Two possible scenarios: we're on a "global" route, or the project was not found.
-        // In both cases, there is no authorization to perform, and we simply continue.
-        // It is not the job of the interceptor to return a 404 error.
-        ?: return true
+        // The project was not found: nothing to authorize here.
+        ?: return continueUnlessGuest()
 
     val requiredScopes = getRequiredScopes(request, handler)
     val isWriteOperation = !handler.isReadOnly(request.method)
@@ -61,6 +64,11 @@ class ProjectAuthorizationInterceptor(
     // Add project/org context to OpenTelemetry traces
     tracingContext.setContext(project.id, project.organizationOwnerId)
 
+    return true
+  }
+
+  private fun continueUnlessGuest(): Boolean {
+    if (authenticationFacade.isGuest) throw AuthenticationException(Message.UNAUTHENTICATED)
     return true
   }
 

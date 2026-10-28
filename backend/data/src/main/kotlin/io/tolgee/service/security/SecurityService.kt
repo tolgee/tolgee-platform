@@ -129,7 +129,7 @@ class SecurityService(
     val scopes =
       Scope
         .expand(
-          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
+          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUserOrGuest.id),
         ).toSet()
 
     val credential = authenticationFacade.scopedCredential ?: return scopes
@@ -417,7 +417,7 @@ class SecurityService(
     val usersPermission =
       permissionService.getProjectPermissionData(
         projectId,
-        authenticationFacade.authenticatedUser.id,
+        authenticationFacade.authenticatedUserOrGuest.id,
       )
     permissionCheckFn(usersPermission.computedPermissions)
   }
@@ -432,7 +432,7 @@ class SecurityService(
       val usersPermission =
         permissionService.getProjectPermissionData(
           projectId,
-          authenticationFacade.authenticatedUser.id,
+          authenticationFacade.authenticatedUserOrGuest.id,
         )
       fn(usersPermission.computedPermissions, languageIds.values.map { it.id })
     } catch (e: LanguageNotPermittedException) {
@@ -658,7 +658,7 @@ class SecurityService(
   }
 
   private val activeUser: UserAccountDto
-    get() = authenticationFacade.authenticatedUserOrNull ?: throw PermissionException(Message.UNAUTHENTICATED)
+    get() = authenticationFacade.authenticatedUserOrGuest
 
   companion object {
     private const val KEY_ID_LOOKUP_CHUNK_SIZE = 10_000

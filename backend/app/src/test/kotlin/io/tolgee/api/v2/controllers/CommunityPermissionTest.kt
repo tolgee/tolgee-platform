@@ -154,20 +154,6 @@ class CommunityPermissionTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `anonymous user cannot open a public project`() {
-    setPublic(true)
-    performGet(projectUrl()).andIsForbidden
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `anonymous user cannot list translations of a public project`() {
-    setPublic(true)
-    performGet("${projectUrl()}/translations").andIsForbidden
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `community user cannot change translations`() {
     setPublic(true)
     userAccount = testData.communityUser

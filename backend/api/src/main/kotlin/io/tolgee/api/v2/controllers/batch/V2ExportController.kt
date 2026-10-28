@@ -98,8 +98,11 @@ class V2ExportController(
 
       params.languages =
         languageService
-          .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
-          .toList()
+          .getLanguagesForExport(
+            params.languages,
+            projectHolder.project.id,
+            authenticationFacade.authenticatedUserOrGuest.id,
+          ).toList()
           .map { language -> language.tag }
           .toSet()
       val exported = exportService.export(projectHolder.project.id, params)

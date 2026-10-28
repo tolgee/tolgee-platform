@@ -16,8 +16,10 @@
 
 package io.tolgee.security
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.InvalidPathException
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationService
@@ -66,8 +68,13 @@ class RequestContextService(
   }
 
   private fun getTargetProjectImplicit(): ProjectDto? {
-    val projectId = authenticationFacade.implicitProjectId ?: throw ProjectNotSelectedException()
+    val projectId = authenticationFacade.implicitProjectId ?: throw noImplicitProject()
     return projectService.findDto(projectId)
+  }
+
+  private fun noImplicitProject(): Exception {
+    if (authenticationFacade.isGuest) return AuthenticationException(Message.UNAUTHENTICATED)
+    return ProjectNotSelectedException()
   }
 
   /**

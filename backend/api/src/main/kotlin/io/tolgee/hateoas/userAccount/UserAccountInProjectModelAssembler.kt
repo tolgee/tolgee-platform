@@ -6,6 +6,7 @@ import io.tolgee.hateoas.permission.PermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionWithAgencyModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ExtendedUserAccountInProject
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.AvatarService
 import io.tolgee.service.security.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -31,6 +32,7 @@ class UserAccountInProjectModelAssembler(
         view.directPermission,
         UserAccount.Role.USER,
         asScopedCredential = false,
+        isGuest = view.id == TolgeeAuthentication.GUEST_USER_ID,
       )
     val avatar = avatarService.getAvatarLinks(view.avatarHash)
     return UserAccountInProjectModel(
