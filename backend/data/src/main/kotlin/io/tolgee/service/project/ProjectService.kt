@@ -3,6 +3,8 @@ package io.tolgee.service.project
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.BatchJobService
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -85,6 +87,7 @@ class ProjectService(
   private val batchJobService: BatchJobService,
   @Lazy
   private val branchService: BranchService,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -251,6 +254,15 @@ class ProjectService(
     public: Boolean,
   ): Project {
     val project = get(id)
+    if (project.public != public) {
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "PROJECT_PUBLIC_SETTINGS_CHANGE",
+          projectId = id,
+          data = mapOf("public" to public),
+        ),
+      )
+    }
     project.public = public
     return projectRepository.save(project)
   }

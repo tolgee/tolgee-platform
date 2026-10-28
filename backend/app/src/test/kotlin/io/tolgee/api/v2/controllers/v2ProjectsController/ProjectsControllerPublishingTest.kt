@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.PropertyModification
@@ -10,11 +11,17 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.postHogEventsCapturedSoFar
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 
@@ -23,11 +30,50 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 class ProjectsControllerPublishingTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: ProjectPublishingTestData
 
+  @Autowired
+  private lateinit var postHog: PostHog
+
   @BeforeEach
   fun setup() {
+    Mockito.reset(postHog)
     testData = ProjectPublishingTestData()
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun clean() {
+    testDataService.cleanTestData(testData.root)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `reports a business event for each flip`() {
+    userAccount = testData.owner
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk
+    assertPostHogEventReported(postHog, "PROJECT_PUBLIC_SETTINGS_CHANGE") {
+      it["public"].assert.isEqualTo(true)
+      (it["\$groups"] as Map<*, *>)["project"].assert.isEqualTo(testData.project.id)
+      it["organizationId"].assert.isEqualTo(testData.project.organizationOwner.id)
+    }
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = false)).andIsOk
+    assertPostHogEventReported(postHog, "PROJECT_PUBLIC_SETTINGS_CHANGE") {
+      it["public"].assert.isEqualTo(false)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `setting the current value again reports no business event`() {
+    userAccount = testData.owner
+    assertThat(testData.project.public).isFalse()
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = false)).andIsOk
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk
+    assertPostHogEventReported(postHog, "PROJECT_PUBLIC_SETTINGS_CHANGE") { it["public"].assert.isEqualTo(true) }
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = false)).andIsOk
+    assertPostHogEventReported(postHog, "PROJECT_PUBLIC_SETTINGS_CHANGE") { it["public"].assert.isEqualTo(false) }
+    postHogEventsCapturedSoFar(postHog, "PROJECT_PUBLIC_SETTINGS_CHANGE").assert.isEqualTo(2)
   }
 
   @Test
