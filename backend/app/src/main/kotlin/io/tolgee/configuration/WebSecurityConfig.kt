@@ -23,6 +23,7 @@ import io.tolgee.security.authentication.AdminAccessInterceptor
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.EmailValidationInterceptor
+import io.tolgee.security.authentication.GuestAccessInterceptor
 import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
@@ -63,6 +64,7 @@ class WebSecurityConfig(
   private val rateLimitInterceptor: RateLimitInterceptor,
   @Lazy
   private val authenticationInterceptor: AuthenticationInterceptor,
+  private val guestAccessInterceptor: GuestAccessInterceptor,
   @Lazy
   private val emailValidationInterceptor: EmailValidationInterceptor,
   @Lazy
@@ -139,6 +141,11 @@ class WebSecurityConfig(
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
+    // The project routes authorize a guest through the floor.
+    registry
+      .addInterceptor(guestAccessInterceptor)
+      .addPathPatterns("/api/**", "/v2/**")
+      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS, *PROJECT_ENDPOINTS)
     registry
       .addInterceptor(ssoAuthenticationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)

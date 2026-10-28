@@ -106,7 +106,7 @@ class AuthenticationDisabledFilterTest {
   }
 
   @Test
-  fun `it does not authenticate when authentication is enabled`() {
+  fun `it installs the guest principal instead of the initial user when authentication is enabled`() {
     Mockito.`when`(authProperties.enabled).thenReturn(true)
 
     val req = MockHttpServletRequest()
@@ -115,8 +115,9 @@ class AuthenticationDisabledFilterTest {
 
     assertDoesNotThrow { authenticationDisabledFilter.doFilter(req, res, chain) }
 
-    val ctx = SecurityContextHolder.getContext()
-    assertThat(ctx.authentication).isNull()
+    val auth = SecurityContextHolder.getContext().authentication as TolgeeAuthentication
+    assertThat(auth.isGuest).isTrue()
+    assertThat(auth.isSuperToken).isFalse()
   }
 
   @Test

@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
@@ -47,6 +48,7 @@ class ProjectContextService(
    * When a permission check fails, admins and supporters (for read-only operations)
    * can bypass the check. If the user has zero access and can't even bypass for
    * read-only, a [ProjectNotFoundException] is thrown to hide project existence.
+   * A guest never bypasses anything, and every denial is "sign in" for a guest.
    */
   fun setup(
     project: ProjectDto,
@@ -54,7 +56,7 @@ class ProjectContextService(
     useDefaultPermissions: Boolean,
     isWriteOperation: Boolean,
   ) {
-    val userId = authenticationFacade.authenticatedUser.id
+    val userId = authenticationFacade.authenticatedUserOrGuest.id
     var bypassed = false
 
     // Before the scope gate: a credential pointed at a project it does not cover is told so, rather than being told
@@ -74,11 +76,11 @@ class ProjectContextService(
 
           if (!canBypassForReadOnly()) {
             // Security consideration: if the user cannot see the project, pretend it does not exist.
-            throw ProjectNotFoundException(project.id)
+            deny(ProjectNotFoundException(project.id))
           }
 
           // Admin access for read-only operations is allowed, but it's not enough for the current operation.
-          throw PermissionException()
+          deny(PermissionException())
         }
 
         bypassed = true
@@ -94,9 +96,11 @@ class ProjectContextService(
               userId,
             )
 
-            throw PermissionException(
-              Message.OPERATION_NOT_PERMITTED,
-              missing.map { it.value },
+            deny(
+              PermissionException(
+                Message.OPERATION_NOT_PERMITTED,
+                missing.map { it.value },
+              ),
             )
           }
 
@@ -143,12 +147,19 @@ class ProjectContextService(
     get() = !authenticationFacade.isScopedCredential
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
+    if (authenticationFacade.isGuest) return false
     if (!canUseAdminPermissions) return false
     if (authenticationFacade.authenticatedUser.isAdmin()) return true
     return !isWriteOperation && canBypassForReadOnly()
   }
 
   private fun canBypassForReadOnly(): Boolean {
+    if (authenticationFacade.isGuest) return false
     return canUseAdminPermissions && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
+  }
+
+  private fun deny(exception: Exception): Nothing {
+    if (authenticationFacade.isGuest) throw AuthenticationException(Message.UNAUTHENTICATED)
+    throw exception
   }
 }
