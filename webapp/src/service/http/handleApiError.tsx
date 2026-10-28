@@ -15,6 +15,8 @@ const SSO_MIGRATION_PATHS = [
   LINKS.ACCEPT_AUTH_PROVIDER_CHANGE,
 ];
 import { errorAction } from './errorAction';
+import { tokenService } from 'tg.service/TokenService';
+import { shouldRememberAfterLogin } from 'tg.component/common/RedirectUnsignedUser';
 
 export const handleApiError = (
   r: Response,
@@ -33,6 +35,14 @@ export const handleApiError = (
   }
   if (!options.disableAuthRedirect) {
     if (r.status == 401) {
+      if (!tokenService.getToken()) {
+        const location = globalContext.actions?.currentLocation();
+        if (location && shouldRememberAfterLogin(location)) {
+          globalContext.actions?.saveAfterLoginLink(location);
+        }
+        globalContext.actions?.redirectTo(LINKS.LOGIN.build());
+        return;
+      }
       // eslint-disable-next-line no-console
       console.warn('Redirecting to login - unauthorized user');
       messageService.error(

@@ -369,6 +369,8 @@ export class LINKS {
 
   static PROJECT_DASHBOARD = LINKS.PROJECT;
 
+  static PROJECT_COMMUNITY = Link.ofParent(LINKS.PROJECT, 'community');
+
   static PROJECT_AI = Link.ofParent(LINKS.PROJECT, 'ai');
 
   static PROJECT_CONTEXT_DATA = Link.ofParent(LINKS.PROJECT_AI, 'context-data');
