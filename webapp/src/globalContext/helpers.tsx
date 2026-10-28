@@ -8,6 +8,16 @@ export const useConfig = () =>
 
 export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 
+export const useIsGuest = () => useGlobalContext((c) => !c.auth.allowPrivate);
+
+export const useRegistrationAllowed = () =>
+  useGlobalContext(
+    (c) =>
+      (c.initialData.serverConfiguration.allowRegistrations ||
+        c.auth.allowRegistration) &&
+      c.initialData.serverConfiguration.nativeEnabled
+  );
+
 export const useIsEmailVerified = () =>
   useGlobalContext((c) => c.isEmailVerified);
 

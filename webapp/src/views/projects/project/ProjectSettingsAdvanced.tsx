@@ -73,7 +73,7 @@ export const ProjectSettingsAdvanced = () => {
       message: value ? (
         <T
           keyName="community_settings_open_confirmation"
-          defaultValue="Anyone signed in will be able to find “{name}” in the community translations list and suggest translations. They won’t become members and can’t edit existing translations."
+          defaultValue="Anyone will be able to find and browse “{name}” in the community translations list; signed-in users can suggest translations. They won’t become members and can’t edit existing translations."
           params={{ name: project.name }}
         />
       ) : (
@@ -151,7 +151,7 @@ export const ProjectSettingsAdvanced = () => {
         )}
         description={t(
           'community_settings_switch_hint',
-          'Anyone can find this project in the community translations list and suggest translations. Only the organization owner can change this.'
+          'Anyone can find and browse this project in the community translations list; signed-in users can suggest translations. Only the organization owner can change this.'
         )}
         checked={project.public}
         onSwitch={handlePublicSwitch}
