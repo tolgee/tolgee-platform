@@ -185,6 +185,7 @@ export type Activity = {
 export type ActivityOptions = {
   label: (params?: TranslateParams) => React.ReactElement;
   description?: (data: ProjectActivityModel) => string | undefined;
+  title?: (data: ActivityModel) => React.ReactElement | undefined;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];
   compactFieldCount?: number;
