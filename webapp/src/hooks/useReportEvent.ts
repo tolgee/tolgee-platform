@@ -11,7 +11,7 @@ export const useReportEvent = () => {
     method: 'post',
     options: { noGlobalLoading: true },
   });
-  const isAuthenticated = tokenService.getToken() !== null;
+  const isAuthenticated = !!tokenService.getToken();
   const storedPreferredOrganization = usePreferredOrganization();
 
   const preferredOrganization = isAuthenticated
@@ -19,23 +19,21 @@ export const useReportEvent = () => {
     : undefined;
 
   const storedProject = useProjectContextOptional()?.project;
+  // BusinessEventController.report silently drops a guest's report naming a project/org; pass it in data
   const project = isAuthenticated ? storedProject : undefined;
 
   const organizationId =
     project?.organizationOwner?.id ||
     preferredOrganization?.preferredOrganization?.id;
 
-  return (
-    eventName: string,
-    data: Record<string, any> | undefined = undefined
-  ) => {
+  return (eventName: string, data?: Record<string, any>) => {
     reportMutation.mutate({
       content: {
         'application/json': {
           eventName,
           data,
           projectId: project?.id,
-          organizationId: organizationId,
+          organizationId,
           anonymousUserId: AnonymousIdService.get() || undefined,
         },
       },
@@ -45,7 +43,7 @@ export const useReportEvent = () => {
 
 export const useReportOnce = (
   eventName: string,
-  data: Record<string, any> | undefined = undefined
+  data?: Record<string, any>
 ) => {
   const reportEvent = useReportEvent();
 

@@ -187,6 +187,27 @@ export const actionsConfiguration: Partial<
     label(params) {
       return <T keyName="activity_edit_project" params={params} />;
     },
+    title(data) {
+      const isPublic: unknown =
+        data.modifiedEntities?.Project?.[0]?.modifications?.public?.new;
+      if (isPublic === true) {
+        return (
+          <T
+            keyName="community_activity_project_opened"
+            defaultValue="Project opened to community translation"
+          />
+        );
+      }
+      if (isPublic === false) {
+        return (
+          <T
+            keyName="community_activity_project_closed"
+            defaultValue="Project closed to community translation"
+          />
+        );
+      }
+      return undefined;
+    },
     entities: { Project: ['name'] },
   },
   NAMESPACE_EDIT: {
