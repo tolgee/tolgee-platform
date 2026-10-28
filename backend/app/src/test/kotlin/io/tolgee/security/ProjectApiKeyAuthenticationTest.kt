@@ -30,7 +30,7 @@ class ProjectApiKeyAuthenticationTest : AbstractControllerTest() {
 
   @Test
   fun accessWithApiKey_failure() {
-    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations")).andIsForbidden
+    mvc.perform(MockMvcRequestBuilders.get("/v2/projects/translations")).andIsUnauthorized
   }
 
   @Test

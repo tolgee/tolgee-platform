@@ -23,8 +23,8 @@ describe('Public projects view', () => {
     publicProjectsData.generateStandard();
     visit();
     gcy('community-translation-banner').should('be.visible');
-    gcy('public-projects-login-button').should('be.visible');
-    gcy('public-projects-sign-up-button').should('be.visible');
+    gcy('guest-login-button').should('be.visible');
+    gcy('guest-sign-up-button').should('be.visible');
     gcy('organization-switch').should('not.exist');
     gcy('global-plus-button').should('not.exist');
   });
@@ -64,20 +64,28 @@ describe('Public projects view', () => {
     gcy('global-search-field').should('not.exist');
   });
 
-  it('routes a public row click to the login page', () => {
+  it('opens a public row read-only for a logged-out visitor', () => {
     publicProjectsData.generateStandard();
     visit();
     gcy('dashboard-projects-list-item').first().click();
-    cy.url().should('include', '/login');
+    cy.url().should('match', /\/projects\/[0-9]+$/);
+    waitForGlobalLoading();
+    gcy('global-base-view-content').should('exist');
+    gcy('guest-login-button').should('be.visible');
+    gcy('global-user-menu-button').should('not.exist');
   });
 
-  it('returns a logged-out visitor to the clicked project after login', () => {
+  it('returns a logged-out visitor to the opened project after login', () => {
     publicProjectsData.generateStandard();
     visit();
     gcy('dashboard-projects-list-item').first().click();
+    cy.url().should('match', /\/projects\/[0-9]+$/);
+    waitForGlobalLoading();
+    gcy('guest-login-button').click();
     cy.url().should('include', '/login');
     loginViaForm('admin', 'admin');
-    cy.url().should('match', /\/projects\/[0-9]+/);
+    cy.url().should('match', /\/projects\/[0-9]+$/);
+    gcy('global-user-menu-button').should('be.visible');
   });
 
   it('opens the project instead of login for a logged-in visitor', () => {

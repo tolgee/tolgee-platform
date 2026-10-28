@@ -14,6 +14,7 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -112,6 +113,21 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
 
     logged.filter { it.level == Level.ERROR }.assert.isEmpty()
   }
+
+  @Test
+  fun `it drops a guest's project-scoped event instead of attributing it to the organization owner`() {
+    performPost(
+      "/v2/public/business-events/report",
+      mapOf("eventName" to "GUEST_PROJECT_EVENT", "projectId" to testData.publicProject.id),
+    ).andIsOk
+
+    reportAs(testData.nonMember, mapOf("eventName" to "AFTER_GUEST_EVENT"))
+    assertPostHogEventReported(postHog, "AFTER_GUEST_EVENT")
+    postHogCaptured("GUEST_PROJECT_EVENT").assert.isFalse()
+  }
+
+  private fun postHogCaptured(eventName: String): Boolean =
+    Mockito.mockingDetails(postHog).invocations.any { it.method.name == "capture" && it.arguments[1] == eventName }
 
   private fun reportAs(
     user: UserAccount,

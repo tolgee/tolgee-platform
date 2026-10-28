@@ -21,6 +21,7 @@ import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.OrganizationDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -39,7 +40,9 @@ import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.tracing.TolgeeTracingContext
+import jakarta.servlet.ServletException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -97,6 +100,7 @@ class ProjectAuthorizationInterceptorTest {
       requestContextService,
       projectContextService,
       tracingContext,
+      authenticationFacade,
     )
 
   private val mockMvc =
@@ -109,6 +113,7 @@ class ProjectAuthorizationInterceptorTest {
   fun setupMocks() {
     Mockito.`when`(authenticationFacade.authentication).thenReturn(authentication)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
+    Mockito.`when`(authenticationFacade.authenticatedUserOrGuest).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
     Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(false)
@@ -154,6 +159,17 @@ class ProjectAuthorizationInterceptorTest {
   fun `it has no effect on endpoints not specific to a single project`() {
     Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(null)
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects")).andIsOk
+  }
+
+  @Test
+  fun `a guest is told to sign in on a global project route and on a missing project`() {
+    Mockito.`when`(authenticationFacade.isGuest).thenReturn(true)
+    Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(null)
+
+    listOf("/v2/projects", "/v2/projects/1/default-perms").forEach { path ->
+      val thrown = assertThrows<ServletException>(path) { mockMvc.perform(MockMvcRequestBuilders.get(path)) }
+      assertThat(thrown.cause).describedAs(path).isInstanceOf(AuthenticationException::class.java)
+    }
   }
 
   @Test
