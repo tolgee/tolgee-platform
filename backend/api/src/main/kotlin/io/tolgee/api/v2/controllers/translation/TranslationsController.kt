@@ -258,7 +258,7 @@ When null, resulting file will be a flat key-value object.
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
+        authenticationFacade.authenticatedUserOrGuest.id,
       )
 
     val pageableWithSort = getSafeSortPageable(pageable)
@@ -288,7 +288,7 @@ When null, resulting file will be a flat key-value object.
   }
 
   private fun addTasksToResponse(data: Page<KeyWithTranslationsView>) {
-    val user = authenticationFacade.authenticatedUser
+    val user = authenticationFacade.authenticatedUserOrNull ?: return
     val keyIds = data.content.map { key -> key.keyId }
 
     val translationsWithTasks = taskService.getKeysWithTasks(user.id, keyIds)

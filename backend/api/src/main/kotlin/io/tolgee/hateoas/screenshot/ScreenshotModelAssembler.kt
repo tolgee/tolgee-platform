@@ -85,7 +85,7 @@ class ScreenshotModelAssembler(
     if (tolgeeProperties.authentication.securedImageRetrieval) {
       val token =
         jwtService.emitTicket(
-          authenticationFacade.authenticatedUser.id,
+          authenticationFacade.authenticatedUserOrGuest.id,
           JwtService.TicketType.IMG_ACCESS,
           tolgeeProperties.authentication.securedImageTimestampMaxAge,
           mapOf(

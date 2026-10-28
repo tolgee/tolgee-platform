@@ -39,20 +39,24 @@ class AuthenticationFacade(
   private val patService: PatService,
 ) {
   // -- GENERAL AUTHENTICATION INFO
+  val isGuest: Boolean
+    get() = tolgeeAuthenticationOrNull?.isGuest == true
+
   val isAuthenticated: Boolean
-    get() = SecurityContextHolder.getContext().authentication is TolgeeAuthentication
+    get() = signedInAuthenticationOrNull != null
 
   val authentication: TolgeeAuthentication
-    get() =
-      SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
-        ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+    get() = signedInAuthenticationOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
 
   // -- CURRENT USER
   val authenticatedUser: UserAccountDto
     get() = authentication.principal
 
+  val authenticatedUserOrGuest: UserAccountDto
+    get() = tolgeeAuthenticationOrNull?.principal ?: throw AuthenticationException(Message.UNAUTHENTICATED)
+
   val authenticatedUserOrNull: UserAccountDto?
-    get() = if (isAuthenticated) authentication.principal else null
+    get() = signedInAuthenticationOrNull?.principal
 
   val authenticatedUserEntity: UserAccount
     get() = authenticatedUserEntityOrNull ?: throw AuthenticationException(Message.UNAUTHENTICATED)
@@ -120,7 +124,7 @@ class AuthenticationFacade(
 
   fun isAuthorSelfAccess(authorId: Long?): Boolean {
     if (!canUseAuthorSelfAccess) return false
-    return authorId != null && authorId == authenticatedUser.id
+    return authorId != null && authorId == authenticatedUserOrNull?.id
   }
 
   val implicitProjectId: Long?
@@ -153,8 +157,11 @@ class AuthenticationFacade(
     }
 
   private val credentialsOrNull: Any?
-    get() {
-      if (!isAuthenticated) return null
-      return authentication.credentials
-    }
+    get() = signedInAuthenticationOrNull?.credentials
+
+  private val tolgeeAuthenticationOrNull: TolgeeAuthentication?
+    get() = SecurityContextHolder.getContext().authentication as? TolgeeAuthentication
+
+  private val signedInAuthenticationOrNull: TolgeeAuthentication?
+    get() = tolgeeAuthenticationOrNull?.takeUnless { it.isGuest }
 }
