@@ -1,21 +1,10 @@
 import { useEffect } from 'react';
-import { Redirect, matchPath, useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { GlobalLoading } from 'tg.component/GlobalLoading';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useIsGuest } from 'tg.globalContext/helpers';
-
-// paths which shouldn't be stored, so we avoid loops
-const PATHS_NOT_TO_REMEMBER = [LINKS.PROJECTS, LINKS.LOGIN, LINKS.ROOT];
-
-export const shouldRememberAfterLogin = (location: string) =>
-  !PATHS_NOT_TO_REMEMBER.some((link) =>
-    matchPath(location, {
-      path: link.template,
-      exact: true,
-      strict: false,
-    })
-  );
+import { shouldRememberAfterLogin } from 'tg.service/afterLoginLink';
 
 export const RedirectUnsignedUser: React.FC<
   React.PropsWithChildren<unknown>

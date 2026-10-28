@@ -16,7 +16,7 @@ const SSO_MIGRATION_PATHS = [
 ];
 import { errorAction } from './errorAction';
 import { tokenService } from 'tg.service/TokenService';
-import { shouldRememberAfterLogin } from 'tg.component/common/RedirectUnsignedUser';
+import { shouldRememberAfterLogin } from 'tg.service/afterLoginLink';
 
 export const handleApiError = (
   r: Response,
