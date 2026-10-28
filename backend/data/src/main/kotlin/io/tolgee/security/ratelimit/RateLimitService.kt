@@ -222,6 +222,7 @@ class RateLimitService(
       (!isAuthentication && rateLimitProperties.endpointLimits)
   }
 
+  /** Does nothing for a caller without an account, guests included: only the per-IP buckets limit them. */
   fun checkPerUserRateLimit(
     bucketName: String,
     limit: Int,

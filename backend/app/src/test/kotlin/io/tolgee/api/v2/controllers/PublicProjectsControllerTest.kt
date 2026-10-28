@@ -47,7 +47,7 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a public row carries stats, org and NONE permission for an anonymous visitor`() {
+  fun `a public row carries stats, org and the view-only guest permission for an anonymous visitor`() {
     performGet("/v2/public/projects/with-stats").andIsOk.andAssertThatJson {
       node("_embedded.projects[1]") {
         node("id").isEqualTo(testData.publicProject.id)
@@ -57,8 +57,9 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
         node("languages").isArray.hasSize(1)
         node("directPermission").isEqualTo(null)
         node("organizationRole").isEqualTo(null)
-        node("computedPermission.type").isEqualTo("NONE")
-        node("computedPermission.scopes").isArray.hasSize(0)
+        node("computedPermission.type").isEqualTo("VIEW")
+        node("computedPermission.origin").isEqualTo("GUEST")
+        node("computedPermission.scopes").isArray.contains("translations.view").doesNotContain("translations.suggest")
       }
     }
   }

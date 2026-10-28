@@ -27,7 +27,11 @@ class SecurityServiceOAuthNarrowingTest {
       on { id } doReturn 1L
       on { role } doReturn UserAccount.Role.USER
     }
-  private val authenticationFacade = mock<AuthenticationFacade> { on { authenticatedUserOrNull } doReturn user }
+  private val authenticationFacade =
+    mock<AuthenticationFacade> {
+      on { authenticatedUserOrNull } doReturn user
+      on { authenticatedUserOrGuest } doReturn user
+    }
   private val permissionService = mock<PermissionService>()
 
   private fun service(): SecurityService =

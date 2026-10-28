@@ -2414,7 +2414,8 @@ export interface components {
         | "NONE"
         | "SERVER_ADMIN"
         | "SERVER_SUPPORTER"
-        | "COMMUNITY";
+        | "COMMUNITY"
+        | "GUEST";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated

@@ -12,6 +12,7 @@ import io.tolgee.hateoas.community.CommunityActivityModel
 import io.tolgee.hateoas.community.CommunityActivityModelAssembler
 import io.tolgee.hateoas.community.CommunityProfileModel
 import io.tolgee.hateoas.community.CommunityProfileModelAssembler
+import io.tolgee.security.authentication.AllowGuestAccess
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.contributor.CommunityStatsService
 import org.springdoc.core.annotations.ParameterObject
@@ -30,7 +31,7 @@ import java.time.Duration
 @RequestMapping(value = ["/v2/users/{userId:[0-9]+}"])
 @Tag(
   name = "Community profile",
-  description = "A signed-in user's view of another user's contributions to public projects",
+  description = "A user's contributions to public projects, readable with or without an account",
 )
 class CommunityProfileController(
   private val communityStatsService: CommunityStatsService,
@@ -41,6 +42,7 @@ class CommunityProfileController(
   private val communityProfileModelAssembler: CommunityProfileModelAssembler,
 ) {
   @GetMapping("/community-profile")
+  @AllowGuestAccess
   @Operation(
     summary = "Get community profile",
     description =
@@ -63,6 +65,7 @@ class CommunityProfileController(
     )
 
   @GetMapping("/community-activity")
+  @AllowGuestAccess
   @Operation(
     summary = "Get community activity feed",
     description =

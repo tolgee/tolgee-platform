@@ -81,6 +81,7 @@ class ProjectModelAssembler(
       authenticationFacade.authenticatedUserOrNull?.role,
       asScopedCredential = authenticationFacade.isScopedCredential,
       isProjectPublic = view.public,
+      isGuest = authenticationFacade.isGuest,
     )
   }
 }
