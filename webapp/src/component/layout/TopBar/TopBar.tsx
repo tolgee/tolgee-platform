@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import { Box, styled, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -20,6 +20,9 @@ import { TopBarTestClockInfo } from './TopBarTestClockInfo';
 import React, { FC } from 'react';
 import { TrialChip } from 'tg.ee';
 import { NotificationsTopBarButton } from 'tg.component/layout/Notifications/NotificationsTopBarButton';
+import { LoginSignUpButtons } from 'tg.component/layout/TopBar/LoginSignUpButtons';
+import { LINKS } from 'tg.constants/links';
+import { useIsGuest } from 'tg.globalContext/helpers';
 
 export const StyledAppBar = styled(AppBar)(
   ({ theme }) =>
@@ -86,6 +89,10 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
 
   const user = useUser();
   const isEmailVerified = useIsEmailVerified();
+  const isGuest = useIsGuest();
+  const onAuthPage = Boolean(
+    useRouteMatch([LINKS.LOGIN.template, LINKS.SIGN_UP.template])
+  );
 
   const theme = useTheme();
   const appNavigation = !hideAppNavigation;
@@ -149,6 +156,7 @@ export const TopBar: FC<React.PropsWithChildren<Props>> = ({
           </>
         )}
         {(!user || !appNavigation) && <LanguageMenu />}
+        {isGuest && !onAuthPage && <LoginSignUpButtons />}
       </StyledToolbar>
     </StyledAppBar>
   );

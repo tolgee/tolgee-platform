@@ -313,6 +313,9 @@ declare namespace DataCy {
         "glossary-translation-save-button": true;
         "glossary-view-button": true;
         "glossary-view-language-select": true;
+        "guest-login-button": true;
+        "guest-login-dialog-sign-up-link": true;
+        "guest-sign-up-button": true;
         "handlebars-editor": true;
         "handlebars-tooltip": true;
         "handlebars-tooltip-helper-description": true;
@@ -727,8 +730,6 @@ declare namespace DataCy {
         "project-transfer-dialog": true;
         "prompt-basic-option": true;
         "prompt-basic-option-edit": true;
-        "public-projects-login-button": true;
-        "public-projects-sign-up-button": true;
         "qa-action-correct": true;
         "qa-action-ignore": true;
         "qa-badge": true;
@@ -989,6 +990,7 @@ declare namespace DataCy {
         "translations-filter-select-clear": true;
         "translations-filter-task-status": true;
         "translations-filter-task-type": true;
+        "translations-guest-bar": true;
         "translations-history-load-more-button": true;
         "translations-key-cell-description": true;
         "translations-key-count": true;

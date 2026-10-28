@@ -16,6 +16,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { LoginCredentialsForm } from './LoginCredentialsForm';
 import { LoginTotpForm } from './LoginTotpForm';
 import { LoginMoreInfo } from './LoginMoreInfo';
+import { useRegistrationAllowed } from 'tg.globalContext/helpers';
 
 export const LoginView: FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -39,12 +40,7 @@ export const LoginView: FunctionComponent<
 
   const isSmall = useMediaQuery(SPLIT_CONTENT_BREAK_POINT);
 
-  const registrationAllowed = useGlobalContext(
-    (c) =>
-      (c.initialData.serverConfiguration.allowRegistrations ||
-        c.auth.allowRegistration) &&
-      c.initialData.serverConfiguration.nativeEnabled
-  );
+  const registrationAllowed = useRegistrationAllowed();
 
   useReportOnce('LOGIN_PAGE_OPENED');
 
