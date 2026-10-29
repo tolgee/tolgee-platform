@@ -26,7 +26,6 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
-import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
@@ -35,22 +34,22 @@ class ImportDataManager(
   // data is not saved when single step import is used
   val saveData: Boolean = true,
 ) : Logging {
-  private val importService: ImportService by lazy { applicationContext.getBean<ImportService>() }
+  private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
 
-  private val keyService: KeyService by lazy { applicationContext.getBean<KeyService>() }
+  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
 
-  private val namespaceService: NamespaceService by lazy { applicationContext.getBean<NamespaceService>() }
+  private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
 
-  private val projectHolder: ProjectHolder by lazy { applicationContext.getBean<ProjectHolder>() }
+  private val projectHolder: ProjectHolder by lazy { applicationContext.getBean(ProjectHolder::class.java) }
 
-  private val securityService: SecurityService by lazy { applicationContext.getBean<SecurityService>() }
+  private val securityService: SecurityService by lazy { applicationContext.getBean(SecurityService::class.java) }
 
   private val collisionHandlers by lazy {
     applicationContext.getBeansOfType(CollisionHandler::class.java).values
   }
 
   private val keyMetaService: KeyMetaService by lazy {
-    applicationContext.getBean<KeyMetaService>()
+    applicationContext.getBean(KeyMetaService::class.java)
   }
 
   /** Nested file → keyName → ImportKey. */
