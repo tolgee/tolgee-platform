@@ -71,6 +71,12 @@ class BranchMerge :
       return sourceBranch
     }
 
+  val originBranch: Branch
+    get() {
+      if (isUpdate) return sourceBranch
+      return targetBranch
+    }
+
   fun sourceKeyIdOf(snapshot: KeySnapshot): Long {
     if (isUpdate) return snapshot.originalKeyId
     return snapshot.branchKeyId

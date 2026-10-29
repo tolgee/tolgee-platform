@@ -14,6 +14,7 @@ import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.mapResponseTo
@@ -23,8 +24,10 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.service.branching.BranchService
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -364,6 +367,22 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost("branches/merge/$mergeId/apply")
       .andIsNotFound
       .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `apply into protected branch requires protected-modify scope`() {
+    val keys = createConflictKeys()
+    val change = createMergeWithConflict(keys.second, keys.first, BranchKeyMergeResolutionType.SOURCE)
+    performProjectAuthPost("branches/merge/${change.branchMerge.id}/apply").andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT, Scope.BRANCH_PROTECTED_MODIFY])
+  fun `apply into protected branch passes with protected-modify scope`() {
+    val keys = createConflictKeys()
+    val change = createMergeWithConflict(keys.second, keys.first, BranchKeyMergeResolutionType.SOURCE)
+    performProjectAuthPost("branches/merge/${change.branchMerge.id}/apply").andIsOk
   }
 
   private fun createMergeWithConflict(

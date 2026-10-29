@@ -629,7 +629,7 @@ class SecurityService(
     }
   }
 
-  private fun checkBranchModify(
+  fun checkBranchModify(
     branch: Branch?,
     projectId: Long,
   ) {
