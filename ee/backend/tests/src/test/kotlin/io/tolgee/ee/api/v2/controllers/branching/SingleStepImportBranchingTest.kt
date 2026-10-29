@@ -1,7 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
@@ -23,10 +21,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -152,13 +147,13 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
 
   private fun performImportWithApiKey(branch: String): ResultActions {
     val apiKey = (projectAuthRequestPerformer as ProjectApiKeyAuthRequestPerformer).apiKey.key!!
-    val request =
-      MockMvcRequestBuilders
-        .multipart("/v2/projects/${testData.project.id}/single-step-import")
-        .file(MockMultipartFile("files", "en.json", "application/json", simpleJson.file.readBytes()))
-        .part(MockPart("params", ObjectMapper().writeValueAsBytes(mapOf("branch" to branch))))
-        .header(API_KEY_HEADER_NAME, apiKey)
-    return mvc.perform(request)
+    return performSingleStepImport(
+      mvc,
+      testData.project.id,
+      listOf(Pair("en.json", simpleJson)),
+      mapOf("branch" to branch),
+      apiKey = apiKey,
+    )
   }
 
   private fun performImport(

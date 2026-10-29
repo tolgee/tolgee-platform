@@ -14,7 +14,7 @@ import java.util.LinkedHashMap
 
 data class AppliedChange(
   val sourceKey: Key?,
-  val targetKey: Key?,
+  val targetKey: Key,
 )
 
 @Service
@@ -163,22 +163,9 @@ class BranchSnapshotService(
       return
     }
     val child = merge.childBranch
-    val pairs =
-      applied.map { change ->
-        val sourceId = change.sourceKey?.id
-        val targetId = checkNotNull(change.targetKey).id
-        if (merge.isUpdate) {
-          Triple(
-            change.sourceKey,
-            sourceId,
-            targetId,
-          )
-        } else {
-          Triple(change.sourceKey, targetId, sourceId)
-        }
-      }
-    val originIds = pairs.mapNotNull { it.second }
-    val childIds = pairs.mapNotNull { it.third }
+    val ids = applied.map { originAndChild(merge, it.sourceKey?.id, it.targetKey.id) }
+    val originIds = ids.mapNotNull { it.first }
+    val childIds = ids.mapNotNull { it.second }
     val stale =
       (
         keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(child.id, originIds) +
@@ -187,11 +174,21 @@ class BranchSnapshotService(
     keySnapshotRepository.deleteAll(stale)
     keySnapshotRepository.flush()
     val fresh =
-      pairs.mapNotNull { (source, originId, childId) ->
-        source ?: return@mapNotNull null
-        snapshotOf(source, checkNotNull(originId), checkNotNull(childId), child)
+      applied.mapNotNull { change ->
+        val source = change.sourceKey ?: return@mapNotNull null
+        val (originId, childId) = originAndChild(merge, source.id, change.targetKey.id)
+        snapshotOf(source, originId, childId, child)
       }
     keySnapshotRepository.saveAll(fresh)
+  }
+
+  private fun <T> originAndChild(
+    merge: BranchMerge,
+    sourceSide: T,
+    targetSide: T,
+  ): Pair<T, T> {
+    if (merge.isUpdate) return sourceSide to targetSide
+    return targetSide to sourceSide
   }
 
   private fun snapshotOf(

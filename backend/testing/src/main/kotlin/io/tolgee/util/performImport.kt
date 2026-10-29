@@ -1,5 +1,6 @@
 package io.tolgee.util
 
+import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
@@ -40,6 +41,7 @@ fun performSingleStepImport(
   files: List<Pair<String, Resource>>?,
   params: Map<String, Any?> = mapOf(),
   paramsContentType: MediaType? = null,
+  apiKey: String? = null,
 ): ResultActions {
   val builder =
     MockMvcRequestBuilders
@@ -60,7 +62,8 @@ fun performSingleStepImport(
   paramsContentType?.let { paramsPart.headers.contentType = it }
   builder.part(paramsPart)
 
-  return mvc.perform(AuthorizedRequestFactory.addToken(builder))
+  if (apiKey == null) return mvc.perform(AuthorizedRequestFactory.addToken(builder))
+  return mvc.perform(builder.header(API_KEY_HEADER_NAME, apiKey))
 }
 
 private fun mapToQueryString(map: Map<String, Any?>): String {

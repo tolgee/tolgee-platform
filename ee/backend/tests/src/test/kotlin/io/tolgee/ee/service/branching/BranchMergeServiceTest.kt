@@ -107,16 +107,11 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
     val merge = dryRunUpdateFromMain()
     merge.isUpdate.assert.isTrue()
-    val updates = merge.changes.filter { it.change == BranchKeyMergeChangeType.UPDATE }
-    updates.assert.hasSize(1)
-    updates
-      .single()
-      .sourceKey!!
+    val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    update.sourceKey!!
       .id.assert
       .isEqualTo(testData.mainKeyToUpdate.id)
-    updates
-      .single()
-      .targetKey!!
+    update.targetKey!!
       .id.assert
       .isEqualTo(testData.featureKeyToUpdate.id)
     merge.changes
@@ -752,28 +747,6 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     mergedTranslation!!.text.assert.isEqualTo(germanValue)
   }
 
-  private fun setLabels(
-    translation: Translation,
-    vararg labels: Label,
-  ) {
-    translation.labels.clear()
-    labels.forEach { translation.addLabel(it) }
-    translationService.save(translation)
-  }
-
-  private fun prepareMergeScenario(): BranchMerge {
-    createFeatureOnlyKey()
-    deleteFeatureKey()
-    updateFeatureKey()
-    waitForNotThrowing(timeout = 5000, pollTime = 100) {
-      testData.featureBranch
-        .refresh()!!
-        .revision.assert
-        .isEqualTo(4)
-    }
-    return dryRunFeatureBranchMerge()
-  }
-
   @Test
   fun `apply merge - renames the target key when the source key was renamed`() {
     keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
@@ -825,6 +798,176 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .maxCharLimit.assert
       .isEqualTo(42)
     dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - same-name key added on both branches resolved as source takes the source value`() {
+    val mainKey = createKey("same-name-new-key", "Main value", testData.mainBranch)
+    createKey("same-name-new-key", "Feature value", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge()
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.SOURCE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    mainKey.enTranslation().assert.isEqualTo("Feature value")
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - same-name key added on both branches resolved as target keeps the target value`() {
+    val mainKey = createKey("same-name-new-key", "Main value", testData.mainBranch)
+    val featureKey = createKey("same-name-new-key", "Feature value", testData.featureBranch)
+    addTagToKey(featureKey, "feature-only-tag")
+    val merge = dryRunFeatureBranchMerge()
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.TARGET)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    mainKey.enTranslation().assert.isEqualTo("Main value")
+    val mainTags = mainKey.refresh().keyMeta?.tags
+    mainTags.orEmpty().assert.isEmpty()
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - updates a target key that was deleted and re-created with the same name`() {
+    keyService.hardDelete(testData.mainKeyToDelete.id)
+    val recreated = createKey(BranchMergeTestData.DELETE_KEY_NAME, "Text to delete", testData.mainBranch)
+    updateKeyTranslation(testData.featureKeyToDelete, updatedValue)
+    val merge = dryRunFeatureBranchMerge()
+    merge.changes
+      .single()
+      .change.assert
+      .isEqualTo(BranchKeyMergeChangeType.UPDATE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    recreated.enTranslation().assert.isEqualTo(updatedValue)
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - deletes a key before renaming another key to its name`() {
+    deleteFeatureKey()
+    keyService.edit(
+      keyService.get(testData.featureKeyToUpdate.id),
+      BranchMergeTestData.DELETE_KEY_NAME,
+      null,
+      testData.featureBranch.name,
+    )
+    val merge = dryRunFeatureBranchMerge()
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactlyInAnyOrder(BranchKeyMergeChangeType.DELETE, BranchKeyMergeChangeType.UPDATE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    testData.mainBranch
+      .findKey(BranchMergeTestData.DELETE_KEY_NAME)!!
+      .id.assert
+      .isEqualTo(testData.mainKeyToUpdate.id)
+    keyRepository
+      .findById(testData.mainKeyToDelete.id)
+      .orElseThrow()
+      .deletedAt.assert
+      .isNotNull()
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `dry-run offers a new key that reuses the old name of a renamed key as addition`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    dryRunFeatureBranchMerge()
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactlyInAnyOrder(BranchKeyMergeChangeType.UPDATE, BranchKeyMergeChangeType.ADD)
+  }
+
+  @Test
+  fun `dry-run does not pair a key deleted on the target with another target key renamed to its name`() {
+    deleteTargetKey()
+    keyService.edit(
+      keyService.get(testData.mainKeyToUpdate.id),
+      BranchMergeTestData.DELETE_KEY_NAME,
+      null,
+      testData.mainBranch.name,
+    )
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - update from origin renames the child key`() {
+    keyService.edit(keyService.get(testData.mainKeyToUpdate.id), "renamed-on-main", null, testData.mainBranch.name)
+    val merge = dryRunUpdateFromMain()
+    merge.changes
+      .single()
+      .change.assert
+      .isEqualTo(BranchKeyMergeChangeType.UPDATE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    testData.featureKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo("renamed-on-main")
+    dryRunUpdateFromMain().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - moves the target key to the namespace of the source key`() {
+    moveFeatureKeyToNamespace("ns")
+    branchService.applyMerge(testData.project.id, dryRunFeatureBranchMerge().id, false)
+    executeInNewTransaction {
+      keyRepository
+        .findByIdOrNull(testData.mainKeyToUpdate.id)!!
+        .namespace
+        ?.name.assert
+        .isEqualTo("ns")
+    }
+  }
+
+  @Test
+  fun `apply merge - adds a new key that reuses the old name of a renamed key`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    branchService.applyMerge(testData.project.id, dryRunFeatureBranchMerge().id, false)
+    testData.mainKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo("renamed-key")
+    testData.mainBranch
+      .findKey(BranchMergeTestData.UPDATE_KEY_NAME)!!
+      .enTranslation()
+      .assert
+      .isEqualTo("Reused name")
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  private fun setLabels(
+    translation: Translation,
+    vararg labels: Label,
+  ) {
+    translation.labels.clear()
+    labels.forEach { translation.addLabel(it) }
+    translationService.save(translation)
+  }
+
+  private fun prepareMergeScenario(): BranchMerge {
+    createFeatureOnlyKey()
+    deleteFeatureKey()
+    updateFeatureKey()
+    waitForNotThrowing(timeout = 5000, pollTime = 100) {
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isEqualTo(4)
+    }
+    return dryRunFeatureBranchMerge()
+  }
+
+  private fun resolveOnlyConflict(
+    merge: BranchMerge,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    val conflict = merge.changes.single { it.change == BranchKeyMergeChangeType.CONFLICT }
+    branchService.resolveConflict(
+      testData.project.id,
+      merge.id,
+      ResolveBranchMergeConflictRequest(conflict.id, resolution),
+    )
   }
 
   private fun dryRunFeatureBranchMerge(): BranchMerge {
