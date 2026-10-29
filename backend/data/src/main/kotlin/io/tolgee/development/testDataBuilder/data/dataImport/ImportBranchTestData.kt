@@ -5,6 +5,7 @@ import io.tolgee.model.branching.Branch
 
 class ImportBranchTestData : BaseTestData() {
   var featureBranch: Branch
+  var protectedBranch: Branch
 
   init {
     this.root.apply {
@@ -15,6 +16,14 @@ class ImportBranchTestData : BaseTestData() {
             name = "feature"
             project = projectBuilder.self
             isProtected = false
+            isDefault = false
+            originBranch = this
+          }.self
+        protectedBranch =
+          addBranch {
+            name = "protected"
+            project = projectBuilder.self
+            isProtected = true
             isDefault = false
             originBranch = this
           }.self

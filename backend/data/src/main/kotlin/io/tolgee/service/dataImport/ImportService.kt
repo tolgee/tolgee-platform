@@ -40,6 +40,7 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
@@ -79,6 +80,8 @@ class ImportService(
   private val importSettingsService: ImportSettingsService,
   @Lazy
   private val branchService: BranchService,
+  @Lazy
+  private val securityService: SecurityService,
 ) {
   @Transactional
   fun addFiles(
@@ -137,6 +140,7 @@ class ImportService(
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatusItem) -> Unit = {},
   ): ImportResult {
+    securityService.checkBranchModify(import.project, import.branch?.name)
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
     val result =

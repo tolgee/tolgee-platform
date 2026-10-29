@@ -20,6 +20,7 @@ import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.dataImport.status.ImportApplicationStatusItem
+import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -35,6 +36,8 @@ class SingleStepImportService(
   private val currentDateProvider: CurrentDateProvider,
   private val applicationContext: ApplicationContext,
   private val branchingService: BranchService,
+  @Lazy
+  private val securityService: SecurityService,
 ) {
   @Transactional
   fun singleStepImport(
@@ -52,6 +55,7 @@ class SingleStepImportService(
         it.author = userAccount
         it.branch = getBranch(project, params.branch)
       }
+    securityService.checkBranchModify(project, import.branch?.name)
 
     importService.publishImportBusinessEvent(project.id, userAccount.id)
 

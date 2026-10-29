@@ -1,14 +1,20 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.API_KEY_HEADER_NAME
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.dataImport.SingleStepImportBranchTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.Scope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
@@ -17,7 +23,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockPart
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -123,6 +132,33 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
       listOf(Pair("en.json", simpleJson)),
       params = mapOf("branch" to "non-existent"),
     ).andIsNotFound
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE])
+  fun `fails importing into protected branch without protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImportWithApiKey(testData.defaultBranch.name).andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE, Scope.BRANCH_PROTECTED_MODIFY],
+  )
+  fun `imports into protected branch with protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImportWithApiKey(testData.defaultBranch.name).andIsOk
+  }
+
+  private fun performImportWithApiKey(branch: String): ResultActions {
+    val apiKey = (projectAuthRequestPerformer as ProjectApiKeyAuthRequestPerformer).apiKey.key!!
+    val request =
+      MockMvcRequestBuilders
+        .multipart("/v2/projects/${testData.project.id}/single-step-import")
+        .file(MockMultipartFile("files", "en.json", "application/json", simpleJson.file.readBytes()))
+        .part(MockPart("params", ObjectMapper().writeValueAsBytes(mapOf("branch" to branch))))
+        .header(API_KEY_HEADER_NAME, apiKey)
+    return mvc.perform(request)
   }
 
   private fun performImport(
