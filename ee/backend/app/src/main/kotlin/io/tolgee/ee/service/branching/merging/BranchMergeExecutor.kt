@@ -14,6 +14,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
+import io.tolgee.service.branching.chooseThreeWay
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
@@ -103,6 +104,10 @@ class BranchMergeExecutor(
     val targetKey =
       change.targetKey ?: return applyAddition(change, change.branchMerge.targetBranch)
     targetKey.merge(sourceKey, snapshotKey, resolution)
+    val name = chooseThreeWay(sourceKey.name, targetKey.name, snapshotKey.name, resolution) ?: targetKey.name
+    val namespace =
+      chooseThreeWay(sourceKey.namespace?.name, targetKey.namespace?.name, snapshotKey.namespace, resolution)
+    keyService.edit(targetKey, name, namespace, change.branchMerge.targetBranch.name)
     persistAfterMerge(targetKey)
     return AppliedChange(sourceKey, targetKey)
   }
@@ -122,6 +127,7 @@ class BranchMergeExecutor(
         namespace = sourceKey.namespace
         isPlural = sourceKey.isPlural
         pluralArgName = sourceKey.pluralArgName
+        maxCharLimit = sourceKey.maxCharLimit
         project = targetBranch.project
         branch = targetBranch
       }

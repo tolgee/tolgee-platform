@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
@@ -33,6 +34,7 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
@@ -770,6 +772,59 @@ class BranchMergeServiceTest : AbstractSpringTest() {
         .isEqualTo(4)
     }
     return dryRunFeatureBranchMerge()
+  }
+
+  @Test
+  fun `apply merge - renames the target key when the source key was renamed`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    val merge = dryRunFeatureBranchMerge()
+    merge.changes
+      .single()
+      .change.assert
+      .isEqualTo(BranchKeyMergeChangeType.UPDATE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    testData.mainKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo("renamed-key")
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `dry-run marks a key renamed differently on both sides as conflict`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "feature-name", null, testData.featureBranch.name)
+    keyService.edit(keyService.get(testData.mainKeyToUpdate.id), "main-name", null, testData.mainBranch.name)
+    dryRunFeatureBranchMerge()
+      .changes
+      .single()
+      .change.assert
+      .isEqualTo(BranchKeyMergeChangeType.CONFLICT)
+  }
+
+  @Test
+  fun `apply merge - rename onto an existing target name fails and rolls back`() {
+    val clashingName = "rename-clash-name"
+    createKey(clashingName, "x", testData.mainBranch)
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), clashingName, null, testData.featureBranch.name)
+    val merge = dryRunFeatureBranchMerge()
+    assertThrows<ValidationException> { branchService.applyMerge(testData.project.id, merge.id, false) }
+    testData.mainKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+  }
+
+  @Test
+  fun `apply merge - copies maxCharLimit of an added key and leaves no phantom change`() {
+    val featureKey = createKey(additionKeyName, additionValue, testData.featureBranch)
+    featureKey.maxCharLimit = 42
+    keyRepository.save(featureKey)
+    branchService.applyMerge(testData.project.id, dryRunFeatureBranchMerge().id, false)
+    testData.mainBranch
+      .findKey(additionKeyName)!!
+      .maxCharLimit.assert
+      .isEqualTo(42)
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
   }
 
   private fun dryRunFeatureBranchMerge(): BranchMerge {
