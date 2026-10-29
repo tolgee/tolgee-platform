@@ -328,7 +328,7 @@ class Key(
     }
   }
 
-  internal fun toScreenshotViews(): List<KeyScreenshotReferenceView> =
+  fun toScreenshotViews(): List<KeyScreenshotReferenceView> =
     this.keyScreenshotReferences.map {
       KeyScreenshotReferenceView(
         screenshotId = it.screenshot.id,
