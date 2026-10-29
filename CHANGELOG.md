@@ -1,3 +1,10 @@
+## [3.241.3](https://github.com/tolgee/tolgee-platform/compare/v3.241.2...v3.241.3) (2026-10-29)
+
+
+### Bug Fixes
+
+* bump Jackson and OpenTelemetry to patch Snyk-reported vulnerabilities ([#4018](https://github.com/tolgee/tolgee-platform/issues/4018)) ([1d80231](https://github.com/tolgee/tolgee-platform/commit/1d802310179b131c3883a4f0a318c307f9579fca))
+
 ## [3.241.2](https://github.com/tolgee/tolgee-platform/compare/v3.241.1...v3.241.2) (2026-10-29)
 
 
