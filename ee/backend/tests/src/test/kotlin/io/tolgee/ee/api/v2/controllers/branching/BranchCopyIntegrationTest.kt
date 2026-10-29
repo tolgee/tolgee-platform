@@ -202,16 +202,8 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       codeReference.createdAt.assert.isEqualTo(this.branch!!.createdAt)
     }
 
-    val (mainKeyMetaComments, branchKeyMetaComments) =
-      executeInNewTransaction {
-        listOf(this.keyMeta!!.id, other.keyMeta!!.id).map {
-          keyMetaRepository
-            .findById(it)
-            .get()
-            .comments
-            .toList()
-        }
-      }
+    val mainKeyMetaComments = getKeyMetaComments(this.keyMeta!!.id)
+    val branchKeyMetaComments = getKeyMetaComments(other.keyMeta!!.id)
 
     mainKeyMetaComments.assert.hasSizeGreaterThan(0)
     mainKeyMetaComments.assert.hasSize(branchKeyMetaComments.size)
@@ -223,6 +215,16 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         ?.id.assert
         .isEqualTo(branchComment.author?.id)
       comment.fromImport.assert.isEqualTo(branchComment.fromImport)
+      comment.createdAt.assert.isEqualTo(this.branch!!.createdAt)
     }
   }
+
+  private fun getKeyMetaComments(keyMetaId: Long) =
+    executeInNewTransaction {
+      keyMetaRepository
+        .findById(keyMetaId)
+        .get()
+        .comments
+        .toList()
+    }
 }
