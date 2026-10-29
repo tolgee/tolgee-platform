@@ -29,6 +29,7 @@ import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.filterFiles
@@ -70,6 +71,7 @@ class V2ImportController(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
   private val streamingImportProgressUtil: StreamingImportProgressUtil,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val securityService: SecurityService,
 ) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
@@ -123,6 +125,7 @@ class V2ImportController(
     @RequestParam branch: String? = null,
   ) {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, branch)
     val projectId = projectHolder.project.id
     this.importService.import(projectId, authenticationFacade.authenticatedUser.id, branch, forceMode)
   }
@@ -144,6 +147,7 @@ class V2ImportController(
     @RequestParam branch: String? = null,
   ): ResponseEntity<StreamingResponseBody> {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, branch)
     val projectId = projectHolder.project.id
 
     return streamingImportProgressUtil.stream { writeStatus ->

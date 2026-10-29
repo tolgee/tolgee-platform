@@ -1,12 +1,16 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportBranchTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.Scope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.util.performImport
 import org.junit.jupiter.api.BeforeEach
@@ -81,5 +85,44 @@ class V2ImportControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/
 
     performProjectAuthGet("import/result")
       .andIsOk
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE])
+  fun `apply into protected branch is forbidden without protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImport(
+      mvc = mvc,
+      projectId = testData.project.id,
+      files = listOf("simple.json" to simpleJson),
+      params = mapOf("branch" to testData.protectedBranch.name),
+    ).andIsOk
+    performProjectAuthPut("import/apply?branch=${testData.protectedBranch.name}", null).andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE, Scope.BRANCH_PROTECTED_MODIFY],
+  )
+  fun `apply into protected branch passes with protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    val importResponse =
+      performImport(
+        mvc = mvc,
+        projectId = testData.project.id,
+        files = listOf("simple.json" to simpleJson),
+        params = mapOf("branch" to testData.protectedBranch.name),
+      ).andIsOk.andReturn().response.contentAsString
+    val importLanguageId =
+      ObjectMapper()
+        .readTree(
+          importResponse,
+        ).at("/result/_embedded/languages/0/id")
+        .asLong()
+    performProjectAuthPut(
+      "import/result/languages/$importLanguageId/select-existing/${testData.englishLanguage.id}",
+      null,
+    ).andIsOk
+    performProjectAuthPut("import/apply?branch=${testData.protectedBranch.name}", null).andIsOk
   }
 }
