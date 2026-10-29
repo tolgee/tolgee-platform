@@ -85,6 +85,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     }
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
+    authenticateAs(testData.user)
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
@@ -94,6 +95,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
+    clearAuthentication()
     testDataService.cleanTestData(testData.root)
   }
 
@@ -292,6 +294,90 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val newMerge = dryRunFeatureBranchMerge()
     newMerge.changes.size.assert
       .isEqualTo(0)
+  }
+
+  @Test
+  fun `apply merge - soft-deletes the target key so it can be restored`() {
+    val merge = prepareMergeScenario()
+    applyMerge(merge)
+    val deleted = keyRepository.findById(testData.mainKeyToDelete.id).orElseThrow()
+    deleted.deletedAt.assert.isNotNull()
+    testData.mainBranch
+      .findKey(testData.mainKeyToDelete.name)
+      .assert
+      .isNull()
+  }
+
+  @Test
+  fun `apply merge - a restored key is not deleted again by the next merge`() {
+    branchService.applyMerge(testData.project.id, prepareMergeScenario().id, false)
+    keyService.restoreKeys(listOf(testData.mainKeyToDelete.id), testData.project.id)
+    val next = dryRunFeatureBranchMerge()
+    next.changes
+      .filter { it.change == BranchKeyMergeChangeType.DELETE }
+      .assert
+      .isEmpty()
+  }
+
+  @Test
+  fun `apply merge - never deletes a protected source branch`() {
+    val merge = prepareMergeScenario()
+    branchService.setProtected(testData.project.id, testData.featureBranch.id, true)
+    branchService.refreshMerge(testData.project.id, merge.id)
+    branchService.applyMerge(testData.project.id, merge.id, true)
+    testData.featureBranch
+      .refresh()!!
+      .deletedAt.assert
+      .isNull()
+  }
+
+  @Test
+  fun `apply merge - update from origin never deletes a branch`() {
+    updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
+    val merge = dryRunUpdateFromMain()
+    branchService.applyMerge(testData.project.id, merge.id, true)
+    testData.mainBranch
+      .refresh()!!
+      .deletedAt.assert
+      .isNull()
+    testData.featureBranch
+      .refresh()!!
+      .deletedAt.assert
+      .isNull()
+    testData.featureKeyToUpdate
+      .refresh()
+      .enTranslation()
+      .assert
+      .isEqualTo("Hotfix on main")
+  }
+
+  @Test
+  fun `apply merge - update from origin rebuilds the child snapshot`() {
+    updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
+    val merge = dryRunUpdateFromMain()
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    dryRunUpdateFromMain().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `apply merge - update of a nested branch never deletes its non-default origin`() {
+    val sub = branchService.createBranch(testData.project.id, "sub", testData.featureBranch.id, testData.user)
+    updateKeyTranslation(testData.featureKeyToUpdate, "Feature hotfix")
+    val merge = branchService.dryRunMerge(testData.featureBranch.refresh()!!, sub.refresh()!!)
+    branchService.applyMerge(testData.project.id, merge.id, true)
+    testData.featureBranch
+      .refresh()!!
+      .deletedAt.assert
+      .isNull()
+    sub
+      .refresh()!!
+      .deletedAt.assert
+      .isNull()
+    sub
+      .findKey(testData.featureKeyToUpdate.name)!!
+      .enTranslation()
+      .assert
+      .isEqualTo("Feature hotfix")
   }
 
   @Test
@@ -759,7 +845,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun Branch.findKey(name: String): Key? {
-    return keyRepository.findAllByBranchId(this.id).firstOrNull { it.name == name }
+    return keyRepository.findAllByBranchId(this.id).firstOrNull { it.name == name && it.deletedAt == null }
   }
 
   private fun Branch.refresh(): Branch? {

@@ -19,13 +19,16 @@ import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationPrope
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.ImportService
@@ -59,6 +62,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
@@ -236,6 +240,20 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
       cacheManager.getCache(cacheName)?.clear()
     }
   }
+
+  protected fun authenticateAs(user: UserAccount) {
+    SecurityContextHolder.getContext().authentication =
+      TolgeeAuthentication(
+        credentials = null,
+        deviceId = null,
+        userAccount = UserAccountDto.fromEntity(user),
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
+      )
+  }
+
+  protected fun clearAuthentication() = SecurityContextHolder.clearContext()
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

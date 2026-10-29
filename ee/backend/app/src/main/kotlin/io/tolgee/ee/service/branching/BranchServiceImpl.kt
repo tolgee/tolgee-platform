@@ -29,6 +29,7 @@ import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
+import io.tolgee.service.security.SecurityService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -59,6 +60,8 @@ class BranchServiceImpl(
   private val metrics: Metrics,
   @Lazy
   private val qaRecheckService: QaRecheckService,
+  @Lazy
+  private val securityService: SecurityService,
 ) : AbstractBranchService(
     branchRepository,
     branchMergeService,
@@ -233,6 +236,7 @@ class BranchServiceImpl(
     val merge =
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    securityService.checkBranchModify(merge.targetBranch, projectId)
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
         throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)
@@ -242,22 +246,15 @@ class BranchServiceImpl(
       }
     }
     val mergedMerge = branchMergeService.applyMerge(merge)
-    if (!mergedMerge.sourceBranch.isDefault) {
-      if (deleteBranch == true) {
-        val defaultBranch =
-          getDefaultBranch(projectId)
-            ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
-        taskService.moveTasksAfterMerge(projectId, mergedMerge.sourceBranch, defaultBranch)
-        deleteBranch(projectId, mergedMerge.sourceBranch.id)
-      } else {
-        entityManager.flush()
-        branchSnapshotService.rebuildSnapshotFromSource(
-          projectId = projectId,
-          sourceBranch = mergedMerge.sourceBranch,
-          targetBranch = mergedMerge.targetBranch,
-        )
-      }
+    val source = mergedMerge.sourceBranch
+    val shouldDelete = deleteBranch == true && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
+    if (!shouldDelete) {
+      entityManager.flush()
+      branchSnapshotService.rebuildSnapshotFromSource(projectId, mergedMerge.childBranch, mergedMerge.originBranch)
+      return
     }
+    taskService.moveTasksAfterMerge(projectId, source, mergedMerge.targetBranch)
+    deleteBranch(projectId, source.id)
   }
 
   override fun getBranchMergeView(
