@@ -26,6 +26,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
+import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 
 class ImportDataManager(
@@ -34,22 +35,22 @@ class ImportDataManager(
   // data is not saved when single step import is used
   val saveData: Boolean = true,
 ) : Logging {
-  private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+  private val importService: ImportService by lazy { applicationContext.getBean<ImportService>() }
 
-  private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+  private val keyService: KeyService by lazy { applicationContext.getBean<KeyService>() }
 
-  private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
+  private val namespaceService: NamespaceService by lazy { applicationContext.getBean<NamespaceService>() }
 
-  private val projectHolder: ProjectHolder by lazy { applicationContext.getBean(ProjectHolder::class.java) }
+  private val projectHolder: ProjectHolder by lazy { applicationContext.getBean<ProjectHolder>() }
 
-  private val securityService: SecurityService by lazy { applicationContext.getBean(SecurityService::class.java) }
+  private val securityService: SecurityService by lazy { applicationContext.getBean<SecurityService>() }
 
   private val collisionHandlers by lazy {
     applicationContext.getBeansOfType(CollisionHandler::class.java).values
   }
 
   private val keyMetaService: KeyMetaService by lazy {
-    applicationContext.getBean(KeyMetaService::class.java)
+    applicationContext.getBean<KeyMetaService>()
   }
 
   /** Nested file → keyName → ImportKey. */
@@ -105,9 +106,7 @@ class ImportDataManager(
   val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
     keyService
       .getAllByBranch(import.project.id, import.branch?.name)
-      .asSequence()
-      .map { (it.namespace?.name to it.name) to it }
-      .toMap(mutableMapOf())
+      .associateByTo(mutableMapOf()) { (it.namespace?.name to it.name) }
   }
 
   private val translationService: TranslationService by lazy {
@@ -116,15 +115,14 @@ class ImportDataManager(
 
   val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
     keyMetaService
-      .getWithFetchedData(this.import.project)
-      .asSequence()
-      .map { (it.key!!.namespace?.name to it.key!!.name) to it }
-      .toMap()
-      .toMutableMap()
+      .getWithFetchedData(import.project, import.branch?.name)
+      .associateByTo(mutableMapOf()) { (it.key!!.namespace?.name to it.key!!.name) }
   }
 
   val existingNamespaces by lazy {
-    namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
+    namespaceService
+      .getAllInProject(import.project.id)
+      .associateByTo(mutableMapOf()) { it.name }
   }
 
   fun releaseData() {
