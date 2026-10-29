@@ -33,14 +33,14 @@ class SingleStepImportBranchTestData : BaseTestData() {
           branch = defaultBranch
         }.build { setDescription("Main description") }
         (1..3).forEach { num ->
-          addKeyWithCodeReference("meta key $num", defaultBranch, if (num < 3) "ns$num" else null)
+          addKeyWithMeta("meta key $num", defaultBranch, if (num < 3) "ns$num" else null)
         }
-        addKeyWithCodeReference("feature meta key", featureBranch, null)
+        addKeyWithMeta("feature meta key", featureBranch, null)
       }
     }
   }
 
-  private fun ProjectBuilder.addKeyWithCodeReference(
+  private fun ProjectBuilder.addKeyWithMeta(
     keyName: String,
     keyBranch: Branch,
     namespace: String?,
@@ -51,6 +51,7 @@ class SingleStepImportBranchTestData : BaseTestData() {
     }.build {
       setNamespace(namespace)
       addMeta {
+        addComment(user) { text = "comment of $keyName" }
         addCodeReference(user) { path = "src/$keyName.swift" }
       }
     }

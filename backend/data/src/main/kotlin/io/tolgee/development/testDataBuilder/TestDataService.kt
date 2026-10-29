@@ -19,7 +19,6 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
-import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
@@ -97,7 +96,6 @@ class TestDataService(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val bypassableActivityListeners: List<BypassableActivityListener>,
   private val invitationService: InvitationService,
-  private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -568,7 +566,10 @@ class TestDataService(
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.mapNotNull { it.data.meta?.self }
     tagService.saveAll(metas.flatMap { it.tags })
-    keyCodeReferenceRepository.saveAll(metas.flatMap { it.codeReferences })
+    // Must precede keyMetaService.saveAll: metas are already persisted via Key.keyMeta cascade, so saveAll
+    // merges them, and merge replaces still-transient elements of these collections with empty instances.
+    keyMetaService.saveAllCodeReferences(metas.flatMap { it.codeReferences })
+    keyMetaService.saveAllComments(metas.flatMap { it.comments })
     keyMetaService.saveAll(metas)
   }
 
