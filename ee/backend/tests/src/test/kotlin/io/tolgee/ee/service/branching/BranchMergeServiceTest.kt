@@ -3,6 +3,7 @@ package io.tolgee.ee.service.branching
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
+import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
@@ -352,11 +353,75 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `apply merge - update from origin rebuilds the child snapshot`() {
+  fun `apply merge - update from origin advances the child snapshot`() {
     updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
     val merge = dryRunUpdateFromMain()
     branchService.applyMerge(testData.project.id, merge.id, false)
     dryRunUpdateFromMain().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `update from origin then promote reports no change`() {
+    updateKeyTranslation(testData.mainKeyToUpdate, "Hotfix on main")
+    val update = dryRunUpdateFromMain()
+    update.changes.assert.hasSize(1)
+    branchService.applyMerge(testData.project.id, update.id, false)
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `conflict resolved as keep target is not offered again`() {
+    updateKeyTranslation(testData.mainConflictKey, "Main side")
+    updateKeyTranslation(testData.featureConflictKey, "Feature side")
+    val merge = dryRunFeatureBranchMerge()
+    val conflict = merge.changes.single { it.change == BranchKeyMergeChangeType.CONFLICT }
+    branchService.resolveConflict(
+      testData.project.id,
+      merge.id,
+      ResolveBranchMergeConflictRequest(conflict.id, BranchKeyMergeResolutionType.TARGET),
+    )
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    testData.mainConflictKey
+      .refresh()
+      .enTranslation()
+      .assert
+      .isEqualTo("Main side")
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `key deleted on child survives an update and is offered as deletion by the next promote`() {
+    deleteFeatureKey()
+    val update = dryRunUpdateFromMain()
+    branchService.applyMerge(testData.project.id, update.id, false)
+    branchSnapshotService
+      .getSnapshotKeys(testData.featureBranch.id)
+      .map { it.name }
+      .assert
+      .contains(BranchMergeTestData.DELETE_KEY_NAME)
+    val promote = dryRunFeatureBranchMerge()
+    promote.changes
+      .single { it.change == BranchKeyMergeChangeType.DELETE }
+      .targetKey!!
+      .name.assert
+      .isEqualTo(BranchMergeTestData.DELETE_KEY_NAME)
+  }
+
+  @Test
+  fun `update from origin deletes a key deleted on origin and the next promote reports no change`() {
+    keyService.hardDelete(testData.mainKeyToDelete.id)
+    val update = dryRunUpdateFromMain()
+    update.changes
+      .single()
+      .change.assert
+      .isEqualTo(BranchKeyMergeChangeType.DELETE)
+    branchService.applyMerge(testData.project.id, update.id, false)
+    keyRepository
+      .findById(testData.featureKeyToDelete.id)
+      .orElseThrow()
+      .deletedAt.assert
+      .isNotNull()
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
   }
 
   @Test

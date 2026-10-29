@@ -249,8 +249,6 @@ class BranchServiceImpl(
     val source = mergedMerge.sourceBranch
     val shouldDelete = deleteBranch == true && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
     if (!shouldDelete) {
-      entityManager.flush()
-      branchSnapshotService.rebuildSnapshotFromSource(projectId, mergedMerge.childBranch, mergedMerge.originBranch)
       return
     }
     taskService.moveTasksAfterMerge(projectId, source, mergedMerge.targetBranch)
