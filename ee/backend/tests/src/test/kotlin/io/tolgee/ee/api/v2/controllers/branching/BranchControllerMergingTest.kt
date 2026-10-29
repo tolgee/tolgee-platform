@@ -383,6 +383,36 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     val keys = createConflictKeys()
     val change = createMergeWithConflict(keys.second, keys.first, BranchKeyMergeResolutionType.SOURCE)
     performProjectAuthPost("branches/merge/${change.branchMerge.id}/apply").andIsOk
+    branchMergeRepository
+      .findByIdOrNull(change.branchMerge.id)!!
+      .mergedAt.assert
+      .isNotNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview with target branch builds an update from origin`() {
+    performProjectAuthPost(
+      "branches/merge/preview",
+      mapOf("sourceBranchId" to testData.mainBranch.id, "targetBranchId" to testData.featureBranch.id),
+    ).andIsOk.andAssertThatJson { node("targetBranchName").isEqualTo("feature") }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview without target branch still merges into the origin`() {
+    performProjectAuthPost("branches/merge/preview", mapOf("sourceBranchId" to testData.featureBranch.id))
+      .andIsOk
+      .andAssertThatJson { node("targetBranchName").isEqualTo("main") }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview rejects two branches that are not origin and child`() {
+    performProjectAuthPost(
+      "branches/merge/preview",
+      mapOf("sourceBranchId" to testData.featureBranch.id, "targetBranchId" to testData.conflictsBranch.id),
+    ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_MERGE_BRANCHES_NOT_RELATED)
   }
 
   private fun createMergeWithConflict(
@@ -516,31 +546,5 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       .findAll()
       .first { it.branchMerge.id == mergeId && it.change == BranchKeyMergeChangeType.CONFLICT }
       .id
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `preview with target branch builds an update from origin`() {
-    performProjectAuthPost(
-      "branches/merge/preview",
-      mapOf("sourceBranchId" to testData.mainBranch.id, "targetBranchId" to testData.featureBranch.id),
-    ).andIsOk.andAssertThatJson { node("targetBranchName").isEqualTo("feature") }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `preview without target branch still merges into the origin`() {
-    performProjectAuthPost("branches/merge/preview", mapOf("sourceBranchId" to testData.featureBranch.id))
-      .andIsOk
-      .andAssertThatJson { node("targetBranchName").isEqualTo("main") }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `preview rejects two branches that are not origin and child`() {
-    performProjectAuthPost(
-      "branches/merge/preview",
-      mapOf("sourceBranchId" to testData.featureBranch.id, "targetBranchId" to testData.conflictsBranch.id),
-    ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_MERGE_BRANCHES_NOT_RELATED)
   }
 }

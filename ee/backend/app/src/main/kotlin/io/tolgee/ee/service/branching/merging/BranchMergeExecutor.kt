@@ -36,10 +36,13 @@ class BranchMergeExecutor(
   @Transactional
   fun execute(merge: BranchMerge): BranchMerge {
     attachKeysForMerge(merge)
-    val snapshotKeys by lazy {
-      branchSnapshotService.getSnapshotKeys(merge.childBranch.id).associateBy { merge.targetKeyIdOf(it) }
-    }
-    val applied = applyChanges(merge, snapshotKeys)
+    val snapshotKeys by lazy { branchSnapshotService.getSnapshotKeys(merge.childBranch.id) }
+    val byTargetKeyId by lazy { snapshotKeys.associateBy { merge.targetKeyIdOf(it) } }
+    val bySourceKeyId by lazy { snapshotKeys.associateBy { merge.sourceKeyIdOf(it) } }
+    val applied =
+      applyChanges(merge) { change ->
+        change.targetKey?.id?.let { byTargetKeyId[it] } ?: change.sourceKey?.id?.let { bySourceKeyId[it] }
+      }
     entityManager.flush()
     branchSnapshotService.advanceSnapshot(merge, applied)
     return finalizeMerge(merge)
@@ -47,19 +50,29 @@ class BranchMergeExecutor(
 
   private fun applyChanges(
     merge: BranchMerge,
-    snapshotKeys: Map<Long, KeySnapshot>,
-  ): List<AppliedChange> = merge.changes.mapNotNull { applyChange(it, merge, snapshotKeys) }
+    snapshotKeyOf: (BranchMergeChange) -> KeySnapshot?,
+  ): List<AppliedChange> {
+    val (deletions, rest) = merge.changes.partition { it.change == BranchKeyMergeChangeType.DELETE }
+    val (additions, edits) = rest.partition { it.change == BranchKeyMergeChangeType.ADD }
+    val deleted = deletions.mapNotNull { applyChange(it, merge, snapshotKeyOf) }
+    keyService.softDeleteMultiple(deleted.map { it.targetKey.id })
+    val edited = edits.mapNotNull { applyChange(it, merge, snapshotKeyOf) }
+    // Hibernate flushes inserts before updates; without this an added key reusing a name that a rename
+    // just freed violates the active-key unique index.
+    entityManager.flush()
+    return deleted + edited + additions.mapNotNull { applyChange(it, merge, snapshotKeyOf) }
+  }
 
   private fun applyChange(
     change: BranchMergeChange,
     merge: BranchMerge,
-    snapshotKeys: Map<Long, KeySnapshot>,
+    snapshotKeyOf: (BranchMergeChange) -> KeySnapshot?,
   ): AppliedChange? {
     return when (change.change) {
       BranchKeyMergeChangeType.ADD -> applyAddition(change, merge.targetBranch)
-      BranchKeyMergeChangeType.UPDATE -> change.withSnapshotKey(snapshotKeys) { applyUpdate(change, it) }
+      BranchKeyMergeChangeType.UPDATE -> applyUpdate(change, snapshotKeyOf(change))
       BranchKeyMergeChangeType.DELETE -> applyDeletion(change)
-      BranchKeyMergeChangeType.CONFLICT -> change.withSnapshotKey(snapshotKeys) { applyConflict(change, it) }
+      BranchKeyMergeChangeType.CONFLICT -> applyConflict(change, snapshotKeyOf(change))
     }
   }
 
@@ -89,7 +102,7 @@ class BranchMergeExecutor(
 
   private fun applyConflict(
     change: BranchMergeChange,
-    keySnapshot: KeySnapshot,
+    keySnapshot: KeySnapshot?,
   ): AppliedChange? {
     change.resolution ?: throw BranchMergeConflictNotResolvedException()
     return applyUpdate(change, keySnapshot)
@@ -97,17 +110,21 @@ class BranchMergeExecutor(
 
   private fun applyUpdate(
     change: BranchMergeChange,
-    snapshotKey: KeySnapshot,
+    snapshotKey: KeySnapshot?,
   ): AppliedChange? {
     val resolution = change.resolution ?: BranchKeyMergeResolutionType.SOURCE
     val sourceKey = change.sourceKey ?: return null
     val targetKey =
       change.targetKey ?: return applyAddition(change, change.branchMerge.targetBranch)
+    if (snapshotKey == null && resolution == BranchKeyMergeResolutionType.TARGET) {
+      return AppliedChange(sourceKey, targetKey)
+    }
     targetKey.merge(sourceKey, snapshotKey, resolution)
-    val name = chooseThreeWay(sourceKey.name, targetKey.name, snapshotKey.name, resolution) ?: targetKey.name
+    val name = chooseThreeWay(sourceKey.name, targetKey.name, snapshotKey?.name, resolution) ?: targetKey.name
     val namespace =
-      chooseThreeWay(sourceKey.namespace?.name, targetKey.namespace?.name, snapshotKey.namespace, resolution)
-    keyService.edit(targetKey, name, namespace, change.branchMerge.targetBranch.name)
+      chooseThreeWay(sourceKey.namespace?.name, targetKey.namespace?.name, snapshotKey?.namespace, resolution)
+    val targetBranch = change.branchMerge.targetBranch
+    keyService.edit(targetKey, name, namespace, targetBranch.name.takeUnless { targetBranch.isDefault })
     persistAfterMerge(targetKey)
     return AppliedChange(sourceKey, targetKey)
   }
@@ -176,7 +193,6 @@ class BranchMergeExecutor(
     }
     val targetKey = change.targetKey ?: return null
     change.targetKey = null
-    keyService.softDeleteMultiple(listOf(targetKey.id))
     return AppliedChange(null, targetKey)
   }
 
@@ -186,14 +202,5 @@ class BranchMergeExecutor(
         translationService.save(it)
       }
     }
-  }
-
-  private inline fun BranchMergeChange.withSnapshotKey(
-    snapshotKeys: Map<Long, KeySnapshot>,
-    block: (KeySnapshot) -> AppliedChange?,
-  ): AppliedChange? {
-    val id = targetKey?.id ?: return null
-    val snapshotKey = snapshotKeys[id] ?: return null
-    return block(snapshotKey)
   }
 }
