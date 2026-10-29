@@ -199,6 +199,9 @@ class Key(
     source: Key,
     snapshot: KeySnapshot,
   ): Boolean {
+    if (isConflictingThreeWay(source.name, this.name, snapshot.name)) {
+      return true
+    }
     if (isConflictingThreeWay(source.namespace?.name, this.namespace?.name, snapshot.namespace)) {
       return true
     }
