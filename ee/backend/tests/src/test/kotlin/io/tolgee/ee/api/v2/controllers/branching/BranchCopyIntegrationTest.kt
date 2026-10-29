@@ -201,5 +201,28 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       codeReference.fromImport.assert.isEqualTo(branchCodeReference.fromImport)
       codeReference.createdAt.assert.isEqualTo(this.branch!!.createdAt)
     }
+
+    val (mainKeyMetaComments, branchKeyMetaComments) =
+      executeInNewTransaction {
+        listOf(this.keyMeta!!.id, other.keyMeta!!.id).map {
+          keyMetaRepository
+            .findById(it)
+            .get()
+            .comments
+            .toList()
+        }
+      }
+
+    mainKeyMetaComments.assert.hasSizeGreaterThan(0)
+    mainKeyMetaComments.assert.hasSize(branchKeyMetaComments.size)
+    mainKeyMetaComments.first().let { comment ->
+      val branchComment = branchKeyMetaComments.first()
+      comment.id.assert.isNotEqualTo(branchComment.id)
+      comment.text.assert.isEqualTo(branchComment.text)
+      comment.author
+        ?.id.assert
+        .isEqualTo(branchComment.author?.id)
+      comment.fromImport.assert.isEqualTo(branchComment.fromImport)
+    }
   }
 }
