@@ -51,6 +51,7 @@ class SingleStepImportBranchTestData : BaseTestData() {
     }.build {
       setNamespace(namespace)
       addMeta {
+        addComment(user) { text = "comment of $keyName" }
         addCodeReference(user) { path = "src/$keyName.swift" }
       }
     }
