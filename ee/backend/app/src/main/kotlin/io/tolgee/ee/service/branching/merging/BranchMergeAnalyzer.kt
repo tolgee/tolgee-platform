@@ -56,10 +56,12 @@ class BranchMergeAnalyzer(
       snapshotsBySignature
         .mapNotNull { (signature, snapshotGroup) ->
           if (snapshotGroup.size != 1) return@mapNotNull null
+          val snapshot = snapshotGroup.single()
+          if (sourceById.containsKey(merge.sourceKeyIdOf(snapshot))) return@mapNotNull null
           val sourceGroup = sourceBySignature[signature] ?: return@mapNotNull null
           if (sourceGroup.size != 1) return@mapNotNull null
-          val snapshot = snapshotGroup.single()
           val sourceKey = sourceGroup.single()
+          if (snapshotBySourceKeyId.containsKey(sourceKey.id)) return@mapNotNull null
           merge.sourceKeyIdOf(snapshot) to sourceKey
         }.toMap()
     val fallbackSourceKeyIds = fallbackBySourceKeyId.values.map { it.id }.toSet()
@@ -75,6 +77,7 @@ class BranchMergeAnalyzer(
           val targetGroup = targetBySignature[signature] ?: return@mapNotNull null
           if (targetGroup.size != 1) return@mapNotNull null
           val targetKey = targetGroup.single()
+          if (snapshotTargetIds.contains(targetKey.id)) return@mapNotNull null
           merge.targetKeyIdOf(snapshot) to targetKey
         }.toMap()
 
