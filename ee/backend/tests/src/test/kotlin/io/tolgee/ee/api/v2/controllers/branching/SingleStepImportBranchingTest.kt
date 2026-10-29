@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +28,9 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
   @Value("classpath:import/new.json")
   lateinit var newJson: Resource
 
+  @Value("classpath:import/apple/en.strings")
+  lateinit var sharedKeyStrings: Resource
+
   lateinit var testData: SingleStepImportBranchTestData
 
   @Autowired
@@ -38,6 +42,11 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -93,6 +102,59 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
 
       val keysOnFeature = keyService.getAllByBranch(testData.project.id, "feature")
       keysOnFeature.find { it.name == "test" }.assert.isNotNull
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `branch import does not take key meta of the same key on default branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImport(
+      listOf(Pair("en.lproj/Localizable.strings", sharedKeyStrings)),
+      params = mapOf("branch" to testData.featureBranch.name, "overrideKeyDescriptions" to true),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val mainKey = keyService.getAllByBranch(testData.project.id, "main").single { it.name == "shared" }
+      mainKey.keyMeta!!
+        .description.assert
+        .isEqualTo("Main description")
+
+      val featureKey = keyService.getAllByBranch(testData.project.id, "feature").single { it.name == "shared" }
+      featureKey.keyMeta!!
+        .description.assert
+        .isEqualTo("Imported description")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `imports when default branch has more key metas than PostgreSQL bind parameter limit`() {
+    executeInNewTransaction {
+      entityManager
+        .createNativeQuery(
+          """
+          WITH k AS (
+            INSERT INTO key (id, name, project_id, branch_id, is_plural, created_at, updated_at)
+            SELECT nextval('hibernate_sequence'), 'bulk_' || g, :projectId, :branchId, false, now(), now()
+            FROM generate_series(1, 65536) g
+            RETURNING id
+          )
+          INSERT INTO key_meta (id, key_id, created_at, updated_at)
+          SELECT nextval('hibernate_sequence'), id, now(), now() FROM k
+          """,
+        ).setParameter("projectId", testData.project.id)
+        .setParameter("branchId", testData.defaultBranch.id)
+        .executeUpdate()
+    }
+
+    performImport(listOf(Pair("en.lproj/Localizable.strings", sharedKeyStrings))).andIsOk
+
+    executeInNewTransaction {
+      val mainKey = keyService.getAllByBranch(testData.project.id, "main").single { it.name == "shared" }
+      mainKey.keyMeta!!
+        .description.assert
+        .isEqualTo("Main description")
     }
   }
 
