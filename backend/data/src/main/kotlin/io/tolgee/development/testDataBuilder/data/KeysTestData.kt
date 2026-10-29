@@ -99,7 +99,7 @@ class KeysTestData {
                   name = "test"
                 },
               )
-              addComment {
+              addComment(user) {
                 text = "What a text comment"
               }
               addCodeReference {

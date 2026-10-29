@@ -568,7 +568,10 @@ class TestDataService(
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.mapNotNull { it.data.meta?.self }
     tagService.saveAll(metas.flatMap { it.tags })
+    // Must precede keyMetaService.saveAll: metas are already persisted via Key.keyMeta cascade, so saveAll
+    // merges them, and merge replaces still-transient elements of these collections with empty instances.
     keyCodeReferenceRepository.saveAll(metas.flatMap { it.codeReferences })
+    keyMetaService.saveAllComments(metas.flatMap { it.comments })
     keyMetaService.saveAll(metas)
   }
 
