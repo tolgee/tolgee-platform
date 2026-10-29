@@ -1,3 +1,10 @@
+## [3.241.2](https://github.com/tolgee/tolgee-platform/compare/v3.241.1...v3.241.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* scope existing key metas in imports to the import's branch ([#4016](https://github.com/tolgee/tolgee-platform/issues/4016)) ([08f00cb](https://github.com/tolgee/tolgee-platform/commit/08f00cb19ca51c579912f05597d2ccb711b2ed35))
+
 ## [3.241.1](https://github.com/tolgee/tolgee-platform/compare/v3.241.0...v3.241.1) (2026-10-27)
 
 
