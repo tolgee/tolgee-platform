@@ -6,6 +6,8 @@ import io.tolgee.model.views.CommunityContributorTotalsView
 import io.tolgee.model.views.CommunityDayRowView
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
+import io.tolgee.model.views.ProjectActiveSuggestionsView
+import io.tolgee.model.views.SuggestedTranslationsView
 import io.tolgee.repository.ProjectRepository.Companion.PUBLIC_PROJECT_VISIBILITY
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -19,24 +21,32 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       select c.userId as id, u.name as name, u.avatarHash as avatarHash,
         sum(c.contributions) as contributions,
         sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
-        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt
+        pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt,
+        (select count(s) from TranslationSuggestion s
+          where s.author.id = c.userId and s.project.id = :projectId and $LIVE_ACTIVE_S and $LANGUAGE_FILTER_S) as active
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
       left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
-      where c.projectId = :projectId and $LIVE_USER_AND_LANGUAGE
+      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE
       group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt
+      having (:excludeEmpty = false or sum(c.suggested) > 0)
     """,
     countQuery = """
       select count(distinct c.userId)
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
-      where c.projectId = :projectId and $LIVE_USER_AND_LANGUAGE
+      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE
+        and (:excludeEmpty = false or c.suggested > 0)
     """,
   )
   fun findContributorTotals(
     projectId: Long,
+    from: LocalDate,
+    to: LocalDate,
+    languageIds: Collection<Long>?,
+    excludeEmpty: Boolean,
     pageable: Pageable,
   ): Page<CommunityContributorTotalsView>
 
@@ -46,12 +56,16 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
         c.suggested as suggested, c.accepted as accepted, c.declined as declined
       from CommunityContributionDay c
       join Language l on l.id = c.languageId
-      where c.projectId = :projectId and c.userId in :userIds and l.deletedAt is null
+      where c.projectId = :projectId and c.userId in :userIds and $IN_RANGE and $LANGUAGE_FILTER
+        and l.deletedAt is null
     """,
   )
   fun findDayRows(
     projectId: Long,
     userIds: Collection<Long>,
+    from: LocalDate,
+    to: LocalDate,
+    languageIds: Collection<Long>?,
   ): List<CommunityDayRowView>
 
   @Query(
@@ -61,14 +75,32 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
-      where c.projectId = :projectId and c.day >= :since and $LIVE_USER_AND_LANGUAGE
+      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE
       group by c.day
     """,
   )
   fun findDailyTotals(
     projectId: Long,
-    since: LocalDate,
+    from: LocalDate,
+    to: LocalDate,
+    languageIds: Collection<Long>?,
   ): List<DayCountsView>
+
+  @Query(
+    """
+      select count(distinct $TRANSLATION_KEY) as any,
+        count(distinct case when s.state = $ACTIVE then $TRANSLATION_KEY end) as pending
+      from TranslationSuggestion s
+      where s.project.id = :projectId and cast(s.createdAt as date) between :from and :to
+        and s.language.deletedAt is null and $LANGUAGE_FILTER_S
+    """,
+  )
+  fun countSuggestedTranslations(
+    projectId: Long,
+    from: LocalDate,
+    to: LocalDate,
+    languageIds: Collection<Long>?,
+  ): SuggestedTranslationsView
 
   @Query(
     """
@@ -90,6 +122,19 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   @Query(
     """
+      select s.project.id as projectId, count(s) as active
+      from TranslationSuggestion s
+      join s.project r
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      where s.author.id = :userId and $LIVE_ACTIVE_S and $PUBLIC_PROJECT_VISIBILITY
+      group by s.project.id
+    """,
+  )
+  fun findPublicActiveSuggestionsOfUser(userId: Long): List<ProjectActiveSuggestionsView>
+
+  @Query(
+    """
       select distinct c.projectId
       from CommunityContributionDay c
       join Language l on l.id = c.languageId
@@ -106,5 +151,11 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
 
   companion object {
     const val LIVE_USER_AND_LANGUAGE = "u.deletedAt is null and u.disabledAt is null and l.deletedAt is null"
+    const val IN_RANGE = "c.day between :from and :to"
+    const val LANGUAGE_FILTER = "(:languageIds is null or c.languageId in :languageIds)"
+    const val LANGUAGE_FILTER_S = "(:languageIds is null or s.language.id in :languageIds)"
+    const val ACTIVE = "io.tolgee.model.enums.TranslationSuggestionState.ACTIVE"
+    const val LIVE_ACTIVE_S = "s.state = $ACTIVE and s.language.deletedAt is null"
+    const val TRANSLATION_KEY = "concat(cast(s.key.id as string), ':', cast(s.language.id as string))"
   }
 }
