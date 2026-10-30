@@ -20,10 +20,11 @@ class CommunityContributorModelAssembler :
       suggested = stats.suggested,
       accepted = stats.accepted,
       declined = stats.declined,
+      active = stats.active,
       firstContributionAt = stats.firstContributionAt,
       lastContributionAt = stats.lastContributionAt,
       languages = stats.languages,
-      weeks = stats.weeks,
+      buckets = stats.buckets,
     )
   }
 }

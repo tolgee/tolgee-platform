@@ -104,6 +104,7 @@ open class CommunityStatsTestData : BaseTestData(OWNER_USERNAME, "Community Stat
           }.self
         val key = addKey { name = "private-key" }
         suggest(key, alice, privateCzech, TranslationSuggestionState.ACCEPTED)
+        suggest(key, alice, privateCzech, TranslationSuggestionState.ACTIVE)
         suggest(key, carol, privateCzech, TranslationSuggestionState.ACTIVE)
       }
     }

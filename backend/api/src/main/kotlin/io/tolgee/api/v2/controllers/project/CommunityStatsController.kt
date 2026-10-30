@@ -1,9 +1,11 @@
 package io.tolgee.api.v2.controllers.project
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityContributorStats
+import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.hateoas.community.CommunityContributorModel
 import io.tolgee.hateoas.community.CommunityContributorModelAssembler
 import io.tolgee.model.enums.Scope
@@ -34,20 +36,32 @@ class CommunityStatsController(
   @Operation(
     summary = "Get community contributors",
     description =
-      "Users with translation contributions in the project (translations, state changes, comments, " +
-        "suggestions and their moderation), with contributions / suggested / accepted / declined totals, " +
-        "first and last contribution dates, per-language counts and weekly buckets for the last `weeks` " +
-        "ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; " +
-        "default contributions desc, suggested desc.",
+      "Users who worked on translations in the project within the range: translating, changing translation " +
+        "states, commenting, suggesting, and accepting or declining suggestions. For each user: the number of " +
+        "contributions, suggestions, accepted and declined suggestions, the counts per language, and one bucket " +
+        "of counts per day or week, all within the range. The dates of the first and last contribution are not " +
+        "limited by the range or the languages: they cover the user's whole history in the project. " +
+        DEFAULT_RANGE + PeriodParams.RANGE_LIMITS + " " + APPROXIMATE +
+        "`active` is exact: the number of the user's suggestions that are pending right now. " +
+        "Sort by contributions, suggested, accepted, declined, active or lastContributionAt; users without a " +
+        "lastContributionAt come last. By default, most contributions come first, then most suggestions.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getContributors(
     @PathVariable projectId: Long,
     @ParameterObject pageable: Pageable,
-    @RequestParam(defaultValue = CommunityStatsService.DEFAULT_WEEKS.toString()) weeks: Int,
+    @ParameterObject period: PeriodParams,
+    @Parameter(
+      description =
+        "Count only these languages. Users with no contributions in them within the range are left out. " +
+          "The filter also applies to the totals, the buckets, the counts per language and `active`.",
+    )
+    @RequestParam(required = false) languageIds: List<Long>?,
+    @Parameter(description = "Leave out contributors with no suggestion in the range.")
+    @RequestParam(defaultValue = "false") excludeEmpty: Boolean,
   ): PagedModel<CommunityContributorModel> {
-    val page = communityStatsService.getContributors(projectId, pageable, weeks)
+    val page = communityStatsService.getContributors(projectId, pageable, period, languageIds, excludeEmpty)
     return pagedResourcesAssembler.toModel(page, communityContributorModelAssembler)
   }
 
@@ -55,13 +69,31 @@ class CommunityStatsController(
   @Operation(
     summary = "Get community activity",
     description =
-      "Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), " +
-        "oldest first, zero-filled.",
+      "Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of " +
+        "the range, oldest first, with zeros where nothing happened. " +
+        "Also two exact counts of translations, where a translation is one key in one language: " +
+        "`translationsWithAnySuggestion` counts the translations that received a suggestion within the range, " +
+        "and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. " +
+        "A pending suggestion created before the range is not counted. " +
+        DEFAULT_RANGE + PeriodParams.RANGE_LIMITS + " " + APPROXIMATE +
+        "The two translation counts are exact: they are read from the suggestions as they are now.",
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getActivity(
     @PathVariable projectId: Long,
-    @RequestParam(defaultValue = CommunityStatsService.DEFAULT_WEEKS.toString()) weeks: Int,
-  ): CommunityActivity = communityStatsService.getActivity(projectId, weeks)
+    @ParameterObject period: PeriodParams,
+    @Parameter(description = "Count only these languages, in the buckets and in both translation counts.")
+    @RequestParam(required = false) languageIds: List<Long>?,
+  ): CommunityActivity = communityStatsService.getActivity(projectId, period, languageIds)
+
+  companion object {
+    private const val DEFAULT_RANGE =
+      "By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one " +
+        "bucket per week. "
+    private const val APPROXIMATE =
+      "The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they " +
+        "come from the activity log and never go down, so a suggestion made in one period and accepted or " +
+        "declined in a later one counts in both. "
+  }
 }

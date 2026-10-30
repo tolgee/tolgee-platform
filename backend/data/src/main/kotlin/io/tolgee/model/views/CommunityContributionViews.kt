@@ -11,6 +11,7 @@ interface CommunityContributorTotalsView {
   val suggested: Long
   val accepted: Long
   val declined: Long
+  val active: Long
   val firstContributionAt: Date?
   val lastContributionAt: Date?
 }
@@ -31,6 +32,16 @@ interface DayCountsView {
   val suggested: Long
   val accepted: Long
   val declined: Long
+}
+
+interface SuggestedTranslationsView {
+  val any: Long
+  val pending: Long
+}
+
+interface ProjectActiveSuggestionsView {
+  val projectId: Long
+  val active: Long
 }
 
 interface CommunityProfileRowView {
