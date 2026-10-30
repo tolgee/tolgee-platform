@@ -26,6 +26,8 @@ class LanguageMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_languages",
+      "List languages",
+      McpToolEffect.READ_ONLY,
       "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
@@ -57,6 +59,8 @@ class LanguageMcpTools(
 
     server.addTool(
       "create_language",
+      "Create language",
+      McpToolEffect.ADDITIVE,
       "Add a new language to a Tolgee project",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")

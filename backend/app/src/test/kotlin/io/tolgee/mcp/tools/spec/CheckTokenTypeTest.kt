@@ -92,6 +92,13 @@ class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
       })
   }
 
+  @Test
+  fun `OAuth auth passes on a PAT-only tool that opted in to OAuth tokens`() {
+    oauthAuthenticated()
+
+    sut.executeAs(spec(allowedTokenType = AuthTokenType.ONLY_PAT).copy(allowsOAuthToken = true)) {}
+  }
+
   private fun oauthAuthenticated() {
     whenever(authenticationFacade.isApiAuthentication).thenReturn(true)
     whenever(authenticationFacade.isOAuthTokenAuth).thenReturn(true)

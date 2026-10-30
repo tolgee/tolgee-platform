@@ -5,16 +5,20 @@ import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
+import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -29,10 +33,12 @@ class ProjectMcpTools(
   private val languageService: LanguageService,
   private val organizationRoleService: OrganizationRoleService,
   private val projectHolder: ProjectHolder,
+  private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
-  private val listProjectsSpec = buildSpec(ProjectsController::getAll, "list_projects")
+  private val listProjectsSpec =
+    buildSpec(ProjectsController::getAll, "list_projects").copy(allowsOAuthToken = true)
   private val createProjectSpec = buildSpec(ProjectsController::createProject, "create_project")
   private val getLanguageStatsSpec =
     buildSpec(ProjectStatsController::getProjectStats, "get_project_language_statistics")
@@ -40,7 +46,10 @@ class ProjectMcpTools(
   override fun register(server: McpStatelessSyncServer) {
     server.addTool(
       "list_projects",
-      "List Tolgee projects accessible to the current user. Returns up to 100 results per page.",
+      "List projects",
+      McpToolEffect.READ_ONLY,
+      "List Tolgee projects accessible to the current user. An OAuth token lists only the projects it was " +
+        "authorized for. Returns up to 100 results per page.",
       toolSchema {
         string("search", "Optional search query to filter projects by name")
         number("page", "Optional: page number (0-based, default 0)")
@@ -49,11 +58,18 @@ class ProjectMcpTools(
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
         val pageNum = request.arguments?.getInt("page") ?: 0
+        val pageable = PageRequest.of(pageNum, 100)
+        val tokenProjectIds = (authenticationFacade.scopedCredential as? OAuth2TokenCredentials)?.projectIds
         val projects =
-          projectService.findPermittedInOrganizationPaged(
-            PageRequest.of(pageNum, 100),
-            search,
-          )
+          if (tokenProjectIds?.isEmpty() == true) {
+            Page.empty(pageable)
+          } else {
+            projectService.findPermittedInOrganizationPaged(
+              pageable,
+              search,
+              filters = ProjectFilters().apply { filterId = tokenProjectIds?.toList() },
+            )
+          }
         val result =
           pagedResponse(projects) { p ->
             mapOf(
@@ -71,6 +87,8 @@ class ProjectMcpTools(
 
     server.addTool(
       "create_project",
+      "Create project",
+      McpToolEffect.ADDITIVE,
       "Create a new Tolgee project with initial languages",
       toolSchema {
         string("name", "Project name", required = true)
@@ -121,6 +139,8 @@ class ProjectMcpTools(
 
     server.addTool(
       "get_project_language_statistics",
+      "Get project language statistics",
+      McpToolEffect.READ_ONLY,
       "Get translation status and progress for each language in a project. " +
         "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {
