@@ -14,8 +14,9 @@ class CommunityProfileModelAssembler {
       suggested = communityProfile.suggested,
       accepted = communityProfile.accepted,
       declined = communityProfile.declined,
+      active = communityProfile.active,
       languages = communityProfile.languages,
       projects = communityProfile.projects,
-      days = communityProfile.days,
+      buckets = communityProfile.buckets,
     )
 }

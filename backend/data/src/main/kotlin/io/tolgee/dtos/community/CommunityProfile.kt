@@ -10,7 +10,8 @@ data class CommunityProfile(
   val suggested: Long,
   val accepted: Long,
   val declined: Long,
+  val active: Long,
   val languages: List<ProfileLanguage>,
   val projects: List<ProfileProject>,
-  val days: List<DayCounts>,
+  val buckets: List<Bucket>,
 )

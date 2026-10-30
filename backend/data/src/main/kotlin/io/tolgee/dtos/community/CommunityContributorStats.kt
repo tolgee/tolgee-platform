@@ -11,8 +11,8 @@ data class CommunityContributorStats(
   val suggested: Long,
   val accepted: Long,
   val declined: Long,
+  val active: Long,
   val firstContributionAt: Date?,
   val lastContributionAt: Date?,
   val languages: List<LanguageCounts>,
-  val weeks: List<WeekBucket>,
 )

@@ -1,8 +1,8 @@
 package io.tolgee.dtos.community
 
-data class DayCounts(
+data class Bucket(
   /** ISO date. */
-  val day: String,
+  val start: String,
   val contributions: Long,
   val suggested: Long,
   val accepted: Long,

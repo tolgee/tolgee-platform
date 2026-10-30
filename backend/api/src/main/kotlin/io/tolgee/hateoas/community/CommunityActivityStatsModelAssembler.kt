@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component
 class CommunityActivityStatsModelAssembler {
   fun toModel(communityActivity: CommunityActivity) =
     CommunityActivityStatsModel(
-      weeks = communityActivity.weeks,
+      buckets = communityActivity.buckets,
+      translationsWithPendingSuggestion = communityActivity.translationsWithPendingSuggestion,
+      translationsWithAnySuggestion = communityActivity.translationsWithAnySuggestion,
     )
 }

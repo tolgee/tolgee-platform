@@ -11,6 +11,7 @@ data class ProfileProject(
   val suggested: Long,
   val accepted: Long,
   val declined: Long,
+  val active: Long,
   val firstContributionAt: Date?,
   val lastContributionAt: Date?,
 )
