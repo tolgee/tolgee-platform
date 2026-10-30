@@ -445,6 +445,7 @@ declare namespace DataCy {
         "machine-translations-settings-language-enabled-service": true;
         "machine-translations-settings-language-options": true;
         "machine-translations-settings-language-primary-service": true;
+        "members": true;
         "merge-changes-tabs": true;
         "merge-stat-additions": true;
         "merge-stat-additions-count": true;
@@ -542,6 +543,7 @@ declare namespace DataCy {
         "organization-member-disabled-label": true;
         "organization-member-item": true;
         "organization-member-leave-button": true;
+        "organization-member-mfa-badge": true;
         "organization-members-disable-user-button": true;
         "organization-members-enable-user-button": true;
         "organization-members-remove-user-button": true;
