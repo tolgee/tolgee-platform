@@ -992,6 +992,7 @@ declare namespace DataCy {
         "translations-filter-task-type": true;
         "translations-history-load-more-button": true;
         "translations-key-cell-description": true;
+        "translations-key-cell-description-expand-button": true;
         "translations-key-count": true;
         "translations-key-edit-description-field": true;
         "translations-key-edit-key-field": true;
