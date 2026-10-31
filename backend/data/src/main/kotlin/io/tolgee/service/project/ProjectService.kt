@@ -44,6 +44,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.withoutSort
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -487,7 +488,7 @@ class ProjectService(
     filterContributed: Boolean = false,
   ): Page<ProjectWithLanguagesView> {
     val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
-    val projects = findPublicProjectViews(userAccountId, pageable, search, filterContributed)
+    val projects = findPublicProjectViews(userAccountId, pageable.withoutSort, search, filterContributed)
     return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 

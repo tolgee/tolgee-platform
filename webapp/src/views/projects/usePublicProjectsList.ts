@@ -23,7 +23,6 @@ export const usePublicProjectsList = ({
       page,
       size: 20,
       search,
-      sort: ['name,asc'],
       filterContributed: myContributionsOnly,
     },
     options: {
