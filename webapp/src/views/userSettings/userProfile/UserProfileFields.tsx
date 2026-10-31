@@ -1,7 +1,8 @@
 import { useFormikContext } from 'formik';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, MenuItem, Typography } from '@mui/material';
 import { UserProfileAvatar } from 'tg.views/userSettings/userProfile/UserProfileAvatar';
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { Select } from 'tg.component/common/form/fields/Select';
 import { T, useTranslate } from '@tolgee/react';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { FunctionComponent } from 'react';
@@ -36,6 +37,27 @@ export const UserProfileFields: FunctionComponent<
             helperText={isManaged ? t('managed-account-field-hint') : undefined}
             label={<T keyName="User settings - E-mail" />}
           />
+          <Select
+            name="profileVisibility"
+            data-cy="user-profile-visibility-select"
+            label={t(
+              'user_profile_visibility_label',
+              'Community profile visibility'
+            )}
+          >
+            <MenuItem value="DEFAULT">
+              {t(
+                'user_profile_visibility_default',
+                'Default (public once you contribute to a community project)'
+              )}
+            </MenuItem>
+            <MenuItem value="PUBLIC">
+              {t('user_profile_visibility_public', 'Public')}
+            </MenuItem>
+            <MenuItem value="PRIVATE">
+              {t('user_profile_visibility_private', 'Private')}
+            </MenuItem>
+          </Select>
           {user?.emailAwaitingVerification && (
             <Box>
               <Typography variant="body1">

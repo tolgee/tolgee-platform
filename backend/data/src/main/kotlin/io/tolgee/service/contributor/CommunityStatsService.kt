@@ -3,6 +3,7 @@ package io.tolgee.service.contributor
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.dtos.community.Bucket
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityActivityItem
@@ -13,11 +14,15 @@ import io.tolgee.dtos.community.LanguageCounts
 import io.tolgee.dtos.community.ProfileLanguage
 import io.tolgee.dtos.community.ProfileProject
 import io.tolgee.dtos.request.community.PeriodParams
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.views.CommunityContributorTotalsView
 import io.tolgee.model.views.CommunityDayRowView
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -37,6 +42,7 @@ class CommunityStatsService(
   private val userAccountService: UserAccountService,
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   fun getContributors(
     projectId: Long,
@@ -104,9 +110,8 @@ class CommunityStatsService(
   fun getProfile(
     userId: Long,
     params: PeriodParams,
-  ): CommunityProfile? {
-    val user = userAccountService.findActive(userId) ?: return null
-    if (!isProfileVisible(userId)) return null
+  ): CommunityProfile {
+    val user = visibleUser(userId)
     // ponytail: one query, all of the user's public rows, aggregated here; ceiling = days × languages × projects.
     val rows = repository.findPublicRowsOfUser(userId)
     val totals = rows.map { it.counts() }.sum()
@@ -131,16 +136,28 @@ class CommunityStatsService(
   fun getActivityFeed(
     userId: Long,
     pageable: Pageable,
-  ): Page<CommunityActivityItem>? {
-    if (userAccountService.findActive(userId) == null || !isProfileVisible(userId)) return null
+  ): Page<CommunityActivityItem> {
+    visibleUser(userId)
     val newestFirst = PageRequest.of(pageable.pageNumber, pageable.pageSize)
     val page = activityService.findPublicContributionsOfUser(userId, CONTRIBUTION_TYPES, newestFirst)
     val projects = projectService.findAll(page.content.mapNotNull { it.projectId }.toSet()).associateBy { it.id }
     return page.map { CommunityActivityItem(projects.getValue(it.projectId!!), it) }
   }
 
-  private fun isProfileVisible(userId: Long): Boolean =
-    repository.findPublicProjectIds(userId, PageRequest.of(0, 1)).isNotEmpty()
+  private fun visibleUser(userId: Long): UserAccount {
+    val user = userAccountService.findActive(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    if (!isVisibleToViewer(user)) throw NotFoundException(Message.COMMUNITY_PROFILE_PRIVATE)
+    return user
+  }
+
+  private fun isVisibleToViewer(user: UserAccount): Boolean {
+    if (authenticationFacade.authenticatedUserOrNull?.id == user.id) return true
+    return when (user.profileVisibility) {
+      ProfileVisibility.PUBLIC -> true
+      ProfileVisibility.PRIVATE -> false
+      ProfileVisibility.DEFAULT -> repository.findPublicProjectIds(user.id, PageRequest.of(0, 1)).isNotEmpty()
+    }
+  }
 
   private fun languageCounts(dayRows: List<CommunityDayRowView>): List<LanguageCounts> =
     dayRows
