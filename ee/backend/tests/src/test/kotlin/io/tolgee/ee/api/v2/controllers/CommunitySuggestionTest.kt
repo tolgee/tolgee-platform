@@ -254,8 +254,7 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
     assertPostHogEventReported(postHog, "COMMUNITY_FIRST_SUGGESTION")
 
     performProjectAuthPost(path, CreateTranslationSuggestionRequest(translation = "Second")).andIsOk
-    awaitSuggestionReportsFlushed(expectedSuggestions = 2)
-    reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(2)
+    waitForNotThrowing { reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(2) }
     reportedCount("COMMUNITY_FIRST_SUGGESTION").assert.isEqualTo(1)
   }
 
@@ -267,14 +266,10 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
       "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest(translation = "Member suggestion"),
     ).andIsOk
-    awaitSuggestionReportsFlushed()
+    waitForNotThrowing { reportedCount("CREATE_SUGGESTION").assert.isEqualTo(1) }
     reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(0)
     reportedCount("COMMUNITY_FIRST_SUGGESTION").assert.isEqualTo(0)
   }
-
-  // heuristic: CREATE_SUGGESTION shares the @Async reporter, so zero counts after it are likely but not guaranteed final
-  private fun awaitSuggestionReportsFlushed(expectedSuggestions: Int = 1) =
-    waitForNotThrowing { reportedCount("CREATE_SUGGESTION").assert.isEqualTo(expectedSuggestions) }
 
   private fun reportedCount(eventName: String) = postHogEventsCapturedSoFar(postHog, eventName)
 }
