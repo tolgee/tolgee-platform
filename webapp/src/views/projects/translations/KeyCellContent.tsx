@@ -21,6 +21,10 @@ export const StyledDescription = styled('div')`
     theme.palette.mode === 'light'
       ? theme.palette.emphasis[300]
       : theme.palette.emphasis[500]};
+
+  & hr {
+    width: 100%;
+  }
 `;
 
 type Props = {
