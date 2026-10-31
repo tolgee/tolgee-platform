@@ -552,11 +552,11 @@ export interface paths {
     post: operations["setProtected"];
   };
   "/v2/projects/{projectId}/community/activity": {
-    /** Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+    /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
     get: operations["getActivity"];
   };
   "/v2/projects/{projectId}/community/contributors": {
-    /** Users with translation contributions in the project (translations, state changes, comments, suggestions and their moderation), with contributions / suggested / accepted / declined totals, first and last contribution dates, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; default contributions desc, suggested desc. */
+    /** Users who worked on translations in the project within the range: translating, changing translation states, commenting, suggesting, and accepting or declining suggestions. For each user: the number of contributions, suggestions, accepted and declined suggestions, the counts per language, and one bucket of counts per day or week, all within the range. The dates of the first and last contribution are not limited by the range or the languages: they cover the user's whole history in the project. By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. `active` is exact: the number of the user's suggestions that are pending right now. Sort by contributions, suggested, accepted, declined, active or lastContributionAt; users without a lastContributionAt come last. By default, most contributions come first, then most suggestions. */
     get: operations["getContributors_1"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
@@ -1350,11 +1350,11 @@ export interface paths {
     get: operations["getSso"];
   };
   "/v2/users/{userId}/community-activity": {
-    /** The user's translation-related activity in public projects, always newest first (the sort parameter is ignored), in the shape of the project activity log plus the project and without the author. Visible under the same rule as the community profile. */
+    /** The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry has the shape of an entry in the project activity log, with the project added and the author left out. Returns 404 whenever the community profile does. */
     get: operations["getActivityFeed"];
   };
   "/v2/users/{userId}/community-profile": {
-    /** Contribution totals, languages, per-day counts for the last 365 days and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+    /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user, or one without contributions to public projects, returns 404. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
     get: operations["getProfile"];
   };
 }
@@ -1949,6 +1949,17 @@ export interface components {
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
     };
+    Bucket: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      start: string;
+      /** Format: int64 */
+      suggested: number;
+    };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
       data?: { [key: string]: { [key: string]: unknown } };
@@ -2141,7 +2152,11 @@ export interface components {
       };
     };
     CommunityActivity: {
-      weeks: components["schemas"]["WeekBucket"][];
+      buckets: components["schemas"]["Bucket"][];
+      /** Format: int64 */
+      translationsWithAnySuggestion: number;
+      /** Format: int64 */
+      translationsWithPendingSuggestion: number;
     };
     CommunityActivityModel: {
       counts?: { [key: string]: number };
@@ -2260,12 +2275,27 @@ export interface components {
         | "QA_ISSUE_UNIGNORE";
     };
     CommunityContributorModel: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Approximate: counted from the activity log within the range, and never goes down.
+       */
       accepted: number;
+      /**
+       * Format: int64
+       * @description Exact: the number of the user's suggestions in this project that are pending right now, whatever the range. When `languageIds` is given, only those languages count.
+       */
+      active: number;
       avatar?: components["schemas"]["Avatar"];
-      /** Format: int64 */
+      buckets: components["schemas"]["Bucket"][];
+      /**
+       * Format: int64
+       * @description Approximate: counted from the activity log within the range, and never goes down.
+       */
       contributions: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Approximate: counted from the activity log within the range, and never goes down.
+       */
       declined: number;
       /** Format: date-time */
       firstContributionAt?: string;
@@ -2275,17 +2305,21 @@ export interface components {
       /** Format: date-time */
       lastContributionAt?: string;
       name?: string;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Approximate: counted from the activity log within the range, and never goes down.
+       */
       suggested: number;
-      weeks: components["schemas"]["WeekBucket"][];
     };
     CommunityProfile: {
       /** Format: int64 */
       accepted: number;
+      /** Format: int64 */
+      active: number;
       avatar?: components["schemas"]["Avatar"];
+      buckets: components["schemas"]["Bucket"][];
       /** Format: int64 */
       contributions: number;
-      days: components["schemas"]["DayCounts"][];
       /** Format: int64 */
       declined: number;
       /** Format: int64 */
@@ -2991,17 +3025,6 @@ export interface components {
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
       words?: components["schemas"]["CurrentUsageItemModel"];
-    };
-    DayCounts: {
-      /** Format: int64 */
-      accepted: number;
-      /** Format: int64 */
-      contributions: number;
-      day: string;
-      /** Format: int64 */
-      declined: number;
-      /** Format: int64 */
-      suggested: number;
     };
     DeleteKeysDto: {
       /** @description IDs of keys to delete */
@@ -5711,6 +5734,8 @@ export interface components {
     ProfileProject: {
       /** Format: int64 */
       accepted: number;
+      /** Format: int64 */
+      active: number;
       avatar?: components["schemas"]["Avatar"];
       /** Format: int64 */
       contributions: number;
@@ -8428,17 +8453,6 @@ export interface components {
     };
     WebhookTestResponse: {
       success: boolean;
-    };
-    WeekBucket: {
-      /** Format: int64 */
-      accepted: number;
-      /** Format: int64 */
-      contributions: number;
-      /** Format: int64 */
-      declined: number;
-      /** Format: int64 */
-      suggested: number;
-      weekStart: string;
     };
     WorkspaceModel: {
       /** Format: int64 */
@@ -17458,14 +17472,21 @@ export interface operations {
       };
     };
   };
-  /** Contributions / suggested / accepted / declined counts per ISO week for the last `weeks` weeks (1 to 104), oldest first, zero-filled. */
+  /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
   getActivity: {
     parameters: {
       path: {
         projectId: number;
       };
       query: {
-        weeks?: number;
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. */
+        to?: string;
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
+        /** Count only these languages, in the buckets and in both translation counts. */
+        languageIds?: number[];
       };
     };
     responses: {
@@ -17509,7 +17530,7 @@ export interface operations {
       };
     };
   };
-  /** Users with translation contributions in the project (translations, state changes, comments, suggestions and their moderation), with contributions / suggested / accepted / declined totals, first and last contribution dates, per-language counts and weekly buckets for the last `weeks` ISO weeks (1 to 104). Sortable by contributions, suggested, accepted and declined; default contributions desc, suggested desc. */
+  /** Users who worked on translations in the project within the range: translating, changing translation states, commenting, suggesting, and accepting or declining suggestions. For each user: the number of contributions, suggestions, accepted and declined suggestions, the counts per language, and one bucket of counts per day or week, all within the range. The dates of the first and last contribution are not limited by the range or the languages: they cover the user's whole history in the project. By default, the range is the 12 weeks ending with the week of `to` (today, unless given), with one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. `active` is exact: the number of the user's suggestions that are pending right now. Sort by contributions, suggested, accepted, declined, active or lastContributionAt; users without a lastContributionAt come last. By default, most contributions come first, then most suggestions. */
   getContributors_1: {
     parameters: {
       path: {
@@ -17522,7 +17543,16 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        weeks?: number;
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. */
+        to?: string;
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
+        /** Count only these languages. Users with no contributions in them within the range are left out. The filter also applies to the totals, the buckets, the counts per language and `active`. */
+        languageIds?: number[];
+        /** Leave out contributors with no suggestion in the range. */
+        excludeEmpty?: boolean;
       };
     };
     responses: {
@@ -31282,7 +31312,7 @@ export interface operations {
       };
     };
   };
-  /** The user's translation-related activity in public projects, always newest first (the sort parameter is ignored), in the shape of the project activity log plus the project and without the author. Visible under the same rule as the community profile. */
+  /** The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry has the shape of an entry in the project activity log, with the project added and the author left out. Returns 404 whenever the community profile does. */
   getActivityFeed: {
     parameters: {
       path: {
@@ -31338,11 +31368,19 @@ export interface operations {
       };
     };
   };
-  /** Contribution totals, languages, per-day counts for the last 365 days and the public projects contributed to. Only contributions to public projects are counted; a user without any is 404. */
+  /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user, or one without contributions to public projects, returns 404. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
   getProfile: {
     parameters: {
       path: {
         userId: number;
+      };
+      query: {
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. */
+        to?: string;
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
       };
     };
     responses: {

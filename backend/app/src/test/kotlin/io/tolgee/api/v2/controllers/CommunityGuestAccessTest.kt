@@ -70,10 +70,13 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     }
     performGet("$project/machine-translation-service-settings").andIsOk
     performGet("$project/keys/${testData.publicKeys[0].self.id}/screenshots").andIsOk
-    performGet("$project/community/contributors?weeks=3").andIsOk.andAssertThatJson {
+    performGet("$project/community/contributors?granularity=WEEK").andIsOk.andAssertThatJson {
       node("_embedded.contributors").isArray.isNotEmpty
+      node("_embedded.contributors[0].buckets").isArray.isNotEmpty
     }
-    performGet("$project/community/activity?weeks=3").andIsOk
+    performGet("$project/community/activity?granularity=DAY").andIsOk.andAssertThatJson {
+      node("buckets").isArray.isNotEmpty
+    }
     performGet("$project/export?zip=false&languages=en&format=JSON")
       .andDo { it.asyncResult }
       .andIsOk

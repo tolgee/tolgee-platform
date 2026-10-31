@@ -6,6 +6,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.community.CommunityActivityItem
 import io.tolgee.dtos.community.CommunityProfile
+import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.community.CommunityActivityModel
 import io.tolgee.hateoas.community.CommunityActivityModelAssembler
@@ -42,21 +43,30 @@ class CommunityProfileController(
   @Operation(
     summary = "Get community profile",
     description =
-      "Contribution totals, languages, per-day counts for the last 365 days and the public projects " +
-        "contributed to. Only contributions to public projects are counted; a user without any is 404.",
+      "The user's contribution counts, languages and the public projects they contributed to, over their " +
+        "whole history, plus one bucket of counts per day or week of the range. By default, the range is the " +
+        "365 days ending with `to` (today, unless given), with one bucket per day. " +
+        PeriodParams.RANGE_LIMITS + " " +
+        "Only contributions to public projects count. An unknown, deleted or disabled user, or one without " +
+        "contributions to public projects, returns 404. The counts are approximate: they come from the activity " +
+        "log and never go down, so a suggestion made on one day and accepted or declined on a later day counts " +
+        "on both. `active` is exact: the number of the user's suggestions that are pending right now, in total " +
+        "and per project.",
   )
   fun getProfile(
     @PathVariable userId: Long,
-  ): CommunityProfile = communityStatsService.getProfile(userId) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    @ParameterObject period: PeriodParams,
+  ): CommunityProfile =
+    communityStatsService.getProfile(userId, period) ?: throw NotFoundException(Message.USER_NOT_FOUND)
 
   @GetMapping("/community-activity")
   @AllowGuestAccess
   @Operation(
     summary = "Get community activity feed",
     description =
-      "The user's translation-related activity in public projects, always newest first (the sort parameter " +
-        "is ignored), in the shape of the project activity log plus the project and without the author. " +
-        "Visible under the same rule as the community profile.",
+      "The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry " +
+        "has the shape of an entry in the project activity log, with the project added and the author left out. " +
+        "Returns 404 whenever the community profile does.",
   )
   fun getActivityFeed(
     @PathVariable userId: Long,

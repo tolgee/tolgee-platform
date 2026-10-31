@@ -46,7 +46,7 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `profile counts only public projects, heatmap limited to a year`() {
+  fun `profile counts only public projects, pending included, heatmap limited to a year`() {
     performAuthGet("/v2/users/${testData.alice.id}/community-profile")
       .andIsOk
       .andAssertThatJson {
@@ -58,6 +58,7 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
         node("suggested").isEqualTo(4)
         node("accepted").isEqualTo(2)
         node("declined").isEqualTo(1)
+        node("active").isEqualTo(1)
         node("languages") {
           isArray.hasSize(2)
           node("[0].tag").isEqualTo("cs")
@@ -74,16 +75,43 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
           node("[0].name").isEqualTo(CommunityStatsTestData.PUBLIC_PROJECT_NAME)
           node("[0].contributions").isEqualTo(5)
           node("[0].suggested").isEqualTo(4)
-          node("[0].firstContributionAt").isEqualTo(currentDateProvider.date.time)
-          node("[0].lastContributionAt").isEqualTo(currentDateProvider.date.time)
+          node("[0].active").isEqualTo(1)
+          node("[0].firstContributionAt").isEqualTo("2026-03-04T12:00:00.000Z")
+          node("[0].lastContributionAt").isEqualTo("2026-03-04T12:00:00.000Z")
         }
-        node("days") {
+        node("days").isAbsent()
+        node("buckets") {
+          isArray.hasSize(365)
+          node("[0].start").isEqualTo("2025-03-05")
+          node("[0].contributions").isEqualTo(0)
+          node("[364].start").isEqualTo("2026-03-04")
+          node("[364].contributions").isEqualTo(4)
+          node("[364].suggested").isEqualTo(3)
+          node("[364].accepted").isEqualTo(2)
+          node("[364].declined").isEqualTo(0)
+        }
+      }
+  }
+
+  @Test
+  fun `profile buckets take the range and granularity and keep days outside the range out, totals stay all-time`() {
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile?from=2026-03-04&to=2026-03-04&granularity=WEEK")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(5)
+        node("buckets") {
           isArray.hasSize(1)
-          node("[0].day").isEqualTo("2026-03-04")
+          node("[0].start").isEqualTo("2026-03-02")
           node("[0].contributions").isEqualTo(4)
-          node("[0].suggested").isEqualTo(3)
-          node("[0].accepted").isEqualTo(2)
-          node("[0].declined").isEqualTo(0)
+        }
+      }
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile?from=2026-03-02&to=2026-03-03&granularity=WEEK")
+      .andIsOk
+      .andAssertThatJson {
+        node("buckets") {
+          isArray.hasSize(1)
+          node("[0].start").isEqualTo("2026-03-02")
+          node("[0].contributions").isEqualTo(0)
         }
       }
   }
@@ -91,12 +119,17 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
   @Test
   fun `a soft-deleted language drops out of the profile`() {
     jdbcTemplate.update("update language set deleted_at = now() where id = ?", testData.german.id)
+    jdbcTemplate.update(
+      "update translation_suggestion set state = 'ACTIVE' where language_id = ?",
+      testData.german.id,
+    )
     performAuthGet("/v2/users/${testData.alice.id}/community-profile")
       .andIsOk
       .andAssertThatJson {
         node("contributions").isEqualTo(4)
         node("suggested").isEqualTo(3)
         node("declined").isEqualTo(0)
+        node("active").isEqualTo(1)
         node("languages").isArray.hasSize(1)
       }
   }
