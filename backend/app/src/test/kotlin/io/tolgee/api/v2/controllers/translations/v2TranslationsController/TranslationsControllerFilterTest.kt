@@ -596,6 +596,28 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters auto-translated by source`() {
+    val testData = TranslationsTestData()
+    testData.addMtAutoTranslatedKeyWithManualGerman()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    projectSupplier = { testData.projectBuilder.self }
+    val autoInBoth = "/translations?filterAutoTranslatedInLang=en&filterAutoTranslatedInLang=de"
+    performProjectAuthGet("$autoInBoth&filterAutoTranslatedBy=TRANSLATION_MEMORY").andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(1)
+        node("[0].keyName").isEqualTo("Z key")
+      }
+      node("page.totalElements").isEqualTo(1)
+    }
+    performProjectAuthGet("$autoInBoth&filterAutoTranslatedBy=MACHINE_TRANSLATION").andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(2)
+      node("page.totalElements").isEqualTo(2)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `filters keys with unresolved comments`() {
     val testData = TranslationsTestData()
     testData.addCommentStatesData()

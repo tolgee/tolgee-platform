@@ -10,6 +10,10 @@ type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
+export type AutoTranslatedBy = NonNullable<
+  FiltersType['filterAutoTranslatedBy']
+>;
+
 export type TaskStatusFilter =
   | 'IN_OPEN_TASK'
   | 'NOT_IN_OPEN_TASK'
@@ -32,6 +36,8 @@ export type FiltersInternal = {
   filterNamespace?: string[];
   filterNoNamespace?: string[];
   filterTranslationState?: TranslationStateType[];
+  /** Narrows `AUTO_TRANSLATED` in `filterTranslationState`; undefined = any source */
+  filterAutoTranslatedBy?: AutoTranslatedBy;
   filterHasScreenshot?: boolean;
   filterHasNoScreenshot?: boolean;
   filterHasDescription?: boolean;
