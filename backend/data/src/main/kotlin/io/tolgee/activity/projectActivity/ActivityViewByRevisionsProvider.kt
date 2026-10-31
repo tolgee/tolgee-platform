@@ -57,6 +57,7 @@ class ActivityViewByRevisionsProvider(
       val author = authors[revision.authorId]
       ProjectActivityView(
         revisionId = revision.id,
+        projectId = revision.projectId,
         timestamp = revision.timestamp.time,
         type = revision.type ?: ActivityType.UNKNOWN,
         authorId = revision.authorId,
