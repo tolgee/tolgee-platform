@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.posthog.server.PostHog
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.UserAccount
@@ -22,6 +23,9 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var postHog: PostHog
+
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @BeforeEach
   fun setup() {
@@ -79,6 +83,27 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
 
     val params = assertPostHogEventReported(postHog, "PUBLIC_PROJECT_EVENT")
     (params["\$groups"] as Map<*, *>)["project"].assert.isEqualTo(testData.publicProject.id)
+  }
+
+  @Test
+  fun `it accepts a report from an account whose email is not verified yet`() {
+    val oldNeedsVerification = tolgeeProperties.authentication.needsEmailVerification
+    tolgeeProperties.authentication.needsEmailVerification = true
+    emailTestUtil.initMocks()
+    val code =
+      executeInNewTransaction {
+        emailVerificationService.createForUser(userAccountService.get(testData.nonMember.id))!!.code!!
+      }
+    try {
+      reportAs(
+        testData.nonMember,
+        mapOf("eventName" to "UNVERIFIED_EVENT", "projectId" to testData.publicProject.id),
+      )
+      assertPostHogEventReported(postHog, "UNVERIFIED_EVENT")
+    } finally {
+      executeInNewTransaction { emailVerificationService.verify(testData.nonMember.id, code) }
+      tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification
+    }
   }
 
   @Test
