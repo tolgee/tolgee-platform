@@ -41,25 +41,25 @@ export const ProjectRouter = () => {
           <SingleKeyView />
         </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
+        <PrivateRoute exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
           <TrashView />
-        </Route>
+        </PrivateRoute>
 
         <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
           <TranslationsView />
         </Route>
 
-        <Route path={LINKS.PROJECT_EDIT.template}>
+        <PrivateRoute path={LINKS.PROJECT_EDIT.template}>
           <ProjectSettingsView />
-        </Route>
+        </PrivateRoute>
 
-        <Route path={LINKS.PROJECT_LANGUAGES.template}>
+        <PrivateRoute path={LINKS.PROJECT_LANGUAGES.template}>
           <LanguageSettingsView />
-        </Route>
+        </PrivateRoute>
 
-        <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
+        <PrivateRoute exact path={LINKS.PROJECT_PERMISSIONS.template}>
           <ProjectMembersView />
-        </Route>
+        </PrivateRoute>
 
         <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
           <ImportView />
@@ -69,42 +69,42 @@ export const ProjectRouter = () => {
           <ExportView />
         </Route>
 
-        <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
+        <PrivateRoute exact path={LINKS.PROJECT_INTEGRATE.template}>
           <IntegrateView />
-        </Route>
+        </PrivateRoute>
 
         <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
           <DashboardView />
         </Route>
 
-        <Route path={LINKS.PROJECT_DEVELOPER.template}>
+        <PrivateRoute path={LINKS.PROJECT_DEVELOPER.template}>
           <DeveloperView />
-        </Route>
+        </PrivateRoute>
 
         {/* /ai redirects to the default Context Data tab; /ai/* renders AiView. */}
-        <Route exact path={LINKS.PROJECT_AI.template}>
+        <PrivateRoute exact path={LINKS.PROJECT_AI.template}>
           <Redirect
             to={LINKS.PROJECT_CONTEXT_DATA.build({
               [PARAMS.PROJECT_ID]: projectId,
             })}
           />
-        </Route>
-        <Route path={LINKS.PROJECT_AI.template}>
+        </PrivateRoute>
+        <PrivateRoute path={LINKS.PROJECT_AI.template}>
           <AiView />
-        </Route>
+        </PrivateRoute>
 
-        <Route path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
+        <PrivateRoute path={LINKS.GO_TO_PROJECT_ACTIVITY_DETAIL.template}>
           <ActivityDetailRedirect />
-        </Route>
+        </PrivateRoute>
 
-        <Route path={LINKS.GO_TO_PROJECT_TASK.template}>
+        <PrivateRoute path={LINKS.GO_TO_PROJECT_TASK.template}>
           <TaskRedirect />
-        </Route>
+        </PrivateRoute>
 
         {/* Internal preview route (websockets debugging). */}
-        <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
+        <PrivateRoute exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
           <WebsocketPreview />
-        </Route>
+        </PrivateRoute>
 
         {/*Branched views*/}
         <Route exact path={BRANCH_ROUTES.translation.branched}>
@@ -119,17 +119,22 @@ export const ProjectRouter = () => {
           <DashboardView />
         </Route>
 
-        <Route exact path={BRANCH_ROUTES.import.branched}>
+        <PrivateRoute exact path={BRANCH_ROUTES.import.branched}>
           <ImportView />
-        </Route>
+        </PrivateRoute>
 
         <Route exact path={BRANCH_ROUTES.export.branched}>
           <ExportView />
         </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
+        <PrivateRoute
+          exact
+          path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}
+        >
           <TrashView />
-        </Route>
+        </PrivateRoute>
+        {/* Guest catch-all: a route guests may open must sit above this line. Members match it too and render nothing. */}
+        <PrivateRoute />
       </Switch>
       <routes.Project />
     </ProjectContext>

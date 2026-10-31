@@ -58,10 +58,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.io.Serializable
 
-// fed into BASE_VIEW_QUERY's per-user permission/role joins; must never equal a real UserAccount id,
-// or an anonymous caller would inherit that account's permissions
-private const val NO_USER_ID = -1L
-
 @Transactional
 @Service
 class ProjectService(
@@ -158,9 +154,10 @@ class ProjectService(
 
   @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
-    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
+    val userId = authenticationFacade.authenticatedUserOrGuest.id
+    val perms = permissionService.getProjectPermissionData(id, userId)
     val withoutPermittedLanguages =
-      projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
+      projectRepository.findViewById(userId, id)
         ?: throw ProjectNotFoundException(id)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
@@ -314,6 +311,7 @@ class ProjectService(
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
               asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccount.id),
+              isGuest = false,
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
@@ -486,7 +484,7 @@ class ProjectService(
     search: String?,
     filterContributed: Boolean = false,
   ): Page<ProjectWithLanguagesView> {
-    val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
+    val userAccountId = authenticationFacade.authenticatedUserOrGuest.id
     val projects = findPublicProjectViews(userAccountId, pageable, search, filterContributed)
     return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }

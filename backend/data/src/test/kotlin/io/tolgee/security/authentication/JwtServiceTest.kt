@@ -167,6 +167,20 @@ class JwtServiceTest {
   }
 
   @Test
+  fun `a guest image ticket validates without an account, other subjects and ticket types do not`() {
+    val guestTicket = jwtService.emitTicket(TolgeeAuthentication.GUEST_USER_ID, JwtService.TicketType.IMG_ACCESS)
+    val authenticated = jwtService.validateTicket(guestTicket, JwtService.TicketType.IMG_ACCESS)
+    assertThat(authenticated.userAccount.id).isEqualTo(TolgeeAuthentication.GUEST_USER_ID)
+    assertThat(authenticated.userAccount.role).isNull()
+
+    val unknownTicket = jwtService.emitTicket(987654321L, JwtService.TicketType.IMG_ACCESS)
+    assertThrows<AuthenticationException> { jwtService.validateTicket(unknownTicket, JwtService.TicketType.IMG_ACCESS) }
+
+    val guestMfaTicket = jwtService.emitTicket(TolgeeAuthentication.GUEST_USER_ID, JwtService.TicketType.AUTH_MFA)
+    assertThrows<AuthenticationException> { jwtService.validateTicket(guestMfaTicket, JwtService.TicketType.AUTH_MFA) }
+  }
+
+  @Test
   fun `it validates the type of the ticket`() {
     val ticket = jwtService.emitTicket(TEST_USER_ID, JwtService.TicketType.AUTH_MFA)
 

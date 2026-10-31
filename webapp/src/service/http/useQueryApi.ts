@@ -162,7 +162,7 @@ export const useApiQueries = <
             ...fetchOptions,
             disableAutoErrorHandle: true,
           })(request),
-        options: autoErrorHandling(
+        ...autoErrorHandling(
           options as UseQueryOptions<any, ApiError>,
           Boolean(fetchOptions?.disableAutoErrorHandle)
         ),

@@ -213,5 +213,20 @@ class ComputedPermissionDto(
           ),
           origin = ComputedPermissionOrigin.COMMUNITY,
         )
+
+    val GUEST
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes =
+              arrayOf(
+                Scope.TRANSLATIONS_VIEW,
+                Scope.SCREENSHOTS_VIEW,
+                Scope.ACTIVITY_VIEW,
+              ),
+            type = ProjectPermissionType.VIEW,
+          ),
+          origin = ComputedPermissionOrigin.GUEST,
+        )
   }
 }
