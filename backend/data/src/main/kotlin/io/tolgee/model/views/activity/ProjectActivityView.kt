@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ActivityType
 
 class ProjectActivityView(
   val revisionId: Long,
+  val projectId: Long? = null,
   val timestamp: Long,
   val type: ActivityType,
   var authorId: Long? = null,

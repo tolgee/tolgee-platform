@@ -6,10 +6,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.IdClass
 import jakarta.persistence.Index
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Immutable
 import java.time.LocalDate
 
-/** Rows arrive from the `track_community_contribution_day` trigger and `communityContributionDayBackfill.sql`, never from JPA. */
+/** Rows arrive from the `track_community_contribution_day` trigger (`communityContributionTrigger.sql`) and `communityContributionBackfill.sql`, never from JPA. */
 @Entity
 @Immutable
 @IdClass(CommunityContributionDayId::class)
@@ -31,6 +32,9 @@ class CommunityContributionDay(
   val languageId: Long,
   @Id
   val day: LocalDate,
+  @Column(nullable = false)
+  @ColumnDefault("0")
+  val contributions: Int,
   @Column(nullable = false)
   val suggested: Int,
   @Column(nullable = false)
