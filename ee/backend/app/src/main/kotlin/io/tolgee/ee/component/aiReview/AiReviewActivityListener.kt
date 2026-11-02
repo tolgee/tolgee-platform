@@ -84,7 +84,7 @@ class AiReviewActivityListener(
     val projectId = event.job.projectId ?: return
     if (isSelfHealJob(event.job)) return
     runSentryCatching {
-      aiReviewQueueService.selfHeal(projectId)
+      aiReviewQueueService.selfHeal(projectId, event.job.id)
     }
   }
 

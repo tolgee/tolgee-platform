@@ -172,10 +172,13 @@ class AiReviewQueueService(
    * finalize triggers the next self-heal.
    */
   @Transactional
-  fun selfHeal(projectId: Long) {
+  fun selfHeal(
+    projectId: Long,
+    finishedJobId: Long? = null,
+  ) {
     val project = projectService.getDto(projectId)
     if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
-    if (batchJobService.hasActiveJobForProject(projectId, BatchJobType.AI_REVIEW)) return
+    if (batchJobService.hasActiveJobForProject(projectId, BatchJobType.AI_REVIEW, finishedJobId)) return
     reviewRepository.releaseStaleClaims(projectId)
     val ready = findReadyProjectWide(projectId, isQaOn(project))
     startJob(projectId, ready, handlingStuckItems = true)
