@@ -31,6 +31,8 @@ import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.aiReview.AiReviewRowAccess
+import io.tolgee.service.aiReview.SourceChangeDecision
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -55,6 +57,8 @@ import java.util.Optional
 @Service
 @Transactional
 class TranslationService(
+  @Lazy
+  private val aiReviewRowAccess: AiReviewRowAccess,
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
   private val tolgeeProperties: TolgeeProperties,
@@ -388,6 +392,7 @@ class TranslationService(
   fun setOutdated(
     key: Key,
     excludeTranslationIds: Set<Long> = emptySet(),
+    decide: ((Translation) -> SourceChangeDecision)? = null,
   ) {
     val baseLanguage = key.project.baseLanguage
     key.translations.forEach {
@@ -396,14 +401,24 @@ class TranslationService(
       val isExcluded = excludeTranslationIds.contains(it.id)
 
       if (!isBase && !isEmpty && !isExcluded) {
-        val project = projectHolder.projectOrNull
+        val decision = decide?.invoke(it) ?: defaultSourceChangeDecision()
         it.outdated = true
-        if (project?.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
-          it.state = TranslationState.TRANSLATED
-        }
+        decision.newState?.let { state -> it.state = state }
+        decision.setAuto?.let { auto -> it.auto = auto }
         save(it)
+        if (decision.deleteAiReviewRow) {
+          aiReviewRowAccess.deleteRow(it.id)
+        }
       }
     }
+  }
+
+  private fun defaultSourceChangeDecision(): SourceChangeDecision {
+    val project = projectHolder.projectOrNull
+    if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED) {
+      return SourceChangeDecision(newState = null)
+    }
+    return SourceChangeDecision(newState = TranslationState.TRANSLATED)
   }
 
   fun setOutdatedBatch(keyIds: List<Long>) {
