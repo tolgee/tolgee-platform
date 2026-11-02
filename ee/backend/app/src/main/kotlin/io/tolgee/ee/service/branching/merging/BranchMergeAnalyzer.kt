@@ -236,6 +236,7 @@ private fun BranchMergeFilters.accepts(
   if (!acceptsTags(sourceKey)) return false
   if (!reviewedOnly) return true
   return sourceKey.translations.all { translation ->
+    if (translation.text.isNullOrEmpty()) return@all true
     val snapshotTranslation = snapshot?.translations?.find { it.language == translation.language.tag }
     val changed = snapshotTranslation == null || translation.hasChanged(snapshotTranslation)
     !changed || translation.state == TranslationState.REVIEWED

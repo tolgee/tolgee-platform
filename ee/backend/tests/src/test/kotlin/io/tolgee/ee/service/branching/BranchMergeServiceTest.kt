@@ -1064,6 +1064,20 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run with reviewedOnly ignores an empty translation row`() {
+    val key = createKey(additionKeyName, additionValue, testData.featureBranch)
+    val english = getTranslation(key, testData.englishLanguage)
+    translationService.setStateBatch(mapOf(english to TranslationState.REVIEWED))
+    val german = addProjectLanguage("de", "German")
+    translationService.save(translationService.getOrCreate(testData.project.id, key.id, german.id))
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.ADD)
+  }
+
+  @Test
   fun `dry-run with tag filters keeps or drops keys by tag`() {
     updateFeatureKey()
     createFeatureOnlyKey()
