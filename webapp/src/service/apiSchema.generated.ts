@@ -2055,7 +2055,7 @@ export interface components {
        */
       uncompletedTasksCount: number;
     };
-    /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
+    /** @description Last applied update of this branch from its origin */
     BranchMergeRefModel: {
       /**
        * Format: int64
@@ -2067,6 +2067,8 @@ export interface components {
        * @description Date of merge. If null, merge was not applied yet
        */
       mergedAt?: number;
+      /** @description Source branch name */
+      sourceBranchName: string;
       /** @description Target branch name */
       targetBranchName: string;
     };
@@ -2112,6 +2114,7 @@ export interface components {
       name: string;
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
+      update?: components["schemas"]["BranchMergeRefModel"];
     };
     Bucket: {
       /** Format: int64 */
@@ -2440,6 +2443,7 @@ export interface components {
         | "BRANCH_DELETE"
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
+        | "BRANCH_UPDATE"
         | "QA_ISSUE_IGNORE"
         | "QA_ISSUE_UNIGNORE";
     };
@@ -6046,6 +6050,7 @@ export interface components {
         | "BRANCH_DELETE"
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
+        | "BRANCH_UPDATE"
         | "QA_ISSUE_IGNORE"
         | "QA_ISSUE_UNIGNORE";
     };

@@ -207,6 +207,37 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `applying an update records BRANCH_UPDATE with origin as source`() {
+    applyUpdateFromOrigin()
+    waitForNotThrowing(timeout = 5000, pollTime = 250) {
+      performProjectAuthGet("activity").andIsOk.andAssertThatJson {
+        node("_embedded.activities[0].type").isEqualTo("BRANCH_UPDATE")
+        node("_embedded.activities[0].params.source").isEqualTo(testData.mainBranch.name)
+        node("_embedded.activities[0].params.target").isEqualTo(testData.featureBranch.name)
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  @Suppress("UNCHECKED_CAST")
+  fun `branch list shows the update on the child and not as the origin's merge`() {
+    applyUpdateFromOrigin()
+    val branches =
+      performProjectAuthGet("branches")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+        .let { (it["_embedded"] as Map<*, *>)["branches"] as List<Map<String, Any?>> }
+    val feature = branches.first { it["name"] == testData.featureBranch.name }
+    val update = feature["update"] as Map<*, *>
+    update["sourceBranchName"].assert.isEqualTo(testData.mainBranch.name)
+    update["mergedAt"].assert.isNotNull
+    branches.first { it["name"] == testData.mainBranch.name }["merge"].assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `refreshes merge preview without losing resolved conflicts`() {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
@@ -587,12 +618,22 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     return branchRepository.findByIdOrNull(this.id)!!
   }
 
-  private fun createMergePreview(sourceBranchId: Long): Long {
+  private fun applyUpdateFromOrigin() {
+    val mergeId = createMergePreview(testData.mainBranch.id, testData.featureBranch.id)
+    performProjectAuthPut("branches/merge/$mergeId/resolve-all", mapOf("resolve" to "SOURCE")).andIsOk
+    performProjectAuthPost("branches/merge/$mergeId/apply", mapOf("deleteBranch" to false)).andIsOk
+  }
+
+  private fun createMergePreview(
+    sourceBranchId: Long,
+    targetBranchId: Long? = null,
+  ): Long {
     val response =
       performProjectAuthPost(
         "branches/merge/preview",
         mapOf(
           "sourceBranchId" to sourceBranchId,
+          "targetBranchId" to targetBranchId,
         ),
       ).andIsOk
         .andReturn()

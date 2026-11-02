@@ -59,12 +59,23 @@ class Branch(
   @Column(name = "revision")
   @ColumnDefault("0")
   var revision: Int = 0,
-  // Restricted to the single latest merge (see lastMerge); a fetch join can't filter its collection
+  // Restricted to the single latest promote into the origin (see lastMerge), and updates to the single
+  // latest applied update from the origin (see lastUpdate); a fetch join can't filter its collection
   // in Hibernate 7, so the restriction lives here instead of in the repository query.
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
-  @SQLRestriction("id = (select max(m.id) from branch_merge m where m.source_branch_id = source_branch_id)")
+  @SQLRestriction(
+    "id = (select max(m.id) from branch_merge m where m.source_branch_id = source_branch_id " +
+      "and m.target_branch_id = (select b.origin_branch_id from branch b where b.id = m.source_branch_id))",
+  )
   var merges: MutableList<BranchMerge> = mutableListOf(),
+  @OneToMany(targetEntity = BranchMerge::class, mappedBy = "targetBranch", fetch = FetchType.LAZY)
+  @SQLRestriction(
+    "id = (select max(m.id) from branch_merge m where m.target_branch_id = target_branch_id " +
+      "and m.merged_at is not null " +
+      "and m.source_branch_id = (select b.origin_branch_id from branch b where b.id = m.target_branch_id))",
+  )
+  var updates: MutableSet<BranchMerge> = mutableSetOf(),
   var deletedAt: Date? = null,
 ) : StandardAuditModel() {
   companion object {
@@ -97,6 +108,9 @@ class Branch(
 
   val lastMerge: BranchMerge?
     get() = merges.firstOrNull()
+
+  val lastUpdate: BranchMerge?
+    get() = updates.firstOrNull()
 
   val isActive: Boolean
     get() = deletedAt == null
