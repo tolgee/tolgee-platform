@@ -7,6 +7,7 @@ import type { components } from './apiSchema.generated';
 export type AcceptAuthProviderChangeRequest = components['schemas']['AcceptAuthProviderChangeRequest'];
 export type AiPlaygroundResultModel = components['schemas']['AiPlaygroundResultModel'];
 export type AiPlaygroundResultRequest = components['schemas']['AiPlaygroundResultRequest'];
+export type AiReviewIssue = components['schemas']['AiReviewIssue'];
 export type AiReviewIssueModel = components['schemas']['AiReviewIssueModel'];
 export type AiReviewRuleCountsModel = components['schemas']['AiReviewRuleCountsModel'];
 export type AiReviewRuleEnabledRequest = components['schemas']['AiReviewRuleEnabledRequest'];

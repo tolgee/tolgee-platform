@@ -65,6 +65,10 @@ enum class BatchJobType(
     maxRetries = 3,
     processor = AiPlaygroundChunkProcessor::class,
   ),
+  AI_PLAYGROUND_REVIEW(
+    maxRetries = 3,
+    processor = AiPlaygroundChunkProcessor::class,
+  ),
   PRE_TRANSLATE_BT_TM(
     activityType = ActivityType.BATCH_PRE_TRANSLATE_BY_TM,
     maxRetries = 3,

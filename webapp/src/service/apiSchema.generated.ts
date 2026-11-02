@@ -1385,15 +1385,25 @@ export interface components {
     };
     AiPlaygroundResultModel: {
       contextDescription?: string;
+      issues?: components["schemas"]["AiReviewIssue"][];
       /** Format: int64 */
       keyId: number;
       /** Format: int64 */
       languageId: number;
+      /** Format: int32 */
+      score?: number;
       translation?: string;
     };
     AiPlaygroundResultRequest: {
       keys: number[];
       languages: number[];
+    };
+    AiReviewIssue: {
+      category?: string;
+      message: string;
+      /** Format: int32 */
+      points: number;
+      severity: string;
     };
     AiReviewIssueModel: {
       category?: string;
@@ -1853,6 +1863,7 @@ export interface components {
         | "AI_REVIEW"
         | "AI_REVIEW_DEMOTION"
         | "AI_PLAYGROUND_TRANSLATE"
+        | "AI_PLAYGROUND_REVIEW"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
         | "AUTO_TRANSLATE"
@@ -4001,6 +4012,7 @@ export interface components {
         | "AI_REVIEW"
         | "AI_REVIEW_DEMOTION"
         | "AI_PLAYGROUND_TRANSLATE"
+        | "AI_PLAYGROUND_REVIEW"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
         | "AUTO_TRANSLATE"

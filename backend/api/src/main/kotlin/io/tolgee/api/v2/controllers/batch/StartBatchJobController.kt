@@ -22,6 +22,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -110,14 +111,25 @@ class StartBatchJobController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+    if (data.llmPrompt?.type == PromptType.REVIEW) {
+      enabledFeaturesProvider.checkFeatureEnabled(
+        projectHolder.project.organizationOwnerId,
+        Feature.AI_REVIEW,
+      )
+    }
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     aiPlaygroundResultService.removeResults(projectHolder.project.id, authenticationFacade.authenticatedUserEntity.id)
+    val jobType =
+      when (data.llmPrompt?.type) {
+        PromptType.REVIEW -> BatchJobType.AI_PLAYGROUND_REVIEW
+        else -> BatchJobType.AI_PLAYGROUND_TRANSLATE
+      }
     return batchJobService
       .startJob(
         data,
         projectHolder.projectEntity,
         authenticationFacade.authenticatedUserEntity,
-        BatchJobType.AI_PLAYGROUND_TRANSLATE,
+        jobType,
       ).model
   }
 
