@@ -953,6 +953,11 @@ export interface paths {
   "/v2/projects/{projectId}/single-step-import-resolvable": {
     post: operations["singleStepResolvableImport"];
   };
+  "/v2/projects/{projectId}/source-change-settings": {
+    get: operations["getSourceChangeSettings"];
+    /** The setting decides whether human work is overwritten automatically later. */
+    put: operations["setSourceChangeSettings"];
+  };
   "/v2/projects/{projectId}/start-batch-job/ai-playground-translate": {
     post: operations["aiPlaygroundTranslate"];
   };
@@ -5673,6 +5678,7 @@ export interface components {
         | "AI_PROMPT_CREATE"
         | "AI_PROMPT_UPDATE"
         | "AI_PROMPT_DELETE"
+        | "AI_REVIEW_SETTINGS_UPDATE"
         | "AI_REVIEW_RULE_CREATE"
         | "AI_REVIEW_RULE_UPDATE"
         | "AI_REVIEW_RULE_DELETE"
@@ -7019,6 +7025,24 @@ export interface components {
       slackName?: string;
       slackRealName?: string;
       teamName: string;
+    };
+    SourceChangeSettingsModel: {
+      /** @enum {string} */
+      aiApproved: "RETRANSLATE" | "MARK_OUTDATED";
+      aiApprovedLocked: boolean;
+      /** @enum {string} */
+      humanEdited: "RETRANSLATE" | "MARK_OUTDATED";
+      /** @enum {string} */
+      humanReviewed: "RETRANSLATE" | "MARK_OUTDATED";
+      humanReviewedLocked: boolean;
+    };
+    SourceChangeSettingsRequest: {
+      /** @enum {string} */
+      aiApproved: "RETRANSLATE" | "MARK_OUTDATED";
+      /** @enum {string} */
+      humanEdited: "RETRANSLATE" | "MARK_OUTDATED";
+      /** @enum {string} */
+      humanReviewed: "RETRANSLATE" | "MARK_OUTDATED";
     };
     SsoGlobalPublicConfigDTO: {
       clientId?: string;
@@ -24412,6 +24436,106 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SingleStepImportResolvableRequest"];
+      };
+    };
+  };
+  getSourceChangeSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SourceChangeSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** The setting decides whether human work is overwritten automatically later. */
+  setSourceChangeSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SourceChangeSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SourceChangeSettingsRequest"];
       };
     };
   };
