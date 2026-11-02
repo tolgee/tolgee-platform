@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Plus } from '@untitled-ui/icons-react';
@@ -9,6 +10,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AiReviewRuleItem } from './AiReviewRuleItem';
+import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
 
 export const AiReviewRulesView = () => {
   const { t } = useTranslate();
@@ -16,6 +18,7 @@ export const AiReviewRulesView = () => {
   const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
   const canEdit = satisfiesPermission('prompts.edit');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const rulesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/ai-review-rules',
@@ -62,6 +65,7 @@ export const AiReviewRulesView = () => {
               color="primary"
               variant="contained"
               startIcon={<Plus width={19} height={19} />}
+              onClick={() => setCreateOpen(true)}
               data-cy="ai-review-add-rule-button"
             >
               {t('ai_review_add_rule', 'Add rule')}
@@ -91,6 +95,7 @@ export const AiReviewRulesView = () => {
                   color="primary"
                   variant="contained"
                   startIcon={<Plus width={19} height={19} />}
+                  onClick={() => setCreateOpen(true)}
                   data-cy="ai-review-add-rule-button"
                 >
                   {t('ai_review_add_rule', 'Add rule')}
@@ -108,6 +113,9 @@ export const AiReviewRulesView = () => {
               />
             ))}
           </Box>
+        )}
+        {createOpen && (
+          <AiReviewRuleDialog onClose={() => setCreateOpen(false)} />
         )}
       </Box>
     </ProjectLanguagesProvider>
