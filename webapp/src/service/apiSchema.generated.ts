@@ -1813,6 +1813,7 @@ export interface components {
        */
       type:
         | "AI_REVIEW"
+        | "AI_REVIEW_DEMOTION"
         | "AI_PLAYGROUND_TRANSLATE"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"
@@ -3959,6 +3960,7 @@ export interface components {
       /** @enum {string} */
       type:
         | "AI_REVIEW"
+        | "AI_REVIEW_DEMOTION"
         | "AI_PLAYGROUND_TRANSLATE"
         | "PRE_TRANSLATE_BT_TM"
         | "MACHINE_TRANSLATE"

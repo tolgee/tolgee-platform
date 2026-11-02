@@ -157,7 +157,7 @@ class PromptServiceEeImpl(
     val prompt = this.findPrompt(projectId, promptId)
     val project = projectService.get(projectId)
     mtServiceConfigService.removePrompt(project, prompt.id)
-    if (prompt.type == PromptType.REVIEW) aiReviewRuleService.detachPrompt(projectId, prompt.id)
+    if (prompt.type == PromptType.REVIEW) aiReviewRuleService.detachPromptAndSwitchToDryRun(projectId, prompt.id)
     promptRepository.delete(prompt)
   }
 

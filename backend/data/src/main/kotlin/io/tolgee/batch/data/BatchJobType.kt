@@ -4,6 +4,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
 import io.tolgee.batch.processors.AiReviewChunkProcessor
+import io.tolgee.batch.processors.AiReviewDemotionChunkProcessor
 import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.AutoTranslateChunkProcessor
 import io.tolgee.batch.processors.AutoUpgradeNoticeProcessor
@@ -51,6 +52,12 @@ enum class BatchJobType(
   AI_REVIEW(
     maxRetries = 3,
     processor = AiReviewChunkProcessor::class,
+    defaultExclusive = false,
+    systemActor = SystemActor.AI_REVIEWER,
+  ),
+  AI_REVIEW_DEMOTION(
+    maxRetries = 3,
+    processor = AiReviewDemotionChunkProcessor::class,
     defaultExclusive = false,
     systemActor = SystemActor.AI_REVIEWER,
   ),

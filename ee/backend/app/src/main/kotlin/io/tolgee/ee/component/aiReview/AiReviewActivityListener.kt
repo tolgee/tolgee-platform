@@ -16,10 +16,12 @@ import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.params.AiReviewJobParams
 import io.tolgee.model.batch.params.QaCheckJobParams
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.runSentryCatching
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -36,6 +38,7 @@ class AiReviewActivityListener(
   private val languageService: LanguageService,
   private val translationRepository: TranslationRepository,
   private val objectMapper: ObjectMapper,
+  private val entityManager: EntityManager,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -100,6 +103,7 @@ class AiReviewActivityListener(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
   ) {
+    handleKeyScopeChanged(projectId, entities)
     val textChanged = textChangedTranslations(entities)
     if (textChanged.isEmpty()) return
 
@@ -110,6 +114,45 @@ class AiReviewActivityListener(
         .mapNotNull { it.describingRelations?.get("key")?.entityId }
     aiReviewQueueService.onSourceChanged(projectId, baseKeyIds)
     aiReviewQueueService.onTextChanged(projectId, textChanged.map { it.entityId })
+  }
+
+  /**
+   * A tag or namespace change can move a key under a stricter rule, so its approvals are
+   * re-checked against the stored scores.
+   */
+  private fun handleKeyScopeChanged(
+    projectId: Long,
+    entities: List<ActivityModifiedEntity>,
+  ) {
+    val namespaceChangedKeyIds =
+      entities
+        .filter {
+          it.entityClass == Key::class.simpleName &&
+            it.revisionType == RevisionType.MOD &&
+            it.modifications.containsKey("namespace")
+        }.map { it.entityId }
+    val tagsChangedKeyMetaIds =
+      entities
+        .filter {
+          it.entityClass == "KeyMeta" &&
+            it.revisionType != RevisionType.DEL &&
+            it.modifications.containsKey("tags")
+        }.map { it.entityId }
+    val keyIds = namespaceChangedKeyIds + keyIdsOfKeyMetas(tagsChangedKeyMetaIds)
+    if (keyIds.isEmpty()) return
+    aiReviewQueueService.startDemotionJob(projectId, keyIds.distinct())
+  }
+
+  private fun keyIdsOfKeyMetas(keyMetaIds: List<Long>): List<Long> {
+    if (keyMetaIds.isEmpty()) return emptyList()
+    return keyMetaIds.chunked(10_000).flatMap { chunk ->
+      @Suppress("UNCHECKED_CAST")
+      entityManager
+        .createNativeQuery("select key_id from key_meta where id in :ids")
+        .setParameter("ids", chunk)
+        .resultList
+        .map { (it as Number).toLong() }
+    }
   }
 
   private fun handleQaFinalized(

@@ -123,6 +123,33 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
   )
   fun findClaimableTranslationIds(projectId: Long): List<Long>
 
+  @Query(
+    """
+    select distinct t.key.id from TranslationAiReview r
+    join r.translation t
+    where t.key.project.id = :projectId
+      and r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.APPROVED
+    """,
+  )
+  fun findApprovedKeyIds(projectId: Long): List<Long>
+
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where t.key.id in :keyIds
+      and r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.APPROVED
+    """,
+  )
+  fun findApprovedTranslationIdsByKeyIds(keyIds: Collection<Long>): List<Long>
+
+  @Modifying
+  @Query("delete from TranslationAiReview r where r.rule.id = :ruleId and r.status in :statuses")
+  fun deleteByRuleAndStatuses(
+    ruleId: Long,
+    statuses: Collection<AiReviewStatus>,
+  ): Int
+
   @Modifying
   @Query("delete from TranslationAiReview r where r.translation.id in :translationIds")
   fun deleteAllByTranslationIds(translationIds: Collection<Long>): Int
