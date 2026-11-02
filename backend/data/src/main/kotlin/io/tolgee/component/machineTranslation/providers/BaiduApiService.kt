@@ -49,11 +49,25 @@ class BaiduApiService(
         requestBody,
       )
 
-    return response.body
-      ?.transResult
-      ?.first()
-      ?.dst
-      ?: throw RuntimeException(response.toString())
+    val results =
+      response.body
+        ?.transResult
+        ?.takeIf { it.isNotEmpty() }
+        ?: throw RuntimeException(response.toString())
+
+    return joinLines(text, results)
+  }
+
+  // Baidu splits the query on newlines and returns one result per non-blank line only.
+  private fun joinLines(
+    source: String,
+    results: List<BaiduTranslation>,
+  ): String {
+    val remaining = results.iterator()
+    return source.split("\n").joinToString("\n") { line ->
+      if (line.isBlank() || !remaining.hasNext()) return@joinToString line
+      remaining.next().dst.orEmpty()
+    }
   }
 
   private fun getSalt(): String {
