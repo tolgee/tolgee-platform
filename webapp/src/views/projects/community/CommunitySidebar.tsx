@@ -1,12 +1,15 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Box, Link as MuiLink, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 import {
+  ArrowUpRight,
   ChevronDown,
   ChevronUp,
   CursorClick02,
 } from '@untitled-ui/icons-react';
 
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { UserName } from 'tg.component/common/UserName';
@@ -285,6 +288,28 @@ export const CommunitySidebar = ({
                 <UserName name={c.name} />
               </Box>
             ))}
+            <MuiLink
+              component={Link}
+              to={{
+                pathname: LINKS.PROJECT_COMMUNITY_CONTRIBUTORS.build({
+                  [PARAMS.PROJECT_ID]: details.projectId,
+                }),
+                search: `?period=${top.period}`,
+              }}
+              underline="none"
+              sx={{ justifySelf: 'start' }}
+              data-cy="community-all-contributors"
+            >
+              {t('community_all_contributors', 'All contributors')}
+              <ArrowUpRight
+                style={{
+                  display: 'inline-flex',
+                  width: '1.43em',
+                  height: '1.43em',
+                  verticalAlign: 'bottom',
+                }}
+              />
+            </MuiLink>
           </>
         ) : (
           top && (

@@ -371,6 +371,11 @@ export class LINKS {
 
   static PROJECT_COMMUNITY = Link.ofParent(LINKS.PROJECT, 'community');
 
+  static PROJECT_COMMUNITY_CONTRIBUTORS = Link.ofParent(
+    LINKS.PROJECT_COMMUNITY,
+    'contributors'
+  );
+
   static PROJECT_AI = Link.ofParent(LINKS.PROJECT, 'ai');
 
   static PROJECT_CONTEXT_DATA = Link.ofParent(LINKS.PROJECT_AI, 'context-data');

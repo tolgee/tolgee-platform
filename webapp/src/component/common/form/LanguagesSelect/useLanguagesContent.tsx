@@ -144,17 +144,23 @@ export const useLanguagesContent = ({
         <Checkbox checked={allSelected} size="small" />
         <ListItemText primary={t('languages_permitted_list_select_all')} />
       </MenuItem>,
-      <MenuItem
-        key="select-base"
-        onClick={handleSelectBase}
-        disabled={!baseLang}
-        data-cy="translations-language-select-base"
-      >
-        <Checkbox checked={isOnlyBaseSelected} size="small" />
-        <ListItemText
-          primary={t('languages_select_base_language', 'Base language only')}
-        />
-      </MenuItem>,
+      ...(baseLang
+        ? [
+            <MenuItem
+              key="select-base"
+              onClick={handleSelectBase}
+              data-cy="translations-language-select-base"
+            >
+              <Checkbox checked={isOnlyBaseSelected} size="small" />
+              <ListItemText
+                primary={t(
+                  'languages_select_base_language',
+                  'Base language only'
+                )}
+              />
+            </MenuItem>,
+          ]
+        : []),
       <Divider key="divider" />,
       ...languageItems,
     ];

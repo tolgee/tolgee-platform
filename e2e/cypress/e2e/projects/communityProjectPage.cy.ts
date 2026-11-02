@@ -35,13 +35,16 @@ describe('Community project page', () => {
     waitForGlobalLoading();
   };
 
-  it('shows the top contributors with their period', () => {
+  it('shows top contributors with their period and links to all contributors', () => {
     visitPage();
     gcy('community-top-contributor').should('have.length', 3);
     gcy('community-top-contributors-period')
       .invoke('attr', 'data-cy-period')
       .then((period) => {
         expect(['month', 'year']).to.include(period);
+        gcy('community-all-contributors')
+          .should('have.attr', 'href')
+          .and('include', `/community/contributors?period=${period}`);
       });
   });
 
