@@ -6207,6 +6207,19 @@
         <sqlFile path="classpath:db/changelog/communityContributionBackfill.sql" splitStatements="false"/>
         <rollback/>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1793000000000-1">
+        <addColumn tableName="project">
+            <column name="community_description" type="VARCHAR(2000)"/>
+            <column name="community_guidelines" type="VARCHAR(2000)"/>
+            <column name="community_shared" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="community_in_context" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="community_app_url" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
     <changeSet author="jirikuchynka" id="1792410000000-1">
         <addColumn tableName="user_account">
             <column name="profile_visibility" type="VARCHAR(255)" defaultValue="DEFAULT">

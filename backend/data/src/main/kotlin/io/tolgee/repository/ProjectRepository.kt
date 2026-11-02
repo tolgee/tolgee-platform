@@ -24,6 +24,12 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.public as public,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
+        r.communityDescription as communityDescription,
+        r.communityGuidelines as communityGuidelines,
+        r.communityShared as communityShared,
+        r.communityInContext as communityInContext,
+        r.communityAppUrl as communityAppUrl,
+        r.createdAt as createdAt,
         dn as defaultNamespace, o as organizationOwner,
         role.type as organizationRole, p as directPermission, r.icuPlaceholders as icuPlaceholders
         from Project r

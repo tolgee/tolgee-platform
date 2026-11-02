@@ -5984,7 +5984,19 @@ export interface components {
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** @description Link to the app that supports in-context translation, http or https. */
+      communityAppUrl?: string;
+      /** @description Markdown shown on the community page. Null means the project has none. */
+      communityDescription?: string;
+      /** @description Markdown on how to contribute, shown on the community page. Null means the default text. */
+      communityGuidelines?: string;
+      /** @description Whether the community page tells visitors that the app supports in-context translation. */
+      communityInContext: boolean;
+      /** @description Whether the owner marked the community page as shared outside Tolgee. */
+      communityShared: boolean;
       computedPermission: components["schemas"]["ComputedPermissionModel"];
+      /** Format: int64 */
+      createdAt?: number;
       defaultNamespace?: components["schemas"]["NamespaceModel"];
       description?: string;
       directPermission?: components["schemas"]["PermissionModel"];

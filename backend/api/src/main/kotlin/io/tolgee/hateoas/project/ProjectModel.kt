@@ -12,6 +12,7 @@ import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "projects", itemRelation = "project")
@@ -39,4 +40,15 @@ open class ProjectModel(
   var suggestionsMode: SuggestionsMode,
   @Schema(description = "Level of protection of translations")
   var translationProtection: TranslationProtection,
+  @Schema(description = "Markdown shown on the community page. Null means the project has none.")
+  val communityDescription: String?,
+  @Schema(description = "Markdown on how to contribute, shown on the community page. Null means the default text.")
+  val communityGuidelines: String?,
+  @Schema(description = "Whether the owner marked the community page as shared outside Tolgee.")
+  val communityShared: Boolean,
+  @Schema(description = "Whether the community page tells visitors that the app supports in-context translation.")
+  val communityInContext: Boolean,
+  @Schema(description = "Link to the app that supports in-context translation, http or https.")
+  val communityAppUrl: String?,
+  val createdAt: Date?,
 ) : RepresentationModel<ProjectModel>()

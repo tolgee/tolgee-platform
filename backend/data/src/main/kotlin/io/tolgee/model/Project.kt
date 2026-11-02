@@ -174,6 +174,25 @@ class Project(
   @ActivityLoggedProp
   var public: Boolean = false
 
+  @Column(length = 2000)
+  @ActivityLoggedProp
+  var communityDescription: String? = null
+
+  @Column(length = 2000)
+  @ActivityLoggedProp
+  var communityGuidelines: String? = null
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var communityShared: Boolean = false
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var communityInContext: Boolean = false
+
+  @ActivityLoggedProp
+  var communityAppUrl: String? = null
+
   @ColumnDefault("DISABLED")
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)

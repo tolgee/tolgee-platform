@@ -6,6 +6,7 @@ import {
 import { publicProjectsData } from '../../common/apiCalls/testData/testData';
 import {
   assertSwitchedToOrganization,
+  continueToProjectDashboard,
   gcy,
   gcyAdvanced,
   openPublicProject,
@@ -49,8 +50,7 @@ describe('Org-less community user', () => {
       value: 'dashboard-projects-list-item',
       name: 'Community Alpha',
     }).click();
-    cy.url().should('match', /\/projects\/[0-9]+/);
-    waitForGlobalLoading();
+    continueToProjectDashboard();
 
     assertSwitchedToOrganization('publicProjectsUser');
   });
