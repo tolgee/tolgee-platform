@@ -68,6 +68,7 @@ class BranchMergeExecutor(
     merge: BranchMerge,
     snapshotKeyOf: (BranchMergeChange) -> KeySnapshot?,
   ): AppliedChange? {
+    if (change.excluded) return null
     return when (change.change) {
       BranchKeyMergeChangeType.ADD -> applyAddition(change, merge.targetBranch)
       BranchKeyMergeChangeType.UPDATE -> applyUpdate(change, snapshotKeyOf(change))

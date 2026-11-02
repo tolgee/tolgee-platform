@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 
@@ -57,6 +58,10 @@ class BranchMergeChange :
   @Column(nullable = true)
   @Enumerated(EnumType.STRING)
   var resolution: BranchKeyMergeResolutionType? = null
+
+  @Column(nullable = false)
+  @ColumnDefault("false")
+  var excluded: Boolean = false
 
   val isResolved: Boolean
     get() = resolution != null

@@ -22,4 +22,6 @@ open class BranchMergeConflictModel(
   val resolution: BranchKeyMergeResolutionType?,
   @Schema(description = "Effective resolution used to compute the merged key")
   val effectiveResolution: BranchKeyMergeResolutionType?,
+  @Schema(description = "Change is left out of this merge and stays pending for the next one")
+  val excluded: Boolean,
 ) : RepresentationModel<BranchMergeConflictModel>()

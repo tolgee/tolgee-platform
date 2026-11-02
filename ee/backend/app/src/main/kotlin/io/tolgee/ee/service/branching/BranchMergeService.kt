@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
 import io.tolgee.ee.repository.branching.BranchMergeChangeRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
@@ -81,8 +82,17 @@ class BranchMergeService(
       branchMerge.changes
         .filter { it.change == BranchKeyMergeChangeType.CONFLICT && it.resolution != null }
         .associateBy { ConflictKey(it.sourceKey?.id, it.targetKey?.id) }
+    val excludedKeys =
+      branchMerge.changes
+        .filter { it.excluded }
+        .map { ConflictKey(it.sourceKey?.id, it.targetKey?.id) }
+        .toSet()
 
     dryRun(branchMerge)
+
+    branchMerge.changes
+      .filter { ConflictKey(it.sourceKey?.id, it.targetKey?.id) in excludedKeys }
+      .forEach { it.excluded = true }
 
     branchMerge.changes
       .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
@@ -261,6 +271,16 @@ class BranchMergeService(
   ) {
     findActiveMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeChangeRepository.resolveAllConflicts(mergeId, resolution)
+  }
+
+  @Transactional
+  fun setChangesExcluded(
+    projectId: Long,
+    mergeId: Long,
+    request: SetBranchMergeChangesExcludedRequest,
+  ) {
+    findActiveMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    branchMergeChangeRepository.setExcluded(mergeId, request.changeIds, request.type, request.excluded)
   }
 
   fun findActiveMerge(

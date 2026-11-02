@@ -57,7 +57,7 @@ class BranchMerge :
     get() = sourceRevision == sourceBranch.revision && targetRevision == targetBranch.revision
 
   val isResolved: Boolean
-    get() = changes.none { !it.isResolved }
+    get() = changes.none { !it.excluded && !it.isResolved }
 
   val isReadyToMerge: Boolean
     get() = isRevisionValid && isResolved
