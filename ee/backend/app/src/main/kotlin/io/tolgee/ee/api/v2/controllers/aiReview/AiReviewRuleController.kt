@@ -87,7 +87,7 @@ class AiReviewRuleController(
     @PathVariable ruleId: Long,
     @RequestBody @Valid
     request: AiReviewRuleRequest,
-  ): AiReviewRuleModel = toModelWithCounts(aiReviewRuleService.update(projectHolder.project.id, ruleId, request).rule)
+  ): AiReviewRuleModel = toModelWithCounts(aiReviewRuleService.update(projectHolder.project.id, ruleId, request))
 
   @PutMapping("/{ruleId:[0-9]+}/enabled")
   @Operation(summary = "Enable or disable an AI review rule")
@@ -100,7 +100,7 @@ class AiReviewRuleController(
     @RequestBody @Valid
     request: AiReviewRuleEnabledRequest,
   ): AiReviewRuleModel =
-    toModelWithCounts(aiReviewRuleService.setEnabled(projectHolder.project.id, ruleId, request.enabled).rule)
+    toModelWithCounts(aiReviewRuleService.setEnabled(projectHolder.project.id, ruleId, request.enabled))
 
   @DeleteMapping("/{ruleId:[0-9]+}")
   @Operation(summary = "Delete an AI review rule")

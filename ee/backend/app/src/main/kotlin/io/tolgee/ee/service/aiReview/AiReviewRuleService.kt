@@ -3,7 +3,6 @@ package io.tolgee.ee.service.aiReview
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.aiReview.AiReviewRuleOverrideRequest
 import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
-import io.tolgee.ee.service.aiReview.matching.RuleSnapshot
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -12,8 +11,10 @@ import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.AiReviewRuleLanguageOverride
 import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
+import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.repository.PromptRepository
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
+import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 import jakarta.persistence.EntityManager
@@ -27,21 +28,18 @@ class AiReviewRuleService(
   private val languageService: LanguageService,
   private val promptRepository: PromptRepository,
   private val entityManager: EntityManager,
+  private val aiReviewQueueService: AiReviewQueueService,
+  private val translationAiReviewRepository: TranslationAiReviewRepository,
 ) {
-  class RuleChange(
-    val rule: AiReviewRule,
-    val previous: RuleSnapshot,
-  )
-
   @Transactional(readOnly = true)
-  fun list(projectId: Long): List<AiReviewRule> = aiReviewRuleRepository.findAllByProjectIdOrderById(projectId)
+  fun list(projectId: Long): List<AiReviewRule> = aiReviewRuleRepository.findAllWithScopeByProjectId(projectId)
 
   @Transactional(readOnly = true)
   fun get(
     projectId: Long,
     ruleId: Long,
   ): AiReviewRule =
-    aiReviewRuleRepository.findByProjectIdAndId(projectId, ruleId)
+    aiReviewRuleRepository.findWithScopeByProjectIdAndId(projectId, ruleId)
       ?: throw NotFoundException(Message.AI_REVIEW_RULE_NOT_FOUND)
 
   @Transactional
@@ -51,8 +49,7 @@ class AiReviewRuleService(
   ): AiReviewRule {
     val rule = AiReviewRule(project = entityManager.getReference(Project::class.java, projectId))
     applyRequest(projectId, rule, request)
-    aiReviewRuleRepository.save(rule)
-    aiReviewRuleCache.evict(projectId)
+    saveAndEvict(projectId, rule, startDemotion = rule.enabled)
     return rule
   }
 
@@ -61,13 +58,11 @@ class AiReviewRuleService(
     projectId: Long,
     ruleId: Long,
     request: AiReviewRuleRequest,
-  ): RuleChange {
+  ): AiReviewRule {
     val rule = get(projectId, ruleId)
-    val previous = rule.toSnapshot()
     applyRequest(projectId, rule, request)
-    aiReviewRuleRepository.save(rule)
-    aiReviewRuleCache.evict(projectId)
-    return RuleChange(rule, previous)
+    saveAndEvict(projectId, rule, startDemotion = rule.enabled)
+    return rule
   }
 
   @Transactional
@@ -75,13 +70,11 @@ class AiReviewRuleService(
     projectId: Long,
     ruleId: Long,
     enabled: Boolean,
-  ): RuleChange {
+  ): AiReviewRule {
     val rule = get(projectId, ruleId)
-    val previous = rule.toSnapshot()
     rule.enabled = enabled
-    aiReviewRuleRepository.save(rule)
-    aiReviewRuleCache.evict(projectId)
-    return RuleChange(rule, previous)
+    saveAndEvict(projectId, rule, startDemotion = enabled)
+    return rule
   }
 
   @Transactional
@@ -89,7 +82,11 @@ class AiReviewRuleService(
     projectId: Long,
     ruleId: Long,
   ) {
-    aiReviewRuleRepository.delete(get(projectId, ruleId))
+    val rule = get(projectId, ruleId)
+    // Result rows survive with rule = null (FK SET NULL): deleting approvals would make their
+    // translations look human-reviewed. Transient rows carry no decision and go away.
+    translationAiReviewRepository.deleteByRuleAndStatuses(ruleId, TRANSIENT_STATUSES)
+    aiReviewRuleRepository.delete(rule)
     aiReviewRuleCache.evict(projectId)
   }
 
@@ -100,12 +97,11 @@ class AiReviewRuleService(
   ) {
     val rules = aiReviewRuleRepository.findAllByProjectIdAndPromptId(projectId, promptId)
     rules.forEach { it.mode = AiReviewRuleMode.DRY_RUN }
-    aiReviewRuleRepository.saveAll(rules)
-    aiReviewRuleCache.evict(projectId)
+    saveAllAndEvict(projectId, rules)
   }
 
   @Transactional
-  fun detachPrompt(
+  fun detachPromptAndSwitchToDryRun(
     projectId: Long,
     promptId: Long,
   ) {
@@ -114,8 +110,7 @@ class AiReviewRuleService(
       it.prompt = null
       it.mode = AiReviewRuleMode.DRY_RUN
     }
-    aiReviewRuleRepository.saveAll(rules)
-    aiReviewRuleCache.evict(projectId)
+    saveAllAndEvict(projectId, rules)
   }
 
   fun countActiveRulesUsingPrompt(
@@ -128,7 +123,7 @@ class AiReviewRuleService(
     projectId: Long,
     languageId: Long,
   ) {
-    val rules = aiReviewRuleRepository.findAllByProjectIdOrderById(projectId)
+    val rules = aiReviewRuleRepository.findAllWithScopeByProjectId(projectId)
     rules.forEach { rule ->
       val hadLanguages = rule.languages.isNotEmpty()
       rule.languages.removeIf { it.id == languageId }
@@ -136,8 +131,7 @@ class AiReviewRuleService(
       // An empty language list means "all languages", so a delete must never leave a scoped rule enabled
       if (hadLanguages && rule.languages.isEmpty()) rule.enabled = false
     }
-    aiReviewRuleRepository.saveAll(rules)
-    aiReviewRuleCache.evict(projectId)
+    saveAllAndEvict(projectId, rules)
   }
 
   @Transactional
@@ -154,14 +148,31 @@ class AiReviewRuleService(
       it.namespaceIn = it.namespaceIn.renamed(oldName, newName)
       it.namespaceNotIn = it.namespaceNotIn.renamed(oldName, newName)
     }
-    aiReviewRuleRepository.saveAll(rules)
-    aiReviewRuleCache.evict(projectId)
+    saveAllAndEvict(projectId, rules)
   }
 
   private fun List<String>.renamed(
     oldName: String,
     newName: String,
   ): MutableList<String> = map { if (it == oldName) newName else it }.distinct().toMutableList()
+
+  private fun saveAndEvict(
+    projectId: Long,
+    rule: AiReviewRule,
+    startDemotion: Boolean,
+  ) {
+    aiReviewRuleRepository.save(rule)
+    aiReviewRuleCache.evict(projectId)
+    if (startDemotion) aiReviewQueueService.startDemotionJobForApprovals(projectId)
+  }
+
+  private fun saveAllAndEvict(
+    projectId: Long,
+    rules: Collection<AiReviewRule>,
+  ) {
+    aiReviewRuleRepository.saveAll(rules)
+    aiReviewRuleCache.evict(projectId)
+  }
 
   private fun applyRequest(
     projectId: Long,
@@ -226,5 +237,15 @@ class AiReviewRuleService(
     promptId: Long,
   ) = (promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)).also {
     if (it.type != PromptType.REVIEW) throw BadRequestException(Message.AI_REVIEW_PROMPT_MUST_BE_REVIEW_TYPE)
+  }
+
+  companion object {
+    private val TRANSIENT_STATUSES =
+      setOf(
+        AiReviewStatus.DRY_RUN_PASS,
+        AiReviewStatus.DRY_RUN_FAIL,
+        AiReviewStatus.FAILED,
+        AiReviewStatus.SKIPPED_QA_ISSUES,
+      )
   }
 }

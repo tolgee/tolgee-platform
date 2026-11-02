@@ -26,7 +26,6 @@ import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
@@ -59,9 +58,6 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Autowired
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
-
-  @Autowired
-  private lateinit var activityRevisionRepository: ActivityRevisionRepository
 
   @Autowired
   @MockitoBean
@@ -451,9 +447,13 @@ class AiReviewJobTest : AbstractSpringTest() {
 
     executeInNewTransaction(platformTransactionManager) {
       val revisions =
-        activityRevisionRepository
-          .findAll()
-          .filter { it.projectId == testData.project.id && it.systemActor == SystemActor.AI_REVIEWER }
+        entityManager
+          .createQuery(
+            "from ActivityRevision ar where ar.projectId = :projectId and ar.systemActor = :actor",
+            io.tolgee.model.activity.ActivityRevision::class.java,
+          ).setParameter("projectId", testData.project.id)
+          .setParameter("actor", SystemActor.AI_REVIEWER)
+          .resultList
       revisions.assert.isNotEmpty()
       revisions
         .flatMap { it.modifiedEntities }

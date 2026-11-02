@@ -2,6 +2,7 @@ package io.tolgee.ee.service.aiReview
 
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.request.AiReviewDemotionRequest
 import io.tolgee.batch.request.AiReviewRequest
 import io.tolgee.constants.Feature
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
@@ -45,7 +46,7 @@ class AiReviewQueueService(
     if (translationIds.isEmpty()) return
     val project = projectService.getDto(projectId)
     if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
-      reviewRepository.deleteAllByTranslationIds(translationIds)
+      translationIds.chunked(IN_CLAUSE_CHUNK).forEach { reviewRepository.deleteAllByTranslationIds(it) }
       return
     }
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
@@ -88,7 +89,9 @@ class AiReviewQueueService(
   ) {
     if (keyIds.isEmpty()) return
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
-    reviewRepository.deleteSiblingRows(keyIds, baseLanguageId, STALE_ON_SOURCE_CHANGE)
+    keyIds.chunked(IN_CLAUSE_CHUNK).forEach {
+      reviewRepository.deleteSiblingRows(it, baseLanguageId, STALE_ON_SOURCE_CHANGE)
+    }
   }
 
   /**
@@ -184,6 +187,33 @@ class AiReviewQueueService(
     startJob(projectId, ready, handlingStuckItems = true)
   }
 
+  /**
+   * One hidden demotion job per call. Demotion makes no LLM call, so the job is cheap; starting
+   * it for a superset of the affected keys is safe because the evaluation is idempotent.
+   */
+  @Transactional
+  fun startDemotionJob(
+    projectId: Long,
+    keyIds: Collection<Long>,
+  ) {
+    if (keyIds.isEmpty()) return
+    val project = projectService.getDto(projectId)
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    val projectRef = entityManager.getReference(Project::class.java, projectId)
+    batchJobService.startJob(
+      request = AiReviewDemotionRequest(keyIds = keyIds.toList()),
+      project = projectRef,
+      author = null,
+      type = BatchJobType.AI_REVIEW_DEMOTION,
+      isHidden = true,
+    )
+  }
+
+  @Transactional
+  fun startDemotionJobForApprovals(projectId: Long) {
+    startDemotionJob(projectId, reviewRepository.findApprovedKeyIds(projectId))
+  }
+
   private fun startJob(
     projectId: Long,
     translationIds: List<Long>,
@@ -218,10 +248,14 @@ class AiReviewQueueService(
     translationIds: Collection<Long>,
     qaOn: Boolean,
   ): List<Long> {
-    if (!qaOn) return reviewRepository.findClaimableTranslationIds(projectId, translationIds)
-    val qaLanguageIds = projectQaConfigService.getEnabledLanguageIds(projectId)
-    if (qaLanguageIds.isEmpty()) return reviewRepository.findClaimableTranslationIds(projectId, translationIds)
-    return reviewRepository.findReadyTranslationIds(projectId, translationIds, qaLanguageIds)
+    val qaLanguageIds = if (qaOn) projectQaConfigService.getEnabledLanguageIds(projectId) else emptySet()
+    return translationIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
+      if (qaLanguageIds.isEmpty()) {
+        reviewRepository.findClaimableTranslationIds(projectId, chunk)
+      } else {
+        reviewRepository.findReadyTranslationIds(projectId, chunk, qaLanguageIds)
+      }
+    }
   }
 
   private fun queue(
@@ -249,5 +283,7 @@ class AiReviewQueueService(
       )
 
     private val KEPT_HUMAN_DECISIONS = setOf(AiReviewStatus.CONFIRMED, AiReviewStatus.REJECTED)
+
+    private const val IN_CLAUSE_CHUNK = 10_000
   }
 }
