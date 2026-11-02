@@ -33,20 +33,6 @@ class KeyMetaServiceTest : AbstractSpringTest() {
   fun setup() {
     testData = SingleStepImportBranchTestData()
     testDataService.saveTestData(testData.root)
-    // TestDataService does not persist key meta comments
-    executeInNewTransaction {
-      entityManager
-        .createNativeQuery(
-          """
-          INSERT INTO key_comment (id, key_meta_id, author_id, text, from_import, created_at, updated_at)
-          SELECT nextval('hibernate_sequence'), km.id, :authorId, 'comment of ' || k.name, false, now(), now()
-          FROM key_meta km JOIN key k ON k.id = km.key_id
-          WHERE k.project_id = :projectId AND k.name LIKE '%meta key%'
-          """,
-        ).setParameter("authorId", testData.user.id)
-        .setParameter("projectId", testData.project.id)
-        .executeUpdate()
-    }
   }
 
   @AfterEach

@@ -187,7 +187,7 @@ class BranchTranslationsTestData {
         description = "description of key number $num"
         tags.add(firstTag)
         tags.add(secondTag)
-        addComment {
+        addComment(user) {
           text = "text comment"
         }
         addCodeReference {
