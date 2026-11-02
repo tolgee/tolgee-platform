@@ -104,6 +104,10 @@ class AiReviewBatchServiceImpl(
       if (row.textHash != textHash) return@executeInNewTransaction null
 
       val project = translation.key.project
+      // Losing the feature stops processing but keeps the queued rows for a later regain.
+      if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
+        return@executeInNewTransaction null
+      }
       val baseLanguageId = project.baseLanguage?.id
       if (!AiReviewEligibility.isEligible(translation, baseLanguageId, row)) {
         deleteUnlessResolved(row)
