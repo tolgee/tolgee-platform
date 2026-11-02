@@ -97,6 +97,8 @@ export const usePastDueBanner = Empty;
 export const AiPrompt = Empty;
 export const AiContextData = Empty;
 export const AiPromptsList = Empty;
+export const AiReviewRulesView = Empty;
+export const useAiReviewEnabled = () => false;
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
