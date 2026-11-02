@@ -282,6 +282,7 @@ class BranchMergeService(
     mergeId: Long,
     request: SetBranchMergeChangesExcludedRequest,
   ) {
+    if (request.changeIds?.isEmpty() == true) return
     findActiveMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeChangeRepository.setExcluded(mergeId, request.changeIds, request.type, request.excluded)
   }
