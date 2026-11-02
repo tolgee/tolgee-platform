@@ -1,9 +1,11 @@
 package io.tolgee.ee.service.branching.merging
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.ee.data.branching.AppliedChange
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
 import io.tolgee.ee.service.branching.BranchSnapshotService
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -36,6 +38,7 @@ class BranchMergeExecutor(
   @Transactional
   fun execute(merge: BranchMerge): BranchMerge {
     attachKeysForMerge(merge)
+    checkAdditionsDoNotCollideWithExcludedChanges(merge)
     val snapshotKeys by lazy { branchSnapshotService.getSnapshotKeys(merge.childBranch.id) }
     val byTargetKeyId by lazy { snapshotKeys.associateBy { merge.targetKeyIdOf(it) } }
     val bySourceKeyId by lazy { snapshotKeys.associateBy { merge.sourceKeyIdOf(it) } }
@@ -76,6 +79,30 @@ class BranchMergeExecutor(
       BranchKeyMergeChangeType.CONFLICT -> applyConflict(change, snapshotKeyOf(change))
     }
   }
+
+  private fun checkAdditionsDoNotCollideWithExcludedChanges(merge: BranchMerge) {
+    val keptTargetNames =
+      merge.changes
+        .filter { it.excluded && it.keepsTargetName() }
+        .mapNotNull { it.targetKey?.nameAndNamespace() }
+        .toSet()
+    val collides =
+      merge.changes
+        .filter { !it.excluded && it.change == BranchKeyMergeChangeType.ADD }
+        .mapNotNull { it.sourceKey?.nameAndNamespace() }
+        .any { it in keptTargetNames }
+    if (collides) {
+      throw BadRequestException(Message.BRANCH_MERGE_ADDITION_COLLIDES_WITH_EXCLUDED_CHANGE)
+    }
+  }
+
+  private fun BranchMergeChange.keepsTargetName(): Boolean {
+    if (change == BranchKeyMergeChangeType.DELETE) return true
+    if (change != BranchKeyMergeChangeType.UPDATE) return false
+    return sourceKey?.nameAndNamespace() != targetKey?.nameAndNamespace()
+  }
+
+  private fun Key.nameAndNamespace() = name to namespace?.name
 
   private fun finalizeMerge(merge: BranchMerge): BranchMerge {
     merge.markMerged(currentDateProvider.date)

@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
@@ -13,6 +14,7 @@ import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
@@ -981,6 +983,30 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
       .assert
       .hasSize(1)
+  }
+
+  @Test
+  fun `apply merge - rejects an included addition reusing the name of an excluded rename`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge()
+    val rename = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = listOf(rename.id), excluded = true),
+    )
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_ADDITION_COLLIDES_WITH_EXCLUDED_CHANGE)
+    testData.mainKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+    testData.mainBranch
+      .findKey(BranchMergeTestData.UPDATE_KEY_NAME)!!
+      .id.assert
+      .isEqualTo(testData.mainKeyToUpdate.id)
   }
 
   @Test
