@@ -1,5 +1,7 @@
 package io.tolgee.service
 
+import io.tolgee.model.aiReview.AiReviewIssue
+
 interface AiPlaygroundResultService {
   fun setResult(
     projectId: Long,
@@ -8,6 +10,8 @@ interface AiPlaygroundResultService {
     languageId: Long,
     translation: String?,
     contextDescription: String?,
+    score: Int? = null,
+    issues: List<AiReviewIssue>? = null,
   )
 
   fun removeResults(
