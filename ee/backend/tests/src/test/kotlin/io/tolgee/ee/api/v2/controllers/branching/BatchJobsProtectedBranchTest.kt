@@ -65,6 +65,21 @@ class BatchJobsProtectedBranchTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_DELETE])
+  fun `batch delete of a key without a branch is forbidden when the default branch is protected`() {
+    val orphanKey = keyService.create(testData.projectBuilder.self, CreateKeyDto(name = "orphan-key"))
+    executeInNewTransaction { keyService.get(orphanKey.id).branch = null }
+    executeInNewTransaction {
+      keyService
+        .get(orphanKey.id)
+        .branch.assert
+        .isNull()
+    }
+    performProjectAuthPost("start-batch-job/delete-keys", mapOf("keyIds" to listOf(orphanKey.id))).andIsForbidden
+    batchJobRepository.findAll().assert.isEmpty()
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_DELETE])
   fun `batch delete on an unprotected branch needs no extra scope`() {
     performProjectAuthPost("start-batch-job/delete-keys", mapOf("keyIds" to listOf(featureKey.id))).andIsOk
   }
