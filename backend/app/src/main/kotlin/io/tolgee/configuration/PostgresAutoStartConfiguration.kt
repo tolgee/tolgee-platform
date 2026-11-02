@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.sql.DriverManager
 import java.sql.SQLException
 import javax.sql.DataSource
 
@@ -39,16 +40,19 @@ class PostgresAutoStartConfiguration(
   }
 
   private fun waitForPostgresRunning(postgresRunner: PostgresRunner) {
-    val localDataSource = buildDataSource(postgresRunner)
     val maxRetries = postgresAutostartProperties.maxWaitTime
     val retryInterval = 1000L
     var numTries = 0
     while (numTries < maxRetries) {
       try {
-        localDataSource.connection?.use { conn ->
-          val statement = conn.createStatement()
-          statement.executeQuery("SELECT 1") // Execute a simple SQL statement
-        }
+        DriverManager
+          .getConnection(
+            postgresRunner.datasourceUrl,
+            postgresAutostartProperties.user,
+            postgresAutostartProperties.password,
+          ).use { conn ->
+            conn.createStatement().use { it.executeQuery("SELECT 1") }
+          }
         // If we got this far without an exception, break the loop
         break
       } catch (e: Exception) {
