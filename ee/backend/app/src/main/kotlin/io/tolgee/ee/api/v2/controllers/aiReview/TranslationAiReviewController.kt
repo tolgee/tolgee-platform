@@ -8,18 +8,25 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.aiReview.TranslationAiReviewModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.aiReview.TranslationAiReviewModel
+import io.tolgee.ee.data.aiReview.AiReviewRunRequest
 import io.tolgee.ee.service.aiReview.AiReviewActionService
+import io.tolgee.ee.service.aiReview.AiReviewRunService
+import io.tolgee.hateoas.batch.BatchJobModel
+import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.BatchJobView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -36,6 +43,9 @@ class TranslationAiReviewController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val aiReviewRunService: AiReviewRunService,
+  private val batchJobModelAssembler: BatchJobModelAssembler,
+  private val userAccountService: UserAccountService,
 ) {
   @GetMapping("")
   @Operation(summary = "Get the AI review of a translation")
@@ -73,6 +83,25 @@ class TranslationAiReviewController(
     val translation = checkedForStateChange(translationId)
     val row = aiReviewActionService.reject(translation, authenticationFacade.authenticatedUser.id)
     return translationAiReviewModelAssembler.toModel(row)
+  }
+
+  @PostMapping("/retry")
+  @Operation(summary = "Run the AI review again for one translation")
+  @RequiresProjectPermissions([Scope.BATCH_MACHINE_TRANSLATE])
+  fun retryAiReview(
+    @PathVariable translationId: Long,
+  ): BatchJobModel {
+    checkAiReviewEnabled()
+    val translation = loadTranslation(translationId)
+    securityService.checkBranchModify(translation)
+    val author = userAccountService.get(authenticationFacade.authenticatedUser.id)
+    val job =
+      aiReviewRunService.start(
+        projectHolder.project.id,
+        AiReviewRunRequest(translationIds = listOf(translationId), reReview = true),
+        author,
+      )
+    return batchJobModelAssembler.toModel(BatchJobView(job, 0, null))
   }
 
   private fun checkedForStateChange(translationId: Long): Translation {

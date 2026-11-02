@@ -40,6 +40,16 @@ class ProjectFeatureGuard(
     }
   }
 
+  fun checkEnabled(
+    feature: Feature,
+    project: ProjectDto,
+  ) {
+    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwnerId, feature)
+    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
+      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
+    }
+  }
+
   fun isFeatureEnabled(
     feature: Feature,
     project: Project = projectHolder.projectEntity,

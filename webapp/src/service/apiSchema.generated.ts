@@ -477,6 +477,12 @@ export interface paths {
   "/v2/projects/{projectId}/ai-review-rules/{ruleId}/enabled": {
     put: operations["setAiReviewRuleEnabled"];
   };
+  "/v2/projects/{projectId}/ai-review/run": {
+    post: operations["startAiReviewRun"];
+  };
+  "/v2/projects/{projectId}/ai-review/run/preview": {
+    post: operations["previewAiReviewRun"];
+  };
   "/v2/projects/{projectId}/all-keys": {
     get: operations["getAllKeys"];
   };
@@ -1136,6 +1142,9 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/ai-review/reject": {
     put: operations["rejectAiReview"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/ai-review/retry": {
+    post: operations["retryAiReview"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     /** Returns translation comments of translation */
     get: operations["getAll_3"];
@@ -1467,6 +1476,22 @@ export interface components {
       tagNotIn: string[];
       /** Format: int32 */
       threshold: number;
+    };
+    AiReviewRunPreviewModel: {
+      /** Format: int64 */
+      dryRunOnly: number;
+      skipped: { [key: string]: number };
+      /** Format: int64 */
+      toReview: number;
+    };
+    AiReviewRunRequest: {
+      failedOnly: boolean;
+      keyIds?: number[];
+      languageIds: number[];
+      reReview: boolean;
+      /** Format: int64 */
+      ruleId?: number;
+      translationIds?: number[];
     };
     AnnouncementDto: {
       /** @enum {string} */
@@ -16211,6 +16236,110 @@ export interface operations {
       };
     };
   };
+  startAiReviewRun: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRunRequest"];
+      };
+    };
+  };
+  previewAiReviewRun: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AiReviewRunPreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AiReviewRunRequest"];
+      };
+    };
+  };
   getAllKeys: {
     parameters: {
       query: {
@@ -27974,6 +28103,54 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["TranslationAiReviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  retryAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
         };
       };
       /** Bad Request */
