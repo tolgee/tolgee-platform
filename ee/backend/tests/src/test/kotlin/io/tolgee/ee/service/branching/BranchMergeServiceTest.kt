@@ -7,7 +7,6 @@ import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
@@ -786,7 +785,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createKey(clashingName, "x", testData.mainBranch)
     keyService.edit(keyService.get(testData.featureKeyToUpdate.id), clashingName, null, testData.featureBranch.name)
     val merge = dryRunFeatureBranchMerge()
-    assertThrows<ValidationException> { branchService.applyMerge(testData.project.id, merge.id, false) }
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
     testData.mainKeyToUpdate
       .refresh()
       .name.assert
@@ -1000,7 +1001,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     )
     assertThrows<BadRequestException> {
       branchService.applyMerge(testData.project.id, merge.id, false)
-    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_ADDITION_COLLIDES_WITH_EXCLUDED_CHANGE)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
     testData.mainKeyToUpdate
       .refresh()
       .name.assert
@@ -1009,6 +1010,37 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .findKey(BranchMergeTestData.UPDATE_KEY_NAME)!!
       .id.assert
       .isEqualTo(testData.mainKeyToUpdate.id)
+  }
+
+  @Test
+  fun `apply merge - rejects an addition reusing the name of a rename dropped by a filter`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    addTagToKey(testData.featureKeyToUpdate, "hold")
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge(BranchMergeFilters(withoutTag = "hold"))
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.ADD)
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
+  }
+
+  @Test
+  fun `apply merge - rejects an addition reusing the name a conflict resolved as target keeps`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "feature-name", null, testData.featureBranch.name)
+    keyService.edit(keyService.get(testData.mainKeyToUpdate.id), "main-name", null, testData.mainBranch.name)
+    createKey("main-name", "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge()
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactlyInAnyOrder(BranchKeyMergeChangeType.CONFLICT, BranchKeyMergeChangeType.ADD)
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.TARGET)
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
   }
 
   @Test
