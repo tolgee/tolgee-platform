@@ -66,6 +66,7 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -88,6 +89,7 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -141,6 +143,7 @@ class StartBatchJobController(
     data: DeleteKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -159,6 +162,7 @@ class StartBatchJobController(
     data: SetTranslationsStateStateRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     securityService.checkLanguageStateChangePermission(projectHolder.project.id, data.languageIds)
     return batchJobService
       .startJob(
@@ -181,6 +185,7 @@ class StartBatchJobController(
     data: ClearTranslationsRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
     return batchJobService
       .startJob(
@@ -203,6 +208,7 @@ class StartBatchJobController(
     data: CopyTranslationRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(data.sourceLanguageId))
     return batchJobService
@@ -224,6 +230,7 @@ class StartBatchJobController(
   ): BatchJobModel {
     data.tags.validate()
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -242,6 +249,7 @@ class StartBatchJobController(
     data: UntagKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -260,6 +268,7 @@ class StartBatchJobController(
     data: SetKeysNamespaceRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -278,6 +287,7 @@ class StartBatchJobController(
     data: RestoreKeysRequest,
   ): BatchJobModel {
     securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
@@ -296,6 +306,7 @@ class StartBatchJobController(
     data: HardDeleteKeysRequest,
   ): BatchJobModel {
     securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     return batchJobService
       .startJob(
         data,
