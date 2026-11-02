@@ -3038,6 +3038,8 @@ export interface components {
        * @description Origin branch id
        */
       originBranchId: number;
+      /** @description Create the branch protected: edits, imports, merges and updates into it then require BRANCH_PROTECTED_MODIFY */
+      protected?: boolean;
     };
     CreateGlossaryRequest: {
       /** @description IDs of projects to be assigned to glossary */

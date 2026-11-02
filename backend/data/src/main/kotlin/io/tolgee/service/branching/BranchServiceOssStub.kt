@@ -65,6 +65,7 @@ class BranchServiceOssStub(
     name: String,
     originBranchId: Long,
     author: UserAccount,
+    isProtected: Boolean,
   ): Branch {
     throw UnsupportedOperationException()
   }

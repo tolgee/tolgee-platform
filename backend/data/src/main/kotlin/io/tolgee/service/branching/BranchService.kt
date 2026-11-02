@@ -55,6 +55,7 @@ interface BranchService {
     name: String,
     originBranchId: Long,
     author: UserAccount,
+    isProtected: Boolean = false,
   ): Branch
 
   fun deleteBranch(
