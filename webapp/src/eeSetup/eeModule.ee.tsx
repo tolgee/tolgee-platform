@@ -104,6 +104,8 @@ export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
+export { AiReviewRulesView } from '../ee/aiReview/rules/AiReviewRulesView';
+export { useAiReviewEnabled } from '../ee/aiReview/hooks/useAiReviewEnabled';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';

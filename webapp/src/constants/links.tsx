@@ -375,6 +375,8 @@ export class LINKS {
 
   static PROJECT_AI_PROMPTS = Link.ofParent(LINKS.PROJECT_AI, 'prompts');
 
+  static PROJECT_AI_REVIEW = Link.ofParent(LINKS.PROJECT_AI, 'review');
+
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
   /**

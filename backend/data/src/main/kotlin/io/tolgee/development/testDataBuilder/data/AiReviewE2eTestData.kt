@@ -8,6 +8,7 @@ import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.PromptType
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
@@ -37,7 +38,18 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
           .also { user ->
             addPermission {
               this.user = user
-              type = ProjectPermissionType.REVIEW
+              // The REVIEW permission type has no prompt scopes, so the e2e "reviewer" persona
+              // carries the granular scopes the AI review UI needs.
+              type = null
+              scopes =
+                arrayOf(
+                  Scope.KEYS_VIEW,
+                  Scope.TRANSLATIONS_VIEW,
+                  Scope.TRANSLATIONS_STATE_EDIT,
+                  Scope.PROMPTS_VIEW,
+                  Scope.PROMPTS_EDIT,
+                  Scope.BATCH_MACHINE_TRANSLATE,
+                )
             }
           }
       translator =
@@ -124,6 +136,17 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
         addTranslation("fr", "Pas encore vérifié")
       }
     }
+
+    root
+      .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "ai_review_empty_project" }
+      .build {
+        self.baseLanguage = addEnglish().self
+        addGerman()
+        addKey { name = "plain_key" }.build {
+          addTranslation("en", "Plain source")
+          addTranslation("de", "Einfacher Text")
+        }
+      }
   }
 
   private fun addReviewedKey(

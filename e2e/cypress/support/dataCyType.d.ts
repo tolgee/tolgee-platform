@@ -46,6 +46,7 @@ declare namespace DataCy {
         "ai-languages-description-edit": true;
         "ai-menu-context-data": true;
         "ai-menu-prompts": true;
+        "ai-menu-review": true;
         "ai-playground-admin-access-info": true;
         "ai-playground-preview": true;
         "ai-playground-usage-cached-tokens": true;
@@ -91,6 +92,20 @@ declare namespace DataCy {
         "ai-prompts-menu-item-delete": true;
         "ai-prompts-menu-item-rename": true;
         "ai-prompts-open-playground-button": true;
+        "ai-review-add-rule-button": true;
+        "ai-review-empty-state": true;
+        "ai-review-rule-backlog": true;
+        "ai-review-rule-counts-active": true;
+        "ai-review-rule-counts-dry-run": true;
+        "ai-review-rule-edit": true;
+        "ai-review-rule-item": true;
+        "ai-review-rule-label": true;
+        "ai-review-rule-menu": true;
+        "ai-review-rule-menu-delete": true;
+        "ai-review-rule-mode": true;
+        "ai-review-rule-switch": true;
+        "ai-review-rules-view": true;
+        "ai-review-scope-chip": true;
         "api-key-expiry-info": true;
         "api-key-list-item": true;
         "api-key-list-item-delete-button": true;
