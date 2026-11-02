@@ -2,6 +2,7 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
@@ -240,6 +241,7 @@ class BranchServiceImpl(
     val merge =
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    if (merge.isUpdate) activityHolder.activity = ActivityType.BRANCH_UPDATE
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
         throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)

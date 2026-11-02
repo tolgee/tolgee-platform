@@ -14,6 +14,7 @@ interface BranchRepository : BranchRepositoryOss {
     select distinct b
     from Branch b
       left join fetch b.merges
+      left join fetch b.updates
     where b.project.id = :projectId and b.deletedAt IS NULL
       and (:search is null or lower(b.name) like lower(concat('%', cast(:search AS text), '%')))
     order by b.isDefault desc, b.createdAt desc, b.id desc
@@ -30,6 +31,7 @@ interface BranchRepository : BranchRepositoryOss {
     select b
     from Branch b
       left join fetch b.merges
+      left join fetch b.updates
     where b.project.id = :projectId and b.id = :branchId and b.deletedAt IS NULL
   """,
   )

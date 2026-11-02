@@ -36,6 +36,8 @@ data class BranchModel(
         "Null when the branch is not being merged yet",
   )
   val merge: BranchMergeRefModel? = null,
+  @Schema(description = "Last applied update of this branch from its origin")
+  val update: BranchMergeRefModel? = null,
   @Schema(description = "Name of the branch this branch was created from")
   val originBranchName: String? = null,
 ) : RepresentationModel<BranchModel>()
