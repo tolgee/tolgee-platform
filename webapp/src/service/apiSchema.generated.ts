@@ -1806,10 +1806,11 @@ export interface components {
       sourceKey: components["schemas"]["BranchMergeKeyModel"];
       targetKey: components["schemas"]["BranchMergeKeyModel"];
     };
+    /** @description Filters this merge session was created with */
     BranchMergeFilters: {
       /** @description Offer only keys that already exist in the target. New keys are left for a later merge. */
       existingKeysOnly: boolean;
-      /** @description Offer a key only when every translation that changed on it is in the Reviewed state. Deletions are always offered. */
+      /** @description Offer a key only when every translation that changed on it is in the Reviewed state. Deletions are always offered. Empty translations are ignored. */
       reviewedOnly: boolean;
       /** @description Offer only keys carrying this tag. */
       tag?: string;
