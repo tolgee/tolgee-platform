@@ -4,6 +4,7 @@ import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.queryResults.keyDisabledLanguages.KeyDisabledLanguagesQueryResultView
 import io.tolgee.model.Language
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
 import org.springframework.context.annotation.Lazy
@@ -154,6 +155,9 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun getBranchIdsByIds(ids: Collection<Long>): List<Long?>
+
+  @Query("select distinct b from Key k left join k.branch b where k.id in :keyIds")
+  fun getBranchesForKeyIds(keyIds: Collection<Long>): List<Branch?>
 
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 

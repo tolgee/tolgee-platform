@@ -600,6 +600,19 @@ class SecurityService(
     }
   }
 
+  fun checkKeyIdsBranchModify(
+    keyIds: List<Long>,
+    project: Project,
+  ) {
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, project)) return
+    keyIds
+      .chunked(KEY_ID_LOOKUP_CHUNK_SIZE)
+      .flatMap { keyRepository.getBranchesForKeyIds(it) }
+      .map { it ?: branchService.getDefaultBranch(project.id) }
+      .distinct()
+      .forEach { checkBranchModify(it, project.id) }
+  }
+
   fun checkBranchModify(entity: BranchMergeableEntity<*, *>) {
     val key = entity.resolveKey() ?: return
     val branch = key.branch

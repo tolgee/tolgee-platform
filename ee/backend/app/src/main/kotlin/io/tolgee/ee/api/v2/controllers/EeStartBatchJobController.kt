@@ -62,6 +62,7 @@ class EeStartBatchJobController(
       Feature.TRANSLATION_LABELS,
     )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
     return batchJobService
       .startJob(
@@ -87,6 +88,7 @@ class EeStartBatchJobController(
       Feature.TRANSLATION_LABELS,
     )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
     return batchJobService
       .startJob(
@@ -110,6 +112,7 @@ class EeStartBatchJobController(
     projectFeatureGuard.checkEnabled(Feature.QA_CHECKS)
     val projectId = projectHolder.project.id
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectId)
+    securityService.checkKeyIdsBranchModify(data.keyIds, projectHolder.projectEntity)
     if (data.languageIds != null) {
       securityService.checkLanguageTranslatePermission(projectId, data.languageIds!!)
     }
