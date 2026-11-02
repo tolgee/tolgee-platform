@@ -32,6 +32,33 @@ class BaiduApiServiceTest {
     assertThat(result).isEqualTo("First paragraph.\n\nSecond paragraph.\n")
   }
 
+  @Test
+  fun `restores source HTML tags that Baidu returned with spaces`() {
+    val service = serviceWithMockedResponse("First < b >sentence< / b >.< br >Second sentence.")
+
+    val result = service.translate("第一<b>句</b>。<br>第二句。", "zh", "en")
+
+    assertThat(result).isEqualTo("First <b>sentence</b>.<br>Second sentence.")
+  }
+
+  @Test
+  fun `keeps each form of a tag that appears in the source in two spellings`() {
+    val service = serviceWithMockedResponse("A<br/>B<br />C")
+
+    val result = service.translate("甲<br/>乙<br />丙", "zh", "en")
+
+    assertThat(result).isEqualTo("A<br/>B<br />C")
+  }
+
+  @Test
+  fun `leaves spaced angle brackets alone when the source had no such tag`() {
+    val service = serviceWithMockedResponse("1 < b > 0")
+
+    val result = service.translate("1 大于 0", "zh", "en")
+
+    assertThat(result).isEqualTo("1 < b > 0")
+  }
+
   private fun serviceWithMockedResponse(vararg lines: String): BaiduApiService {
     val response =
       BaiduResponse().apply {
