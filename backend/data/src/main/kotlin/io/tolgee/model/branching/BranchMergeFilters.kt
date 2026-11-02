@@ -14,7 +14,7 @@ data class BranchMergeFilters(
   @Schema(
     description =
       "Offer a key only when every translation that changed on it is in the Reviewed state. " +
-        "Deletions are always offered.",
+        "Deletions are always offered. Empty translations are ignored.",
   )
   @Column(name = "reviewed_only", nullable = false)
   @ColumnDefault("false")
