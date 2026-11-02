@@ -7,10 +7,12 @@ import io.tolgee.activity.data.RevisionType
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.ee.service.aiReview.AiReviewActionService
 import io.tolgee.ee.service.aiReview.AiReviewQueueService
+import io.tolgee.ee.service.aiReview.AiReviewRunService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.events.OnQaIssuesIgnored
 import io.tolgee.model.Project
@@ -42,6 +44,7 @@ class AiReviewActivityListener(
   private val objectMapper: ObjectMapper,
   private val entityManager: EntityManager,
   private val aiReviewActionService: AiReviewActionService,
+  private val aiReviewRunService: AiReviewRunService,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -90,6 +93,15 @@ class AiReviewActivityListener(
     if (bypass) return
     runSentryCatching {
       aiReviewQueueService.onQaIssuesIgnored(event.projectId, event.translationIds)
+    }
+  }
+
+  @EventListener
+  fun onBatchJobCancelled(event: OnBatchJobCancelled) {
+    if (bypass) return
+    if (event.job.type != BatchJobType.AI_REVIEW) return
+    runSentryCatching {
+      aiReviewRunService.onRunCancelled(event.job.id)
     }
   }
 

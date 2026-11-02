@@ -143,6 +143,35 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
   )
   fun findApprovedTranslationIdsByKeyIds(keyIds: Collection<Long>): List<Long>
 
+  @Query(
+    """
+    select t.id from TranslationAiReview r
+    join r.translation t
+    where r.rule.id = :ruleId
+      and (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.FAILED or r.lastFailureReason is not null)
+    """,
+  )
+  fun findFailedTranslationIdsByRule(ruleId: Long): List<Long>
+
+  @Modifying
+  @Query(
+    """
+    delete from TranslationAiReview r
+    where r.manualRunBatchJobId = :jobId and r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING
+    """,
+  )
+  fun deletePendingOfManualRun(jobId: Long): Int
+
+  @Modifying
+  @Query(
+    """
+    update TranslationAiReview r
+    set r.reReviewRequested = false, r.manualRunBatchJobId = null
+    where r.manualRunBatchJobId = :jobId and r.reReviewRequested = true
+    """,
+  )
+  fun clearReReviewOfManualRun(jobId: Long): Int
+
   @Modifying
   @Query("delete from TranslationAiReview r where r.rule.id = :ruleId and r.status in :statuses")
   fun deleteByRuleAndStatuses(
