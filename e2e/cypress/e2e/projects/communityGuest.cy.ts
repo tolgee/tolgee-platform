@@ -142,4 +142,11 @@ describe('Community project browsed without an account', () => {
     gcy('translations-guest-bar').should('not.exist');
     gcy('global-user-menu-button').should('be.visible');
   });
+
+  it('shows the contributors page to a guest', () => {
+    cy.visit(`${HOST}/projects/${publicProjectId}/community/contributors`);
+    waitForGlobalLoading();
+    gcy('community-contributor-card').should('have.length.at.least', 2);
+    gcy('guest-login-button').should('be.visible');
+  });
 });
