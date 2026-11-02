@@ -323,6 +323,7 @@ export type ScreenshotInfoDto = components['schemas']['ScreenshotInfoDto'];
 export type ScreenshotModel = components['schemas']['ScreenshotModel'];
 export type SelectAllResponse = components['schemas']['SelectAllResponse'];
 export type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
+export type SetBranchMergeChangesExcludedRequest = components['schemas']['SetBranchMergeChangesExcludedRequest'];
 export type SetBranchProtectedModel = components['schemas']['SetBranchProtectedModel'];
 export type SetDisabledLanguagesRequest = components['schemas']['SetDisabledLanguagesRequest'];
 export type SetFileNamespaceRequest = components['schemas']['SetFileNamespaceRequest'];

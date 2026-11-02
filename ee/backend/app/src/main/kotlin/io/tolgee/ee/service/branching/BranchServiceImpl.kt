@@ -10,6 +10,7 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.ee.service.TaskService
@@ -327,6 +328,15 @@ class BranchServiceImpl(
     request: ResolveAllBranchMergeConflictsRequest,
   ) {
     branchMergeService.resolveAllConflicts(projectId, mergeId, request.resolve)
+  }
+
+  @Transactional
+  override fun setChangesExcluded(
+    projectId: Long,
+    mergeId: Long,
+    request: SetBranchMergeChangesExcludedRequest,
+  ) {
+    branchMergeService.setChangesExcluded(projectId, mergeId, request)
   }
 
   @Transactional

@@ -54,11 +54,12 @@ interface BranchMergeRepository : BranchMergeRepositoryOss {
       tb,
       bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL and ch.excluded = false then 1 end),
+      count(case when ch.excluded = true then 1 end),
       (
         select count(t)
         from Task t
@@ -94,11 +95,12 @@ interface BranchMergeRepository : BranchMergeRepositoryOss {
       tb,
       bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 end),
-      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL and ch.excluded = false then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL and ch.excluded = false then 1 end),
+      count(case when ch.excluded = true then 1 end),
       (
         select count(t)
         from Task t

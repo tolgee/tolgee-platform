@@ -6,6 +6,7 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
@@ -140,6 +141,14 @@ class BranchServiceOssStub(
     projectId: Long,
     mergeId: Long,
     request: ResolveAllBranchMergeConflictsRequest,
+  ) {
+    throw UnsupportedOperationException()
+  }
+
+  override fun setChangesExcluded(
+    projectId: Long,
+    mergeId: Long,
+    request: SetBranchMergeChangesExcludedRequest,
   ) {
     throw UnsupportedOperationException()
   }

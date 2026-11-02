@@ -18,6 +18,7 @@ class BranchMergeConflictModelAssembler(
       changedTranslations = entity.changedTranslations,
       resolution = entity.resolutionType,
       effectiveResolution = entity.effectiveResolutionType ?: entity.resolutionType,
+      excluded = entity.excluded,
     )
   }
 }

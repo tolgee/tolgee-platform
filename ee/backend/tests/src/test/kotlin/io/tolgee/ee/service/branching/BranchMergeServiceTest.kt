@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.ee.repository.EeSubscriptionRepository
@@ -52,6 +53,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var branchMergeRepository: BranchMergeRepository
+
+  @Autowired
+  lateinit var branchMergeService: BranchMergeService
 
   @Autowired
   lateinit var keyRepository: KeyRepository
@@ -934,6 +938,69 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     dryRunFeatureBranchMerge().changes.assert.isEmpty()
   }
 
+  @Test
+  fun `apply merge - an excluded update is not applied and is offered again by the next merge`() {
+    val merge = prepareMergeScenarioWithConflict()
+    val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    val before = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = listOf(update.id), excluded = true),
+    )
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.SOURCE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text.assert.isEqualTo(before)
+    val next = dryRunFeatureBranchMerge()
+    next.changes
+      .filter { it.change == BranchKeyMergeChangeType.UPDATE }
+      .map { it.sourceKey!!.id }
+      .assert
+      .containsExactly(testData.featureKeyToUpdate.id)
+  }
+
+  @Test
+  fun `apply merge - an excluded unresolved conflict does not block the merge and is offered again`() {
+    val merge = prepareMergeScenarioWithConflict()
+    val conflict = merge.changes.single { it.change == BranchKeyMergeChangeType.CONFLICT }
+    val before = getTranslation(testData.mainConflictKey, testData.englishLanguage).text
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = listOf(conflict.id), excluded = true),
+    )
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    branchMergeRepository
+      .findById(merge.id)
+      .get()
+      .mergedAt.assert
+      .isNotNull()
+    getTranslation(testData.mainConflictKey, testData.englishLanguage).text.assert.isEqualTo(before)
+    dryRunFeatureBranchMerge()
+      .changes
+      .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+      .assert
+      .hasSize(1)
+  }
+
+  @Test
+  fun `refresh keeps the excluded flag for the same key pair`() {
+    val merge = prepareMergeScenario()
+    val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = listOf(update.id), excluded = true),
+    )
+    updateKeyTranslation(testData.featureKeyToUpdate, "edited again")
+    branchService.refreshMerge(testData.project.id, merge.id)
+    val refreshed = branchMergeService.findActiveMergeFull(testData.project.id, merge.id)!!
+    refreshed.changes
+      .single { it.change == BranchKeyMergeChangeType.UPDATE }
+      .excluded.assert
+      .isTrue()
+  }
+
   private fun setLabels(
     translation: Translation,
     vararg labels: Label,
@@ -943,7 +1010,13 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     translationService.save(translation)
   }
 
-  private fun prepareMergeScenario(): BranchMerge {
+  private fun prepareMergeScenarioWithConflict(): BranchMerge {
+    updateKeyTranslation(testData.mainConflictKey, "Main side")
+    updateKeyTranslation(testData.featureConflictKey, "Feature side")
+    return prepareMergeScenario(expectedRevision = 5)
+  }
+
+  private fun prepareMergeScenario(expectedRevision: Int = 4): BranchMerge {
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
@@ -951,7 +1024,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       testData.featureBranch
         .refresh()!!
         .revision.assert
-        .isEqualTo(4)
+        .isEqualTo(expectedRevision)
     }
     return dryRunFeatureBranchMerge()
   }

@@ -415,6 +415,56 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_MERGE_BRANCHES_NOT_RELATED)
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  @Suppress("UNCHECKED_CAST")
+  fun `exclude endpoint marks changes and the preview counts them`() {
+    val mergeId = createUpdatePreview()
+    val updateId =
+      performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+        .let { ((it["_embedded"] as Map<*, *>)["branchMergeChanges"] as List<Map<String, Any>>).first()["id"] }
+    performProjectAuthPut(
+      "branches/merge/$mergeId/exclude",
+      mapOf("changeIds" to listOf(updateId), "excluded" to true),
+    ).andIsOk
+    performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE").andIsOk.andAssertThatJson {
+      node("_embedded.branchMergeChanges[0].excluded").isEqualTo(true)
+    }
+    performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
+      node("keyExcludedCount").isEqualTo(1)
+      node("keyModificationsCount").isEqualTo(0)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `exclude endpoint without ids marks a whole type and null type means all`() {
+    val mergeId = createUpdatePreview()
+    performProjectAuthPut("branches/merge/$mergeId/exclude", mapOf("type" to "UPDATE", "excluded" to true)).andIsOk
+    performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
+      node("keyModificationsCount").isEqualTo(0)
+      node("keyExcludedCount").isEqualTo(1)
+    }
+    performProjectAuthPut("branches/merge/$mergeId/exclude", mapOf("excluded" to false)).andIsOk
+    performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
+      node("keyExcludedCount").isEqualTo(0)
+      node("keyModificationsCount").isEqualTo(1)
+    }
+  }
+
+  private fun createUpdatePreview(): Long {
+    branchSnapshotService.createInitialSnapshot(
+      testData.project.id,
+      testData.mainBranch,
+      testData.featureBranch,
+    )
+    updateKeyTranslation(testData.featureKeyToUpdate, "Updated text")
+    return createMergePreview(testData.featureBranch.id)
+  }
+
   private fun createMergeWithConflict(
     sourceKey: Key,
     targetKey: Key,

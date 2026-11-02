@@ -532,6 +532,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts": {
     get: operations["getBranchMergeSessionConflicts"];
   };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/exclude": {
+    put: operations["setChangesExcluded"];
+  };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/preview": {
     get: operations["getBranchMergeSessionPreview"];
   };
@@ -1757,6 +1760,8 @@ export interface components {
        * @enum {string}
        */
       effectiveResolution?: "SOURCE" | "TARGET";
+      /** @description Change is left out of this merge and stays pending for the next one */
+      excluded: boolean;
       /**
        * Format: int64
        * @description Branch merge change id
@@ -1784,6 +1789,8 @@ export interface components {
        * @enum {string}
        */
       effectiveResolution?: "SOURCE" | "TARGET";
+      /** @description Change is left out of this merge and stays pending for the next one */
+      excluded: boolean;
       /**
        * Format: int64
        * @description Branch merge session id
@@ -1834,6 +1841,11 @@ export interface components {
        * @description Key deletions count
        */
       keyDeletionsCount: number;
+      /**
+       * Format: int32
+       * @description Count of changes excluded from the merge
+       */
+      keyExcludedCount: number;
       /**
        * Format: int32
        * @description Key updates count
@@ -6544,6 +6556,13 @@ export interface components {
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
+    };
+    SetBranchMergeChangesExcludedRequest: {
+      /** @description Changes to mark. Null means every change of the merge, narrowed by `type` when given. */
+      changeIds?: number[];
+      excluded: boolean;
+      /** @enum {string} */
+      type?: "ADD" | "UPDATE" | "DELETE" | "CONFLICT";
     };
     SetBranchProtectedModel: {
       /**
@@ -16875,6 +16894,55 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  setChangesExcluded: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetBranchMergeChangesExcludedRequest"];
       };
     };
   };
