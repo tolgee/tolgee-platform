@@ -21,9 +21,11 @@ import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeFilters
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
@@ -1027,6 +1029,67 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .isTrue()
   }
 
+  @Test
+  fun `dry-run with existingKeysOnly offers no additions`() {
+    createFeatureOnlyKey()
+    updateFeatureKey()
+    val merge = dryRunFeatureBranchMerge(BranchMergeFilters(existingKeysOnly = true))
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with reviewedOnly holds back a key whose changed translation is not reviewed`() {
+    updateFeatureKey()
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true)).changes.assert.isEmpty()
+    val translation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
+    translationService.setStateBatch(mapOf(translation to TranslationState.REVIEWED))
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with reviewedOnly lets a key through when no translation changed`() {
+    addTagToKey(testData.featureKeyToUpdate, "release")
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with tag filters keeps or drops keys by tag`() {
+    updateFeatureKey()
+    createFeatureOnlyKey()
+    addTagToKey(testData.featureKeyToUpdate, "release")
+    dryRunFeatureBranchMerge(BranchMergeFilters(tag = "release"))
+      .changes
+      .map { it.sourceKey!!.id }
+      .assert
+      .containsExactly(testData.featureKeyToUpdate.id)
+    dryRunFeatureBranchMerge(BranchMergeFilters(withoutTag = "release"))
+      .changes
+      .map { it.sourceKey!!.name }
+      .assert
+      .containsExactly(additionKeyName)
+  }
+
+  @Test
+  fun `dry-run filters never drop deletions`() {
+    deleteFeatureKey()
+    dryRunFeatureBranchMerge(BranchMergeFilters(existingKeysOnly = true, reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.DELETE)
+  }
+
   private fun setLabels(
     translation: Translation,
     vararg labels: Label,
@@ -1067,10 +1130,11 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     )
   }
 
-  private fun dryRunFeatureBranchMerge(): BranchMerge {
+  private fun dryRunFeatureBranchMerge(filters: BranchMergeFilters = BranchMergeFilters()): BranchMerge {
     return branchService.dryRunMerge(
       testData.featureBranch.refresh()!!,
       testData.mainBranch.refresh()!!,
+      filters,
     )
   }
 

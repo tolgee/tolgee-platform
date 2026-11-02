@@ -23,6 +23,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeFilters
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.repository.branching.KeyMetaSnapshotRepository
 import io.tolgee.repository.branching.TranslationSnapshotRepository
@@ -198,7 +199,11 @@ class BranchServiceImpl(
     request: DryRunMergeBranchRequest,
   ): BranchMerge {
     val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
-    return dryRunMerge(sourceBranch, resolveMergeTarget(projectId, sourceBranch, request.targetBranchId))
+    return dryRunMerge(
+      sourceBranch,
+      resolveMergeTarget(projectId, sourceBranch, request.targetBranchId),
+      request.filters,
+    )
   }
 
   private fun resolveMergeTarget(
@@ -221,8 +226,9 @@ class BranchServiceImpl(
   fun dryRunMerge(
     sourceBranch: Branch,
     targetBranch: Branch,
+    filters: BranchMergeFilters = BranchMergeFilters(),
   ): BranchMerge {
-    return branchMergeService.dryRun(sourceBranch, targetBranch)
+    return branchMergeService.dryRun(sourceBranch, targetBranch, filters)
   }
 
   @Transactional

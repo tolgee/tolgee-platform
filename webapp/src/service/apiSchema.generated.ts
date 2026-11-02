@@ -1805,6 +1805,16 @@ export interface components {
       sourceKey: components["schemas"]["BranchMergeKeyModel"];
       targetKey: components["schemas"]["BranchMergeKeyModel"];
     };
+    BranchMergeFilters: {
+      /** @description Offer only keys that already exist in the target. New keys are left for a later merge. */
+      existingKeysOnly: boolean;
+      /** @description Offer a key only when every translation that changed on it is in the Reviewed state. Deletions are always offered. */
+      reviewedOnly: boolean;
+      /** @description Offer only keys carrying this tag. */
+      tag?: string;
+      /** @description Offer only keys not carrying this tag. */
+      withoutTag?: string;
+    };
     /** @description Target branch key */
     BranchMergeKeyModel: {
       /** @description Key description */
@@ -1826,6 +1836,7 @@ export interface components {
       };
     };
     BranchMergeModel: {
+      filters: components["schemas"]["BranchMergeFilters"];
       /**
        * Format: int64
        * @description Branch merge id
@@ -2855,6 +2866,7 @@ export interface components {
       state: string;
     };
     DryRunMergeBranchRequest: {
+      filters?: components["schemas"]["BranchMergeFilters"];
       /**
        * Format: int64
        * @description Source branch id

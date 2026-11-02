@@ -26,6 +26,7 @@ export type BatchJobModel = components['schemas']['BatchJobModel'];
 export type BigMetaDto = components['schemas']['BigMetaDto'];
 export type BranchMergeChangeModel = components['schemas']['BranchMergeChangeModel'];
 export type BranchMergeConflictModel = components['schemas']['BranchMergeConflictModel'];
+export type BranchMergeFilters = components['schemas']['BranchMergeFilters'];
 export type BranchMergeKeyModel = components['schemas']['BranchMergeKeyModel'];
 export type BranchMergeModel = components['schemas']['BranchMergeModel'];
 export type BranchMergeRefModel = components['schemas']['BranchMergeRefModel'];

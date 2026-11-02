@@ -1,6 +1,7 @@
 package io.tolgee.dtos.queryResults.branching
 
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMergeFilters
 import java.util.Date
 
 data class BranchMergeView(
@@ -16,4 +17,5 @@ data class BranchMergeView(
   val keyResolvedConflictsCount: Long,
   val keyExcludedCount: Long,
   val uncompletedTasksCount: Long,
+  val filters: BranchMergeFilters,
 )
