@@ -7696,6 +7696,24 @@ export interface components {
       /** Format: int32 */
       threshold?: number;
     };
+    /** @description AI review result for the current text. Null without a current result or the feature. */
+    TranslationAiReviewSummaryModel: {
+      dryRun: boolean;
+      lastFailed: boolean;
+      /** Format: int32 */
+      score?: number;
+      /** @enum {string} */
+      status:
+        | "PENDING"
+        | "APPROVED"
+        | "BELOW_THRESHOLD"
+        | "DRY_RUN_PASS"
+        | "DRY_RUN_FAIL"
+        | "FAILED"
+        | "SKIPPED_QA_ISSUES"
+        | "CONFIRMED"
+        | "REJECTED";
+    };
     TranslationCommentDto: {
       /** @enum {string} */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
@@ -8006,6 +8024,7 @@ export interface components {
        * @description Number of active suggestions
        */
       activeSuggestionCount: number;
+      aiReview?: components["schemas"]["TranslationAiReviewSummaryModel"];
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /**
@@ -20591,6 +20610,17 @@ export interface operations {
          * A key matches if any of the selected check types is present in any of the selected languages.
          */
         filterQaCheckType?: string[];
+        /** Filter by AI review outcome. Several values combine with OR. Current results only. */
+        filterAiReviewStatus?: (
+          | "REVIEWED_BY_AI"
+          | "BELOW_THRESHOLD"
+          | "DRY_RUN_PASS"
+          | "DRY_RUN_FAIL"
+          | "FAILED"
+          | "NOT_REVIEWED_YET"
+        )[];
+        /** Limit the AI review filter to these language tags. */
+        filterAiReviewLanguage?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -20868,6 +20898,17 @@ export interface operations {
          * A key matches if any of the selected check types is present in any of the selected languages.
          */
         filterQaCheckType?: string[];
+        /** Filter by AI review outcome. Several values combine with OR. Current results only. */
+        filterAiReviewStatus?: (
+          | "REVIEWED_BY_AI"
+          | "BELOW_THRESHOLD"
+          | "DRY_RUN_PASS"
+          | "DRY_RUN_FAIL"
+          | "FAILED"
+          | "NOT_REVIEWED_YET"
+        )[];
+        /** Limit the AI review filter to these language tags. */
+        filterAiReviewLanguage?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21189,6 +21230,17 @@ export interface operations {
          * A key matches if any of the selected check types is present in any of the selected languages.
          */
         filterQaCheckType?: string[];
+        /** Filter by AI review outcome. Several values combine with OR. Current results only. */
+        filterAiReviewStatus?: (
+          | "REVIEWED_BY_AI"
+          | "BELOW_THRESHOLD"
+          | "DRY_RUN_PASS"
+          | "DRY_RUN_FAIL"
+          | "FAILED"
+          | "NOT_REVIEWED_YET"
+        )[];
+        /** Limit the AI review filter to these language tags. */
+        filterAiReviewLanguage?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -27380,6 +27432,17 @@ export interface operations {
          * A key matches if any of the selected check types is present in any of the selected languages.
          */
         filterQaCheckType?: string[];
+        /** Filter by AI review outcome. Several values combine with OR. Current results only. */
+        filterAiReviewStatus?: (
+          | "REVIEWED_BY_AI"
+          | "BELOW_THRESHOLD"
+          | "DRY_RUN_PASS"
+          | "DRY_RUN_FAIL"
+          | "FAILED"
+          | "NOT_REVIEWED_YET"
+        )[];
+        /** Limit the AI review filter to these language tags. */
+        filterAiReviewLanguage?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -27869,6 +27932,17 @@ export interface operations {
          * A key matches if any of the selected check types is present in any of the selected languages.
          */
         filterQaCheckType?: string[];
+        /** Filter by AI review outcome. Several values combine with OR. Current results only. */
+        filterAiReviewStatus?: (
+          | "REVIEWED_BY_AI"
+          | "BELOW_THRESHOLD"
+          | "DRY_RUN_PASS"
+          | "DRY_RUN_FAIL"
+          | "FAILED"
+          | "NOT_REVIEWED_YET"
+        )[];
+        /** Limit the AI review filter to these language tags. */
+        filterAiReviewLanguage?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */

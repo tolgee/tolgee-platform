@@ -388,6 +388,7 @@ export type TmAssignedProjectModel = components['schemas']['TmAssignedProjectMod
 export type TmxImportResult = components['schemas']['TmxImportResult'];
 export type TranslationAgencySimpleModel = components['schemas']['TranslationAgencySimpleModel'];
 export type TranslationAiReviewModel = components['schemas']['TranslationAiReviewModel'];
+export type TranslationAiReviewSummaryModel = components['schemas']['TranslationAiReviewSummaryModel'];
 export type TranslationCommentDto = components['schemas']['TranslationCommentDto'];
 export type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 export type TranslationCommentWithLangKeyDto = components['schemas']['TranslationCommentWithLangKeyDto'];
