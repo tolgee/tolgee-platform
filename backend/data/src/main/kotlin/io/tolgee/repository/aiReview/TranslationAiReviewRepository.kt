@@ -13,12 +13,9 @@ import org.springframework.stereotype.Repository
 interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Long> {
   fun findByTranslationId(translationId: Long): TranslationAiReview?
 
-  /**
-   * Assigns one queued row to a job before the LLM call (the "claim" step in
-   * docs/ai-review/README.md). Runs under READ COMMITTED: a concurrent update waits on the row lock,
-   * re-checks the WHERE and updates 0 rows. `batch_job_id = :jobId` in the guard lets a retried
-   * chunk of the same job take its item again.
-   */
+  fun findAllByTranslationIdIn(translationIds: Collection<Long>): List<TranslationAiReview>
+
+  // `batch_job_id = :jobId` in the guard lets a retried chunk of the same job take its item again.
   @Modifying
   @Query(
     nativeQuery = true,
@@ -75,10 +72,6 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
     translationIds: Collection<Long>,
   ): List<Long>
 
-  /**
-   * Clears the claim of rows whose job finished, failed, was cancelled or is missing — a pod can
-   * crash between the claim and the save.
-   */
   @Modifying
   @Query(
     nativeQuery = true,
@@ -179,6 +172,27 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
     statuses: Collection<AiReviewStatus>,
   ): Int
 
+  @Query(
+    """
+    select distinct k.project.id from TranslationAiReview r
+    join r.translation t
+    join t.key k
+    where (r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true)
+      and k.project.organizationOwner.id = :organizationId
+    """,
+  )
+  fun findProjectIdsWithClaimableRows(organizationId: Long): List<Long>
+
+  @Query(
+    """
+    select distinct k.project.id from TranslationAiReview r
+    join r.translation t
+    join t.key k
+    where r.status = io.tolgee.model.enums.aiReview.AiReviewStatus.PENDING or r.reReviewRequested = true
+    """,
+  )
+  fun findProjectIdsWithClaimableRows(): List<Long>
+
   @Modifying
   @Query("delete from TranslationAiReview r where r.translation.id in :translationIds")
   fun deleteAllByTranslationIds(translationIds: Collection<Long>): Int
@@ -198,6 +212,21 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
     keyIds: Collection<Long>,
     baseLanguageId: Long,
     statuses: Collection<AiReviewStatus>,
+  ): Int
+
+  @Modifying
+  @Query(
+    """
+    delete from TranslationAiReview r
+    where r.translation.id in (
+      select t.id from Translation t where t.key.project.id = :projectId
+    )
+    and r.status not in :keptStatuses
+    """,
+  )
+  fun deleteByProject(
+    projectId: Long,
+    keptStatuses: Collection<AiReviewStatus>,
   ): Int
 
   @Modifying
