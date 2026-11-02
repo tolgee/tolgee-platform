@@ -135,6 +135,7 @@ class BranchServiceImpl(
     name: String,
     originBranchId: Long,
     author: UserAccount,
+    isProtected: Boolean,
   ): Branch {
     return metrics.branchCreateTimer.recordCallable {
       val originBranch =
@@ -145,6 +146,7 @@ class BranchServiceImpl(
       val branch =
         createBranch(projectId, name, author).also {
           it.originBranch = originBranch
+          it.isProtected = isProtected
         }
       branchRepository.save(branch)
 

@@ -99,6 +99,7 @@ class BranchController(
         branch.name,
         branch.originBranchId,
         authenticationFacade.authenticatedUserEntity,
+        branch.protected,
       )
     return branchModelAssembler.toModel(branch)
   }
