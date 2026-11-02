@@ -68,9 +68,9 @@ describe('Public projects view', () => {
     publicProjectsData.generateStandard();
     visit();
     gcy('dashboard-projects-list-item').first().click();
-    cy.url().should('match', /\/projects\/[0-9]+$/);
+    cy.url().should('match', /\/projects\/[0-9]+\/community$/);
     waitForGlobalLoading();
-    gcy('global-base-view-content').should('exist');
+    gcy('community-project-page').should('exist');
     gcy('guest-login-button').should('be.visible');
     gcy('global-user-menu-button').should('not.exist');
   });
@@ -79,12 +79,12 @@ describe('Public projects view', () => {
     publicProjectsData.generateStandard();
     visit();
     gcy('dashboard-projects-list-item').first().click();
-    cy.url().should('match', /\/projects\/[0-9]+$/);
+    cy.url().should('match', /\/projects\/[0-9]+\/community$/);
     waitForGlobalLoading();
     gcy('guest-login-button').click();
     cy.url().should('include', '/login');
     loginViaForm('admin', 'admin');
-    cy.url().should('match', /\/projects\/[0-9]+$/);
+    cy.url().should('match', /\/projects\/[0-9]+\/community$/);
     gcy('global-user-menu-button').should('be.visible');
   });
 

@@ -177,7 +177,10 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
       isPublicVariant={isPublicVariant}
       onClick={() =>
         history.push(
-          LINKS.PROJECT_DASHBOARD.build({
+          (isPublicVariant
+            ? LINKS.PROJECT_COMMUNITY
+            : LINKS.PROJECT_DASHBOARD
+          ).build({
             [PARAMS.PROJECT_ID]: p.id,
           })
         )
