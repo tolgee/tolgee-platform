@@ -339,6 +339,6 @@ class BranchController(
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merge = branchService.getBranchMergeView(projectHolder.project.id, mergeId)
     securityService.checkBranchModify(merge.targetBranch, projectHolder.project.id)
-    branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch ?: true)
+    branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch)
   }
 }

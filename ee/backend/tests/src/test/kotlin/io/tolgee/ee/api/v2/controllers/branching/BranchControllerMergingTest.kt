@@ -507,6 +507,30 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `apply without deleteBranch keeps the source branch of a selective merge`() {
+    val mergeId = createUpdatePreview()
+    performProjectAuthPut("branches/merge/$mergeId/exclude", mapOf("type" to "UPDATE", "excluded" to true)).andIsOk
+    performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
+    testData.featureBranch
+      .refresh()
+      .deletedAt.assert
+      .isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `apply with deleteBranch deletes the source branch of a selective merge`() {
+    val mergeId = createUpdatePreview()
+    performProjectAuthPut("branches/merge/$mergeId/exclude", mapOf("type" to "UPDATE", "excluded" to true)).andIsOk
+    performProjectAuthPost("branches/merge/$mergeId/apply", mapOf("deleteBranch" to true)).andIsOk
+    testData.featureBranch
+      .refresh()
+      .deletedAt.assert
+      .isNotNull()
+  }
+
   private fun createUpdatePreview(): Long {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,

@@ -123,7 +123,7 @@ interface BranchService {
   fun applyMerge(
     projectId: Long,
     mergeId: Long,
-    deleteBranch: Boolean? = true,
+    deleteBranch: Boolean? = null,
   )
 
   fun deleteMerge(
