@@ -1,3 +1,10 @@
+## [3.241.4](https://github.com/tolgee/tolgee-platform/compare/v3.241.3...v3.241.4) (2026-11-02)
+
+
+### Bug Fixes
+
+* close the probe connection when waiting for autostarted Postgres ([#3982](https://github.com/tolgee/tolgee-platform/issues/3982)) ([c5b5867](https://github.com/tolgee/tolgee-platform/commit/c5b58675dea69dfcd6a1a62841c8560358cc81c3))
+
 ## [3.241.3](https://github.com/tolgee/tolgee-platform/compare/v3.241.2...v3.241.3) (2026-10-29)
 
 
