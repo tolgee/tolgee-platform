@@ -34,6 +34,15 @@ class TranslationViewModelAssembler(
       qaChecksStale = view.qaChecksStale,
       suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) },
       qaIssues = view.qaIssues.takeIf { it.isNotEmpty() }?.map { qaIssueModelAssembler.toModel(it) },
+      aiReview =
+        view.aiReviewStatus?.let {
+          TranslationAiReviewSummaryModel(
+            status = it,
+            score = view.aiReviewScore,
+            dryRun = view.aiReviewDryRun,
+            lastFailed = view.aiReviewLastFailed,
+          )
+        },
     )
   }
 }
