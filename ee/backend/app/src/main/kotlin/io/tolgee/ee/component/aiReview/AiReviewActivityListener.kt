@@ -9,6 +9,7 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.BypassableActivityListener
+import io.tolgee.ee.service.aiReview.AiReviewActionService
 import io.tolgee.ee.service.aiReview.AiReviewQueueService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.events.OnQaIssuesIgnored
@@ -16,6 +17,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.params.AiReviewJobParams
 import io.tolgee.model.batch.params.QaCheckJobParams
+import io.tolgee.model.enums.SystemActor
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
@@ -39,6 +41,7 @@ class AiReviewActivityListener(
   private val translationRepository: TranslationRepository,
   private val objectMapper: ObjectMapper,
   private val entityManager: EntityManager,
+  private val aiReviewActionService: AiReviewActionService,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -51,7 +54,12 @@ class AiReviewActivityListener(
       if (event.activityRevision.batchJobChunkExecution != null) return
 
       handleBaseLanguageChanged(event, projectId)
-      process(projectId, event.modifiedEntities.values.flatMap { it.values })
+      process(
+        projectId,
+        event.modifiedEntities.values.flatMap { it.values },
+        systemActor = event.activityRevision.systemActor,
+        authorId = event.activityRevision.authorId,
+      )
     }
   }
 
@@ -68,7 +76,12 @@ class AiReviewActivityListener(
 
       val activityRevisionId = event.activityRevisionId ?: return
       val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
-      process(projectId, entities)
+      process(
+        projectId,
+        entities,
+        systemActor = event.job.type.systemActor,
+        authorId = event.job.authorId,
+      )
     }
   }
 
@@ -102,7 +115,10 @@ class AiReviewActivityListener(
   private fun process(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
+    systemActor: SystemActor?,
+    authorId: Long?,
   ) {
+    handleHumanUnReview(entities, systemActor, authorId)
     handleKeyScopeChanged(projectId, entities)
     val textChanged = textChangedTranslations(entities)
     if (textChanged.isEmpty()) return
@@ -114,6 +130,29 @@ class AiReviewActivityListener(
         .mapNotNull { it.describingRelations?.get("key")?.entityId }
     aiReviewQueueService.onSourceChanged(projectId, baseKeyIds)
     aiReviewQueueService.onTextChanged(projectId, textChanged.map { it.entityId })
+  }
+
+  /**
+   * Un-reviewing an AI approval by any human path counts as a rejection. The system's own state
+   * changes carry a system actor and are skipped.
+   */
+  private fun handleHumanUnReview(
+    entities: List<ActivityModifiedEntity>,
+    systemActor: SystemActor?,
+    authorId: Long?,
+  ) {
+    if (systemActor != null) return
+    val unReviewedIds =
+      entities
+        .filter {
+          it.entityClass == Translation::class.simpleName &&
+            it.revisionType == RevisionType.MOD &&
+            it.modifications["state"]?.let { mod ->
+              mod.old?.toString() == "REVIEWED" && mod.new?.toString() == "TRANSLATED"
+            } == true
+        }.map { it.entityId }
+    if (unReviewedIds.isEmpty()) return
+    aiReviewActionService.markRejectedByStateChange(unReviewedIds, authorId)
   }
 
   /**

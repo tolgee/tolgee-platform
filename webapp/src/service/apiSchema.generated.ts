@@ -1122,6 +1122,15 @@ export interface paths {
     /** Returns all translations for specified languages */
     get: operations["getAllTranslations"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/ai-review": {
+    get: operations["getAiReview"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/ai-review/confirm": {
+    put: operations["confirmAiReview"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/ai-review/reject": {
+    put: operations["rejectAiReview"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     /** Returns translation comments of translation */
     get: operations["getAll_3"];
@@ -3395,6 +3404,7 @@ export interface components {
         | "ai_review_prompt_must_be_review_type"
         | "ai_review_rule_base_language"
         | "ai_review_duplicate_language_override"
+        | "ai_review_not_an_approval"
         | "prompt_type_cannot_be_changed"
         | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
@@ -7377,6 +7387,7 @@ export interface components {
         | "ai_review_prompt_must_be_review_type"
         | "ai_review_rule_base_language"
         | "ai_review_duplicate_language_override"
+        | "ai_review_not_an_approval"
         | "prompt_type_cannot_be_changed"
         | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
@@ -7589,6 +7600,52 @@ export interface components {
       id: number;
       name: string;
       url?: string;
+    };
+    TranslationAiReviewModel: {
+      dryRun: boolean;
+      /** @enum {string} */
+      failureReason?:
+        | "NO_PROVIDER"
+        | "PROVIDER_ERROR"
+        | "OUT_OF_CREDITS"
+        | "TEMPLATE_ERROR"
+        | "PARSE_ERROR";
+      issues: components["schemas"]["AiReviewIssueModel"][];
+      /** Format: int64 */
+      lastFailedAt?: number;
+      /** @enum {string} */
+      lastFailureReason?:
+        | "NO_PROVIDER"
+        | "PROVIDER_ERROR"
+        | "OUT_OF_CREDITS"
+        | "TEMPLATE_ERROR"
+        | "PARSE_ERROR";
+      model?: string;
+      promptName?: string;
+      providerName?: string;
+      /** Format: int64 */
+      resolvedAt?: number;
+      resolvedBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      reviewedAt?: number;
+      /** Format: int64 */
+      ruleId?: number;
+      ruleName?: string;
+      /** Format: int32 */
+      score?: number;
+      /** @enum {string} */
+      status:
+        | "PENDING"
+        | "APPROVED"
+        | "BELOW_THRESHOLD"
+        | "DRY_RUN_PASS"
+        | "DRY_RUN_FAIL"
+        | "FAILED"
+        | "SKIPPED_QA_ISSUES"
+        | "CONFIRMED"
+        | "REJECTED";
+      /** Format: int32 */
+      threshold?: number;
     };
     TranslationCommentDto: {
       /** @enum {string} */
@@ -27649,6 +27706,150 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAiReviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  confirmAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAiReviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  rejectAiReview: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationAiReviewModel"];
         };
       };
       /** Bad Request */
