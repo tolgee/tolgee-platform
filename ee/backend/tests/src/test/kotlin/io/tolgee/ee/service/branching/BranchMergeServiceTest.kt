@@ -948,11 +948,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val merge = prepareMergeScenarioWithConflict()
     val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
     val before = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text
-    branchService.setChangesExcluded(
-      testData.project.id,
-      merge.id,
-      SetBranchMergeChangesExcludedRequest(changeIds = listOf(update.id), excluded = true),
-    )
+    excludeChanges(merge, listOf(update.id))
     resolveOnlyConflict(merge, BranchKeyMergeResolutionType.SOURCE)
     branchService.applyMerge(testData.project.id, merge.id, false)
     getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text.assert.isEqualTo(before)
@@ -969,11 +965,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val merge = prepareMergeScenarioWithConflict()
     val conflict = merge.changes.single { it.change == BranchKeyMergeChangeType.CONFLICT }
     val before = getTranslation(testData.mainConflictKey, testData.englishLanguage).text
-    branchService.setChangesExcluded(
-      testData.project.id,
-      merge.id,
-      SetBranchMergeChangesExcludedRequest(changeIds = listOf(conflict.id), excluded = true),
-    )
+    excludeChanges(merge, listOf(conflict.id))
     branchService.applyMerge(testData.project.id, merge.id, false)
     branchMergeRepository
       .findById(merge.id)
@@ -994,11 +986,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
     val merge = dryRunFeatureBranchMerge()
     val rename = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
-    branchService.setChangesExcluded(
-      testData.project.id,
-      merge.id,
-      SetBranchMergeChangesExcludedRequest(changeIds = listOf(rename.id), excluded = true),
-    )
+    excludeChanges(merge, listOf(rename.id))
     assertThrows<BadRequestException> {
       branchService.applyMerge(testData.project.id, merge.id, false)
     }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
@@ -1046,11 +1034,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @Test
   fun `excluding an empty list of changes changes nothing`() {
     val merge = prepareMergeScenario()
-    branchService.setChangesExcluded(
-      testData.project.id,
-      merge.id,
-      SetBranchMergeChangesExcludedRequest(changeIds = emptyList(), excluded = true),
-    )
+    excludeChanges(merge, emptyList())
     branchMergeService
       .findActiveMergeFull(testData.project.id, merge.id)!!
       .changes
@@ -1063,11 +1047,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   fun `refresh keeps the excluded flag for the same key pair`() {
     val merge = prepareMergeScenario()
     val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
-    branchService.setChangesExcluded(
-      testData.project.id,
-      merge.id,
-      SetBranchMergeChangesExcludedRequest(changeIds = listOf(update.id), excluded = true),
-    )
+    excludeChanges(merge, listOf(update.id))
     updateKeyTranslation(testData.featureKeyToUpdate, "edited again")
     branchService.refreshMerge(testData.project.id, merge.id)
     val refreshed = branchMergeService.findActiveMergeFull(testData.project.id, merge.id)!!
@@ -1189,6 +1169,17 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       testData.project.id,
       merge.id,
       ResolveBranchMergeConflictRequest(conflict.id, resolution),
+    )
+  }
+
+  private fun excludeChanges(
+    merge: BranchMerge,
+    changeIds: List<Long>,
+  ) {
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = changeIds, excluded = true),
     )
   }
 

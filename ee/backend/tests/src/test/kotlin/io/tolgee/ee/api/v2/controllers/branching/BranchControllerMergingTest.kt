@@ -490,15 +490,10 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `preview stores the filters and refresh keeps them`() {
     val mergeId =
-      performProjectAuthPost(
-        "branches/merge/preview",
-        mapOf(
-          "sourceBranchId" to testData.featureBranch.id,
-          "filters" to mapOf("reviewedOnly" to true, "tag" to "release"),
-        ),
-      ).andIsOk
-        .andReturn()
-        .mapResponseTo<Map<String, Any>>()["id"]
+      createMergePreview(
+        testData.featureBranch.id,
+        filters = mapOf("reviewedOnly" to true, "tag" to "release"),
+      )
     performProjectAuthPost("branches/merge/$mergeId/refresh").andIsOk
     performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
       node("filters.reviewedOnly").isEqualTo(true)
@@ -651,6 +646,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun createMergePreview(
     sourceBranchId: Long,
     targetBranchId: Long? = null,
+    filters: Map<String, Any>? = null,
   ): Long {
     val response =
       performProjectAuthPost(
@@ -658,7 +654,8 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
         mapOf(
           "sourceBranchId" to sourceBranchId,
           "targetBranchId" to targetBranchId,
-        ),
+          "filters" to filters,
+        ).filterValues { it != null },
       ).andIsOk
         .andReturn()
         .mapResponseTo<Map<String, Any>>()
