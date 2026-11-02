@@ -259,6 +259,7 @@ class Key(
 
     val snapshotTranslations = snapshot?.translations?.associateBy { it.language } ?: emptyMap()
     val targetTranslations = this.translations.associateBy { it.language.tag }
+    val textMovedLanguageTags = mutableSetOf<String>()
 
     source.translations.forEach { sourceTranslation ->
       val languageTag = sourceTranslation.language.tag
@@ -267,7 +268,11 @@ class Key(
 
       if (targetTranslation != null) {
         // Both have it - merge
+        val textBefore = targetTranslation.text
         targetTranslation.merge(sourceTranslation, translationSnapshot, resolution)
+        if (targetTranslation.text != textBefore) {
+          textMovedLanguageTags.add(languageTag)
+        }
       } else {
         // Source has it, target doesn't - add if new in source or source wins
         val shouldAdd = translationSnapshot == null || resolution == BranchKeyMergeResolutionType.SOURCE
@@ -282,9 +287,11 @@ class Key(
               mtProvider = sourceTranslation.mtProvider
             }
           this.translations.add(newTranslation)
+          textMovedLanguageTags.add(languageTag)
         }
       }
     }
+    markOutdatedWhenBaseTextMoved(textMovedLanguageTags)
 
     this.keyMeta?.let { meta ->
       source.keyMeta?.let { sourceMeta ->
@@ -293,6 +300,14 @@ class Key(
     }
 
     mergeScreenshots(source, snapshot, resolution)
+  }
+
+  private fun markOutdatedWhenBaseTextMoved(textMovedLanguageTags: Set<String>) {
+    val baseTag = project.baseLanguage?.tag ?: return
+    if (baseTag !in textMovedLanguageTags) return
+    translations
+      .filter { it.language.tag != baseTag && it.language.tag !in textMovedLanguageTags && !it.text.isNullOrEmpty() }
+      .forEach { it.outdated = true }
   }
 
   private fun mergeScreenshots(
