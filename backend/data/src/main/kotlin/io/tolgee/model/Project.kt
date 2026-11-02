@@ -188,16 +188,19 @@ class Project(
   @Column(nullable = false)
   @ColumnDefault("RETRANSLATE")
   @Enumerated(EnumType.STRING)
+  @ActivityLoggedProp
   var aiApprovedSourceChangeAction: SourceChangeAction = SourceChangeAction.RETRANSLATE
 
   @Column(nullable = false)
   @ColumnDefault("MARK_OUTDATED")
   @Enumerated(EnumType.STRING)
+  @ActivityLoggedProp
   var humanEditedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED
 
   @Column(nullable = false)
   @ColumnDefault("MARK_OUTDATED")
   @Enumerated(EnumType.STRING)
+  @ActivityLoggedProp
   var humanReviewedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED
 
   @ColumnDefault("0")
