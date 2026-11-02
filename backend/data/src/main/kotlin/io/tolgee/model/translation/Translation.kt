@@ -263,11 +263,15 @@ class Translation(
     snapshot: TranslationSnapshot?,
     resolution: BranchKeyMergeResolutionType,
   ) {
-    this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    val text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    val textMoved = text != this.text
+    this.text = text
     this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
-    this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
-    this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false
-    this.mtProvider = chooseThreeWay(source.mtProvider, this.mtProvider, null, resolution)
+    if (textMoved) {
+      this.outdated = source.outdated
+      this.auto = source.auto
+      this.mtProvider = source.mtProvider
+    }
 
     val snapshotLabels = snapshot?.labels?.toSet() ?: emptySet()
     val sourceByName = source.labels.associateBy { it.name }
