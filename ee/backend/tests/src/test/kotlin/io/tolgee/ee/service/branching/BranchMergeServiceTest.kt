@@ -1044,6 +1044,22 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `excluding an empty list of changes changes nothing`() {
+    val merge = prepareMergeScenario()
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = emptyList(), excluded = true),
+    )
+    branchMergeService
+      .findActiveMergeFull(testData.project.id, merge.id)!!
+      .changes
+      .map { it.excluded }
+      .assert
+      .containsOnly(false)
+  }
+
+  @Test
   fun `refresh keeps the excluded flag for the same key pair`() {
     val merge = prepareMergeScenario()
     val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
