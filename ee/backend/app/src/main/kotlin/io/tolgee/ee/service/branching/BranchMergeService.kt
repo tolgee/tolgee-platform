@@ -17,6 +17,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.BranchMergeFilters
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
@@ -61,6 +62,7 @@ class BranchMergeService(
   fun dryRun(
     sourceBranch: Branch,
     targetBranch: Branch,
+    filters: BranchMergeFilters = BranchMergeFilters(),
   ): BranchMerge {
     return metrics.branchMergePreviewTimer.recordCallable {
       val branchMerge =
@@ -69,6 +71,7 @@ class BranchMergeService(
           this.targetBranch = targetBranch
           this.sourceRevision = sourceBranch.revision
           this.targetRevision = targetBranch.revision
+          this.filters = filters
         }
       dryRun(branchMerge)
       branchMergeRepository.save(branchMerge)

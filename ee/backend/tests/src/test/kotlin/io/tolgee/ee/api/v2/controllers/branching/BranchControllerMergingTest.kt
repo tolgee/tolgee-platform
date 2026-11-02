@@ -455,6 +455,27 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview stores the filters and refresh keeps them`() {
+    val mergeId =
+      performProjectAuthPost(
+        "branches/merge/preview",
+        mapOf(
+          "sourceBranchId" to testData.featureBranch.id,
+          "filters" to mapOf("reviewedOnly" to true, "tag" to "release"),
+        ),
+      ).andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()["id"]
+    performProjectAuthPost("branches/merge/$mergeId/refresh").andIsOk
+    performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
+      node("filters.reviewedOnly").isEqualTo(true)
+      node("filters.existingKeysOnly").isEqualTo(false)
+      node("filters.tag").isEqualTo("release")
+    }
+  }
+
   private fun createUpdatePreview(): Long {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,

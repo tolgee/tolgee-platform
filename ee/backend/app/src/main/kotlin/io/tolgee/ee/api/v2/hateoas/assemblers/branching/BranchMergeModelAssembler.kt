@@ -22,6 +22,7 @@ class BranchMergeModelAssembler : RepresentationModelAssembler<BranchMergeView, 
       keyResolvedConflictsCount = entity.keyResolvedConflictsCount.toInt(),
       keyExcludedCount = entity.keyExcludedCount.toInt(),
       uncompletedTasksCount = entity.uncompletedTasksCount.toInt(),
+      filters = entity.filters,
       mergedAt = entity.mergedAt?.time,
     )
   }

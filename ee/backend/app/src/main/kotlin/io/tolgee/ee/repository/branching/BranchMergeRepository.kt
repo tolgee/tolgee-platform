@@ -71,7 +71,8 @@ interface BranchMergeRepository : BranchMergeRepositoryOss {
             io.tolgee.model.enums.TaskState.NEW,
             io.tolgee.model.enums.TaskState.IN_PROGRESS
           )
-      )
+      ),
+      bm.filters
     )
     from BranchMerge bm
       join bm.sourceBranch sb
@@ -112,7 +113,8 @@ interface BranchMergeRepository : BranchMergeRepositoryOss {
             io.tolgee.model.enums.TaskState.NEW,
             io.tolgee.model.enums.TaskState.IN_PROGRESS
           )
-      )
+      ),
+      bm.filters
     )
     from BranchMerge bm
       join bm.sourceBranch sb

@@ -7,6 +7,7 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -44,6 +45,9 @@ class BranchMerge :
 
   @Column(nullable = true)
   var mergedAt: Date? = null
+
+  @Embedded
+  var filters: BranchMergeFilters = BranchMergeFilters()
 
   @OneToMany(
     targetEntity = BranchMergeChange::class,
