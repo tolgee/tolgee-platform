@@ -66,6 +66,9 @@ class BranchMerge :
   val isReadyToMerge: Boolean
     get() = isRevisionValid && isResolved
 
+  val isSelective: Boolean
+    get() = changes.any { it.excluded } || filters != BranchMergeFilters()
+
   val isUpdate: Boolean
     get() = targetBranch.originBranch?.id == sourceBranch.id
 

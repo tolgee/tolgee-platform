@@ -252,9 +252,10 @@ class BranchServiceImpl(
         throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
       }
     }
+    val wantsDelete = deleteBranch ?: !merge.isSelective
     val mergedMerge = branchMergeService.applyMerge(merge)
     val source = mergedMerge.sourceBranch
-    val shouldDelete = deleteBranch == true && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
+    val shouldDelete = wantsDelete && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
     if (!shouldDelete) {
       return
     }

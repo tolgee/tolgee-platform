@@ -1604,7 +1604,8 @@ export interface components {
       username?: string;
     };
     ApplyBranchMergeRequest: {
-      deleteBranch: boolean;
+      /** @description Delete the source branch after the merge. When omitted, the branch is deleted unless the merge was selective (filters or excluded changes), in which case it is kept so the held-back changes stay pending. */
+      deleteBranch?: boolean;
     };
     AssignSharedTranslationMemoryRequest: {
       /**
