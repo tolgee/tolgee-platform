@@ -147,6 +147,43 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
           addTranslation("de", "Einfacher Text")
         }
       }
+
+    root
+      .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "ai_review_branching_project" }
+      .build {
+        self.useBranching = true
+        self.useQaChecks = true
+        self.baseLanguage = addEnglish().self
+        addGerman()
+        addFrench()
+        val mainBranch =
+          addBranch {
+            name = "main"
+            project = self
+            isDefault = true
+            isProtected = true
+          }.self
+        addBranch {
+          name = "release"
+          project = self
+        }
+        addKey {
+          name = "branch_key_ui"
+          branch = mainBranch
+        }.build {
+          addTag("ui")
+          addTranslation("en", "Branch source ui")
+          addTranslation("de", "Branch Text ui")
+        }
+        addKey {
+          name = "branch_key_legal"
+          branch = mainBranch
+        }.build {
+          addTag("legal")
+          addTranslation("en", "Branch source legal")
+          addTranslation("de", "Branch Text legal")
+        }
+      }
   }
 
   private fun addReviewedKey(

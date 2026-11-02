@@ -20,6 +20,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { AiReviewRuleScopeChips } from './AiReviewRuleScopeChips';
+import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
 import { useRuleLabel } from './useRuleLabel';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
@@ -49,6 +50,7 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
   const ruleLabel = useRuleLabel();
   const label = ruleLabel(rule);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const enabledLoadable = useApiMutation({
@@ -182,7 +184,12 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
         />
         {canEdit && (
           <>
-            <IconButton size="small" data-cy="ai-review-rule-edit">
+            <IconButton
+              size="small"
+              onClick={() => setEditOpen(true)}
+              data-cy="ai-review-rule-edit"
+              data-cy-name={label}
+            >
               <Edit02 width={18} height={18} />
             </IconButton>
             <IconButton
@@ -207,6 +214,9 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
             {t('ai_review_rule_delete', 'Delete')}
           </MenuItem>
         </Menu>
+      )}
+      {editOpen && (
+        <AiReviewRuleDialog rule={rule} onClose={() => setEditOpen(false)} />
       )}
     </StyledItem>
   );
