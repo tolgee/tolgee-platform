@@ -16,6 +16,7 @@ import { TranslationsView } from './translations/TranslationsView';
 import { TrashView } from './translations/trash/TrashView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import { DashboardView } from './dashboard/DashboardView';
+import { CommunityProjectView } from 'tg.views/projects/community/CommunityProjectView';
 import { WebsocketPreview } from './WebsocketPreview';
 import { DeveloperView } from './developer/DeveloperView';
 import { TaskRedirect } from './TaskRedirect';
@@ -75,6 +76,10 @@ export const ProjectRouter = () => {
 
         <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
           <DashboardView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_COMMUNITY.template}>
+          <CommunityProjectView />
         </Route>
 
         <PrivateRoute path={LINKS.PROJECT_DEVELOPER.template}>
