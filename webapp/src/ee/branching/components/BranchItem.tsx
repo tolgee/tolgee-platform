@@ -9,8 +9,13 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
-import { DotsVertical, GitMerge, ShieldTick } from '@untitled-ui/icons-react';
+import React, { ReactElement, ReactNode, useState } from 'react';
+import {
+  DotsVertical,
+  GitMerge,
+  RefreshCcw01,
+  ShieldTick,
+} from '@untitled-ui/icons-react';
 import { DefaultBranchChip } from 'tg.component/branching/DefaultBranchChip';
 import { BranchNameLink } from 'tg.ee.module/branching/components/BranchNameLink';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -52,6 +57,28 @@ const StyledItemActions = styled(StyledListItemColumn)`
   justify-content: flex-end;
 `;
 
+const BranchAction: React.FC<{
+  pending: boolean;
+  active: boolean;
+  tooltip: ReactNode;
+  pendingTooltip: ReactNode;
+  children: ReactElement;
+}> = ({ pending, active, tooltip, pendingTooltip, children }) => {
+  if (pending) {
+    return (
+      <Tooltip title={pendingTooltip}>
+        <Badge variant="dot" color="warning">
+          {children}
+        </Badge>
+      </Tooltip>
+    );
+  }
+  if (!active) {
+    return null;
+  }
+  return <Tooltip title={tooltip}>{children}</Tooltip>;
+};
+
 type BranchModel = components['schemas']['BranchModel'];
 
 type Props = {
@@ -61,6 +88,8 @@ type Props = {
   onSetProtected?: (branch: BranchModel) => void;
   onMergeInto?: () => void;
   onMergeDetail: () => void;
+  onUpdateFrom?: () => void;
+  onUpdateDetail: () => void;
 };
 
 export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
@@ -70,6 +99,8 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
   onSetProtected,
   onMergeInto,
   onMergeDetail,
+  onUpdateFrom,
+  onUpdateDetail,
 }) => {
   const timeDistance = useTimeDistance();
   const formatDate = useDateFormatter();
@@ -153,6 +184,43 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
               </Tooltip>
             </PointerLink>
           )}
+          {branch.update?.mergedAt && (
+            <PointerLink onClick={onUpdateDetail}>
+              <Tooltip
+                title={
+                  <T
+                    keyName="branch_updated_from_branch_full_text"
+                    defaultValue="Updated from <b>{branch}</b> on {date}"
+                    noWrap
+                    params={{
+                      b: <b />,
+                      branch: branch.update.sourceBranchName,
+                      date: formatDate(branch.update.mergedAt, {
+                        dateStyle: 'long',
+                        timeStyle: 'short',
+                      }),
+                    }}
+                  />
+                }
+              >
+                <DefaultChip
+                  label={
+                    <Typography variant="caption">
+                      <T
+                        keyName="branch_updated_from_branch"
+                        defaultValue="Updated from <b>{branch}</b> {date}"
+                        params={{
+                          b: <b />,
+                          branch: branch.update.sourceBranchName,
+                          date: formatDate(branch.update.mergedAt),
+                        }}
+                      />
+                    </Typography>
+                  }
+                />
+              </Tooltip>
+            </PointerLink>
+          )}
         </Box>
       </StyledItemText>
       <StyledItemText data-cy="project-settings-branch-item-properties">
@@ -183,40 +251,55 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
         )}
       </StyledItemText>
       <StyledItemActions>
-        {!branch.isDefault &&
-          onMergeInto &&
-          (branch.merge && !branch.merge.mergedAt ? (
-            <Tooltip title={<T keyName="branch_merge_into_warning_tooltip" />}>
-              <Badge variant="dot" color="warning">
-                <IconButton
-                  data-cy="project-settings-branches-merge-into-button"
-                  size="medium"
-                  onClick={onMergeInto}
-                >
-                  <GitMerge width={20} height={20} />
-                </IconButton>
-              </Badge>
-            </Tooltip>
-          ) : (
-            branch.active && (
-              <Tooltip
-                title={
-                  <T
-                    keyName="branch_merge_into_tooltip"
-                    params={{ target: branch.originBranchName!, b: <b /> }}
-                  />
-                }
-              >
-                <IconButton
-                  data-cy="project-settings-branches-merge-into-button"
-                  size="medium"
-                  onClick={onMergeInto}
-                >
-                  <GitMerge width={20} height={20} />
-                </IconButton>
-              </Tooltip>
-            )
-          ))}
+        {!branch.isDefault && onUpdateFrom && (
+          <BranchAction
+            pending={Boolean(branch.update && !branch.update.mergedAt)}
+            active={branch.active}
+            tooltip={
+              <T
+                keyName="branch_update_from_tooltip"
+                defaultValue="Update branch from <b>{origin}</b>"
+                params={{ origin: branch.originBranchName!, b: <b /> }}
+              />
+            }
+            pendingTooltip={
+              <T
+                keyName="branch_update_from_warning_tooltip"
+                defaultValue="Ongoing update"
+              />
+            }
+          >
+            <IconButton
+              data-cy="project-settings-branches-update-from-button"
+              size="medium"
+              onClick={onUpdateFrom}
+            >
+              <RefreshCcw01 width={20} height={20} />
+            </IconButton>
+          </BranchAction>
+        )}
+
+        {!branch.isDefault && onMergeInto && (
+          <BranchAction
+            pending={Boolean(branch.merge && !branch.merge.mergedAt)}
+            active={branch.active}
+            tooltip={
+              <T
+                keyName="branch_merge_into_tooltip"
+                params={{ target: branch.originBranchName!, b: <b /> }}
+              />
+            }
+            pendingTooltip={<T keyName="branch_merge_into_warning_tooltip" />}
+          >
+            <IconButton
+              data-cy="project-settings-branches-merge-into-button"
+              size="medium"
+              onClick={onMergeInto}
+            >
+              <GitMerge width={20} height={20} />
+            </IconButton>
+          </BranchAction>
+        )}
 
         {hasMenuItems && (
           <>

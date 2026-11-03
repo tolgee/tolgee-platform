@@ -12,6 +12,15 @@ export class E2MergeSection {
       .click();
   }
 
+  initiateUpdateFromBranches(branchName: string) {
+    gcy('project-settings-branch-item-name')
+      .contains(branchName)
+      .closestDcy('project-settings-branch-item')
+      .findDcy('project-settings-branches-update-from-button')
+      .click();
+    waitForGlobalLoading();
+  }
+
   confirmMergeCreation() {
     // Confirm the merge creation dialog
     gcy('global-confirmation-confirm').should('be.visible').click();
