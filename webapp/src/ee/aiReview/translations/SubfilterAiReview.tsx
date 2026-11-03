@@ -10,8 +10,8 @@ import {
   FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
-import { SubfilterAiReviewProps } from '../../../eeSetup/EeModuleType';
-import { AiReviewBadge } from './AiReviewBadge';
+import { SubfilterAiReviewProps } from 'eeSetup/EeModuleType';
+import { AiReviewBadge } from 'tg.ee.module/aiReview/translations/AiReviewBadge';
 
 const OUTCOME_BADGE_STATUS = {
   REVIEWED_BY_AI: 'APPROVED',
@@ -86,6 +86,7 @@ export const SubfilterAiReview = ({
     <>
       <SubmenuItem
         ref={anchorEl}
+        data-cy-id="ai-review"
         label={t('translations_filters_heading_ai_review', 'AI review')}
         onClick={() => setOpen(true)}
         selected={Boolean(getAiReviewFiltersLength(value))}
@@ -161,6 +162,7 @@ export const SubfilterAiReview = ({
                   .map((lang) => (
                     <FilterItem
                       data-cy="translations-filter-apply-for-language"
+                      data-cy-language={lang.tag}
                       key={lang.id}
                       label={lang.name}
                       selected={
@@ -198,17 +200,42 @@ export function getAiReviewFiltersName(value: FiltersInternal) {
   if (value.filterAiReviewOutcomes?.length) {
     switch (value.filterAiReviewOutcomes[0]) {
       case 'REVIEWED_BY_AI':
-        return <T keyName="ai_review_filter_reviewed_by_ai" />;
+        return (
+          <T
+            keyName="ai_review_filter_reviewed_by_ai"
+            defaultValue="Reviewed by AI"
+          />
+        );
       case 'BELOW_THRESHOLD':
-        return <T keyName="ai_review_filter_below_threshold" />;
+        return (
+          <T
+            keyName="ai_review_filter_below_threshold"
+            defaultValue="Below threshold"
+          />
+        );
       case 'DRY_RUN_PASS':
-        return <T keyName="ai_review_filter_dry_run_pass" />;
+        return (
+          <T
+            keyName="ai_review_filter_dry_run_pass"
+            defaultValue="Dry run: would be auto-reviewed"
+          />
+        );
       case 'DRY_RUN_FAIL':
-        return <T keyName="ai_review_filter_dry_run_fail" />;
+        return (
+          <T
+            keyName="ai_review_filter_dry_run_fail"
+            defaultValue="Dry run: would not be auto-reviewed"
+          />
+        );
       case 'FAILED':
-        return <T keyName="ai_review_filter_failed" />;
+        return <T keyName="ai_review_filter_failed" defaultValue="Failed" />;
       case 'NOT_REVIEWED_YET':
-        return <T keyName="ai_review_filter_not_reviewed_yet" />;
+        return (
+          <T
+            keyName="ai_review_filter_not_reviewed_yet"
+            defaultValue="Not reviewed yet"
+          />
+        );
     }
   }
 }
