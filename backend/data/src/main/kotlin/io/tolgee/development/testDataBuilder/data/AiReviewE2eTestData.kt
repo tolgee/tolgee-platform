@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Prompt
@@ -10,11 +11,13 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SystemActor
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
+import java.util.Date
 
 class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
   lateinit var german: Language
@@ -28,6 +31,8 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
   lateinit var approvedTranslation: TranslationBuilder
 
   init {
+    // The dashboard shows "started by {name}" only for an author with a name.
+    user.name = "Test User"
     project.useQaChecks = false
 
     projectBuilder.build {
@@ -210,6 +215,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
         addTranslation("fr", "Pas encore vérifié")
       }
     }
+    addManualRunRevision()
 
     root
       .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "ai_review_empty_project" }
@@ -261,6 +267,17 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
       }
   }
 
+  private fun addManualRunRevision() {
+    projectBuilder
+      .addActivityRevision {
+        type = ActivityType.AI_REVIEW
+        systemActor = SystemActor.AI_REVIEWER
+      }.also { builder ->
+        builder.authorIdProvider = { user.id }
+        builder.addModifiedEntity("Translation") { approvedTranslation.self.id }
+      }
+  }
+
   private fun addReviewedKey(
     keyName: String,
     status: AiReviewStatus,
@@ -286,6 +303,9 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
     de.addAiReview {
       this.status = status
       this.score = score
+      if (status != AiReviewStatus.PENDING && status != AiReviewStatus.SKIPPED_QA_ISSUES) {
+        this.reviewedAt = Date()
+      }
       ft(this)
     }
     return de
