@@ -114,13 +114,17 @@ class BatchJobActivityFinalizer(
         set
          batch_job_chunk_execution_id = null,
          batch_job_id = :jobId,
-         author_id = :authorId
+         author_id = :authorId,
+         type = coalesce(type, :type)
         where id = :activityRevisionIdToMergeInto
         """,
       ).setParameter("activityRevisionIdToMergeInto", activityRevisionIdToMergeInto)
       .setParameter("jobId", job.id)
       .setParameter("authorId", TypedParameterValue(StandardBasicTypes.LONG, job.authorId))
-      .executeUpdate()
+      .setParameter(
+        "type",
+        TypedParameterValue(StandardBasicTypes.STRING, job.type.activityType?.name),
+      ).executeUpdate()
   }
 
   private fun deleteUnusedRevisions(revisionIds: MutableList<Long>) {
@@ -203,6 +207,7 @@ class BatchJobActivityFinalizer(
         from ActivityRevision ar
         join ar.batchJobChunkExecution b
         where b.batchJob.id = :jobId
+        order by case when ar.type is null then 1 else 0 end, ar.id
       """,
         Long::class.javaObjectType,
       ).setParameter("jobId", jobId)

@@ -10,9 +10,11 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.component.eventListeners.BypassableActivityListener
+import io.tolgee.constants.Feature
 import io.tolgee.ee.service.aiReview.AiReviewActionService
 import io.tolgee.ee.service.aiReview.AiReviewQueueService
 import io.tolgee.ee.service.aiReview.AiReviewRunService
+import io.tolgee.ee.service.aiReview.IN_CLAUSE_CHUNK
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.events.OnQaIssuesIgnored
 import io.tolgee.model.Project
@@ -20,26 +22,27 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.batch.params.AiReviewJobParams
 import io.tolgee.model.batch.params.QaCheckJobParams
 import io.tolgee.model.enums.SystemActor
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
 import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 
-/**
- * Follows the pattern of QaActivityListener: normal requests arrive through
- * [OnProjectActivityEvent] (batch chunks are skipped there), batch jobs through
- * [OnBatchJobFinalized] with the merged revision.
- */
 @Component
 class AiReviewActivityListener(
   private val activityService: ActivityService,
   private val aiReviewQueueService: AiReviewQueueService,
   private val languageService: LanguageService,
+  private val projectService: ProjectService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
   private val translationRepository: TranslationRepository,
   private val objectMapper: ObjectMapper,
   private val entityManager: EntityManager,
@@ -57,7 +60,7 @@ class AiReviewActivityListener(
       if (event.activityRevision.batchJobChunkExecution != null) return
 
       handleBaseLanguageChanged(event, projectId)
-      process(
+      applyTranslationChanges(
         projectId,
         event.modifiedEntities.values.flatMap { it.values },
         systemActor = event.activityRevision.systemActor,
@@ -71,20 +74,8 @@ class AiReviewActivityListener(
     if (bypass) return
     runSentryCatching {
       val projectId = event.job.projectId ?: return
-      if (event.job.type == BatchJobType.AI_REVIEW) return
-      if (event.job.type == BatchJobType.QA_CHECK) {
-        handleQaFinalized(event, projectId)
-        return
-      }
-
-      val activityRevisionId = event.activityRevisionId ?: return
-      val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
-      process(
-        projectId,
-        entities,
-        systemActor = event.job.type.systemActor,
-        authorId = event.job.authorId,
-      )
+      handleFinalizedActivity(event, projectId)
+      selfHealAfterJob(event, projectId)
     }
   }
 
@@ -105,15 +96,33 @@ class AiReviewActivityListener(
     }
   }
 
-  @EventListener
-  fun onSelfHeal(event: OnBatchJobFinalized) {
-    if (bypass) return
-    if (event.job.type != BatchJobType.QA_CHECK && event.job.type != BatchJobType.AI_REVIEW) return
-    val projectId = event.job.projectId ?: return
-    if (isSelfHealJob(event.job)) return
-    runSentryCatching {
-      aiReviewQueueService.selfHeal(projectId, event.job.id)
+  private fun handleFinalizedActivity(
+    event: OnBatchJobFinalized,
+    projectId: Long,
+  ) {
+    if (event.job.type == BatchJobType.AI_REVIEW) return
+    if (event.job.type == BatchJobType.QA_CHECK) {
+      handleQaFinalized(event, projectId)
+      return
     }
+
+    val activityRevisionId = event.activityRevisionId ?: return
+    val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
+    applyTranslationChanges(
+      projectId,
+      entities,
+      systemActor = event.job.type.systemActor,
+      authorId = event.job.authorId,
+    )
+  }
+
+  private fun selfHealAfterJob(
+    event: OnBatchJobFinalized,
+    projectId: Long,
+  ) {
+    if (event.job.type != BatchJobType.QA_CHECK && event.job.type != BatchJobType.AI_REVIEW) return
+    if (isSelfHealJob(event.job)) return
+    aiReviewQueueService.selfHeal(projectId, event.job.id)
   }
 
   private fun isSelfHealJob(job: BatchJobDto): Boolean {
@@ -124,53 +133,55 @@ class AiReviewActivityListener(
     return objectMapper.convertValue(params, QaCheckJobParams::class.java).handlingStuckStaleItems
   }
 
-  private fun process(
+  private fun handleQaFinalized(
+    event: OnBatchJobFinalized,
+    projectId: Long,
+  ) {
+    if (!isAiReviewOn(projectId)) return
+    val items = event.job.target.map { objectMapper.convertValue(it, BatchTranslationTargetItem::class.java) }
+    if (items.isEmpty()) return
+    val translationIds =
+      items.map { it.keyId }.distinct().chunked(IN_CLAUSE_CHUNK).flatMap { keyIds ->
+        translationRepository.getIdsByKeyIdsAndLanguageIds(keyIds, items.map { it.languageId }.distinct())
+      }
+    aiReviewQueueService.startJobsForReady(projectId, translationIds)
+  }
+
+  private fun applyTranslationChanges(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
     systemActor: SystemActor?,
     authorId: Long?,
   ) {
-    handleHumanUnReview(entities, systemActor, authorId)
+    if (isAiReviewOn(projectId)) handleHumanUnReview(entities, systemActor, authorId)
     handleKeyScopeChanged(projectId, entities)
     val textChanged = textChangedTranslations(entities)
     if (textChanged.isEmpty()) return
 
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
-    val baseKeyIds =
-      textChanged
-        .filter { it.describingRelations?.get("language")?.entityId == baseLanguageId }
-        .mapNotNull { it.describingRelations?.get("key")?.entityId }
-    aiReviewQueueService.onSourceChanged(projectId, baseKeyIds)
+    aiReviewQueueService.onSourceChanged(projectId, baseTextKeyIds(textChanged, baseLanguageId))
     aiReviewQueueService.onTextChanged(projectId, textChanged.map { it.entityId })
   }
 
-  /**
-   * Un-reviewing an AI approval by any human path counts as a rejection. The system's own state
-   * changes carry a system actor and are skipped.
-   */
   private fun handleHumanUnReview(
     entities: List<ActivityModifiedEntity>,
     systemActor: SystemActor?,
     authorId: Long?,
   ) {
     if (systemActor != null) return
-    val unReviewedIds =
-      entities
-        .filter {
-          it.entityClass == Translation::class.simpleName &&
-            it.revisionType == RevisionType.MOD &&
-            it.modifications["state"]?.let { mod ->
-              mod.old?.toString() == "REVIEWED" && mod.new?.toString() == "TRANSLATED"
-            } == true
-        }.map { it.entityId }
+    val unReviewedIds = entities.filter { isHumanUnReview(it) }.map { it.entityId }
     if (unReviewedIds.isEmpty()) return
     aiReviewActionService.markRejectedByStateChange(unReviewedIds, authorId)
   }
 
-  /**
-   * A tag or namespace change can move a key under a stricter rule, so its approvals are
-   * re-checked against the stored scores.
-   */
+  private fun isHumanUnReview(entity: ActivityModifiedEntity): Boolean {
+    if (entity.entityClass != Translation::class.simpleName) return false
+    if (entity.revisionType != RevisionType.MOD) return false
+    val stateChange = entity.modifications["state"] ?: return false
+    return stateChange.old?.toString() == TranslationState.REVIEWED.name &&
+      stateChange.new?.toString() == TranslationState.TRANSLATED.name
+  }
+
   private fun handleKeyScopeChanged(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
@@ -185,7 +196,7 @@ class AiReviewActivityListener(
     val tagsChangedKeyMetaIds =
       entities
         .filter {
-          it.entityClass == "KeyMeta" &&
+          it.entityClass == KeyMeta::class.simpleName &&
             it.revisionType != RevisionType.DEL &&
             it.modifications.containsKey("tags")
         }.map { it.entityId }
@@ -196,28 +207,13 @@ class AiReviewActivityListener(
 
   private fun keyIdsOfKeyMetas(keyMetaIds: List<Long>): List<Long> {
     if (keyMetaIds.isEmpty()) return emptyList()
-    return keyMetaIds.chunked(10_000).flatMap { chunk ->
-      @Suppress("UNCHECKED_CAST")
+    return keyMetaIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
       entityManager
         .createNativeQuery("select key_id from key_meta where id in :ids")
         .setParameter("ids", chunk)
         .resultList
         .map { (it as Number).toLong() }
     }
-  }
-
-  private fun handleQaFinalized(
-    event: OnBatchJobFinalized,
-    projectId: Long,
-  ) {
-    val translationIds =
-      event.job.target.mapNotNull { target ->
-        val item = objectMapper.convertValue(target, BatchTranslationTargetItem::class.java)
-        translationRepository
-          .findOneByProjectIdAndKeyIdAndLanguageId(projectId, item.keyId, item.languageId)
-          ?.id
-      }
-    aiReviewQueueService.startJobsForReady(projectId, translationIds)
   }
 
   /**
@@ -230,12 +226,33 @@ class AiReviewActivityListener(
     projectId: Long,
   ) {
     val projectEntities = event.modifiedEntities[Project::class] ?: return
-    val newBaseLanguageId =
+    val baseLanguageChanged =
       projectEntities.values
         .filter { it.revisionType == RevisionType.MOD }
-        .firstNotNullOfOrNull { entityIdOf(it.modifications["baseLanguage"]?.new) }
-        ?: return
-    aiReviewQueueService.onBaseLanguageChanged(projectId, newBaseLanguageId)
+        .any { entityIdOf(it.modifications["baseLanguage"]?.new) != null }
+    if (!baseLanguageChanged) return
+    aiReviewQueueService.onBaseLanguageChanged(projectId)
+  }
+
+  private fun baseTextKeyIds(
+    textChanged: List<ActivityModifiedEntity>,
+    baseLanguageId: Long,
+  ): List<Long> =
+    textChanged
+      .filter { it.describingRelations?.get("language")?.entityId == baseLanguageId }
+      .mapNotNull { it.describingRelations?.get("key")?.entityId }
+
+  private fun textChangedTranslations(entities: List<ActivityModifiedEntity>): List<ActivityModifiedEntity> =
+    entities.filter {
+      it.entityClass == Translation::class.simpleName &&
+        it.revisionType != RevisionType.DEL &&
+        it.modifications.containsKey("text")
+    }
+
+  private fun isAiReviewOn(projectId: Long): Boolean {
+    // The activity can describe a project hard-delete, so the project may be gone already.
+    val project = projectService.findDto(projectId) ?: return false
+    return projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)
   }
 
   private fun entityIdOf(value: Any?): Long? {
@@ -244,11 +261,4 @@ class AiReviewActivityListener(
     if (value is Map<*, *>) return (value["entityId"] as? Number)?.toLong()
     return null
   }
-
-  private fun textChangedTranslations(entities: List<ActivityModifiedEntity>): List<ActivityModifiedEntity> =
-    entities.filter {
-      it.entityClass == Translation::class.simpleName &&
-        it.revisionType != RevisionType.DEL &&
-        it.modifications.containsKey("text")
-    }
 }

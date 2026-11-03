@@ -283,6 +283,93 @@ export const actionsConfiguration: Partial<
       );
     },
   },
+  AI_REVIEW: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review"
+          defaultValue="AI review"
+          params={params}
+        />
+      );
+    },
+    entities: { Translation: [] },
+  },
+  AI_REVIEW_DEMOTION: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_demotion"
+          defaultValue="AI review cleanup"
+          params={params}
+        />
+      );
+    },
+    entities: { Translation: [] },
+  },
+  AI_REVIEW_RULE_CREATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_create"
+          defaultValue="Created AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+      AiReviewRuleLanguageOverride: [],
+    },
+  },
+  AI_REVIEW_RULE_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_update"
+          defaultValue="Updated AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+      AiReviewRuleLanguageOverride: [],
+    },
+  },
+  AI_REVIEW_RULE_DELETE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_delete"
+          defaultValue="Deleted AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+      AiReviewRuleLanguageOverride: [],
+    },
+  },
+  AI_REVIEW_SETTINGS_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_settings_update"
+          defaultValue="Updated AI review source change settings"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      Project: [
+        'aiApprovedSourceChangeAction',
+        'humanEditedSourceChangeAction',
+        'humanReviewedSourceChangeAction',
+      ],
+    },
+  },
   CONTENT_DELIVERY_CONFIG_CREATE: {
     label(params) {
       return (

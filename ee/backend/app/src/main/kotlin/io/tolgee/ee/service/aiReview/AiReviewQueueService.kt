@@ -5,20 +5,18 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.AiReviewDemotionRequest
 import io.tolgee.batch.request.AiReviewRequest
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
-import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.aiReview.AiReviewStatus
-import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
-import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
-import org.apache.commons.codec.digest.DigestUtils.sha256Hex
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -28,8 +26,8 @@ class AiReviewQueueService(
   private val reviewRepository: TranslationAiReviewRepository,
   private val projectService: ProjectService,
   private val projectFeatureGuard: ProjectFeatureGuard,
-  private val projectQaConfigService: ProjectQaConfigService,
-  private val qaIssueRepository: TranslationQaIssueRepository,
+  private val qaGate: AiReviewQaGate,
+  private val translationRepository: TranslationRepository,
   private val languageService: LanguageService,
   private val batchJobService: BatchJobService,
   private val entityManager: EntityManager,
@@ -45,57 +43,84 @@ class AiReviewQueueService(
     translationIds: Collection<Long>,
   ) {
     if (translationIds.isEmpty()) return
-    val project = projectService.getDto(projectId)
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
+    if (aiReviewProject(projectId) == null) {
       translationIds.chunked(IN_CLAUSE_CHUNK).forEach { reviewRepository.deleteAllByTranslationIds(it) }
+      return
+    }
+    val projectRules = evaluator.forProject(projectId)
+    if (projectRules.rules.isEmpty()) {
+      deleteRowsAndPublish(projectId, translationIds)
       return
     }
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
 
-    val queued = mutableListOf<Long>()
+    val queuedIds = mutableListOf<Long>()
     val updates = mutableListOf<AiReviewUpdate>()
-    translationIds.forEach { translationId ->
-      val translation =
-        entityManager.find(Translation::class.java, translationId) ?: return@forEach
-      val oldRow = reviewRepository.findByTranslationId(translationId)
-      val eligible = AiReviewEligibility.isEligible(translation, baseLanguageId, oldRow)
-      val aiManaged = AiReviewEligibility.isAiManagedReview(translation, oldRow)
-      oldRow?.let {
-        reviewRepository.delete(it)
-        // This runs in the activity event, which fires after the last flush of its transaction
-        // (see BatchJobActivityFinalizer.afterActivityFlushed). An unflushed change is silently
-        // lost at commit. The flush also keeps this delete ahead of the replacement insert,
-        // which Hibernate would otherwise order first into the unique translation_id.
-        entityManager.flush()
+    translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      val oldRows = reviewRepository.findAllByTranslationIdIn(chunk).associateBy { it.translation.id }
+      val toQueue = mutableListOf<Translation>()
+      var deleted = false
+      translationRepository.findAllForAiReviewRuleEvaluation(chunk).forEach { translation ->
+        val oldRow = oldRows[translation.id]
+        val eligible = AiReviewEligibility.isEligible(translation, baseLanguageId, oldRow)
+        val aiManaged = AiReviewEligibility.isAiManagedReview(translation, oldRow)
+        oldRow?.let {
+          reviewRepository.delete(it)
+          deleted = true
+        }
+        val requeue =
+          eligible && projectRules.evaluate(translation, activeOnly = aiManaged) is RuleDecision.Review
+        if (oldRow != null || requeue) {
+          updates += removedOrPendingUpdate(translation, requeue)
+        }
+        if (requeue) toQueue += translation
       }
-      val requeue =
-        eligible && evaluator.evaluate(translation, activeOnly = aiManaged) is RuleDecision.Review
-      if (oldRow != null || requeue) {
-        updates +=
-          AiReviewUpdate(
-            translationId = translation.id,
-            keyId = translation.key.id,
-            languageTag = translation.language.tag,
-            status = if (requeue) AiReviewStatus.PENDING else null,
-            score = null,
-            dryRun = false,
-            lastFailed = false,
-          )
-      }
-      if (!requeue) return@forEach
-
-      queue(translation)
-      queued += translationId
+      // The activity event fires after its transaction's last flush, so an unflushed change is lost
+      // at commit. The flush also keeps the deletes ahead of the inserts into the unique column.
+      if (deleted) entityManager.flush()
+      toQueue.forEach { queue(it) }
+      queuedIds += toQueue.map { it.id }
     }
-    if (queued.isNotEmpty()) entityManager.flush()
+    if (queuedIds.isNotEmpty()) entityManager.flush()
     websocketPublisher.publishAfterCommit(projectId, updates)
-    startJobsForReady(projectId, queued)
+    startJobsForReady(projectId, queuedIds)
   }
 
-  /**
-   * The scores of sibling rows refer to the old source text. APPROVED rows follow the
-   * source-change settings instead, and CONFIRMED/REJECTED rows are human decisions.
-   */
+  private fun deleteRowsAndPublish(
+    projectId: Long,
+    translationIds: Collection<Long>,
+  ) {
+    val updates = mutableListOf<AiReviewUpdate>()
+    translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      val rows = reviewRepository.findAllByTranslationIdIn(chunk)
+      if (rows.isEmpty()) return@forEach
+      val translations =
+        translationRepository
+          .findAllForAiReviewRuleEvaluation(rows.map { it.translation.id })
+          .associateBy { it.id }
+      rows.forEach { row ->
+        translations[row.translation.id]?.let { updates += removedOrPendingUpdate(it, requeue = false) }
+        reviewRepository.delete(row)
+      }
+    }
+    if (updates.isEmpty()) return
+    entityManager.flush()
+    websocketPublisher.publishAfterCommit(projectId, updates)
+  }
+
+  private fun removedOrPendingUpdate(
+    translation: Translation,
+    requeue: Boolean,
+  ) = AiReviewUpdate(
+    translationId = translation.id,
+    keyId = translation.key.id,
+    languageTag = translation.language.tag,
+    status = if (requeue) AiReviewStatus.PENDING else null,
+    score = null,
+    dryRun = false,
+    lastFailed = false,
+  )
+
   @Transactional
   fun onSourceChanged(
     projectId: Long,
@@ -108,39 +133,50 @@ class AiReviewQueueService(
     }
   }
 
-  /**
-   * Translations of the new base language are the source now, so they are not eligible.
-   */
   @Transactional
-  fun onBaseLanguageChanged(
-    projectId: Long,
-    newBaseLanguageId: Long,
-  ) {
-    reviewRepository.deleteByLanguage(newBaseLanguageId, KEPT_HUMAN_DECISIONS)
+  fun onBaseLanguageChanged(projectId: Long) {
+    reviewRepository.deleteByProject(projectId, AiReviewEligibility.HUMAN_DECISIONS)
   }
 
+  // Reads come first, writes after: a lookup between inserts would flush them one by one.
   @Transactional
-  fun queue(
-    projectId: Long,
+  fun queueAndClearContext(
     translationIds: Collection<Long>,
     manualRunBatchJobId: Long? = null,
   ): Int {
     var queued = 0
-    translationIds.forEach { translationId ->
-      val translation = entityManager.find(Translation::class.java, translationId) ?: return@forEach
-      if (reviewRepository.findByTranslationId(translationId) != null) return@forEach
-      queue(translation, manualRunBatchJobId)
-      queued++
+    translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      val existing =
+        reviewRepository
+          .findAllByTranslationIdIn(chunk)
+          .map { it.translation.id }
+          .toSet()
+      translationRepository
+        .findAllForAiReviewRuleEvaluation(chunk)
+        .filter { it.id !in existing }
+        .forEach { translation ->
+          queue(translation, manualRunBatchJobId)
+          queued++
+        }
+      entityManager.flush()
+      entityManager.clear()
     }
-    if (queued > 0) entityManager.flush()
     return queued
   }
 
-  /**
-   * "Ready" = the row is claimable and QA does not hold it back: QA is off for the language, or
-   * the translation's QA checks are fresh. One hidden job per call, no debounce: the batch
-   * debounce would return the existing job and drop the new request's targets.
-   */
+  private fun queue(
+    translation: Translation,
+    manualRunBatchJobId: Long? = null,
+  ) {
+    reviewRepository.save(
+      TranslationAiReview(translation).apply {
+        textHash = AiReviewEligibility.currentTextHash(translation)
+        status = AiReviewStatus.PENDING
+        this.manualRunBatchJobId = manualRunBatchJobId
+      },
+    )
+  }
+
   @Transactional
   fun startJobsForReady(
     projectId: Long,
@@ -148,33 +184,25 @@ class AiReviewQueueService(
     handlingStuckItems: Boolean = false,
   ) {
     if (translationIds.isEmpty()) return
-    val project = projectService.getDto(projectId)
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    val project = aiReviewProject(projectId) ?: return
 
-    val ready = findReady(projectId, translationIds, isQaOn(project))
+    val ready = findReady(projectId, translationIds, qaGate.qaLanguageIds(project))
     startJob(projectId, ready, handlingStuckItems)
   }
 
-  /**
-   * A row skipped for open QA issues becomes reviewable again when the last OPEN issue of its
-   * translation is ignored. A text change that fixes the issues goes through the normal path.
-   */
   @Transactional
   fun onQaIssuesIgnored(
     projectId: Long,
     translationIds: Collection<Long>,
   ) {
     if (translationIds.isEmpty()) return
-    val project = projectService.getDto(projectId)
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    aiReviewProject(projectId) ?: return
 
     val requeued = mutableListOf<Long>()
     translationIds.forEach { translationId ->
       val row = reviewRepository.findByTranslationId(translationId) ?: return@forEach
       if (row.status != AiReviewStatus.SKIPPED_QA_ISSUES) return@forEach
-      if (qaIssueRepository.findAllByTranslationId(translationId).any { it.state == QaIssueState.OPEN }) {
-        return@forEach
-      }
+      if (qaGate.hasOpenQaIssues(translationId)) return@forEach
       row.status = AiReviewStatus.PENDING
       requeued += translationId
     }
@@ -183,36 +211,25 @@ class AiReviewQueueService(
     startJobsForReady(projectId, requeued)
   }
 
-  /**
-   * Covers a pod crash during an LLM call: stale claims are released and one hidden self-heal job
-   * reviews what is still queued. Skipped while another AI review job runs — that job's own
-   * finalize triggers the next self-heal.
-   */
   @Transactional
   fun selfHeal(
     projectId: Long,
     finishedJobId: Long? = null,
   ) {
-    val project = projectService.getDto(projectId)
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    val project = aiReviewProject(projectId) ?: return
     if (batchJobService.hasActiveJobForProject(projectId, BatchJobType.AI_REVIEW, finishedJobId)) return
     reviewRepository.releaseStaleClaims(projectId)
-    val ready = findReadyProjectWide(projectId, isQaOn(project))
+    val ready = findReadyProjectWide(projectId, qaGate.qaLanguageIds(project))
     startJob(projectId, ready, handlingStuckItems = true)
   }
 
-  /**
-   * One hidden demotion job per call. Demotion makes no LLM call, so the job is cheap; starting
-   * it for a superset of the affected keys is safe because the evaluation is idempotent.
-   */
   @Transactional
   fun startDemotionJob(
     projectId: Long,
     keyIds: Collection<Long>,
   ) {
     if (keyIds.isEmpty()) return
-    val project = projectService.getDto(projectId)
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return
+    aiReviewProject(projectId) ?: return
     val projectRef = entityManager.getReference(Project::class.java, projectId)
     batchJobService.startJob(
       request = AiReviewDemotionRequest(keyIds = keyIds.toList()),
@@ -228,6 +245,10 @@ class AiReviewQueueService(
     startDemotionJob(projectId, reviewRepository.findApprovedKeyIds(projectId))
   }
 
+  /**
+   * One hidden job per call, no debounce: the batch debounce would return the existing job and
+   * drop the new request's targets.
+   */
   private fun startJob(
     projectId: Long,
     translationIds: List<Long>,
@@ -244,45 +265,36 @@ class AiReviewQueueService(
     )
   }
 
-  private fun isQaOn(project: io.tolgee.dtos.cacheable.ProjectDto): Boolean =
-    project.useQaChecks && projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
-
-  private fun findReadyProjectWide(
-    projectId: Long,
-    qaOn: Boolean,
-  ): List<Long> {
-    if (!qaOn) return reviewRepository.findClaimableTranslationIds(projectId)
-    val qaLanguageIds = projectQaConfigService.getEnabledLanguageIds(projectId)
-    if (qaLanguageIds.isEmpty()) return reviewRepository.findClaimableTranslationIds(projectId)
-    return reviewRepository.findReadyTranslationIds(projectId, qaLanguageIds)
+  private fun aiReviewProject(projectId: Long): ProjectDto? {
+    val project = projectService.getDto(projectId)
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) return null
+    return project
   }
 
   private fun findReady(
     projectId: Long,
     translationIds: Collection<Long>,
-    qaOn: Boolean,
-  ): List<Long> {
-    val qaLanguageIds = if (qaOn) projectQaConfigService.getEnabledLanguageIds(projectId) else emptySet()
-    return translationIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
-      if (qaLanguageIds.isEmpty()) {
-        reviewRepository.findClaimableTranslationIds(projectId, chunk)
-      } else {
-        reviewRepository.findReadyTranslationIds(projectId, chunk, qaLanguageIds)
-      }
+    qaLanguageIds: Set<Long>,
+  ): List<Long> =
+    translationIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
+      findReadyChunk(projectId, chunk, qaLanguageIds)
     }
+
+  private fun findReadyChunk(
+    projectId: Long,
+    chunk: List<Long>,
+    qaLanguageIds: Set<Long>,
+  ): List<Long> {
+    if (qaLanguageIds.isEmpty()) return reviewRepository.findClaimableTranslationIds(projectId, chunk)
+    return reviewRepository.findReadyTranslationIds(projectId, chunk, qaLanguageIds)
   }
 
-  private fun queue(
-    translation: Translation,
-    manualRunBatchJobId: Long? = null,
-  ) {
-    reviewRepository.save(
-      TranslationAiReview(translation).apply {
-        textHash = sha256Hex(translation.text ?: "")
-        status = AiReviewStatus.PENDING
-        this.manualRunBatchJobId = manualRunBatchJobId
-      },
-    )
+  private fun findReadyProjectWide(
+    projectId: Long,
+    qaLanguageIds: Set<Long>,
+  ): List<Long> {
+    if (qaLanguageIds.isEmpty()) return reviewRepository.findClaimableTranslationIds(projectId)
+    return reviewRepository.findReadyTranslationIds(projectId, qaLanguageIds)
   }
 
   companion object {
@@ -295,9 +307,5 @@ class AiReviewQueueService(
         AiReviewStatus.FAILED,
         AiReviewStatus.SKIPPED_QA_ISSUES,
       )
-
-    private val KEPT_HUMAN_DECISIONS = setOf(AiReviewStatus.CONFIRMED, AiReviewStatus.REJECTED)
-
-    private const val IN_CLAUSE_CHUNK = 10_000
   }
 }

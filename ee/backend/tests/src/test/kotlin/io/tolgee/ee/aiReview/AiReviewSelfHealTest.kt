@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import java.security.MessageDigest
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,9 +82,9 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
   @Test
   fun `the claim of a failed job is released and the row is reviewed`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    val deadJob = addJob(BatchJobStatus.FAILED)
     save()
-    val deadJobId = createJob(BatchJobStatus.FAILED)
-    setBatchJobIdOnRow(testData.deTranslation.id, deadJobId)
+    setBatchJobIdOnRow(testData.deTranslation.id, deadJob.id)
 
     fireFinalized(aiReviewJob(handlingStuckItems = false))
 
@@ -109,10 +110,25 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `self-heal does not start when an AI review job is active`() {
+  fun `a queued row with a stale text hash is reviewed for the current text`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
     save()
-    createJob(BatchJobStatus.RUNNING)
+    setTextHashOnRow(testData.deTranslation.id, "stale-hash")
+
+    fireFinalized(aiReviewJob(handlingStuckItems = false))
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val row = review(testData.deTranslation.id)!!
+      row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+      row.textHash.assert.isEqualTo(sha256Hex("Jetzt bezahlen"))
+    }
+  }
+
+  @Test
+  fun `self-heal does not start when an AI review job is active`() {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    addJob(BatchJobStatus.RUNNING)
+    save()
     val baseline = aiReviewJobCount()
 
     fireFinalized(aiReviewJob(handlingStuckItems = false))
@@ -150,19 +166,16 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
     )
 
   private fun fireFinalized(job: BatchJobDto) {
-    aiReviewActivityListener.onSelfHeal(OnBatchJobFinalized(job, activityRevisionId = null))
+    aiReviewActivityListener.onBatchJobFinalized(OnBatchJobFinalized(job, activityRevisionId = null))
   }
 
-  private fun createJob(status: BatchJobStatus): Long =
-    executeInNewTransaction(platformTransactionManager) {
-      val job = BatchJob()
-      job.project = entityManager.getReference(Project::class.java, testData.project.id)
-      job.type = BatchJobType.AI_REVIEW
-      job.status = status
-      job.hidden = true
-      entityManager.persist(job)
-      job.id
-    }
+  private fun addJob(status: BatchJobStatus): BatchJob =
+    testData.projectBuilder
+      .addBatchJob {
+        type = BatchJobType.AI_REVIEW
+        this.status = status
+        hidden = true
+      }.self
 
   private fun setBatchJobIdOnRow(
     translationId: Long,
@@ -171,6 +184,17 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
     executeInNewTransaction(platformTransactionManager) {
       val row = translationAiReviewRepository.findByTranslationId(translationId)!!
       row.batchJobId = jobId
+      translationAiReviewRepository.save(row)
+    }
+  }
+
+  private fun setTextHashOnRow(
+    translationId: Long,
+    textHash: String,
+  ) {
+    executeInNewTransaction(platformTransactionManager) {
+      val row = translationAiReviewRepository.findByTranslationId(translationId)!!
+      row.textHash = textHash
       translationAiReviewRepository.save(row)
     }
   }
@@ -210,4 +234,10 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
         .singleResult
         .toLong()
     }
+
+  private fun sha256Hex(text: String): String =
+    MessageDigest
+      .getInstance("SHA-256")
+      .digest(text.toByteArray(Charsets.UTF_8))
+      .joinToString("") { "%02x".format(it) }
 }

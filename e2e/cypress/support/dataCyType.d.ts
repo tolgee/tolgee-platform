@@ -20,6 +20,8 @@ declare namespace DataCy {
         "activity-compact-detail-button": true;
         "activity-detail": true;
         "activity-detail-dialog": true;
+        "activity-started-by": true;
+        "activity-system-actor": true;
         "administration-access-message": true;
         "administration-debug-customer-account-message": true;
         "administration-debug-customer-exit-button": true;

@@ -6,6 +6,10 @@ import { buildActivity } from 'tg.component/activity/activityTools';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import {
+  SystemActorAvatar,
+  SystemActorLabel,
+} from 'tg.component/activity/SystemActor';
 import { UserName } from 'tg.component/common/UserName';
 
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
@@ -55,27 +59,39 @@ export const PrefilterActivity = ({ revisionId }: Props) => {
   }
 
   const date = new Date(data.timestamp);
+  const systemActor = data.systemActor;
 
   return (
     <PrefilterContainer
       title={<T keyName="activity_filter_indicator_label" />}
       content={
         <StyledDescription>
-          {data.author && (
-            <Box gridArea="avatar" sx={{ marginRight: '6px' }}>
-              <AvatarImg
-                size={24}
-                owner={{
-                  type: 'USER',
-                  id: data.author.id,
-                  avatar: data.author.avatar,
-                  deleted: data.author.deleted,
-                }}
-              />
+          {systemActor ? (
+            <Box gridArea="avatar" sx={{ marginRight: '6px', display: 'flex' }}>
+              <SystemActorAvatar systemActor={systemActor} />
             </Box>
+          ) : (
+            data.author && (
+              <Box gridArea="avatar" sx={{ marginRight: '6px' }}>
+                <AvatarImg
+                  size={24}
+                  owner={{
+                    type: 'USER',
+                    id: data.author.id,
+                    avatar: data.author.avatar,
+                    deleted: data.author.deleted,
+                  }}
+                />
+              </Box>
+            )
           )}
           <StyledUser>
-            {data.author?.deleted ? (
+            {systemActor ? (
+              <SystemActorLabel
+                systemActor={systemActor}
+                authorName={data.author?.name}
+              />
+            ) : data.author?.deleted ? (
               <UserName {...data.author} />
             ) : (
               data.author?.name

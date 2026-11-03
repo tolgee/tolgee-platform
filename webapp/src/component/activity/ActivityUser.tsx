@@ -1,6 +1,10 @@
 import { Box, styled } from '@mui/material';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import {
+  SystemActorAvatar,
+  SystemActorLabel,
+} from 'tg.component/activity/SystemActor';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { ActivityModel } from './types';
 import { UserName } from '../common/UserName';
@@ -43,23 +47,36 @@ export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
   const date = new Date(item.timestamp);
   const lang = useCurrentLanguage();
 
+  const systemActor = item.systemActor;
+
   return (
     <StyledContainer>
-      {item.author && (
+      {systemActor ? (
         <StyledAvatar gridArea="avatar">
-          <AvatarImg
-            size={24}
-            owner={{
-              type: 'USER',
-              id: item.author.id,
-              avatar: item.author.avatar,
-              deleted: item.author.deleted,
-            }}
-          />
+          <SystemActorAvatar systemActor={systemActor} />
         </StyledAvatar>
+      ) : (
+        item.author && (
+          <StyledAvatar gridArea="avatar">
+            <AvatarImg
+              size={24}
+              owner={{
+                type: 'USER',
+                id: item.author.id,
+                avatar: item.author.avatar,
+                deleted: item.author.deleted,
+              }}
+            />
+          </StyledAvatar>
+        )
       )}
       <StyledUser gridArea="user">
-        {item.author?.deleted ? (
+        {systemActor ? (
+          <SystemActorLabel
+            systemActor={systemActor}
+            authorName={item.author?.name}
+          />
+        ) : item.author?.deleted ? (
           <UserName {...item.author} />
         ) : (
           item.author?.name

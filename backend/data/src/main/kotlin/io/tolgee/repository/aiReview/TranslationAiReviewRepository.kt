@@ -30,7 +30,7 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
       and (batch_job_id is null or batch_job_id = :jobId)
     """,
   )
-  fun assignToJob(
+  fun claimForJob(
     jobId: Long,
     translationId: Long,
     textHash: String,
@@ -226,21 +226,6 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
   )
   fun deleteByProject(
     projectId: Long,
-    keptStatuses: Collection<AiReviewStatus>,
-  ): Int
-
-  @Modifying
-  @Query(
-    """
-    delete from TranslationAiReview r
-    where r.translation.id in (
-      select t.id from Translation t where t.language.id = :languageId
-    )
-    and r.status not in :keptStatuses
-    """,
-  )
-  fun deleteByLanguage(
-    languageId: Long,
     keptStatuses: Collection<AiReviewStatus>,
   ): Int
 

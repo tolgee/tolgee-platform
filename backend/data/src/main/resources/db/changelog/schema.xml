@@ -6268,7 +6268,6 @@
             <column name="re_review_requested" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
-            <!-- Lets cancelling a manual run undo only its own rows while an automatic job also queues rows -->
             <column name="manual_run_batch_job_id" type="BIGINT"/>
             <column name="batch_job_id" type="BIGINT"/>
             <column name="resolved_by_id" type="BIGINT"/>
@@ -6389,5 +6388,18 @@
             <column name="score" type="INTEGER"/>
             <column name="issues" type="JSONB"/>
         </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-9">
+        <dropUniqueConstraint constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL" tableName="activity_revision"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-10" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists IDX_activity_revision_batch_job_chunk_execution_id on public.activity_revision (batch_job_chunk_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-11" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists IDX_translation_ai_review_re_review_requested on public.translation_ai_review (translation_id) where re_review_requested;
+        </sql>
     </changeSet>
 </databaseChangeLog>

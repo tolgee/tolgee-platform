@@ -5718,6 +5718,8 @@ export interface components {
         | "AI_REVIEW_RULE_CREATE"
         | "AI_REVIEW_RULE_UPDATE"
         | "AI_REVIEW_RULE_DELETE"
+        | "AI_REVIEW"
+        | "AI_REVIEW_DEMOTION"
         | "BRANCH_CREATE"
         | "BRANCH_RENAME"
         | "BRANCH_DELETE"
