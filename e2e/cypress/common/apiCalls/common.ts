@@ -315,6 +315,16 @@ export const setUserType = (username: string, type: AccountType) => {
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
 };
 
+export const setProfileVisibility = (
+  username: string,
+  visibility: 'PUBLIC' | 'PRIVATE' | 'DEFAULT'
+) => {
+  const sql = `UPDATE user_account
+               SET profile_visibility = '${visibility}'
+               WHERE username = '${username}'`;
+  return internalFetch(`sql/execute`, { method: 'POST', body: sql });
+};
+
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
   v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body

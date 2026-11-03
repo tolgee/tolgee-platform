@@ -30,9 +30,10 @@ data class CommunityContributorModel(
   val active: Long,
   @Schema(
     description =
-      "Whether the user's community profile is public: true when the user has at least one counted " +
-        "contribution in a community (public) project, whichever project this list is for. " +
-        "The same for every caller.",
+      "Whether the user's community profile is visible to others: the user's profile visibility setting, or, " +
+        "when left on the default, whether the user has at least one counted contribution in a community " +
+        "(public) project, whichever project this list is for. The same for every caller; a user always sees " +
+        "their own profile, whatever this says.",
   )
   val profilePublic: Boolean,
   @get:JsonFormat(shape = JsonFormat.Shape.STRING)

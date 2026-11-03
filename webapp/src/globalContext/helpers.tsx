@@ -24,6 +24,9 @@ export const useIsEmailVerified = () =>
 export const useHasCommunityContributions = () =>
   useGlobalContext((c) => c.initialData.hasCommunityContributions);
 
+export const useHasPublicContribution = () =>
+  useGlobalContext((c) => c.initialData.hasPublicContribution);
+
 export const useEmailAwaitingVerification = () =>
   useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification);
 

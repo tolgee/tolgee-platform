@@ -18,7 +18,7 @@ import java.time.LocalDate
 interface CommunityContributionDayRepository : Repository<CommunityContributionDay, CommunityContributionDayId> {
   @Query(
     """
-      select c.userId as id, u.name as name, u.avatarHash as avatarHash,
+      select c.userId as id, u.name as name, u.avatarHash as avatarHash, u.profileVisibility as profileVisibility,
         sum(c.contributions) as contributions,
         sum(c.suggested) as suggested, sum(c.accepted) as accepted, sum(c.declined) as declined,
         pc.firstContributionAt as firstContributionAt, pc.lastContributionAt as lastContributionAt,
@@ -29,7 +29,7 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       join Language l on l.id = c.languageId
       left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
       where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE and $NAME_SEARCH
-      group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt
+      group by c.userId, u.name, u.avatarHash, u.profileVisibility, pc.firstContributionAt, pc.lastContributionAt
       having (:excludeEmpty = false or sum(c.suggested) > 0)
     """,
     countQuery = """

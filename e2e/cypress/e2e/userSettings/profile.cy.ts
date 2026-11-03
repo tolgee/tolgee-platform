@@ -6,7 +6,9 @@ import {
   enableEmailVerification,
   getParsedEmailVerification,
   login,
+  setProfileVisibility,
 } from '../../common/apiCalls/common';
+import { communityStatsData } from '../../common/apiCalls/testData/testData';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage } from '../../common/shared';
@@ -120,6 +122,15 @@ describe('User profile', () => {
     cy.xpath("//*[@name='email']").should('have.value', 'honza@honza.com');
   });
 
+  it('profile visibility switch waits for the first contribution', () => {
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.disabled')
+      .and('not.be.checked');
+    cy.gcy('user-profile-visibility-find-link').should('be.visible');
+    cy.gcy('user-profile-visibility-view-link').should('not.exist');
+  });
+
   it('will fail when user exists', () => {
     createUser(NEW_EMAIL);
     cy.visit(`${HOST}/account/profile`);
@@ -131,5 +142,79 @@ describe('User profile', () => {
     cy.contains('User name already exists.').should('be.visible');
     cy.reload();
     cy.xpath("//*[@name='email']").should('have.value', INITIAL_EMAIL);
+  });
+});
+
+describe('Profile visibility of a contributor', () => {
+  beforeEach(() => {
+    communityStatsData.clean();
+    communityStatsData.generateStandard();
+    login('alice@community.test', 'admin');
+    cy.visit(HOST + '/account/profile');
+  });
+
+  afterEach(() => {
+    communityStatsData.clean();
+  });
+
+  it('turns the profile private and back on as default', () => {
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('be.checked');
+    cy.gcy('user-profile-visibility-view-link').should('be.visible');
+    cy.gcy('user-profile-visibility-find-link').should('not.exist');
+
+    cy.gcy('user-profile-visibility-switch').click();
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('not.be.checked');
+    cy.gcy('global-form-save-button').click();
+    assertMessage('User data updated');
+
+    cy.reload();
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('not.be.checked');
+    cy.gcy('user-profile-visibility-view-link').should('be.visible');
+
+    cy.intercept('PUT', '**/v2/user').as('saveUser');
+    cy.gcy('user-profile-visibility-switch').click();
+    cy.gcy('global-form-save-button').click();
+    cy.wait('@saveUser')
+      .its('request.body.profileVisibility')
+      .should('eq', 'DEFAULT');
+    assertMessage('User data updated');
+    cy.reload();
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('be.checked');
+  });
+
+  it('keeps an explicitly public profile public without a contribution', () => {
+    setProfileVisibility('carol@community.test', 'PUBLIC');
+    login('carol@community.test', 'admin');
+    cy.visit(HOST + '/account/profile');
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('be.checked');
+
+    cy.gcy('user-profile-visibility-switch').click();
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('not.be.checked');
+    cy.gcy('user-profile-visibility-switch').click();
+    cy.gcy('global-form-save-button').click();
+    assertMessage('User data updated');
+
+    cy.reload();
+    cy.gcy('user-profile-visibility-switch')
+      .find('input')
+      .should('be.enabled')
+      .and('be.checked');
   });
 });
