@@ -38,7 +38,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const { isEnabled } = useEnabledFeatures();
   const project = useProject();
 
-  const { setOpenPrompt, setAiPlayground } = usePromptUrlState();
+  const { setOpenPrompt, setAiPlayground, openPromptType } =
+    usePromptUrlState();
 
   const [options, setOptions] = useState<BasicPromptOption[]>(
     DEFAULT_BASIC_OPTIONS
@@ -55,6 +56,12 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const [provider, setProvider] = useState<string>('default');
   const [errors, setErrors] = useState<EditorError[]>();
+  const [promptType, setPromptType] = useState<'TRANSLATE' | 'REVIEW'>(
+    openPromptType ?? 'TRANSLATE'
+  );
+  const [reviewCriteria, setReviewCriteria] = useState('');
+  const effectiveReviewCriteria =
+    promptType === 'REVIEW' ? reviewCriteria : undefined;
 
   const runLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/run',
@@ -64,6 +71,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const openPromptLoadable = useOpenedPrompt({
     projectId: project.id,
+    type: promptType,
   });
 
   useEffect(() => {
@@ -81,6 +89,15 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const unsavedChanges = useMemo(() => {
     if (openPromptData) {
       if (openPromptData.providerName !== provider) {
+        return true;
+      }
+      if ((openPromptData.type ?? 'TRANSLATE') !== promptType) {
+        return true;
+      }
+      if (
+        promptType === 'REVIEW' &&
+        (openPromptData.reviewCriteria ?? '') !== reviewCriteria
+      ) {
         return true;
       }
       const type = getPromptType(openPromptData);
@@ -102,7 +119,15 @@ export const usePromptState = ({ language, keyData }: Props) => {
       return false;
     }
     return undefined;
-  }, [openPromptData, value, options, provider, tab]);
+  }, [
+    openPromptData,
+    value,
+    options,
+    provider,
+    tab,
+    promptType,
+    reviewCriteria,
+  ]);
 
   const preventLeave = unsavedChanges === true && tab === 'advanced';
 
@@ -135,6 +160,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
     setProvider(item.providerName);
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
     setOptions(item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS);
+    setPromptType(item.type ?? 'TRANSLATE');
+    setReviewCriteria(item.reviewCriteria ?? '');
     if (!tab || overrideTab) {
       if (item.id === undefined) {
         setTab('basic');
@@ -190,7 +217,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
             targetLanguageId: language.id,
             provider,
             basicPromptOptions: tab === 'basic' ? options : undefined,
-            type: 'TRANSLATE',
+            type: promptType,
+            reviewCriteria: effectiveReviewCriteria,
           },
         },
       },
@@ -213,9 +241,16 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const usage = runLoadable.data?.usage;
 
+  const typeLocked = typeof openPromptData?.id === 'number';
+
   return {
     usage,
     openPromptData,
+    promptType,
+    setPromptType,
+    typeLocked,
+    effectiveReviewCriteria,
+    setReviewCriteria,
     variables: promptVariables.data,
     providers: providersLoadable.data,
     handleTestPrompt,

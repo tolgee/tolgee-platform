@@ -88,6 +88,11 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
           type = PromptType.REVIEW
           reviewCriteria = "Use informal language."
         }.self
+      addPrompt {
+        name = "Plain translate"
+        providerName = "default"
+        type = PromptType.TRANSLATE
+      }
 
       activeRule =
         addAiReviewRule {
@@ -95,6 +100,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
           mode = AiReviewRuleMode.ACTIVE
           threshold = 85
           tagIn = mutableListOf("ui")
+          prompt = reviewPrompt
         }.self
       dryRunRule =
         addAiReviewRule {
