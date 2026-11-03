@@ -6144,4 +6144,23 @@
             <column name="hosted_words" type="BIGINT"/>
         </addColumn>
     </changeSet>
+    <changeSet author="dkrizan" id="1793600000000-1">
+        <addColumn tableName="branch_merge_change">
+            <column name="excluded" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1793600000000-2">
+        <addColumn tableName="branch_merge">
+            <column name="existing_keys_only" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reviewed_only" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_filter" type="VARCHAR(255)"/>
+            <column name="without_tag_filter" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -1,26 +1,30 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeFilters
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
@@ -52,6 +56,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var branchMergeRepository: BranchMergeRepository
+
+  @Autowired
+  lateinit var branchMergeService: BranchMergeService
 
   @Autowired
   lateinit var keyRepository: KeyRepository
@@ -778,7 +785,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createKey(clashingName, "x", testData.mainBranch)
     keyService.edit(keyService.get(testData.featureKeyToUpdate.id), clashingName, null, testData.featureBranch.name)
     val merge = dryRunFeatureBranchMerge()
-    assertThrows<ValidationException> { branchService.applyMerge(testData.project.id, merge.id, false) }
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
     testData.mainKeyToUpdate
       .refresh()
       .name.assert
@@ -934,6 +943,195 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     dryRunFeatureBranchMerge().changes.assert.isEmpty()
   }
 
+  @Test
+  fun `apply merge - an excluded update is not applied and is offered again by the next merge`() {
+    val merge = prepareMergeScenarioWithConflict()
+    val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    val before = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text
+    excludeChanges(merge, listOf(update.id))
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.SOURCE)
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    getTranslation(testData.mainKeyToUpdate, testData.englishLanguage).text.assert.isEqualTo(before)
+    val next = dryRunFeatureBranchMerge()
+    next.changes
+      .filter { it.change == BranchKeyMergeChangeType.UPDATE }
+      .map { it.sourceKey!!.id }
+      .assert
+      .containsExactly(testData.featureKeyToUpdate.id)
+  }
+
+  @Test
+  fun `apply merge - an excluded unresolved conflict does not block the merge and is offered again`() {
+    val merge = prepareMergeScenarioWithConflict()
+    val conflict = merge.changes.single { it.change == BranchKeyMergeChangeType.CONFLICT }
+    val before = getTranslation(testData.mainConflictKey, testData.englishLanguage).text
+    excludeChanges(merge, listOf(conflict.id))
+    branchService.applyMerge(testData.project.id, merge.id, false)
+    branchMergeRepository
+      .findById(merge.id)
+      .get()
+      .mergedAt.assert
+      .isNotNull()
+    getTranslation(testData.mainConflictKey, testData.englishLanguage).text.assert.isEqualTo(before)
+    dryRunFeatureBranchMerge()
+      .changes
+      .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+      .assert
+      .hasSize(1)
+  }
+
+  @Test
+  fun `apply merge - rejects an included addition reusing the name of an excluded rename`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge()
+    val rename = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    excludeChanges(merge, listOf(rename.id))
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
+    testData.mainKeyToUpdate
+      .refresh()
+      .name.assert
+      .isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+    testData.mainBranch
+      .findKey(BranchMergeTestData.UPDATE_KEY_NAME)!!
+      .id.assert
+      .isEqualTo(testData.mainKeyToUpdate.id)
+  }
+
+  @Test
+  fun `apply merge - rejects an addition reusing the name of a rename dropped by a filter`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "renamed-key", null, testData.featureBranch.name)
+    addTagToKey(testData.featureKeyToUpdate, "hold")
+    createKey(BranchMergeTestData.UPDATE_KEY_NAME, "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge(BranchMergeFilters(withoutTag = "hold"))
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.ADD)
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
+  }
+
+  @Test
+  fun `apply merge - rejects an addition reusing the name a conflict resolved as target keeps`() {
+    keyService.edit(keyService.get(testData.featureKeyToUpdate.id), "feature-name", null, testData.featureBranch.name)
+    keyService.edit(keyService.get(testData.mainKeyToUpdate.id), "main-name", null, testData.mainBranch.name)
+    createKey("main-name", "Reused name", testData.featureBranch)
+    val merge = dryRunFeatureBranchMerge()
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactlyInAnyOrder(BranchKeyMergeChangeType.CONFLICT, BranchKeyMergeChangeType.ADD)
+    resolveOnlyConflict(merge, BranchKeyMergeResolutionType.TARGET)
+    assertThrows<BadRequestException> {
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }.tolgeeMessage.assert.isEqualTo(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
+  }
+
+  @Test
+  fun `excluding an empty list of changes changes nothing`() {
+    val merge = prepareMergeScenario()
+    excludeChanges(merge, emptyList())
+    branchMergeService
+      .findActiveMergeFull(testData.project.id, merge.id)!!
+      .changes
+      .map { it.excluded }
+      .assert
+      .containsOnly(false)
+  }
+
+  @Test
+  fun `refresh keeps the excluded flag for the same key pair`() {
+    val merge = prepareMergeScenario()
+    val update = merge.changes.single { it.change == BranchKeyMergeChangeType.UPDATE }
+    excludeChanges(merge, listOf(update.id))
+    updateKeyTranslation(testData.featureKeyToUpdate, "edited again")
+    branchService.refreshMerge(testData.project.id, merge.id)
+    val refreshed = branchMergeService.findActiveMergeFull(testData.project.id, merge.id)!!
+    refreshed.changes
+      .single { it.change == BranchKeyMergeChangeType.UPDATE }
+      .excluded.assert
+      .isTrue()
+  }
+
+  @Test
+  fun `dry-run with existingKeysOnly offers no additions`() {
+    createFeatureOnlyKey()
+    updateFeatureKey()
+    val merge = dryRunFeatureBranchMerge(BranchMergeFilters(existingKeysOnly = true))
+    merge.changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with reviewedOnly holds back a key whose changed translation is not reviewed`() {
+    updateFeatureKey()
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true)).changes.assert.isEmpty()
+    val translation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
+    translationService.setStateBatch(mapOf(translation to TranslationState.REVIEWED))
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with reviewedOnly lets a key through when no translation changed`() {
+    addTagToKey(testData.featureKeyToUpdate, "release")
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.UPDATE)
+  }
+
+  @Test
+  fun `dry-run with reviewedOnly ignores an empty translation row`() {
+    val key = createKey(additionKeyName, additionValue, testData.featureBranch)
+    val english = getTranslation(key, testData.englishLanguage)
+    translationService.setStateBatch(mapOf(english to TranslationState.REVIEWED))
+    val german = addProjectLanguage("de", "German")
+    translationService.save(translationService.getOrCreate(testData.project.id, key.id, german.id))
+    dryRunFeatureBranchMerge(BranchMergeFilters(reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.ADD)
+  }
+
+  @Test
+  fun `dry-run with tag filters keeps or drops keys by tag`() {
+    updateFeatureKey()
+    createFeatureOnlyKey()
+    addTagToKey(testData.featureKeyToUpdate, "release")
+    dryRunFeatureBranchMerge(BranchMergeFilters(tag = "release"))
+      .changes
+      .map { it.sourceKey!!.id }
+      .assert
+      .containsExactly(testData.featureKeyToUpdate.id)
+    dryRunFeatureBranchMerge(BranchMergeFilters(withoutTag = "release"))
+      .changes
+      .map { it.sourceKey!!.name }
+      .assert
+      .containsExactly(additionKeyName)
+  }
+
+  @Test
+  fun `dry-run filters never drop deletions`() {
+    deleteFeatureKey()
+    dryRunFeatureBranchMerge(BranchMergeFilters(existingKeysOnly = true, reviewedOnly = true))
+      .changes
+      .map { it.change }
+      .assert
+      .containsExactly(BranchKeyMergeChangeType.DELETE)
+  }
+
   private fun setLabels(
     translation: Translation,
     vararg labels: Label,
@@ -943,7 +1141,13 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     translationService.save(translation)
   }
 
-  private fun prepareMergeScenario(): BranchMerge {
+  private fun prepareMergeScenarioWithConflict(): BranchMerge {
+    updateKeyTranslation(testData.mainConflictKey, "Main side")
+    updateKeyTranslation(testData.featureConflictKey, "Feature side")
+    return prepareMergeScenario(expectedRevision = 5)
+  }
+
+  private fun prepareMergeScenario(expectedRevision: Int = 4): BranchMerge {
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
@@ -951,7 +1155,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       testData.featureBranch
         .refresh()!!
         .revision.assert
-        .isEqualTo(4)
+        .isEqualTo(expectedRevision)
     }
     return dryRunFeatureBranchMerge()
   }
@@ -968,10 +1172,22 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     )
   }
 
-  private fun dryRunFeatureBranchMerge(): BranchMerge {
+  private fun excludeChanges(
+    merge: BranchMerge,
+    changeIds: List<Long>,
+  ) {
+    branchService.setChangesExcluded(
+      testData.project.id,
+      merge.id,
+      SetBranchMergeChangesExcludedRequest(changeIds = changeIds, excluded = true),
+    )
+  }
+
+  private fun dryRunFeatureBranchMerge(filters: BranchMergeFilters = BranchMergeFilters()): BranchMerge {
     return branchService.dryRunMerge(
       testData.featureBranch.refresh()!!,
       testData.mainBranch.refresh()!!,
+      filters,
     )
   }
 

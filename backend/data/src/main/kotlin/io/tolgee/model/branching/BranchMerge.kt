@@ -7,6 +7,7 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -45,6 +46,9 @@ class BranchMerge :
   @Column(nullable = true)
   var mergedAt: Date? = null
 
+  @Embedded
+  var filters: BranchMergeFilters = BranchMergeFilters()
+
   @OneToMany(
     targetEntity = BranchMergeChange::class,
     orphanRemoval = true,
@@ -57,10 +61,13 @@ class BranchMerge :
     get() = sourceRevision == sourceBranch.revision && targetRevision == targetBranch.revision
 
   val isResolved: Boolean
-    get() = changes.none { !it.isResolved }
+    get() = changes.none { !it.excluded && !it.isResolved }
 
   val isReadyToMerge: Boolean
     get() = isRevisionValid && isResolved
+
+  val isSelective: Boolean
+    get() = changes.any { it.excluded } || filters != BranchMergeFilters()
 
   val isUpdate: Boolean
     get() = targetBranch.originBranch?.id == sourceBranch.id

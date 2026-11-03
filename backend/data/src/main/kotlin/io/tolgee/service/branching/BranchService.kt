@@ -6,6 +6,7 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
@@ -54,6 +55,7 @@ interface BranchService {
     name: String,
     originBranchId: Long,
     author: UserAccount,
+    isProtected: Boolean = false,
   ): Branch
 
   fun deleteBranch(
@@ -112,10 +114,16 @@ interface BranchService {
     request: ResolveAllBranchMergeConflictsRequest,
   )
 
+  fun setChangesExcluded(
+    projectId: Long,
+    mergeId: Long,
+    request: SetBranchMergeChangesExcludedRequest,
+  )
+
   fun applyMerge(
     projectId: Long,
     mergeId: Long,
-    deleteBranch: Boolean? = true,
+    deleteBranch: Boolean? = null,
   )
 
   fun deleteMerge(

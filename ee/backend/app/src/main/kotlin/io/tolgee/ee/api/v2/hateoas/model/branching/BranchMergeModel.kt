@@ -1,6 +1,7 @@
 package io.tolgee.ee.api.v2.hateoas.model.branching
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.model.branching.BranchMergeFilters
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -29,8 +30,12 @@ open class BranchMergeModel(
   val keyUnresolvedConflictsCount: Int,
   @Schema(description = "Key resolved conflicts count")
   val keyResolvedConflictsCount: Int,
+  @Schema(description = "Count of changes excluded from the merge")
+  val keyExcludedCount: Int,
   @Schema(description = "Uncompleted tasks count on source branch")
   val uncompletedTasksCount: Int,
+  @Schema(description = "Filters this merge session was created with")
+  val filters: BranchMergeFilters,
   @Schema(description = "Date of merge. If null, merge was not applied yet")
   val mergedAt: Long? = null,
 ) : RepresentationModel<BranchMergeModel>()

@@ -3,8 +3,12 @@ package io.tolgee.ee.service.branching.merging
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.BranchMergeFilters
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,7 +50,8 @@ class BranchMergeAnalyzer(
     // key wasn't exported (see EntityGraphDeserializer.remapKeyId). It never equals a live key id, so these
     // lookups miss and the snapshot correctly takes the deleted path.
     val snapshotBySourceKeyId = snapshots.associateBy { merge.sourceKeyIdOf(it) }
-    val snapshotTargetIds = snapshots.map { merge.targetKeyIdOf(it) }.toSet()
+    val snapshotByTargetKeyId = snapshots.associateBy { merge.targetKeyIdOf(it) }
+    val snapshotTargetIds = snapshotByTargetKeyId.keys
     val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
     val targetBySignature = targetKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
     val snapshotsBySignature = snapshots.groupBy { KeySignature(it.namespace, it.name) }
@@ -214,5 +219,37 @@ class BranchMergeAnalyzer(
     }
 
     return changes
+      .filter {
+        val snapshot = snapshotBySourceKeyId[it.sourceKey?.id] ?: snapshotByTargetKeyId[it.targetKey?.id]
+        merge.filters.accepts(it, snapshot)
+      }.toMutableList()
   }
+}
+
+private fun BranchMergeFilters.accepts(
+  change: BranchMergeChange,
+  snapshot: KeySnapshot?,
+): Boolean {
+  if (change.change == BranchKeyMergeChangeType.DELETE) return acceptsTags(change.targetKey)
+  if (existingKeysOnly && change.change == BranchKeyMergeChangeType.ADD) return false
+  val sourceKey = change.sourceKey ?: return true
+  if (!acceptsTags(sourceKey)) return false
+  if (!reviewedOnly) return true
+  return sourceKey.translations.all { translation ->
+    if (translation.text.isNullOrEmpty()) return@all true
+    val snapshotTranslation = snapshot?.translations?.find { it.language == translation.language.tag }
+    val changed = snapshotTranslation == null || translation.hasChanged(snapshotTranslation)
+    !changed || translation.state == TranslationState.REVIEWED
+  }
+}
+
+private fun BranchMergeFilters.acceptsTags(key: Key?): Boolean {
+  val tagNames =
+    key
+      ?.keyMeta
+      ?.tags
+      ?.map { it.name }
+      .orEmpty()
+  if (tag != null && tag !in tagNames) return false
+  return withoutTag == null || withoutTag !in tagNames
 }

@@ -532,6 +532,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts": {
     get: operations["getBranchMergeSessionConflicts"];
   };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/exclude": {
+    put: operations["setChangesExcluded"];
+  };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/preview": {
     get: operations["getBranchMergeSessionPreview"];
   };
@@ -1601,7 +1604,8 @@ export interface components {
       username?: string;
     };
     ApplyBranchMergeRequest: {
-      deleteBranch: boolean;
+      /** @description Delete the source branch after the merge. When omitted, the branch is deleted unless the merge was selective (filters or excluded changes), in which case it is kept so the held-back changes stay pending. */
+      deleteBranch?: boolean;
     };
     AssignSharedTranslationMemoryRequest: {
       /**
@@ -1757,6 +1761,8 @@ export interface components {
        * @enum {string}
        */
       effectiveResolution?: "SOURCE" | "TARGET";
+      /** @description Change is left out of this merge and stays pending for the next one */
+      excluded: boolean;
       /**
        * Format: int64
        * @description Branch merge change id
@@ -1784,6 +1790,8 @@ export interface components {
        * @enum {string}
        */
       effectiveResolution?: "SOURCE" | "TARGET";
+      /** @description Change is left out of this merge and stays pending for the next one */
+      excluded: boolean;
       /**
        * Format: int64
        * @description Branch merge session id
@@ -1797,6 +1805,17 @@ export interface components {
       resolution?: "SOURCE" | "TARGET";
       sourceKey: components["schemas"]["BranchMergeKeyModel"];
       targetKey: components["schemas"]["BranchMergeKeyModel"];
+    };
+    /** @description Filters this merge session was created with */
+    BranchMergeFilters: {
+      /** @description Offer only keys that already exist in the target. New keys are left for a later merge. */
+      existingKeysOnly: boolean;
+      /** @description Offer a key only when every translation that changed on it is in the Reviewed state. Deletions are always offered. Empty translations are ignored. */
+      reviewedOnly: boolean;
+      /** @description Offer only keys carrying this tag. */
+      tag?: string;
+      /** @description Offer only keys not carrying this tag. */
+      withoutTag?: string;
     };
     /** @description Target branch key */
     BranchMergeKeyModel: {
@@ -1819,6 +1838,7 @@ export interface components {
       };
     };
     BranchMergeModel: {
+      filters: components["schemas"]["BranchMergeFilters"];
       /**
        * Format: int64
        * @description Branch merge id
@@ -1834,6 +1854,11 @@ export interface components {
        * @description Key deletions count
        */
       keyDeletionsCount: number;
+      /**
+       * Format: int32
+       * @description Count of changes excluded from the merge
+       */
+      keyExcludedCount: number;
       /**
        * Format: int32
        * @description Key updates count
@@ -1876,7 +1901,7 @@ export interface components {
        */
       uncompletedTasksCount: number;
     };
-    /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
+    /** @description Last applied update of this branch from its origin */
     BranchMergeRefModel: {
       /**
        * Format: int64
@@ -1888,6 +1913,8 @@ export interface components {
        * @description Date of merge. If null, merge was not applied yet
        */
       mergedAt?: number;
+      /** @description Source branch name */
+      sourceBranchName: string;
       /** @description Target branch name */
       targetBranchName: string;
     };
@@ -1933,6 +1960,7 @@ export interface components {
       name: string;
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
+      update?: components["schemas"]["BranchMergeRefModel"];
     };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
@@ -2638,6 +2666,8 @@ export interface components {
        * @description Origin branch id
        */
       originBranchId: number;
+      /** @description Create the branch protected: edits, imports, merges and updates into it then require BRANCH_PROTECTED_MODIFY */
+      protected?: boolean;
     };
     CreateGlossaryRequest: {
       /** @description IDs of projects to be assigned to glossary */
@@ -2843,6 +2873,7 @@ export interface components {
       state: string;
     };
     DryRunMergeBranchRequest: {
+      filters?: components["schemas"]["BranchMergeFilters"];
       /**
        * Format: int64
        * @description Source branch id
@@ -3333,6 +3364,7 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branch_merge_branches_not_related"
+        | "branch_merge_key_name_collision"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
@@ -5616,6 +5648,7 @@ export interface components {
         | "BRANCH_DELETE"
         | "BRANCH_PROTECTION_CHANGE"
         | "BRANCH_MERGE"
+        | "BRANCH_UPDATE"
         | "QA_ISSUE_IGNORE"
         | "QA_ISSUE_UNIGNORE";
     };
@@ -6545,6 +6578,13 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
     };
+    SetBranchMergeChangesExcludedRequest: {
+      /** @description Changes to mark. Null means every change of the merge, narrowed by `type` when given. */
+      changeIds?: number[];
+      excluded: boolean;
+      /** @enum {string} */
+      type?: "ADD" | "UPDATE" | "DELETE" | "CONFLICT";
+    };
     SetBranchProtectedModel: {
       /**
        * @description Whether the branch is protected
@@ -7339,6 +7379,7 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branch_merge_branches_not_related"
+        | "branch_merge_key_name_collision"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
@@ -16875,6 +16916,55 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  setChangesExcluded: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetBranchMergeChangesExcludedRequest"];
       };
     };
   };

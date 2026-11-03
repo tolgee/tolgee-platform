@@ -2,6 +2,7 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
@@ -10,6 +11,7 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.ee.service.TaskService
@@ -22,6 +24,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeFilters
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.repository.branching.KeyMetaSnapshotRepository
 import io.tolgee.repository.branching.TranslationSnapshotRepository
@@ -132,6 +135,7 @@ class BranchServiceImpl(
     name: String,
     originBranchId: Long,
     author: UserAccount,
+    isProtected: Boolean,
   ): Branch {
     return metrics.branchCreateTimer.recordCallable {
       val originBranch =
@@ -142,6 +146,7 @@ class BranchServiceImpl(
       val branch =
         createBranch(projectId, name, author).also {
           it.originBranch = originBranch
+          it.isProtected = isProtected
         }
       branchRepository.save(branch)
 
@@ -197,7 +202,11 @@ class BranchServiceImpl(
     request: DryRunMergeBranchRequest,
   ): BranchMerge {
     val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
-    return dryRunMerge(sourceBranch, resolveMergeTarget(projectId, sourceBranch, request.targetBranchId))
+    return dryRunMerge(
+      sourceBranch,
+      resolveMergeTarget(projectId, sourceBranch, request.targetBranchId),
+      request.filters,
+    )
   }
 
   private fun resolveMergeTarget(
@@ -220,8 +229,9 @@ class BranchServiceImpl(
   fun dryRunMerge(
     sourceBranch: Branch,
     targetBranch: Branch,
+    filters: BranchMergeFilters = BranchMergeFilters(),
   ): BranchMerge {
-    return branchMergeService.dryRun(sourceBranch, targetBranch)
+    return branchMergeService.dryRun(sourceBranch, targetBranch, filters)
   }
 
   @Transactional
@@ -233,6 +243,7 @@ class BranchServiceImpl(
     val merge =
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    if (merge.isUpdate) activityHolder.activity = ActivityType.BRANCH_UPDATE
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
         throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)
@@ -241,9 +252,10 @@ class BranchServiceImpl(
         throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
       }
     }
+    val wantsDelete = deleteBranch ?: !merge.isSelective
     val mergedMerge = branchMergeService.applyMerge(merge)
     val source = mergedMerge.sourceBranch
-    val shouldDelete = deleteBranch == true && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
+    val shouldDelete = wantsDelete && !mergedMerge.isUpdate && !source.isDefault && !source.isProtected
     if (!shouldDelete) {
       return
     }
@@ -327,6 +339,15 @@ class BranchServiceImpl(
     request: ResolveAllBranchMergeConflictsRequest,
   ) {
     branchMergeService.resolveAllConflicts(projectId, mergeId, request.resolve)
+  }
+
+  @Transactional
+  override fun setChangesExcluded(
+    projectId: Long,
+    mergeId: Long,
+    request: SetBranchMergeChangesExcludedRequest,
+  ) {
+    branchMergeService.setChangesExcluded(projectId, mergeId, request)
   }
 
   @Transactional

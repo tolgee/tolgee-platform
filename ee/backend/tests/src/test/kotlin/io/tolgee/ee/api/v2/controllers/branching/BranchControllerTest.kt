@@ -115,6 +115,23 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test()
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
+  fun `creates a protected branch`() {
+    performProjectAuthPost(
+      "branches",
+      mapOf("name" to "release", "originBranchId" to testData.mainBranch.id, "protected" to true),
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("release")
+      node("isProtected").isEqualTo(true)
+    }
+    branchRepository
+      .findActiveByProjectIdAndName(testData.project.id, "release")!!
+      .isProtected.assert.isTrue
+  }
+
+  @Test()
   @ProjectApiKeyAuthTestMethod
   fun `unable to create branch without proper permission`() {
     performProjectAuthPost(

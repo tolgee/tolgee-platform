@@ -13,6 +13,7 @@ import io.tolgee.dtos.request.branching.ApplyBranchMergeRequest
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.dtos.request.branching.SetBranchMergeChangesExcludedRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeChangeModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeConflictModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
@@ -98,6 +99,7 @@ class BranchController(
         branch.name,
         branch.originBranchId,
         authenticationFacade.authenticatedUserEntity,
+        branch.protected,
       )
     return branchModelAssembler.toModel(branch)
   }
@@ -299,6 +301,19 @@ class BranchController(
     branchService.resolveAllConflicts(projectHolder.project.id, mergeId, request)
   }
 
+  @PutMapping(value = ["/merge/{mergeId}/exclude"])
+  @Operation(summary = "Exclude or include merge changes")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
+  @OpenApiOrderExtension(10)
+  fun setChangesExcluded(
+    @PathVariable mergeId: Long,
+    @RequestBody request: SetBranchMergeChangesExcludedRequest,
+  ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    branchService.setChangesExcluded(projectHolder.project.id, mergeId, request)
+  }
+
   @DeleteMapping(value = ["/merge/{mergeId}"])
   @Operation(summary = "Delete branch merge session")
   @AllowApiAccess
@@ -324,6 +339,6 @@ class BranchController(
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merge = branchService.getBranchMergeView(projectHolder.project.id, mergeId)
     securityService.checkBranchModify(merge.targetBranch, projectHolder.project.id)
-    branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch ?: true)
+    branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch)
   }
 }
