@@ -7,7 +7,7 @@ type AiReviewIssueModel = components['schemas']['AiReviewIssueModel'];
 const StyledIssue = styled(Box)`
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 8px;
+  gap: ${({ theme }) => theme.spacing(1)};
   align-items: center;
 `;
 
@@ -51,8 +51,8 @@ export const AiReviewIssueList = ({ issues }: Props) => {
             }}
           />
           <Typography variant="body2">{issue.category}</Typography>
-          <Typography variant="body2" fontWeight={600}>
-            {issue.points}
+          <Typography variant="body2" fontWeight={500}>
+            {`−${issue.points}`}
           </Typography>
           <Typography
             variant="body2"

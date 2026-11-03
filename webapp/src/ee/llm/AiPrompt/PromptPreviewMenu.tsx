@@ -31,6 +31,8 @@ type Props = {
   templateValue: string | undefined;
   options: BasicPromptOption[] | undefined;
   providerName: string;
+  promptType: 'TRANSLATE' | 'REVIEW';
+  reviewCriteria?: string;
   onBatchFinished: () => void;
   onTestPrompt: () => void;
   loading?: boolean;
@@ -43,6 +45,8 @@ export const PromptPreviewMenu = ({
   templateValue,
   options,
   providerName,
+  promptType,
+  reviewCriteria,
   onBatchFinished,
   onTestPrompt,
   loading,
@@ -135,6 +139,8 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          promptType={promptType}
+          reviewCriteria={reviewCriteria}
           onStart={(data) => setRunningOperation(data)}
         />
       )}
@@ -157,6 +163,8 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          promptType={promptType}
+          reviewCriteria={reviewCriteria}
           onStart={(data) => setRunningOperation(data)}
         />
       )}

@@ -1,20 +1,8 @@
-import {
-  Box,
-  IconButton,
-  MenuItem,
-  Select,
-  styled,
-  Tab,
-  Tabs,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, IconButton, styled, Tab, Tabs } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Edit01, InfoCircle, X } from '@untitled-ui/icons-react';
+import { Edit01, X } from '@untitled-ui/icons-react';
 
-import { useAiReviewEnabled } from '../../aiReview/hooks/useAiReviewEnabled';
+import { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
 
 import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
 import { components } from 'tg.service/apiSchema.generated';
@@ -29,6 +17,8 @@ import { AiResultUsage } from './AiResultUsage';
 import { AiRenderedPrompt } from './AiRenderedPrompt';
 import { TabBasic } from './TabBasic';
 import { PromptRename } from './PromptRename';
+import { PromptTypeToggle } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
+import { PromptModelSelect } from 'tg.ee.module/llm/AiPrompt/PromptModelSelect';
 import { AdminAccessAlert } from 'tg.component/common/AdminAccessAlert';
 import { useIsAdminAccess } from 'tg.hooks/useIsAdminAccess';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
@@ -133,7 +123,7 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
     promptType,
     setPromptType,
     typeLocked,
-    reviewCriteria,
+    effectiveReviewCriteria,
     setReviewCriteria,
     setAiPlayground,
     errors,
@@ -215,76 +205,19 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             </Box>
           </StyledTitle>
           {aiReviewEnabled && (
-            <ToggleButtonGroup
-              size="small"
-              exclusive
+            <PromptTypeToggle
               value={promptType}
-              onChange={(_, newType) => {
-                if (newType && !typeLocked) {
-                  confirmUnsaved(() => setPromptType(newType));
-                }
-              }}
-              data-cy="ai-prompt-type-switch"
-            >
-              <ToggleButton
-                value="TRANSLATE"
-                disabled={typeLocked}
-                data-cy="ai-prompt-type-translate"
-              >
-                {t('ai_prompt_type_translate', 'Translate')}
-              </ToggleButton>
-              <ToggleButton
-                value="REVIEW"
-                disabled={typeLocked}
-                data-cy="ai-prompt-type-review"
-              >
-                {t('ai_prompt_type_review', 'Review')}
-              </ToggleButton>
-            </ToggleButtonGroup>
+              locked={typeLocked}
+              onChange={(newType) =>
+                confirmUnsaved(() => setPromptType(newType))
+              }
+            />
           )}
-          <Box display="grid" gap={0.5}>
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <Typography variant="caption" color="textSecondary">
-                {t('ai_prompt_model_label', 'Model')}
-              </Typography>
-              <Tooltip
-                title={t(
-                  'ai_prompt_model_tooltip',
-                  'Each prompt has its own model.'
-                )}
-                disableInteractive
-              >
-                <Box display="flex">
-                  <InfoCircle width={16} height={16} />
-                </Box>
-              </Tooltip>
-            </Box>
-            <Select
-              size="small"
-              value={provider}
-              onChange={(e) => setProvider(e.target.value)}
-              sx={{ width: '50%' }}
-              data-cy="ai-prompt-provider-select"
-            >
-              {providers?._embedded?.providers?.map((i) => (
-                <MenuItem
-                  key={i.name}
-                  value={i.name}
-                  data-cy="ai-prompt-provider-item"
-                >
-                  {i.resolvesToName
-                    ? t(
-                        'ai_prompt_provider_server_default',
-                        'default ({name})',
-                        {
-                          name: i.resolvesToName,
-                        }
-                      )
-                    : i.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
+          <PromptModelSelect
+            provider={provider}
+            onProviderChange={setProvider}
+            providers={providers}
+          />
           {isAdminAccess && (
             <AdminAccessAlert data-cy="ai-playground-admin-access-info" />
           )}
@@ -316,9 +249,7 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
           <TabBasic
             value={options}
             onChange={setOptions}
-            reviewCriteria={
-              promptType === 'REVIEW' ? reviewCriteria : undefined
-            }
+            reviewCriteria={effectiveReviewCriteria}
             onReviewCriteriaChange={
               promptType === 'REVIEW' ? setReviewCriteria : undefined
             }
@@ -332,6 +263,9 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
               isPlural={keyData?.keyIsPlural}
               locale={language?.tag}
               loading={runIsLoading}
+              promptType={promptType}
+              issues={runData?.issues}
+              score={runData?.score}
             />
             {usage && <AiResultUsage usage={usage} price={runData?.price} />}
           </Box>
@@ -356,6 +290,8 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
           templateValue={tab === 'advanced' ? value : undefined}
           options={tab === 'basic' ? options : undefined}
           providerName={provider}
+          promptType={promptType}
+          reviewCriteria={effectiveReviewCriteria}
           onBatchFinished={() => {
             refetchTranslations();
           }}
@@ -370,8 +306,7 @@ export const AiPrompt: React.FC<React.PropsWithChildren<Props>> = ({
             template: tab === 'advanced' ? value : undefined,
             basicPromptOptions: tab === 'basic' ? options : undefined,
             type: promptType,
-            reviewCriteria:
-              promptType === 'REVIEW' ? reviewCriteria : undefined,
+            reviewCriteria: effectiveReviewCriteria,
           }}
           existingPrompt={openPromptData}
           unsavedChanges={unsavedChanges}

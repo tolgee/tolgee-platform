@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import {
   AiReviewCellButtonProps,
+  AiReviewIssueListProps,
   SubfilterAiReviewProps,
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
@@ -112,6 +113,8 @@ export const isAiReviewBadgeVisible = (
   _auto: boolean | undefined
 ): boolean => false;
 export const SubfilterAiReview = (_props: SubfilterAiReviewProps) =>
+  Empty() as JSX.Element;
+export const AiReviewIssueList = (_props: AiReviewIssueListProps) =>
   Empty() as JSX.Element;
 export const getAiReviewFiltersLength = (_value: FiltersInternal) => 0;
 export const getAiReviewFiltersName = (

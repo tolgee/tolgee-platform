@@ -4,7 +4,7 @@ import {
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import { editCell } from '../../common/translations';
+import { editCell, getTranslationCell } from '../../common/translations';
 import { HOST } from '../../common/constants';
 
 describe('AI review badge', () => {
@@ -31,28 +31,20 @@ describe('AI review badge', () => {
     );
   }
 
-  function cell(key: string) {
-    return gcyAdvanced({
-      value: 'translations-table-cell',
-      key,
-      language: 'de',
-    });
-  }
-
   function badgeIn(key: string, status: string) {
-    return cell(key).within(() => {
+    return getTranslationCell(key, 'de').within(() => {
       gcyAdvanced({ value: 'ai-review-badge', status }).should('be.visible');
     });
   }
 
   function noBadgeIn(key: string) {
-    cell(key).within(() => {
+    getTranslationCell(key, 'de').within(() => {
       gcy('ai-review-badge').should('not.exist');
     });
   }
 
   function openPopover(key: string, status: string) {
-    cell(key).within(() => {
+    getTranslationCell(key, 'de').within(() => {
       gcyAdvanced({ value: 'ai-review-badge', status }).click();
     });
     gcy('ai-review-popover').should('be.visible');
@@ -92,7 +84,7 @@ describe('AI review badge', () => {
 
   it('shows the warning mark and previous-result note for a failed re-review', () => {
     visitKey('key_last_failed');
-    cell('key_last_failed').within(() => {
+    getTranslationCell('key_last_failed', 'de').within(() => {
       gcyAdvanced({
         value: 'ai-review-badge',
         status: 'APPROVED',
@@ -116,7 +108,7 @@ describe('AI review badge', () => {
     gcyAdvanced({
       value: 'ai-review-issue',
       severity: 'critical',
-      points: '-35',
+      points: '35',
     }).should('be.visible');
   });
 
@@ -133,7 +125,7 @@ describe('AI review badge', () => {
     openPopover('key_failed', 'FAILED');
     gcy('ai-review-popover-failure-reason').should('be.visible');
     gcy('ai-review-popover-retry').click();
-    cell('key_failed').within(() => {
+    getTranslationCell('key_failed', 'de').within(() => {
       gcyAdvanced(
         { value: 'ai-review-badge', status: 'APPROVED' },
         { timeout: 60_000 }
@@ -141,22 +133,30 @@ describe('AI review badge', () => {
     });
   });
 
-  it('confirm keeps the review and hides the badge', () => {
+  it('confirm keeps the translation Reviewed and hides the badge', () => {
     visitKey('key_approved');
     openPopover('key_approved', 'APPROVED');
     gcy('ai-review-popover-confirm').click();
-    cell('key_approved').within(() => {
+    getTranslationCell('key_approved', 'de').within(() => {
       gcy('ai-review-badge', { timeout: 10_000 }).should('not.exist');
     });
+    getTranslationCell('key_approved', 'de')
+      .closestDcy('translations-table-cell-translation')
+      .findDcy('translations-state-indicator')
+      .should('have.attr', 'data-cy-state', 'REVIEWED');
   });
 
-  it('reject hides the badge', () => {
+  it('reject sets the translation back to Translated and hides the badge', () => {
     visitKey('key_approved');
     openPopover('key_approved', 'APPROVED');
     gcy('ai-review-popover-reject').click();
-    cell('key_approved').within(() => {
+    getTranslationCell('key_approved', 'de').within(() => {
       gcy('ai-review-badge', { timeout: 10_000 }).should('not.exist');
     });
+    getTranslationCell('key_approved', 'de')
+      .closestDcy('translations-table-cell-translation')
+      .findDcy('translations-state-indicator')
+      .should('have.attr', 'data-cy-state', 'TRANSLATED');
   });
 
   it('hides confirm, reject and retry without the permissions', () => {
@@ -171,12 +171,15 @@ describe('AI review badge', () => {
     gcy('ai-review-popover-retry').should('not.exist');
   });
 
-  it('removes the badge after the text is edited', () => {
-    visitKey('key_approved');
-    badgeIn('key_approved', 'APPROVED');
-    editCell('Deutsch für key_approved', 'Neuer Text');
-    cell('key_approved').within(() => {
-      gcy('ai-review-badge', { timeout: 10_000 }).should('not.exist');
+  it('an edit replaces the result with a fresh review of the new text', () => {
+    visitKey('key_below_threshold');
+    badgeIn('key_below_threshold', 'BELOW_THRESHOLD');
+    editCell('Deutsch für key_below_threshold', 'Neuer Text');
+    getTranslationCell('key_below_threshold', 'de').within(() => {
+      gcyAdvanced(
+        { value: 'ai-review-badge', status: 'APPROVED' },
+        { timeout: 30_000 }
+      ).should('be.visible');
     });
   });
 });

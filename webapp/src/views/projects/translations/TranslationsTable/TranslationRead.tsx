@@ -133,6 +133,8 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
             tooltip={aiPlaygroundData.contextDescription}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
+            score={aiPlaygroundData.score}
+            issues={aiPlaygroundData.issues}
           />
         )}
       </StyledTranslation>

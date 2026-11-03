@@ -49,6 +49,8 @@ declare namespace DataCy {
         "ai-menu-review": true;
         "ai-playground-admin-access-info": true;
         "ai-playground-preview": true;
+        "ai-playground-preview-no-issues": true;
+        "ai-playground-preview-score": true;
         "ai-playground-usage-cached-tokens": true;
         "ai-playground-usage-mt-credits": true;
         "ai-playground-usage-tokens": true;
@@ -77,6 +79,7 @@ declare namespace DataCy {
         "ai-prompt-rendered": true;
         "ai-prompt-rendered-expand-button": true;
         "ai-prompt-result-raw": true;
+        "ai-prompt-result-review": true;
         "ai-prompt-result-translation": true;
         "ai-prompt-review-chip": true;
         "ai-prompt-review-criteria": true;

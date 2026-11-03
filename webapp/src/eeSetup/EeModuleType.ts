@@ -76,6 +76,10 @@ export type QaBadgeProps = {
   darkWhenNoIssues?: boolean;
 };
 
+export type AiReviewIssueListProps = {
+  issues: components['schemas']['AiReviewIssueModel'][];
+};
+
 export type AiReviewCellButtonProps = {
   aiReview: components['schemas']['TranslationAiReviewSummaryModel'];
   translationId: number;
