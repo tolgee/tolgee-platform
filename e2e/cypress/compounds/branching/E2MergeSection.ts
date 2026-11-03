@@ -118,4 +118,32 @@ export class E2MergeSection {
   assertApplyButtonDisabled() {
     gcy('project-branch-merge-apply').should('be.disabled');
   }
+
+  setChangeIncluded(keyName: string, included: boolean) {
+    gcy('project-branch-merge-change')
+      .findDcy('translations-key-name')
+      .contains(keyName)
+      .closest('[data-cy="project-branch-merge-change"]')
+      .findDcy('project-branch-merge-change-include')
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== included) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+  }
+
+  setAllIncluded(included: boolean) {
+    gcy('project-branch-merge-include-all')
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== included) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+  }
+
+  assertIncludedCount(included: number, total: number) {
+    gcy('project-branch-merge-included-count')
+      .should('have.attr', 'data-cy-included', String(included))
+      .and('have.attr', 'data-cy-total', String(total));
+  }
 }

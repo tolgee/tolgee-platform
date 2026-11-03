@@ -602,8 +602,11 @@ declare namespace DataCy {
         "project-branch-merge-apply": true;
         "project-branch-merge-cancel": true;
         "project-branch-merge-change": true;
+        "project-branch-merge-change-include": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-branch-merge-include-all": true;
+        "project-branch-merge-included-count": true;
         "project-contributor-invitation-pending": true;
         "project-contributor-invite-button": true;
         "project-contributor-item": true;

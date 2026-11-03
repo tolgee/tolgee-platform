@@ -36,7 +36,6 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => {
       {addTab && (
         <Tab
           value="ADD"
-          disabled={addTab.count === 0}
           data-cy="merge-tab-add"
           label={
             <Box display="flex" gap={1} alignItems="center">
@@ -56,7 +55,6 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => {
       {updateTab && (
         <Tab
           value="UPDATE"
-          disabled={updateTab.count === 0}
           data-cy="merge-tab-update"
           label={
             <Box display="flex" gap={1} alignItems="center">
@@ -76,7 +74,6 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => {
       {deleteTab && (
         <Tab
           value="DELETE"
-          disabled={deleteTab.count === 0}
           data-cy="merge-tab-delete"
           label={
             <Box display="flex" gap={1} alignItems="center">
@@ -96,7 +93,6 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => {
       {conflictTab && (
         <Tab
           value="CONFLICT"
-          disabled={conflictTab.count === 0}
           data-cy="merge-tab-conflict"
           label={
             <Box display="flex" gap={1} alignItems="center">

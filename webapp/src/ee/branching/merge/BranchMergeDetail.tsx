@@ -9,6 +9,7 @@ import {
   Portal,
   styled,
   Alert,
+  Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -21,7 +22,11 @@ import { useMergeData } from './hooks/useMergeData';
 import { MergeHeader } from './components/MergeHeader';
 import { ChangesTabs } from './components/changes/ChangesTabs';
 import { ChangeList } from './components/changes/ChangeList';
-import { BranchMergeChangeType, BranchMergeConflictModel } from './types';
+import {
+  BranchMergeChangeModel,
+  BranchMergeChangeType,
+  BranchMergeConflictModel,
+} from './types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
@@ -89,6 +94,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     changes,
     resolveMutation,
     resolveAllMutation,
+    excludeMutation,
     applyMutation,
     refreshPreviewMutation,
   } = useMergeData(project.id, numericMergeId, selectedTab);
@@ -140,21 +146,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     }
   }, [merge?.outdated]);
 
-  const handleResolve = async (
-    conflict: BranchMergeConflictModel,
-    resolution: 'SOURCE' | 'TARGET'
-  ) => {
-    await resolveMutation.mutateAsync({
-      path: { projectId: project.id, mergeId: numericMergeId },
-      content: {
-        'application/json': {
-          changeId: conflict.id,
-          resolve: resolution,
-        },
-      },
-    });
-
-    // Fetch just the updated change instead of all pages
+  const refetchChange = async (changeId: number) => {
     const updatedChange = await apiSchemaHttpService.schemaRequest(
       '/v2/projects/{projectId}/branches/merge/{mergeId}/changes/{changeId}',
       'get'
@@ -162,11 +154,10 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       path: {
         projectId: project.id,
         mergeId: numericMergeId,
-        changeId: conflict.id,
+        changeId,
       },
     });
 
-    // Update the cache with the single changed item
     const queryKey = [
       '/v2/projects/{projectId}/branches/merge/{mergeId}/changes',
       { projectId: project.id, mergeId: numericMergeId },
@@ -182,16 +173,59 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
           _embedded: {
             ...page._embedded,
             branchMergeChanges: page._embedded?.branchMergeChanges?.map(
-              (change: any) =>
-                change.id === conflict.id ? updatedChange : change
+              (change: any) => (change.id === changeId ? updatedChange : change)
             ),
           },
         })),
       };
     });
 
-    // Only refetch preview for updated stats (conflict counts)
     await previewLoadable.refetch?.();
+  };
+
+  const handleResolve = async (
+    conflict: BranchMergeConflictModel,
+    resolution: 'SOURCE' | 'TARGET'
+  ) => {
+    await resolveMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': {
+          changeId: conflict.id,
+          resolve: resolution,
+        },
+      },
+    });
+    await refetchChange(conflict.id);
+  };
+
+  const handleSetExcluded = async (
+    change: BranchMergeChangeModel,
+    excluded: boolean
+  ) => {
+    userSelectedTab.current = true;
+    await excludeMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': { changeIds: [change.id], excluded },
+      },
+    });
+    await refetchChange(change.id);
+  };
+
+  const handleSetTypeExcluded = async (
+    type: BranchMergeChangeType,
+    excluded: boolean
+  ) => {
+    userSelectedTab.current = true;
+    await excludeMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: { 'application/json': { type, excluded } },
+    });
+    await Promise.all([
+      changesLoadable.refetch?.(),
+      previewLoadable.refetch?.(),
+    ]);
   };
 
   const handleResolveAll = async (resolution: 'SOURCE' | 'TARGET') => {
@@ -274,6 +308,8 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       merge.keyResolvedConflictsCount
     : 0;
 
+  const totalWithExcluded = totalChanges + (merge?.keyExcludedCount ?? 0);
+
   const isOutdated = merge?.outdated;
 
   const readyToMerge =
@@ -301,7 +337,19 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
           }
         />
       )}
-      <Box display="flex" columnGap={2}>
+      <Box display="flex" columnGap={2} alignItems="center">
+        <Typography
+          color="textSecondary"
+          data-cy="project-branch-merge-included-count"
+          data-cy-included={totalChanges}
+          data-cy-total={totalWithExcluded}
+        >
+          <T
+            keyName="branch_merge_included_count"
+            defaultValue="{total, plural, one {{included} of {total} key included} other {{included} of {total} keys included}}"
+            params={{ included: totalChanges, total: totalWithExcluded }}
+          />
+        </Typography>
         <Button
           variant="outlined"
           color="primary"
@@ -366,7 +414,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
               </Box>
             )}
 
-            {totalChanges > 0 && (
+            {totalWithExcluded > 0 && (
               <ChangesTabs
                 tabs={tabs}
                 selectedTab={selectedTab ?? 'CONFLICT'}
@@ -386,9 +434,22 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
                 onResolve={handleResolve}
                 onResolveAll={handleResolveAll}
                 resolveAllLoading={resolveAllMutation.isLoading}
+                onSetExcluded={handleSetExcluded}
+                onSetTypeExcluded={handleSetTypeExcluded}
               />
               <Alert severity="info">
-                {t('branch_merge_tags_labels_screenshots_joined')}
+                {t('branch_merge_tags_labels_screenshots_joined')}{' '}
+                {merge.isUpdate ? (
+                  <T
+                    keyName="branch_update_excluded_stay_pending"
+                    defaultValue="Keys you exclude stay pending for the next update."
+                  />
+                ) : (
+                  <T
+                    keyName="branch_merge_excluded_stay_pending"
+                    defaultValue="Keys you exclude stay pending for the next merge."
+                  />
+                )}
               </Alert>
               <Box
                 ref={actionsRef}
