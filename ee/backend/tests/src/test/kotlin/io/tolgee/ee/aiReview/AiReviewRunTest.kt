@@ -24,6 +24,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -160,14 +161,19 @@ class AiReviewRunTest : AuthorizedControllerTest() {
         revision.systemActor.assert.isEqualTo(SystemActor.AI_REVIEWER)
         revision.authorId.assert.isEqualTo(testData.user.id)
         revision.batchJob.assert.isNotNull
-        revision.modifiedEntities.any { it.entityClass == "Translation" }.assert.isTrue()
+        revision.modifiedEntities
+          .any { it.entityClass == "Translation" }
+          .assert
+          .isTrue()
       }
     }
   }
 
   @Test
   fun `a backlog run on the e2e dataset produces only typed AI_REVIEW revisions`() {
-    val e2eData = io.tolgee.development.testDataBuilder.data.AiReviewE2eTestData()
+    val e2eData =
+      io.tolgee.development.testDataBuilder.data
+        .AiReviewE2eTestData()
     testDataService.saveTestData(e2eData.root)
     try {
       userAccount = e2eData.user
@@ -258,6 +264,24 @@ class AiReviewRunTest : AuthorizedControllerTest() {
       fr.lastFailureReason.assert.isNull()
     }
     review(otherKey.de.self.id)!!.status.assert.isEqualTo(AiReviewStatus.FAILED)
+  }
+
+  @Test
+  fun `the preview skips translations with open QA issues`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW, Feature.QA_CHECKS)
+    testData.project.useQaChecks = true
+    testData.rule.skipOpenQaIssues = true
+    testData.deTranslation.qaChecksStale = false
+    testData.deTranslationBuilder.addQaIssue { state = QaIssueState.OPEN }
+    save()
+
+    performAuthPost(
+      "$projectUrl/ai-review/run/preview",
+      runBody(keyIds = listOf(testData.key.id), languageIds = listOf(testData.german.id)),
+    ).andIsOk.andAssertThatJson {
+      node("toReview").isEqualTo(0)
+      node("skipped.OPEN_QA_ISSUES").isEqualTo(1)
+    }
   }
 
   @Test
@@ -455,15 +479,12 @@ class AiReviewRunTest : AuthorizedControllerTest() {
 
   @Test
   fun `a run while another AI review job is active is accepted`() {
-    save()
-    executeInNewTransaction(platformTransactionManager) {
-      val job = BatchJob()
-      job.project = entityManager.getReference(io.tolgee.model.Project::class.java, testData.project.id)
-      job.type = BatchJobType.AI_REVIEW
-      job.status = BatchJobStatus.RUNNING
-      job.hidden = true
-      entityManager.persist(job)
+    testData.projectBuilder.addBatchJob {
+      type = BatchJobType.AI_REVIEW
+      status = BatchJobStatus.RUNNING
+      hidden = true
     }
+    save()
 
     performAuthPost("$projectUrl/ai-review/run", runBody(ruleId = testData.rule.id)).andIsOk
   }
@@ -482,7 +503,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
         aiReviewRunService.start(
           testData.project.id,
           runRequest(),
-          entityManager.getReference(UserAccount::class.java, testData.user.id),
+          testData.user.id,
         )
       }
     }.isInstanceOf(BadRequestException::class.java)
