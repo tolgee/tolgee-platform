@@ -606,4 +606,18 @@ export const actionsConfiguration: Partial<
       Branch: [],
     },
   },
+  BRANCH_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_branch_update"
+          defaultValue="Updated branch <branch>{target}</branch> from <branch>{source}</branch>"
+          params={{ ...params, branch: <BranchNameChipNode size={'small'} /> }}
+        />
+      );
+    },
+    entities: {
+      Branch: [],
+    },
+  },
 };
