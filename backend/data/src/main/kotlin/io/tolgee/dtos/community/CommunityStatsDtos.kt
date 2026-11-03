@@ -53,6 +53,7 @@ data class CommunityContributorStats(
   val accepted: Long,
   val declined: Long,
   val active: Long,
+  val profilePublic: Boolean,
   val firstContributionAt: Date?,
   val lastContributionAt: Date?,
   val languages: List<LanguageCounts>,

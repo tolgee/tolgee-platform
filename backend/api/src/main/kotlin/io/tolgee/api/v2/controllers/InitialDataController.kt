@@ -14,6 +14,7 @@ import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.TenantService
+import io.tolgee.service.contributor.CommunityStatsService
 import io.tolgee.service.contributor.ProjectContributorService
 import io.tolgee.service.security.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -43,6 +44,7 @@ class InitialDataController(
   private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val projectContributorService: ProjectContributorService,
+  private val communityStatsService: CommunityStatsService,
   private val onboardingSurveyProvider: OnboardingSurveyProvider?,
 ) : IController {
   @GetMapping(value = [""])
@@ -66,6 +68,7 @@ class InitialDataController(
       data.announcement = announcementController.getLatest()
       data.eeSubscription = getEeSubscriptionModel()
       data.hasCommunityContributions = projectContributorService.hasCommunityContributions(userAccount.id)
+      data.hasPublicContribution = communityStatsService.hasPublicContribution(userAccount.id)
       data.onboardingSurveyVersion = onboardingSurveyProvider?.resolveVersion(userAccount.id)
     }
 
