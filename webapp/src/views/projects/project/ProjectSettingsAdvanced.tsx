@@ -11,6 +11,7 @@ import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog'
 import { messageService } from 'tg.service/MessageService';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
+import { CommunityPageSettings } from 'tg.views/projects/project/components/CommunityPageSettings';
 import { components } from 'tg.service/apiSchema.generated';
 import { SwitchWithDescription } from 'tg.views/projects/project/components/SwitchWithDescription';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
@@ -51,6 +52,8 @@ export const ProjectSettingsAdvanced = () => {
     invalidatePrefix: '/v2/projects',
   });
 
+  const [setupOpen, setSetupOpen] = useState(false);
+
   const canChangePublic =
     project.organizationRole === 'OWNER' ||
     project.computedPermission.origin === 'SERVER_ADMIN' ||
@@ -84,10 +87,13 @@ export const ProjectSettingsAdvanced = () => {
         />
       ),
       onConfirm: () =>
-        publishingLoadable.mutate({
-          path: { projectId: project.id },
-          content: { 'application/json': { public: value } },
-        }),
+        publishingLoadable.mutate(
+          {
+            path: { projectId: project.id },
+            content: { 'application/json': { public: value } },
+          },
+          { onSuccess: () => setSetupOpen(value) }
+        ),
     });
   };
 
@@ -153,10 +159,22 @@ export const ProjectSettingsAdvanced = () => {
           'community_settings_switch_hint',
           'Anyone can find and browse this project in the community translations list; signed-in users can suggest translations. Only the organization owner can change this.'
         )}
+        disabledTooltip={t(
+          'community_settings_switch_owner_only',
+          'Only the organization owner can change this.'
+        )}
         checked={project.public}
         onSwitch={handlePublicSwitch}
         disabled={publishingLoadable.isLoading || !canChangePublic}
       />
+
+      {project.public && (
+        <CommunityPageSettings
+          canEdit={canChangePublic}
+          setupOpen={setupOpen}
+          onSetupClose={() => setSetupOpen(false)}
+        />
+      )}
 
       <Typography variant="h5" mt={5} mb="20px">
         {t('project_settings_advanced_translations')}
