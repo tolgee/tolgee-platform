@@ -1,9 +1,10 @@
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
+import { Link } from '@mui/material';
 
 export function useErrorTranslation() {
   const { t } = useTranslate();
 
-  return (code: string, params?: string[]) => {
+  return function translateError(code: string, params?: string[]) {
     switch (code.toLocaleLowerCase()) {
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':
@@ -120,6 +121,26 @@ export function useErrorTranslation() {
         return t('plan_has_subscribers');
       case 'plan_has_migrations':
         return t('plan_has_migrations');
+      case 'plan_change_blocked_by_migration':
+        return (
+          <span>
+            <T
+              keyName="plan_change_blocked_by_migration"
+              defaultValue="Your plan is scheduled to change at your next renewal because of a plan update, so you can't downgrade until then. If you think this is a mistake, contact us at <email>billing@tolgee.io</email>."
+              params={{
+                email: (
+                  <Link
+                    href="mailto:billing@tolgee.io"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    color="inherit"
+                    underline="always"
+                  />
+                ),
+              }}
+            />
+          </span>
+        );
       case 'plan_migration_not_found':
         return t('plan_migration_not_found');
       case 'source_and_target_plan_must_be_different':

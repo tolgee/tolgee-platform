@@ -3343,7 +3343,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "plan_change_blocked_by_migration";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -7348,7 +7349,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "plan_change_blocked_by_migration";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
