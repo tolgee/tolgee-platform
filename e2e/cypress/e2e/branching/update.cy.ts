@@ -45,6 +45,22 @@ describe('Branch update', () => {
 
     gcy('project-branch-merge-detail').should('be.visible');
     mergeSection.assertStats({ modifications: 1 });
+    gcy('project-branch-merge-detail').should(
+      'have.attr',
+      'data-cy-direction',
+      'update'
+    );
+    gcy('project-branch-merge-delete-branch-checkbox').should('not.exist');
+    mergeSection.applyMerge();
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.assertTranslationValue(
+      'shared-update-key',
+      'en',
+      'Hotfix on main'
+    );
+    branchesSection.visit(projectId);
+    branchesSection.assertBranchExists('feature');
   });
 
   it('reopens the pending update instead of creating a second one', () => {

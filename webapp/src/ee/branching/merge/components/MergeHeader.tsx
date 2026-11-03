@@ -31,23 +31,38 @@ export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
     <>
       <StyledHead>
         <Typography variant="h4">
-          <T keyName="branches_merge_title" />
+          {merge.isUpdate ? (
+            <T keyName="branches_update_title" defaultValue="Update branch" />
+          ) : (
+            <T keyName="branches_merge_title" />
+          )}
         </Typography>
       </StyledHead>
 
-      <StyledBody data-cy="project-branch-merge-detail">
+      <StyledBody
+        data-cy="project-branch-merge-detail"
+        data-cy-direction={merge.isUpdate ? 'update' : 'merge'}
+      >
         <MergeTitle merge={merge} />
 
         {hasUnresolvedConflicts && (
           <Alert severity="warning">
-            <T
-              keyName="branch_merges_unresolved_conflicts_alert"
-              params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
-            />
+            {merge.isUpdate ? (
+              <T
+                keyName="branch_update_unresolved_conflicts_alert"
+                defaultValue="{value, plural, one {Resolve <b>{value} conflict</b> before updating.} other {Resolve <b>{value} conflicts</b> before updating.}}"
+                params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
+              />
+            ) : (
+              <T
+                keyName="branch_merges_unresolved_conflicts_alert"
+                params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
+              />
+            )}
           </Alert>
         )}
 
-        {merge.uncompletedTasksCount > 0 && (
+        {!merge.isUpdate && merge.uncompletedTasksCount > 0 && (
           <Alert severity="warning">
             <T
               keyName="branch_merges_uncompleted_tasks_alert"

@@ -214,10 +214,21 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     await applyMutation.mutateAsync({
       path: { projectId: project.id, mergeId: numericMergeId },
       content: {
-        'application/json': { deleteBranch: deleteBranchAfterMerge },
+        'application/json': {
+          deleteBranch: merge?.isUpdate ? false : deleteBranchAfterMerge,
+        },
       },
     });
-    messaging.success(<T keyName="branch_merges_apply_success" />);
+    messaging.success(
+      merge?.isUpdate ? (
+        <T
+          keyName="branch_update_apply_success"
+          defaultValue="Branch successfully updated"
+        />
+      ) : (
+        <T keyName="branch_merges_apply_success" />
+      )
+    );
     history.push(
       LINKS.PROJECT_TRANSLATIONS_WITH_BRANCH.build({
         [PARAMS.PROJECT_ID]: project.id,
@@ -227,7 +238,11 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   };
 
   const handleApply = async () => {
-    if (deleteBranchAfterMerge && (merge?.uncompletedTasksCount ?? 0) > 0) {
+    if (
+      !merge?.isUpdate &&
+      deleteBranchAfterMerge &&
+      (merge?.uncompletedTasksCount ?? 0) > 0
+    ) {
       confirmation({
         message: (
           <T
@@ -266,24 +281,26 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
 
   const actionControls = (
     <>
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={deleteBranchAfterMerge}
-            onChange={(event) =>
-              setDeleteBranchAfterMerge(event.target.checked)
-            }
-            data-cy="project-branch-merge-delete-branch-checkbox"
-          />
-        }
-        label={
-          <T
-            keyName="branch_merge_delete_branch_after_merge"
-            params={{ b: <b />, branch: merge?.sourceBranchName }}
-          />
-        }
-      />
+      {!merge?.isUpdate && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={deleteBranchAfterMerge}
+              onChange={(event) =>
+                setDeleteBranchAfterMerge(event.target.checked)
+              }
+              data-cy="project-branch-merge-delete-branch-checkbox"
+            />
+          }
+          label={
+            <T
+              keyName="branch_merge_delete_branch_after_merge"
+              params={{ b: <b />, branch: merge?.sourceBranchName }}
+            />
+          }
+        />
+      )}
       <Box display="flex" columnGap={2}>
         <Button
           variant="outlined"
@@ -306,7 +323,14 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
           onClick={handleApply}
           disabled={!readyToMerge || applyMutation.isLoading}
         >
-          <T keyName="branch_merges_apply_button" />
+          {merge?.isUpdate ? (
+            <T
+              keyName="branch_update_apply_button"
+              defaultValue="Update branch"
+            />
+          ) : (
+            <T keyName="branch_merges_apply_button" />
+          )}
         </Button>
       </Box>
     </>
@@ -315,7 +339,11 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <BaseProjectView
       maxWidth={1200}
-      windowTitle={t('branch_merges_title')}
+      windowTitle={
+        merge?.isUpdate
+          ? t('branches_update_title', 'Update branch')
+          : t('branch_merges_title')
+      }
       navigation={[
         [
           t('branches_title'),
@@ -398,8 +426,26 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       )}
       <BranchProgressModal
         open={applyMutation.isLoading}
-        title={<T keyName="branch_merge_applying_title" />}
-        message={<T keyName="branch_merge_applying_message" />}
+        title={
+          merge?.isUpdate ? (
+            <T
+              keyName="branch_update_applying_title"
+              defaultValue="Updating branch"
+            />
+          ) : (
+            <T keyName="branch_merge_applying_title" />
+          )
+        }
+        message={
+          merge?.isUpdate ? (
+            <T
+              keyName="branch_update_applying_message"
+              defaultValue="Please wait while the branch is being updated..."
+            />
+          ) : (
+            <T keyName="branch_merge_applying_message" />
+          )
+        }
       />
       <BranchProgressModal
         open={refreshPreviewMutation.isLoading}
