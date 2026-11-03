@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.mcp.McpRequestContext
@@ -23,8 +22,8 @@ class LanguageMcpTools(
   private val listLanguagesSpec = buildSpec(V2LanguagesController::getAll, "list_languages")
   private val createLanguageSpec = buildSpec(V2LanguagesController::createLanguage, "create_language")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_languages",
       "List languages",
       McpToolEffect.READ_ONLY,
@@ -33,6 +32,7 @@ class LanguageMcpTools(
         projectId()
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listLanguagesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listLanguagesSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -57,7 +57,7 @@ class LanguageMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_language",
       "Create language",
       McpToolEffect.ADDITIVE,
@@ -69,6 +69,7 @@ class LanguageMcpTools(
         string("originalName", "Native name of the language (e.g. 'Deutsch')")
         string("flagEmoji", "Flag emoji for this language")
       },
+      spec = createLanguageSpec,
     ) { request ->
       mcpRequestContext.executeAs(createLanguageSpec, request.arguments.getProjectId()) {
         val dto =

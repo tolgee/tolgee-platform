@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.batch.BatchJobManagementController
 import io.tolgee.api.v2.controllers.batch.StartBatchJobController
 import io.tolgee.batch.BatchJobService
@@ -34,8 +33,8 @@ class BatchJobMcpTools(
   private val getBatchJobSpec = buildSpec(BatchJobManagementController::get, "get_batch_job_status")
   private val machineTranslateSpec = buildSpec(StartBatchJobController::machineTranslation, "machine_translate")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "get_batch_job_status",
       "Get batch job status",
       McpToolEffect.READ_ONLY,
@@ -44,6 +43,7 @@ class BatchJobMcpTools(
         projectId()
         number("jobId", "ID of the batch job", required = true)
       },
+      spec = getBatchJobSpec,
     ) { request ->
       mcpRequestContext.executeAs(getBatchJobSpec, request.arguments.getProjectId()) {
         val jobId = request.arguments.requireLong("jobId")
@@ -64,7 +64,7 @@ class BatchJobMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "machine_translate",
       "Machine translate keys",
       McpToolEffect.DESTRUCTIVE,
@@ -77,6 +77,7 @@ class BatchJobMcpTools(
         string("branch", "Optional: branch name")
       },
       openWorld = true,
+      spec = machineTranslateSpec,
     ) { request ->
       mcpRequestContext.executeAs(machineTranslateSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")

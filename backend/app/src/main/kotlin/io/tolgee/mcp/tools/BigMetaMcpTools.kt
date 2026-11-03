@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.BigMetaController
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
@@ -24,8 +23,8 @@ class BigMetaMcpTools(
 ) : McpToolsProvider {
   private val storeBigMetaSpec = buildSpec(BigMetaController::store, "store_big_meta")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "store_big_meta",
       "Store key relationships",
       McpToolEffect.DESTRUCTIVE,
@@ -40,6 +39,7 @@ class BigMetaMcpTools(
         }
         string("branch", "Optional: branch name")
       },
+      spec = storeBigMetaSpec,
     ) { request ->
       mcpRequestContext.executeAs(storeBigMetaSpec, request.arguments.getProjectId()) {
         val branch = request.arguments.getString("branch")

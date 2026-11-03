@@ -88,6 +88,20 @@ class McpOAuthAccessTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `create_project is the only tool an OAuth client is not offered`() {
+    val token = tokenFor(Scope.entries.map { it.value }, null)
+    val patData = createTestDataWithPat()
+    try {
+      val patToolNames = listedToolNames(createMcpClientWithPat(patData.pat.token!!)).toSet()
+      val oauthToolNames = listedToolNames(createMcpClientWithBearer(token)).toSet()
+
+      assertThat(patToolNames - oauthToolNames).isEqualTo(setOf("create_project"))
+    } finally {
+      testDataService.cleanTestData(patData.testData.root)
+    }
+  }
+
+  @Test
   fun `create_project cannot be called with an OAuth token`() {
     val token = tokenFor(Scope.entries.map { it.value }, null)
 

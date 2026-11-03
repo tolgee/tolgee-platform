@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.constants.Feature
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
@@ -43,8 +42,8 @@ class BranchMcpTools(
   private val deleteBranchSpec =
     buildSpec(branchControllerClass, "delete", "delete_branch", Long::class.javaPrimitiveType!!)
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_branches",
       "List branches",
       McpToolEffect.READ_ONLY,
@@ -54,6 +53,7 @@ class BranchMcpTools(
         string("search", "Optional: search filter for branch names")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listBranchesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listBranchesSpec, request.arguments.getProjectId()) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
@@ -78,7 +78,7 @@ class BranchMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_branch",
       "Create branch",
       McpToolEffect.ADDITIVE,
@@ -88,6 +88,7 @@ class BranchMcpTools(
         string("name", "Name of the new branch", required = true)
         number("originBranchId", "ID of the branch to fork from", required = true)
       },
+      spec = createBranchSpec,
     ) { request ->
       mcpRequestContext.executeAs(createBranchSpec, request.arguments.getProjectId()) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
@@ -111,7 +112,7 @@ class BranchMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "delete_branch",
       "Delete branch",
       McpToolEffect.DESTRUCTIVE,
@@ -120,6 +121,7 @@ class BranchMcpTools(
         projectId()
         string("branchName", "Name of the branch to delete", required = true)
       },
+      spec = deleteBranchSpec,
     ) { request ->
       mcpRequestContext.executeAs(deleteBranchSpec, request.arguments.getProjectId()) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)

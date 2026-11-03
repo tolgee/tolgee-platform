@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
@@ -26,8 +25,8 @@ class TranslationMcpTools(
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
   private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "get_translations",
       "Get translations",
       McpToolEffect.READ_ONLY,
@@ -42,6 +41,7 @@ class TranslationMcpTools(
           "Optional: language tags to filter by (e.g. ['en', 'de']). If omitted, returns all languages.",
         )
       },
+      spec = getTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getTranslationsSpec, request.arguments.getProjectId()) {
         val key =
@@ -81,7 +81,7 @@ class TranslationMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "set_translation",
       "Set translation",
       McpToolEffect.DESTRUCTIVE,
@@ -97,6 +97,7 @@ class TranslationMcpTools(
         )
         string("branch", "Optional: branch name")
       },
+      spec = setTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(setTranslationsSpec, request.arguments.getProjectId()) {
         val dto =

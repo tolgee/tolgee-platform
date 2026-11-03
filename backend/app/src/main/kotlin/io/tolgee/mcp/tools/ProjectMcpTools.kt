@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
@@ -38,8 +37,8 @@ class ProjectMcpTools(
   private val getLanguageStatsSpec =
     buildSpec(ProjectStatsController::getProjectStats, "get_project_language_statistics")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_projects",
       "List projects",
       McpToolEffect.READ_ONLY,
@@ -49,6 +48,7 @@ class ProjectMcpTools(
         string("search", "Optional search query to filter projects by name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listProjectsSpec,
     ) { request ->
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
@@ -69,7 +69,7 @@ class ProjectMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_project",
       "Create project",
       McpToolEffect.ADDITIVE,
@@ -85,6 +85,7 @@ class ProjectMcpTools(
         }
         string("baseLanguageTag", "Tag of the base language (default: first language)")
       },
+      spec = createProjectSpec,
     ) { request ->
       mcpRequestContext.executeAs(createProjectSpec) {
         val args = request.arguments
@@ -121,7 +122,7 @@ class ProjectMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "get_project_language_statistics",
       "Get project language statistics",
       McpToolEffect.READ_ONLY,
@@ -130,6 +131,7 @@ class ProjectMcpTools(
       toolSchema {
         projectId()
       },
+      spec = getLanguageStatsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {
         val languages = languageService.findAll(projectHolder.project.id)

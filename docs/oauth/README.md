@@ -512,12 +512,13 @@ tiny single objects, so the cost to an honest caller is one retry with a credent
 
 `McpConfig` builds two MCP servers on the same endpoint and picks one per request:
 
-- An OAuth token, or no credential at all, gets the server without `McpConfig.OAUTH_UNAVAILABLE_TOOLS`
-  (today only `create_project`).
+- An OAuth token, or no credential at all, gets the server with only the tools an OAuth token can run.
 - A personal access token or a project API key gets the full server.
 
-`create_project` is an organization action. The consent screen can only grant project scopes, so the tool would
-refuse every OAuth token. Hiding it means a client is never offered a tool that cannot work for it. A client
+`McpToolRegistrar` decides this from each tool's `ToolEndpointSpec.isAvailableToOAuth`, the same rule
+`McpRequestContext` uses to refuse OAuth tokens. Today it leaves out only `create_project`: it is an organization
+action, and the consent screen can only grant project scopes. Hiding such a tool means a client is never offered a
+tool that cannot work for it. A client
 with no credential gets the short list because it will most likely log in through OAuth. Clients that use a
 personal access token or an API key send it on every call, so they still get the full list. A call to a hidden
 tool fails with "Tool not found", and `McpRequestContext` would still refuse it if it ran.

@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.NamespaceController
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
@@ -19,8 +18,8 @@ class NamespaceMcpTools(
 ) : McpToolsProvider {
   private val listNamespacesSpec = buildSpec(NamespaceController::getAllNamespaces, "list_namespaces")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_namespaces",
       "List namespaces",
       McpToolEffect.READ_ONLY,
@@ -28,6 +27,7 @@ class NamespaceMcpTools(
       toolSchema {
         projectId()
       },
+      spec = listNamespacesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listNamespacesSpec, request.arguments.getProjectId()) {
         val namespaces =

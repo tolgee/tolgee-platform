@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.keys.KeyController
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
@@ -44,8 +43,8 @@ class KeyMcpTools(
       Set::class.java,
     )
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_keys",
       "List keys",
       McpToolEffect.READ_ONLY,
@@ -56,6 +55,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(listKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -77,7 +77,7 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "search_keys",
       "Search keys",
       McpToolEffect.READ_ONLY,
@@ -91,6 +91,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = searchKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(searchKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -116,7 +117,7 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_keys",
       "Create keys",
       McpToolEffect.ADDITIVE,
@@ -135,6 +136,7 @@ class KeyMcpTools(
         string("namespace", "Optional: default namespace for all keys (individual keys can override)")
         string("branch", "Optional: branch name")
       },
+      spec = createKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(createKeysSpec, request.arguments.getProjectId()) {
         val branch = request.arguments.getString("branch")
@@ -155,7 +157,7 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "get_key",
       "Get key",
       McpToolEffect.READ_ONLY,
@@ -166,6 +168,7 @@ class KeyMcpTools(
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
       },
+      spec = getKeySpec,
     ) { request ->
       mcpRequestContext.executeAs(getKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
@@ -192,7 +195,7 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "update_key",
       "Update key",
       McpToolEffect.DESTRUCTIVE,
@@ -206,6 +209,7 @@ class KeyMcpTools(
         string("newNamespace", "Optional: new namespace for the key")
         string("newDescription", "Optional: new description for the key")
       },
+      spec = editKeySpec,
     ) { request ->
       mcpRequestContext.executeAs(editKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
@@ -238,7 +242,7 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "delete_keys",
       "Delete keys",
       McpToolEffect.DESTRUCTIVE,
@@ -249,6 +253,7 @@ class KeyMcpTools(
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
+      spec = deleteKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(deleteKeysSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")

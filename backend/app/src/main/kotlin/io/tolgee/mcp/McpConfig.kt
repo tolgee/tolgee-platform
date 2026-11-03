@@ -4,6 +4,7 @@ import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.modelcontextprotocol.spec.McpSchema
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.mcp.tools.McpToolRegistrar
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
 import io.tolgee.util.VersionProvider
@@ -18,8 +19,8 @@ import tools.jackson.databind.ObjectMapper
 
 /**
  * Serves two tool lists on the same endpoint. An OAuth client (and a client that has not logged in yet, which
- * will most likely log in through OAuth) gets the list without [OAUTH_UNAVAILABLE_TOOLS], so it is never offered
- * a tool that always refuses its token. Every other credential gets the full list.
+ * will most likely log in through OAuth) gets only the tools an OAuth token can run; see [McpToolRegistrar].
+ * Every other credential gets the full list.
  */
 @Configuration
 class McpConfig {
@@ -33,9 +34,8 @@ class McpConfig {
   ): RouterFunction<ServerResponse> {
     val fullTransport = createTransport()
     val oauthTransport = createTransport()
-    val fullServer = createServer(fullTransport, versionProvider, toolsProviders)
-    val oauthServer = createServer(oauthTransport, versionProvider, toolsProviders)
-    OAUTH_UNAVAILABLE_TOOLS.forEach { oauthServer.removeTool(it) }
+    val fullServer = createServer(fullTransport, versionProvider, toolsProviders, oauthOnly = false)
+    val oauthServer = createServer(oauthTransport, versionProvider, toolsProviders, oauthOnly = true)
     servers.addAll(listOf(fullServer, oauthServer))
 
     return RouterFunction { request ->
@@ -69,6 +69,7 @@ class McpConfig {
     transport: WebMvcStatelessServerTransport,
     versionProvider: VersionProvider,
     toolsProviders: List<McpToolsProvider>,
+    oauthOnly: Boolean,
   ): McpStatelessSyncServer {
     val server =
       McpServer
@@ -82,7 +83,8 @@ class McpConfig {
         ).immediateExecution(true)
         .build()
 
-    toolsProviders.forEach { it.register(server) }
+    val registrar = McpToolRegistrar(server, oauthOnly)
+    toolsProviders.forEach { it.register(registrar) }
 
     return server
   }
@@ -97,10 +99,5 @@ class McpConfig {
       FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper, authenticationProperties))
     registration.addUrlPatterns("/mcp/*")
     return registration
-  }
-
-  companion object {
-    /** Tools that need an organization-level grant, which an OAuth consent cannot give yet. */
-    val OAUTH_UNAVAILABLE_TOOLS = setOf("create_project")
   }
 }
