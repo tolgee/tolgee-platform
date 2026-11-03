@@ -94,6 +94,7 @@ declare namespace DataCy {
         "ai-prompts-open-playground-button": true;
         "ai-review-add-rule-button": true;
         "ai-review-badge": true;
+        "ai-review-batch-re-review": true;
         "ai-review-empty-state": true;
         "ai-review-filter-item": true;
         "ai-review-issue": true;
