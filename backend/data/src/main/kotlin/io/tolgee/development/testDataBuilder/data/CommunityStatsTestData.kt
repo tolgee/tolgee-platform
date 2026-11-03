@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationSuggestionState
 import jakarta.persistence.EntityManager
@@ -113,6 +114,18 @@ open class CommunityStatsTestData : BaseTestData(OWNER_USERNAME, "Community Stat
 
   fun replayActivity(entityManager: EntityManager) {
     CommunityActivityReplayer.replay(entityManager, listOf(publicProject.id, privateProject.id), maintainerId = user.id)
+  }
+
+  fun setProfileVisibility(
+    entityManager: EntityManager,
+    user: UserAccount,
+    visibility: ProfileVisibility,
+  ) {
+    entityManager
+      .createQuery("update UserAccount u set u.profileVisibility = :visibility where u.id = :id")
+      .setParameter("visibility", visibility)
+      .setParameter("id", user.id)
+      .executeUpdate()
   }
 
   fun moveCounterDays(

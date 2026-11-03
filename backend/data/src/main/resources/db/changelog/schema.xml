@@ -6220,4 +6220,11 @@
             <column name="community_app_url" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1792410000000-1">
+        <addColumn tableName="user_account">
+            <column name="profile_visibility" type="VARCHAR(255)" defaultValue="DEFAULT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

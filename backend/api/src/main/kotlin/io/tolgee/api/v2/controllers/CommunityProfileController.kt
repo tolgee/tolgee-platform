@@ -3,11 +3,9 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.constants.Message
 import io.tolgee.dtos.community.CommunityActivityItem
 import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.dtos.request.community.RangeParams
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.community.CommunityActivityModel
 import io.tolgee.hateoas.community.CommunityActivityModelAssembler
 import io.tolgee.hateoas.community.CommunityProfileModel
@@ -50,8 +48,10 @@ class CommunityProfileController(
         "whole history, plus one bucket of counts per day or week of the range. By default, the range is the " +
         "365 days ending with `to` (today, unless given), with one bucket per day. " +
         RangeParams.RANGE_LIMITS + " " +
-        "Only contributions to public projects count. An unknown, deleted or disabled user, or one without " +
-        "contributions to public projects, returns 404. The counts are approximate: they come from the activity " +
+        "Only contributions to public projects count. An unknown, deleted or disabled user returns 404 " +
+        "`user_not_found`. A profile set to private, or one left on the default visibility by a user without " +
+        "contributions to public projects, returns 404 `community_profile_private`; users always see their own " +
+        "profile. The counts are approximate: they come from the activity " +
         "log and never go down, so a suggestion made on one day and accepted or declined on a later day counts " +
         "on both. `active` is exact: the number of the user's suggestions that are pending right now, in total " +
         "and per project.",
@@ -59,10 +59,7 @@ class CommunityProfileController(
   fun getProfile(
     @PathVariable userId: Long,
     @ParameterObject period: PeriodParams,
-  ): CommunityProfileModel =
-    communityProfileModelAssembler.toModel(
-      communityStatsService.getProfile(userId, period) ?: throw NotFoundException(Message.USER_NOT_FOUND),
-    )
+  ): CommunityProfileModel = communityProfileModelAssembler.toModel(communityStatsService.getProfile(userId, period))
 
   @GetMapping("/community-activity")
   @AllowGuestAccess
@@ -82,8 +79,7 @@ class CommunityProfileController(
       limit = tolgeeProperties.rateLimits.activityRequestLimit,
       refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
     )
-    val page =
-      communityStatsService.getActivityFeed(userId, pageable) ?: throw NotFoundException(Message.USER_NOT_FOUND)
+    val page = communityStatsService.getActivityFeed(userId, pageable)
     return pagedResourcesAssembler.toModel(page, communityActivityModelAssembler)
   }
 }

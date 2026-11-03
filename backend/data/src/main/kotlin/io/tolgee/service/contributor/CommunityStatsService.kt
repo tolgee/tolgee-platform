@@ -3,6 +3,7 @@ package io.tolgee.service.contributor
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.dtos.community.Bucket
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityActivityItem
@@ -14,11 +15,15 @@ import io.tolgee.dtos.community.ProfileLanguage
 import io.tolgee.dtos.community.ProfileProject
 import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.dtos.request.community.RangeParams
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.views.CommunityContributorTotalsView
 import io.tolgee.model.views.CommunityDayRowView
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
@@ -39,6 +44,7 @@ class CommunityStatsService(
   private val userAccountService: UserAccountService,
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   fun getContributors(
     projectId: Long,
@@ -68,7 +74,8 @@ class CommunityStatsService(
         .orEmpty()
     val publicUsers = userIds?.let { repository.findUserIdsWithPublicRows(it) }.orEmpty().toSet()
     return totals.map { total ->
-      contributorStats(total, dayRowsByUser[total.id].orEmpty(), total.id in publicUsers)
+      val profilePublic = isProfilePublic(total.profileVisibility) { total.id in publicUsers }
+      contributorStats(total, dayRowsByUser[total.id].orEmpty(), profilePublic)
     }
   }
 
@@ -110,9 +117,8 @@ class CommunityStatsService(
   fun getProfile(
     userId: Long,
     params: PeriodParams,
-  ): CommunityProfile? {
-    val user = userAccountService.findActive(userId) ?: return null
-    if (!isProfileVisible(userId)) return null
+  ): CommunityProfile {
+    val user = requireVisibleUser(userId)
     // ponytail: one query, all of the user's public rows, aggregated here; ceiling = days × languages × projects.
     val rows = repository.findPublicRowsOfUser(userId)
     val totals = rows.map { it.counts() }.sum()
@@ -141,8 +147,8 @@ class CommunityStatsService(
   fun getActivityFeed(
     userId: Long,
     pageable: Pageable,
-  ): Page<CommunityActivityItem>? {
-    if (userAccountService.findActive(userId) == null || !isProfileVisible(userId)) return null
+  ): Page<CommunityActivityItem> {
+    requireVisibleUser(userId)
     val newestFirst = PageRequest.of(pageable.pageNumber, pageable.pageSize)
     val page = activityService.findPublicContributionsOfUser(userId, CONTRIBUTION_TYPES, newestFirst)
     val projects = projectService.findAll(page.content.mapNotNull { it.projectId }.toSet()).associateBy { it.id }
@@ -152,7 +158,26 @@ class CommunityStatsService(
   fun hasPublicContribution(userId: Long): Boolean =
     repository.findPublicRowUserIds(userId, PageRequest.of(0, 1)).isNotEmpty()
 
-  private fun isProfileVisible(userId: Long): Boolean = hasPublicContribution(userId)
+  private fun requireVisibleUser(userId: Long): UserAccount {
+    val user = userAccountService.get(userId)
+    if (!isVisibleToViewer(user)) throw NotFoundException(Message.COMMUNITY_PROFILE_PRIVATE)
+    return user
+  }
+
+  private fun isVisibleToViewer(user: UserAccount): Boolean {
+    if (authenticationFacade.authenticatedUserOrNull?.id == user.id) return true
+    return isProfilePublic(user.profileVisibility) { hasPublicContribution(user.id) }
+  }
+
+  private fun isProfilePublic(
+    visibility: ProfileVisibility,
+    whenDefault: () -> Boolean,
+  ): Boolean =
+    when (visibility) {
+      ProfileVisibility.PUBLIC -> true
+      ProfileVisibility.PRIVATE -> false
+      ProfileVisibility.DEFAULT -> whenDefault()
+    }
 
   private fun languageCounts(dayRows: List<CommunityDayRowView>): List<LanguageCounts> =
     dayRows

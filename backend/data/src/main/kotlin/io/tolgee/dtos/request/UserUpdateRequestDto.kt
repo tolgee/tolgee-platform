@@ -2,6 +2,7 @@ package io.tolgee.dtos.request
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.model.enums.ProfileVisibility
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
@@ -19,4 +20,6 @@ data class UserUpdateRequestDto(
         " This may be omitted, when server has set frontEndUrl in properties.",
   )
   var callbackUrl: String? = null,
+  @Schema(description = "Who can open the user's community profile. Omitted = unchanged.")
+  var profileVisibility: ProfileVisibility? = null,
 )

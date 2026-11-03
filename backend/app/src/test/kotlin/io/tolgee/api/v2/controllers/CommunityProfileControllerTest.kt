@@ -5,6 +5,8 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -130,10 +132,98 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `unknown, disabled and never-publicly-contributing users are 404`() {
-    performAuthGet("/v2/users/999999999/community-profile").andIsNotFound
-    performAuthGet("/v2/users/${testData.dave.id}/community-profile").andIsNotFound
-    performAuthGet("/v2/users/${testData.carol.id}/community-profile").andIsNotFound
+  fun `unknown and disabled users are 404 user_not_found`() {
+    performAuthGet("/v2/users/999999999/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+    performAuthGet("/v2/users/${testData.dave.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+  }
+
+  @Test
+  fun `default visibility hides a user without public contributions as private`() {
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `private visibility hides a populated profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `private visibility still lists the user among project contributors, with profilePublic false`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          isArray.hasSize(3)
+          node("[0].id").isEqualTo(testData.user.id)
+          node("[0].profilePublic").isEqualTo(true)
+          node("[1].id").isEqualTo(testData.alice.id)
+          node("[1].name").isEqualTo("Alice Adams")
+          node("[1].profilePublic").isEqualTo(false)
+        }
+      }
+  }
+
+  @Test
+  fun `public visibility lists a user without public contributions with profilePublic true`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    userAccount = testData.user
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors?sort=suggested,desc")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          node("[1].id").isEqualTo(testData.carol.id)
+          node("[1].profilePublic").isEqualTo(true)
+        }
+      }
+  }
+
+  @Test
+  fun `public visibility shows an empty profile`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson {
+        node("name").isEqualTo("Carol Clark")
+        node("suggested").isEqualTo(0)
+        node("languages").isArray.isEmpty()
+        node("projects").isArray.isEmpty()
+        node("active").isEqualTo(0)
+        node("buckets").isArray.hasSize(365)
+        node("buckets[364].contributions").isEqualTo(0)
+      }
+  }
+
+  @Test
+  fun `users always see their own profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    userAccount = testData.carol
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile").andIsOk
+    userAccount = testData.alice
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson { node("suggested").isEqualTo(4) }
+  }
+
+  private fun setVisibility(
+    user: UserAccount,
+    visibility: ProfileVisibility,
+  ) {
+    executeInNewTransaction { testData.setProfileVisibility(entityManager, user, visibility) }
   }
 
   @Test
@@ -177,7 +267,11 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
   @Test
   fun `the feed is hidden exactly where the profile is`() {
     performAuthGet("/v2/users/999999999/community-activity").andIsNotFound
-    performAuthGet("/v2/users/${testData.dave.id}/community-activity").andIsNotFound
-    performAuthGet("/v2/users/${testData.carol.id}/community-activity").andIsNotFound
+    performAuthGet("/v2/users/${testData.dave.id}/community-activity")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+    performAuthGet("/v2/users/${testData.carol.id}/community-activity")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
   }
 }
