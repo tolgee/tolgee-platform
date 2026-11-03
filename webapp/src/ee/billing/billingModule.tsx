@@ -5,6 +5,7 @@
  */
 import { Link } from 'tg.constants/links';
 import { BillingMenuItemsProps } from 'eeSetup/EeModuleType';
+import { ModuleErrorTranslator } from 'tg.translationTools/moduleErrorTranslator';
 
 const Empty = () => null;
 
@@ -18,6 +19,8 @@ export const billingModule = {
   billingMenuItems: [] as React.FC<
     React.PropsWithChildren<BillingMenuItemsProps>
   >[],
+
+  translateError: (() => undefined) as ModuleErrorTranslator,
 
   AdministrationRoutes: Empty,
   OrganizationRoutes: Empty,
