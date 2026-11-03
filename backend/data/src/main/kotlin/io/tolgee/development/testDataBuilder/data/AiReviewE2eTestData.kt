@@ -10,6 +10,7 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
@@ -213,6 +214,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
     root
       .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "ai_review_empty_project" }
       .build {
+        self.translationProtection = TranslationProtection.PROTECT_REVIEWED
         self.baseLanguage = addEnglish().self
         addGerman()
         addKey { name = "plain_key" }.build {

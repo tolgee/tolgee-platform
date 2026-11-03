@@ -169,6 +169,7 @@ declare namespace DataCy {
         "ai-review-run-to-review": true;
         "ai-review-run-warning": true;
         "ai-review-scope-chip": true;
+        "ai-review-source-change-settings": true;
         "api-key-expiry-info": true;
         "api-key-list-item": true;
         "api-key-list-item-delete-button": true;
@@ -859,6 +860,9 @@ declare namespace DataCy {
         "signup-error-free-seat-limit": true;
         "signup-error-plan-seat-limit": true;
         "signup-error-seats-spending-limit": true;
+        "source-change-locked-hint": true;
+        "source-change-select": true;
+        "source-change-select-item": true;
         "spending-limit-dialog-close": true;
         "spending-limit-exceeded-popover": true;
         "sso-migration-info-text": true;
