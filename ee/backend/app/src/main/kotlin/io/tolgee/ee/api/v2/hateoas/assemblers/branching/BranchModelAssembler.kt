@@ -23,6 +23,7 @@ class BranchModelAssembler(
       merge = entity.lastMerge?.let { branchMergeRefModelAssembler.toModel(it) },
       update = entity.lastUpdate?.let { branchMergeRefModelAssembler.toModel(it) },
       originBranchName = entity.originBranch?.name,
+      originBranchId = entity.originBranch?.id,
     )
   }
 }

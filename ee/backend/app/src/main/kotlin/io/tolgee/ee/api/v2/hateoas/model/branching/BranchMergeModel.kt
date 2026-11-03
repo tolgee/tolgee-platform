@@ -18,6 +18,8 @@ open class BranchMergeModel(
   val targetBranchId: Long,
   @Schema(description = "Target branch name")
   val targetBranchName: String,
+  @Schema(description = "The target branch is the source's child, so this session updates it from its origin")
+  val isUpdate: Boolean,
   @Schema(description = "Is merge outdated. If true, it means, that either source or target branch data were changed")
   val outdated: Boolean,
   @Schema(description = "Key additions count")

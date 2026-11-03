@@ -78,6 +78,15 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `branch list exposes the origin branch id`() {
+    val response = performProjectAuthGet("branches").andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val branches = (response["_embedded"] as Map<*, *>)["branches"] as List<*>
+    val feature = branches.filterIsInstance<Map<*, *>>().single { it["name"] == "feature-branch" }
+    (feature["originBranchId"] as Number).toLong().assert.isEqualTo(testData.mainBranch.id)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns list of all branches sorted by created date`() {
     testData.projectBuilder.self = testData.secondProject
     createBranchesOneByObe(testData.secondProject)

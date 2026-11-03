@@ -431,6 +431,19 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `preview of an update is flagged as update, a promote is not`() {
+    val updateId = createMergePreview(testData.mainBranch.id, targetBranchId = testData.featureBranch.id)
+    performProjectAuthGet("branches/merge/$updateId/preview").andIsOk.andAssertThatJson {
+      node("isUpdate").isEqualTo(true)
+    }
+    val promoteId = createMergePreview(testData.featureBranch.id)
+    performProjectAuthGet("branches/merge/$promoteId/preview").andIsOk.andAssertThatJson {
+      node("isUpdate").isEqualTo(false)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `preview without target branch still merges into the origin`() {
     performProjectAuthPost("branches/merge/preview", mapOf("sourceBranchId" to testData.featureBranch.id))
       .andIsOk
