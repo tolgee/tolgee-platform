@@ -130,8 +130,17 @@ declare namespace DataCy {
         "ai-review-rule-menu": true;
         "ai-review-rule-menu-delete": true;
         "ai-review-rule-mode": true;
+        "ai-review-rule-retry-failed": true;
+        "ai-review-rule-review-now": true;
         "ai-review-rule-switch": true;
         "ai-review-rules-view": true;
+        "ai-review-run-cancel": true;
+        "ai-review-run-dialog": true;
+        "ai-review-run-dry-run-only": true;
+        "ai-review-run-skip-reason": true;
+        "ai-review-run-start": true;
+        "ai-review-run-to-review": true;
+        "ai-review-run-warning": true;
         "ai-review-scope-chip": true;
         "api-key-expiry-info": true;
         "api-key-list-item": true;
@@ -164,6 +173,7 @@ declare namespace DataCy {
         "batch-operations-section": true;
         "batch-operations-select": true;
         "batch-operations-submit-button": true;
+        "batch-operations-summary": true;
         "batch-progress": true;
         "batch-select-item": true;
         "billing-active-card-current-period": true;

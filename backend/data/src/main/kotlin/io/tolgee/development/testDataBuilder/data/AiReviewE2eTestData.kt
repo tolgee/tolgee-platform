@@ -19,6 +19,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
   lateinit var french: Language
   lateinit var reviewer: UserAccount
   lateinit var translator: UserAccount
+  lateinit var promptsViewer: UserAccount
   lateinit var reviewPrompt: Prompt
   lateinit var activeRule: AiReviewRule
   lateinit var dryRunRule: AiReviewRule
@@ -60,6 +61,22 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
             addPermission {
               this.user = user
               type = ProjectPermissionType.TRANSLATE
+            }
+          }
+      promptsViewer =
+        root
+          .addUserAccount { username = "prompts_viewer_username" }
+          .self
+          .also { user ->
+            addPermission {
+              this.user = user
+              type = null
+              scopes =
+                arrayOf(
+                  Scope.KEYS_VIEW,
+                  Scope.TRANSLATIONS_VIEW,
+                  Scope.PROMPTS_VIEW,
+                )
             }
           }
 

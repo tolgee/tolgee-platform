@@ -44,6 +44,13 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_hard_delete_keys');
       case 'QA_CHECK':
         return t('batch_operation_type_qa_check');
+      case 'AI_REVIEW':
+        return t('batch_operation_type_ai_review', 'AI review');
+      case 'AI_REVIEW_DEMOTION':
+        return t(
+          'batch_operation_type_ai_review_demotion',
+          'AI review cleanup'
+        );
       default:
         return type;
     }

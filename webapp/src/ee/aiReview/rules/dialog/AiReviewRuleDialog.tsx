@@ -21,8 +21,10 @@ import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -62,15 +64,25 @@ const StyledPromptModeRow = styled('div')`
 type Props = {
   onClose: () => void;
   rule?: AiReviewRuleModel;
+  onRequestRun?: (saved: AiReviewRuleModel) => void;
 };
 
-export const AiReviewRuleDialog = ({ onClose, rule }: Props) => {
+export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
   const messaging = useMessage();
   const isBranchingEnabled = useIsBranchingEnabled();
   const languages = useProjectLanguages();
   const nonBaseLanguages = languages.filter((language) => !language.base);
+  const { satisfiesPermission } = useProjectPermissions();
+  const canRun = satisfiesPermission('translations.batch-machine');
+
+  function offerRun(saved: AiReviewRuleModel) {
+    if (!onRequestRun || !canRun || saved.counts.backlog === 0) {
+      return;
+    }
+    onRequestRun(saved);
+  }
 
   const createMutation = useApiMutation({
     url: '/v2/projects/{projectId}/ai-review-rules',
@@ -105,9 +117,10 @@ export const AiReviewRuleDialog = ({ onClose, rule }: Props) => {
           content: { 'application/json': request },
         },
         {
-          onSuccess() {
+          onSuccess(data) {
             messaging.success(<T keyName="ai_review_rule_update_success" />);
             onClose();
+            offerRun(data);
           },
         }
       );
@@ -118,9 +131,10 @@ export const AiReviewRuleDialog = ({ onClose, rule }: Props) => {
         content: { 'application/json': request },
       },
       {
-        onSuccess() {
+        onSuccess(data) {
           messaging.success(<T keyName="ai_review_rule_create_success" />);
           onClose();
+          offerRun(data);
         },
       }
     );
