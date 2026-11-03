@@ -21,6 +21,7 @@ class CommunityContributorModelAssembler :
       accepted = stats.accepted,
       declined = stats.declined,
       active = stats.active,
+      profilePublic = stats.profilePublic,
       firstContributionAt = stats.firstContributionAt,
       lastContributionAt = stats.lastContributionAt,
       languages = stats.languages,

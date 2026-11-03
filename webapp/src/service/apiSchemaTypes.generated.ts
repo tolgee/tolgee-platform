@@ -72,6 +72,7 @@ export type CollectionModelWorkspaceModel = components['schemas']['CollectionMod
 export type CommunityActivity = components['schemas']['CommunityActivity'];
 export type CommunityActivityModel = components['schemas']['CommunityActivityModel'];
 export type CommunityContributorModel = components['schemas']['CommunityContributorModel'];
+export type CommunityPageRequest = components['schemas']['CommunityPageRequest'];
 export type CommunityProfile = components['schemas']['CommunityProfile'];
 export type ComplexEditKeyDto = components['schemas']['ComplexEditKeyDto'];
 export type ComplexTagKeysRequest = components['schemas']['ComplexTagKeysRequest'];
