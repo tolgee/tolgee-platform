@@ -676,6 +676,7 @@ declare namespace DataCy {
         "project-settings-branches-protection-button": true;
         "project-settings-branches-remove-button": true;
         "project-settings-branches-rename-button": true;
+        "project-settings-branches-update-from-button": true;
         "project-settings-button": true;
         "project-settings-delete-button": true;
         "project-settings-description": true;
