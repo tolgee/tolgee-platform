@@ -22,8 +22,7 @@ import io.tolgee.security.authentication.ScopedCredential
 
 data class OAuth2TokenCredentials(
   override val scopes: Set<Scope>,
-  /** Null means every project the user can reach, not none. */
-  val projectIds: Set<Long>?,
+  override val projectIds: Set<Long>?,
 ) : ScopedCredential {
   override val singleProjectId: Long?
     get() = projectIds?.singleOrNull()

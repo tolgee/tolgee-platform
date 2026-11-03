@@ -643,15 +643,16 @@ These are known gaps, deferred to the client rounds that first exercise them:
 - **An all-projects token cannot enumerate the projects it reaches over REST.** `*` means "every project this user
   can currently see", a set that changes with their membership, so a client cannot cache it — and no REST route
   lets it ask: `getAll` is `ONLY_PAT` and `getAllWithStatistics` carries no `@AllowApiAccess` at all. MCP is the
-  exception: the `list_projects` tool opts in through `ToolEndpointSpec.allowsOAuthToken` and returns the user's
-  permitted projects narrowed to the token's project set. Note what does *not* do
+  exception: the `list_projects` tool opts in through `ToolEndpointSpec.allowsOAuthToken`. The narrowing itself lives
+  in `ProjectService.findPermittedInOrganizationPaged`, which limits the user's permitted projects to
+  `ScopedCredential.projectIds` for every scoped credential (an OAuth token or a project API key). So a REST route
+  that later admits these credentials is narrowed without extra code. Note what does *not* do
   that work: `@IsGlobalRoute` short-circuits `AbstractAuthorizationInterceptor.preHandle` before either
   authorization interceptor runs, and `AuthenticationInterceptor.isOAuthAllowed` inspects only
   `@AllowApiAccess.tokenType`, so a global route is not gated for OAuth tokens — it is simply never asked. Not a
   boundary problem — every request is still narrowed by `coversProject()` and the user's live permissions, so the
   failure is "cannot discover", never "reaches further than intended". The browser extension is handed its project
-  by the page it edits; the follow-up for REST clients is one non-global OAuth-reachable route returning the token's
-  projects. `AuthenticationFacade.implicitProjectId` answers it through the shared
+  by the page it edits; the follow-up for REST clients is to admit OAuth on one non-global project-listing route. `AuthenticationFacade.implicitProjectId` answers it through the shared
   `ScopedCredential.singleProjectId`, so `*` currently reads as "no project" — the opposite of what it means — and
   wants fixing in the same change.
 

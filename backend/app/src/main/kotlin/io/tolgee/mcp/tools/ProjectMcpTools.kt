@@ -5,20 +5,16 @@ import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
-import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.oauth2.OAuth2TokenCredentials
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -33,7 +29,6 @@ class ProjectMcpTools(
   private val languageService: LanguageService,
   private val organizationRoleService: OrganizationRoleService,
   private val projectHolder: ProjectHolder,
-  private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -58,18 +53,7 @@ class ProjectMcpTools(
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
         val pageNum = request.arguments?.getInt("page") ?: 0
-        val pageable = PageRequest.of(pageNum, 100)
-        val tokenProjectIds = (authenticationFacade.scopedCredential as? OAuth2TokenCredentials)?.projectIds
-        val projects =
-          if (tokenProjectIds?.isEmpty() == true) {
-            Page.empty(pageable)
-          } else {
-            projectService.findPermittedInOrganizationPaged(
-              pageable,
-              search,
-              filters = ProjectFilters().apply { filterId = tokenProjectIds?.toList() },
-            )
-          }
+        val projects = projectService.findPermittedInOrganizationPaged(PageRequest.of(pageNum, 100), search)
         val result =
           pagedResponse(projects) { p ->
             mapOf(
