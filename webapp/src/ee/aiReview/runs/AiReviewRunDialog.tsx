@@ -14,9 +14,10 @@ import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useAiReviewRun } from './useAiReviewRun';
+import { useAiReviewRun } from 'tg.ee.module/aiReview/runs/useAiReviewRun';
 
 type AiReviewRunRequest = components['schemas']['AiReviewRunRequest'];
+type BatchJobModel = components['schemas']['BatchJobModel'];
 type SkipReason =
   keyof components['schemas']['AiReviewRunPreviewModel']['skipped'];
 
@@ -26,18 +27,66 @@ type Props = {
   variant: AiReviewRunVariant;
   request: Partial<AiReviewRunRequest>;
   onClose: () => void;
+  onStarted?: (job: BatchJobModel) => void;
 };
 
 const WARNING_LIMIT = 1000;
 
-export const AiReviewRunDialog = ({ variant, request, onClose }: Props) => {
+export const AiReviewRunDialog = ({
+  variant,
+  request,
+  onClose,
+  onStarted,
+}: Props) => {
   const { t } = useTranslate();
   const { preview, start, projectId } = useAiReviewRun();
+
+  const variantConfig = {
+    review: {
+      failedOnly: false,
+      showsDryRunLine: true,
+      title: () =>
+        t('ai_review_run_title_review', 'Review existing translations'),
+      countLine: (count: number) =>
+        t(
+          'ai_review_run_to_review_count',
+          '{count, plural, one {# translation will be reviewed} other {# translations will be reviewed}}',
+          { count }
+        ),
+      startLabel: () => t('ai_review_run_start_review', 'Review now'),
+    },
+    score: {
+      failedOnly: false,
+      showsDryRunLine: false,
+      title: () =>
+        t('ai_review_run_title_score', 'Score existing translations'),
+      countLine: (count: number) =>
+        t(
+          'ai_review_run_to_score_count',
+          '{count, plural, one {# translation will be scored} other {# translations will be scored}}',
+          { count }
+        ),
+      startLabel: () => t('ai_review_run_start_score', 'Score now'),
+    },
+    retry: {
+      failedOnly: true,
+      showsDryRunLine: true,
+      title: () => t('ai_review_run_title_retry', 'Retry failed reviews'),
+      countLine: (count: number) =>
+        t(
+          'ai_review_run_to_review_count',
+          '{count, plural, one {# translation will be reviewed} other {# translations will be reviewed}}',
+          { count }
+        ),
+      startLabel: () => t('ai_review_run_start_retry', 'Retry'),
+    },
+  } as const;
+  const config = variantConfig[variant];
 
   const fullRequest: AiReviewRunRequest = {
     languageIds: [],
     reReview: false,
-    failedOnly: variant === 'retry',
+    failedOnly: config.failedOnly,
     ...request,
   };
 
@@ -121,16 +170,6 @@ export const AiReviewRunDialog = ({ variant, request, onClose }: Props) => {
     }
   }
 
-  function title() {
-    if (variant === 'score') {
-      return t('ai_review_run_title_score', 'Score existing translations');
-    }
-    if (variant === 'retry') {
-      return t('ai_review_run_title_retry', 'Retry failed reviews');
-    }
-    return t('ai_review_run_title_review', 'Review existing translations');
-  }
-
   function handleStart() {
     start.mutate(
       {
@@ -138,8 +177,9 @@ export const AiReviewRunDialog = ({ variant, request, onClose }: Props) => {
         content: { 'application/json': fullRequest },
       },
       {
-        onSuccess() {
+        onSuccess(data) {
           onClose();
+          onStarted?.(data);
         },
       }
     );
@@ -152,30 +192,23 @@ export const AiReviewRunDialog = ({ variant, request, onClose }: Props) => {
       data-cy="ai-review-run-dialog"
       data-cy-variant={variant}
     >
-      <DialogTitle>{title()}</DialogTitle>
+      <DialogTitle>{config.title()}</DialogTitle>
       <DialogContent sx={{ display: 'grid', gap: 1, minWidth: 420 }}>
         {preview.isLoading || !data ? (
           <BoxLoading />
         ) : (
           <>
-            <Typography data-cy="ai-review-run-to-review">
-              {variant === 'score'
-                ? t(
-                    'ai_review_run_to_score_count',
-                    '{count} translations will be scored',
-                    { count: toReview }
-                  )
-                : t(
-                    'ai_review_run_to_review_count',
-                    '{count} translations will be reviewed',
-                    { count: toReview }
-                  )}
+            <Typography
+              data-cy="ai-review-run-to-review"
+              data-cy-count={String(toReview)}
+            >
+              {config.countLine(toReview)}
             </Typography>
-            {variant !== 'score' && dryRunOnly > 0 && (
+            {config.showsDryRunLine && dryRunOnly > 0 && (
               <Typography data-cy="ai-review-run-dry-run-only">
                 {t(
                   'ai_review_run_dry_run_only_count',
-                  '{count} of them will only be scored',
+                  '{count, plural, one {# of them will only be scored} other {# of them will only be scored}}',
                   { count: dryRunOnly }
                 )}
               </Typography>
@@ -221,11 +254,7 @@ export const AiReviewRunDialog = ({ variant, request, onClose }: Props) => {
           onClick={handleStart}
           data-cy="ai-review-run-start"
         >
-          {variant === 'score'
-            ? t('ai_review_run_start_score', 'Score now')
-            : variant === 'retry'
-            ? t('ai_review_run_start_retry', 'Retry')
-            : t('ai_review_run_start_review', 'Review now')}
+          {config.startLabel()}
         </LoadingButton>
       </DialogActions>
     </Dialog>

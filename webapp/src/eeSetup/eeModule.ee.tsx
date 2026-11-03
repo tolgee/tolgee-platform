@@ -81,6 +81,7 @@ import { OperationUnassignTranslationLabel } from '../ee/batchOperations/Operati
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { OperationQaRecheck } from '../ee/qa/components/OperationQaRecheck';
+import { OperationAiReview } from '../ee/aiReview/batch/OperationAiReview';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -227,12 +228,26 @@ export const useAddBatchOperations = () => {
   const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const qaChecksProjectFeature = qaChecksFeature && project.useQaChecks;
+  const aiReviewFeature = isEnabled('AI_REVIEW');
+  const canBatchMachine = satisfiesPermission('translations.batch-machine');
   const isAdminOrSupporter = useIsAdminOrSupporter();
   const isBeingImpersonated = useIsBeingImpersonated();
   const hasPrivilegedAccess = isAdminOrSupporter || isBeingImpersonated;
   const { t } = useTranslate();
 
   return addOperations([
+    {
+      items: [
+        {
+          id: 'ai_review',
+          label: t('batch_operations_ai_review', 'AI review'),
+          enabled: canBatchMachine,
+          hidden: !aiReviewFeature,
+          component: OperationAiReview,
+        },
+      ],
+      placement: { position: 'after', value: 'machine_translate' },
+    },
     {
       items: [
         {
