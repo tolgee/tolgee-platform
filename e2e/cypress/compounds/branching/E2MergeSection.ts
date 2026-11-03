@@ -141,6 +141,29 @@ export class E2MergeSection {
     waitForGlobalLoading();
   }
 
+  setReviewedOnly(on: boolean) {
+    this.setSwitch('project-branch-merge-filter-reviewed-only', on);
+  }
+
+  setExistingKeysOnly(on: boolean) {
+    this.setSwitch('project-branch-merge-filter-existing-keys-only', on);
+  }
+
+  private setSwitch(
+    dataCy:
+      | 'project-branch-merge-filter-reviewed-only'
+      | 'project-branch-merge-filter-existing-keys-only',
+    on: boolean
+  ) {
+    gcy(dataCy)
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== on) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+    gcy('project-branch-merge-detail').should('be.visible');
+  }
+
   assertIncludedCount(included: number, total: number) {
     gcy('project-branch-merge-included-count')
       .should('have.attr', 'data-cy-included', String(included))

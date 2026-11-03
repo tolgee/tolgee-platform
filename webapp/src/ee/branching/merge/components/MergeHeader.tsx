@@ -1,12 +1,15 @@
 import React from 'react';
 import { Alert, Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
-import { BranchMergeModel } from '../types';
+import { BranchMergeFilters, BranchMergeModel } from '../types';
 import { StatsBlock } from './header/StatsBlock';
 import { MergeTitle } from 'tg.ee.module/branching/merge/components/header/MergeTitle';
+import { MergeFilters } from 'tg.ee.module/branching/merge/components/header/MergeFilters';
 
 type Props = {
   merge: BranchMergeModel;
+  onFiltersChange: (filters: BranchMergeFilters) => void;
+  filtersBusy: boolean;
 };
 
 const StyledHead = styled(Box)`
@@ -24,6 +27,8 @@ const StyledBody = styled(Box)`
 
 export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
   merge,
+  onFiltersChange,
+  filtersBusy,
 }) => {
   const hasUnresolvedConflicts = merge.keyUnresolvedConflictsCount > 0;
 
@@ -72,6 +77,12 @@ export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
         )}
 
         <StatsBlock merge={merge} />
+
+        <MergeFilters
+          merge={merge}
+          onChange={onFiltersChange}
+          disabled={Boolean(merge.mergedAt) || filtersBusy}
+        />
       </StyledBody>
     </>
   );

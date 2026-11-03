@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import { useQueryClient } from 'react-query';
 import {
   Box,
@@ -26,6 +27,7 @@ import {
   BranchMergeChangeModel,
   BranchMergeChangeType,
   BranchMergeConflictModel,
+  BranchMergeFilters,
 } from './types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
@@ -71,6 +73,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   const { mergeId } = useParams<RouteParams>();
   const numericMergeId = Number(mergeId);
   const userSelectedTab = useRef(false);
+  const keepTabOnNextMerge = useRef(false);
   const { ref: actionsRef, inView: actionsInView } = useInView({
     rootMargin: '0px',
     threshold: 0.1,
@@ -97,11 +100,21 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     excludeMutation,
     applyMutation,
     refreshPreviewMutation,
+    deleteMutation,
+    createPreviewMutation,
   } = useMergeData(project.id, numericMergeId, selectedTab);
 
   const { tabs } = useMergeTabs(merge, labels, selectedTab, setSelectedTab);
+  const [creatingLongEnough] = useDebounce(
+    createPreviewMutation.isLoading,
+    500
+  );
 
   useEffect(() => {
+    if (keepTabOnNextMerge.current) {
+      keepTabOnNextMerge.current = false;
+      return;
+    }
     userSelectedTab.current = false;
     setSelectedTab('CONFLICT');
   }, [numericMergeId]);
@@ -295,6 +308,60 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     await applyMerge();
   };
 
+  const recreateWithFilters = async (filters: BranchMergeFilters) => {
+    const created = await createPreviewMutation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          sourceBranchId: merge!.sourceBranchId,
+          targetBranchId: merge!.targetBranchId,
+          filters,
+        },
+      },
+    });
+    keepTabOnNextMerge.current = true;
+    history.replace(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        [PARAMS.PROJECT_ID]: project.id,
+        [PARAMS.MERGE_ID]: created.id,
+      })
+    );
+    deleteMutation.mutate({
+      path: { projectId: project.id, mergeId: numericMergeId },
+    });
+  };
+
+  const handleFiltersChange = (filters: BranchMergeFilters) => {
+    const hasWork =
+      (merge?.keyResolvedConflictsCount ?? 0) > 0 ||
+      (merge?.keyExcludedCount ?? 0) > 0;
+    if (!hasWork) {
+      recreateWithFilters(filters);
+      return;
+    }
+    confirmation({
+      title: (
+        <T
+          keyName="branch_merge_filter_change_confirmation_title"
+          defaultValue="Change filters"
+        />
+      ),
+      message: (
+        <T
+          keyName="branch_merge_filter_change_confirmation"
+          defaultValue="Changing filters creates a new preview. Your conflict resolutions and excluded keys will be reset."
+        />
+      ),
+      confirmButtonText: (
+        <T
+          keyName="branch_merge_filter_change_confirm_button"
+          defaultValue="Create new preview"
+        />
+      ),
+      onConfirm: () => recreateWithFilters(filters),
+    });
+  };
+
   const handleTabSelect = (tab: BranchMergeChangeType) => {
     userSelectedTab.current = true;
     setSelectedTab(tab);
@@ -404,7 +471,15 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       ) : (
         merge && (
           <StyledDetail>
-            <MergeHeader merge={merge} />
+            <MergeHeader
+              merge={merge}
+              onFiltersChange={handleFiltersChange}
+              filtersBusy={
+                deleteMutation.isLoading ||
+                createPreviewMutation.isLoading ||
+                previewLoadable.isPreviousData
+              }
+            />
 
             {isOutdated && (
               <Box mt={1}>
@@ -507,6 +582,11 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
             <T keyName="branch_merge_applying_message" />
           )
         }
+      />
+      <BranchProgressModal
+        open={createPreviewMutation.isLoading && creatingLongEnough}
+        title={<T keyName="branch_merge_creating_title" />}
+        message={<T keyName="branch_merge_creating_message" />}
       />
       <BranchProgressModal
         open={refreshPreviewMutation.isLoading}

@@ -50,6 +50,8 @@ describe('Branch update', () => {
       'data-cy-direction',
       'update'
     );
+    gcy('project-branch-merge-filter-reviewed-only').should('exist');
+    gcy('project-branch-merge-filter-existing-keys-only').should('not.exist');
     gcy('project-branch-merge-delete-branch-checkbox').should('not.exist');
     mergeSection.applyMerge();
     translationsView.visitWithBranch(projectId, 'feature');

@@ -10,3 +10,4 @@ export type BranchMergeChangeType =
 export type BranchMergeKeyModel = components['schemas']['BranchMergeKeyModel'];
 export type BranchMergeTranslationModel =
   components['schemas']['BranchMergeTranslationModel'];
+export type BranchMergeFilters = components['schemas']['BranchMergeFilters'];
