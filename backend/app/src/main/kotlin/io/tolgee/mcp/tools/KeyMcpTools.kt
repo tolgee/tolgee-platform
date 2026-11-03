@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.keys.KeyController
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
@@ -44,16 +43,19 @@ class KeyMcpTools(
       Set::class.java,
     )
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_keys",
+      "List keys",
+      McpToolEffect.READ_ONLY,
       "List translation keys in a Tolgee project. " +
         "Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(listKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -75,18 +77,21 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "search_keys",
+      "Search keys",
+      McpToolEffect.READ_ONLY,
       "Search for translation keys in a Tolgee project by name or translation text. " +
         "Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("query", "Search query (matches key name or translation text)", required = true)
         string("languageTag", "Optional: language tag to search translations in")
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = searchKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(searchKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -112,13 +117,15 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_keys",
+      "Create keys",
+      McpToolEffect.ADDITIVE,
       "Create translation keys in a Tolgee project with optional translations and tags. " +
         "Keys that already exist are silently skipped — their translations and tags are not updated. " +
         "Use update_key and set_translation to modify existing keys.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         objectArray("keys", "List of keys to create", required = true) {
           string("name", "Key name (e.g. 'home.welcome_message')", required = true)
           string("namespace", "Optional: namespace for the key (overrides top-level namespace)")
@@ -129,6 +136,7 @@ class KeyMcpTools(
         string("namespace", "Optional: default namespace for all keys (individual keys can override)")
         string("branch", "Optional: branch name")
       },
+      spec = createKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(createKeysSpec, request.arguments.getProjectId()) {
         val branch = request.arguments.getString("branch")
@@ -149,15 +157,18 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "get_key",
+      "Get key",
+      McpToolEffect.READ_ONLY,
       "Get a translation key's metadata (name, namespace, description) by its name. To get the key's translations, use get_translations.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
       },
+      spec = getKeySpec,
     ) { request ->
       mcpRequestContext.executeAs(getKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
@@ -184,11 +195,13 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "update_key",
+      "Update key",
+      McpToolEffect.DESTRUCTIVE,
       "Update an existing translation key's name, namespace, or description",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "Current key name (used to find the key)", required = true)
         string("keyNamespace", "Optional: current namespace of the key (used to find the key)")
         string("keyBranch", "Optional: branch name (used to find the key, for branching projects)")
@@ -196,6 +209,7 @@ class KeyMcpTools(
         string("newNamespace", "Optional: new namespace for the key")
         string("newDescription", "Optional: new description for the key")
       },
+      spec = editKeySpec,
     ) { request ->
       mcpRequestContext.executeAs(editKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
@@ -228,16 +242,18 @@ class KeyMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "delete_keys",
-      "Delete translation keys from a Tolgee project. " +
-        "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
+      "Delete keys",
+      McpToolEffect.DESTRUCTIVE,
+      "Delete translation keys from a Tolgee project.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         stringArray("keyNames", "Names of the keys to delete", required = true)
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
+      spec = deleteKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(deleteKeysSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")

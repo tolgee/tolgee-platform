@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
@@ -26,12 +25,14 @@ class TranslationMcpTools(
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
   private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "get_translations",
+      "Get translations",
+      McpToolEffect.READ_ONLY,
       "Get translations for a specific key in a Tolgee project. Returns translations in all project languages, or only the specified languages if provided.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
@@ -40,6 +41,7 @@ class TranslationMcpTools(
           "Optional: language tags to filter by (e.g. ['en', 'de']). If omitted, returns all languages.",
         )
       },
+      spec = getTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getTranslationsSpec, request.arguments.getProjectId()) {
         val key =
@@ -79,11 +81,13 @@ class TranslationMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "set_translation",
+      "Set translation",
+      McpToolEffect.DESTRUCTIVE,
       "Set or update translations for a key in one or more languages. The key must already exist — use create_keys to create it first.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         stringMap(
@@ -93,6 +97,7 @@ class TranslationMcpTools(
         )
         string("branch", "Optional: branch name")
       },
+      spec = setTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(setTranslationsSpec, request.arguments.getProjectId()) {
         val dto =

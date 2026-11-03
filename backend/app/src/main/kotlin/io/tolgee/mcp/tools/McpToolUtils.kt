@@ -10,6 +10,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithCode
+import io.tolgee.mcp.ToolEndpointSpec
 import org.springframework.data.domain.Page
 
 fun textResult(text: String): CallToolResult {
@@ -28,25 +29,58 @@ fun errorResult(message: String): CallToolResult {
     .build()
 }
 
-fun McpStatelessSyncServer.addTool(
-  name: String,
-  description: String,
-  schema: JsonSchema,
-  handler: (McpSchema.CallToolRequest) -> CallToolResult,
+enum class McpToolEffect(
+  val readOnly: Boolean,
+  val destructive: Boolean,
 ) {
-  val tool =
-    McpSchema.Tool
-      .builder()
-      .name(name)
-      .description(description)
-      .inputSchema(schema)
-      .build()
+  READ_ONLY(readOnly = true, destructive = false),
+  ADDITIVE(readOnly = false, destructive = false),
+  DESTRUCTIVE(readOnly = false, destructive = true),
+}
 
-  addTool(
-    McpStatelessServerFeatures.SyncToolSpecification(tool) { _, request ->
-      withNonNullErrorMessage { handler(request) }
-    },
-  )
+/**
+ * Adds tools to one MCP server. The server for OAuth clients ([oauthOnly]) skips every tool whose spec refuses an
+ * OAuth token, so such a client is never offered a tool it cannot run.
+ */
+class McpToolRegistrar(
+  private val server: McpStatelessSyncServer,
+  private val oauthOnly: Boolean,
+) {
+  fun addTool(
+    name: String,
+    title: String,
+    effect: McpToolEffect,
+    description: String,
+    schema: JsonSchema,
+    spec: ToolEndpointSpec,
+    openWorld: Boolean = false,
+    handler: (McpSchema.CallToolRequest) -> CallToolResult,
+  ) {
+    if (oauthOnly && !spec.isAvailableToOAuth) return
+
+    val tool =
+      McpSchema.Tool
+        .builder()
+        .name(name)
+        .title(title)
+        .description(description)
+        .inputSchema(schema)
+        .annotations(
+          McpSchema.ToolAnnotations
+            .builder()
+            .title(title)
+            .readOnlyHint(effect.readOnly)
+            .destructiveHint(effect.destructive)
+            .openWorldHint(openWorld)
+            .build(),
+        ).build()
+
+    server.addTool(
+      McpStatelessServerFeatures.SyncToolSpecification(tool) { _, request ->
+        withNonNullErrorMessage { handler(request) }
+      },
+    )
+  }
 }
 
 private fun <T> withNonNullErrorMessage(block: () -> T): T {

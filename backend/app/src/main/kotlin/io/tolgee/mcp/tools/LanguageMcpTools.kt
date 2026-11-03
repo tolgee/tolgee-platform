@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.mcp.McpRequestContext
@@ -23,14 +22,17 @@ class LanguageMcpTools(
   private val listLanguagesSpec = buildSpec(V2LanguagesController::getAll, "list_languages")
   private val createLanguageSpec = buildSpec(V2LanguagesController::createLanguage, "create_language")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_languages",
+      "List languages",
+      McpToolEffect.READ_ONLY,
       "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listLanguagesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listLanguagesSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
@@ -55,16 +57,19 @@ class LanguageMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_language",
+      "Create language",
+      McpToolEffect.ADDITIVE,
       "Add a new language to a Tolgee project",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("name", "Language display name (e.g. 'German')", required = true)
         string("tag", "Language tag / IETF BCP 47 code (e.g. 'de')", required = true)
         string("originalName", "Native name of the language (e.g. 'Deutsch')")
         string("flagEmoji", "Flag emoji for this language")
       },
+      spec = createLanguageSpec,
     ) { request ->
       mcpRequestContext.executeAs(createLanguageSpec, request.arguments.getProjectId()) {
         val dto =

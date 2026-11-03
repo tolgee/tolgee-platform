@@ -23,6 +23,9 @@ import io.tolgee.model.enums.Scope
 interface ScopedCredential {
   val scopes: Set<Scope>
 
+  /** The projects this credential can reach. Null means every project the user can reach, not none. */
+  val projectIds: Set<Long>?
+
   /** Null when the credential is not narrowed to exactly one project — all of them, none, or several. */
   val singleProjectId: Long?
 

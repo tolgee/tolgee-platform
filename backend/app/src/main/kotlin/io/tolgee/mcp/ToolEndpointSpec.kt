@@ -42,7 +42,12 @@ data class ToolEndpointSpec(
   val requiredOneOfFeatures: Array<out Feature>? = null,
   val activityType: ActivityType? = null,
   val rateLimitPolicy: RateLimitSpec? = null,
-)
+  val allowsOAuthToken: Boolean = allowedTokenType == AuthTokenType.ANY,
+) {
+  /** Must match the OAuth refusals in [McpRequestContext.checkTokenType] and [McpRequestContext.checkOrgRole]. */
+  val isAvailableToOAuth: Boolean
+    get() = allowsOAuthToken && requiredOrgRole == null
+}
 
 fun buildSpec(
   controllerMethod: KFunction<*>,

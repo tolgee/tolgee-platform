@@ -452,13 +452,26 @@ class ProjectService(
     organizationId: Long? = null,
     filters: ProjectFilters? = null,
   ): Page<ProjectWithLanguagesView> {
+    val credentialFilters = narrowToCredentialProjects(filters) ?: return Page.empty(pageable)
     return findPermittedInOrganizationPaged(
       pageable = pageable,
       search = search,
       organizationId = organizationId,
       userAccountId = authenticationFacade.authenticatedUser.id,
-      filters = filters,
+      filters = credentialFilters,
     )
+  }
+
+  /** Returns null when the current credential can reach none of the requested projects. */
+  private fun narrowToCredentialProjects(filters: ProjectFilters?): ProjectFilters? {
+    val credentialProjectIds = authenticationFacade.scopedCredential?.projectIds ?: return filters ?: ProjectFilters()
+    val allowedIds = filters?.filterId?.filter { it in credentialProjectIds } ?: credentialProjectIds.toList()
+    if (allowedIds.isEmpty()) return null
+    return ProjectFilters().apply {
+      filterId = allowedIds
+      filterNotId = filters?.filterNotId
+      filterBaseLanguageTag = filters?.filterBaseLanguageTag
+    }
   }
 
   @Transactional(readOnly = true)

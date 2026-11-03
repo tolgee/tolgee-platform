@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
@@ -32,28 +31,29 @@ class ProjectMcpTools(
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
-  private val listProjectsSpec = buildSpec(ProjectsController::getAll, "list_projects")
+  private val listProjectsSpec =
+    buildSpec(ProjectsController::getAll, "list_projects").copy(allowsOAuthToken = true)
   private val createProjectSpec = buildSpec(ProjectsController::createProject, "create_project")
   private val getLanguageStatsSpec =
     buildSpec(ProjectStatsController::getProjectStats, "get_project_language_statistics")
 
-  override fun register(server: McpStatelessSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "list_projects",
-      "List Tolgee projects accessible to the current user. Returns up to 100 results per page.",
+      "List projects",
+      McpToolEffect.READ_ONLY,
+      "List Tolgee projects accessible to the current user. An OAuth token lists only the projects it was " +
+        "authorized for. Returns up to 100 results per page.",
       toolSchema {
         string("search", "Optional search query to filter projects by name")
         number("page", "Optional: page number (0-based, default 0)")
       },
+      spec = listProjectsSpec,
     ) { request ->
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
         val pageNum = request.arguments?.getInt("page") ?: 0
-        val projects =
-          projectService.findPermittedInOrganizationPaged(
-            PageRequest.of(pageNum, 100),
-            search,
-          )
+        val projects = projectService.findPermittedInOrganizationPaged(PageRequest.of(pageNum, 100), search)
         val result =
           pagedResponse(projects) { p ->
             mapOf(
@@ -69,8 +69,10 @@ class ProjectMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "create_project",
+      "Create project",
+      McpToolEffect.ADDITIVE,
       "Create a new Tolgee project with initial languages",
       toolSchema {
         string("name", "Project name", required = true)
@@ -83,6 +85,7 @@ class ProjectMcpTools(
         }
         string("baseLanguageTag", "Tag of the base language (default: first language)")
       },
+      spec = createProjectSpec,
     ) { request ->
       mcpRequestContext.executeAs(createProjectSpec) {
         val args = request.arguments
@@ -119,13 +122,16 @@ class ProjectMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "get_project_language_statistics",
+      "Get project language statistics",
+      McpToolEffect.READ_ONLY,
       "Get translation status and progress for each language in a project. " +
         "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
       },
+      spec = getLanguageStatsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {
         val languages = languageService.findAll(projectHolder.project.id)
