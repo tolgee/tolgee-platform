@@ -31,6 +31,13 @@ describe('Branch management', () => {
     branchesSection.assertBranchExists('e2e-branch');
   });
 
+  it('creates a protected branch', () => {
+    branchesSection.visit(projectId);
+    branchesSection.createBranch('release', { protected: true });
+    branchesSection.assertBranchExists('release');
+    branchesSection.assertBranchIsProtected('release');
+  });
+
   it('renames an existing branch', () => {
     branchesSection.visit(projectId);
     branchesSection.renameBranch('feature-branch', 'feature-branch-renamed');

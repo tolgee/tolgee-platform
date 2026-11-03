@@ -137,6 +137,7 @@ declare namespace DataCy {
         "billing-progress-label-item": true;
         "branch-default-chip": true;
         "branch-name-input": true;
+        "branch-protected-checkbox": true;
         "branch-protected-icon": true;
         "branch-select-item": true;
         "branch-selector": true;
