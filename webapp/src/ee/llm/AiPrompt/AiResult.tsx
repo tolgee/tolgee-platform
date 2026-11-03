@@ -10,6 +10,7 @@ import { Code02 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
+import { components } from 'tg.service/apiSchema.generated';
 import { Label } from './Label';
 import { AiPlaygroundPreview } from 'tg.views/projects/translations/translationVisual/AiPlaygroundPreview';
 
@@ -25,22 +26,43 @@ const StyledDescription = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+type AiReviewIssueModel = components['schemas']['AiReviewIssueModel'];
+
 type Props = {
   raw: string | undefined;
   json: Record<string, string | undefined> | undefined;
   isPlural: boolean;
   locale: string;
   loading: boolean;
+  promptType?: 'TRANSLATE' | 'REVIEW';
+  issues?: AiReviewIssueModel[] | null;
+  score?: number | null;
 };
 
-export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
+export const AiResult = ({
+  raw,
+  json,
+  isPlural,
+  locale,
+  loading,
+  promptType,
+  issues,
+  score,
+}: Props) => {
   const { t } = useTranslate();
   const [_mode, setMode] = useLocalStorageState({
     key: 'aiPlaygroundResultMode',
     initial: 'translation',
   });
 
-  const mode = json?.output ? _mode : 'raw';
+  const isReview = promptType === 'REVIEW';
+  const reviewIssues = isReview ? issues ?? undefined : undefined;
+  const reviewScore = isReview ? score ?? undefined : undefined;
+
+  const hasParsedResult = isReview
+    ? reviewScore !== undefined
+    : Boolean(json?.output);
+  const mode = hasParsedResult ? _mode : 'raw';
 
   return (
     <Box display="grid">
@@ -57,7 +79,7 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
               <IconButton
                 sx={{ marginY: -1 }}
                 color={mode === 'translation' ? undefined : 'primary'}
-                disabled={!json?.output}
+                disabled={!hasParsedResult}
                 onClick={() =>
                   setMode(_mode === 'translation' ? 'raw' : 'translation')
                 }
@@ -76,20 +98,30 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
           <Skeleton variant="text" sx={{ fontSize: 36 }} />
           <Skeleton variant="text" sx={{ width: '75%' }} />
         </>
-      ) : !raw && !json ? (
+      ) : !raw && !json && !hasParsedResult ? (
         <StyledDescription sx={{ fontStyle: 'italic' }}>
           {t('ai_playground_result_empty')}
         </StyledDescription>
       ) : mode === 'raw' ? (
         <Box display="grid" gap={1}>
           <StyledPre data-cy="ai-prompt-result-raw">{raw}</StyledPre>
-          {!json?.output && (
+          {!hasParsedResult && (
             <Box display="grid">
               <Alert color="warning" icon={false}>
                 <T keyName="ai_playground_result_not_json_warning" />
               </Alert>
             </Box>
           )}
+        </Box>
+      ) : isReview ? (
+        <Box display="grid" gap={1} data-cy="ai-prompt-result-review">
+          <AiPlaygroundPreview
+            locale={locale}
+            isPlural={isPlural}
+            translation={undefined}
+            score={reviewScore}
+            issues={reviewIssues}
+          />
         </Box>
       ) : (
         <Box display="grid" gap={1} data-cy="ai-prompt-result-translation">

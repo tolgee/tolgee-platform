@@ -179,15 +179,28 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
         model = "gpt-test"
         issues =
           mutableListOf(
-            AiReviewIssue("critical", "accuracy", "Wrong meaning", -35),
-            AiReviewIssue("minor", "style", "Awkward wording", -10),
+            AiReviewIssue("critical", "accuracy", "Wrong meaning", 35),
+            AiReviewIssue("minor", "style", "Awkward wording", 10),
           )
       }
 
-      addKey { name = "key_untagged" }.build {
+      val untaggedKey = addKey { name = "key_untagged" }
+      untaggedKey.build {
         addTranslation("en", "Untagged source")
         addTranslation("de", "Text ohne Tags")
         addTranslation("fr", "Texte sans tags")
+      }
+      addAiPlaygroundResult {
+        this.user = this@AiReviewE2eTestData.user
+        this.project = projectBuilder.self
+        this.key = untaggedKey.self
+        this.language = german
+        this.score = 55
+        this.issues =
+          mutableListOf(
+            AiReviewIssue("critical", "accuracy", "Wrong meaning", 35),
+            AiReviewIssue("minor", "style", "Awkward wording", 10),
+          )
       }
       addKey { name = "key_not_reviewed" }.build {
         addTag("ui")

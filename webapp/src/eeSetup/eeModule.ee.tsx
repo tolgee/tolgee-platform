@@ -81,7 +81,7 @@ import { OperationUnassignTranslationLabel } from '../ee/batchOperations/Operati
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { OperationQaRecheck } from '../ee/qa/components/OperationQaRecheck';
-import { OperationAiReview } from '../ee/aiReview/batch/OperationAiReview';
+import { OperationAiReview } from 'tg.ee.module/aiReview/batch/OperationAiReview';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -105,15 +105,16 @@ export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
-export { AiReviewRulesView } from '../ee/aiReview/rules/AiReviewRulesView';
-export { useAiReviewEnabled } from '../ee/aiReview/hooks/useAiReviewEnabled';
-export { AiReviewCellButton } from '../ee/aiReview/translations/AiReviewCellButton';
-export { isAiReviewBadgeVisible } from '../ee/aiReview/translations/aiReviewVisibility';
+export { AiReviewRulesView } from 'tg.ee.module/aiReview/rules/AiReviewRulesView';
+export { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
+export { AiReviewCellButton } from 'tg.ee.module/aiReview/translations/AiReviewCellButton';
+export { isAiReviewBadgeVisible } from 'tg.ee.module/aiReview/translations/aiReviewVisibility';
 export {
   SubfilterAiReview,
   getAiReviewFiltersLength,
   getAiReviewFiltersName,
-} from '../ee/aiReview/translations/SubfilterAiReview';
+} from 'tg.ee.module/aiReview/translations/SubfilterAiReview';
+export { AiReviewIssueList } from 'tg.ee.module/aiReview/translations/AiReviewIssueList';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
