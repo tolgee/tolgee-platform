@@ -78,6 +78,8 @@ declare namespace DataCy {
         "ai-prompt-rendered-expand-button": true;
         "ai-prompt-result-raw": true;
         "ai-prompt-result-translation": true;
+        "ai-prompt-review-chip": true;
+        "ai-prompt-review-criteria": true;
         "ai-prompt-save-as-field-name": true;
         "ai-prompt-save-as-field-use-as-default": true;
         "ai-prompt-save-as-new-button": true;
@@ -88,6 +90,9 @@ declare namespace DataCy {
         "ai-prompt-show-result-toggle": true;
         "ai-prompt-tab-advanced": true;
         "ai-prompt-tab-basic": true;
+        "ai-prompt-type-review": true;
+        "ai-prompt-type-switch": true;
+        "ai-prompt-type-translate": true;
         "ai-prompts-add-prompt": true;
         "ai-prompts-menu-item-delete": true;
         "ai-prompts-menu-item-rename": true;
@@ -111,6 +116,8 @@ declare namespace DataCy {
         "ai-review-popover-rule": true;
         "ai-review-popover-score": true;
         "ai-review-popover-status": true;
+        "ai-review-prompt-delete-warning": true;
+        "ai-review-prompt-save-warning": true;
         "ai-review-rule-backlog": true;
         "ai-review-rule-counts-active": true;
         "ai-review-rule-counts-dry-run": true;
@@ -557,6 +564,8 @@ declare namespace DataCy {
         "mt-language-dialog-formality-select": true;
         "mt-language-dialog-formality-select-item": true;
         "mt-language-dialog-primary-radio": true;
+        "mt-language-dialog-prompt-item": true;
+        "mt-language-dialog-prompt-select": true;
         "mt-language-dialog-save": true;
         "mt-language-dialog-service-label": true;
         "namespace-value": true;

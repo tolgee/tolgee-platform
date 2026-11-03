@@ -69,6 +69,7 @@ export const LanguageSettingsDialog = ({
     path: { projectId: project.id },
     query: {
       size: 1000,
+      type: 'TRANSLATE',
     },
     options: {
       enabled: Boolean(promptEnabled),
