@@ -1844,6 +1844,8 @@ export interface components {
        * @description Branch merge id
        */
       id: number;
+      /** @description The target branch is the source's child, so this session updates it from its origin */
+      isUpdate: boolean;
       /**
        * Format: int32
        * @description Key additions count
@@ -1958,6 +1960,11 @@ export interface components {
       merge?: components["schemas"]["BranchMergeRefModel"];
       /** @description Human-readable name of the branch. Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page') */
       name: string;
+      /**
+       * Format: int64
+       * @description Id of the origin branch, null for the default branch or when the origin was deleted
+       */
+      originBranchId?: number;
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
       update?: components["schemas"]["BranchMergeRefModel"];
