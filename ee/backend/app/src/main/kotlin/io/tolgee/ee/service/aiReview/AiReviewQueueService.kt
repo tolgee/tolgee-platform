@@ -33,6 +33,7 @@ class AiReviewQueueService(
   private val languageService: LanguageService,
   private val batchJobService: BatchJobService,
   private val entityManager: EntityManager,
+  private val websocketPublisher: AiReviewWebsocketPublisher,
 ) {
   /**
    * The old row is deleted even when AI_REVIEW is off: a row must never describe text it did
@@ -52,6 +53,7 @@ class AiReviewQueueService(
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
 
     val queued = mutableListOf<Long>()
+    val updates = mutableListOf<AiReviewUpdate>()
     translationIds.forEach { translationId ->
       val translation =
         entityManager.find(Translation::class.java, translationId) ?: return@forEach
@@ -66,15 +68,27 @@ class AiReviewQueueService(
         // which Hibernate would otherwise order first into the unique translation_id.
         entityManager.flush()
       }
-      if (!eligible) return@forEach
-
-      val decision = evaluator.evaluate(translation, activeOnly = aiManaged)
-      if (decision !is RuleDecision.Review) return@forEach
+      val requeue =
+        eligible && evaluator.evaluate(translation, activeOnly = aiManaged) is RuleDecision.Review
+      if (oldRow != null || requeue) {
+        updates +=
+          AiReviewUpdate(
+            translationId = translation.id,
+            keyId = translation.key.id,
+            languageTag = translation.language.tag,
+            status = if (requeue) AiReviewStatus.PENDING else null,
+            score = null,
+            dryRun = false,
+            lastFailed = false,
+          )
+      }
+      if (!requeue) return@forEach
 
       queue(translation)
       queued += translationId
     }
     if (queued.isNotEmpty()) entityManager.flush()
+    websocketPublisher.publishAfterCommit(projectId, updates)
     startJobsForReady(projectId, queued)
   }
 

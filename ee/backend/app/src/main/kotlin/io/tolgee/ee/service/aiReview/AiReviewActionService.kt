@@ -21,6 +21,7 @@ class AiReviewActionService(
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
+  private val websocketPublisher: AiReviewWebsocketPublisher,
 ) {
   @Transactional
   fun confirm(
@@ -37,25 +38,39 @@ class AiReviewActionService(
   fun get(translationId: Long): TranslationAiReview =
     reviewRepository.findByTranslationId(translationId) ?: throw NotFoundException()
 
-  /**
-   * Any human un-review of an AI approval counts as a rejection, so the rejected metric stays
-   * complete. The system's own demotions never arrive here.
-   */
   @Transactional
   fun markRejectedByStateChange(
     translationIds: Collection<Long>,
     resolvedById: Long?,
   ) {
     var changed = false
-    translationIds.forEach { translationId ->
-      val row = reviewRepository.findByTranslationId(translationId) ?: return@forEach
-      if (row.status != AiReviewStatus.APPROVED) return@forEach
-      resolve(row, AiReviewStatus.REJECTED, resolvedById)
-      changed = true
+    translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      reviewRepository.findAllByTranslationIdIn(chunk).forEach { row ->
+        if (row.status != AiReviewStatus.APPROVED) return@forEach
+        resolve(row, AiReviewStatus.REJECTED, resolvedById)
+        publishRow(row)
+        changed = true
+      }
     }
-    // The activity event fires after the last flush of its transaction, so pending changes would
-    // be silently lost at commit.
     if (changed) entityManager.flush()
+  }
+
+  private fun publishRow(row: TranslationAiReview) {
+    val translation = row.translation
+    websocketPublisher.publishAfterCommit(
+      translation.key.project.id,
+      listOf(
+        AiReviewUpdate(
+          translationId = translation.id,
+          keyId = translation.key.id,
+          languageTag = translation.language.tag,
+          status = row.status,
+          score = row.score,
+          dryRun = false,
+          lastFailed = row.lastFailureReason != null,
+        ),
+      ),
+    )
   }
 
   private fun resolveApproval(
@@ -70,6 +85,7 @@ class AiReviewActionService(
     }
     translationService.setStateBatch(translation, state)
     resolve(row, status, userId)
+    publishRow(row)
     return row
   }
 
