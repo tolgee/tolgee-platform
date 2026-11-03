@@ -9,9 +9,9 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 
-import { AiReviewBadge } from './AiReviewBadge';
-import { AiReviewIssueList } from './AiReviewIssueList';
-import { useAiReviewDetails } from './useAiReviewDetails';
+import { AiReviewBadge } from 'tg.ee.module/aiReview/translations/AiReviewBadge';
+import { AiReviewIssueList } from 'tg.ee.module/aiReview/translations/AiReviewIssueList';
+import { useAiReviewDetails } from 'tg.ee.module/aiReview/translations/useAiReviewDetails';
 
 type AiReviewSummary = components['schemas']['TranslationAiReviewSummaryModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
@@ -28,6 +28,23 @@ type Props = {
   auto?: boolean;
   stateChangeEnabled?: boolean;
 };
+
+function ruleMarker(details: { ruleId?: number; ruleName?: string }): string {
+  if (details.ruleId == null) {
+    return 'deleted';
+  }
+  return details.ruleName ?? 'unnamed';
+}
+
+function ruleLine(marker: string, t: ReturnType<typeof useTranslate>['t']) {
+  if (marker === 'deleted') {
+    return t('ai_review_popover_rule_deleted', 'Rule: deleted');
+  }
+  if (marker === 'unnamed') {
+    return t('ai_review_popover_rule_unnamed', 'Rule: unnamed rule');
+  }
+  return t('ai_review_popover_rule', 'Rule: {name}', { name: marker });
+}
 
 export const AiReviewPopover = ({
   anchorEl,
@@ -141,7 +158,7 @@ export const AiReviewPopover = ({
       ) : (
         <Box display="grid" gap={1}>
           <Box display="flex" justifyContent="space-between" gap={1}>
-            <Typography fontWeight={600} data-cy="ai-review-popover-status">
+            <Typography fontWeight={500} data-cy="ai-review-popover-status">
               {statusLine()}
             </Typography>
             <AiReviewBadge aiReview={aiReview} />
@@ -158,7 +175,7 @@ export const AiReviewPopover = ({
               )}
             </Typography>
           )}
-          {details.score !== undefined && (
+          {details.score != null && (
             <Typography variant="body2" data-cy="ai-review-popover-score">
               {t(
                 'ai_review_popover_score',
@@ -174,13 +191,9 @@ export const AiReviewPopover = ({
             <Typography
               variant="body2"
               data-cy="ai-review-popover-rule"
-              data-cy-rule={details.ruleName ?? 'deleted'}
+              data-cy-rule={ruleMarker(details)}
             >
-              {details.ruleName
-                ? t('ai_review_popover_rule', 'Rule: {name}', {
-                    name: details.ruleName,
-                  })
-                : t('ai_review_popover_rule_deleted', 'Rule: deleted')}
+              {ruleLine(ruleMarker(details), t)}
             </Typography>
             {details.promptName && (
               <Typography variant="body2" data-cy="ai-review-popover-prompt">
@@ -196,7 +209,7 @@ export const AiReviewPopover = ({
                 })}
               </Typography>
             )}
-            {details.reviewedAt !== undefined && (
+            {details.reviewedAt != null && (
               <Typography variant="body2" data-cy="ai-review-popover-reviewed">
                 {t('ai_review_popover_reviewed', 'Reviewed {time}', {
                   time: timeDistance(details.reviewedAt),
