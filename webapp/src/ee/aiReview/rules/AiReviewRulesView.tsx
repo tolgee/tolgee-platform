@@ -10,12 +10,13 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
-import { AiReviewRuleItem } from './AiReviewRuleItem';
-import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
+import { AiReviewRuleItem } from 'tg.ee.module/aiReview/rules/AiReviewRuleItem';
+import { AiReviewRuleDialog } from 'tg.ee.module/aiReview/rules/dialog/AiReviewRuleDialog';
+import { SourceChangeSettings } from 'tg.ee.module/aiReview/settings/SourceChangeSettings';
 import {
   AiReviewRunDialog,
   AiReviewRunVariant,
-} from '../runs/AiReviewRunDialog';
+} from 'tg.ee.module/aiReview/runs/AiReviewRunDialog';
 
 export const AiReviewRulesView = () => {
   const { t } = useTranslate();
@@ -71,8 +72,8 @@ export const AiReviewRulesView = () => {
     <ProjectLanguagesProvider>
       <Box
         display="grid"
-        marginTop="32px"
-        gap="20px"
+        marginTop={4}
+        gap={2.5}
         data-cy="ai-review-rules-view"
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -126,7 +127,7 @@ export const AiReviewRulesView = () => {
             </Box>
           </EmptyState>
         ) : (
-          <Box display="grid" gap="12px">
+          <Box display="grid" gap={1.5}>
             {rules.map((rule) => (
               <AiReviewRuleItem
                 key={rule.id}
@@ -136,6 +137,7 @@ export const AiReviewRulesView = () => {
             ))}
           </Box>
         )}
+        <SourceChangeSettings />
         {createOpen && (
           <AiReviewRuleDialog
             onClose={() => setCreateOpen(false)}
