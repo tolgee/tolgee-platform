@@ -60,7 +60,7 @@ class Branch(
   @ColumnDefault("0")
   var revision: Int = 0,
   // Restricted to the single latest promote into the origin (see lastMerge), and updates to the single
-  // latest applied update from the origin (see lastUpdate); a fetch join can't filter its collection
+  // latest update from the origin (see lastUpdate); a fetch join can't filter its collection
   // in Hibernate 7, so the restriction lives here instead of in the repository query.
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
@@ -72,7 +72,6 @@ class Branch(
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "targetBranch", fetch = FetchType.LAZY)
   @SQLRestriction(
     "id = (select max(m.id) from branch_merge m where m.target_branch_id = target_branch_id " +
-      "and m.merged_at is not null " +
       "and m.source_branch_id = (select b.origin_branch_id from branch b where b.id = m.target_branch_id))",
   )
   var updates: MutableSet<BranchMerge> = mutableSetOf(),
