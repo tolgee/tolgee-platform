@@ -104,6 +104,12 @@ export type SubfilterQaChecksProps = {
   selectedLanguages: LanguageModel[];
 };
 
+export type SubfilterAiReviewProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+};
+
 export type OnboardingSurveyGateProps = {
   children: React.ReactNode;
 };

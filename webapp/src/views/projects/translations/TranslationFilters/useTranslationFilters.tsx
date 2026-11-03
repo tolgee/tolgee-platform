@@ -17,6 +17,7 @@ const LANGUAGE_SCOPES = [
   'filterSuggestionLanguage',
   'filterTaskLanguage',
   'filterQaCheckTypeLanguage',
+  'filterAiReviewOutcomeLanguage',
 ] as const satisfies readonly (keyof FiltersInternal)[];
 
 /**
@@ -164,6 +165,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterQaChecksStale: true,
         });
+      case 'filterAiReviewOutcomes':
+        return setFilters({
+          ...filters,
+          filterAiReviewOutcomes: add(filters.filterAiReviewOutcomes, value),
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -269,6 +275,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterQaChecksStale: undefined,
         });
+      case 'filterAiReviewOutcomes':
+        return setFilters({
+          ...filters,
+          filterAiReviewOutcomes: remove(filters.filterAiReviewOutcomes, value),
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -363,6 +374,23 @@ export const useTranslationFilters = ({
           );
         });
       });
+
+    if (filters.filterAiReviewOutcomes?.length) {
+      const aiReviewLanguages = selectedLanguages.filter((tag) => {
+        switch (filters.filterAiReviewOutcomeLanguage) {
+          case undefined:
+            return true;
+          case false:
+            return tag !== baseLang;
+          default:
+            return tag === filters.filterAiReviewOutcomeLanguage;
+        }
+      });
+      if (aiReviewLanguages.length) {
+        filtersQuery.filterAiReviewStatus = filters.filterAiReviewOutcomes;
+        filtersQuery.filterAiReviewLanguage = aiReviewLanguages;
+      }
+    }
     selectedLanguages
       .filter(inLanguageScope(filters.filterTranslationLanguage))
       .forEach((tag) => {
