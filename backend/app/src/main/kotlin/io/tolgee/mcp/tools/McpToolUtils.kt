@@ -43,6 +43,7 @@ fun McpStatelessSyncServer.addTool(
   effect: McpToolEffect,
   description: String,
   schema: JsonSchema,
+  openWorld: Boolean = false,
   handler: (McpSchema.CallToolRequest) -> CallToolResult,
 ) {
   val tool =
@@ -58,6 +59,7 @@ fun McpStatelessSyncServer.addTool(
           .title(title)
           .readOnlyHint(effect.readOnly)
           .destructiveHint(effect.destructive)
+          .openWorldHint(openWorld)
           .build(),
       ).build()
 

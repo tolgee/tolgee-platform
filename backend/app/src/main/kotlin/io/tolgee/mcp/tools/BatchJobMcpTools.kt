@@ -76,6 +76,7 @@ class BatchJobMcpTools(
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
+      openWorld = true,
     ) { request ->
       mcpRequestContext.executeAs(machineTranslateSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")

@@ -31,6 +31,7 @@ class McpToolAnnotationsTest : AbstractMcpTest() {
       assertThat(annotations).describedAs("annotations of ${tool.name()}").isNotNull
       assertThat(annotations.readOnlyHint()).describedAs("readOnlyHint of ${tool.name()}").isNotNull
       assertThat(annotations.destructiveHint()).describedAs("destructiveHint of ${tool.name()}").isNotNull
+      assertThat(annotations.openWorldHint()).describedAs("openWorldHint of ${tool.name()}").isNotNull
       assertThat(annotations.readOnlyHint() && annotations.destructiveHint())
         .describedAs("${tool.name()} is both read-only and destructive")
         .isFalse()
@@ -45,6 +46,13 @@ class McpToolAnnotationsTest : AbstractMcpTest() {
     assertThat(tools["create_keys"]!!.annotations().readOnlyHint()).isFalse()
     assertThat(tools["create_keys"]!!.annotations().destructiveHint()).isFalse()
     assertThat(tools["delete_keys"]!!.annotations().destructiveHint()).isTrue()
+  }
+
+  @Test
+  fun `only machine translation reaches services outside Tolgee`() {
+    val openWorldTools = listAllTools().filter { it.annotations().openWorldHint() }.map { it.name() }
+
+    assertThat(openWorldTools).isEqualTo(listOf("machine_translate"))
   }
 
   /** A personal access token gets the full list; OAuth and anonymous clients get a shorter one. */
