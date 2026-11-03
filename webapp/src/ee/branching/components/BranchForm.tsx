@@ -1,8 +1,9 @@
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { components } from 'tg.service/apiSchema.generated';
 import React, { FC } from 'react';
-import { Box } from '@mui/material';
+import { Box, FormControlLabel, Typography } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { Checkbox } from 'tg.component/common/form/fields/Checkbox';
 import { FieldLabel } from 'tg.component/FormField';
 import { T, useTranslate } from '@tolgee/react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
@@ -14,6 +15,7 @@ type BranchModel = components['schemas']['BranchModel'];
 export type BranchFormValues = {
   name: string;
   originBranchId: number;
+  protected: boolean;
 };
 
 export type BranchFormProps = {
@@ -33,6 +35,7 @@ export const BranchForm: FC<React.PropsWithChildren<BranchFormProps>> = ({
   const initValues = {
     name: '',
     originBranchId: 0,
+    protected: false,
   } satisfies BranchFormValues;
 
   const onSubmit = (values: BranchFormValues) => {
@@ -70,6 +73,25 @@ export const BranchForm: FC<React.PropsWithChildren<BranchFormProps>> = ({
             </FieldLabel>
             <BranchSelectField name="originBranchId" />
           </Box>
+        </Box>
+        <Box display="grid">
+          <FormControlLabel
+            control={
+              <Checkbox name="protected" data-cy="branch-protected-checkbox" />
+            }
+            label={
+              <T
+                keyName="branch_form_protect_label"
+                defaultValue="Protect this branch"
+              />
+            }
+          />
+          <Typography variant="caption" color="textSecondary">
+            <T
+              keyName="branch_form_protect_hint"
+              defaultValue='Only members with the "Write to protected branch" permission can edit keys, import into it, or merge and update into it.'
+            />
+          </Typography>
         </Box>
       </Box>
     </StandardForm>
