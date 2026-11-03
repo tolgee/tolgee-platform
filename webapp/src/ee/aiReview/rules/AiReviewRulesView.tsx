@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Plus } from '@untitled-ui/icons-react';
@@ -9,8 +9,13 @@ import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useProjectContext } from 'tg.hooks/ProjectContext';
 import { AiReviewRuleItem } from './AiReviewRuleItem';
 import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
+import {
+  AiReviewRunDialog,
+  AiReviewRunVariant,
+} from '../runs/AiReviewRunDialog';
 
 export const AiReviewRulesView = () => {
   const { t } = useTranslate();
@@ -19,12 +24,29 @@ export const AiReviewRulesView = () => {
   const { satisfiesPermission } = useProjectPermissions();
   const canEdit = satisfiesPermission('prompts.edit');
   const [createOpen, setCreateOpen] = useState(false);
+  const [run, setRun] = useState<{
+    ruleId: number;
+    variant: AiReviewRunVariant;
+  }>();
 
   const rulesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/ai-review-rules',
     method: 'get',
     path: { projectId: project.id },
   });
+
+  const batchOperations = useProjectContext((c) => c.batchOperations);
+  const finishedAiReviewJobs =
+    batchOperations?.filter(
+      (operation) =>
+        operation.type === 'AI_REVIEW' && operation.status === 'SUCCESS'
+    ).length ?? 0;
+
+  useEffect(() => {
+    if (finishedAiReviewJobs > 0) {
+      rulesLoadable.refetch();
+    }
+  }, [finishedAiReviewJobs]);
 
   const promptsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/prompts',
@@ -115,7 +137,22 @@ export const AiReviewRulesView = () => {
           </Box>
         )}
         {createOpen && (
-          <AiReviewRuleDialog onClose={() => setCreateOpen(false)} />
+          <AiReviewRuleDialog
+            onClose={() => setCreateOpen(false)}
+            onRequestRun={(saved) =>
+              setRun({
+                ruleId: saved.id,
+                variant: saved.mode === 'DRY_RUN' ? 'score' : 'review',
+              })
+            }
+          />
+        )}
+        {run && (
+          <AiReviewRunDialog
+            variant={run.variant}
+            request={{ ruleId: run.ruleId }}
+            onClose={() => setRun(undefined)}
+          />
         )}
       </Box>
     </ProjectLanguagesProvider>

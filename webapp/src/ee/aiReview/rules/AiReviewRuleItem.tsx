@@ -3,6 +3,7 @@ import {
   Box,
   Chip,
   IconButton,
+  Link as MuiLink,
   Menu,
   MenuItem,
   Paper,
@@ -21,6 +22,10 @@ import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { AiReviewRuleScopeChips } from './AiReviewRuleScopeChips';
 import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
+import {
+  AiReviewRunDialog,
+  AiReviewRunVariant,
+} from '../runs/AiReviewRunDialog';
 import { useRuleLabel } from './useRuleLabel';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
@@ -51,7 +56,9 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
   const label = ruleLabel(rule);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [runVariant, setRunVariant] = useState<AiReviewRunVariant>();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const canRun = satisfiesPermission('translations.batch-machine');
 
   const enabledLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/ai-review-rules/{ruleId}/enabled',
@@ -134,7 +141,10 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
             )}
           </StyledInfoLine>
         ) : (
-          <StyledInfoLine data-cy="ai-review-rule-counts-active">
+          <StyledInfoLine
+            data-cy="ai-review-rule-counts-active"
+            data-cy-failed={String(rule.counts.failed)}
+          >
             {t(
               'ai_review_rule_counts_active',
               '{autoReviewed} auto-reviewed · {rejected} rejected · {failed} failed',
@@ -143,6 +153,18 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
                 rejected: rule.counts.rejected,
                 failed: rule.counts.failed,
               }
+            )}
+            {canRun && rule.counts.failed > 0 && (
+              <>
+                {' · '}
+                <MuiLink
+                  component="button"
+                  onClick={() => setRunVariant('retry')}
+                  data-cy="ai-review-rule-retry-failed"
+                >
+                  {t('ai_review_rule_retry_failed', 'Retry failed reviews')}
+                </MuiLink>
+              </>
             )}
           </StyledInfoLine>
         )}
@@ -159,6 +181,20 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
                   '{count} existing translations not reviewed',
                   { count: rule.counts.backlog }
                 )}
+            {canRun && (
+              <>
+                {' · '}
+                <MuiLink
+                  component="button"
+                  onClick={() => setRunVariant(isDryRun ? 'score' : 'review')}
+                  data-cy="ai-review-rule-review-now"
+                >
+                  {isDryRun
+                    ? t('ai_review_rule_score_now', 'Score now')
+                    : t('ai_review_rule_review_now', 'Review now')}
+                </MuiLink>
+              </>
+            )}
           </StyledInfoLine>
         )}
       </Box>
@@ -216,7 +252,20 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
         </Menu>
       )}
       {editOpen && (
-        <AiReviewRuleDialog rule={rule} onClose={() => setEditOpen(false)} />
+        <AiReviewRuleDialog
+          rule={rule}
+          onClose={() => setEditOpen(false)}
+          onRequestRun={(saved) =>
+            setRunVariant(saved.mode === 'DRY_RUN' ? 'score' : 'review')
+          }
+        />
+      )}
+      {runVariant && (
+        <AiReviewRunDialog
+          variant={runVariant}
+          request={{ ruleId: rule.id }}
+          onClose={() => setRunVariant(undefined)}
+        />
       )}
     </StyledItem>
   );
