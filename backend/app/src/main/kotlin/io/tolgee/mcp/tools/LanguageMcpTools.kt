@@ -30,7 +30,7 @@ class LanguageMcpTools(
       McpToolEffect.READ_ONLY,
       "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
@@ -63,7 +63,7 @@ class LanguageMcpTools(
       McpToolEffect.ADDITIVE,
       "Add a new language to a Tolgee project",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("name", "Language display name (e.g. 'German')", required = true)
         string("tag", "Language tag / IETF BCP 47 code (e.g. 'de')", required = true)
         string("originalName", "Native name of the language (e.g. 'Deutsch')")

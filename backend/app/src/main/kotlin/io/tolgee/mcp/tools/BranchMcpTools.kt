@@ -50,7 +50,7 @@ class BranchMcpTools(
       McpToolEffect.READ_ONLY,
       "List branches in a Tolgee project. Returns up to 100 results per page. Only available for projects with branching enabled (enterprise feature).",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("search", "Optional: search filter for branch names")
         number("page", "Optional: page number (0-based, default 0)")
       },
@@ -84,7 +84,7 @@ class BranchMcpTools(
       McpToolEffect.ADDITIVE,
       "Create a new branch in a Tolgee project by forking from an existing branch. Only available for projects with branching enabled (enterprise feature).",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("name", "Name of the new branch", required = true)
         number("originBranchId", "ID of the branch to fork from", required = true)
       },
@@ -117,7 +117,7 @@ class BranchMcpTools(
       McpToolEffect.DESTRUCTIVE,
       "Delete a branch from a Tolgee project.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("branchName", "Name of the branch to delete", required = true)
       },
     ) { request ->

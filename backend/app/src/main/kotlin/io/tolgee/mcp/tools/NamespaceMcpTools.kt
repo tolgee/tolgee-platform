@@ -26,7 +26,7 @@ class NamespaceMcpTools(
       McpToolEffect.READ_ONLY,
       "List all namespaces in a Tolgee project. Namespaces organize translation keys into logical groups (e.g. by feature, page, or module).",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
       },
     ) { request ->
       mcpRequestContext.executeAs(listNamespacesSpec, request.arguments.getProjectId()) {

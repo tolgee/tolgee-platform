@@ -52,7 +52,7 @@ class KeyMcpTools(
       "List translation keys in a Tolgee project. " +
         "Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
@@ -85,7 +85,7 @@ class KeyMcpTools(
         "Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("query", "Search query (matches key name or translation text)", required = true)
         string("languageTag", "Optional: language tag to search translations in")
         string("branch", "Optional: branch name")
@@ -124,7 +124,7 @@ class KeyMcpTools(
         "Keys that already exist are silently skipped — their translations and tags are not updated. " +
         "Use update_key and set_translation to modify existing keys.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         objectArray("keys", "List of keys to create", required = true) {
           string("name", "Key name (e.g. 'home.welcome_message')", required = true)
           string("namespace", "Optional: namespace for the key (overrides top-level namespace)")
@@ -161,7 +161,7 @@ class KeyMcpTools(
       McpToolEffect.READ_ONLY,
       "Get a translation key's metadata (name, namespace, description) by its name. To get the key's translations, use get_translations.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
@@ -198,7 +198,7 @@ class KeyMcpTools(
       McpToolEffect.DESTRUCTIVE,
       "Update an existing translation key's name, namespace, or description",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "Current key name (used to find the key)", required = true)
         string("keyNamespace", "Optional: current namespace of the key (used to find the key)")
         string("keyBranch", "Optional: branch name (used to find the key, for branching projects)")
@@ -244,7 +244,7 @@ class KeyMcpTools(
       McpToolEffect.DESTRUCTIVE,
       "Delete translation keys from a Tolgee project.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         stringArray("keyNames", "Names of the keys to delete", required = true)
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")

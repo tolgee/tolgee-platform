@@ -33,7 +33,7 @@ class TranslationMcpTools(
       McpToolEffect.READ_ONLY,
       "Get translations for a specific key in a Tolgee project. Returns translations in all project languages, or only the specified languages if provided.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
@@ -87,7 +87,7 @@ class TranslationMcpTools(
       McpToolEffect.DESTRUCTIVE,
       "Set or update translations for a key in one or more languages. The key must already exist — use create_keys to create it first.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         stringMap(

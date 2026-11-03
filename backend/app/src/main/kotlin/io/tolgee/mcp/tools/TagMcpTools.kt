@@ -34,7 +34,7 @@ class TagMcpTools(
       McpToolEffect.READ_ONLY,
       "List all tags used in a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("search", "Optional: search filter for tag names")
         number("page", "Optional: page number (0-based, default 0)")
       },
@@ -65,7 +65,7 @@ class TagMcpTools(
       McpToolEffect.ADDITIVE,
       "Add tags to translation keys. Creates tags if they don't exist.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         stringArray("keyNames", "Names of the keys to tag", required = true)
         stringArray("tags", "Names of the tags to add", required = true)
         string("namespace", "Optional: namespace of the keys")

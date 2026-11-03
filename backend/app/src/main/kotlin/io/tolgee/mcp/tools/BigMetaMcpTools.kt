@@ -33,7 +33,7 @@ class BigMetaMcpTools(
         "producing more consistent results. Keys that appear near each other in source code " +
         "(e.g. on the same page or component) should be stored as related.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         objectArray("relatedKeysInOrder", "List of related keys in the order they appear together", required = true) {
           string("keyName", "Key name", required = true)
           string("namespace", "Optional: key namespace")

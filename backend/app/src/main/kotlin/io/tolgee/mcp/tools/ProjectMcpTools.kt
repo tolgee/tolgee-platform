@@ -144,7 +144,7 @@ class ProjectMcpTools(
       "Get translation status and progress for each language in a project. " +
         "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
       },
     ) { request ->
       mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {

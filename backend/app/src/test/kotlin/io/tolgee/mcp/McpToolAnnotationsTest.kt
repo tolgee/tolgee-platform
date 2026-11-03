@@ -55,6 +55,21 @@ class McpToolAnnotationsTest : AbstractMcpTest() {
     assertThat(openWorldTools).isEqualTo(listOf("machine_translate"))
   }
 
+  @Test
+  fun `the projectId parameter explains when it can be left out`() {
+    val descriptions =
+      listAllTools().mapNotNull { tool ->
+        val properties = tool.inputSchema()["properties"] as Map<*, *>
+        val projectId = properties["projectId"] as? Map<*, *> ?: return@mapNotNull null
+        tool.name() to projectId["description"]
+      }
+
+    assertThat(descriptions).isNotEmpty
+    descriptions.forEach { (name, description) ->
+      assertThat(description.toString()).describedAs("projectId of $name").contains("OAuth token")
+    }
+  }
+
   /** A personal access token gets the full list; OAuth and anonymous clients get a shorter one. */
   private fun listAllTools(): List<McpSchema.Tool> = createMcpClientWithPat(data.pat.token!!).listTools().tools()
 }

@@ -41,7 +41,7 @@ class BatchJobMcpTools(
       McpToolEffect.READ_ONLY,
       "Get the status of a batch job (e.g. machine translation) by its ID. Use to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         number("jobId", "ID of the batch job", required = true)
       },
     ) { request ->
@@ -70,7 +70,7 @@ class BatchJobMcpTools(
       McpToolEffect.DESTRUCTIVE,
       "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         stringArray("keyNames", "Names of keys to translate", required = true)
         stringArray("targetLanguageTags", "Language tags to translate into (e.g. ['de', 'fr'])", required = true)
         string("namespace", "Optional: namespace of the keys")
