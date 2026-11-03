@@ -27,7 +27,7 @@ describe('AI review badge', () => {
 
   function visitKey(search: string) {
     cy.visit(
-      `${HOST}/projects/${projectId}/translations?languages=en,de&search=${search}`
+      `${HOST}/projects/${projectId}/translations?languages=en&languages=de&search=${search}`
     );
   }
 

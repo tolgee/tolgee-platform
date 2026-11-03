@@ -108,6 +108,11 @@ export { AiReviewRulesView } from '../ee/aiReview/rules/AiReviewRulesView';
 export { useAiReviewEnabled } from '../ee/aiReview/hooks/useAiReviewEnabled';
 export { AiReviewCellButton } from '../ee/aiReview/translations/AiReviewCellButton';
 export { isAiReviewBadgeVisible } from '../ee/aiReview/translations/aiReviewVisibility';
+export {
+  SubfilterAiReview,
+  getAiReviewFiltersLength,
+  getAiReviewFiltersName,
+} from '../ee/aiReview/translations/SubfilterAiReview';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';

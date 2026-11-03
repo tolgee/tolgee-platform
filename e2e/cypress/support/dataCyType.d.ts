@@ -95,6 +95,7 @@ declare namespace DataCy {
         "ai-review-add-rule-button": true;
         "ai-review-badge": true;
         "ai-review-empty-state": true;
+        "ai-review-filter-item": true;
         "ai-review-issue": true;
         "ai-review-popover": true;
         "ai-review-popover-confirm": true;
