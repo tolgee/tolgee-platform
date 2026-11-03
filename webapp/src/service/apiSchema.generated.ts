@@ -1903,7 +1903,7 @@ export interface components {
        */
       uncompletedTasksCount: number;
     };
-    /** @description Last applied update of this branch from its origin */
+    /** @description Last update session of this branch from its origin, pending or applied */
     BranchMergeRefModel: {
       /**
        * Format: int64
