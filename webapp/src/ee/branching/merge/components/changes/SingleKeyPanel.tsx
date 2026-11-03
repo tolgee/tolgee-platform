@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import clsx from 'clsx';
 import {
   KeyFooterToggle,
@@ -17,6 +17,7 @@ type Props = {
   onToggleShowAll?: () => void;
   hideAllWhenFalse?: boolean;
   variant?: 'added' | 'deleted';
+  headerStart?: ReactNode;
   toggleLabels?: {
     showAll: string;
     showLess: string;
@@ -30,12 +31,17 @@ export const SingleKeyPanel: FC<React.PropsWithChildren<Props>> = ({
   onToggleShowAll,
   hideAllWhenFalse,
   variant,
+  headerStart,
   toggleLabels,
 }) => (
   <KeyWrapper className={clsx(variant)}>
     <KeyPanel>
       <KeyHeader>
-        <MergeKeyHeader data={keyData} variant={variant} />
+        <MergeKeyHeader
+          data={keyData}
+          variant={variant}
+          headerStart={headerStart}
+        />
       </KeyHeader>
       <KeyTranslations
         keyData={keyData}

@@ -54,6 +54,11 @@ export const useMergeData = (
     method: 'put',
   });
 
+  const excludeMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/exclude',
+    method: 'put',
+  });
+
   const applyMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/apply',
     method: 'post',
@@ -81,6 +86,7 @@ export const useMergeData = (
     changes,
     resolveMutation,
     resolveAllMutation,
+    excludeMutation,
     applyMutation,
     deleteMutation,
     refreshPreviewMutation,

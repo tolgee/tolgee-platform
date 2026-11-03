@@ -1,6 +1,6 @@
 import { Button, Chip } from '@mui/material';
 import clsx from 'clsx';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { T } from '@tolgee/react';
 import { BranchMergeKeyModel } from '../../types';
 import {
@@ -21,6 +21,7 @@ type ConflictPanelProps = {
   showAll?: boolean;
   onToggleShowAll?: () => void;
   hideAllWhenFalse?: boolean;
+  headerStart?: ReactNode;
   toggleLabels?: {
     showAll: string;
     showLess: string;
@@ -37,12 +38,13 @@ export const ConflictKeyPanel: FC<
   showAll,
   onToggleShowAll,
   hideAllWhenFalse,
+  headerStart,
   toggleLabels,
 }) => (
   <KeyWrapper className={clsx({ accepted })}>
     <KeyPanel>
       <KeyHeader className={clsx({ accepted })}>
-        <MergeKeyHeader data={keyData} />
+        <MergeKeyHeader data={keyData} headerStart={headerStart} />
         <AcceptButton>
           {accepted ? (
             <Chip
