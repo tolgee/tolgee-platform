@@ -8,14 +8,26 @@ export const MergeTitle = ({ merge }: { merge: BranchMergeModel }) => {
   return (
     <>
       <Box>
-        <T
-          keyName="branch_merging_into_title"
-          params={{
-            branch: <BranchNameChipNode />,
-            sourceName: merge.sourceBranchName,
-            targetName: merge.targetBranchName,
-          }}
-        />
+        {merge.isUpdate ? (
+          <T
+            keyName="branch_updating_from_title"
+            defaultValue="Updating <branch>{targetName}</branch> from <branch>{sourceName}</branch>"
+            params={{
+              branch: <BranchNameChipNode />,
+              sourceName: merge.sourceBranchName,
+              targetName: merge.targetBranchName,
+            }}
+          />
+        ) : (
+          <T
+            keyName="branch_merging_into_title"
+            params={{
+              branch: <BranchNameChipNode />,
+              sourceName: merge.sourceBranchName,
+              targetName: merge.targetBranchName,
+            }}
+          />
+        )}
       </Box>
     </>
   );
