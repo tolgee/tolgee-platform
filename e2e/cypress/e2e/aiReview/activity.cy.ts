@@ -67,18 +67,23 @@ describe('AI reviewer in activity', () => {
     waitForGlobalLoading();
 
     visitDashboard();
-    cy.gcy('activity-compact')
-      .contains('Created AI review rule')
-      .should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Updated AI review rule')
-      .should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Deleted AI review rule')
-      .should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Updated AI review source change settings')
-      .should('be.visible');
+    // activity-compact uses display: contents, so it has no own box to be "visible".
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'AI_REVIEW_RULE_CREATE',
+    }).should('exist');
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'AI_REVIEW_RULE_UPDATE',
+    }).should('exist');
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'AI_REVIEW_RULE_DELETE',
+    }).should('exist');
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'AI_REVIEW_SETTINGS_UPDATE',
+    }).should('exist');
   });
 
   it('an automatic review shows the AI reviewer without an author', () => {
@@ -86,19 +91,19 @@ describe('AI reviewer in activity', () => {
       `${HOST}/projects/${projectId}/translations?languages=en&languages=de&search=key_not_reviewed`
     );
     editCell('Noch nicht geprüft', 'Neuer Text');
+    gcyAdvanced(
+      { value: 'ai-review-badge', status: 'APPROVED' },
+      { timeout: 30_000 }
+    ).should('be.visible');
     visitDashboard();
-    cy.gcy('activity-system-actor', { timeout: 30_000 }).should('be.visible');
-    cy.gcy('activity-system-actor')
-      .first()
-      .closestDcy('activity-compact')
-      .findDcy('activity-started-by')
-      .should('not.exist');
+    const startedBy: DataCy.Value = 'activity-started-by';
+    gcyAdvanced({ value: 'activity-compact', type: 'AI_REVIEW' })
+      .not(`:has([data-cy=${startedBy}])`)
+      .findDcy('activity-system-actor')
+      .should('be.visible');
   });
 
-  // The run revision is seeded by the e2e data controller. A live run finishes its
-  // activity only after an async finalize step, which the dashboard does not poll, so a
-  // live-run assertion here would be racy. The backend finalize behavior is covered by
-  // AiReviewRunTest.
+  // Asserts on seeded data: a live run finalizes its activity asynchronously, so it would race.
   it('a run shows the AI reviewer and who started it', () => {
     visitDashboard();
     cy.gcy('activity-started-by', { timeout: 30_000 }).should('be.visible');
