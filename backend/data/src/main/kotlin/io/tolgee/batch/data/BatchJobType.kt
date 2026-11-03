@@ -50,12 +50,14 @@ enum class BatchJobType(
   val systemActor: SystemActor? = null,
 ) {
   AI_REVIEW(
+    activityType = ActivityType.AI_REVIEW,
     maxRetries = 3,
     processor = AiReviewChunkProcessor::class,
     defaultExclusive = false,
     systemActor = SystemActor.AI_REVIEWER,
   ),
   AI_REVIEW_DEMOTION(
+    activityType = ActivityType.AI_REVIEW_DEMOTION,
     maxRetries = 3,
     processor = AiReviewDemotionChunkProcessor::class,
     defaultExclusive = false,

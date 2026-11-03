@@ -6,11 +6,14 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.AiReviewRequest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.service.aiReview.AiReviewUpdate
+import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
@@ -19,6 +22,7 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.SystemActor
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
@@ -46,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.security.MessageDigest
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -137,7 +142,7 @@ class AiReviewJobTest : AbstractSpringTest() {
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
     val row = review(testData.deTranslation.id)!!
     row.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
-    row.score.assert.isEqualTo(50)
+    row.score.assert.isEqualTo(FAILING_SCORE)
     row.issues.assert.hasSize(1)
     row.issues[0]
       .severity.assert
@@ -200,6 +205,90 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `a missing provider gives FAILED NO_PROVIDER`() {
+    val prompt =
+      testData.projectBuilder
+        .addPrompt {
+          name = "Broken provider"
+          providerName = "missing-provider"
+          type = PromptType.REVIEW
+        }.self
+    testData.rule.prompt = prompt
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    save()
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    row.failureReason.assert.isEqualTo(AiReviewFailureReason.NO_PROVIDER)
+  }
+
+  @Test
+  fun `a broken prompt template gives FAILED TEMPLATE_ERROR`() {
+    val prompt =
+      testData.projectBuilder
+        .addPrompt {
+          name = "Broken template"
+          providerName = "server-provider"
+          type = PromptType.REVIEW
+          template = "{{#if}}"
+        }.self
+    testData.rule.prompt = prompt
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    save()
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    row.failureReason.assert.isEqualTo(AiReviewFailureReason.TEMPLATE_ERROR)
+  }
+
+  @Test
+  fun `a provider error gives FAILED PROVIDER_ERROR`() {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    save()
+    whenever(openaiApiService.translate(any(), any(), any()))
+      .thenThrow(FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf("boom")))
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    row.failureReason.assert.isEqualTo(AiReviewFailureReason.PROVIDER_ERROR)
+  }
+
+  @Test
+  fun `the claim guard lets only one job claim a row`() {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    save()
+    val textHash = review(testData.deTranslation.id)!!.textHash
+
+    claim(jobId = 1, textHash).assert.isEqualTo(1)
+    claim(jobId = 2, textHash).assert.isEqualTo(0)
+    claim(jobId = 1, textHash).assert.isEqualTo(1)
+  }
+
+  private fun claim(
+    jobId: Long,
+    textHash: String,
+  ): Int =
+    executeInNewTransaction(platformTransactionManager) {
+      translationAiReviewRepository.claimForJob(
+        jobId = jobId,
+        translationId = testData.deTranslation.id,
+        textHash = textHash,
+        ruleId = testData.rule.id,
+        ruleMode = AiReviewRuleMode.ACTIVE.name,
+        promptId = null,
+        promptName = "Default review prompt",
+        promptRevision = null,
+        threshold = 85,
+      )
+    }
+
+  @Test
   fun `failed re-review of an APPROVED row keeps everything and sets the last failure`() {
     approvedReviewedTranslation(reReviewRequested = true)
     save()
@@ -211,7 +300,7 @@ class AiReviewJobTest : AbstractSpringTest() {
     translation.state.assert.isEqualTo(TranslationState.REVIEWED)
     val row = review(testData.deTranslation.id)!!
     row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
-    row.score.assert.isEqualTo(90)
+    row.score.assert.isEqualTo(APPROVED_SCORE)
     row.lastFailureReason.assert.isEqualTo(AiReviewFailureReason.PARSE_ERROR)
     row.lastFailedAt.assert.isNotNull()
     row.reReviewRequested.assert.isFalse()
@@ -250,7 +339,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
     val row = review(testData.deTranslation.id)!!
     row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
-    row.score.assert.isEqualTo(90)
+    row.score.assert.isEqualTo(APPROVED_SCORE)
     row.threshold.assert.isEqualTo(85)
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
   }
@@ -281,7 +370,7 @@ class AiReviewJobTest : AbstractSpringTest() {
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
     val row = review(testData.deTranslation.id)!!
     row.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
-    row.score.assert.isEqualTo(50)
+    row.score.assert.isEqualTo(FAILING_SCORE)
   }
 
   @Test
@@ -316,17 +405,13 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `skips non-claimable rows and rows with a stale hash without calling the LLM`() {
+  fun `skips non-claimable rows without calling the LLM`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.CONFIRMED, 95)
-    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.PENDING, null) {
-      textHash = "0000000000000000000000000000000000000000000000000000000000000000"
-    }
     save()
 
-    runJob(testData.deTranslation.id, testData.frTranslation.id)
+    runJob(testData.deTranslation.id)
 
     review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.CONFIRMED)
-    review(testData.frTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.PENDING)
     verify(openaiApiService, never()).translate(any(), any(), any())
   }
 
@@ -356,7 +441,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `text changed during the LLM call drops the result`() {
+  fun `text changed during the LLM call drops the result and reviews the new text`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
     save()
     whenever(openaiApiService.translate(any(), any(), any())).thenAnswer {
@@ -370,12 +455,13 @@ class AiReviewJobTest : AbstractSpringTest() {
 
     runJob(testData.deTranslation.id)
 
-    val translation = translation(testData.deTranslation.id)
-    translation.state.assert.isEqualTo(TranslationState.TRANSLATED)
-    translation.text.assert.isEqualTo("Sofort zahlen")
-    val row = review(testData.deTranslation.id)!!
-    row.status.assert.isEqualTo(AiReviewStatus.PENDING)
-    row.score.assert.isNull()
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val row = review(testData.deTranslation.id)!!
+      row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+      row.textHash.assert.isEqualTo(sha256Hex("Sofort zahlen"))
+    }
+    translation(testData.deTranslation.id).text.assert.isEqualTo("Sofort zahlen")
+    verify(openaiApiService, times(2)).translate(any(), any(), any())
   }
 
   @Test
@@ -477,12 +563,12 @@ class AiReviewJobTest : AbstractSpringTest() {
     val index = destination.allValues.indexOf("/projects/${testData.project.id}/ai-review-updated")
     index.assert.isGreaterThanOrEqualTo(0)
     @Suppress("UNCHECKED_CAST")
-    val updates = event.allValues[index].data as List<Map<String, Any?>>
+    val updates = event.allValues[index].data as List<AiReviewUpdate>
     updates.assert.hasSize(1)
-    updates[0]["translationId"].assert.isEqualTo(testData.deTranslation.id)
-    updates[0]["status"].assert.isEqualTo(AiReviewStatus.APPROVED)
-    updates[0]["score"].assert.isEqualTo(100)
-    updates[0]["dryRun"].assert.isEqualTo(false)
+    updates[0].translationId.assert.isEqualTo(testData.deTranslation.id)
+    updates[0].status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    updates[0].score.assert.isEqualTo(100)
+    updates[0].dryRun.assert.isEqualTo(false)
   }
 
   private fun save() {
@@ -495,7 +581,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   ) {
     testData.deTranslation.state = TranslationState.REVIEWED
     testData.deTranslation.auto = true
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, 90) {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, APPROVED_SCORE) {
       this.reReviewRequested = reReviewRequested
       this.threshold = 85
       ft(this)
@@ -557,12 +643,22 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   private fun stubPass() = stubResponse(PASS_RESPONSE)
 
-  private fun stubFail() = stubResponse(issuesResponse(points = 50))
+  private fun stubFail() = stubResponse(issuesResponse(points = 100 - FAILING_SCORE))
 
   private fun issuesResponse(points: Int) =
     """{"issues": [{"severity": "major", "category": "accuracy", "message": "Wrong.", "points": $points}]}"""
 
   companion object {
     private const val PASS_RESPONSE = """{"issues": []}"""
+
+    private const val APPROVED_SCORE = 90
+
+    private const val FAILING_SCORE = 50
   }
+
+  private fun sha256Hex(text: String): String =
+    MessageDigest
+      .getInstance("SHA-256")
+      .digest(text.toByteArray(Charsets.UTF_8))
+      .joinToString("") { "%02x".format(it) }
 }

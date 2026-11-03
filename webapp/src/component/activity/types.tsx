@@ -59,7 +59,9 @@ export type EntityEnum =
   | 'Label'
   | 'TranslationSuggestion'
   | 'TranslationQaIssue'
-  | 'Branch';
+  | 'Branch'
+  | 'AiReviewRule'
+  | 'AiReviewRuleLanguageOverride';
 
 export type FieldTypeEnum =
   | 'text'

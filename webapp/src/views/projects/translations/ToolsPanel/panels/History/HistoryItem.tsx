@@ -15,6 +15,10 @@ import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 import { UserName } from 'tg.component/common/UserName';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import {
+  SystemActorAvatar,
+  SystemActorLabel,
+} from 'tg.component/activity/SystemActor';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -100,6 +104,7 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
   const [detailOpen, setDetailOpen] = useState(false);
 
   const date = new Date(entry.timestamp);
+  const systemActor = entry.systemActor;
 
   const textChanges = entry.modifications?.['text'] as DiffInput;
   const stateChanges = entry.modifications?.['state'] as DiffInput;
@@ -118,17 +123,35 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
 
   return textDiff || stateDiff || mtProviderDiff ? (
     <StyledContainer data-cy="translation-history-item">
-      <Tooltip title={<UserName {...entry.author} />}>
-        <StyledAvatar>
-          <AvatarImg
-            owner={{
-              ...entry.author,
-              type: 'USER',
-              id: entry.author?.id as number,
-            }}
-            size={24}
-          />
-        </StyledAvatar>
+      <Tooltip
+        title={
+          systemActor ? (
+            <SystemActorLabel
+              systemActor={systemActor}
+              authorName={entry.author?.name}
+              dataCySpans={false}
+            />
+          ) : (
+            <UserName {...entry.author} />
+          )
+        }
+      >
+        {systemActor ? (
+          <StyledAvatar data-cy="activity-system-actor">
+            <SystemActorAvatar systemActor={systemActor} />
+          </StyledAvatar>
+        ) : (
+          <StyledAvatar>
+            <AvatarImg
+              owner={{
+                ...entry.author,
+                type: 'USER',
+                id: entry.author?.id as number,
+              }}
+              size={24}
+            />
+          </StyledAvatar>
+        )}
       </Tooltip>
 
       <StyledChanges>

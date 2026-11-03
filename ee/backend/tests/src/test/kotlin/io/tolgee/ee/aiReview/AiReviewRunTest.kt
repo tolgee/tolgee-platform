@@ -127,6 +127,102 @@ class AiReviewRunTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a run merges the review activity into one visible AI_REVIEW revision`() {
+    save()
+
+    performAuthPost("$projectUrl/ai-review/run", runBody(ruleId = testData.rule.id)).andIsOk
+
+    waitForNotThrowing(pollTime = 200, timeout = 30_000) {
+      executeInNewTransaction(platformTransactionManager) {
+        val visible =
+          entityManager
+            .createQuery(
+              "from ActivityRevision ar where ar.projectId = :projectId " +
+                "and ar.type is not null and ar.batchJobChunkExecution is null",
+              io.tolgee.model.activity.ActivityRevision::class.java,
+            ).setParameter("projectId", testData.project.id)
+            .resultList
+        val all =
+          entityManager
+            .createQuery(
+              "from ActivityRevision ar where ar.projectId = :projectId",
+              io.tolgee.model.activity.ActivityRevision::class.java,
+            ).setParameter("projectId", testData.project.id)
+            .resultList
+            .map {
+              "id=" + it.id + " type=" + it.type + " exec=" + it.batchJobChunkExecution?.id +
+                " job=" + it.batchJob?.id + " actor=" + it.systemActor + " author=" + it.authorId +
+                " mods=" + it.modifiedEntities.size
+            }
+        visible.assert.withFailMessage("all revisions: " + all).hasSize(1)
+        val revision = visible.single()
+        revision.type.assert.isEqualTo(io.tolgee.activity.data.ActivityType.AI_REVIEW)
+        revision.systemActor.assert.isEqualTo(SystemActor.AI_REVIEWER)
+        revision.authorId.assert.isEqualTo(testData.user.id)
+        revision.batchJob.assert.isNotNull
+        revision.modifiedEntities.any { it.entityClass == "Translation" }.assert.isTrue()
+      }
+    }
+  }
+
+  @Test
+  fun `a backlog run on the e2e dataset produces only typed AI_REVIEW revisions`() {
+    val e2eData = io.tolgee.development.testDataBuilder.data.AiReviewE2eTestData()
+    testDataService.saveTestData(e2eData.root)
+    try {
+      userAccount = e2eData.user
+      val projectId = e2eData.project.id
+
+      performAuthPost(
+        "/v2/projects/" + projectId + "/ai-review/run",
+        runBody(ruleId = e2eData.activeRule.id),
+      ).andIsOk
+
+      waitForNotThrowing(pollTime = 300, timeout = 40_000) {
+        executeInNewTransaction(platformTransactionManager) {
+          val unfinished =
+            entityManager
+              .createQuery(
+                "select count(j) from BatchJob j where j.project.id = :projectId " +
+                  "and j.status in (io.tolgee.model.batch.BatchJobStatus.PENDING, " +
+                  "io.tolgee.model.batch.BatchJobStatus.RUNNING)",
+                java.lang.Long::class.java,
+              ).setParameter("projectId", projectId)
+              .singleResult
+          unfinished.assert.isEqualTo(0L)
+
+          val actorRevisions =
+            entityManager
+              .createQuery(
+                "from ActivityRevision ar where ar.projectId = :projectId and ar.systemActor is not null",
+                io.tolgee.model.activity.ActivityRevision::class.java,
+              ).setParameter("projectId", projectId)
+              .resultList
+          val dump =
+            actorRevisions.map {
+              "id=" + it.id + " type=" + it.type + " exec=" + it.batchJobChunkExecution?.id +
+                " job=" + it.batchJob?.id + " author=" + it.authorId +
+                " mods=" + it.modifiedEntities.size
+            }
+          actorRevisions.assert.withFailMessage("revisions: " + dump).isNotEmpty
+          actorRevisions
+            .all { it.type == io.tolgee.activity.data.ActivityType.AI_REVIEW && it.batchJobChunkExecution == null }
+            .assert
+            .withFailMessage("revisions: " + dump)
+            .isTrue()
+          actorRevisions
+            .any { it.authorId == e2eData.user.id }
+            .assert
+            .withFailMessage("revisions: " + dump)
+            .isTrue()
+        }
+      }
+    } finally {
+      testDataService.cleanTestData(e2eData.root)
+    }
+  }
+
+  @Test
   fun `retry failed queues the FAILED rows and failing approvals of the rule only`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.FAILED, null) {
       rule = testData.rule
