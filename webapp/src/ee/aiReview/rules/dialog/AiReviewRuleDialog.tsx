@@ -1,17 +1,11 @@
 import {
-  Box,
   Button,
   Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   FormControlLabel,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
   styled,
   Typography,
 } from '@mui/material';
@@ -21,35 +15,34 @@ import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 
-import { RuleKeysScopeSelect } from './RuleKeysScopeSelect';
-import { RuleBranchesField } from './RuleBranchesField';
-import { RuleThresholdField } from './RuleThresholdField';
-import { RuleLanguageOverrides } from './RuleLanguageOverrides';
-import { RulePromptSelect } from './RulePromptSelect';
+import { RuleKeysScopeSelect } from 'tg.ee.module/aiReview/rules/dialog/RuleKeysScopeSelect';
+import { RuleBranchesField } from 'tg.ee.module/aiReview/rules/dialog/RuleBranchesField';
+import { RuleThresholdField } from 'tg.ee.module/aiReview/rules/dialog/RuleThresholdField';
+import { RuleLanguageOverrides } from 'tg.ee.module/aiReview/rules/dialog/RuleLanguageOverrides';
+import { RulePromptSelect } from 'tg.ee.module/aiReview/rules/dialog/RulePromptSelect';
+import { RuleModeSelect } from 'tg.ee.module/aiReview/rules/dialog/RuleModeSelect';
+import { RuleLanguagesField } from 'tg.ee.module/aiReview/rules/dialog/RuleLanguagesField';
 import {
   getRuleInitialValues,
   hasThresholdOverride,
   RuleFormValues,
   ruleNeverFullyApplies,
   ruleValuesToRequest,
-} from './useRuleFormValues';
+} from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
   gap: ${({ theme }) => theme.spacing(2.5)};
-  margin-top: 8px;
+  margin-top: ${({ theme }) => theme.spacing(1)};
   width: 85vw;
   max-width: 600px;
 `;
@@ -72,8 +65,6 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
   const project = useProject();
   const messaging = useMessage();
   const isBranchingEnabled = useIsBranchingEnabled();
-  const languages = useProjectLanguages();
-  const nonBaseLanguages = languages.filter((language) => !language.base);
   const { satisfiesPermission } = useProjectPermissions();
   const canRun = satisfiesPermission('translations.batch-machine');
 
@@ -108,6 +99,21 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
       .max(100, thresholdMessage),
   });
 
+  function handleSaved(data: AiReviewRuleModel) {
+    messaging.success(
+      rule ? (
+        <T keyName="ai_review_rule_update_success" defaultValue="Rule saved" />
+      ) : (
+        <T
+          keyName="ai_review_rule_create_success"
+          defaultValue="Rule created"
+        />
+      )
+    );
+    onClose();
+    offerRun(data);
+  }
+
   function handleSubmit(values: RuleFormValues) {
     const request = ruleValuesToRequest(values, rule?.enabled ?? true);
     if (rule) {
@@ -116,13 +122,7 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
           path: { projectId: project.id, ruleId: rule.id },
           content: { 'application/json': request },
         },
-        {
-          onSuccess(data) {
-            messaging.success(<T keyName="ai_review_rule_update_success" />);
-            onClose();
-            offerRun(data);
-          },
-        }
+        { onSuccess: handleSaved }
       );
     }
     return createMutation.mutateAsync(
@@ -130,13 +130,7 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
         path: { projectId: project.id },
         content: { 'application/json': request },
       },
-      {
-        onSuccess(data) {
-          messaging.success(<T keyName="ai_review_rule_create_success" />);
-          onClose();
-          offerRun(data);
-        },
-      }
+      { onSuccess: handleSaved }
     );
   }
 
@@ -189,37 +183,7 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
                     setFieldValue('namespaceNotIn', scope.namespaceNotIn);
                   }}
                 />
-                <Box
-                  display="grid"
-                  gap={0.5}
-                  justifyItems="start"
-                  data-cy="ai-review-rule-form-languages"
-                >
-                  <Typography variant="caption" color="textSecondary">
-                    {t('ai_review_rule_form_languages_label', 'Languages')}
-                  </Typography>
-                  <LanguagesSelect
-                    context="ai-review-rule"
-                    languages={nonBaseLanguages}
-                    value={nonBaseLanguages
-                      .filter((language) =>
-                        values.languageIds.includes(language.id)
-                      )
-                      .map((language) => language.tag)}
-                    onChange={(tags) =>
-                      setFieldValue(
-                        'languageIds',
-                        nonBaseLanguages
-                          .filter((language) => tags.includes(language.tag))
-                          .map((language) => language.id)
-                      )
-                    }
-                    placeholder={t(
-                      'ai_review_rule_form_languages_all',
-                      'All languages'
-                    )}
-                  />
-                </Box>
+                <RuleLanguagesField />
                 {isBranchingEnabled && (
                   <RuleBranchesField
                     branchIn={values.branchIn}
@@ -233,44 +197,8 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
                 <RuleThresholdField />
                 <RuleLanguageOverrides />
                 <StyledPromptModeRow>
-                <RulePromptSelect />
-                <FormControl size="small" disabled={fullNever}>
-                  <InputLabel>
-                    {t('ai_review_rule_form_mode_label', 'Mode')}
-                  </InputLabel>
-                  <Select
-                    label={t('ai_review_rule_form_mode_label', 'Mode')}
-                    value={values.mode}
-                    onChange={(e) => setFieldValue('mode', e.target.value)}
-                    SelectDisplayProps={
-                      { 'data-cy': 'ai-review-rule-form-mode' } as any
-                    }
-                  >
-                    <MenuItem
-                      value="DRY_RUN"
-                      data-cy="ai-review-rule-form-mode-dry-run"
-                    >
-                      {t('ai_review_rule_form_mode_dry_run', 'Dry run')}
-                    </MenuItem>
-                    <MenuItem
-                      value="ACTIVE"
-                      data-cy="ai-review-rule-form-mode-active"
-                    >
-                      {t('ai_review_rule_form_mode_active', 'Active')}
-                    </MenuItem>
-                  </Select>
-                  <FormHelperText>
-                    {values.mode === 'DRY_RUN'
-                      ? t(
-                          'ai_review_rule_form_mode_dry_run_hint',
-                          'The AI only scores translations. Nothing is marked as reviewed.'
-                        )
-                      : t(
-                          'ai_review_rule_form_mode_active_hint',
-                          'Translations that pass are marked as reviewed.'
-                        )}
-                  </FormHelperText>
-                </FormControl>
+                  <RulePromptSelect />
+                  <RuleModeSelect disabled={fullNever} />
                 </StyledPromptModeRow>
                 {overrideHintVisible && (
                   <Typography

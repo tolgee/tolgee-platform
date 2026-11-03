@@ -20,27 +20,32 @@ import { messageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { AiReviewRuleScopeChips } from './AiReviewRuleScopeChips';
-import { AiReviewRuleDialog } from './dialog/AiReviewRuleDialog';
+import { AiReviewRuleScopeChips } from 'tg.ee.module/aiReview/rules/AiReviewRuleScopeChips';
+import { AiReviewRuleDialog } from 'tg.ee.module/aiReview/rules/dialog/AiReviewRuleDialog';
 import {
   AiReviewRunDialog,
   AiReviewRunVariant,
-} from '../runs/AiReviewRunDialog';
-import { useRuleLabel } from './useRuleLabel';
+} from 'tg.ee.module/aiReview/runs/AiReviewRunDialog';
+import { useRuleLabel } from 'tg.ee.module/aiReview/rules/useRuleLabel';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
 
 const StyledItem = styled(Paper)`
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
-  padding: 16px;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledInfoLine = styled(Typography)`
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: ${({ theme }) => theme.spacing(0.5)};
   color: ${({ theme }) => theme.palette.text.secondary};
-  font-size: 14px;
+  font-size: ${({ theme }) => theme.typography.body2.fontSize};
 `;
+
+const Dot = () => <span aria-hidden="true">·</span>;
 
 type Props = {
   rule: AiReviewRuleModel;
@@ -92,14 +97,23 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
   function handleDelete() {
     setMenuOpen(false);
     confirmation({
-      message: <T keyName="ai_review_rule_delete_message" params={{ label }} />,
+      message: (
+        <T
+          keyName="ai_review_rule_delete_message"
+          defaultValue="Delete the AI review rule {label}?"
+          params={{ label }}
+        />
+      ),
       onConfirm() {
         deleteLoadable.mutate(
           { path: { projectId: project.id, ruleId: rule.id } },
           {
             onSuccess() {
               messageService.success(
-                <T keyName="ai_review_rule_delete_success" />
+                <T
+                  keyName="ai_review_rule_delete_success"
+                  defaultValue="Rule deleted"
+                />
               );
             },
           }
@@ -120,20 +134,27 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
         </Typography>
         <AiReviewRuleScopeChips rule={rule} />
         <StyledInfoLine>
-          {scoreInfo}
-          {rule.overrides.length > 0 &&
-            ' · ' +
-              t('ai_review_rule_overrides_info', '{count} language overrides', {
-                count: rule.overrides.length,
-              })}
-          {' · '}
-          {promptName}
+          <span>{scoreInfo}</span>
+          {rule.overrides.length > 0 && (
+            <>
+              <Dot />
+              <span>
+                {t(
+                  'ai_review_rule_overrides_info',
+                  '{count, plural, one {# language override} other {# language overrides}}',
+                  { count: rule.overrides.length }
+                )}
+              </span>
+            </>
+          )}
+          <Dot />
+          <span>{promptName}</span>
         </StyledInfoLine>
         {isDryRun ? (
           <StyledInfoLine data-cy="ai-review-rule-counts-dry-run">
             {t(
               'ai_review_rule_counts_dry_run',
-              '{scored} scored · {wouldBeAutoReviewed} would be auto-reviewed',
+              '{scored, plural, one {# scored} other {# scored}} · {wouldBeAutoReviewed, plural, one {# would be auto-reviewed} other {# would be auto-reviewed}}',
               {
                 scored: rule.counts.scored,
                 wouldBeAutoReviewed: rule.counts.wouldBeAutoReviewed,
@@ -145,18 +166,20 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
             data-cy="ai-review-rule-counts-active"
             data-cy-failed={String(rule.counts.failed)}
           >
-            {t(
-              'ai_review_rule_counts_active',
-              '{autoReviewed} auto-reviewed · {rejected} rejected · {failed} failed',
-              {
-                autoReviewed: rule.counts.autoReviewed,
-                rejected: rule.counts.rejected,
-                failed: rule.counts.failed,
-              }
-            )}
+            <span>
+              {t(
+                'ai_review_rule_counts_active',
+                '{autoReviewed, plural, one {# auto-reviewed} other {# auto-reviewed}} · {rejected, plural, one {# rejected} other {# rejected}} · {failed, plural, one {# failed} other {# failed}}',
+                {
+                  autoReviewed: rule.counts.autoReviewed,
+                  rejected: rule.counts.rejected,
+                  failed: rule.counts.failed,
+                }
+              )}
+            </span>
             {canRun && rule.counts.failed > 0 && (
               <>
-                {' · '}
+                <Dot />
                 <MuiLink
                   component="button"
                   onClick={() => setRunVariant('retry')}
@@ -170,20 +193,22 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
         )}
         {rule.counts.backlog > 0 && (
           <StyledInfoLine data-cy="ai-review-rule-backlog">
-            {isDryRun
-              ? t(
-                  'ai_review_rule_backlog_dry_run',
-                  '{count} existing translations not scored',
-                  { count: rule.counts.backlog }
-                )
-              : t(
-                  'ai_review_rule_backlog_active',
-                  '{count} existing translations not reviewed',
-                  { count: rule.counts.backlog }
-                )}
+            <span>
+              {isDryRun
+                ? t(
+                    'ai_review_rule_backlog_dry_run',
+                    '{count, plural, one {# existing translation not scored} other {# existing translations not scored}}',
+                    { count: rule.counts.backlog }
+                  )
+                : t(
+                    'ai_review_rule_backlog_active',
+                    '{count, plural, one {# existing translation not reviewed} other {# existing translations not reviewed}}',
+                    { count: rule.counts.backlog }
+                  )}
+            </span>
             {canRun && (
               <>
-                {' · '}
+                <Dot />
                 <MuiLink
                   component="button"
                   onClick={() => setRunVariant(isDryRun ? 'score' : 'review')}
