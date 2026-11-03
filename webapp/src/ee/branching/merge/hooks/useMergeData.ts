@@ -14,6 +14,7 @@ export const useMergeData = (
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/preview',
     method: 'get',
     path: { projectId, mergeId },
+    options: { keepPreviousData: true },
   });
 
   const changesLoadable = useApiInfiniteQuery({
@@ -69,6 +70,11 @@ export const useMergeData = (
     method: 'delete',
   });
 
+  const createPreviewMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/preview',
+    method: 'post',
+  });
+
   const refreshPreviewMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/refresh',
     method: 'post',
@@ -90,5 +96,6 @@ export const useMergeData = (
     applyMutation,
     deleteMutation,
     refreshPreviewMutation,
+    createPreviewMutation,
   };
 };

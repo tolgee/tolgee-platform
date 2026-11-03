@@ -809,6 +809,8 @@ declare namespace DataCy {
         "project-branch-merge-change-include": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-branch-merge-filter-existing-keys-only": true;
+        "project-branch-merge-filter-reviewed-only": true;
         "project-branch-merge-include-all": true;
         "project-branch-merge-included-count": true;
         "project-contributor-invitation-pending": true;

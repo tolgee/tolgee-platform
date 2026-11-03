@@ -272,4 +272,48 @@ describe('Branch merging', () => {
     mergeSection.initiateMergeFromBranches('feature');
     mergeSection.assertStats({ deletions: 1 });
   });
+
+  it('reviewed-only filter holds back keys with unreviewed translations', () => {
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.editTranslation(
+      'shared-update-key',
+      'en',
+      'Not reviewed yet'
+    );
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ modifications: 1 });
+
+    mergeSection.setReviewedOnly(true);
+    mergeSection.assertStats({ modifications: 0 });
+    mergeSection.assertApplyButtonDisabled();
+
+    mergeSection.setReviewedOnly(false);
+    mergeSection.assertStats({ modifications: 1 });
+    mergeSection.assertApplyButtonEnabled();
+  });
+
+  it('existing-keys-only filter holds back new keys', () => {
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.createKey({
+      key: 'brand-new-key-from-feature',
+      translation: 'New translation value',
+    });
+    waitForGlobalLoading();
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ additions: 1 });
+
+    mergeSection.setExistingKeysOnly(true);
+    mergeSection.assertStats({ additions: 0 });
+    mergeSection.assertApplyButtonDisabled();
+
+    mergeSection.setExistingKeysOnly(false);
+    mergeSection.assertStats({ additions: 1 });
+    mergeSection.assertApplyButtonEnabled();
+  });
 });
