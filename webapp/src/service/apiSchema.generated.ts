@@ -551,6 +551,10 @@ export interface paths {
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
   };
+  "/v2/projects/{projectId}/community-page": {
+    /** Sets the texts and flags shown on the project's community page. All fields are replaced: a missing or empty text clears it. The settings stay when the project is closed to the community. Only the organization owner or a server admin can change them. */
+    put: operations["setCommunityPage"];
+  };
   "/v2/projects/{projectId}/community/activity": {
     /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given). By default there is one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
     get: operations["getActivity"];
@@ -914,7 +918,7 @@ export interface paths {
     delete: operations["deletePrompt"];
   };
   "/v2/projects/{projectId}/publishing": {
-    /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+    /** Marks the project as public or private. Opening a private project also turns suggestions on (`suggestionsMode` becomes `ENABLED`); closing it, or opening an already public project, leaves `suggestionsMode` as it is. Only the organization owner or a server admin can change this. */
     put: operations["setProjectPublic"];
   };
   "/v2/projects/{projectId}/qa-settings": {
@@ -2305,11 +2309,25 @@ export interface components {
       /** Format: int64 */
       lastContributionAt?: number;
       name?: string;
+      /** @description Whether the user's community profile is public: true when the user has at least one counted contribution in a community (public) project, whichever project this list is for. The same for every caller. */
+      profilePublic: boolean;
       /**
        * Format: int64
        * @description Approximate: counted from the activity log within the range, and never goes down.
        */
       suggested: number;
+    };
+    CommunityPageRequest: {
+      /** @description Link to the app that supports in-context translation. Only http and https are accepted. */
+      communityAppUrl?: string;
+      /** @description Markdown shown on the community page. Empty or missing clears it. */
+      communityDescription?: string;
+      /** @description Markdown on how to contribute. Empty or missing clears it, and the page shows its default text. */
+      communityGuidelines?: string;
+      /** @description Whether the community page tells visitors that the app supports in-context translation. */
+      communityInContext: boolean;
+      /** @description Whether the owner marked the community page as shared outside Tolgee. */
+      communityShared: boolean;
     };
     CommunityProfileModel: {
       /** Format: int64 */
@@ -4092,7 +4110,10 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
+      /** @description Whether the user has contributed to a community (public) project they are not a member of. Drives the "Community projects" entry in the organization switcher. */
       hasCommunityContributions: boolean;
+      /** @description Whether the user has at least one counted contribution in a community (public) project, as a member or not. This is the rule that makes a community profile visible by default. */
+      hasPublicContribution: boolean;
       languageTag?: string;
       /** @enum {string} */
       onboardingSurveyVersion?: "default_v1" | "invited_v1";
@@ -5971,7 +5992,19 @@ export interface components {
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** @description Link to the app that supports in-context translation, http or https. */
+      communityAppUrl?: string;
+      /** @description Markdown shown on the community page. Null means the project has none. */
+      communityDescription?: string;
+      /** @description Markdown on how to contribute, shown on the community page. Null means the default text. */
+      communityGuidelines?: string;
+      /** @description Whether the community page tells visitors that the app supports in-context translation. */
+      communityInContext: boolean;
+      /** @description Whether the owner marked the community page as shared outside Tolgee. */
+      communityShared: boolean;
       computedPermission: components["schemas"]["ComputedPermissionModel"];
+      /** Format: int64 */
+      createdAt?: number;
       defaultNamespace?: components["schemas"]["NamespaceModel"];
       description?: string;
       directPermission?: components["schemas"]["PermissionModel"];
@@ -17475,6 +17508,59 @@ export interface operations {
       };
     };
   };
+  /** Sets the texts and flags shown on the project's community page. All fields are replaced: a missing or empty text clears it. The settings stay when the project is closed to the community. Only the organization owner or a server admin can change them. */
+  setCommunityPage: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CommunityPageRequest"];
+      };
+    };
+  };
   /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given). By default there is one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
   getActivity: {
     parameters: {
@@ -17554,6 +17640,8 @@ export interface operations {
         languageIds?: number[];
         /** Leave out contributors with no suggestion in the range. */
         withSuggestionsOnly?: boolean;
+        /** Only users whose name contains this text, ignoring case. */
+        search?: string;
       };
     };
     responses: {
@@ -23759,7 +23847,7 @@ export interface operations {
       };
     };
   };
-  /** Marks the project as public or private. Only the organization owner or a server admin can change this. */
+  /** Marks the project as public or private. Opening a private project also turns suggestions on (`suggestionsMode` becomes `ENABLED`); closing it, or opening an already public project, leaves `suggestionsMode` as it is. Only the organization owner or a server admin can change this. */
   setProjectPublic: {
     parameters: {
       path: {

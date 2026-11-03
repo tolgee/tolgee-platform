@@ -28,7 +28,7 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
       left join ProjectContributor pc on pc.projectId = c.projectId and pc.userId = c.userId
-      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE
+      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE and $NAME_SEARCH
       group by c.userId, u.name, u.avatarHash, pc.firstContributionAt, pc.lastContributionAt
       having (:withSuggestionsOnly = false or sum(c.suggested) > 0)
     """,
@@ -37,7 +37,7 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
       from CommunityContributionDay c
       join UserAccount u on u.id = c.userId
       join Language l on l.id = c.languageId
-      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE
+      where c.projectId = :projectId and $IN_RANGE and $LANGUAGE_FILTER and $LIVE_USER_AND_LANGUAGE and $NAME_SEARCH
         and (:withSuggestionsOnly = false or c.suggested > 0)
     """,
   )
@@ -47,8 +47,38 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
     to: LocalDate,
     languageIds: Collection<Long>?,
     withSuggestionsOnly: Boolean,
+    search: String?,
     pageable: Pageable,
   ): Page<CommunityContributorTotalsView>
+
+  @Query(
+    """
+      select distinct c.userId
+      from CommunityContributionDay c
+      join Language l on l.id = c.languageId
+      join Project r on r.id = c.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      where c.userId in :userIds and l.deletedAt is null and $PUBLIC_PROJECT_VISIBILITY
+    """,
+  )
+  fun findUserIdsWithPublicRows(userIds: Collection<Long>): List<Long>
+
+  @Query(
+    """
+      select c.userId
+      from CommunityContributionDay c
+      join Language l on l.id = c.languageId
+      join Project r on r.id = c.projectId
+      left join r.baseLanguage bl
+      left join r.organizationOwner o
+      where c.userId = :userId and l.deletedAt is null and $PUBLIC_PROJECT_VISIBILITY
+    """,
+  )
+  fun findPublicRowUserIds(
+    userId: Long,
+    pageable: Pageable,
+  ): List<Long>
 
   @Query(
     """
@@ -133,26 +163,11 @@ interface CommunityContributionDayRepository : Repository<CommunityContributionD
   )
   fun findPublicActiveSuggestionsOfUser(userId: Long): List<ProjectActiveSuggestionsView>
 
-  @Query(
-    """
-      select distinct c.projectId
-      from CommunityContributionDay c
-      join Language l on l.id = c.languageId
-      join Project r on r.id = c.projectId
-      left join r.baseLanguage bl
-      left join r.organizationOwner o
-      where c.userId = :userId and l.deletedAt is null and $PUBLIC_PROJECT_VISIBILITY
-    """,
-  )
-  fun findPublicProjectIds(
-    userId: Long,
-    pageable: Pageable,
-  ): List<Long>
-
   companion object {
     const val LIVE_USER_AND_LANGUAGE = "u.deletedAt is null and u.disabledAt is null and l.deletedAt is null"
     const val IN_RANGE = "c.day between :from and :to"
     const val LANGUAGE_FILTER = "(:languageIds is null or c.languageId in :languageIds)"
+    const val NAME_SEARCH = "(:search is null or lower(u.name) like lower(concat('%', cast(:search as text), '%')))"
     const val LANGUAGE_FILTER_S = "(:languageIds is null or s.language.id in :languageIds)"
     const val ACTIVE = "io.tolgee.model.enums.TranslationSuggestionState.ACTIVE"
     const val LIVE_ACTIVE_S = "s.state = $ACTIVE and s.language.deletedAt is null"

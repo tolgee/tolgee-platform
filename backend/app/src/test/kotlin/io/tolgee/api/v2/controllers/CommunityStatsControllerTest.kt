@@ -211,6 +211,48 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `search matches the display name ignoring case, never the e-mail, and narrows totalElements`() {
+    performAuthGet("$contributors?search=ALICE&size=1")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(1)
+        node("_embedded.contributors[0].id").isEqualTo(testData.alice.id)
+      }
+    val everyUsernameEndsWith = "community.test"
+    performAuthGet("$contributors?search=$everyUsernameEndsWith").andIsOk.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `profilePublic is true for users with a counted contribution in any public project, false otherwise`() {
+    userAccount = testData.user
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors?sort=suggested,desc")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          isArray.hasSize(3)
+          node("[0].id").isEqualTo(testData.alice.id)
+          node("[0].profilePublic").isEqualTo(true)
+          node("[1].id").isEqualTo(testData.carol.id)
+          node("[1].profilePublic").isEqualTo(false)
+          node("[2].id").isEqualTo(testData.user.id)
+          node("[2].profilePublic").isEqualTo(true)
+        }
+      }
+  }
+
+  @Test
+  fun `hasPublicContribution counts members and non-members alike, public projects only`() {
+    for ((user, expected) in listOf(testData.alice to true, testData.user to true, testData.carol to false)) {
+      userAccount = user
+      performAuthGet("/v2/public/initial-data").andIsOk.andAssertThatJson {
+        node("hasPublicContribution").isEqualTo(expected)
+      }
+    }
+  }
+
+  @Test
   fun `activity returns zero-filled buckets ending with the current week and live tile counts`() {
     performAuthGet(activity)
       .andIsOk

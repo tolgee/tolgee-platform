@@ -7,6 +7,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.request.project.CommunityPageRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -21,6 +22,7 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
@@ -44,6 +46,7 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.nullIfBlank
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -251,7 +254,25 @@ class ProjectService(
     public: Boolean,
   ): Project {
     val project = get(id)
+    if (public && !project.public) {
+      project.suggestionsMode = SuggestionsMode.ENABLED
+    }
     project.public = public
+    return projectRepository.save(project)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
+  fun setCommunityPage(
+    id: Long,
+    dto: CommunityPageRequest,
+  ): Project {
+    val project = get(id)
+    project.communityDescription = dto.communityDescription.nullIfBlank
+    project.communityGuidelines = dto.communityGuidelines.nullIfBlank
+    project.communityShared = dto.communityShared
+    project.communityInContext = dto.communityInContext
+    project.communityAppUrl = dto.communityAppUrl?.trim().nullIfBlank
     return projectRepository.save(project)
   }
 

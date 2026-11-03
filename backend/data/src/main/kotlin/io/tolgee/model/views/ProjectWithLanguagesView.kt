@@ -6,6 +6,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.key.Namespace
+import java.util.Date
 
 open class ProjectWithLanguagesView(
   override val id: Long,
@@ -24,6 +25,12 @@ open class ProjectWithLanguagesView(
   override var icuPlaceholders: Boolean,
   override var suggestionsMode: SuggestionsMode,
   override var translationProtection: TranslationProtection,
+  override val communityDescription: String?,
+  override val communityGuidelines: String?,
+  override val communityShared: Boolean,
+  override val communityInContext: Boolean,
+  override val communityAppUrl: String?,
+  override val createdAt: Date?,
   val permittedLanguageIds: List<Long>?,
 ) : ProjectView {
   companion object {
@@ -49,6 +56,12 @@ open class ProjectWithLanguagesView(
         icuPlaceholders = view.icuPlaceholders,
         suggestionsMode = view.suggestionsMode,
         translationProtection = view.translationProtection,
+        communityDescription = view.communityDescription,
+        communityGuidelines = view.communityGuidelines,
+        communityShared = view.communityShared,
+        communityInContext = view.communityInContext,
+        communityAppUrl = view.communityAppUrl,
+        createdAt = view.createdAt,
       )
     }
   }

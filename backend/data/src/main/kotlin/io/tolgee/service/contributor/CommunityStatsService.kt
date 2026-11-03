@@ -22,6 +22,7 @@ import io.tolgee.repository.CommunityContributionDayRepository
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.nullIfBlank
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -45,6 +46,7 @@ class CommunityStatsService(
     params: RangeParams,
     languageIds: Collection<Long>?,
     withSuggestionsOnly: Boolean,
+    search: String?,
   ): Page<CommunityContributorStats> {
     val (from, to) = range(params)
     val languages = languageFilter(languageIds)
@@ -55,21 +57,25 @@ class CommunityStatsService(
         to,
         languages,
         withSuggestionsOnly,
+        search.nullIfBlank,
         allowedSort(pageable),
       )
+    val userIds = totals.content.map { it.id }.takeIf { it.isNotEmpty() }
     // ponytail: loads every counter row of the page's users; fine while a user has days × languages rows.
     val dayRowsByUser =
-      totals.content
-        .map { it.id }
-        .takeIf { it.isNotEmpty() }
+      userIds
         ?.let { repository.findDayRows(projectId, it, from, to, languages).groupBy { row -> row.userId } }
         .orEmpty()
-    return totals.map { total -> contributorStats(total, dayRowsByUser[total.id].orEmpty()) }
+    val publicUsers = userIds?.let { repository.findUserIdsWithPublicRows(it) }.orEmpty().toSet()
+    return totals.map { total ->
+      contributorStats(total, dayRowsByUser[total.id].orEmpty(), total.id in publicUsers)
+    }
   }
 
   private fun contributorStats(
     total: CommunityContributorTotalsView,
     dayRows: List<CommunityDayRowView>,
+    profilePublic: Boolean,
   ) = CommunityContributorStats(
     id = total.id,
     name = total.name,
@@ -79,6 +85,7 @@ class CommunityStatsService(
     accepted = total.accepted,
     declined = total.declined,
     active = total.active,
+    profilePublic = profilePublic,
     firstContributionAt = total.firstContributionAt,
     lastContributionAt = total.lastContributionAt,
     languages = languageCounts(dayRows),
@@ -142,8 +149,10 @@ class CommunityStatsService(
     return page.map { CommunityActivityItem(projects.getValue(it.projectId!!), it) }
   }
 
-  private fun isProfileVisible(userId: Long): Boolean =
-    repository.findPublicProjectIds(userId, PageRequest.of(0, 1)).isNotEmpty()
+  fun hasPublicContribution(userId: Long): Boolean =
+    repository.findPublicRowUserIds(userId, PageRequest.of(0, 1)).isNotEmpty()
+
+  private fun isProfileVisible(userId: Long): Boolean = hasPublicContribution(userId)
 
   private fun languageCounts(dayRows: List<CommunityDayRowView>): List<LanguageCounts> =
     dayRows

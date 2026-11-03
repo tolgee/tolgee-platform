@@ -63,8 +63,18 @@ class CommunityStatsController(
     @RequestParam(required = false) languageIds: List<Long>?,
     @Parameter(description = "Leave out contributors with no suggestion in the range.")
     @RequestParam(defaultValue = "false") withSuggestionsOnly: Boolean,
+    @Parameter(description = "Only users whose name contains this text, ignoring case.")
+    @RequestParam(required = false) search: String?,
   ): PagedModel<CommunityContributorModel> {
-    val page = communityStatsService.getContributors(projectId, pageable, period, languageIds, withSuggestionsOnly)
+    val page =
+      communityStatsService.getContributors(
+        projectId,
+        pageable,
+        period,
+        languageIds,
+        withSuggestionsOnly,
+        search,
+      )
     return pagedResourcesAssembler.toModel(page, communityContributorModelAssembler)
   }
 

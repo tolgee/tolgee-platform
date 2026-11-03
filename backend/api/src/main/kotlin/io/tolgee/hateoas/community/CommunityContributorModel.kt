@@ -26,6 +26,13 @@ data class CommunityContributorModel(
         "range. When `languageIds` is given, only those languages count.",
   )
   val active: Long,
+  @Schema(
+    description =
+      "Whether the user's community profile is public: true when the user has at least one counted " +
+        "contribution in a community (public) project, whichever project this list is for. " +
+        "The same for every caller.",
+  )
+  val profilePublic: Boolean,
   val firstContributionAt: Date?,
   val lastContributionAt: Date?,
   val languages: List<LanguageCounts>,
