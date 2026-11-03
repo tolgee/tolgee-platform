@@ -106,6 +106,8 @@ export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
 export { AiReviewRulesView } from '../ee/aiReview/rules/AiReviewRulesView';
 export { useAiReviewEnabled } from '../ee/aiReview/hooks/useAiReviewEnabled';
+export { AiReviewCellButton } from '../ee/aiReview/translations/AiReviewCellButton';
+export { isAiReviewBadgeVisible } from '../ee/aiReview/translations/aiReviewVisibility';
 
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';

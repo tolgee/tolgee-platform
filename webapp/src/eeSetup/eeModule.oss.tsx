@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import {
+  AiReviewCellButtonProps,
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
@@ -12,6 +13,7 @@ import {
   SubfilterTasksProps,
 } from './EeModuleType';
 import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
+import type { components } from 'tg.service/apiSchema.generated';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
   function NotIncludedInOss(props: any, ref: any) {
@@ -99,6 +101,15 @@ export const AiContextData = Empty;
 export const AiPromptsList = Empty;
 export const AiReviewRulesView = Empty;
 export const useAiReviewEnabled = () => false;
+export const AiReviewCellButton = (_props: AiReviewCellButtonProps) =>
+  Empty() as JSX.Element;
+export const isAiReviewBadgeVisible = (
+  _aiReview:
+    | components['schemas']['TranslationAiReviewSummaryModel']
+    | undefined,
+  _state: components['schemas']['TranslationViewModel']['state'] | undefined,
+  _auto: boolean | undefined
+): boolean => false;
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps

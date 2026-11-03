@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Prompt
 import io.tolgee.model.UserAccount
+import io.tolgee.model.aiReview.AiReviewIssue
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.ProjectPermissionType
@@ -140,6 +141,42 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
         threshold = 85
         lastFailureReason = AiReviewFailureReason.PROVIDER_ERROR
       }
+      addReviewedKey("key_confirmed", AiReviewStatus.CONFIRMED, 92) {
+        rule = activeRule
+        threshold = 85
+      }
+      addReviewedKey("key_rejected", AiReviewStatus.REJECTED, 92, reviewed = false) {
+        rule = activeRule
+        threshold = 85
+      }
+      addReviewedKey("key_rule_deleted", AiReviewStatus.APPROVED, 91) {
+        threshold = 85
+      }
+      addReviewedKey("key_protect_below", AiReviewStatus.BELOW_THRESHOLD, 40) {
+        rule = activeRule
+        threshold = 85
+      }
+      addReviewedKey("key_human_below", AiReviewStatus.BELOW_THRESHOLD, 40, auto = false) {
+        rule = activeRule
+        threshold = 85
+      }
+      addReviewedKey("key_human_failed", AiReviewStatus.FAILED, null, auto = false) {
+        rule = dryRunRule
+        ruleMode = AiReviewRuleMode.DRY_RUN
+        failureReason = AiReviewFailureReason.PROVIDER_ERROR
+      }
+      addReviewedKey("key_with_issues", AiReviewStatus.BELOW_THRESHOLD, 55, reviewed = false) {
+        rule = activeRule
+        threshold = 85
+        promptName = "Default review prompt"
+        providerName = "server-provider"
+        model = "gpt-test"
+        issues =
+          mutableListOf(
+            AiReviewIssue("critical", "accuracy", "Wrong meaning", -35),
+            AiReviewIssue("minor", "style", "Awkward wording", -10),
+          )
+      }
 
       addKey { name = "key_untagged" }.build {
         addTranslation("en", "Untagged source")
@@ -208,6 +245,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
     status: AiReviewStatus,
     score: Int?,
     reviewed: Boolean = true,
+    auto: Boolean = true,
     tag: String = "ui",
     ft: TranslationAiReview.() -> Unit,
   ): TranslationBuilder {
@@ -222,7 +260,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
       }
     if (reviewed) {
       de.self.state = TranslationState.REVIEWED
-      de.self.auto = true
+      de.self.auto = auto
     }
     de.addAiReview {
       this.status = status
