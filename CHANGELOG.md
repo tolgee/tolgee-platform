@@ -1,3 +1,10 @@
+# [3.242.0](https://github.com/tolgee/tolgee-platform/compare/v3.241.4...v3.242.0) (2026-11-03)
+
+
+### Features
+
+* prepare the MCP server for the Claude Connectors Directory ([#3977](https://github.com/tolgee/tolgee-platform/issues/3977)) ([799e21e](https://github.com/tolgee/tolgee-platform/commit/799e21e7288cee437d835404ea5646e85346b518))
+
 ## [3.241.4](https://github.com/tolgee/tolgee-platform/compare/v3.241.3...v3.241.4) (2026-11-02)
 
 
