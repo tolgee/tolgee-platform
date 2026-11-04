@@ -10,7 +10,12 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { DotsVertical, GitMerge, ShieldTick } from '@untitled-ui/icons-react';
+import {
+  DotsVertical,
+  GitMerge,
+  RefreshCcw01,
+  ShieldTick,
+} from '@untitled-ui/icons-react';
 import { DefaultBranchChip } from 'tg.component/branching/DefaultBranchChip';
 import { BranchNameLink } from 'tg.ee.module/branching/components/BranchNameLink';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
@@ -61,6 +66,8 @@ type Props = {
   onSetProtected?: (branch: BranchModel) => void;
   onMergeInto?: () => void;
   onMergeDetail: () => void;
+  onUpdateFrom?: () => void;
+  onUpdateDetail: () => void;
 };
 
 export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
@@ -70,6 +77,8 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
   onSetProtected,
   onMergeInto,
   onMergeDetail,
+  onUpdateFrom,
+  onUpdateDetail,
 }) => {
   const timeDistance = useTimeDistance();
   const formatDate = useDateFormatter();
@@ -153,6 +162,43 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
               </Tooltip>
             </PointerLink>
           )}
+          {branch.update?.mergedAt && (
+            <PointerLink onClick={onUpdateDetail}>
+              <Tooltip
+                title={
+                  <T
+                    keyName="branch_updated_from_branch_full_text"
+                    defaultValue="Updated from <b>{branch}</b> on {date}"
+                    noWrap
+                    params={{
+                      b: <b />,
+                      branch: branch.update.sourceBranchName,
+                      date: formatDate(branch.update.mergedAt, {
+                        dateStyle: 'long',
+                        timeStyle: 'short',
+                      }),
+                    }}
+                  />
+                }
+              >
+                <DefaultChip
+                  label={
+                    <Typography variant="caption">
+                      <T
+                        keyName="branch_updated_from_branch"
+                        defaultValue="Updated from <b>{branch}</b> {date}"
+                        params={{
+                          b: <b />,
+                          branch: branch.update.sourceBranchName,
+                          date: formatDate(branch.update.mergedAt),
+                        }}
+                      />
+                    </Typography>
+                  }
+                />
+              </Tooltip>
+            </PointerLink>
+          )}
         </Box>
       </StyledItemText>
       <StyledItemText data-cy="project-settings-branch-item-properties">
@@ -183,6 +229,49 @@ export const BranchItem: React.FC<React.PropsWithChildren<Props>> = ({
         )}
       </StyledItemText>
       <StyledItemActions>
+        {!branch.isDefault &&
+          onUpdateFrom &&
+          (branch.update && !branch.update.mergedAt ? (
+            <Tooltip
+              title={
+                <T
+                  keyName="branch_update_from_warning_tooltip"
+                  defaultValue="Ongoing update"
+                />
+              }
+            >
+              <Badge variant="dot" color="warning">
+                <IconButton
+                  data-cy="project-settings-branches-update-from-button"
+                  size="medium"
+                  onClick={onUpdateFrom}
+                >
+                  <RefreshCcw01 width={20} height={20} />
+                </IconButton>
+              </Badge>
+            </Tooltip>
+          ) : (
+            branch.active && (
+              <Tooltip
+                title={
+                  <T
+                    keyName="branch_update_from_tooltip"
+                    defaultValue="Update branch from <b>{origin}</b>"
+                    params={{ origin: branch.originBranchName!, b: <b /> }}
+                  />
+                }
+              >
+                <IconButton
+                  data-cy="project-settings-branches-update-from-button"
+                  size="medium"
+                  onClick={onUpdateFrom}
+                >
+                  <RefreshCcw01 width={20} height={20} />
+                </IconButton>
+              </Tooltip>
+            )
+          ))}
+
         {!branch.isDefault &&
           onMergeInto &&
           (branch.merge && !branch.merge.mergedAt ? (

@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import { useQueryClient } from 'react-query';
 import {
   Box,
@@ -9,6 +10,7 @@ import {
   Portal,
   styled,
   Alert,
+  Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -21,7 +23,12 @@ import { useMergeData } from './hooks/useMergeData';
 import { MergeHeader } from './components/MergeHeader';
 import { ChangesTabs } from './components/changes/ChangesTabs';
 import { ChangeList } from './components/changes/ChangeList';
-import { BranchMergeChangeType, BranchMergeConflictModel } from './types';
+import {
+  BranchMergeChangeModel,
+  BranchMergeChangeType,
+  BranchMergeConflictModel,
+  BranchMergeFilters,
+} from './types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
@@ -66,6 +73,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   const { mergeId } = useParams<RouteParams>();
   const numericMergeId = Number(mergeId);
   const userSelectedTab = useRef(false);
+  const keepTabOnNextMerge = useRef(false);
   const { ref: actionsRef, inView: actionsInView } = useInView({
     rootMargin: '0px',
     threshold: 0.1,
@@ -89,13 +97,24 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     changes,
     resolveMutation,
     resolveAllMutation,
+    excludeMutation,
     applyMutation,
     refreshPreviewMutation,
+    deleteMutation,
+    createPreviewMutation,
   } = useMergeData(project.id, numericMergeId, selectedTab);
 
   const { tabs } = useMergeTabs(merge, labels, selectedTab, setSelectedTab);
+  const [creatingLongEnough] = useDebounce(
+    createPreviewMutation.isLoading,
+    500
+  );
 
   useEffect(() => {
+    if (keepTabOnNextMerge.current) {
+      keepTabOnNextMerge.current = false;
+      return;
+    }
     userSelectedTab.current = false;
     setSelectedTab('CONFLICT');
   }, [numericMergeId]);
@@ -140,21 +159,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     }
   }, [merge?.outdated]);
 
-  const handleResolve = async (
-    conflict: BranchMergeConflictModel,
-    resolution: 'SOURCE' | 'TARGET'
-  ) => {
-    await resolveMutation.mutateAsync({
-      path: { projectId: project.id, mergeId: numericMergeId },
-      content: {
-        'application/json': {
-          changeId: conflict.id,
-          resolve: resolution,
-        },
-      },
-    });
-
-    // Fetch just the updated change instead of all pages
+  const refetchChange = async (changeId: number) => {
     const updatedChange = await apiSchemaHttpService.schemaRequest(
       '/v2/projects/{projectId}/branches/merge/{mergeId}/changes/{changeId}',
       'get'
@@ -162,11 +167,10 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       path: {
         projectId: project.id,
         mergeId: numericMergeId,
-        changeId: conflict.id,
+        changeId,
       },
     });
 
-    // Update the cache with the single changed item
     const queryKey = [
       '/v2/projects/{projectId}/branches/merge/{mergeId}/changes',
       { projectId: project.id, mergeId: numericMergeId },
@@ -182,16 +186,59 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
           _embedded: {
             ...page._embedded,
             branchMergeChanges: page._embedded?.branchMergeChanges?.map(
-              (change: any) =>
-                change.id === conflict.id ? updatedChange : change
+              (change: any) => (change.id === changeId ? updatedChange : change)
             ),
           },
         })),
       };
     });
 
-    // Only refetch preview for updated stats (conflict counts)
     await previewLoadable.refetch?.();
+  };
+
+  const handleResolve = async (
+    conflict: BranchMergeConflictModel,
+    resolution: 'SOURCE' | 'TARGET'
+  ) => {
+    await resolveMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': {
+          changeId: conflict.id,
+          resolve: resolution,
+        },
+      },
+    });
+    await refetchChange(conflict.id);
+  };
+
+  const handleSetExcluded = async (
+    change: BranchMergeChangeModel,
+    excluded: boolean
+  ) => {
+    userSelectedTab.current = true;
+    await excludeMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': { changeIds: [change.id], excluded },
+      },
+    });
+    await refetchChange(change.id);
+  };
+
+  const handleSetTypeExcluded = async (
+    type: BranchMergeChangeType,
+    excluded: boolean
+  ) => {
+    userSelectedTab.current = true;
+    await excludeMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: { 'application/json': { type, excluded } },
+    });
+    await Promise.all([
+      changesLoadable.refetch?.(),
+      previewLoadable.refetch?.(),
+    ]);
   };
 
   const handleResolveAll = async (resolution: 'SOURCE' | 'TARGET') => {
@@ -214,10 +261,21 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     await applyMutation.mutateAsync({
       path: { projectId: project.id, mergeId: numericMergeId },
       content: {
-        'application/json': { deleteBranch: deleteBranchAfterMerge },
+        'application/json': {
+          deleteBranch: merge?.isUpdate ? false : deleteBranchAfterMerge,
+        },
       },
     });
-    messaging.success(<T keyName="branch_merges_apply_success" />);
+    messaging.success(
+      merge?.isUpdate ? (
+        <T
+          keyName="branch_update_apply_success"
+          defaultValue="Branch successfully updated"
+        />
+      ) : (
+        <T keyName="branch_merges_apply_success" />
+      )
+    );
     history.push(
       LINKS.PROJECT_TRANSLATIONS_WITH_BRANCH.build({
         [PARAMS.PROJECT_ID]: project.id,
@@ -227,7 +285,11 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   };
 
   const handleApply = async () => {
-    if (deleteBranchAfterMerge && (merge?.uncompletedTasksCount ?? 0) > 0) {
+    if (
+      !merge?.isUpdate &&
+      deleteBranchAfterMerge &&
+      (merge?.uncompletedTasksCount ?? 0) > 0
+    ) {
       confirmation({
         message: (
           <T
@@ -246,6 +308,60 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     await applyMerge();
   };
 
+  const recreateWithFilters = async (filters: BranchMergeFilters) => {
+    const created = await createPreviewMutation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          sourceBranchId: merge!.sourceBranchId,
+          targetBranchId: merge!.targetBranchId,
+          filters,
+        },
+      },
+    });
+    keepTabOnNextMerge.current = true;
+    history.replace(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        [PARAMS.PROJECT_ID]: project.id,
+        [PARAMS.MERGE_ID]: created.id,
+      })
+    );
+    deleteMutation.mutate({
+      path: { projectId: project.id, mergeId: numericMergeId },
+    });
+  };
+
+  const handleFiltersChange = (filters: BranchMergeFilters) => {
+    const hasWork =
+      (merge?.keyResolvedConflictsCount ?? 0) > 0 ||
+      (merge?.keyExcludedCount ?? 0) > 0;
+    if (!hasWork) {
+      recreateWithFilters(filters);
+      return;
+    }
+    confirmation({
+      title: (
+        <T
+          keyName="branch_merge_filter_change_confirmation_title"
+          defaultValue="Change filters"
+        />
+      ),
+      message: (
+        <T
+          keyName="branch_merge_filter_change_confirmation"
+          defaultValue="Changing filters creates a new preview. Your conflict resolutions and excluded keys will be reset."
+        />
+      ),
+      confirmButtonText: (
+        <T
+          keyName="branch_merge_filter_change_confirm_button"
+          defaultValue="Create new preview"
+        />
+      ),
+      onConfirm: () => recreateWithFilters(filters),
+    });
+  };
+
   const handleTabSelect = (tab: BranchMergeChangeType) => {
     userSelectedTab.current = true;
     setSelectedTab(tab);
@@ -259,6 +375,8 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       merge.keyResolvedConflictsCount
     : 0;
 
+  const totalWithExcluded = totalChanges + (merge?.keyExcludedCount ?? 0);
+
   const isOutdated = merge?.outdated;
 
   const readyToMerge =
@@ -266,25 +384,39 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
 
   const actionControls = (
     <>
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={deleteBranchAfterMerge}
-            onChange={(event) =>
-              setDeleteBranchAfterMerge(event.target.checked)
-            }
-            data-cy="project-branch-merge-delete-branch-checkbox"
-          />
-        }
-        label={
+      {!merge?.isUpdate && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={deleteBranchAfterMerge}
+              onChange={(event) =>
+                setDeleteBranchAfterMerge(event.target.checked)
+              }
+              data-cy="project-branch-merge-delete-branch-checkbox"
+            />
+          }
+          label={
+            <T
+              keyName="branch_merge_delete_branch_after_merge"
+              params={{ b: <b />, branch: merge?.sourceBranchName }}
+            />
+          }
+        />
+      )}
+      <Box display="flex" columnGap={2} alignItems="center">
+        <Typography
+          color="textSecondary"
+          data-cy="project-branch-merge-included-count"
+          data-cy-included={totalChanges}
+          data-cy-total={totalWithExcluded}
+        >
           <T
-            keyName="branch_merge_delete_branch_after_merge"
-            params={{ b: <b />, branch: merge?.sourceBranchName }}
+            keyName="branch_merge_included_count"
+            defaultValue="{total, plural, one {{included} of {total} key included} other {{included} of {total} keys included}}"
+            params={{ included: totalChanges, total: totalWithExcluded }}
           />
-        }
-      />
-      <Box display="flex" columnGap={2}>
+        </Typography>
         <Button
           variant="outlined"
           color="primary"
@@ -306,7 +438,14 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
           onClick={handleApply}
           disabled={!readyToMerge || applyMutation.isLoading}
         >
-          <T keyName="branch_merges_apply_button" />
+          {merge?.isUpdate ? (
+            <T
+              keyName="branch_update_apply_button"
+              defaultValue="Update branch"
+            />
+          ) : (
+            <T keyName="branch_merges_apply_button" />
+          )}
         </Button>
       </Box>
     </>
@@ -315,7 +454,11 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <BaseProjectView
       maxWidth={1200}
-      windowTitle={t('branch_merges_title')}
+      windowTitle={
+        merge?.isUpdate
+          ? t('branches_update_title', 'Update branch')
+          : t('branch_merges_title')
+      }
       navigation={[
         [
           t('branches_title'),
@@ -328,7 +471,15 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       ) : (
         merge && (
           <StyledDetail>
-            <MergeHeader merge={merge} />
+            <MergeHeader
+              merge={merge}
+              onFiltersChange={handleFiltersChange}
+              filtersBusy={
+                deleteMutation.isLoading ||
+                createPreviewMutation.isLoading ||
+                previewLoadable.isPreviousData
+              }
+            />
 
             {isOutdated && (
               <Box mt={1}>
@@ -338,7 +489,7 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
               </Box>
             )}
 
-            {totalChanges > 0 && (
+            {totalWithExcluded > 0 && (
               <ChangesTabs
                 tabs={tabs}
                 selectedTab={selectedTab ?? 'CONFLICT'}
@@ -358,9 +509,22 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
                 onResolve={handleResolve}
                 onResolveAll={handleResolveAll}
                 resolveAllLoading={resolveAllMutation.isLoading}
+                onSetExcluded={handleSetExcluded}
+                onSetTypeExcluded={handleSetTypeExcluded}
               />
               <Alert severity="info">
-                {t('branch_merge_tags_labels_screenshots_joined')}
+                {t('branch_merge_tags_labels_screenshots_joined')}{' '}
+                {merge.isUpdate ? (
+                  <T
+                    keyName="branch_update_excluded_stay_pending"
+                    defaultValue="Keys you exclude stay pending for the next update."
+                  />
+                ) : (
+                  <T
+                    keyName="branch_merge_excluded_stay_pending"
+                    defaultValue="Keys you exclude stay pending for the next merge."
+                  />
+                )}
               </Alert>
               <Box
                 ref={actionsRef}
@@ -398,8 +562,31 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
       )}
       <BranchProgressModal
         open={applyMutation.isLoading}
-        title={<T keyName="branch_merge_applying_title" />}
-        message={<T keyName="branch_merge_applying_message" />}
+        title={
+          merge?.isUpdate ? (
+            <T
+              keyName="branch_update_applying_title"
+              defaultValue="Updating branch"
+            />
+          ) : (
+            <T keyName="branch_merge_applying_title" />
+          )
+        }
+        message={
+          merge?.isUpdate ? (
+            <T
+              keyName="branch_update_applying_message"
+              defaultValue="Please wait while the branch is being updated..."
+            />
+          ) : (
+            <T keyName="branch_merge_applying_message" />
+          )
+        }
+      />
+      <BranchProgressModal
+        open={createPreviewMutation.isLoading && creatingLongEnough}
+        title={<T keyName="branch_merge_creating_title" />}
+        message={<T keyName="branch_merge_creating_message" />}
       />
       <BranchProgressModal
         open={refreshPreviewMutation.isLoading}

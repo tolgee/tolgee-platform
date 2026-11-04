@@ -12,6 +12,15 @@ export class E2MergeSection {
       .click();
   }
 
+  initiateUpdateFromBranches(branchName: string) {
+    gcy('project-settings-branch-item-name')
+      .contains(branchName)
+      .closestDcy('project-settings-branch-item')
+      .findDcy('project-settings-branches-update-from-button')
+      .click();
+    waitForGlobalLoading();
+  }
+
   confirmMergeCreation() {
     // Confirm the merge creation dialog
     gcy('global-confirmation-confirm').should('be.visible').click();
@@ -108,5 +117,56 @@ export class E2MergeSection {
 
   assertApplyButtonDisabled() {
     gcy('project-branch-merge-apply').should('be.disabled');
+  }
+
+  setChangeIncluded(keyName: string, included: boolean) {
+    gcy('project-branch-merge-change')
+      .findDcy('translations-key-name')
+      .contains(keyName)
+      .closest('[data-cy="project-branch-merge-change"]')
+      .findDcy('project-branch-merge-change-include')
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== included) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+  }
+
+  setAllIncluded(included: boolean) {
+    gcy('project-branch-merge-include-all')
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== included) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+  }
+
+  setReviewedOnly(on: boolean) {
+    this.setSwitch('project-branch-merge-filter-reviewed-only', on);
+  }
+
+  setExistingKeysOnly(on: boolean) {
+    this.setSwitch('project-branch-merge-filter-existing-keys-only', on);
+  }
+
+  private setSwitch(
+    dataCy:
+      | 'project-branch-merge-filter-reviewed-only'
+      | 'project-branch-merge-filter-existing-keys-only',
+    on: boolean
+  ) {
+    gcy(dataCy)
+      .find('input')
+      .then(($input) => {
+        if ($input.is(':checked') !== on) cy.wrap($input).click();
+      });
+    waitForGlobalLoading();
+    gcy('project-branch-merge-detail').should('be.visible');
+  }
+
+  assertIncludedCount(included: number, total: number) {
+    gcy('project-branch-merge-included-count')
+      .should('have.attr', 'data-cy-included', String(included))
+      .and('have.attr', 'data-cy-total', String(total));
   }
 }

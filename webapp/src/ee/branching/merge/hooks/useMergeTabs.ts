@@ -34,7 +34,7 @@ export const useMergeTabs = (
         { key: 'DELETE', label: labels.DELETE, count: merge.keyDeletionsCount },
         { key: 'CONFLICT', label: labels.CONFLICT, count: totalConflicts },
       ] satisfies TabConfig[]
-    ).filter((tab) => tab.count > 0);
+    ).filter((tab) => tab.count > 0 || merge.keyExcludedCount > 0);
   }, [merge, labels, totalConflicts]);
 
   useEffect(() => {

@@ -638,6 +638,11 @@ export function useErrorTranslation() {
         return t('branch_merge_revision_not_valid');
       case 'branch_merge_conflicts_not_resolved':
         return t('branch_merge_conflicts_not_resolved');
+      case 'branch_merge_key_name_collision':
+        return t(
+          'branch_merge_key_name_collision',
+          'A key with this name already exists in the target branch. Include the change that removes or renames it, or exclude the new key.'
+        );
       case 'branch_merge_already_merged':
         return t('branch_merge_already_merged');
       case 'branching_not_enabled_for_project':

@@ -24,9 +24,12 @@ export class E2BranchesSection {
       .click();
   }
 
-  createBranch(name: string) {
+  createBranch(name: string, options?: { protected?: boolean }) {
     this.getAddButton().click();
     gcy('branch-name-input').find('input').type(name);
+    if (options?.protected) {
+      gcy('branch-protected-checkbox').find('input').click();
+    }
     gcy('global-form-save-button').click();
   }
 

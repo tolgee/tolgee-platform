@@ -1,6 +1,6 @@
 import { Box, styled, Typography } from '@mui/material';
-import { FC } from 'react';
-import { KeyWrapper } from './KeyPanelBase';
+import { FC, ReactNode } from 'react';
+import { KeyHeader, KeyWrapper } from './KeyPanelBase';
 
 const PlaceholderContent = styled(Box)`
   min-height: 80px;
@@ -15,9 +15,14 @@ const PlaceholderContent = styled(Box)`
 `;
 
 export const PlaceholderKeyPanel: FC<
-  React.PropsWithChildren<{ text: string }>
-> = ({ text }) => (
+  React.PropsWithChildren<{ text: string; headerStart?: ReactNode }>
+> = ({ text, headerStart }) => (
   <KeyWrapper>
+    {headerStart && (
+      <KeyHeader>
+        <Box display="flex">{headerStart}</Box>
+      </KeyHeader>
+    )}
     <PlaceholderContent>
       <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
         {text}

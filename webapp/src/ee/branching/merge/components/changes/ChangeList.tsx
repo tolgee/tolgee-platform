@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   styled,
   Typography,
@@ -48,7 +49,7 @@ const ConflictColumns = styled(Box)`
 `;
 
 const ChangeCard = styled(Box)`
-  display: grid;
+  display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
 `;
 
@@ -66,6 +67,8 @@ type Props = {
   ) => void;
   onResolveAll?: (resolution: 'SOURCE' | 'TARGET') => void;
   resolveAllLoading?: boolean;
+  onSetExcluded?: (change: BranchMergeChangeModel, excluded: boolean) => void;
+  onSetTypeExcluded?: (type: BranchMergeChangeType, excluded: boolean) => void;
 };
 
 export const ChangeList = ({
@@ -79,6 +82,8 @@ export const ChangeList = ({
   onResolve,
   onResolveAll,
   resolveAllLoading,
+  onSetExcluded,
+  onSetTypeExcluded,
 }: Props) => {
   const { t } = useTranslate();
   const [showAllMap, setShowAllMap] = useState<Record<string, boolean>>({});
@@ -94,6 +99,9 @@ export const ChangeList = ({
     setShowAllMap((prev) => ({ ...prev, [changeId]: !prev[changeId] }));
   };
 
+  const allIncluded = changes.every((change) => !change.excluded);
+  const someIncluded = changes.some((change) => !change.excluded);
+
   const showMergedColumn =
     selectedTab === 'CONFLICT' || selectedTab === 'UPDATE';
 
@@ -106,7 +114,19 @@ export const ChangeList = ({
           <ConflictsWrapper>
             <ConflictsHeader>
               <ConflictsHeaderColumn>
-                <Box display="flex" gap={1}>
+                <Box display="flex" gap={1} alignItems="center">
+                  {onSetTypeExcluded && (
+                    <Checkbox
+                      data-cy="project-branch-merge-include-all"
+                      sx={{ p: 0, ml: 2 }}
+                      disabled={merge.mergedAt != null}
+                      checked={allIncluded}
+                      indeterminate={!allIncluded && someIncluded}
+                      onChange={(e) =>
+                        onSetTypeExcluded(selectedTab, !e.target.checked)
+                      }
+                    />
+                  )}
                   <Branch height={18} width={18} />
                   <Typography variant="body2" fontWeight="medium">
                     {merge.sourceBranchName}
@@ -178,6 +198,15 @@ export const ChangeList = ({
               };
               const changedTranslations = change.changedTranslations ?? [];
 
+              const includeCheckbox = (
+                <Checkbox
+                  data-cy="project-branch-merge-change-include"
+                  sx={{ p: 0 }}
+                  checked={!change.excluded}
+                  disabled={merge.mergedAt != null}
+                  onChange={(e) => onSetExcluded?.(change, !e.target.checked)}
+                />
+              );
               const additionPlaceholder = (
                 <PlaceholderKeyPanel text={t('branch_merge_placeholder_add')} />
               );
@@ -198,6 +227,7 @@ export const ChangeList = ({
                 leftPanel = sourceKey ? (
                   <ConflictKeyPanel
                     keyData={sourceKey}
+                    headerStart={includeCheckbox}
                     accepted={isConflict ? acceptedSource : undefined}
                     changedTranslations={changedTranslations}
                     showAll={showAll}
@@ -247,6 +277,7 @@ export const ChangeList = ({
                 leftPanel = sourceKey ? (
                   <SingleKeyPanel
                     keyData={sourceKey}
+                    headerStart={includeCheckbox}
                     showAll={showAll}
                     onToggleShowAll={() => toggleShowAll(change.id)}
                     hideAllWhenFalse
@@ -254,11 +285,19 @@ export const ChangeList = ({
                     variant="added"
                   />
                 ) : (
-                  additionPlaceholder
+                  <PlaceholderKeyPanel
+                    text={t('branch_merge_placeholder_add')}
+                    headerStart={includeCheckbox}
+                  />
                 );
                 rightPanel = additionPlaceholder;
               } else if (isDeletion) {
-                leftPanel = deletionPlaceholder;
+                leftPanel = (
+                  <PlaceholderKeyPanel
+                    text={t('branch_merge_placeholder_del')}
+                    headerStart={includeCheckbox}
+                  />
+                );
                 rightPanel = targetKey ? (
                   <SingleKeyPanel
                     keyData={targetKey}
@@ -277,21 +316,31 @@ export const ChangeList = ({
                 <ChangeCard
                   key={change.id}
                   data-cy="project-branch-merge-change"
+                  data-cy-excluded={String(change.excluded)}
                 >
-                  {showThreeColumns ? (
-                    <ConflictColumns>
-                      {leftPanel}
-                      {middlePanel}
-                      {rightPanel}
-                    </ConflictColumns>
-                  ) : showTwoColumns ? (
-                    <ConflictColumns>
-                      {leftPanel}
-                      {rightPanel}
-                    </ConflictColumns>
-                  ) : (
-                    <SingleKeyPanel keyData={(sourceKey || targetKey)!} />
-                  )}
+                  <Box
+                    flex={1}
+                    minWidth={0}
+                    sx={{ opacity: change.excluded ? 0.5 : 1 }}
+                  >
+                    {showThreeColumns ? (
+                      <ConflictColumns>
+                        {leftPanel}
+                        {middlePanel}
+                        {rightPanel}
+                      </ConflictColumns>
+                    ) : showTwoColumns ? (
+                      <ConflictColumns>
+                        {leftPanel}
+                        {rightPanel}
+                      </ConflictColumns>
+                    ) : (
+                      <SingleKeyPanel
+                        keyData={(sourceKey || targetKey)!}
+                        headerStart={includeCheckbox}
+                      />
+                    )}
+                  </Box>
                 </ChangeCard>
               );
             })}

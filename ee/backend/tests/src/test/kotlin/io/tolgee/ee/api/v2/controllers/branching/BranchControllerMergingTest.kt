@@ -238,6 +238,22 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  @Suppress("UNCHECKED_CAST")
+  fun `branch list shows a pending update on the child`() {
+    val previewId = createMergePreview(testData.mainBranch.id, testData.featureBranch.id)
+    val branches =
+      performProjectAuthGet("branches")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+        .let { (it["_embedded"] as Map<*, *>)["branches"] as List<Map<String, Any?>> }
+    val update = branches.first { it["name"] == testData.featureBranch.name }["update"] as Map<*, *>
+    (update["id"] as Number).toLong().assert.isEqualTo(previewId)
+    update["mergedAt"].assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `refreshes merge preview without losing resolved conflicts`() {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
@@ -427,6 +443,19 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       "branches/merge/preview",
       mapOf("sourceBranchId" to testData.mainBranch.id, "targetBranchId" to testData.featureBranch.id),
     ).andIsOk.andAssertThatJson { node("targetBranchName").isEqualTo("feature") }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `preview of an update is flagged as update, a promote is not`() {
+    val updateId = createMergePreview(testData.mainBranch.id, targetBranchId = testData.featureBranch.id)
+    performProjectAuthGet("branches/merge/$updateId/preview").andIsOk.andAssertThatJson {
+      node("isUpdate").isEqualTo(true)
+    }
+    val promoteId = createMergePreview(testData.featureBranch.id)
+    performProjectAuthGet("branches/merge/$promoteId/preview").andIsOk.andAssertThatJson {
+      node("isUpdate").isEqualTo(false)
+    }
   }
 
   @Test

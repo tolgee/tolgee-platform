@@ -1,12 +1,15 @@
 import React from 'react';
 import { Alert, Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
-import { BranchMergeModel } from '../types';
+import { BranchMergeFilters, BranchMergeModel } from '../types';
 import { StatsBlock } from './header/StatsBlock';
 import { MergeTitle } from 'tg.ee.module/branching/merge/components/header/MergeTitle';
+import { MergeFilters } from 'tg.ee.module/branching/merge/components/header/MergeFilters';
 
 type Props = {
   merge: BranchMergeModel;
+  onFiltersChange: (filters: BranchMergeFilters) => void;
+  filtersBusy: boolean;
 };
 
 const StyledHead = styled(Box)`
@@ -24,6 +27,8 @@ const StyledBody = styled(Box)`
 
 export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
   merge,
+  onFiltersChange,
+  filtersBusy,
 }) => {
   const hasUnresolvedConflicts = merge.keyUnresolvedConflictsCount > 0;
 
@@ -31,23 +36,38 @@ export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
     <>
       <StyledHead>
         <Typography variant="h4">
-          <T keyName="branches_merge_title" />
+          {merge.isUpdate ? (
+            <T keyName="branches_update_title" defaultValue="Update branch" />
+          ) : (
+            <T keyName="branches_merge_title" />
+          )}
         </Typography>
       </StyledHead>
 
-      <StyledBody data-cy="project-branch-merge-detail">
+      <StyledBody
+        data-cy="project-branch-merge-detail"
+        data-cy-direction={merge.isUpdate ? 'update' : 'merge'}
+      >
         <MergeTitle merge={merge} />
 
         {hasUnresolvedConflicts && (
           <Alert severity="warning">
-            <T
-              keyName="branch_merges_unresolved_conflicts_alert"
-              params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
-            />
+            {merge.isUpdate ? (
+              <T
+                keyName="branch_update_unresolved_conflicts_alert"
+                defaultValue="{value, plural, one {Resolve <b>{value} conflict</b> before updating.} other {Resolve <b>{value} conflicts</b> before updating.}}"
+                params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
+              />
+            ) : (
+              <T
+                keyName="branch_merges_unresolved_conflicts_alert"
+                params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
+              />
+            )}
           </Alert>
         )}
 
-        {merge.uncompletedTasksCount > 0 && (
+        {!merge.isUpdate && merge.uncompletedTasksCount > 0 && (
           <Alert severity="warning">
             <T
               keyName="branch_merges_uncompleted_tasks_alert"
@@ -57,6 +77,12 @@ export const MergeHeader: React.FC<React.PropsWithChildren<Props>> = ({
         )}
 
         <StatsBlock merge={merge} />
+
+        <MergeFilters
+          merge={merge}
+          onChange={onFiltersChange}
+          disabled={Boolean(merge.mergedAt) || filtersBusy}
+        />
       </StyledBody>
     </>
   );

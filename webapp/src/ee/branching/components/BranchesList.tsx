@@ -88,6 +88,7 @@ export const BranchesList = () => {
       content: {
         'application/json': {
           sourceBranchId: values.sourceBranchId,
+          targetBranchId: values.targetBranchId,
         },
       },
     });
@@ -126,6 +127,17 @@ export const BranchesList = () => {
     }
   };
 
+  const handleUpdateFrom = (branch: BranchModel) => {
+    if (branch.update && !branch.update.mergedAt) {
+      handleUpdateDetail(branch);
+    } else {
+      mergeIntoSubmit({
+        sourceBranchId: branch.originBranchId!,
+        targetBranchId: branch.id,
+      });
+    }
+  };
+
   const handleRenameSubmit = async (name: string) => {
     if (!renameBranch) return;
     await renameMutation.mutateAsync({
@@ -155,6 +167,15 @@ export const BranchesList = () => {
       LINKS.PROJECT_BRANCHES_MERGE.build({
         projectId: project.id,
         mergeId: branch.merge!.id,
+      })
+    );
+  };
+
+  const handleUpdateDetail = (branch: BranchModel) => {
+    history.push(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        projectId: project.id,
+        mergeId: branch.update!.id,
       })
     );
   };
@@ -223,6 +244,12 @@ export const BranchesList = () => {
                 canManageBranches ? () => handleMergeInto(l) : undefined
               }
               onMergeDetail={() => handleMergeDetail(l)}
+              onUpdateFrom={
+                canManageBranches && l.originBranchId
+                  ? () => handleUpdateFrom(l)
+                  : undefined
+              }
+              onUpdateDetail={() => handleUpdateDetail(l)}
             />
           )}
         />

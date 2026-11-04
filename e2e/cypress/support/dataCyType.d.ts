@@ -137,6 +137,7 @@ declare namespace DataCy {
         "billing-progress-label-item": true;
         "branch-default-chip": true;
         "branch-name-input": true;
+        "branch-protected-checkbox": true;
         "branch-protected-icon": true;
         "branch-select-item": true;
         "branch-selector": true;
@@ -601,8 +602,13 @@ declare namespace DataCy {
         "project-branch-merge-apply": true;
         "project-branch-merge-cancel": true;
         "project-branch-merge-change": true;
+        "project-branch-merge-change-include": true;
         "project-branch-merge-delete-branch-checkbox": true;
         "project-branch-merge-detail": true;
+        "project-branch-merge-filter-existing-keys-only": true;
+        "project-branch-merge-filter-reviewed-only": true;
+        "project-branch-merge-include-all": true;
+        "project-branch-merge-included-count": true;
         "project-contributor-invitation-pending": true;
         "project-contributor-invite-button": true;
         "project-contributor-item": true;
@@ -676,6 +682,7 @@ declare namespace DataCy {
         "project-settings-branches-protection-button": true;
         "project-settings-branches-remove-button": true;
         "project-settings-branches-rename-button": true;
+        "project-settings-branches-update-from-button": true;
         "project-settings-button": true;
         "project-settings-delete-button": true;
         "project-settings-description": true;

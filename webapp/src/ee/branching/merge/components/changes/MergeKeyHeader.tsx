@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Box, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { KeyName } from 'tg.component/KeyName/KeyName';
@@ -32,6 +32,7 @@ const Markdown = styled('div')`
 type Props = {
   data: BranchMergeKeyModel;
   variant?: 'added' | 'deleted';
+  headerStart?: ReactNode;
 };
 
 const HeaderRow = styled('div')`
@@ -58,6 +59,7 @@ const TextColumn = styled('div')<{ strike?: boolean }>`
 export const MergeKeyHeader: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   variant,
+  headerStart,
 }) => {
   const strike = variant === 'deleted';
   return (
@@ -72,6 +74,7 @@ export const MergeKeyHeader: React.FC<React.PropsWithChildren<Props>> = ({
       })}
     >
       <HeaderRow>
+        {headerStart}
         {variant && (
           <IconWrapper variant={variant}>
             {variant === 'added' ? (
