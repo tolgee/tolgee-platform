@@ -20,12 +20,19 @@ class McpScopeEnforcementTest : AbstractMcpTest() {
     val client = clientWithScopes(Scope.KEYS_VIEW)
 
     assertToolSucceeds(client, "list_keys")
-    assertToolSucceeds(client, "search_keys", mapOf("query" to "test"))
     assertToolSucceeds(client, "get_key", mapOf("keyName" to "test.key"))
+
+    // search_keys returns base translation text, so it also needs TRANSLATIONS_VIEW (like REST)
+    assertToolFails(client, "search_keys", mapOf("query" to "test"))
 
     assertToolFails(client, "create_keys", mapOf("keys" to listOf(mapOf("name" to "new.key"))))
     assertToolFails(client, "update_key", mapOf("keyName" to "test.key", "newName" to "renamed"))
     assertToolFails(client, "delete_keys", mapOf("keyNames" to listOf("test.key")))
+    assertToolFails(
+      client,
+      "set_translation",
+      mapOf("keyName" to "test.key", "translations" to mapOf("en" to "overwritten")),
+    )
   }
 
   @Test

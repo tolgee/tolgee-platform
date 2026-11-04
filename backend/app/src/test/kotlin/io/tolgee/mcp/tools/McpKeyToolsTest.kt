@@ -175,6 +175,29 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `delete_keys moves keys to trash instead of hard-deleting them`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "trash.me")),
+      ),
+    )
+    val keyId = keyService.find(data.projectId, "trash.me", null)!!.id
+
+    callTool(
+      client,
+      "delete_keys",
+      mapOf("projectId" to data.projectId, "keyNames" to listOf("trash.me")),
+    )
+
+    val deleted = keyService.findOptional(keyId)
+    assertThat(deleted.isPresent).isTrue()
+    assertThat(deleted.get().deletedAt).isNotNull()
+  }
+
+  @Test
   fun `delete_keys returns error for non-existent key`() {
     val result =
       callTool(

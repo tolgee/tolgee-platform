@@ -297,7 +297,7 @@ class KeyController(
         "\n\n" +
         "Sort is ignored for this request.",
   )
-  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @RequiresProjectPermissions([Scope.KEYS_VIEW, Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun searchForKey(
     @RequestParam
