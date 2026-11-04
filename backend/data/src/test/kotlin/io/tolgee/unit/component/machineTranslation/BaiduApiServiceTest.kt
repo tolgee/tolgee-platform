@@ -68,6 +68,14 @@ class BaiduApiServiceTest {
       .isInstanceOf(RuntimeException::class.java)
   }
 
+  @Test
+  fun `fails when Baidu returns fewer results than lines`() {
+    val service = serviceWithMockedResponse("First line.")
+
+    assertThatThrownBy { service.translate("第一行。\n第二行。", "zh", "en") }
+      .isInstanceOf(RuntimeException::class.java)
+  }
+
   private fun serviceWithMockedResponse(vararg lines: String?): BaiduApiService {
     val response =
       BaiduResponse().apply {
