@@ -69,7 +69,7 @@ class BaiduApiService(
     val remaining = results.iterator()
     return source.split("\n").joinToString("\n") { line ->
       if (line.isBlank() || !remaining.hasNext()) return@joinToString line
-      remaining.next().dst.orEmpty()
+      remaining.next().dst ?: throw RuntimeException("Baidu returned no translation")
     }
   }
 

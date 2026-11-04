@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.providers.BaiduApiService.Companio
 import io.tolgee.component.machineTranslation.providers.BaiduApiService.Companion.BaiduTranslation
 import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
@@ -59,7 +60,15 @@ class BaiduApiServiceTest {
     assertThat(result).isEqualTo("1 < b > 0")
   }
 
-  private fun serviceWithMockedResponse(vararg lines: String): BaiduApiService {
+  @Test
+  fun `fails when Baidu returns no translation for a line`() {
+    val service = serviceWithMockedResponse("First line.", null)
+
+    assertThatThrownBy { service.translate("第一行。\n第二行。", "zh", "en") }
+      .isInstanceOf(RuntimeException::class.java)
+  }
+
+  private fun serviceWithMockedResponse(vararg lines: String?): BaiduApiService {
     val response =
       BaiduResponse().apply {
         transResult = lines.map { BaiduTranslation().apply { dst = it } }
