@@ -1,3 +1,10 @@
+## [3.242.1](https://github.com/tolgee/tolgee-platform/compare/v3.242.0...v3.242.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* Baidu machine translation drops lines and breaks HTML tags ([#4022](https://github.com/tolgee/tolgee-platform/issues/4022)) ([870181e](https://github.com/tolgee/tolgee-platform/commit/870181e6348c204146b42c332289e5d6686207ee))
+
 # [3.242.0](https://github.com/tolgee/tolgee-platform/compare/v3.241.4...v3.242.0) (2026-11-03)
 
 
