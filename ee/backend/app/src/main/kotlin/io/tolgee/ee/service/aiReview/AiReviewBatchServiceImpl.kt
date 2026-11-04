@@ -242,8 +242,18 @@ class AiReviewBatchServiceImpl(
           return@executeInNewTransaction null
         }
 
+        val project = translation.key.project
+        if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
+          row.batchJobId = null
+          return@executeInNewTransaction null
+        }
+
         val decision = evaluator.evaluate(translation, activeOnly = assignment.aiManaged)
         if (decision !is RuleDecision.Review || winnerChanged(decision, assignment)) {
+          row.batchJobId = null
+          return@executeInNewTransaction null
+        }
+        if (skippedForQa(translation, row, project, decision)) {
           row.batchJobId = null
           return@executeInNewTransaction null
         }
@@ -363,6 +373,8 @@ class AiReviewBatchServiceImpl(
     row.score = null
     row.issues = mutableListOf()
     row.failureReason = null
+    row.lastFailureReason = null
+    row.lastFailedAt = null
   }
 
   private fun deleteUnlessResolved(row: TranslationAiReview) {

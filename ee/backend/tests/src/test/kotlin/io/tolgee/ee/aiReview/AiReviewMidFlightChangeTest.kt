@@ -17,8 +17,11 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -35,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.util.Date
 import java.util.concurrent.atomic.AtomicBoolean
 
 @SpringBootTest
@@ -147,6 +151,62 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
     row.threshold.assert.isEqualTo(99)
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
     verify(openaiApiService, times(2)).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an open QA issue appearing during the call drops the result`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW, Feature.QA_CHECKS)
+    testData.project.useQaChecks = true
+    testData.rule.skipOpenQaIssues = true
+    testData.deTranslation.qaChecksStale = false
+    save()
+    stubWithMidFlightChange {
+      val translation = entityManager.find(Translation::class.java, testData.deTranslation.id)
+      entityManager.persist(TranslationQaIssue(translation = translation))
+    }
+
+    runJob(testData.deTranslation.id)
+
+    waitForStatus(AiReviewStatus.SKIPPED_QA_ISSUES)
+    val row = review(testData.deTranslation.id)!!
+    row.batchJobId.assert.isNull()
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+  }
+
+  @Test
+  fun `losing the feature during the call drops the result`() {
+    save()
+    stubWithMidFlightChange {
+      enabledFeaturesProvider.forceEnabled = emptySet()
+    }
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.PENDING)
+    row.batchJobId.assert.isNull()
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+  }
+
+  @Test
+  fun `a stale-hash claim clears the previous failure fields`() {
+    save()
+    llmProperties.providers = mutableListOf()
+    executeInNewTransaction(platformTransactionManager) {
+      val row = translationAiReviewRepository.findByTranslationId(testData.deTranslation.id)!!
+      row.textHash = "stale-hash"
+      row.lastFailureReason = AiReviewFailureReason.PARSE_ERROR
+      row.lastFailedAt = Date()
+      translationAiReviewRepository.save(row)
+    }
+
+    runJob(testData.deTranslation.id)
+
+    waitForStatus(AiReviewStatus.FAILED)
+    val row = review(testData.deTranslation.id)!!
+    row.failureReason.assert.isEqualTo(AiReviewFailureReason.NO_PROVIDER)
+    row.lastFailureReason.assert.isNull()
+    row.lastFailedAt.assert.isNull()
   }
 
   @Test
