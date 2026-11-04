@@ -172,6 +172,9 @@ class PromptController(
       ),
     )
 
+    if (promptService.findPrompt(projectHolder.project.id, promptId).type == PromptType.REVIEW) {
+      checkAiReviewEnabled()
+    }
     promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 

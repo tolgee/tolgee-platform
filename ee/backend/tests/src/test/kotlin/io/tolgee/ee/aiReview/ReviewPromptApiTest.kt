@@ -80,6 +80,14 @@ class ReviewPromptApiTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `deleting a REVIEW prompt without AI_REVIEW returns FEATURE_NOT_ENABLED`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performAuthDelete("$projectUrl/prompts/${testData.reviewPrompt.id}")
+      .andIsBadRequest
+      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+  }
+
+  @Test
   fun `type cannot change on update`() {
     val body = mapOf("name" to "Now translate", "providerName" to "default", "type" to "TRANSLATE")
     performAuthPut("$projectUrl/prompts/${testData.reviewPrompt.id}", body)
