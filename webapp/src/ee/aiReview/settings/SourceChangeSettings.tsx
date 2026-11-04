@@ -146,7 +146,7 @@ export const SourceChangeSettings = () => {
               <Select
                 size="small"
                 value={settings[row.field]}
-                disabled={!canEdit || row.locked}
+                disabled={!canEdit || row.locked || updateMutation.isLoading}
                 onChange={(e) =>
                   handleChange(row.field, e.target.value as SourceChangeAction)
                 }

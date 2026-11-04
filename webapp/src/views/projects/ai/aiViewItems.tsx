@@ -4,6 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
   AiContextData,
   AiPromptsList,
@@ -14,6 +15,7 @@ import {
 export const useAiViewItems = () => {
   const { t } = useTranslate();
   const aiReviewEnabled = useAiReviewEnabled();
+  const { satisfiesPermission } = useProjectPermissions();
 
   const items: AiViewItem[] = [
     {
@@ -58,7 +60,8 @@ export const useAiViewItems = () => {
     ? items.find(
         (item) =>
           item.link.template === match.path &&
-          (!item.requireExactMatch || match.isExact)
+          (!item.requireExactMatch || match.isExact) &&
+          item.tab.condition({ satisfiesPermission })
       )
     : undefined;
 
