@@ -108,7 +108,11 @@ export const usePromptState = ({ language, keyData }: Props) => {
         return true;
       }
       if (type === 'basic') {
-        const lastOptions = new Set(openPromptData.basicPromptOptions);
+        // Mirrors updateForm, which falls back to the defaults: a prompt
+        // without stored options must not count as an unsaved change.
+        const lastOptions = new Set(
+          openPromptData.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS
+        );
         const newOptions = new Set(options);
         return !(
           lastOptions.size === newOptions.size &&
@@ -129,7 +133,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
     reviewCriteria,
   ]);
 
-  const preventLeave = unsavedChanges === true && tab === 'advanced';
+  const preventLeave = unsavedChanges === true;
 
   usePreventPageLeave(preventLeave);
   function confirmUnsaved(callback: () => void) {
