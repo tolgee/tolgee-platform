@@ -80,7 +80,9 @@ class AiReviewActionService(
     status: AiReviewStatus,
   ): TranslationAiReview {
     val row = reviewRepository.findByTranslationId(translation.id) ?: throw NotFoundException()
-    if (row.status != AiReviewStatus.APPROVED) {
+    if (row.status != AiReviewStatus.APPROVED ||
+      !AiReviewEligibility.isReviewForCurrentText(translation, row)
+    ) {
       throw BadRequestException(Message.AI_REVIEW_NOT_AN_APPROVAL)
     }
     translationService.setStateBatch(translation, state)

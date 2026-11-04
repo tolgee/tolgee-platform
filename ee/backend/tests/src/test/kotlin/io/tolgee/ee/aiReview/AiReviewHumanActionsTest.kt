@@ -126,6 +126,19 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `confirm and reject on an approval for old text return 400`() {
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.APPROVED, 90) {
+      textHash = "stale-hash"
+    }
+    save()
+
+    val url = "$projectUrl/translations/${testData.frTranslation.id}/ai-review"
+    performAuthPut("$url/confirm", null).andIsBadRequest
+    performAuthPut("$url/reject", null).andIsBadRequest
+    review(testData.frTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+  }
+
+  @Test
   fun `confirm on a BELOW_THRESHOLD row returns 400`() {
     testData.addReview(testData.frTranslationBuilder, AiReviewStatus.BELOW_THRESHOLD, 50)
     save()
