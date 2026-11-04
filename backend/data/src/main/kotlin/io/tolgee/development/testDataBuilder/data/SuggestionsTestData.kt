@@ -13,6 +13,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.TranslationSuggestionState
 
 class SuggestionsTestData(
   suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
@@ -351,4 +352,20 @@ class SuggestionsTestData(
     translation.state = TranslationState.DISABLED
     translation.text = null
   }
+
+  fun addUntranslatedKeyWithCzechSuggestions(): KeyBuilder =
+    relatedProject.addKey(null, "untranslated key").apply {
+      addTranslation("en", "Hello")
+      addSuggestion {
+        this.language = czechLanguage
+        this.author = projectTranslator.self
+        this.translation = "Ahoj"
+      }
+      addSuggestion {
+        this.language = czechLanguage
+        this.author = projectReviewer.self
+        this.translation = "Nazdar"
+        this.state = TranslationSuggestionState.DECLINED
+      }
+    }
 }
