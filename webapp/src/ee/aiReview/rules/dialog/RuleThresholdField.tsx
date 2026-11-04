@@ -21,7 +21,7 @@ export const RuleThresholdField = () => {
         helperText={t(
           'ai_review_rule_form_threshold_hint',
           'Translations scoring {threshold} or more are marked as reviewed automatically.',
-          { threshold: String(values.threshold || 85) }
+          { threshold: String(values.threshold === '' ? 85 : values.threshold) }
         )}
         data-cy="ai-review-rule-form-threshold"
         FormHelperTextProps={
