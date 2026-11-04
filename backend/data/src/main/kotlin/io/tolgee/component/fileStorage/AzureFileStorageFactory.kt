@@ -22,6 +22,9 @@ class AzureFileStorageFactory {
     }
   }
 
+  fun resolveEndpoint(config: AzureBlobConfig): String? =
+    runCatching { parseConnectionString(config.connectionString).buildClient().accountUrl }.getOrNull()
+
   private fun parseConnectionString(connectionString: String?): BlobServiceClientBuilder {
     try {
       return BlobServiceClientBuilder().connectionString(connectionString)

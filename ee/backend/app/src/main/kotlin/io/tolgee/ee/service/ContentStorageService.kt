@@ -1,6 +1,8 @@
 package io.tolgee.ee.service
 
 import io.tolgee.component.contentDelivery.ContentDeliveryFileStorageProvider
+import io.tolgee.component.fileStorage.AzureFileStorageFactory
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
 import io.tolgee.ee.component.contentDelivery.ContentStorageConfigProcessor
@@ -9,10 +11,13 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
+import io.tolgee.model.contentDelivery.AzureBlobConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.contentDelivery.ContentStorageType
+import io.tolgee.model.contentDelivery.S3Config
 import io.tolgee.model.contentDelivery.StorageConfig
 import io.tolgee.repository.contentDelivery.ContentStorageRepository
+import io.tolgee.util.UrlSecurity
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
@@ -26,6 +31,9 @@ class ContentStorageService(
   private val entityManager: EntityManager,
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
   private val contentStorageConfigProcessors: List<ContentStorageConfigProcessor<*>>,
+  private val azureFileStorageFactory: AzureFileStorageFactory,
+  private val urlSecurity: UrlSecurity,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   @Transactional
   fun create(
@@ -106,6 +114,7 @@ class ContentStorageService(
       getProcessor(config.contentStorageType).fillDtoSecrets(existing, dto)
     }
     try {
+      validateEndpoint(config)
       val storage = contentDeliveryFileStorageProvider.getStorage(config)
       storage.test()
     } catch (e: Exception) {
@@ -126,6 +135,24 @@ class ContentStorageService(
         listOf(result.message, result.params) as List<Serializable?>?,
       )
     }
+  }
+
+  private fun validateEndpoint(config: StorageConfig) {
+    val endpoint =
+      when (config) {
+        is S3Config -> config.endpoint?.takeIf { it.isNotBlank() }?.let(::withScheme)
+        is AzureBlobConfig -> azureFileStorageFactory.resolveEndpoint(config)
+        else -> null
+      } ?: return
+    urlSecurity.validateUrl(endpoint, tolgeeProperties.contentDelivery.storage.allowLocalAddresses)
+  }
+
+  // S3ClientProvider falls back to https:// for a scheme-less endpoint, so validate the URL it will actually use.
+  private fun withScheme(endpoint: String): String {
+    if (endpoint.startsWith("http://", ignoreCase = true) || endpoint.startsWith("https://", ignoreCase = true)) {
+      return endpoint
+    }
+    return "https://$endpoint"
   }
 
   private fun getNonNullConfig(dto: ContentStorageRequest): StorageConfig {
