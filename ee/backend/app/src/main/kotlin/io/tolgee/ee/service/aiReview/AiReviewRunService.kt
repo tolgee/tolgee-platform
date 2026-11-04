@@ -170,6 +170,7 @@ class AiReviewRunService(
     val qaLanguageIds: Set<Long>,
   ) {
     private val stateEditAllowed = mutableMapOf<Long, Boolean>()
+    private val branchModifyAllowed = mutableMapOf<Long?, Boolean>()
 
     fun decide(
       translation: Translation,
@@ -236,14 +237,19 @@ class AiReviewRunService(
       translation: Translation,
     ): AiReviewSkipReason? {
       if (decision.rule.mode != AiReviewRuleMode.ACTIVE) return null
-      val allowed =
+      val stateEdit =
         stateEditAllowed.getOrPut(translation.language.id) {
           runCatching {
             securityService.checkLanguageStateChangePermission(projectId, listOf(translation.language.id))
           }.isSuccess
         }
-      if (allowed) return null
-      return AiReviewSkipReason.NO_PERMISSION
+      if (!stateEdit) return AiReviewSkipReason.NO_PERMISSION
+      val branchModify =
+        branchModifyAllowed.getOrPut(translation.key.branch?.id) {
+          runCatching { securityService.checkBranchModify(translation) }.isSuccess
+        }
+      if (!branchModify) return AiReviewSkipReason.NO_PERMISSION
+      return null
     }
   }
 

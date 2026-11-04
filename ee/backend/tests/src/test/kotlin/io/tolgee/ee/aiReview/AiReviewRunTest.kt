@@ -372,6 +372,48 @@ class AiReviewRunTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `an Active winner on a protected branch without branch modify permission is skipped`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW, Feature.BRANCHING)
+    testData.project.useBranching = true
+    val branch =
+      testData.projectBuilder
+        .addBranch {
+          name = "protected"
+          isProtected = true
+        }.self
+    val branched = testData.addKeyWithTranslations("branched.key")
+    branched.keyBuilder.self.branch = branch
+    val restricted =
+      testData.root
+        .addUserAccount { username = "run_branch_restricted" }
+        .self
+    testData.projectBuilder.addPermission {
+      user = restricted
+      type = null
+      scopes =
+        arrayOf(
+          Scope.KEYS_VIEW,
+          Scope.TRANSLATIONS_VIEW,
+          Scope.BATCH_MACHINE_TRANSLATE,
+          Scope.TRANSLATIONS_STATE_EDIT,
+        )
+    }
+    save()
+    userAccount = restricted
+
+    performAuthPost(
+      "$projectUrl/ai-review/run/preview",
+      runBody(
+        keyIds = listOf(branched.key.id),
+        languageIds = listOf(testData.german.id),
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("toReview").isEqualTo(0)
+      node("skipped.NO_PERMISSION").isEqualTo(1)
+    }
+  }
+
+  @Test
   fun `reReview re-queues result rows but never CONFIRMED or REJECTED, and the old status stays on failure`() {
     llmProperties.providers = mutableListOf()
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, 90) {
