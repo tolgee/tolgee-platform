@@ -73,7 +73,7 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
     ? `${contributorName} (${contributor.username})`
     : contributorName;
 
-  const formatContribution = (value: string) =>
+  const formatContribution = (value: number) =>
     formatDate(new Date(value), { dateStyle: 'medium' });
   const firstContribution = formatContribution(contributor.firstContributionAt);
   const lastContribution = formatContribution(contributor.lastContributionAt);

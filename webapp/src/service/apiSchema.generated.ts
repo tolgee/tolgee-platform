@@ -2598,13 +2598,13 @@ export interface components {
     };
     ContributorModel: {
       avatar?: components["schemas"]["Avatar"];
-      /** Format: date-time */
-      firstContributionAt: string;
+      /** Format: int64 */
+      firstContributionAt: number;
       /** Format: int64 */
       id: number;
       invitationPending: boolean;
-      /** Format: date-time */
-      lastContributionAt: string;
+      /** Format: int64 */
+      lastContributionAt: number;
       name?: string;
       username: string;
     };
@@ -2923,8 +2923,8 @@ export interface components {
         | "TRANSLATION_MEMORY"
       )[];
       isPayAsYouGo: boolean;
-      /** Format: date-time */
-      lastValidCheck?: string;
+      /** Format: int64 */
+      lastValidCheck?: number;
       licenseKey: string;
       name: string;
       nonCommerical: boolean;
@@ -4087,8 +4087,8 @@ export interface components {
     };
     KeySearchResultView: {
       baseTranslation?: string;
-      /** Format: date-time */
-      deletedAt?: string;
+      /** Format: int64 */
+      deletedAt?: number;
       deletedByUserAvatarHash?: string;
       deletedByUserDeleted?: boolean;
       /** Format: int64 */
@@ -4105,8 +4105,8 @@ export interface components {
     };
     KeySearchSearchResultModel: {
       baseTranslation?: string;
-      /** Format: date-time */
-      deletedAt?: string;
+      /** Format: int64 */
+      deletedAt?: number;
       deletedByUserAvatarHash?: string;
       deletedByUserDeleted?: boolean;
       /** Format: int64 */
@@ -4490,8 +4490,8 @@ export interface components {
       translatedPercentage: number;
       /** Format: int64 */
       translatedWordCount: number;
-      /** Format: date-time */
-      translationsUpdatedAt?: string;
+      /** Format: int64 */
+      translationsUpdatedAt?: number;
       /** Format: int64 */
       untranslatedKeyCount: number;
       /** Format: double */
@@ -4639,8 +4639,8 @@ export interface components {
       name: string;
     };
     NotificationModel: {
-      /** Format: date-time */
-      createdAt?: string;
+      /** Format: int64 */
+      createdAt?: number;
       /** Format: int64 */
       id: number;
       linkedTask?: components["schemas"]["TaskModel"];
@@ -4751,8 +4751,8 @@ export interface components {
     };
     OrganizationInvitationModel: {
       code: string;
-      /** Format: date-time */
-      createdAt: string;
+      /** Format: int64 */
+      createdAt: number;
       createdBy?: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
@@ -5639,8 +5639,8 @@ export interface components {
     };
     ProjectInvitationModel: {
       code?: string;
-      /** Format: date-time */
-      createdAt: string;
+      /** Format: int64 */
+      createdAt: number;
       createdBy?: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
@@ -5905,8 +5905,8 @@ export interface components {
       minUsageInvoiceAmount?: number;
     };
     PublicCloudPlanModel: {
-      /** Format: date-time */
-      archivedAt?: string;
+      /** Format: int64 */
+      archivedAt?: number;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -6467,8 +6467,8 @@ export interface components {
     };
     /** @description Screenshots of the key */
     ScreenshotModel: {
-      /** Format: date-time */
-      createdAt?: string;
+      /** Format: int64 */
+      createdAt?: number;
       fileUrl: string;
       /**
        * @description File name, which may be downloaded from the screenshot path.
@@ -6498,8 +6498,8 @@ export interface components {
       ids: number[];
     };
     SelfHostedEePlanModel: {
-      /** Format: date-time */
-      archivedAt?: string;
+      /** Format: int64 */
+      archivedAt?: number;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -7568,10 +7568,10 @@ export interface components {
     TranslationCommentModel: {
       author: components["schemas"]["SimpleUserAccountModel"];
       /**
-       * Format: date-time
+       * Format: int64
        * @description Date when it was created
        */
-      createdAt: string;
+      createdAt: number;
       /**
        * Format: int64
        * @description Id of translation comment record
@@ -7585,10 +7585,10 @@ export interface components {
       /** @description Text of comment */
       text: string;
       /**
-       * Format: date-time
+       * Format: int64
        * @description Date when it was updated
        */
-      updatedAt: string;
+      updatedAt: number;
     };
     TranslationCommentWithLangKeyDto: {
       /** Format: int64 */
@@ -7697,8 +7697,8 @@ export interface components {
       similarity: number;
       targetText: string;
       translationMemoryName?: string;
-      /** Format: date-time */
-      updatedAt?: string;
+      /** Format: int64 */
+      updatedAt?: number;
     };
     TranslationMemoryModel: {
       /**
@@ -7822,8 +7822,8 @@ export interface components {
     };
     TranslationSuggestionModel: {
       author: components["schemas"]["SimpleUserAccountModel"];
-      /** Format: date-time */
-      createdAt: string;
+      /** Format: int64 */
+      createdAt: number;
       /** Format: int64 */
       id: number;
       isPlural: boolean;
@@ -7834,8 +7834,8 @@ export interface components {
       /** @enum {string} */
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
-      /** Format: date-time */
-      updatedAt: string;
+      /** Format: int64 */
+      updatedAt: number;
     };
     /** @description First suggestion */
     TranslationSuggestionSimpleModel: {
@@ -7923,10 +7923,10 @@ export interface components {
     };
     TrashedKeyWithTranslationsModel: {
       /**
-       * Format: date-time
+       * Format: int64
        * @description When the key was deleted
        */
-      deletedAt: string;
+      deletedAt: number;
       deletedBy?: components["schemas"]["SimpleUserAccountModel"];
       /** @description Description of the key */
       description?: string;
@@ -7948,10 +7948,10 @@ export interface components {
        */
       namespace?: string;
       /**
-       * Format: date-time
+       * Format: int64
        * @description When the key will be permanently deleted
        */
-      permanentDeleteAt: string;
+      permanentDeleteAt: number;
       /** @description Screenshots of the key */
       screenshots: components["schemas"]["ScreenshotModel"][];
       /** @description Tags of key */
@@ -8057,8 +8057,8 @@ export interface components {
       name?: string;
     };
     UploadedImageModel: {
-      /** Format: date-time */
-      createdAt: string;
+      /** Format: int64 */
+      createdAt: number;
       fileUrl: string;
       filename: string;
       /** Format: int64 */
