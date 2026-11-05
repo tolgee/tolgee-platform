@@ -190,12 +190,10 @@ export class Validation {
     currentEmail: string
   ) =>
     Yup.object().shape({
-      currentPassword: Yup.string()
-        .max(50)
-        .when('email', {
-          is: (email) => email !== currentEmail,
-          then: Yup.string().required('Current password is required'),
-        }),
+      currentPassword: Yup.string().when('email', {
+        is: (email) => email !== currentEmail,
+        then: Yup.string().required('Current password is required'),
+      }),
       name: Yup.string().required(),
       email:
         accountType === 'MANAGED'
@@ -205,7 +203,7 @@ export class Validation {
 
   static readonly USER_PASSWORD_CHANGE = (t: TranslateFunction) =>
     Yup.object().shape({
-      currentPassword: Yup.string().max(50).required(),
+      currentPassword: Yup.string().required(),
       password: Validation.USER_PASSWORD(t),
     });
 
@@ -215,16 +213,16 @@ export class Validation {
     });
 
   static readonly USER_MFA_ENABLE = Yup.object().shape({
-    password: Yup.string().max(50).required(),
+    password: Yup.string().required(),
     otp: Yup.string().required().min(6).max(6),
   });
 
   static readonly USER_MFA_VIEW_RECOVERY = Yup.object().shape({
-    password: Yup.string().max(50).required(),
+    password: Yup.string().required(),
   });
 
   static readonly USER_MFA_DISABLE = Yup.object().shape({
-    password: Yup.string().max(50).required(),
+    password: Yup.string().required(),
   });
 
   static readonly API_KEY_SCOPES = Yup.mixed().test(

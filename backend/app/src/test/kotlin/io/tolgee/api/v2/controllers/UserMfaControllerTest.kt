@@ -28,6 +28,7 @@ import java.util.Date
 class UserMfaControllerTest : AuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"
+    private val LONG_PASSWORD = "a".repeat(60)
   }
 
   private val encodedKey: ByteArray = Base32().decode(TOTP_KEY)
@@ -54,6 +55,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   private fun persistedUser(): UserAccount = userAccountService.findActive(initialUsername)!!
+
+  private fun loginAsUserWithLongPassword(): UserAccount =
+    dbPopulator.createUserIfNotExists("long-password@test.com", LONG_PASSWORD).also { loginAsUser(it) }
 
   @BeforeEach
   fun setUp() {
@@ -126,6 +130,37 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
     assertThat(persistedUser().mfaRecoveryCodes).isNotEmpty
+  }
+
+  @Test
+  fun `it enables MFA with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    retry {
+      val requestDto =
+        UserTotpEnableRequestDto(
+          totpKey = TOTP_KEY,
+          otp = mfaService.generateStringCode(encodedKey),
+          password = LONG_PASSWORD,
+        )
+      performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
+    }
+    assertThat(userAccountService.get(user.id).totpKey).isEqualTo(encodedKey)
+  }
+
+  @Test
+  fun `it disables MFA with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    enableMfa()
+    performAuthDelete("/v2/user/mfa/totp", UserTotpDisableRequestDto(password = LONG_PASSWORD)).andIsOk
+    assertThat(userAccountService.get(user.id).totpKey).isNull()
+  }
+
+  @Test
+  fun `it regenerates MFA recovery codes with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    enableMfa()
+    performAuthPut("/v2/user/mfa/recovery", UserMfaRecoveryRequestDto(password = LONG_PASSWORD)).andIsOk
+    assertThat(userAccountService.get(user.id).mfaRecoveryCodes).isNotEmpty
   }
 
   @Test
