@@ -1,3 +1,10 @@
+## [3.242.2](https://github.com/tolgee/tolgee-platform/compare/v3.242.1...v3.242.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* set projectId in the webapp Tolgee SDK config ([#4035](https://github.com/tolgee/tolgee-platform/issues/4035)) ([b47f6ce](https://github.com/tolgee/tolgee-platform/commit/b47f6cef56113ee92cca2b126d79957791a40ad0))
+
 ## [3.242.1](https://github.com/tolgee/tolgee-platform/compare/v3.242.0...v3.242.1) (2026-11-04)
 
 
