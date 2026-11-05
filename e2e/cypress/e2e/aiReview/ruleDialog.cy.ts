@@ -40,17 +40,12 @@ describe('AI review rule dialog', () => {
     openCreateDialog(branchingProjectId);
     gcy('ai-review-rule-form-name').type('Branch rule');
 
-    gcy('ai-review-rule-form-keys-select').click();
-    gcyAdvanced({ value: 'submenu-item', id: 'tags' }).click();
-    cy.gcy('filter-item').contains('ui').click();
-    cy.gcy('filter-item')
-      .contains('legal')
-      .closestDcy('filter-item')
-      .findDcy('filter-item-exclude')
-      .click({ force: true });
-    gcyAdvanced({ value: 'filter-item', id: 'without-tags' }).click();
-    cy.get('body').type('{esc}');
-    cy.get('body').type('{esc}');
+    gcy('ai-review-rule-form-keys-filter-toggle').click();
+    gcy('ai-review-rule-form-tag-in').type('ui{enter}');
+    gcy('ai-review-rule-form-tag-in').click();
+    cy.get('[role="option"]').contains('Without tags').click();
+    gcy('ai-review-rule-form-name').click();
+    gcy('ai-review-rule-form-tag-not-in').type('legal{enter}');
 
     gcy('ai-review-rule-form-languages')
       .findDcy('translations-language-select-form-control')
@@ -129,10 +124,14 @@ describe('AI review rule dialog', () => {
   it('adding a threshold override to a Never rule enables mode, prompt and QA checkbox with the hint', () => {
     openCreateDialog(branchingProjectId);
     gcy('ai-review-rule-form-never').click();
-    gcy('ai-review-rule-form-overrides-toggle').click();
+    gcy('ai-review-rule-form-advanced-toggle').click();
     gcy('ai-review-rule-form-override-add').click();
-    gcy('ai-review-rule-form-override-instead').should('be.visible');
-    gcy('ai-review-rule-form-override-hint').should('be.visible');
+    gcy('ai-review-rule-form-override-instead')
+      .scrollIntoView()
+      .should('be.visible');
+    gcy('ai-review-rule-form-override-hint')
+      .scrollIntoView()
+      .should('be.visible');
     gcy('ai-review-rule-form-mode').should(
       'not.have.attr',
       'aria-disabled',
@@ -149,7 +148,7 @@ describe('AI review rule dialog', () => {
 
   it('Never in an override row disables its threshold field', () => {
     openCreateDialog(projectId);
-    gcy('ai-review-rule-form-overrides-toggle').click();
+    gcy('ai-review-rule-form-advanced-toggle').click();
     gcy('ai-review-rule-form-override-add').click();
     gcy('ai-review-rule-form-override-threshold')
       .find('input')
@@ -162,7 +161,7 @@ describe('AI review rule dialog', () => {
 
   it('adds and removes a language override', () => {
     openCreateDialog(projectId);
-    gcy('ai-review-rule-form-overrides-toggle').click();
+    gcy('ai-review-rule-form-advanced-toggle').click();
     gcy('ai-review-rule-form-override-add').click();
     gcy('ai-review-rule-form-override-row').should('have.length', 1);
     gcy('ai-review-rule-form-override-remove').click();
