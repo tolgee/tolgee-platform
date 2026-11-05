@@ -5,13 +5,15 @@ type TabConfig = {
   key: BranchMergeChangeType;
   label: string;
   count: number;
+  excluded: number;
 };
 
 export const useMergeTabs = (
   merge: BranchMergeModel | undefined,
   labels: Record<BranchMergeChangeType, string>,
   selectedTab: BranchMergeChangeType,
-  setSelectedTab: (tab: BranchMergeChangeType) => void
+  setSelectedTab: (tab: BranchMergeChangeType) => void,
+  userSelected: boolean
 ) => {
   const totalConflicts = useMemo(
     () =>
@@ -25,20 +27,37 @@ export const useMergeTabs = (
     if (!merge) return [];
     return (
       [
-        { key: 'ADD', label: labels.ADD, count: merge.keyAdditionsCount },
+        {
+          key: 'ADD',
+          label: labels.ADD,
+          count: merge.keyAdditionsCount,
+          excluded: merge.keyExcludedAdditionsCount,
+        },
         {
           key: 'UPDATE',
           label: labels.UPDATE,
           count: merge.keyModificationsCount,
+          excluded: merge.keyExcludedModificationsCount,
         },
-        { key: 'DELETE', label: labels.DELETE, count: merge.keyDeletionsCount },
-        { key: 'CONFLICT', label: labels.CONFLICT, count: totalConflicts },
+        {
+          key: 'DELETE',
+          label: labels.DELETE,
+          count: merge.keyDeletionsCount,
+          excluded: merge.keyExcludedDeletionsCount,
+        },
+        {
+          key: 'CONFLICT',
+          label: labels.CONFLICT,
+          count: totalConflicts,
+          excluded: merge.keyExcludedConflictsCount,
+        },
       ] satisfies TabConfig[]
-    ).filter((tab) => tab.count > 0 || merge.keyExcludedCount > 0);
+    ).filter((tab) => tab.count > 0 || tab.excluded > 0);
   }, [merge, labels, totalConflicts]);
 
   useEffect(() => {
-    if (!merge || !tabs.length) return;
+    if (!tabs.length) return;
+    if (userSelected && tabs.some((t) => t.key === selectedTab)) return;
 
     const conflictTab = tabs.find((t) => t.key === 'CONFLICT');
     const firstWithData =
@@ -46,10 +65,10 @@ export const useMergeTabs = (
         ? conflictTab
         : tabs.find((t) => t.count > 0) || tabs[0];
 
-    if (!tabs.find((t) => t.key === selectedTab)) {
+    if (firstWithData.key !== selectedTab) {
       setSelectedTab(firstWithData.key);
     }
-  }, [merge, tabs, selectedTab, setSelectedTab]);
+  }, [tabs, selectedTab, setSelectedTab, userSelected]);
 
   return { tabs, totalConflicts };
 };

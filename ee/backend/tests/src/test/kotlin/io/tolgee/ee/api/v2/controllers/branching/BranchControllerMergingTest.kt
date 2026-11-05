@@ -495,6 +495,8 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     }
     performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
       node("keyExcludedCount").isEqualTo(1)
+      node("keyExcludedModificationsCount").isEqualTo(1)
+      node("keyExcludedAdditionsCount").isEqualTo(0)
       node("keyModificationsCount").isEqualTo(0)
     }
   }
@@ -511,6 +513,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut("branches/merge/$mergeId/exclude", mapOf("excluded" to false)).andIsOk
     performProjectAuthGet("branches/merge/$mergeId/preview").andIsOk.andAssertThatJson {
       node("keyExcludedCount").isEqualTo(0)
+      node("keyExcludedModificationsCount").isEqualTo(0)
       node("keyModificationsCount").isEqualTo(1)
     }
   }

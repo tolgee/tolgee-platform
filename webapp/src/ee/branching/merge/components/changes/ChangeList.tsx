@@ -57,6 +57,8 @@ type Props = {
   merge: BranchMergeModel;
   changes: BranchMergeChangeModel[];
   selectedTab: BranchMergeChangeType;
+  includedCount: number;
+  excludedCount: number;
   isLoading: boolean;
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
@@ -75,6 +77,8 @@ export const ChangeList = ({
   merge,
   changes,
   selectedTab,
+  includedCount,
+  excludedCount,
   isLoading,
   hasNextPage,
   isFetchingNextPage,
@@ -99,8 +103,8 @@ export const ChangeList = ({
     setShowAllMap((prev) => ({ ...prev, [changeId]: !prev[changeId] }));
   };
 
-  const allIncluded = changes.every((change) => !change.excluded);
-  const someIncluded = changes.some((change) => !change.excluded);
+  const allIncluded = excludedCount === 0;
+  const someIncluded = includedCount > 0;
 
   const showMergedColumn =
     selectedTab === 'CONFLICT' || selectedTab === 'UPDATE';

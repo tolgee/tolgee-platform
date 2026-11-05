@@ -105,7 +105,14 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     createPreviewMutation,
   } = useMergeData(project.id, numericMergeId, selectedTab);
 
-  const { tabs } = useMergeTabs(merge, labels, selectedTab, setSelectedTab);
+  const { tabs } = useMergeTabs(
+    merge,
+    labels,
+    selectedTab,
+    setSelectedTab,
+    userSelectedTab.current
+  );
+  const currentTab = tabs.find((tab) => tab.key === selectedTab);
   const [creatingLongEnough] = useDebounce(
     createPreviewMutation.isLoading,
     500
@@ -121,26 +128,6 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
     userSelectedTab.current = false;
     setSelectedTab('CONFLICT');
   }, [numericMergeId]);
-
-  useEffect(() => {
-    if (!merge || userSelectedTab.current) {
-      return;
-    }
-
-    const totalConflicts =
-      merge.keyResolvedConflictsCount + merge.keyUnresolvedConflictsCount;
-
-    const firstTabWithData: BranchMergeChangeType | undefined = [
-      ['CONFLICT', totalConflicts],
-      ['ADD', merge.keyAdditionsCount],
-      ['UPDATE', merge.keyModificationsCount],
-      ['DELETE', merge.keyDeletionsCount],
-    ].find(([, count]) => (count as number) > 0)?.[0] as BranchMergeChangeType;
-
-    if (firstTabWithData && firstTabWithData !== selectedTab) {
-      setSelectedTab(firstTabWithData);
-    }
-  }, [merge, selectedTab]);
 
   useEffect(() => {
     if (!merge) return;
@@ -505,6 +492,8 @@ export const BranchMergeDetail: FC<React.PropsWithChildren<unknown>> = () => {
                 merge={merge}
                 changes={changes}
                 selectedTab={selectedTab ?? 'CONFLICT'}
+                includedCount={currentTab?.count ?? 0}
+                excludedCount={currentTab?.excluded ?? 0}
                 isLoading={changesLoadable.isLoading}
                 hasNextPage={changesLoadable.hasNextPage}
                 isFetchingNextPage={changesLoadable.isFetchingNextPage}

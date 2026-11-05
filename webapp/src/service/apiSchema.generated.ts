@@ -2014,9 +2014,29 @@ export interface components {
       keyDeletionsCount: number;
       /**
        * Format: int32
+       * @description Excluded key additions count
+       */
+      keyExcludedAdditionsCount: number;
+      /**
+       * Format: int32
+       * @description Excluded key conflicts count, resolved or not
+       */
+      keyExcludedConflictsCount: number;
+      /**
+       * Format: int32
        * @description Count of changes excluded from the merge
        */
       keyExcludedCount: number;
+      /**
+       * Format: int32
+       * @description Excluded key deletions count
+       */
+      keyExcludedDeletionsCount: number;
+      /**
+       * Format: int32
+       * @description Excluded key updates count
+       */
+      keyExcludedModificationsCount: number;
       /**
        * Format: int32
        * @description Key updates count

@@ -17,6 +17,10 @@ data class BranchMergeView(
   val keyUnresolvedConflictsCount: Long,
   val keyResolvedConflictsCount: Long,
   val keyExcludedCount: Long,
+  val keyExcludedAdditionsCount: Long,
+  val keyExcludedDeletionsCount: Long,
+  val keyExcludedModificationsCount: Long,
+  val keyExcludedConflictsCount: Long,
   val uncompletedTasksCount: Long,
   val filters: BranchMergeFilters,
 ) {
