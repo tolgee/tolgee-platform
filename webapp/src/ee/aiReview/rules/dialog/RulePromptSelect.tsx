@@ -1,7 +1,6 @@
 import {
   Box,
   FormControl,
-  InputLabel,
   Link as MuiLink,
   MenuItem,
   Select,
@@ -11,6 +10,7 @@ import { useFormikContext } from 'formik';
 import { Link } from 'react-router-dom';
 
 import { getAiPlaygroundUrl } from 'tg.constants/links';
+import { FieldLabel } from 'tg.component/FormField';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import {
@@ -36,11 +36,9 @@ export const RulePromptSelect = () => {
 
   return (
     <Box display="grid" gap={0.5} justifyItems="start">
+      <FieldLabel>{label}</FieldLabel>
       <FormControl size="small" disabled={disabled} fullWidth>
-        <InputLabel shrink>{label}</InputLabel>
         <Select
-          notched
-          label={label}
           value={values.promptId}
           displayEmpty
           onChange={(e) =>

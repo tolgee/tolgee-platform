@@ -1,8 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { FieldLabel } from 'tg.component/FormField';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { RuleFormValues } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 
@@ -19,10 +20,11 @@ export const RuleLanguagesField = () => {
       justifyItems="start"
       data-cy="ai-review-rule-form-languages"
     >
-      <Typography variant="caption" color="textSecondary">
+      <FieldLabel>
         {t('ai_review_rule_form_languages_label', 'Languages')}
-      </Typography>
+      </FieldLabel>
       <LanguagesSelect
+        enableEmpty
         context="ai-review-rule"
         languages={nonBaseLanguages}
         value={nonBaseLanguages

@@ -38,7 +38,7 @@ describe('AI reviewer in activity', () => {
     gcy('ai-review-add-rule-button').click();
     gcy('ai-review-rule-form-name').type('Activity rule');
     gcy('ai-review-rule-form-save').click();
-    cy.gcy('global-confirmation-cancel').click();
+    gcy('ai-review-run-cancel').click();
 
     gcyAdvanced({
       value: 'ai-review-rule-edit',
@@ -46,7 +46,7 @@ describe('AI reviewer in activity', () => {
     }).click();
     gcy('ai-review-rule-form-name').type(' 2');
     gcy('ai-review-rule-form-save').click();
-    cy.gcy('global-confirmation-cancel').click();
+    gcy('ai-review-run-cancel').click();
 
     gcyAdvanced({
       value: 'ai-review-rule-menu',
