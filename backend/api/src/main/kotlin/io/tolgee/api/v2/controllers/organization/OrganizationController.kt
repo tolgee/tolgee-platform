@@ -44,6 +44,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.organization.OrganizationStatsService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.security.UserAccountService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -94,6 +95,7 @@ class OrganizationController(
   private val projectService: ProjectService,
   private val payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider,
   private val organizationHolder: OrganizationHolder,
+  private val securityService: SecurityService,
 ) {
   @PostMapping
   @Transactional
@@ -199,7 +201,8 @@ class OrganizationController(
     summary = "Get all users in organization",
     description =
       "Returns all users in organization. " +
-        "The result also contains users who are only members of projects in the organization.",
+        "The result also contains users who are only members of projects in the organization. " +
+        "MFA status and projects with direct permission are only returned to organization owners.",
   )
   @RequiresOrganizationRole
   @RequiresSuperAuthentication
@@ -210,9 +213,10 @@ class OrganizationController(
     pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<UserAccountWithOrganizationRoleModel> {
+    val canSeeMemberDetails = securityService.shouldExposeOrganizationMemberDetails(id)
     val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
     val userIds = allInOrganization.content.map { it.id }
-    val projectsWithDirectPermission = projectService.getProjectsWithDirectPermissions(id, userIds)
+    val projectsWithDirectPermission = getProjectsWithDirectPermissions(id, userIds, canSeeMemberDetails)
     val pairs =
       allInOrganization.content.map { user ->
         user to (projectsWithDirectPermission[user.id] ?: emptyList())
@@ -220,7 +224,26 @@ class OrganizationController(
 
     val data = PageImpl(pairs, allInOrganization.pageable, allInOrganization.totalElements)
 
-    return arrayUserResourcesAssembler.toModel(data, userAccountWithOrganizationRoleModelAssembler)
+    val model = arrayUserResourcesAssembler.toModel(data, userAccountWithOrganizationRoleModelAssembler)
+    return maskMfaStatus(model, canSeeMemberDetails)
+  }
+
+  private fun maskMfaStatus(
+    model: PagedModel<UserAccountWithOrganizationRoleModel>,
+    canSeeMemberDetails: Boolean,
+  ): PagedModel<UserAccountWithOrganizationRoleModel> {
+    if (canSeeMemberDetails) return model
+    model.content.forEach { it.mfaEnabled = null }
+    return model
+  }
+
+  private fun getProjectsWithDirectPermissions(
+    organizationId: Long,
+    userIds: List<Long>,
+    canSeeMemberDetails: Boolean,
+  ): Map<Long, List<Project>> {
+    if (!canSeeMemberDetails) return emptyMap()
+    return projectService.getProjectsWithDirectPermissions(organizationId, userIds)
   }
 
   @PutMapping("/{id:[0-9]+}/leave")
