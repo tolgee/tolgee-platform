@@ -66,6 +66,8 @@ class QueryTranslationFiltering(
         AiReviewFilterOutcome.DRY_RUN_PASS to AiReviewStatus.DRY_RUN_PASS,
         AiReviewFilterOutcome.DRY_RUN_FAIL to AiReviewStatus.DRY_RUN_FAIL,
         AiReviewFilterOutcome.FAILED to AiReviewStatus.FAILED,
+        AiReviewFilterOutcome.CONFIRMED to AiReviewStatus.CONFIRMED,
+        AiReviewFilterOutcome.REJECTED to AiReviewStatus.REJECTED,
       )
 
     private val QUEUED_STATUSES = listOf(AiReviewStatus.PENDING, AiReviewStatus.SKIPPED_QA_ISSUES)

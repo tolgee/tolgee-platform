@@ -20631,6 +20631,8 @@ export interface operations {
           | "DRY_RUN_PASS"
           | "DRY_RUN_FAIL"
           | "FAILED"
+          | "CONFIRMED"
+          | "REJECTED"
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
@@ -20919,6 +20921,8 @@ export interface operations {
           | "DRY_RUN_PASS"
           | "DRY_RUN_FAIL"
           | "FAILED"
+          | "CONFIRMED"
+          | "REJECTED"
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
@@ -21251,6 +21255,8 @@ export interface operations {
           | "DRY_RUN_PASS"
           | "DRY_RUN_FAIL"
           | "FAILED"
+          | "CONFIRMED"
+          | "REJECTED"
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
@@ -27453,6 +27459,8 @@ export interface operations {
           | "DRY_RUN_PASS"
           | "DRY_RUN_FAIL"
           | "FAILED"
+          | "CONFIRMED"
+          | "REJECTED"
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
@@ -27953,6 +27961,8 @@ export interface operations {
           | "DRY_RUN_PASS"
           | "DRY_RUN_FAIL"
           | "FAILED"
+          | "CONFIRMED"
+          | "REJECTED"
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */

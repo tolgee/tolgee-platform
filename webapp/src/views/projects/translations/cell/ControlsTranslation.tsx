@@ -18,7 +18,7 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
 import {
   AiReviewCellButton,
-  isAiReviewBadgeVisible,
+  getAiReviewCellVisibility,
   QaBadge,
   useAiReviewEnabled,
   useQaChecksEnabled,
@@ -116,10 +116,11 @@ export const ControlsTranslation: React.FC<
   const translateTransition = useTaskTransitionTranslation();
   const qaChecksEnabled = useQaChecksEnabled();
   const aiReviewEnabled = useAiReviewEnabled();
-  const displayAiReview =
-    aiReviewEnabled &&
-    translationId !== undefined &&
-    isAiReviewBadgeVisible(aiReview, state, translationAuto);
+  const aiReviewVisibility =
+    aiReviewEnabled && translationId !== undefined
+      ? getAiReviewCellVisibility(aiReview, state, translationAuto)
+      : 'none';
+  const displayAiReview = aiReviewVisibility !== 'none';
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
@@ -244,6 +245,9 @@ export const ControlsTranslation: React.FC<
       {displayAiReview && (
         <AiReviewCellButton
           style={{ gridArea: 'aiReview' }}
+          className={clsx({
+            [CELL_SHOW_ON_HOVER]: aiReviewVisibility === 'hover',
+          })}
           aiReview={aiReview!}
           translationId={translationId!}
           state={state}

@@ -6,5 +6,7 @@ enum class AiReviewFilterOutcome {
   DRY_RUN_PASS,
   DRY_RUN_FAIL,
   FAILED,
+  CONFIRMED,
+  REJECTED,
   NOT_REVIEWED_YET,
 }

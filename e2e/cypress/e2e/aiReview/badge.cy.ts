@@ -62,10 +62,28 @@ describe('AI review badge', () => {
       visitKey(key);
       badgeIn(key, status);
     });
-    ['key_pending', 'key_confirmed', 'key_rejected'].forEach((key) => {
+    ['key_pending'].forEach((key) => {
       visitKey(key);
       noBadgeIn(key);
     });
+  });
+
+  it('confirmed and rejected rows show a hover chip that opens the popover', () => {
+    visitKey('key_confirmed');
+    getTranslationCell('key_confirmed', 'de').within(() => {
+      gcyAdvanced({ value: 'ai-review-badge', status: 'CONFIRMED' }).click({
+        force: true,
+      });
+    });
+    gcy('ai-review-popover-status').should('be.visible');
+    cy.get('body').type('{esc}');
+    visitKey('key_rejected');
+    getTranslationCell('key_rejected', 'de').within(() => {
+      gcyAdvanced({ value: 'ai-review-badge', status: 'REJECTED' }).click({
+        force: true,
+      });
+    });
+    gcy('ai-review-popover-status').should('be.visible');
   });
 
   it('hides below-threshold and failed badges after a human review', () => {
@@ -138,8 +156,17 @@ describe('AI review badge', () => {
     openPopover('key_approved', 'APPROVED');
     gcy('ai-review-popover-confirm').click();
     getTranslationCell('key_approved', 'de').within(() => {
-      gcy('ai-review-badge', { timeout: 10_000 }).should('not.exist');
+      gcyAdvanced({ value: 'ai-review-badge', status: 'CONFIRMED' }).should(
+        'exist'
+      );
     });
+    getTranslationCell('key_approved', 'de').within(() => {
+      gcyAdvanced({ value: 'ai-review-badge', status: 'CONFIRMED' }).click({
+        force: true,
+      });
+    });
+    gcy('ai-review-popover-resolved').should('be.visible');
+    cy.get('body').type('{esc}');
     getTranslationCell('key_approved', 'de')
       .closestDcy('translations-table-cell-translation')
       .findDcy('translations-state-indicator')
@@ -151,7 +178,9 @@ describe('AI review badge', () => {
     openPopover('key_approved', 'APPROVED');
     gcy('ai-review-popover-reject').click();
     getTranslationCell('key_approved', 'de').within(() => {
-      gcy('ai-review-badge', { timeout: 10_000 }).should('not.exist');
+      gcyAdvanced({ value: 'ai-review-badge', status: 'REJECTED' }).should(
+        'exist'
+      );
     });
     getTranslationCell('key_approved', 'de')
       .closestDcy('translations-table-cell-translation')

@@ -116,6 +116,7 @@ declare namespace DataCy {
         "ai-review-popover-protected-note": true;
         "ai-review-popover-re-review-failed": true;
         "ai-review-popover-reject": true;
+        "ai-review-popover-resolved": true;
         "ai-review-popover-retry": true;
         "ai-review-popover-reviewed": true;
         "ai-review-popover-rule": true;

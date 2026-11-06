@@ -45,6 +45,8 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     row("k.failed", AiReviewStatus.FAILED, null)
     row("k.pending", AiReviewStatus.PENDING, null)
     row("k.skipped", AiReviewStatus.SKIPPED_QA_ISSUES, null)
+    row("k.confirmed", AiReviewStatus.CONFIRMED, 92)
+    row("k.rejected", AiReviewStatus.REJECTED, 91)
     testData.addKeyWithTranslations("k.none")
     testData.addKeyWithTranslations("k.untagged", tags = emptyList())
     testData.addRule {
@@ -134,6 +136,8 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     keysFor("filterAiReviewStatus=DRY_RUN_PASS").assert.containsExactly("k.drypass")
     keysFor("filterAiReviewStatus=DRY_RUN_FAIL").assert.containsExactly("k.dryfail")
     keysFor("filterAiReviewStatus=FAILED").assert.containsExactly("k.failed")
+    keysFor("filterAiReviewStatus=CONFIRMED").assert.containsExactly("k.confirmed")
+    keysFor("filterAiReviewStatus=REJECTED").assert.containsExactly("k.rejected")
   }
 
   @Test

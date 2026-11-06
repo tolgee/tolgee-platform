@@ -77,6 +77,21 @@ describe('AI review filters', () => {
     keyAbsent('key_approved');
   });
 
+  it('filters by the human-resolved outcomes', () => {
+    visit();
+    openAiReviewSubfilter();
+    toggleOutcome('CONFIRMED');
+    waitForGlobalLoading();
+    keyVisible('key_confirmed');
+    keyAbsent('key_approved');
+
+    toggleOutcome('CONFIRMED');
+    toggleOutcome('REJECTED');
+    waitForGlobalLoading();
+    keyVisible('key_rejected');
+    keyAbsent('key_approved');
+  });
+
   it('filters by the two dry run outcomes', () => {
     visit();
     openAiReviewSubfilter();
