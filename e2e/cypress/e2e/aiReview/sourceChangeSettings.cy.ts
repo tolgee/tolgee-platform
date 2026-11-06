@@ -3,9 +3,17 @@ import {
   getProjectByNameFromTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { HOST } from '../../common/constants';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import { visitAiReviewRules } from '../../common/aiReview';
+import {
+  restoreAiReviewFeature,
+  withoutAiReviewFeature,
+} from '../../common/aiReview';
 import { waitForGlobalLoading } from '../../common/loading';
+
+function visitAdvancedSettings(projectId: number) {
+  return cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
+}
 
 describe('AI review source change settings', () => {
   let projectId: number;
@@ -27,11 +35,12 @@ describe('AI review source change settings', () => {
   });
 
   afterEach(() => {
+    restoreAiReviewFeature();
     aiReviewTestData.clean();
   });
 
-  it('shows the defaults', () => {
-    visitAiReviewRules(projectId);
+  it('shows the defaults in the advanced project settings', () => {
+    visitAdvancedSettings(projectId);
     gcy('ai-review-source-change-settings').should('be.visible');
     gcyAdvanced({
       value: 'source-change-select',
@@ -51,7 +60,7 @@ describe('AI review source change settings', () => {
   });
 
   it('a maintainer changes a value and it survives a reload', () => {
-    visitAiReviewRules(projectId);
+    visitAdvancedSettings(projectId);
     gcyAdvanced({
       value: 'source-change-select',
       field: 'humanEdited',
@@ -69,28 +78,22 @@ describe('AI review source change settings', () => {
     }).should('exist');
   });
 
-  it('a user without the edit permissions sees the section read-only', () => {
-    login('prompts_viewer_username');
-    visitAiReviewRules(projectId);
+  it('hides the AI approved row without the AI review feature', () => {
+    withoutAiReviewFeature();
+    visitAdvancedSettings(projectId);
     gcy('ai-review-source-change-settings').should('be.visible');
-    gcyAdvanced({ value: 'source-change-select', field: 'humanEdited' }).should(
-      'have.attr',
-      'aria-disabled',
-      'true'
-    );
-    gcyAdvanced({ value: 'source-change-select', field: 'aiApproved' }).should(
-      'have.attr',
-      'aria-disabled',
-      'true'
-    );
     gcyAdvanced({
       value: 'source-change-select',
-      field: 'humanReviewed',
-    }).should('have.attr', 'aria-disabled', 'true');
+      field: 'humanEdited',
+    }).should('exist');
+    gcyAdvanced({
+      value: 'source-change-select',
+      field: 'aiApproved',
+    }).should('not.exist');
   });
 
   it('locks the protected rows under protect reviewed with helper texts', () => {
-    visitAiReviewRules(protectedProjectId);
+    visitAdvancedSettings(protectedProjectId);
     gcyAdvanced({ value: 'source-change-select', field: 'aiApproved' }).should(
       'have.attr',
       'aria-disabled',

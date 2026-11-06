@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.api.v2.hateoas.model.aiReview.SourceChangeSettingsModel
 import io.tolgee.ee.data.aiReview.SourceChangeSettingsRequest
@@ -13,7 +12,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -34,8 +32,7 @@ class SourceChangeSettingsController(
 ) {
   @GetMapping("")
   @Operation(summary = "Get the source change settings")
-  @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
-  @RequiresFeatures(Feature.AI_REVIEW)
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @AllowApiAccess
   fun getSourceChangeSettings(): SourceChangeSettingsModel = toModel(projectHolder.project)
 
@@ -44,8 +41,7 @@ class SourceChangeSettingsController(
     summary = "Set the source change settings",
     description = "The setting decides whether human work is overwritten automatically later.",
   )
-  @RequiresProjectPermissions([Scope.PROMPTS_EDIT, Scope.PROJECT_EDIT])
-  @RequiresFeatures(Feature.AI_REVIEW)
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @RequestActivity(ActivityType.AI_REVIEW_SETTINGS_UPDATE)
   @AllowApiAccess
   fun setSourceChangeSettings(

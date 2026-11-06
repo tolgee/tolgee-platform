@@ -5,7 +5,6 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.SourceChangeSettingsService
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -18,7 +17,6 @@ import io.tolgee.service.aiReview.SourceChangeSettingsProvider
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,7 +47,7 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW)
     testData = AiReviewTestData()
     promptsEditor = addUserWithScopes("sc_prompts_editor", Scope.PROMPTS_VIEW, Scope.PROMPTS_EDIT)
-    projectEditor = addUserWithScopes("sc_project_editor", Scope.PROMPTS_VIEW, Scope.PROJECT_EDIT)
+    projectEditor = addUserWithScopes("sc_project_editor", Scope.PROJECT_EDIT)
   }
 
   @AfterEach
@@ -65,9 +63,9 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `GET returns the defaults and needs only PROMPTS_VIEW`() {
+  fun `GET returns the defaults and needs only PROJECT_EDIT`() {
     save()
-    userAccount = testData.promptsViewer
+    userAccount = projectEditor
     performAuthGet(url).andIsOk.andAssertThatJson {
       node("aiApproved").isEqualTo("RETRANSLATE")
       node("humanEdited").isEqualTo("MARK_OUTDATED")
@@ -78,7 +76,14 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `PUT stores the values with PROMPTS_EDIT and PROJECT_EDIT`() {
+  fun `GET with only PROMPTS_VIEW returns 403`() {
+    save()
+    userAccount = testData.promptsViewer
+    performAuthGet(url).andIsForbidden
+  }
+
+  @Test
+  fun `PUT stores the values`() {
     save()
     performAuthPut(url, body()).andIsOk.andAssertThatJson {
       node("aiApproved").isEqualTo("MARK_OUTDATED")
@@ -99,14 +104,14 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `PUT with only PROJECT_EDIT returns 403`() {
+  fun `PUT works with only PROJECT_EDIT`() {
     save()
     userAccount = projectEditor
-    performAuthPut(url, body()).andIsForbidden
+    performAuthPut(url, body()).andIsOk
   }
 
   @Test
-  fun `effective values are the defaults when AI review is off`() {
+  fun `without AI review only aiApproved falls back to the default`() {
     testData.project.aiApprovedSourceChangeAction = SourceChangeAction.MARK_OUTDATED
     testData.project.humanEditedSourceChangeAction = SourceChangeAction.RETRANSLATE
     testData.project.humanReviewedSourceChangeAction = SourceChangeAction.RETRANSLATE
@@ -115,8 +120,22 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
 
     val effective = effective()
     effective.aiApproved.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
-    effective.humanEdited.assert.isEqualTo(SourceChangeAction.MARK_OUTDATED)
-    effective.humanReviewed.assert.isEqualTo(SourceChangeAction.MARK_OUTDATED)
+    effective.humanEdited.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
+    effective.humanReviewed.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
+  }
+
+  @Test
+  fun `GET and PUT work without the AI review feature`() {
+    save()
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    performAuthGet(url).andIsOk
+    performAuthPut(url, body()).andIsOk.andAssertThatJson {
+      // The effective aiApproved stays the default without the feature.
+      node("aiApproved").isEqualTo("RETRANSLATE")
+      node("humanEdited").isEqualTo("RETRANSLATE")
+      node("humanReviewed").isEqualTo("RETRANSLATE")
+    }
   }
 
   @Test
@@ -148,19 +167,21 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the service refuses to store values without AI review`() {
+  fun `without AI review the service stores the human settings and keeps aiApproved`() {
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
-    assertThatThrownBy {
-      executeInNewTransaction(platformTransactionManager) {
-        sourceChangeSettingsService.update(
-          testData.project.id,
-          aiApproved = SourceChangeAction.MARK_OUTDATED,
-          humanEdited = SourceChangeAction.RETRANSLATE,
-          humanReviewed = SourceChangeAction.RETRANSLATE,
-        )
-      }
-    }.isInstanceOf(BadRequestException::class.java)
+    executeInNewTransaction(platformTransactionManager) {
+      sourceChangeSettingsService.update(
+        testData.project.id,
+        aiApproved = SourceChangeAction.MARK_OUTDATED,
+        humanEdited = SourceChangeAction.RETRANSLATE,
+        humanReviewed = SourceChangeAction.RETRANSLATE,
+      )
+    }
+    val project = project()
+    project.aiApprovedSourceChangeAction.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
+    project.humanEditedSourceChangeAction.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
+    project.humanReviewedSourceChangeAction.assert.isEqualTo(SourceChangeAction.RETRANSLATE)
   }
 
   @Test

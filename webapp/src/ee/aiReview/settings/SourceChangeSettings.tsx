@@ -5,6 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type SourceChangeSettingsModel =
   components['schemas']['SourceChangeSettingsModel'];
@@ -36,8 +37,8 @@ export const SourceChangeSettings = () => {
   const { t } = useTranslate();
   const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
-  const canEdit =
-    satisfiesPermission('prompts.edit') && satisfiesPermission('project.edit');
+  const canEdit = satisfiesPermission('project.edit');
+  const aiReviewEnabled = useEnabledFeatures().isEnabled('AI_REVIEW');
 
   const settingsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/source-change-settings',
@@ -73,24 +74,32 @@ export const SourceChangeSettings = () => {
     });
   }
 
-  const rows: {
+  type Row = {
     field: Field;
     label: string;
     hint: string;
     locked: boolean;
-  }[] = [
-    {
-      field: 'aiApproved',
-      label: t(
-        'source_change_ai_approved_label',
-        'Machine translations approved by AI'
-      ),
-      hint: t(
-        'source_change_ai_approved_hint',
-        'No human has touched them, so they behave like other machine translations.'
-      ),
-      locked: settings.aiApprovedLocked,
-    },
+  };
+
+  const aiApprovedRow: Row[] = aiReviewEnabled
+    ? [
+        {
+          field: 'aiApproved',
+          label: t(
+            'source_change_ai_approved_label',
+            'Machine translations approved by AI'
+          ),
+          hint: t(
+            'source_change_ai_approved_hint',
+            'No human has touched them, so they behave like other machine translations.'
+          ),
+          locked: settings.aiApprovedLocked,
+        },
+      ]
+    : [];
+
+  const rows: Row[] = [
+    ...aiApprovedRow,
     {
       field: 'humanEdited',
       label: t(

@@ -56,6 +56,7 @@ describe('AI reviewer in activity', () => {
     confirmStandard();
     waitForGlobalLoading();
 
+    cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
     gcyAdvanced({
       value: 'source-change-select',
       field: 'humanEdited',

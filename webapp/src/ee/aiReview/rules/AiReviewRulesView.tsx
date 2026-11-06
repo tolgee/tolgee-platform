@@ -12,7 +12,6 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
 import { AiReviewRuleItem } from 'tg.ee.module/aiReview/rules/AiReviewRuleItem';
 import { AiReviewRuleDialog } from 'tg.ee.module/aiReview/rules/dialog/AiReviewRuleDialog';
-import { SourceChangeSettings } from 'tg.ee.module/aiReview/settings/SourceChangeSettings';
 import {
   AiReviewRunDialog,
   AiReviewRunVariant,
@@ -137,7 +136,6 @@ export const AiReviewRulesView = () => {
             ))}
           </Box>
         )}
-        <SourceChangeSettings />
         {createOpen && (
           <AiReviewRuleDialog
             onClose={() => setCreateOpen(false)}

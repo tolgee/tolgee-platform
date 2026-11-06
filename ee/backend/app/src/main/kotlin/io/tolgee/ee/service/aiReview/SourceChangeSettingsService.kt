@@ -22,12 +22,15 @@ class SourceChangeSettingsService(
   private val entityManager: EntityManager,
 ) : SourceChangeSettingsProvider {
   override fun getEffective(project: ProjectDto): EffectiveSourceChangeSettings {
-    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
-      return EffectiveSourceChangeSettings.DEFAULTS
-    }
     val protect = project.translationProtection == TranslationProtection.PROTECT_REVIEWED
+    val aiApprovedApplies = !protect && projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)
     return EffectiveSourceChangeSettings(
-      aiApproved = if (protect) SourceChangeAction.RETRANSLATE else project.aiApprovedSourceChangeAction,
+      aiApproved =
+        if (aiApprovedApplies) {
+          project.aiApprovedSourceChangeAction
+        } else {
+          EffectiveSourceChangeSettings.DEFAULTS.aiApproved
+        },
       humanEdited = project.humanEditedSourceChangeAction,
       humanReviewed = if (protect) SourceChangeAction.MARK_OUTDATED else project.humanReviewedSourceChangeAction,
     )
@@ -44,8 +47,9 @@ class SourceChangeSettingsService(
     humanReviewed: SourceChangeAction,
   ): Project {
     val project = entityManager.find(Project::class.java, projectId)
-    projectFeatureGuard.checkEnabled(Feature.AI_REVIEW, project)
-    project.aiApprovedSourceChangeAction = aiApproved
+    if (projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
+      project.aiApprovedSourceChangeAction = aiApproved
+    }
     project.humanEditedSourceChangeAction = humanEdited
     project.humanReviewedSourceChangeAction = humanReviewed
     return project
