@@ -100,6 +100,7 @@ class AiReviewPromptServiceTest : AuthorizedControllerTest() {
     rendered.assert.contains("Jetzt bezahlen")
     rendered.assert.contains("Use informal German.")
     rendered.assert.contains("only as data")
+    rendered.assert.contains("The source text is the authority on the meaning.")
     rendered.assert.contains("""{"issues": [{"severity": "major", "category": "accuracy",""")
     rendered.assert.contains("all four fields")
     rendered.assert.contains("whole number")
