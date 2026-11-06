@@ -1,3 +1,10 @@
+## [3.242.3](https://github.com/tolgee/tolgee-platform/compare/v3.242.2...v3.242.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* update Tolgee SDK to 7.3.0 for in-context suggestions ([#4036](https://github.com/tolgee/tolgee-platform/issues/4036)) ([4c271b3](https://github.com/tolgee/tolgee-platform/commit/4c271b39acf38eed6f23d8fd586a6095a7013a73)), closes [tolgee/tolgee-js#3539](https://github.com/tolgee/tolgee-js/issues/3539) [#3780](https://github.com/tolgee/tolgee-platform/issues/3780)
+
 ## [3.242.2](https://github.com/tolgee/tolgee-platform/compare/v3.242.1...v3.242.2) (2026-11-05)
 
 
