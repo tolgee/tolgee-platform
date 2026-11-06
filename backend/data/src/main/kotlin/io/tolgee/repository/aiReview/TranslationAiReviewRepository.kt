@@ -197,6 +197,22 @@ interface TranslationAiReviewRepository : JpaRepository<TranslationAiReview, Lon
   @Query("delete from TranslationAiReview r where r.translation.id in :translationIds")
   fun deleteAllByTranslationIds(translationIds: Collection<Long>): Int
 
+  @Query(
+    """
+    select r from TranslationAiReview r
+    join fetch r.translation t
+    join fetch t.key
+    join fetch t.language
+    where t.key.id in :keyIds and t.language.id <> :baseLanguageId
+    and r.status in :statuses
+    """,
+  )
+  fun findSiblingRows(
+    keyIds: Collection<Long>,
+    baseLanguageId: Long,
+    statuses: Collection<AiReviewStatus>,
+  ): List<TranslationAiReview>
+
   @Modifying
   @Query(
     """

@@ -128,9 +128,14 @@ class AiReviewQueueService(
   ) {
     if (keyIds.isEmpty()) return
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
-    keyIds.chunked(IN_CLAUSE_CHUNK).forEach {
-      reviewRepository.deleteSiblingRows(it, baseLanguageId, STALE_ON_SOURCE_CHANGE)
+    val updates = mutableListOf<AiReviewUpdate>()
+    keyIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      reviewRepository.findSiblingRows(chunk, baseLanguageId, STALE_ON_SOURCE_CHANGE).forEach {
+        updates += removedOrPendingUpdate(it.translation, requeue = false)
+      }
+      reviewRepository.deleteSiblingRows(chunk, baseLanguageId, STALE_ON_SOURCE_CHANGE)
     }
+    websocketPublisher.publishAfterCommit(projectId, updates)
   }
 
   @Transactional

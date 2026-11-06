@@ -7,6 +7,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.service.aiReview.AiReviewUpdate
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
@@ -21,12 +22,18 @@ import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.websocket.WebsocketEvent
+import io.tolgee.websocket.WebsocketEventPublisher
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.security.MessageDigest
 
 @SpringBootTest
@@ -40,6 +47,10 @@ class AiReviewTriggerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
+
+  @Autowired
+  @MockitoBean
+  private lateinit var websocketEventPublisher: WebsocketEventPublisher
 
   lateinit var testData: AiReviewTestData
 
@@ -187,6 +198,30 @@ class AiReviewTriggerTest : AuthorizedControllerTest() {
 
     review(testData.deTranslation.id).assert.isNull()
     review(testData.frTranslation.id).assert.isNull()
+  }
+
+  @Test
+  fun `a source change publishes the removal of stale sibling rows`() {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.DRY_RUN_PASS, 90)
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.BELOW_THRESHOLD, 40)
+    save()
+    editTranslation("en", "Pay immediately")
+
+    val destination = argumentCaptor<String>()
+    val event = argumentCaptor<WebsocketEvent>()
+    verify(websocketEventPublisher, atLeastOnce()).invoke(destination.capture(), event.capture())
+    val index = destination.allValues.indexOf("/projects/${testData.project.id}/ai-review-updated")
+    index.assert.isGreaterThanOrEqualTo(0)
+    @Suppress("UNCHECKED_CAST")
+    val updates = event.allValues[index].data as List<AiReviewUpdate>
+    updates
+      .map { it.translationId }
+      .assert
+      .containsExactlyInAnyOrder(testData.deTranslation.id, testData.frTranslation.id)
+    updates.forEach {
+      it.status.assert.isNull()
+      it.score.assert.isNull()
+    }
   }
 
   @Test
