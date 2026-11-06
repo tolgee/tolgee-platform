@@ -1,3 +1,10 @@
+## [3.242.4](https://github.com/tolgee/tolgee-platform/compare/v3.242.3...v3.242.4) (2026-11-06)
+
+
+### Bug Fixes
+
+* accept current passwords longer than 50 characters in account settings ([#4034](https://github.com/tolgee/tolgee-platform/issues/4034)) ([4845416](https://github.com/tolgee/tolgee-platform/commit/48454167968b89ecf426937da366cac2a51621cd)), closes [#4015](https://github.com/tolgee/tolgee-platform/issues/4015)
+
 ## [3.242.3](https://github.com/tolgee/tolgee-platform/compare/v3.242.2...v3.242.3) (2026-11-06)
 
 
