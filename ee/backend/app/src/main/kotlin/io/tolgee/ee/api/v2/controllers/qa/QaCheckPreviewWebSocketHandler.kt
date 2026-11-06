@@ -44,6 +44,7 @@ import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
+import java.io.IOException
 
 @Component
 class QaCheckPreviewWebSocketHandler(
@@ -290,11 +291,27 @@ class QaCheckPreviewWebSocketHandler(
     session: WebSocketSession,
     data: Any,
   ) {
+    val message = TextMessage(objectMapper.writeValueAsString(data))
     synchronized(session) {
-      if (session.isOpen) {
-        session.sendMessage(TextMessage(objectMapper.writeValueAsString(data)))
+      // Tomcat's WsSession.isOpen() stays true while CLOSING, and a send that fails in that
+      // window leaves the remote endpoint state machine stuck, so every later send throws too.
+      if (!session.isOpen) return
+      try {
+        session.sendMessage(message)
+      } catch (e: IOException) {
+        abandonSession(session, e)
+      } catch (e: IllegalStateException) {
+        abandonSession(session, e)
       }
     }
+  }
+
+  private fun abandonSession(
+    session: WebSocketSession,
+    cause: Exception,
+  ) {
+    logger.debug("Send failed, closing session {}", session.id, cause)
+    runCatching { session.close(CloseStatus.SESSION_NOT_RELIABLE) }
   }
 
   override fun afterConnectionClosed(
