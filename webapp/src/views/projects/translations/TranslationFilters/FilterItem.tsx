@@ -16,6 +16,9 @@ const StyledMenuItem = styled(CompactMenuItem)`
   grid-template-columns: auto 1fr auto auto;
   align-items: center;
   padding-left: 4px !important;
+  &.indented {
+    padding-left: 32px !important;
+  }
   & .hidden {
     opacity: 0;
     transition: opacity ease-in 0.1s;
@@ -51,6 +54,8 @@ type Props = MenuItemProps & {
   onExclude?: () => void;
   exclusive?: boolean;
   indicator?: React.ReactNode;
+  indeterminate?: boolean;
+  indented?: boolean;
 };
 
 export const FilterItem = React.forwardRef(function FilterItem(
@@ -61,6 +66,9 @@ export const FilterItem = React.forwardRef(function FilterItem(
     onExclude,
     exclusive,
     indicator,
+    indeterminate,
+    indented,
+    className,
     ...other
   }: Props,
   ref
@@ -71,6 +79,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
       ref={ref as any}
       data-cy="filter-item"
       selected={selected}
+      className={clsx(className, { indented })}
       {...other}
     >
       {exclusive ? (
@@ -82,6 +91,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
       ) : (
         <StyledCheckbox
           checked={Boolean(selected || excluded)}
+          indeterminate={indeterminate}
           size="small"
           className={clsx({ excluded })}
         />
