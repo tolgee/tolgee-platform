@@ -3,7 +3,23 @@ import { components } from 'tg.service/apiSchema.generated';
 type AiReviewSummary = components['schemas']['TranslationAiReviewSummaryModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
 
-export const isAiReviewBadgeVisible = (
+export type AiReviewCellVisibility = 'badge' | 'hover' | 'none';
+
+export const getAiReviewCellVisibility = (
+  aiReview: AiReviewSummary | undefined,
+  state: State | undefined,
+  auto: boolean | undefined
+): AiReviewCellVisibility => {
+  if (!aiReview) {
+    return 'none';
+  }
+  if (aiReview.status === 'CONFIRMED' || aiReview.status === 'REJECTED') {
+    return 'hover';
+  }
+  return isAiReviewBadgeVisible(aiReview, state, auto) ? 'badge' : 'none';
+};
+
+const isAiReviewBadgeVisible = (
   aiReview: AiReviewSummary | undefined,
   state: State | undefined,
   auto: boolean | undefined

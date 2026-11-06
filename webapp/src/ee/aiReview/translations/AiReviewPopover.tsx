@@ -97,6 +97,10 @@ export const AiReviewPopover = ({
         );
       case 'FAILED':
         return t('ai_review_popover_status_failed', 'Review failed');
+      case 'CONFIRMED':
+        return t('ai_review_popover_status_confirmed', 'Confirmed by a human');
+      case 'REJECTED':
+        return t('ai_review_popover_status_rejected', 'Rejected by a human');
       default:
         return aiReview.status;
     }
@@ -207,6 +211,31 @@ export const AiReviewPopover = ({
                 {t('ai_review_popover_model', 'Model: {name}', {
                   name: details.model,
                 })}
+              </Typography>
+            )}
+            {details.resolvedBy && details.resolvedAt != null && (
+              <Typography variant="body2" data-cy="ai-review-popover-resolved">
+                {aiReview.status === 'REJECTED'
+                  ? t(
+                      'ai_review_popover_rejected_by',
+                      'Rejected by {name} {time}',
+                      {
+                        name:
+                          details.resolvedBy.name ??
+                          details.resolvedBy.username,
+                        time: timeDistance(details.resolvedAt),
+                      }
+                    )
+                  : t(
+                      'ai_review_popover_confirmed_by',
+                      'Confirmed by {name} {time}',
+                      {
+                        name:
+                          details.resolvedBy.name ??
+                          details.resolvedBy.username,
+                        time: timeDistance(details.resolvedAt),
+                      }
+                    )}
               </Typography>
             )}
             {details.reviewedAt != null && (

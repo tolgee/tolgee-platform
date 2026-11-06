@@ -19,6 +19,8 @@ const OUTCOME_BADGE_STATUS = {
   DRY_RUN_PASS: 'DRY_RUN_PASS',
   DRY_RUN_FAIL: 'DRY_RUN_FAIL',
   FAILED: 'FAILED',
+  CONFIRMED: 'CONFIRMED',
+  REJECTED: 'REJECTED',
   NOT_REVIEWED_YET: undefined,
 } as const;
 
@@ -58,6 +60,14 @@ export const SubfilterAiReview = ({
       ),
     },
     { outcome: 'FAILED', label: t('ai_review_filter_failed', 'Failed') },
+    {
+      outcome: 'CONFIRMED',
+      label: t('ai_review_filter_confirmed', 'Confirmed by a human'),
+    },
+    {
+      outcome: 'REJECTED',
+      label: t('ai_review_filter_rejected', 'Rejected by a human'),
+    },
     {
       outcome: 'NOT_REVIEWED_YET',
       label: t('ai_review_filter_not_reviewed_yet', 'Not reviewed yet'),

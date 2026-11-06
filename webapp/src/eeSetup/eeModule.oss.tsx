@@ -105,13 +105,13 @@ export const AiReviewRulesView = Empty;
 export const useAiReviewEnabled = () => false;
 export const AiReviewCellButton = (_props: AiReviewCellButtonProps) =>
   Empty() as JSX.Element;
-export const isAiReviewBadgeVisible = (
+export const getAiReviewCellVisibility = (
   _aiReview:
     | components['schemas']['TranslationAiReviewSummaryModel']
     | undefined,
   _state: components['schemas']['TranslationViewModel']['state'] | undefined,
   _auto: boolean | undefined
-): boolean => false;
+): 'badge' | 'hover' | 'none' => 'none';
 export const SubfilterAiReview = (_props: SubfilterAiReviewProps) =>
   Empty() as JSX.Element;
 export const AiReviewIssueList = (_props: AiReviewIssueListProps) =>

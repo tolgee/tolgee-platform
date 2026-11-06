@@ -1,6 +1,12 @@
 import clsx from 'clsx';
 import { alpha, styled } from '@mui/material';
-import { AlertCircle, AlertTriangle, Stars01 } from '@untitled-ui/icons-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  Check,
+  Stars01,
+  XClose,
+} from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -53,9 +59,12 @@ export const AiReviewBadge = ({ aiReview }: Props) => {
   const { status, score, lastFailed } = aiReview;
 
   const look = clsx({
-    green: status === 'APPROVED' || status === 'DRY_RUN_PASS',
+    green:
+      status === 'APPROVED' ||
+      status === 'DRY_RUN_PASS' ||
+      status === 'CONFIRMED',
     orange: status === 'BELOW_THRESHOLD' || status === 'DRY_RUN_FAIL',
-    grey: status === 'FAILED',
+    grey: status === 'FAILED' || status === 'REJECTED',
     dryRun: status === 'DRY_RUN_PASS' || status === 'DRY_RUN_FAIL',
   });
 
@@ -67,7 +76,12 @@ export const AiReviewBadge = ({ aiReview }: Props) => {
       data-cy-last-failed={String(Boolean(lastFailed))}
     >
       {status === 'FAILED' ? <AlertCircle /> : <Stars01 />}
-      {status !== 'FAILED' && score}
+      {status === 'CONFIRMED' && <Check />}
+      {status === 'REJECTED' && <XClose />}
+      {status !== 'FAILED' &&
+        status !== 'CONFIRMED' &&
+        status !== 'REJECTED' &&
+        score}
       {lastFailed && <AlertTriangle />}
     </StyledPill>
   );

@@ -108,7 +108,7 @@ export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
 export { AiReviewRulesView } from 'tg.ee.module/aiReview/rules/AiReviewRulesView';
 export { useAiReviewEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewEnabled';
 export { AiReviewCellButton } from 'tg.ee.module/aiReview/translations/AiReviewCellButton';
-export { isAiReviewBadgeVisible } from 'tg.ee.module/aiReview/translations/aiReviewVisibility';
+export { getAiReviewCellVisibility } from 'tg.ee.module/aiReview/translations/aiReviewVisibility';
 export {
   SubfilterAiReview,
   getAiReviewFiltersLength,
