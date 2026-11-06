@@ -6,6 +6,7 @@ class LlmParams(
   val messages: List<LlmMessage>,
   val shouldOutputJson: Boolean,
   val priority: LlmProviderPriority,
+  val responseSchema: LlmResponseSchema? = null,
 ) {
   companion object {
     enum class LlmMessageType {

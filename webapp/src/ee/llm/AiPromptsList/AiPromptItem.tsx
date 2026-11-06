@@ -11,6 +11,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { PromptRename } from '../AiPrompt/PromptRename';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { SecondaryChip } from 'tg.component/common/chips/SecondaryChip';
 
 type PromptModel = components['schemas']['PromptModel'];
 
@@ -81,7 +82,22 @@ export const AiPromptItem = ({ prompt }: Props) => {
     setMenuOpen(false);
     confirmation({
       message: (
-        <T keyName="ai_prompts_delete_message" params={{ name: prompt.name }} />
+        <span>
+          <T
+            keyName="ai_prompts_delete_message"
+            params={{ name: prompt.name }}
+          />
+          {prompt.activeRuleCount > 0 && (
+            <span data-cy="ai-review-prompt-delete-warning">
+              {' '}
+              <T
+                keyName="ai_review_prompt_delete_warning"
+                defaultValue="{count, plural, one {# active rule uses this prompt. It will switch to Dry run with the default review prompt.} other {# active rules use this prompt. They will switch to Dry run with the default review prompt.}}"
+                params={{ count: prompt.activeRuleCount }}
+              />
+            </span>
+          )}
+        </span>
       ),
       confirmButtonText: <T keyName="ai_prompt_delete_confirm" />,
       onConfirm() {
@@ -106,6 +122,13 @@ export const AiPromptItem = ({ prompt }: Props) => {
     <StyledContainer>
       <StyledName {...linkProps} data-cy="ai-prompt-item-name">
         {prompt.name}
+        {prompt.type === 'REVIEW' && (
+          <SecondaryChip
+            size="small"
+            label={t('ai_prompts_review_chip', 'Review')}
+            data-cy="ai-prompt-review-chip"
+          />
+        )}
       </StyledName>
       <StyledModel {...linkProps}>{prompt.providerName}</StyledModel>
       <StyledAction sx={{ pr: 1 }}>

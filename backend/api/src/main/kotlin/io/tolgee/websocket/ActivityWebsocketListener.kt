@@ -15,6 +15,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.enums.SystemActor
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.security.UserAccountService
@@ -51,7 +52,11 @@ class ActivityWebsocketListener(
     }
   }
 
-  fun getActorInfo(userId: Long?): ActorInfo {
+  fun getActorInfo(
+    userId: Long?,
+    systemActor: SystemActor? = null,
+  ): ActorInfo {
+    if (systemActor != null) return ActorInfo(type = ActorType.MACHINE, data = null)
     return userId?.let {
       val user = userAccountService.findDto(userId) ?: return@let null
       // These events fan out to every project subscriber and a recipient's MEMBERS_VIEW can't be
@@ -85,7 +90,7 @@ class ActivityWebsocketListener(
     websocketEventPublisher(
       WebsocketEventType.TRANSLATION_DATA_MODIFIED.projectDestinationFor(activityRevision.projectId!!),
       WebsocketEvent(
-        actor = getActorInfo(activityRevision.authorId),
+        actor = getActorInfo(activityRevision.authorId, activityRevision.systemActor),
         data = data,
         sourceActivity = activityRevision.type,
         activityId = activityRevision.id,

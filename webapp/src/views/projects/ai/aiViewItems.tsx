@@ -4,10 +4,18 @@ import { useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
-import { AiContextData, AiPromptsList } from 'tg.ee';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import {
+  AiContextData,
+  AiPromptsList,
+  AiReviewRulesView,
+  useAiReviewEnabled,
+} from 'tg.ee';
 
 export const useAiViewItems = () => {
   const { t } = useTranslate();
+  const aiReviewEnabled = useAiReviewEnabled();
+  const { satisfiesPermission } = useProjectPermissions();
 
   const items: AiViewItem[] = [
     {
@@ -32,6 +40,18 @@ export const useAiViewItems = () => {
       requireExactMatch: true,
       component: AiPromptsList,
     },
+    {
+      value: 'review',
+      tab: {
+        label: t('ai_menu_review', 'AI review'),
+        dataCy: 'ai-menu-review',
+        condition: ({ satisfiesPermission }) =>
+          aiReviewEnabled && satisfiesPermission('prompts.view'),
+      },
+      link: LINKS.PROJECT_AI_REVIEW,
+      requireExactMatch: true,
+      component: AiReviewRulesView,
+    },
   ];
 
   const match = useRouteMatch(items.map((item) => item.link.template));
@@ -40,7 +60,8 @@ export const useAiViewItems = () => {
     ? items.find(
         (item) =>
           item.link.template === match.path &&
-          (!item.requireExactMatch || match.isExact)
+          (!item.requireExactMatch || match.isExact) &&
+          item.tab.condition({ satisfiesPermission })
       )
     : undefined;
 

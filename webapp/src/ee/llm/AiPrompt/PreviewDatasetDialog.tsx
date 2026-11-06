@@ -37,6 +37,8 @@ type Props = {
   providerName: string;
   template: string | undefined;
   options: BasicPromptOption[] | undefined;
+  promptType: 'TRANSLATE' | 'REVIEW';
+  reviewCriteria?: string;
 };
 
 export const PreviewDatasetDialog = ({
@@ -46,6 +48,8 @@ export const PreviewDatasetDialog = ({
   providerName,
   onStart,
   options,
+  promptType,
+  reviewCriteria,
 }: Props) => {
   const { setFilters } = useTranslationsActions();
   const { t } = useTranslate();
@@ -92,6 +96,8 @@ export const PreviewDatasetDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type: promptType,
+              reviewCriteria,
             },
           },
         },

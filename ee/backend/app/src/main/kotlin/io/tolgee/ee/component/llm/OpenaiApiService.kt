@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModel
 import io.tolgee.exceptions.LlmContentFilterException
@@ -49,7 +50,7 @@ class OpenaiApiService :
         response_format =
           if (params.shouldOutputJson) {
             when (config.format) {
-              "json_schema" -> RequestResponseFormat()
+              "json_schema" -> RequestResponseFormat.of(params.responseSchema ?: TRANSLATION_RESPONSE_SCHEMA)
               else -> null
             }
           } else {
@@ -178,24 +179,20 @@ class OpenaiApiService :
 
     class RequestResponseFormat(
       val type: String = "json_schema",
-      @JsonInclude(JsonInclude.Include.NON_NULL)
-      val json_schema: Map<String, Any>? =
-        mapOf(
-          "name" to "simple_response",
-          "schema" to
-            mapOf(
-              "type" to "object",
-              "properties" to
-                mapOf(
-                  "output" to mapOf("type" to "string"),
-                  "contextDescription" to mapOf("type" to "string"),
-                ),
-              "required" to listOf("output", "contextDescription"),
-              "additionalProperties" to false,
-            ),
-          "strict" to true,
-        ),
-    )
+      val json_schema: Map<String, Any>,
+    ) {
+      companion object {
+        fun of(schema: LlmResponseSchema) =
+          RequestResponseFormat(
+            json_schema =
+              mapOf(
+                "name" to schema.name,
+                "schema" to schema.schema,
+                "strict" to true,
+              ),
+          )
+      }
+    }
 
     class ResponseBody(
       val choices: List<ResponseChoice>,

@@ -76,6 +76,20 @@ export type QaBadgeProps = {
   darkWhenNoIssues?: boolean;
 };
 
+export type AiReviewIssueListProps = {
+  issues: components['schemas']['AiReviewIssueModel'][];
+};
+
+export type AiReviewCellButtonProps = {
+  aiReview: components['schemas']['TranslationAiReviewSummaryModel'];
+  translationId: number;
+  state?: components['schemas']['TranslationViewModel']['state'];
+  auto?: boolean;
+  stateChangeEnabled?: boolean;
+  style?: React.CSSProperties;
+  className?: string;
+};
+
 export type QaLanguageStatsProps = {
   languageId: number;
   languageTag: string;
@@ -89,6 +103,12 @@ export type QaIssueHighlightProps = {
 };
 
 export type SubfilterQaChecksProps = {
+  value: FiltersInternal;
+  actions: FilterActions;
+  selectedLanguages: LanguageModel[];
+};
+
+export type SubfilterAiReviewProps = {
   value: FiltersInternal;
   actions: FilterActions;
   selectedLanguages: LanguageModel[];

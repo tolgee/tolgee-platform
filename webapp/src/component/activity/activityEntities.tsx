@@ -219,6 +219,39 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       return <T keyName="activity_entity_project" params={params} />;
     },
     fields: {
+      aiApprovedSourceChangeAction: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_project.ai_approved_source_change"
+              defaultValue="Approved by AI, on source change"
+            />
+          );
+        },
+      },
+      humanEditedSourceChangeAction: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_project.human_edited_source_change"
+              defaultValue="Edited by a human, on source change"
+            />
+          );
+        },
+      },
+      humanReviewedSourceChangeAction: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_project.human_reviewed_source_change"
+              defaultValue="Reviewed by a human, on source change"
+            />
+          );
+        },
+      },
       name: {
         label(params) {
           return <T keyName="activity_entity_project.name" params={params} />;
@@ -587,6 +620,107 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       return name
         ? ([{ type: 'branch', name: name }] as BranchReferenceData[])
         : undefined;
+    },
+  },
+  AiReviewRule: {
+    label() {
+      return (
+        <T
+          keyName="activity_entity_ai_review_rule"
+          defaultValue="AI review rule"
+        />
+      );
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule.name"
+              defaultValue="Name"
+            />
+          );
+        },
+      },
+      enabled: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule.enabled"
+              defaultValue="Enabled"
+            />
+          );
+        },
+      },
+      mode: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule.mode"
+              defaultValue="Mode"
+            />
+          );
+        },
+      },
+      threshold: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule.threshold"
+              defaultValue="Threshold"
+            />
+          );
+        },
+      },
+      never: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule.never"
+              defaultValue="Never auto-review"
+            />
+          );
+        },
+      },
+    },
+  },
+  AiReviewRuleLanguageOverride: {
+    label() {
+      return (
+        <T
+          keyName="activity_entity_ai_review_rule_override"
+          defaultValue="AI review rule language override"
+        />
+      );
+    },
+    fields: {
+      threshold: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule_override.threshold"
+              defaultValue="Threshold"
+            />
+          );
+        },
+      },
+      never: {
+        type: 'text',
+        label() {
+          return (
+            <T
+              keyName="activity_entity_ai_review_rule_override.never"
+              defaultValue="Never auto-review"
+            />
+          );
+        },
+      },
     },
   },
 };

@@ -24,7 +24,10 @@ type PromptModel = components['schemas']['PromptModel'];
 type Props = {
   projectId: number;
   onClose: () => void;
-  data: Omit<PromptModel, 'projectId' | 'id' | 'name'>;
+  data: Omit<
+    PromptModel,
+    'projectId' | 'id' | 'name' | 'revision' | 'activeRuleCount'
+  >;
   onSuccess: (prompt: PromptItem) => void;
 };
 
@@ -60,7 +63,7 @@ export const PromptSaveDialog = ({
             path: { projectId },
             content: { 'application/json': { ...data, name } },
           });
-          if (useAsDefault) {
+          if (useAsDefault && data.type !== 'REVIEW') {
             await setPromptAsDefault.mutateAsync({
               path: { projectId, promptId: result.id },
             });
@@ -79,13 +82,14 @@ export const PromptSaveDialog = ({
                 label={t('ai_prompt_save_as_field_name')}
                 data-cy="ai-prompt-save-as-field-name"
               />
-              {satisfiesPermission('languages.edit') && (
-                <FormControlLabel
-                  control={<Checkbox name="useAsDefault" size="small" />}
-                  label={t('ai_prompt_save_as_field_default')}
-                  data-cy="ai-prompt-save-as-field-use-as-default"
-                />
-              )}
+              {satisfiesPermission('languages.edit') &&
+                data.type !== 'REVIEW' && (
+                  <FormControlLabel
+                    control={<Checkbox name="useAsDefault" size="small" />}
+                    label={t('ai_prompt_save_as_field_default')}
+                    data-cy="ai-prompt-save-as-field-use-as-default"
+                  />
+                )}
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose} data-cy="ai-prompt-save-dialog-cancel">

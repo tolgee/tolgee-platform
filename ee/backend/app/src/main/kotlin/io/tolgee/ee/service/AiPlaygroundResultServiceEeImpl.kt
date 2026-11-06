@@ -2,6 +2,7 @@ package io.tolgee.ee.service
 
 import io.tolgee.ee.repository.AiPlaygroundResultRepository
 import io.tolgee.model.AiPlaygroundResult
+import io.tolgee.model.aiReview.AiReviewIssue
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -39,6 +40,8 @@ class AiPlaygroundResultServiceEeImpl(
     languageId: Long,
     translation: String?,
     contextDescription: String?,
+    score: Int?,
+    issues: List<AiReviewIssue>?,
   ) {
     val project = projectService.get(projectId)
     val key = keyService.get(keyId)
@@ -52,6 +55,8 @@ class AiPlaygroundResultServiceEeImpl(
         user,
         translation = translation,
         contextDescription = contextDescription,
+        score = score,
+        issues = issues?.toMutableList(),
       )
 
     aiPlaygroundResultRepository.save(result)

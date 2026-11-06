@@ -133,6 +133,8 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
             tooltip={aiPlaygroundData.contextDescription}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
+            score={aiPlaygroundData.score}
+            issues={aiPlaygroundData.issues}
           />
         )}
       </StyledTranslation>
@@ -166,6 +168,9 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}
           qaChecksStale={translation?.qaChecksStale}
+          aiReview={translation?.aiReview}
+          translationId={translation?.id}
+          translationAuto={translation?.auto}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

@@ -1,11 +1,15 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
+import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.enums.BasicPromptOption
+import io.tolgee.model.enums.PromptType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -13,7 +17,9 @@ import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 
@@ -27,9 +33,10 @@ import org.hibernate.annotations.Type
 class Prompt(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long = 0L,
+  override var id: Long = 0L,
   @field:NotBlank
   @ActivityLoggedProp
+  @ActivityDescribingProp
   var name: String = "",
   @ActivityLoggedProp
   @Column(columnDefinition = "text")
@@ -52,4 +59,18 @@ class Prompt(
   @ManyToOne
   @JoinColumn(name = "project_id")
   var project: Project,
-) : AuditModel()
+  @Enumerated(EnumType.STRING)
+  @ColumnDefault("'TRANSLATE'")
+  @Column(nullable = false, updatable = false)
+  @ActivityLoggedProp
+  var type: PromptType = PromptType.TRANSLATE,
+  @Column(columnDefinition = "text")
+  @ActivityLoggedProp
+  var reviewCriteria: String? = null,
+  @ColumnDefault("0")
+  var revision: Int = 0,
+) : AuditModel(),
+  EntityWithId {
+  @Transient
+  override var disableActivityLogging = false
+}
