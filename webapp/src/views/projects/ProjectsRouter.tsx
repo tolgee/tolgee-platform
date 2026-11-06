@@ -1,4 +1,4 @@
-import { Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
@@ -15,9 +15,9 @@ export const ProjectsRouter = () => {
         </RequirePreferredOrganization>
       </PrivateRoute>
 
-      <PrivateRoute path={LINKS.PROJECT.template}>
+      <Route path={LINKS.PROJECT.template}>
         <ProjectRouter />
-      </PrivateRoute>
+      </Route>
     </Switch>
   );
 };

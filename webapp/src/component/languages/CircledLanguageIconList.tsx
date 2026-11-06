@@ -11,7 +11,7 @@ const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
   cursor: default;
 `;
 
-const StyledCircledPill = styled(CircledPill)`
+export const StyledCircledPill = styled(CircledPill)`
   cursor: default;
   & .wrapped {
     background: ${({ theme }) => theme.palette.emphasis['50']};

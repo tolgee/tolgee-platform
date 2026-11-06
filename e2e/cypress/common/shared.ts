@@ -200,7 +200,13 @@ export const openPublicProject = (name: string) => {
   cy.visit(`${HOST}/public-projects`);
   waitForGlobalLoading();
   gcyAdvanced({ value: 'dashboard-projects-list-item', name }).click();
-  cy.url().should('match', /\/projects\/[0-9]+/);
+  continueToProjectDashboard();
+};
+
+export const continueToProjectDashboard = () => {
+  cy.url().should('match', /\/projects\/[0-9]+\/community$/);
+  waitForGlobalLoading();
+  cy.url().then((url) => cy.visit(url.replace(/\/community$/, '')));
   waitForGlobalLoading();
 };
 

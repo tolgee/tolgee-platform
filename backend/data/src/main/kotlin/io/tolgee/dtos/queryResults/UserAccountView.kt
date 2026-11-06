@@ -2,6 +2,7 @@ package io.tolgee.dtos.queryResults
 
 import io.tolgee.api.IUserAccount
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.enums.ThirdPartyAuthType
 
 class UserAccountView(
@@ -15,6 +16,7 @@ class UserAccountView(
   val role: UserAccount.Role?,
   override var isInitialUser: Boolean,
   override val totpKey: ByteArray?,
+  val profileVisibility: ProfileVisibility,
 ) : IUserAccount {
   companion object {
     fun fromEntity(entity: UserAccount): UserAccountView {
@@ -29,6 +31,7 @@ class UserAccountView(
         role = entity.role ?: UserAccount.Role.USER,
         isInitialUser = entity.isInitialUser,
         totpKey = entity.totpKey,
+        profileVisibility = entity.profileVisibility,
       )
     }
   }

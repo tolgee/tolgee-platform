@@ -31,7 +31,7 @@ class NullTypedActivityRevisionStorageTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `drops a null-typed revision with no modifications but keeps one with modifications`() {
+  fun `drops a null-typed revision with no modifications, keeps one with modifications, neither is a contribution`() {
     val before = countRevisions()
     val beforeContributors = countContributors()
 
@@ -41,7 +41,7 @@ class NullTypedActivityRevisionStorageTest : AuthorizedControllerTest() {
 
     store(withModification = true)
     assertThat(countRevisions()).isEqualTo(before + 1)
-    assertThat(countContributors()).isEqualTo(beforeContributors + 1)
+    assertThat(countContributors()).isEqualTo(beforeContributors)
   }
 
   private fun store(withModification: Boolean) {

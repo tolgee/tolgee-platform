@@ -24,6 +24,15 @@ import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
 import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
+import { useIsGuest } from 'tg.globalContext/helpers';
+
+export const canOpenProjectSettings = (
+  satisfiesPermission: (
+    scope: 'project.edit' | 'translation-labels.manage'
+  ) => boolean
+) =>
+  satisfiesPermission('project.edit') ||
+  satisfiesPermission('translation-labels.manage');
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -36,11 +45,12 @@ export const ProjectMenu = () => {
   const { t } = useTranslate();
 
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+  const isGuest = useIsGuest();
 
   const baseItems = [
     {
       id: 'projects',
-      condition: () => true,
+      condition: () => !isGuest,
       link: LINKS.PROJECTS,
       icon: HomeLine,
       text: t('project_menu_projects'),
@@ -99,7 +109,7 @@ export const ProjectMenu = () => {
     {
       id: 'export',
       condition: ({ satisfiesPermission }) =>
-        satisfiesPermission('translations.view'),
+        !isGuest && satisfiesPermission('translations.view'),
       link: LINKS.PROJECT_EXPORT,
       icon: FileDownload03,
       text: t('project_menu_export'),
@@ -122,7 +132,8 @@ export const ProjectMenu = () => {
     },
     {
       id: 'integrate',
-      condition: ({ satisfiesPermission }) => satisfiesPermission('keys.view'),
+      condition: ({ satisfiesPermission }) =>
+        !isGuest && satisfiesPermission('keys.view'),
       link: LINKS.PROJECT_INTEGRATE,
       icon: Integration,
       text: t('project_menu_integrate'),
@@ -142,8 +153,7 @@ export const ProjectMenu = () => {
     {
       id: 'settings',
       condition: ({ satisfiesPermission }) =>
-        satisfiesPermission('project.edit') ||
-        satisfiesPermission('translation-labels.manage'),
+        canOpenProjectSettings(satisfiesPermission),
       link: LINKS.PROJECT_EDIT,
       icon: Settings01,
       text: t('project_menu_project_settings'),

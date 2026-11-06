@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -66,9 +67,9 @@ class UserPreferencesSetPreferredOrganizationTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `anonymous cannot set preferred organization`() {
+  fun `anonymous is told to sign in when setting the preferred organization`() {
     performPut("/v2/user-preferences/set-preferred-organization/${testData.otherOrg.id}", null)
-      .andIsForbidden
+      .andIsUnauthorized
   }
 
   private fun assertPreferredOrganization(

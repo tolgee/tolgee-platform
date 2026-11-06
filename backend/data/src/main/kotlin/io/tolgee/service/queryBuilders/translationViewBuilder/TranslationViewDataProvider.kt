@@ -88,10 +88,8 @@ class TranslationViewDataProvider(
     deleteFailedKeysInJobTempTable()
 
     val keyIds = views.map { it.keyId }
-    // Fetch translations + all per-translation counts (comments, suggestions, QA issues)
-    // in a single query. The inline count subqueries are cheap because they only run on
-    // the page's translations (~pageSize × langCount rows, typically <500).
     populateTranslationsWithCounts(keyIds, languages, views, qaEnabled, qaDisabledLanguageIds)
+    populatePlaceholderSuggestionCounts(keyIds, languages, views)
 
     val translationIds =
       views
@@ -212,6 +210,43 @@ class TranslationViewDataProvider(
             qaIssueCount = (row.get(13) as Number?)?.toLong() ?: 0L,
             qaChecksStale = (row.get(6) as Boolean?) ?: false,
           )
+      }
+    }
+  }
+
+  /** Suggestions on a cell without a translation row are invisible to [populateTranslationsWithCounts]. */
+  private fun populatePlaceholderSuggestionCounts(
+    keyIds: List<Long>,
+    languages: Set<LanguageDto>,
+    views: List<KeyWithTranslationsView>,
+  ) {
+    if (keyIds.isEmpty() || languages.isEmpty()) return
+    val viewsByKeyId = views.associateBy { it.keyId }
+    val tagById = languages.associate { it.id to it.tag }
+    keyIds.chunked(IN_CLAUSE_CHUNK_SIZE).forEach { keyIdChunk ->
+      val rows =
+        em
+          .createQuery(
+            """
+            select ts.key.id, ts.language.id, count(ts),
+                   sum(case when ts.state = :activeSuggestion then 1L else 0L end)
+            from TranslationSuggestion ts
+            where ts.key.id in :keyIds and ts.language.id in :languageIds
+              and not exists (
+                select 1 from Translation t where t.key.id = ts.key.id and t.language.id = ts.language.id
+              )
+            group by ts.key.id, ts.language.id
+            """.trimIndent(),
+            Tuple::class.java,
+          ).setParameter("keyIds", keyIdChunk)
+          .setParameter("languageIds", tagById.keys)
+          .setParameter("activeSuggestion", TranslationSuggestionState.ACTIVE)
+          .resultList
+      for (row in rows) {
+        val tag = tagById[row.get(1) as Long] ?: continue
+        val placeholder = viewsByKeyId[row.get(0) as Long]?.translations?.get(tag) ?: continue
+        placeholder.totalSuggestionCount = (row.get(2) as Number).toLong()
+        placeholder.activeSuggestionCount = (row.get(3) as Number?)?.toLong() ?: 0L
       }
     }
   }

@@ -4,6 +4,8 @@
 
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.development.testDataBuilder.data.GuestScreenshotTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
@@ -33,9 +35,13 @@ import java.time.Duration
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
+  private var guestTestData: GuestScreenshotTestData? = null
+
   @AfterEach
   fun clear() {
     clearForcedDate()
+    guestTestData?.let { testDataService.cleanTestData(it.root) }
+    guestTestData = null
   }
 
   @Test
@@ -172,5 +178,23 @@ class SecuredKeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() 
       permissionService.delete(userPermission)
       performGet("/screenshots/${screenshot.filename}?token=$token").andIsNotFound
     }
+  }
+
+  @Test
+  fun `a guest lists a public project's screenshots and opens them with the minted ticket`() {
+    val testData = GuestScreenshotTestData().also { guestTestData = it }
+    testDataService.saveTestData(testData.root)
+
+    val fileUrl =
+      performGet("/v2/projects/${testData.project.id}/keys/${testData.key.id}/screenshots")
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+        .let { jacksonObjectMapper().readTree(it) }
+        .at("/_embedded/screenshots/0/fileUrl")
+        .asText()
+
+    assertThat(fileUrl).contains("token=")
+    performGet(fileUrl.removePrefix(tolgeeProperties.fileStorageUrl)).andIsOk
   }
 }

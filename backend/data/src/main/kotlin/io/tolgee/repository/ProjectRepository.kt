@@ -24,6 +24,12 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.public as public,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
+        r.communityDescription as communityDescription,
+        r.communityGuidelines as communityGuidelines,
+        r.communityShared as communityShared,
+        r.communityInContext as communityInContext,
+        r.communityAppUrl as communityAppUrl,
+        r.createdAt as createdAt,
         dn as defaultNamespace, o as organizationOwner,
         role.type as organizationRole, p as directPermission, r.icuPlaceholders as icuPlaceholders
         from Project r
@@ -55,6 +61,17 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.public = true and r.deletedAt is null and r.organizationOwner is not null
         and r.baseLanguage is not null and bl.deletedAt is null
         and o.deletedAt is null
+        """
+
+    /**
+     * The count mirrors `ProjectStatsService.getProjectsTotals`, so the order matches the `keyCount` each row shows.
+     * ponytail: counted live on every request; rank on the base language's `LanguageStats` once public key volume hurts.
+     */
+    const val PUBLIC_PROJECT_ORDER = """
+        order by (
+          select count(k.id) from Key k left join k.branch b
+          where k.project = r and k.deletedAt is null and (b is null or b.isDefault = true)
+        ) desc, r.name asc, r.id asc
         """
 
     const val NON_MEMBER_FILTER = """
@@ -148,6 +165,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
+        $PUBLIC_PROJECT_ORDER
     """,
   )
   fun findAllPublic(
@@ -164,6 +182,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
         )
         and ($NON_MEMBER_CONTRIBUTOR_FILTER)
+        $PUBLIC_PROJECT_ORDER
     """,
   )
   fun findAllPublicContributed(
