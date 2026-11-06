@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
-import * as Yup from 'yup';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -18,10 +17,11 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 
-import { RuleKeysFilter } from 'tg.ee.module/aiReview/rules/dialog/RuleKeysFilter';
+import { RuleAppliesTo } from 'tg.ee.module/aiReview/rules/dialog/RuleAppliesTo';
 import { RuleThresholdField } from 'tg.ee.module/aiReview/rules/dialog/RuleThresholdField';
 import { RuleAdvancedSection } from 'tg.ee.module/aiReview/rules/dialog/RuleAdvancedSection';
 import { RuleModeSelect } from 'tg.ee.module/aiReview/rules/dialog/RuleModeSelect';
+import { RuleNeverCard } from 'tg.ee.module/aiReview/rules/dialog/RuleNeverCard';
 import {
   getRuleInitialValues,
   RuleFormValues,
@@ -37,6 +37,16 @@ const StyledDialogContent = styled(DialogContent)`
   margin-top: ${({ theme }) => theme.spacing(1)};
   width: 85vw;
   max-width: 600px;
+`;
+
+const StyledSections = styled('div')`
+  border: 1px solid ${({ theme }) => theme.palette.divider1};
+  border-radius: 8px;
+  overflow: hidden;
+
+  & > * + * {
+    border-top: 1px solid ${({ theme }) => theme.palette.divider1};
+  }
 `;
 
 type Props = {
@@ -69,18 +79,6 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
     url: '/v2/projects/{projectId}/ai-review-rules/{ruleId}',
     method: 'put',
     invalidatePrefix: '/v2/projects/{projectId}/ai-review-rules',
-  });
-
-  const thresholdMessage = t(
-    'ai_review_rule_form_threshold_invalid',
-    'Enter a number between 0 and 100'
-  );
-
-  const validationSchema = Yup.object({
-    threshold: Yup.number()
-      .typeError(thresholdMessage)
-      .min(0, thresholdMessage)
-      .max(100, thresholdMessage),
   });
 
   function handleSaved(data: AiReviewRuleModel) {
@@ -127,8 +125,6 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
     >
       <Formik
         initialValues={getRuleInitialValues(rule)}
-        validationSchema={validationSchema}
-        validateOnBlur={false}
         onSubmit={handleSubmit}
       >
         {({ isSubmitting, handleSubmit, values }) => {
@@ -151,10 +147,17 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
                   label={t('ai_review_rule_form_name_label', 'Name')}
                   data-cy="ai-review-rule-form-name"
                 />
-                <RuleKeysFilter />
-                <RuleThresholdField />
-                <RuleModeSelect disabled={fullNever} />
-                <RuleAdvancedSection />
+                <RuleNeverCard />
+                {!fullNever && (
+                  <>
+                    <RuleThresholdField />
+                    <RuleModeSelect />
+                  </>
+                )}
+                <StyledSections>
+                  <RuleAppliesTo />
+                  <RuleAdvancedSection />
+                </StyledSections>
               </StyledDialogContent>
               <DialogActions>
                 <Button onClick={onClose} data-cy="ai-review-rule-form-cancel">
