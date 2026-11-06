@@ -1,6 +1,8 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Language
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 
@@ -105,6 +107,23 @@ class AutoTranslateTestData : BaseTestData() {
           text = "This is beautiful"
         }
       }.self
+  }
+
+  fun addSpanishOnlyTranslator(): UserAccount = addTranslator("spanish-only-translator", spanishLanguage)
+
+  fun addBaseOnlyTranslator(): UserAccount = addTranslator("base-only-translator", englishLanguage)
+
+  private fun addTranslator(
+    name: String,
+    language: Language,
+  ): UserAccount {
+    val translator = root.addUserAccount { username = name }.self
+    projectBuilder.addPermission {
+      user = translator
+      type = ProjectPermissionType.TRANSLATE
+      translateLanguages = mutableSetOf(language)
+    }
+    return translator
   }
 
   fun disableAutoTranslating() {

@@ -410,6 +410,21 @@ class SecurityService(
     return languageTags.toSet()
   }
 
+  fun filterTranslatePermissionByLanguageId(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): Set<Long> {
+    try {
+      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+      runUnlessElevatedAsServerAdmin {
+        checkLanguagePermission(projectId) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+      }
+    } catch (e: LanguageNotPermittedException) {
+      return languageIds.toSet() - e.languageIds.toSet()
+    }
+    return languageIds.toSet()
+  }
+
   private fun checkLanguagePermission(
     projectId: Long,
     permissionCheckFn: (data: ComputedPermissionDto) -> Unit,

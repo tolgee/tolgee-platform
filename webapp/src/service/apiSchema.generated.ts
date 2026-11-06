@@ -790,7 +790,8 @@ export interface paths {
      * Uses enabled auto-translation methods.
      * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
      *
-     * This will replace the the existing translation with the result obtained from specified source!
+     * When languages are specified, their existing translations are replaced with the result obtained from the specified source.
+     * Without languages, only untranslated languages the caller may translate are filled.
      */
     put: operations["autoTranslate"];
   };
@@ -21039,7 +21040,8 @@ export interface operations {
    * Uses enabled auto-translation methods.
    * You need to set at least one of useMachineTranslation or useTranslationMemory to true.
    *
-   * This will replace the the existing translation with the result obtained from specified source!
+   * When languages are specified, their existing translations are replaced with the result obtained from the specified source.
+   * Without languages, only untranslated languages the caller may translate are filled.
    */
   autoTranslate: {
     parameters: {

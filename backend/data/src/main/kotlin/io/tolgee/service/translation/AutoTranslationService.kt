@@ -160,10 +160,11 @@ class AutoTranslationService(
     useTranslationMemory: Boolean? = null,
     useMachineTranslation: Boolean? = null,
     isBatch: Boolean,
+    overrideExisting: Boolean,
   ) {
     tryUntilItDoesntBreakConstraint(maxRepeats = 10) {
       executeInNewTransaction(transactionManager) {
-        autoTranslateSync(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation, isBatch)
+        autoTranslate(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation, isBatch, overrideExisting)
       }
     }
   }
@@ -175,7 +176,26 @@ class AutoTranslationService(
     useMachineTranslation: Boolean? = null,
     isBatch: Boolean,
   ) {
-    val adjustedConfigs = getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation)
+    autoTranslate(
+      key,
+      forcedLanguageTags,
+      useTranslationMemory,
+      useMachineTranslation,
+      isBatch,
+      overrideExisting = forcedLanguageTags != null,
+    )
+  }
+
+  private fun autoTranslate(
+    key: Key,
+    forcedLanguageTags: List<String>?,
+    useTranslationMemory: Boolean?,
+    useMachineTranslation: Boolean?,
+    isBatch: Boolean,
+    overrideExisting: Boolean,
+  ) {
+    val adjustedConfigs =
+      getAdjustedConfigs(key, forcedLanguageTags, useTranslationMemory, useMachineTranslation, overrideExisting)
 
     val translations =
       adjustedConfigs
@@ -213,14 +233,11 @@ class AutoTranslationService(
     forcedLanguageTags: List<String>?,
     useTranslationMemory: Boolean?,
     useMachineTranslation: Boolean?,
+    overrideExisting: Boolean,
   ) = getPerLanguageConfigs(key.project).mapNotNull {
-    if (forcedLanguageTags != null) {
-      // if we got languages provided, we want to override the existing language values
-      it.override = true
-
-      if (!forcedLanguageTags.contains(it.language.tag)) {
-        return@mapNotNull null
-      }
+    it.override = overrideExisting
+    if (forcedLanguageTags != null && !forcedLanguageTags.contains(it.language.tag)) {
+      return@mapNotNull null
     }
 
     it.usingTm = useTranslationMemory ?: it.usingTm
