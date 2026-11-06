@@ -158,8 +158,10 @@ declare namespace DataCy {
         "ai-review-rule-form-skip-qa": true;
         "ai-review-rule-form-tag-in": true;
         "ai-review-rule-form-tag-not-in": true;
-        "ai-review-rule-form-threshold": true;
-        "ai-review-rule-form-threshold-error": true;
+        "ai-review-rule-form-threshold-hint": true;
+        "ai-review-rule-form-threshold-preset": true;
+        "ai-review-rule-form-threshold-presets": true;
+        "ai-review-rule-form-threshold-slider": true;
         "ai-review-rule-item": true;
         "ai-review-rule-label": true;
         "ai-review-rule-menu": true;
