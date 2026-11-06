@@ -24,6 +24,7 @@ class AzureCognitiveApiService(
     text: String,
     sourceTag: String,
     targetTag: String,
+    preserveTags: Boolean = false,
   ): String? {
     val headers = HttpHeaders()
     headers.add("Ocp-Apim-Subscription-Key", azureCognitiveTranslationProperties.authKey)
@@ -36,9 +37,15 @@ class AzureCognitiveApiService(
     val requestBody: List<AzureCognitiveRequest> = listOf(AzureCognitiveRequest(text))
     val request = HttpEntity(requestBody, headers)
 
+    // textType=html tells Azure to parse the text as HTML and preserve tags as-is, so our
+    // <x id="tolgee-number"> placeholder survives translation intact.
+    // https://learn.microsoft.com/en-us/azure/ai-services/translator/reference/v3-0-translate
+    val textType = if (preserveTags) "html" else "plain"
+
     val response: ResponseEntity<LinkedList<AzureCognitiveResponse>> =
       restTemplate.exchange(
-        "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=$sourceTag&to=$targetTag",
+        "https://api.cognitive.microsofttranslator.com/translate" +
+          "?api-version=3.0&from=$sourceTag&to=$targetTag&textType=$textType",
         HttpMethod.POST,
         request,
       )
