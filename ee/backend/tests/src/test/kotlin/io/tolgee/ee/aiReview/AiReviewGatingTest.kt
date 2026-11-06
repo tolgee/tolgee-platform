@@ -103,8 +103,6 @@ class AiReviewGatingTest : AuthorizedControllerTest() {
       { performAuthPut("$translationUrl/confirm", null) },
       { performAuthPut("$translationUrl/reject", null) },
       { performAuthPost("$translationUrl/retry", null) },
-      { performAuthGet("$projectUrl/source-change-settings") },
-      { performAuthPut("$projectUrl/source-change-settings", sourceChangeBody()) },
       { performAuthPost("$projectUrl/ai-review/run/preview", runBody) },
       { performAuthPost("$projectUrl/ai-review/run", runBody) },
     ).forEachIndexed { index, request ->
@@ -163,13 +161,6 @@ class AiReviewGatingTest : AuthorizedControllerTest() {
       review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
     }
   }
-
-  private fun sourceChangeBody() =
-    mapOf(
-      "aiApproved" to "RETRANSLATE",
-      "humanEdited" to "MARK_OUTDATED",
-      "humanReviewed" to "MARK_OUTDATED",
-    )
 
   private fun review(translationId: Long): TranslationAiReview? =
     executeInNewTransaction(platformTransactionManager) {

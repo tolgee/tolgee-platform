@@ -88,6 +88,7 @@ import { Branch } from '../component/CustomIcons';
 import { QaCheck } from '../component/CustomIcons';
 
 export { ProjectSettingsTranslationMemory } from '../ee/translationMemory/components/projectSettings/ProjectSettingsTranslationMemory';
+export { SourceChangeSettings as ProjectSettingsSourceChange } from '../ee/aiReview/settings/SourceChangeSettings';
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
