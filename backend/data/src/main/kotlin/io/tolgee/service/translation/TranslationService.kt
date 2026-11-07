@@ -529,9 +529,9 @@ class TranslationService(
     return keyIds.flatMap { keyId ->
       targetLanguageIds
         .map { languageId ->
-          existingMap[keyId]?.get(languageId) ?: getOrCreate(
-            entityManager.getReference(Key::class.java, keyId),
-            entityManager.getReference(Language::class.java, languageId),
+          existingMap[keyId]?.get(languageId) ?: Translation(
+            key = entityManager.getReference(Key::class.java, keyId),
+            language = entityManager.getReference(Language::class.java, languageId),
           )
         }.filter { it.state !== TranslationState.DISABLED }
     }

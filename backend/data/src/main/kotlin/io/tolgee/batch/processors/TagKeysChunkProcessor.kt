@@ -28,6 +28,7 @@ class TagKeysChunkProcessor(
     val params = getParams(job)
 
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
+    tagService.lockCreationOfMissingTags(projectId, params.tags)
 
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()

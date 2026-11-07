@@ -89,8 +89,7 @@ class ProjectQaConfigService(
   }
 
   fun getEnabledCheckTypesForProject(projectId: Long): Set<QaCheckType> {
-    val settings = getSettings(projectId)
-    return settings.filterValues { it != QaCheckSeverity.OFF }.keys
+    return getSettings(projectId).enabledTypes()
   }
 
   fun isLanguageQaEnabled(
@@ -104,10 +103,27 @@ class ProjectQaConfigService(
     projectId: Long,
     languageId: Long,
   ): Set<QaCheckType> {
-    if (!isLanguageQaEnabled(projectId, languageId)) return emptySet()
-    val settings = getResolvedSettingsForLanguage(projectId, languageId)
-    return settings.filterValues { it != QaCheckSeverity.OFF }.keys
+    return getEnabledCheckTypesForLanguages(projectId, listOf(languageId)).getValue(languageId)
   }
+
+  fun getEnabledCheckTypesForLanguages(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): Map<Long, Set<QaCheckType>> {
+    val globalSettings = getSettings(projectId)
+    val languageConfigs =
+      languageQaConfigRepository
+        .findAllByLanguageProjectId(
+          projectId,
+        ).associateBy { it.language.id }
+    return languageIds.associateWith { languageId ->
+      val languageConfig = languageConfigs[languageId] ?: return@associateWith globalSettings.enabledTypes()
+      if (!languageConfig.enabled) return@associateWith emptySet()
+      resolveEffectiveSettings(globalSettings, languageConfig.settings).enabledTypes()
+    }
+  }
+
+  private fun Map<QaCheckType, QaCheckSeverity>.enabledTypes() = filterValues { it != QaCheckSeverity.OFF }.keys
 
   fun getSettingsForLanguage(
     projectId: Long,

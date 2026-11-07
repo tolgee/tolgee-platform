@@ -296,6 +296,12 @@ class TranslationViewDataProvider(
                          SELECT jsonb_array_elements(bj.target) AS target
                          FROM tolgee_batch_job bj
                          WHERE bj.id = :batchJobId
+                         UNION ALL
+                         SELECT jsonb_build_object('keyId', key_id, 'languageId', language_id) AS target
+                         FROM tolgee_batch_job bj,
+                              jsonb_array_elements(bj.target_product -> 'keyIds') AS key_id,
+                              jsonb_array_elements(bj.target_product -> 'languageIds') AS language_id
+                         WHERE bj.id = :batchJobId
                      ) AS targets
                 WHERE targets.target NOT IN (
                     SELECT jsonb_array_elements(tbje.success_targets)
