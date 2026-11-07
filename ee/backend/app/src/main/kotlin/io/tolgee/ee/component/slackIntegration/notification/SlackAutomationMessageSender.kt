@@ -118,7 +118,8 @@ class SlackAutomationMessageSender(
       }
     }
 
-    val updatedAttachments = additionalAttachments + message.attachments
+    // the changed languages go first, so they stay visible if not all languages fit into the message
+    val updatedAttachments = message.attachments.dropLast(1) + additionalAttachments + message.attachments.last()
     val updatedLanguages = message.languageTags + languagesToAdd
     val authorContextMap = savedMsg.info.associate { it.languageTag to it.authorContext }
     val updatedMessageDto =
@@ -195,7 +196,7 @@ class SlackAutomationMessageSender(
         if (messageDto.blocks.isNotEmpty()) {
           it.blocks(messageDto.blocks)
         }
-        it.attachments(sortSlackMessageAttachments(messageDto.attachments.toMutableList()))
+        it.attachments(prepareAttachments(messageDto))
       }
 
     if (result is SlackChannelMessagesOperations.ChatSuccess) {
@@ -209,12 +210,15 @@ class SlackAutomationMessageSender(
   ) {
     val result =
       slackOperations.sendMessage(context.slackToken, context.slackConfig.channelId, messageDto.blocks) {
-        it.attachments(sortSlackMessageAttachments(messageDto.attachments.toMutableList()))
+        it.attachments(prepareAttachments(messageDto))
       }
     if (result is SlackChannelMessagesOperations.ChatSuccess) {
       saveMessage(messageDto, result.response.ts, context.slackConfig)
     }
   }
+
+  private fun prepareAttachments(messageDto: SlackMessageDto): List<Attachment> =
+    sortAndLimitSlackMessageAttachments(messageDto.attachments, blocksProvider::getHiddenLanguagesAttachment)
 
   private fun createContext(
     slackConfig: SlackConfig,
