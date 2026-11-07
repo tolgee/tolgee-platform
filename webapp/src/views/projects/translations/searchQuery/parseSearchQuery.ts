@@ -3,6 +3,7 @@ export const RESERVED_QUALIFIERS = [
   'description',
   'namespace',
   'translation',
+  'comment',
 ] as const;
 
 export type ReservedQualifier = (typeof RESERVED_QUALIFIERS)[number];

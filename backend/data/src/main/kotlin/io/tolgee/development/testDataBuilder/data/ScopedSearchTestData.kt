@@ -36,6 +36,11 @@ class ScopedSearchTestData : BaseTestData() {
             addTranslation {
               language = germanLanguage
               text = "Warenkorb hinzufügen"
+            }.build {
+              addComment {
+                text = "Checked with the copywriter, 100% fine"
+                author = user
+              }
             }
           }.self
       addKey { name = "cart_subtitle" }.build {
@@ -49,6 +54,15 @@ class ScopedSearchTestData : BaseTestData() {
         addTranslation {
           language = englishLanguage
           text = "Checkout"
+        }.build {
+          addComment {
+            text = "Ask the copywriter, too long for mobile"
+            author = user
+          }
+          addComment {
+            text = "Legal needs to approve this"
+            author = user
+          }
         }
       }
       addKey { name = "my.cart" }.build {

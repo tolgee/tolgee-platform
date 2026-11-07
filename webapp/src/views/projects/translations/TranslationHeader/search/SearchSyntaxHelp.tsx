@@ -84,6 +84,10 @@ const buildExamples = (languageExampleTag: string) => [
     hint: hintNode(QUALIFIER_HINTS.translation),
   },
   {
+    syntax: 'comment:cart',
+    hint: hintNode(QUALIFIER_HINTS.comment),
+  },
+  {
     syntax: `${languageExampleTag}:cart`,
     hint: hintNode(QUALIFIER_HINTS.language, { tag: languageExampleTag }),
   },
