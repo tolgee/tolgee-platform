@@ -459,6 +459,121 @@ class TranslationsControllerPatternFilterTest : ProjectAuthControllerTest("/v2/p
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by comment text in any returned language`() {
+    performProjectAuthGet("/translations?languages=en&languages=de&filterCommentPattern=COPYWRITER")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+          node("[0].keyName").isEqualTo("cart.title")
+          node("[1].keyName").isEqualTo("checkout.title")
+        }
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `comment pattern ignores comments in languages that are not returned`() {
+    performProjectAuthGet("/translations?languages=en&filterCommentPattern=copywriter")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("checkout.title")
+        }
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `comment patterns can be matched by different comments of a key`() {
+    performProjectAuthGet("/translations?filterCommentPattern=copywriter&filterCommentPattern=legal")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("checkout.title")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `comment pattern follows the shared pattern grammar`() {
+    performProjectAuthGet("/translations?languages=de&filterCommentPattern=copywriter, 100% fine")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("cart.title")
+        }
+      }
+    performProjectAuthGet("/translations?languages=de&filterCommentPattern==Checked*fine")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(1)
+      }
+    performProjectAuthGet("/translations?languages=de&filterCommentPattern=copy%fine")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(0)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `negated comment pattern keeps keys without a matching comment`() {
+    performProjectAuthGet(
+      "/translations?languages=en&languages=de&filterKeyPattern=cart&filterNoCommentPattern=copywriter",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(2)
+          node("[0].keyName").isEqualTo("cart_subtitle")
+          node("[1].keyName").isEqualTo("my.cart")
+        }
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `negated comment pattern keeps keys whose comments do not match`() {
+    performProjectAuthGet(
+      "/translations?languages=en&languages=de&filterKeyPattern=*.title&filterNoCommentPattern=legal",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(1)
+          node("[0].keyName").isEqualTo("cart.title")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `select-all applies comment pattern filters`() {
+    performProjectAuthGet("/translations/select-all?languages=de&filterCommentPattern=copywriter")
+      .andIsOk
+      .andAssertThatJson {
+        node("ids") {
+          isArray.hasSize(1)
+          node("[0]").isEqualTo(testData.cartTitleKey.id)
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `rejects an empty comment pattern`() {
+    performProjectAuthGet("/translations?filterCommentPattern=")
+      .andIsBadRequest
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `trash endpoint narrows results by pattern`() {
     performProjectAuthGet("/keys/trash?filterKeyPattern=*cart")
       .andIsOk

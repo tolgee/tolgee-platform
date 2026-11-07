@@ -170,6 +170,22 @@ $PATTERN_GRAMMAR_DOC""",
   )
   var filterNoTranslationPattern: List<String>? = null
 
+  @field:Parameter(
+    description = """Selects only keys with a comment on a translation in any of the returned languages
+matching the provided pattern. Each pattern can be matched by a different comment.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterCommentPattern: List<String>? = null
+
+  @field:Parameter(
+    description = """Selects only keys with no comment on a translation in any of the returned languages
+matching the provided pattern. Keys without comments always match.
+
+$PATTERN_GRAMMAR_DOC""",
+  )
+  var filterNoCommentPattern: List<String>? = null
+
   @field:Parameter(description = "Selects only keys with provided tag")
   var filterTag: List<String>? = null
 
@@ -318,6 +334,8 @@ patterns may be provided per parameter; violations fail with 400."""
         TranslationFilters::filterNoNamespacePattern.name,
         TranslationFilters::filterTranslationPattern.name,
         TranslationFilters::filterNoTranslationPattern.name,
+        TranslationFilters::filterCommentPattern.name,
+        TranslationFilters::filterNoCommentPattern.name,
       )
   }
 }

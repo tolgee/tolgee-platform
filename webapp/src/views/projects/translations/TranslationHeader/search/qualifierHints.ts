@@ -21,6 +21,11 @@ export const QUALIFIER_HINTS = {
     keyName: 'translations_search_help_translation',
     defaultValue: 'Search only in translation texts',
   },
+  comment: {
+    // @tolgee-key translations_search_help_comment
+    keyName: 'translations_search_help_comment',
+    defaultValue: 'Search only in translation comments',
+  },
   language: {
     // @tolgee-key translations_search_help_language
     keyName: 'translations_search_help_language',

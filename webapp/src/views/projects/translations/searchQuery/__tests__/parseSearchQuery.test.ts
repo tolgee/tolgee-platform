@@ -12,7 +12,7 @@ describe('parseSearchQuery', () => {
     ]);
   });
 
-  it.each(['key', 'description', 'namespace', 'translation'])(
+  it.each(['key', 'description', 'namespace', 'translation', 'comment'])(
     'parses %s qualifier',
     (qualifier) => {
       const result = parseSearchQuery(`${qualifier}:foo`, LANGS);
