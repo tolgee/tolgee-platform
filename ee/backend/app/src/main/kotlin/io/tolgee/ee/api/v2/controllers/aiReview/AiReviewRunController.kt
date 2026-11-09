@@ -14,6 +14,7 @@ import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
@@ -39,6 +40,7 @@ class AiReviewRunController(
   @RequiresProjectPermissions([Scope.BATCH_MACHINE_TRANSLATE])
   @RequiresFeatures(Feature.AI_REVIEW)
   @AllowApiAccess
+  @ReadOnlyOperation
   fun previewAiReviewRun(
     @RequestBody @Valid request: AiReviewRunRequest,
   ): AiReviewRunPreviewModel = aiReviewRunService.preview(projectHolder.project.id, request)

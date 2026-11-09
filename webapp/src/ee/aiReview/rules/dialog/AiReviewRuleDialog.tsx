@@ -8,9 +8,10 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
+import { useQueryClient } from 'react-query';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { matchUrlPrefix, useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
@@ -30,6 +31,11 @@ import {
 } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
+type RulesList = {
+  _embedded?: { aiReviewRules?: AiReviewRuleModel[] };
+};
+
+const RULES_URL = '/v2/projects/{projectId}/ai-review-rules';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -41,7 +47,7 @@ const StyledDialogContent = styled(DialogContent)`
 
 const StyledSections = styled('div')`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
   overflow: hidden;
 
   & > * + * {
@@ -62,23 +68,36 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canRun = satisfiesPermission('translations.batch-machine');
 
-  function offerRun(saved: AiReviewRuleModel) {
-    if (!onRequestRun || !canRun || saved.counts.backlog === 0) {
+  const queryClient = useQueryClient();
+
+  async function offerRun(saved: AiReviewRuleModel) {
+    await queryClient.invalidateQueries(matchUrlPrefix(RULES_URL));
+    if (!onRequestRun || !canRun) {
       return;
     }
-    onRequestRun(saved);
+    const rules = queryClient.getQueryData<RulesList>([
+      RULES_URL,
+      { projectId: project.id },
+      undefined,
+      undefined,
+    ]);
+    const refreshed = rules?._embedded?.aiReviewRules?.find(
+      (r) => r.id === saved.id
+    );
+    if (!refreshed?.counts?.backlog) {
+      return;
+    }
+    onRequestRun(refreshed);
   }
 
   const createMutation = useApiMutation({
     url: '/v2/projects/{projectId}/ai-review-rules',
     method: 'post',
-    invalidatePrefix: '/v2/projects/{projectId}/ai-review-rules',
   });
 
   const updateMutation = useApiMutation({
     url: '/v2/projects/{projectId}/ai-review-rules/{ruleId}',
     method: 'put',
-    invalidatePrefix: '/v2/projects/{projectId}/ai-review-rules',
   });
 
   function handleSaved(data: AiReviewRuleModel) {

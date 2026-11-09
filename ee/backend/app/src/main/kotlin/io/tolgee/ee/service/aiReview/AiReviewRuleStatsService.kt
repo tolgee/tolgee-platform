@@ -30,9 +30,15 @@ class AiReviewRuleStatsService(
   fun getCounts(projectId: Long): Map<Long, AiReviewRuleCounts> {
     val counts =
       aiReviewRuleRepository
-        .findAllByProjectIdOrderById(projectId)
-        .associate { it.id to AiReviewRuleCounts(ruleId = it.id) }
-        .toMutableMap()
+        .findDecisionCounts(projectId)
+        .associate {
+          it.ruleId to
+            AiReviewRuleCounts(
+              ruleId = it.ruleId,
+              autoReviewed = it.autoReviewedCount,
+              rejected = it.rejectedCount,
+            )
+        }.toMutableMap()
 
     translationAiReviewRepository.countByRuleAndStatus(projectId).forEach { row ->
       val current = counts[row.ruleId] ?: return@forEach
@@ -70,15 +76,23 @@ class AiReviewRuleStatsService(
     lastFailed: Boolean,
     count: Long,
   ): AiReviewRuleCounts {
-    val withFailure = if (lastFailed) copy(failed = failed + count) else this
+    val withFailure =
+      when {
+        lastFailed -> copy(failed = failed + count)
+        else -> this
+      }
     return when (status) {
-      AiReviewStatus.APPROVED, AiReviewStatus.CONFIRMED -> withFailure.copy(autoReviewed = autoReviewed + count)
-      AiReviewStatus.REJECTED -> withFailure.copy(autoReviewed = autoReviewed + count, rejected = rejected + count)
       AiReviewStatus.FAILED -> withFailure.copy(failed = failed + count)
       AiReviewStatus.DRY_RUN_PASS ->
         withFailure.copy(scored = scored + count, wouldBeAutoReviewed = wouldBeAutoReviewed + count)
       AiReviewStatus.DRY_RUN_FAIL -> withFailure.copy(scored = scored + count)
-      AiReviewStatus.PENDING, AiReviewStatus.BELOW_THRESHOLD, AiReviewStatus.SKIPPED_QA_ISSUES -> withFailure
+      AiReviewStatus.PENDING,
+      AiReviewStatus.APPROVED,
+      AiReviewStatus.BELOW_THRESHOLD,
+      AiReviewStatus.SKIPPED_QA_ISSUES,
+      AiReviewStatus.CONFIRMED,
+      AiReviewStatus.REJECTED,
+      -> withFailure
     }
   }
 }

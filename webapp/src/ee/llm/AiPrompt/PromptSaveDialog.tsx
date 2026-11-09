@@ -21,13 +21,15 @@ import { PromptItem } from './PromptLoadMenu';
 
 type PromptModel = components['schemas']['PromptModel'];
 
+export type PromptSaveData = Omit<
+  PromptModel,
+  'projectId' | 'id' | 'name' | 'revision' | 'activeRuleCount'
+>;
+
 type Props = {
   projectId: number;
   onClose: () => void;
-  data: Omit<
-    PromptModel,
-    'projectId' | 'id' | 'name' | 'revision' | 'activeRuleCount'
-  >;
+  data: PromptSaveData;
   onSuccess: (prompt: PromptItem) => void;
 };
 

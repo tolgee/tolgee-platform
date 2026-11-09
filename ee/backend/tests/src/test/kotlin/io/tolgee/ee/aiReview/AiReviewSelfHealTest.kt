@@ -5,18 +5,23 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.events.OnBatchJobFinalized
+import io.tolgee.batch.request.AiReviewRequest
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.aiReview.AiReviewActivityListener
 import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.service.aiReview.AiReviewEligibility
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.model.enums.TranslationProtection
+import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
@@ -29,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import java.security.MessageDigest
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,7 +87,7 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
 
   @Test
   fun `the claim of a failed job is released and the row is reviewed`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     val deadJob = addJob(BatchJobStatus.FAILED)
     save()
     setBatchJobIdOnRow(testData.deTranslation.id, deadJob.id)
@@ -94,11 +100,33 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a requested re-review of an approval is released and reviewed after a failed job`() {
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, 90) {
+      rule = testData.rule
+      reReviewRequested = true
+    }
+    val deadJob = addJob(BatchJobStatus.FAILED)
+    save()
+    setBatchJobIdOnRow(testData.deTranslation.id, deadJob.id)
+
+    fireFinalized(aiReviewJob(handlingStuckItems = false))
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val row = review(testData.deTranslation.id)!!
+      row.reviewedAt.assert.isNotNull()
+      row.reReviewRequested.assert.isFalse()
+      row.batchJobId.assert.isNull()
+    }
+  }
+
+  @Test
   fun `a stuck PENDING row with fresh QA is picked up after any QA job finishes`() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW, Feature.QA_CHECKS)
     testData.project.useQaChecks = true
     testData.deTranslation.qaChecksStale = false
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     val other = testData.addKeyWithTranslations("other.key")
     save()
 
@@ -111,9 +139,8 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
 
   @Test
   fun `a queued row with a stale text hash is reviewed for the current text`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING) { textHash = "stale-hash" }
     save()
-    setTextHashOnRow(testData.deTranslation.id, "stale-hash")
 
     fireFinalized(aiReviewJob(handlingStuckItems = false))
 
@@ -126,7 +153,7 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
 
   @Test
   fun `self-heal does not start when an AI review job is active`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     addJob(BatchJobStatus.RUNNING)
     save()
     val baseline = aiReviewJobCount()
@@ -138,13 +165,73 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
 
   @Test
   fun `a self-heal job does not trigger another self-heal`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     val baseline = aiReviewJobCount()
 
     fireFinalized(aiReviewJob(handlingStuckItems = true))
 
     aiReviewJobCount().assert.isEqualTo(baseline)
+  }
+
+  @Test
+  fun `an AI-managed PENDING row with no Active winner leaves the queue and stays AI-managed`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    testData.rule.mode = AiReviewRuleMode.DRY_RUN
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
+    save()
+
+    fireFinalized(aiReviewJob(handlingStuckItems = false))
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.get(testData.deTranslation.id)
+      translation.state.assert.isEqualTo(TranslationState.REVIEWED)
+      AiReviewEligibility
+        .isAiManagedReview(translation, translationAiReviewRepository.findByTranslationId(translation.id))
+        .assert
+        .isTrue()
+    }
+    val baseline = aiReviewJobCount()
+    fireFinalized(aiReviewJob(handlingStuckItems = false))
+    aiReviewJobCount().assert.isEqualTo(baseline)
+  }
+
+  @Test
+  fun `a queued row of a trashed key is not claimed`() {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
+    testData.key.deletedAt = Date()
+    save()
+    val baseline = aiReviewJobCount()
+
+    fireFinalized(aiReviewJob(handlingStuckItems = false))
+    aiReviewJobCount().assert.isEqualTo(baseline)
+
+    val job =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService.startJob(
+          request = AiReviewRequest(translationIds = listOf(testData.deTranslation.id)),
+          project = entityManager.getReference(Project::class.java, testData.project.id),
+          author = null,
+          type = BatchJobType.AI_REVIEW,
+          isHidden = true,
+        )
+      }
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService
+          .getJobDtoNoCache(job.id)
+          .status.completed.assert
+          .isTrue()
+      }
+    }
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.PENDING)
+    row.batchJobId.assert.isNull()
   }
 
   private fun aiReviewJob(handlingStuckItems: Boolean): BatchJobDto =
@@ -184,17 +271,6 @@ class AiReviewSelfHealTest : AuthorizedControllerTest() {
     executeInNewTransaction(platformTransactionManager) {
       val row = translationAiReviewRepository.findByTranslationId(translationId)!!
       row.batchJobId = jobId
-      translationAiReviewRepository.save(row)
-    }
-  }
-
-  private fun setTextHashOnRow(
-    translationId: Long,
-    textHash: String,
-  ) {
-    executeInNewTransaction(platformTransactionManager) {
-      val row = translationAiReviewRepository.findByTranslationId(translationId)!!
-      row.textHash = textHash
       translationAiReviewRepository.save(row)
     }
   }

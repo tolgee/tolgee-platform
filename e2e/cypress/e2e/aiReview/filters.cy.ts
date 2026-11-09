@@ -3,17 +3,17 @@ import {
   getProjectByNameFromTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { gcy, gcyAdvanced } from '../../common/shared';
+import { gcyAdvanced } from '../../common/shared';
 import {
   restoreAiReviewFeature,
   withoutAiReviewFeature,
 } from '../../common/aiReview';
-import { HOST } from '../../common/constants';
-import { getTranslationCell } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('AI review filters', () => {
   let projectId: number;
+  const view = new E2TranslationsView();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -32,150 +32,129 @@ describe('AI review filters', () => {
   });
 
   function visit() {
-    cy.visit(
-      `${HOST}/projects/${projectId}/translations?languages=en&languages=de&languages=fr`
-    );
-  }
-
-  function openAiReviewSubfilter() {
-    gcy('translations-filter-select').click();
-    gcyAdvanced({ value: 'submenu-item', id: 'ai-review' }).click();
-  }
-
-  function toggleOutcome(outcome: string) {
-    gcyAdvanced({ value: 'ai-review-filter-item', outcome }).click();
-  }
-
-  function keyVisible(key: string) {
-    getTranslationCell(key, 'de').should('exist');
-  }
-
-  function keyAbsent(key: string) {
-    getTranslationCell(key, 'de').should('not.exist');
+    view.visit(projectId, { languages: ['en', 'de', 'fr'] });
   }
 
   it('filters by reviewed-by-AI, below-threshold and failed outcomes', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('REVIEWED_BY_AI');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('REVIEWED_BY_AI');
     waitForGlobalLoading();
-    keyVisible('key_approved');
-    keyAbsent('key_below_threshold');
-    keyAbsent('key_untagged');
+    view.getTranslationCell('key_approved', 'de').should('exist');
+    view.getTranslationCell('key_below_threshold', 'de').should('not.exist');
+    view.getTranslationCell('key_untagged', 'de').should('not.exist');
 
-    toggleOutcome('REVIEWED_BY_AI');
-    toggleOutcome('BELOW_THRESHOLD');
+    view.toggleAiReviewOutcome('REVIEWED_BY_AI');
+    view.toggleAiReviewOutcome('BELOW_THRESHOLD');
     waitForGlobalLoading();
-    keyVisible('key_below_threshold');
-    keyVisible('key_with_issues');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_below_threshold', 'de').should('exist');
+    view.getTranslationCell('key_with_issues', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
 
-    toggleOutcome('BELOW_THRESHOLD');
-    toggleOutcome('FAILED');
+    view.toggleAiReviewOutcome('BELOW_THRESHOLD');
+    view.toggleAiReviewOutcome('FAILED');
     waitForGlobalLoading();
-    keyVisible('key_failed');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_failed', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
   });
 
   it('filters by the human-resolved outcomes', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('CONFIRMED');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('CONFIRMED');
     waitForGlobalLoading();
-    keyVisible('key_confirmed');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_confirmed', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
 
-    toggleOutcome('CONFIRMED');
-    toggleOutcome('REJECTED');
+    view.toggleAiReviewOutcome('CONFIRMED');
+    view.toggleAiReviewOutcome('REJECTED');
     waitForGlobalLoading();
-    keyVisible('key_rejected');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_rejected', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
   });
 
   it('filters by the two dry run outcomes', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('DRY_RUN_PASS');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('DRY_RUN_PASS');
     waitForGlobalLoading();
-    keyVisible('key_dry_run_pass');
-    keyAbsent('key_dry_run_fail');
+    view.getTranslationCell('key_dry_run_pass', 'de').should('exist');
+    view.getTranslationCell('key_dry_run_fail', 'de').should('not.exist');
 
-    toggleOutcome('DRY_RUN_PASS');
-    toggleOutcome('DRY_RUN_FAIL');
+    view.toggleAiReviewOutcome('DRY_RUN_PASS');
+    view.toggleAiReviewOutcome('DRY_RUN_FAIL');
     waitForGlobalLoading();
-    keyVisible('key_dry_run_fail');
-    keyAbsent('key_dry_run_pass');
+    view.getTranslationCell('key_dry_run_fail', 'de').should('exist');
+    view.getTranslationCell('key_dry_run_pass', 'de').should('not.exist');
   });
 
   it('not reviewed yet excludes keys no rule covers', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('NOT_REVIEWED_YET');
-    // Scope to German; with all languages almost every key has an
-    // unreviewed French translation and the list stays long.
-    cy.gcy('translations-filter-apply-for-expand').click();
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('NOT_REVIEWED_YET');
+    view.applyFilterForExpand();
     gcyAdvanced({
       value: 'translations-filter-apply-for-language',
       language: 'de',
     }).click();
     waitForGlobalLoading();
-    keyVisible('key_not_reviewed');
-    keyAbsent('key_untagged');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_not_reviewed', 'de').should('exist');
+    view.getTranslationCell('key_untagged', 'de').should('not.exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
   });
 
   it('two outcomes combine with OR', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('DRY_RUN_PASS');
-    toggleOutcome('FAILED');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('DRY_RUN_PASS');
+    view.toggleAiReviewOutcome('FAILED');
     waitForGlobalLoading();
-    keyVisible('key_dry_run_pass');
-    keyVisible('key_failed');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_dry_run_pass', 'de').should('exist');
+    view.getTranslationCell('key_failed', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
   });
 
   it('language selection limits the filter', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('BELOW_THRESHOLD');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('BELOW_THRESHOLD');
     waitForGlobalLoading();
-    keyVisible('key_below_threshold');
+    view.getTranslationCell('key_below_threshold', 'de').should('exist');
 
-    cy.gcy('translations-filter-apply-for-expand').click();
+    view.applyFilterForExpand();
     gcyAdvanced({
       value: 'translations-filter-apply-for-language',
       language: 'fr',
     }).click();
     waitForGlobalLoading();
-    keyAbsent('key_below_threshold');
+    view.getTranslationCell('key_below_threshold', 'de').should('not.exist');
 
     gcyAdvanced({
       value: 'translations-filter-apply-for-language',
       language: 'de',
     }).click();
     waitForGlobalLoading();
-    keyVisible('key_below_threshold');
+    view.getTranslationCell('key_below_threshold', 'de').should('exist');
   });
 
   it('is hidden without the feature', () => {
     withoutAiReviewFeature();
     visit();
-    gcy('translations-filter-select').click();
+    view.openFilterSelect();
     gcyAdvanced({ value: 'submenu-item', id: 'tags' }).should('be.visible');
     gcyAdvanced({ value: 'submenu-item', id: 'ai-review' }).should('not.exist');
   });
 
   it('survives a reload through the URL state', () => {
     visit();
-    openAiReviewSubfilter();
-    toggleOutcome('FAILED');
+    view.openAiReviewFilter();
+    view.toggleAiReviewOutcome('FAILED');
     waitForGlobalLoading();
-    keyVisible('key_failed');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_failed', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
     cy.reload();
     waitForGlobalLoading();
-    keyVisible('key_failed');
-    keyAbsent('key_approved');
+    view.getTranslationCell('key_failed', 'de').should('exist');
+    view.getTranslationCell('key_approved', 'de').should('not.exist');
   });
 });

@@ -3,7 +3,6 @@ import {
   Box,
   Chip,
   IconButton,
-  Link as MuiLink,
   Menu,
   MenuItem,
   Paper,
@@ -25,7 +24,13 @@ import { AiReviewRuleDialog } from 'tg.ee.module/aiReview/rules/dialog/AiReviewR
 import {
   AiReviewRunDialog,
   AiReviewRunVariant,
+  runVariantForMode,
 } from 'tg.ee.module/aiReview/runs/AiReviewRunDialog';
+import {
+  AiReviewRuleCounts,
+  Dot,
+  StyledInfoLine,
+} from 'tg.ee.module/aiReview/rules/AiReviewRuleCounts';
 import { useRuleLabel } from 'tg.ee.module/aiReview/rules/useRuleLabel';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
@@ -36,16 +41,6 @@ const StyledItem = styled(Paper)`
   gap: ${({ theme }) => theme.spacing(1)};
   padding: ${({ theme }) => theme.spacing(2)};
 `;
-
-const StyledInfoLine = styled(Typography)`
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: ${({ theme }) => theme.spacing(0.5)};
-  color: ${({ theme }) => theme.palette.text.secondary};
-  font-size: ${({ theme }) => theme.typography.body2.fontSize};
-`;
-
-const Dot = () => <span aria-hidden="true">·</span>;
 
 type Props = {
   rule: AiReviewRuleModel;
@@ -150,78 +145,7 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
           <Dot />
           <span>{promptName}</span>
         </StyledInfoLine>
-        {isDryRun ? (
-          <StyledInfoLine data-cy="ai-review-rule-counts-dry-run">
-            {t(
-              'ai_review_rule_counts_dry_run',
-              '{scored, plural, one {# scored} other {# scored}} · {wouldBeAutoReviewed, plural, one {# would be auto-reviewed} other {# would be auto-reviewed}}',
-              {
-                scored: rule.counts.scored,
-                wouldBeAutoReviewed: rule.counts.wouldBeAutoReviewed,
-              }
-            )}
-          </StyledInfoLine>
-        ) : (
-          <StyledInfoLine
-            data-cy="ai-review-rule-counts-active"
-            data-cy-failed={String(rule.counts.failed)}
-          >
-            <span>
-              {t(
-                'ai_review_rule_counts_active',
-                '{autoReviewed, plural, one {# auto-reviewed} other {# auto-reviewed}} · {rejected, plural, one {# rejected} other {# rejected}} · {failed, plural, one {# failed} other {# failed}}',
-                {
-                  autoReviewed: rule.counts.autoReviewed,
-                  rejected: rule.counts.rejected,
-                  failed: rule.counts.failed,
-                }
-              )}
-            </span>
-            {canRun && rule.counts.failed > 0 && (
-              <>
-                <Dot />
-                <MuiLink
-                  component="button"
-                  onClick={() => setRunVariant('retry')}
-                  data-cy="ai-review-rule-retry-failed"
-                >
-                  {t('ai_review_rule_retry_failed', 'Retry failed reviews')}
-                </MuiLink>
-              </>
-            )}
-          </StyledInfoLine>
-        )}
-        {rule.counts.backlog > 0 && (
-          <StyledInfoLine data-cy="ai-review-rule-backlog">
-            <span>
-              {isDryRun
-                ? t(
-                    'ai_review_rule_backlog_dry_run',
-                    '{count, plural, one {# existing translation not scored} other {# existing translations not scored}}',
-                    { count: rule.counts.backlog }
-                  )
-                : t(
-                    'ai_review_rule_backlog_active',
-                    '{count, plural, one {# existing translation not reviewed} other {# existing translations not reviewed}}',
-                    { count: rule.counts.backlog }
-                  )}
-            </span>
-            {canRun && (
-              <>
-                <Dot />
-                <MuiLink
-                  component="button"
-                  onClick={() => setRunVariant(isDryRun ? 'score' : 'review')}
-                  data-cy="ai-review-rule-review-now"
-                >
-                  {isDryRun
-                    ? t('ai_review_rule_score_now', 'Score now')
-                    : t('ai_review_rule_review_now', 'Review now')}
-                </MuiLink>
-              </>
-            )}
-          </StyledInfoLine>
-        )}
+        <AiReviewRuleCounts rule={rule} canRun={canRun} onRun={setRunVariant} />
       </Box>
       <Box display="flex" alignItems="start" gap={1}>
         <Chip
@@ -280,9 +204,7 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
         <AiReviewRuleDialog
           rule={rule}
           onClose={() => setEditOpen(false)}
-          onRequestRun={(saved) =>
-            setRunVariant(saved.mode === 'DRY_RUN' ? 'score' : 'review')
-          }
+          onRequestRun={(saved) => setRunVariant(runVariantForMode(saved.mode))}
         />
       )}
       {runVariant && (

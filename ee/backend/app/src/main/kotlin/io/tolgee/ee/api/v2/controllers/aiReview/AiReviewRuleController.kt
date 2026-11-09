@@ -11,6 +11,7 @@ import io.tolgee.ee.data.aiReview.AiReviewRuleEnabledRequest
 import io.tolgee.ee.data.aiReview.AiReviewRuleRequest
 import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.aiReview.AiReviewRuleStatsService
+import io.tolgee.ee.service.aiReview.AiReviewRuleStatsService.AiReviewRuleCounts
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
@@ -52,7 +53,9 @@ class AiReviewRuleController(
     val projectId = projectHolder.project.id
     val counts = aiReviewRuleStatsService.getCounts(projectId)
     return CollectionModel.of(
-      aiReviewRuleService.list(projectId).map { aiReviewRuleModelAssembler.toModel(it, counts[it.id]) },
+      aiReviewRuleService.list(projectId).map {
+        aiReviewRuleModelAssembler.toModel(it, counts[it.id] ?: AiReviewRuleCounts(ruleId = it.id))
+      },
     )
   }
 
@@ -64,7 +67,11 @@ class AiReviewRuleController(
   @RequiresFeatures(Feature.AI_REVIEW)
   fun getAiReviewRule(
     @PathVariable ruleId: Long,
-  ): AiReviewRuleModel = toModelWithCounts(aiReviewRuleService.get(projectHolder.project.id, ruleId))
+  ): AiReviewRuleModel {
+    val rule = aiReviewRuleService.get(projectHolder.project.id, ruleId)
+    val counts = aiReviewRuleStatsService.getCounts(projectHolder.project.id)[rule.id] ?: AiReviewRuleCounts(rule.id)
+    return aiReviewRuleModelAssembler.toModel(rule, counts)
+  }
 
   @PostMapping("")
   @Operation(summary = "Create an AI review rule")
@@ -75,7 +82,7 @@ class AiReviewRuleController(
   fun createAiReviewRule(
     @RequestBody @Valid
     request: AiReviewRuleRequest,
-  ): AiReviewRuleModel = toModelWithCounts(aiReviewRuleService.create(projectHolder.project.id, request))
+  ): AiReviewRuleModel = toModelWithoutCounts(aiReviewRuleService.create(projectHolder.project.id, request))
 
   @PutMapping("/{ruleId:[0-9]+}")
   @Operation(summary = "Update an AI review rule")
@@ -87,7 +94,7 @@ class AiReviewRuleController(
     @PathVariable ruleId: Long,
     @RequestBody @Valid
     request: AiReviewRuleRequest,
-  ): AiReviewRuleModel = toModelWithCounts(aiReviewRuleService.update(projectHolder.project.id, ruleId, request))
+  ): AiReviewRuleModel = toModelWithoutCounts(aiReviewRuleService.update(projectHolder.project.id, ruleId, request))
 
   @PutMapping("/{ruleId:[0-9]+}/enabled")
   @Operation(summary = "Enable or disable an AI review rule")
@@ -100,7 +107,7 @@ class AiReviewRuleController(
     @RequestBody @Valid
     request: AiReviewRuleEnabledRequest,
   ): AiReviewRuleModel =
-    toModelWithCounts(aiReviewRuleService.setEnabled(projectHolder.project.id, ruleId, request.enabled))
+    toModelWithoutCounts(aiReviewRuleService.setEnabled(projectHolder.project.id, ruleId, request.enabled))
 
   @DeleteMapping("/{ruleId:[0-9]+}")
   @Operation(summary = "Delete an AI review rule")
@@ -114,6 +121,6 @@ class AiReviewRuleController(
     aiReviewRuleService.delete(projectHolder.project.id, ruleId)
   }
 
-  private fun toModelWithCounts(rule: AiReviewRule): AiReviewRuleModel =
-    aiReviewRuleModelAssembler.toModel(rule, aiReviewRuleStatsService.getCounts(projectHolder.project.id)[rule.id])
+  private fun toModelWithoutCounts(rule: AiReviewRule): AiReviewRuleModel =
+    aiReviewRuleModelAssembler.toModel(rule, null)
 }

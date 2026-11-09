@@ -14,7 +14,7 @@ type Field = 'aiApproved' | 'humanEdited' | 'humanReviewed';
 
 const StyledRows = styled(Box)`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
 `;
 
 const StyledRow = styled(Box)`

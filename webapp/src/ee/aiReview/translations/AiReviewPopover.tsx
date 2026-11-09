@@ -1,23 +1,19 @@
-import { Box, Button, Divider, Popover, Typography } from '@mui/material';
+import { Box, Divider, Popover, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 
 import { AiReviewBadge } from 'tg.ee.module/aiReview/translations/AiReviewBadge';
 import { AiReviewIssueList } from 'tg.ee.module/aiReview/translations/AiReviewIssueList';
 import { useAiReviewDetails } from 'tg.ee.module/aiReview/translations/useAiReviewDetails';
+import { AiReviewPopoverActions } from 'tg.ee.module/aiReview/translations/AiReviewPopoverActions';
+import { useAiReviewStatusLabels } from 'tg.ee.module/aiReview/translations/useAiReviewStatusLabels';
 
 type AiReviewSummary = components['schemas']['TranslationAiReviewSummaryModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
-type FailureReason = NonNullable<
-  components['schemas']['TranslationAiReviewModel']['failureReason']
->;
 
 type Props = {
   anchorEl: HTMLElement;
@@ -25,25 +21,36 @@ type Props = {
   translationId: number;
   aiReview: AiReviewSummary;
   state?: State;
-  auto?: boolean;
   stateChangeEnabled?: boolean;
 };
 
-function ruleMarker(details: { ruleId?: number; ruleName?: string }): string {
+type RuleRef =
+  | { kind: 'deleted' }
+  | { kind: 'unnamed' }
+  | { kind: 'named'; name: string };
+
+function describeReviewRule(details: {
+  ruleId?: number;
+  ruleName?: string;
+}): RuleRef {
   if (details.ruleId == null) {
-    return 'deleted';
+    return { kind: 'deleted' };
   }
-  return details.ruleName ?? 'unnamed';
+  if (details.ruleName == null) {
+    return { kind: 'unnamed' };
+  }
+  return { kind: 'named', name: details.ruleName };
 }
 
-function ruleLine(marker: string, t: ReturnType<typeof useTranslate>['t']) {
-  if (marker === 'deleted') {
-    return t('ai_review_popover_rule_deleted', 'Rule: deleted');
+function ruleLine(ref: RuleRef, t: ReturnType<typeof useTranslate>['t']) {
+  switch (ref.kind) {
+    case 'deleted':
+      return t('ai_review_popover_rule_deleted', 'Rule: deleted');
+    case 'unnamed':
+      return t('ai_review_popover_rule_unnamed', 'Rule: unnamed rule');
+    case 'named':
+      return t('ai_review_popover_rule', 'Rule: {name}', { name: ref.name });
   }
-  if (marker === 'unnamed') {
-    return t('ai_review_popover_rule_unnamed', 'Rule: unnamed rule');
-  }
-  return t('ai_review_popover_rule', 'Rule: {name}', { name: marker });
 }
 
 export const AiReviewPopover = ({
@@ -52,91 +59,27 @@ export const AiReviewPopover = ({
   translationId,
   aiReview,
   state,
-  auto,
   stateChangeEnabled,
 }: Props) => {
   const { t } = useTranslate();
-  const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
   const canRun = satisfiesPermission('translations.batch-machine');
   const timeDistance = useTimeDistance();
+  const { statusLabel, failureReasonLabel } = useAiReviewStatusLabels();
 
-  const detailsLoadable = useAiReviewDetails(translationId, true);
+  const detailsLoadable = useAiReviewDetails(translationId);
   const details = detailsLoadable.data;
-
-  const confirmMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/ai-review/confirm',
-    method: 'put',
-  });
-  const rejectMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/ai-review/reject',
-    method: 'put',
-  });
-  const retryMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/ai-review/retry',
-    method: 'post',
-  });
-
-  const path = { projectId: project.id, translationId };
-
-  function statusLine() {
-    switch (aiReview.status) {
-      case 'APPROVED':
-        return t('ai_review_popover_status_approved', 'Reviewed by AI');
-      case 'BELOW_THRESHOLD':
-        return t('ai_review_popover_status_below', 'Below threshold');
-      case 'DRY_RUN_PASS':
-        return t(
-          'ai_review_popover_status_dry_run_pass',
-          'Dry run: would be auto-reviewed'
-        );
-      case 'DRY_RUN_FAIL':
-        return t(
-          'ai_review_popover_status_dry_run_fail',
-          'Dry run: would not be auto-reviewed'
-        );
-      case 'FAILED':
-        return t('ai_review_popover_status_failed', 'Review failed');
-      case 'CONFIRMED':
-        return t('ai_review_popover_status_confirmed', 'Confirmed by a human');
-      case 'REJECTED':
-        return t('ai_review_popover_status_rejected', 'Rejected by a human');
-      default:
-        return aiReview.status;
-    }
-  }
-
-  function failureReasonLabel(reason: FailureReason) {
-    switch (reason) {
-      case 'NO_PROVIDER':
-        return t(
-          'ai_review_failure_no_provider',
-          'No AI provider is configured'
-        );
-      case 'PROVIDER_ERROR':
-        return t(
-          'ai_review_failure_provider_error',
-          'The AI provider returned an error'
-        );
-      case 'OUT_OF_CREDITS':
-        return t('ai_review_failure_out_of_credits', 'Out of AI credits');
-      case 'TEMPLATE_ERROR':
-        return t(
-          'ai_review_failure_template_error',
-          'The prompt template failed'
-        );
-      case 'PARSE_ERROR':
-        return t(
-          'ai_review_failure_parse_error',
-          'The AI response could not be read'
-        );
-      default:
-        return reason;
-    }
-  }
+  const rule = details && describeReviewRule(details);
+  const resolvedParams =
+    details?.resolvedBy && details.resolvedAt != null
+      ? {
+          name: details.resolvedBy.name ?? details.resolvedBy.username,
+          time: timeDistance(details.resolvedAt),
+        }
+      : undefined;
 
   const protectedNoteVisible =
-    aiReview.status === 'BELOW_THRESHOLD' && state === 'REVIEWED' && auto;
+    aiReview.status === 'BELOW_THRESHOLD' && state === 'REVIEWED';
   const showActions = aiReview.status === 'APPROVED' && stateChangeEnabled;
   const showRetry =
     (aiReview.status === 'FAILED' || Boolean(details?.lastFailureReason)) &&
@@ -163,7 +106,7 @@ export const AiReviewPopover = ({
         <Box display="grid" gap={1}>
           <Box display="flex" justifyContent="space-between" gap={1}>
             <Typography fontWeight={500} data-cy="ai-review-popover-status">
-              {statusLine()}
+              {statusLabel(aiReview.status)}
             </Typography>
             <AiReviewBadge aiReview={aiReview} />
           </Box>
@@ -195,9 +138,9 @@ export const AiReviewPopover = ({
             <Typography
               variant="body2"
               data-cy="ai-review-popover-rule"
-              data-cy-rule={ruleMarker(details)}
+              data-cy-rule={rule?.kind === 'named' ? rule.name : rule?.kind}
             >
-              {ruleLine(ruleMarker(details), t)}
+              {rule && ruleLine(rule, t)}
             </Typography>
             {details.promptName && (
               <Typography variant="body2" data-cy="ai-review-popover-prompt">
@@ -213,28 +156,18 @@ export const AiReviewPopover = ({
                 })}
               </Typography>
             )}
-            {details.resolvedBy && details.resolvedAt != null && (
+            {resolvedParams && (
               <Typography variant="body2" data-cy="ai-review-popover-resolved">
                 {aiReview.status === 'REJECTED'
                   ? t(
                       'ai_review_popover_rejected_by',
                       'Rejected by {name} {time}',
-                      {
-                        name:
-                          details.resolvedBy.name ??
-                          details.resolvedBy.username,
-                        time: timeDistance(details.resolvedAt),
-                      }
+                      resolvedParams
                     )
                   : t(
                       'ai_review_popover_confirmed_by',
                       'Confirmed by {name} {time}',
-                      {
-                        name:
-                          details.resolvedBy.name ??
-                          details.resolvedBy.username,
-                        time: timeDistance(details.resolvedAt),
-                      }
+                      resolvedParams
                     )}
               </Typography>
             )}
@@ -267,62 +200,17 @@ export const AiReviewPopover = ({
             >
               {details.failureReason
                 ? failureReasonLabel(details.failureReason)
-                : statusLine()}
+                : statusLabel(aiReview.status)}
             </Typography>
           ) : (
             <AiReviewIssueList issues={details.issues} />
           )}
-          {(showActions || showRetry) && (
-            <Box display="flex" justifyContent="end" gap={1}>
-              {showRetry && (
-                <LoadingButton
-                  size="small"
-                  loading={retryMutation.isLoading}
-                  onClick={() =>
-                    retryMutation.mutate(
-                      { path },
-                      { onSuccess: () => onClose() }
-                    )
-                  }
-                  data-cy="ai-review-popover-retry"
-                >
-                  {t('ai_review_popover_retry', 'Retry')}
-                </LoadingButton>
-              )}
-              {showActions && (
-                <>
-                  <Button
-                    size="small"
-                    disabled={rejectMutation.isLoading}
-                    onClick={() =>
-                      rejectMutation.mutate(
-                        { path },
-                        { onSuccess: () => onClose() }
-                      )
-                    }
-                    data-cy="ai-review-popover-reject"
-                  >
-                    {t('ai_review_popover_reject', 'Reject')}
-                  </Button>
-                  <LoadingButton
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    loading={confirmMutation.isLoading}
-                    onClick={() =>
-                      confirmMutation.mutate(
-                        { path },
-                        { onSuccess: () => onClose() }
-                      )
-                    }
-                    data-cy="ai-review-popover-confirm"
-                  >
-                    {t('ai_review_popover_confirm', 'Confirm review')}
-                  </LoadingButton>
-                </>
-              )}
-            </Box>
-          )}
+          <AiReviewPopoverActions
+            translationId={translationId}
+            showRetry={showRetry}
+            showActions={Boolean(showActions)}
+            onClose={onClose}
+          />
         </Box>
       )}
     </Popover>

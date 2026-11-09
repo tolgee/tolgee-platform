@@ -4,13 +4,16 @@ import {
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import { loadPrompt, openPlayground } from '../../common/aiPlayground';
-import { visitAiSettings } from '../../common/prompt';
+import {
+  loadPrompt,
+  openPlayground,
+  visitAiSettings,
+} from '../../common/prompt';
 import {
   restoreAiReviewFeature,
-  visitAiReviewRules,
   withoutAiReviewFeature,
 } from '../../common/aiReview';
+import { E2AiReviewRulesView } from '../../compounds/aiReview/E2AiReviewRulesView';
 import { HOST } from '../../common/constants';
 
 describe('AI review prompts in the playground', () => {
@@ -97,7 +100,7 @@ describe('AI review prompts in the playground', () => {
     gcy('ai-prompt-save-button').click();
     gcy('ai-review-prompt-save-warning').should('be.visible');
     cy.gcy('global-confirmation-confirm').click();
-    visitAiReviewRules(projectId);
+    new E2AiReviewRulesView().visit(projectId);
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).within(
       () => {
         gcyAdvanced({ value: 'ai-review-rule-mode', mode: 'DRY_RUN' }).should(

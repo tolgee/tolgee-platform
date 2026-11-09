@@ -4,10 +4,12 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.AiReviewRequest
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.ee.data.aiReview.AiReviewRunPreviewModel
 import io.tolgee.ee.data.aiReview.AiReviewRunRequest
 import io.tolgee.ee.data.aiReview.AiReviewSkipReason
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJob
@@ -77,6 +79,7 @@ class AiReviewRunService(
     authorId: Long,
   ): BatchJob {
     val classified = classifyAndClearContext(projectId, request)
+    if (classified.toReview.isEmpty()) throw BadRequestException(Message.AI_REVIEW_NOTHING_TO_REVIEW)
     val author = userAccountService.get(authorId)
     val projectRef = entityManager.getReference(Project::class.java, projectId)
     val job =
@@ -190,6 +193,7 @@ class AiReviewRunService(
     ): CandidateResult {
       if (translation.key.project.id != projectId) return CandidateResult.NotACandidate
       if (translation.language.id == baseLanguageId) return CandidateResult.NotACandidate
+      if (AiReviewEligibility.isTrashed(translation)) return CandidateResult.NotACandidate
 
       basicSkipReason(translation, row)?.let { return CandidateResult.Skipped(it) }
       val decision =
@@ -284,22 +288,10 @@ class AiReviewRunService(
     }
     val keyIds = request.keyIds ?: return emptyList()
     if (keyIds.isEmpty() || request.languageIds.isEmpty()) return emptyList()
-    return translationIdsOfKeys(keyIds, request.languageIds)
-  }
-
-  private fun translationIdsOfKeys(
-    keyIds: List<Long>,
-    languageIds: List<Long>,
-  ): List<Long> =
-    keyIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
-      entityManager
-        .createQuery(
-          "select t.id from Translation t where t.key.id in :keyIds and t.language.id in :languageIds",
-          Long::class.javaObjectType,
-        ).setParameter("keyIds", chunk)
-        .setParameter("languageIds", languageIds)
-        .resultList
+    return keyIds.chunked(IN_CLAUSE_CHUNK).flatMap {
+      translationRepository.getIdsByKeyIdsAndLanguageIds(it, request.languageIds)
     }
+  }
 
   companion object {
     private val RESULT_STATUSES =

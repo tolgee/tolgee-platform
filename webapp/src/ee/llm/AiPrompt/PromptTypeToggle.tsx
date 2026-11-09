@@ -1,7 +1,9 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-type PromptType = 'TRANSLATE' | 'REVIEW';
+import { components } from 'tg.service/apiSchema.generated';
+
+export type PromptType = components['schemas']['PromptModel']['type'];
 
 type Props = {
   value: PromptType;

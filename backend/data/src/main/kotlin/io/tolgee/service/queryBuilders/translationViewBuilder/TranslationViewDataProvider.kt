@@ -16,6 +16,8 @@ import io.tolgee.model.views.TranslationView
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
+import io.tolgee.service.aiReview.AiReviewResultApplies
+import io.tolgee.service.aiReview.AiReviewTextHash
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
@@ -377,17 +379,20 @@ class TranslationViewDataProvider(
         em
           .createNativeQuery(
             """
-            select r.translation_id, r.status, r.score, r.rule_mode, (r.last_failure_reason is not null)
+            select r.translation_id, r.status, r.score, r.rule_mode, (r.last_failure_reason is not null),
+                   t.state
             from translation_ai_review r
             join translation t on t.id = r.translation_id
             where r.translation_id in :ids
-              and r.text_hash = encode(sha256(convert_to(coalesce(t.text, ''), 'UTF8')), 'hex')
+              and r.text_hash = ${AiReviewTextHash.CURRENT_TEXT_SQL}
             """,
           ).setParameter("ids", chunk)
           .resultList as List<Array<Any?>>
       rows.forEach { row ->
         val view = byId[(row[0] as Number).toLong()] ?: return@forEach
         val status = AiReviewStatus.valueOf(row[1] as String)
+        val state = TranslationState.entries[(row[5] as Number).toInt()]
+        if (!AiReviewResultApplies.stillApplies(status, state)) return@forEach
         view.aiReviewStatus = status
         view.aiReviewScore = (row[2] as Number?)?.toInt()
         view.aiReviewDryRun =

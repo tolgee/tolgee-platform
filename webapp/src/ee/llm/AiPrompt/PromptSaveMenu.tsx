@@ -10,16 +10,13 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { messageService } from 'tg.service/MessageService';
 import { confirmation } from 'tg.hooks/confirmation';
 
 import { PromptItem } from './PromptLoadMenu';
-import { PromptSaveDialog } from './PromptSaveDialog';
-
-type PromptModel = components['schemas']['PromptModel'];
+import { PromptSaveData, PromptSaveDialog } from './PromptSaveDialog';
 
 const StyledArrowButton = styled(Button)`
   padding-left: 6px;
@@ -29,10 +26,7 @@ const StyledArrowButton = styled(Button)`
 
 type Props = {
   projectId: number;
-  data: Omit<
-    PromptModel,
-    'projectId' | 'id' | 'name' | 'revision' | 'activeRuleCount'
-  >;
+  data: PromptSaveData;
   existingPrompt?: PromptItem;
   disabled?: boolean;
   unsavedChanges?: boolean;

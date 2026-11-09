@@ -8,7 +8,11 @@ import { TranslationLanguage } from './TranslationLanguage';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
-import { useQaChecksEnabled, useQaDisabledLanguageIds } from 'tg.ee';
+import {
+  AiReviewPlaygroundResult,
+  useQaChecksEnabled,
+  useQaDisabledLanguageIds,
+} from 'tg.ee';
 import { getFirstPluralVariantWithQaIssues } from 'tg.fixtures/qaUtils';
 
 const StyledContainer = styled('div')`
@@ -146,7 +150,6 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           qaChecksStale={translation?.qaChecksStale}
           aiReview={translation?.aiReview}
           translationId={translation?.id}
-          translationAuto={translation?.auto}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}
@@ -179,14 +182,22 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           />
         )}
         {aiPlaygroundData && (
-          <AiPlaygroundPreview
-            translation={aiPlaygroundData.translation}
-            tooltip={aiPlaygroundData.contextDescription}
-            isPlural={keyData.keyIsPlural}
-            locale={language.tag}
-            score={aiPlaygroundData.score}
-            issues={aiPlaygroundData.issues}
-          />
+          <AiPlaygroundPreview tooltip={aiPlaygroundData.contextDescription}>
+            {aiPlaygroundData.score != null ? (
+              <AiReviewPlaygroundResult
+                score={aiPlaygroundData.score}
+                issues={aiPlaygroundData.issues}
+              />
+            ) : (
+              <TranslationVisual
+                text={aiPlaygroundData.translation}
+                isPlural={keyData.keyIsPlural}
+                locale={language.tag}
+                maxLines={3}
+                extraPadding={false}
+              />
+            )}
+          </AiPlaygroundPreview>
         )}
       </StyledTranslation>
     </StyledContainer>

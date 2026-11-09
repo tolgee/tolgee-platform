@@ -113,4 +113,13 @@ class AiReviewRule(
 
   @OneToMany(mappedBy = "rule", cascade = [CascadeType.ALL], orphanRemoval = true)
   var overrides: MutableList<AiReviewRuleLanguageOverride> = mutableListOf()
+
+  /** Change it only with the atomic updates in AiReviewRuleRepository: an entity write loses concurrent increments. */
+  @ColumnDefault("0")
+  @Column(nullable = false, updatable = false)
+  var autoReviewedCount: Long = 0
+
+  @ColumnDefault("0")
+  @Column(nullable = false, updatable = false)
+  var rejectedCount: Long = 0
 }

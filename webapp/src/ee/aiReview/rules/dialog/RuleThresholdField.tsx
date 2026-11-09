@@ -5,7 +5,7 @@ import { useFormikContext } from 'formik';
 
 import { FieldLabel } from 'tg.component/FormField';
 import { RuleFormValues } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
-import { RuleSegmented } from 'tg.ee.module/aiReview/rules/dialog/RuleSegmented';
+import { SegmentedControl } from 'tg.component/common/SegmentedControl';
 
 const PRESETS = [70, 85, 95];
 
@@ -35,7 +35,7 @@ export const RuleThresholdField = () => {
       <FieldLabel>
         {t('ai_review_rule_form_threshold_label', 'Threshold')}
       </FieldLabel>
-      <RuleSegmented
+      <SegmentedControl
         dataCy="ai-review-rule-form-threshold-presets"
         value={selected}
         disabled={values.never}

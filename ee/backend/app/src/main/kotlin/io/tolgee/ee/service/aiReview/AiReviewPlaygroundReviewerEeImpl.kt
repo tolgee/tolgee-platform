@@ -30,12 +30,13 @@ class AiReviewPlaygroundReviewerEeImpl(
     if (translation.text.isNullOrBlank()) return null
     val organizationId = projectService.getDto(projectId).organizationOwnerId
     val result =
-      aiReviewPromptService.runReview(
+      aiReviewPromptService.reviewWithPrompt(
         organizationId = organizationId,
         projectId = projectId,
         translation = translation,
         prompt = prompt,
         priority = LlmProviderPriority.LOW,
+        savedPrompt = null,
       )
     return PlaygroundReviewResult(score = result.score, issues = result.issues)
   }

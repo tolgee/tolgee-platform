@@ -3,14 +3,26 @@ import {
   getProjectByNameFromTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { confirmStandard, gcy, gcyAdvanced } from '../../common/shared';
+import {
+  confirmStandard,
+  gcy,
+  gcyAdvanced,
+  visitProjectSettingsAdvanced,
+} from '../../common/shared';
 import { editCell } from '../../common/translations';
-import { visitAiReviewRules } from '../../common/aiReview';
-import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
+import { E2AiReviewRulesView } from '../../compounds/aiReview/E2AiReviewRulesView';
+import { E2AiReviewRunDialog } from '../../compounds/aiReview/E2AiReviewRunDialog';
+import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
+
+const AUTOMATIC_REVIEW_TIMEOUT = 30_000;
 
 describe('AI reviewer in activity', () => {
   let projectId: number;
+  const rulesView = new E2AiReviewRulesView();
+  const runDialog = new E2AiReviewRunDialog();
+  const activity = new E2ActivityChecker();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -27,26 +39,18 @@ describe('AI reviewer in activity', () => {
     aiReviewTestData.clean();
   });
 
-  function visitDashboard() {
-    cy.visit(`${HOST}/projects/${projectId}`);
-    cy.gcy('project-dashboard-activity-list').should('be.visible');
-  }
-
   it('project activity shows rule and settings changes', () => {
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
 
-    gcy('ai-review-add-rule-button').click();
+    const createDialog = rulesView.openCreateDialog();
     gcy('ai-review-rule-form-name').type('Activity rule');
-    gcy('ai-review-rule-form-save').click();
-    gcy('ai-review-run-cancel').click();
+    createDialog.save();
+    runDialog.cancel();
 
-    gcyAdvanced({
-      value: 'ai-review-rule-edit',
-      name: 'Legal dry run',
-    }).click();
+    const editDialog = rulesView.openEditDialog('Legal dry run');
     gcy('ai-review-rule-form-name').type(' 2');
-    gcy('ai-review-rule-form-save').click();
-    gcy('ai-review-run-cancel').click();
+    editDialog.save();
+    runDialog.cancel();
 
     gcyAdvanced({
       value: 'ai-review-rule-menu',
@@ -56,7 +60,7 @@ describe('AI reviewer in activity', () => {
     confirmStandard();
     waitForGlobalLoading();
 
-    cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
+    visitProjectSettingsAdvanced(projectId);
     gcyAdvanced({
       value: 'source-change-select',
       field: 'humanEdited',
@@ -67,7 +71,7 @@ describe('AI reviewer in activity', () => {
     }).click();
     waitForGlobalLoading();
 
-    visitDashboard();
+    activity.visitDashboard(projectId);
     // activity-compact uses display: contents, so it has no own box to be "visible".
     gcyAdvanced({
       value: 'activity-compact',
@@ -88,15 +92,16 @@ describe('AI reviewer in activity', () => {
   });
 
   it('an automatic review shows the AI reviewer without an author', () => {
-    cy.visit(
-      `${HOST}/projects/${projectId}/translations?languages=en&languages=de&search=key_not_reviewed`
-    );
+    new E2TranslationsView().visit(projectId, {
+      languages: ['en', 'de'],
+      search: 'key_not_reviewed',
+    });
     editCell('Noch nicht geprüft', 'Neuer Text');
     gcyAdvanced(
       { value: 'ai-review-badge', status: 'APPROVED' },
-      { timeout: 30_000 }
+      { timeout: AUTOMATIC_REVIEW_TIMEOUT }
     ).should('be.visible');
-    visitDashboard();
+    activity.visitDashboard(projectId);
     const startedBy: DataCy.Value = 'activity-started-by';
     gcyAdvanced({ value: 'activity-compact', type: 'AI_REVIEW' })
       .not(`:has([data-cy=${startedBy}])`)
@@ -106,7 +111,7 @@ describe('AI reviewer in activity', () => {
 
   // Asserts on seeded data: a live run finalizes its activity asynchronously, so it would race.
   it('a run shows the AI reviewer and who started it', () => {
-    visitDashboard();
+    activity.visitDashboard(projectId);
     cy.gcy('activity-started-by', { timeout: 30_000 }).should('be.visible');
     cy.gcy('activity-started-by')
       .first()
@@ -116,14 +121,14 @@ describe('AI reviewer in activity', () => {
   });
 
   it('translation history shows the AI reviewer', () => {
-    cy.visit(
-      `${HOST}/projects/${projectId}/translations?languages=en&languages=de&search=key_not_reviewed`
-    );
+    new E2TranslationsView().visit(projectId, {
+      languages: ['en', 'de'],
+      search: 'key_not_reviewed',
+    });
     editCell('Noch nicht geprüft', 'Neuer Text');
-    // The badge arrives over the websocket once the automatic review is done.
     gcyAdvanced(
       { value: 'ai-review-badge', status: 'APPROVED' },
-      { timeout: 30_000 }
+      { timeout: AUTOMATIC_REVIEW_TIMEOUT }
     ).should('be.visible');
     gcyAdvanced({
       value: 'translations-table-cell',

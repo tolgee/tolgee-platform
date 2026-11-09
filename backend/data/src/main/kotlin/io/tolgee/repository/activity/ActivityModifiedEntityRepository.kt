@@ -25,6 +25,7 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     left join UserAccount u on ar.authorId = u.id
     where ame.entityClass = 'Translation' and ame.entityId = :translationId
     and ar.type not in :ignoredActivityTypes
+    and (u.id is not null or ar.systemActor is not null)
   """,
   )
   fun getTranslationHistory(

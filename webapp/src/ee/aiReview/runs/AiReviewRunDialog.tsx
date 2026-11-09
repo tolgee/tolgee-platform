@@ -23,6 +23,10 @@ type SkipReason =
 
 export type AiReviewRunVariant = 'review' | 'score' | 'retry';
 
+export const runVariantForMode = (
+  mode: components['schemas']['AiReviewRuleModel']['mode']
+): AiReviewRunVariant => (mode === 'DRY_RUN' ? 'score' : 'review');
+
 type Props = {
   variant: AiReviewRunVariant;
   request: Partial<AiReviewRunRequest>;

@@ -6,13 +6,13 @@ const StyledGroup = styled('div')`
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
   overflow: hidden;
 `;
 
 const StyledSegment = styled('button')`
   display: grid;
-  gap: 2px;
+  gap: ${({ theme }) => theme.spacing(0.25)};
   justify-items: center;
   padding: ${({ theme }) => theme.spacing(1.25, 1)};
   background: transparent;
@@ -45,16 +45,16 @@ const StyledSegment = styled('button')`
   }
 
   & .title {
-    font-weight: 600;
+    font-weight: ${({ theme }) => theme.typography.fontWeightMedium};
   }
 
   & .subtitle {
-    font-size: 13px;
+    font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
     color: ${({ theme }) => theme.palette.text.secondary};
   }
 `;
 
-export type RuleSegmentedOption<V extends string> = {
+export type SegmentedControlOption<V extends string> = {
   value: V;
   title: string;
   subtitle?: string;
@@ -62,14 +62,14 @@ export type RuleSegmentedOption<V extends string> = {
 };
 
 type Props<V extends string> = {
-  options: RuleSegmentedOption<V>[];
+  options: SegmentedControlOption<V>[];
   value: V;
   disabled?: boolean;
   dataCy: string;
   onChange: (value: V) => void;
 };
 
-export function RuleSegmented<V extends string>({
+export function SegmentedControl<V extends string>({
   options,
   value,
   disabled,

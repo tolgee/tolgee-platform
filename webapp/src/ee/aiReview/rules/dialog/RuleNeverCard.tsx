@@ -10,7 +10,7 @@ const StyledCard = styled('div')`
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
   border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
   padding: ${({ theme }) => theme.spacing(1.5, 2)};
 `;
 

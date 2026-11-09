@@ -4,12 +4,13 @@ import {
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import { visitAiReviewRules } from '../../common/aiReview';
 import { waitForGlobalLoading } from '../../common/loading';
+import { E2AiReviewRulesView } from '../../compounds/aiReview/E2AiReviewRulesView';
 
 describe('AI review rule dialog', () => {
   let projectId: number;
   let branchingProjectId: number;
+  const rulesView = new E2AiReviewRulesView();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -31,61 +32,40 @@ describe('AI review rule dialog', () => {
   });
 
   function openCreateDialog(id: number) {
-    visitAiReviewRules(id);
-    gcy('ai-review-add-rule-button').click();
-    gcy('ai-review-rule-dialog').should('be.visible');
-  }
-
-  function pickThresholdPreset(option: string) {
-    gcyAdvanced({ value: 'ai-review-rule-form-threshold-preset', option })
-      .scrollIntoView()
-      .click();
-  }
-
-  // Synthetic key events don't move a native range input, so set its value directly.
-  function setSlider(value: number) {
-    gcy('ai-review-rule-form-threshold-slider')
-      .find('input')
-      .then(($input) => {
-        const input = $input[0] as HTMLInputElement;
-        const setter = Object.getOwnPropertyDescriptor(
-          Object.getPrototypeOf(input),
-          'value'
-        )?.set;
-        setter?.call(input, String(value));
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      });
+    rulesView.visit(id);
+    return rulesView.openCreateDialog();
   }
 
   it('creates a rule with tags, without tags, languages, branches and a custom threshold', () => {
-    openCreateDialog(branchingProjectId);
+    const dialog = openCreateDialog(branchingProjectId);
     gcy('ai-review-rule-form-name').type('Branch rule');
 
     gcy('ai-review-rule-form-keys-filter-toggle').click();
     gcy('ai-review-rule-form-tag-in').type('ui{enter}');
     gcy('ai-review-rule-form-tag-in').click();
-    cy.get('[role="option"]').contains('Without tags').click();
+    dialog.getScopeOption('').click();
     gcy('ai-review-rule-form-name').click();
     gcy('ai-review-rule-form-tag-not-in').type('legal{enter}');
 
     gcy('ai-review-rule-form-languages')
       .findDcy('translations-language-select-form-control')
       .click();
-    gcy('translations-language-select-item').contains('German').click();
+    gcyAdvanced({
+      value: 'translations-language-select-item',
+      tag: 'de',
+    }).click();
     cy.get('body').type('{esc}');
 
     gcy('ai-review-rule-form-branch-in').type('release{enter}');
     gcy('ai-review-rule-form-branch-not-in').type('feature/*{enter}');
 
-    pickThresholdPreset('custom');
-    setSlider(90);
+    dialog.pickThresholdPreset('custom').setThresholdSlider(90);
     gcyAdvanced({
       value: 'ai-review-rule-form-threshold-preset',
       option: 'custom',
     }).should('contain', '90+');
 
-    gcy('ai-review-rule-form-save').click();
+    dialog.save();
     waitForGlobalLoading();
 
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'Branch rule' }).within(
@@ -122,7 +102,7 @@ describe('AI review rule dialog', () => {
       }
     );
 
-    gcyAdvanced({ value: 'ai-review-rule-edit', name: 'Branch rule' }).click();
+    rulesView.openEditDialog('Branch rule');
     gcyAdvanced({
       value: 'ai-review-rule-form-threshold-preset',
       option: 'custom',
@@ -132,23 +112,24 @@ describe('AI review rule dialog', () => {
   });
 
   it('selecting a branch removes it from the except options', () => {
-    openCreateDialog(branchingProjectId);
+    const dialog = openCreateDialog(branchingProjectId);
     gcy('ai-review-rule-form-keys-filter-toggle').click();
     gcy('ai-review-rule-form-branch-in').type('main{enter}');
     gcy('ai-review-rule-form-branch-not-in').click();
-    cy.get('[role="option"]').should('not.contain', 'main');
+    dialog.getScopeOption('release').should('be.visible');
+    dialog.getScopeOption('main').should('not.exist');
   });
 
   it('a threshold preset selects its value and Custom shows the slider', () => {
-    openCreateDialog(projectId);
+    const dialog = openCreateDialog(projectId);
     gcyAdvanced({
       value: 'ai-review-rule-form-threshold-preset',
       option: '85',
     }).should('have.attr', 'data-cy-selected', 'true');
     gcy('ai-review-rule-form-threshold-slider').should('not.exist');
-    pickThresholdPreset('95');
+    dialog.pickThresholdPreset('95');
     gcy('ai-review-rule-form-threshold-hint').should('contain', '95');
-    pickThresholdPreset('custom');
+    dialog.pickThresholdPreset('custom');
     gcy('ai-review-rule-form-threshold-slider').should('be.visible');
     gcyAdvanced({
       value: 'ai-review-rule-form-threshold-preset',
@@ -234,9 +215,8 @@ describe('AI review rule dialog', () => {
   });
 
   it('edit keeps values', () => {
-    visitAiReviewRules(projectId);
-    gcyAdvanced({ value: 'ai-review-rule-edit', name: 'UI rule' }).click();
-    gcy('ai-review-rule-dialog').should('be.visible');
+    rulesView.visit(projectId);
+    const dialog = rulesView.openEditDialog('UI rule');
     gcy('ai-review-rule-form-name')
       .find('input')
       .should('have.value', 'UI rule');
@@ -244,7 +224,7 @@ describe('AI review rule dialog', () => {
       value: 'ai-review-rule-form-threshold-preset',
       option: '85',
     }).should('have.attr', 'data-cy-selected', 'true');
-    gcy('ai-review-rule-form-save').click();
+    dialog.save();
     waitForGlobalLoading();
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).should(
       'exist'

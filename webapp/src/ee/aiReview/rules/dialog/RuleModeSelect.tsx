@@ -4,7 +4,7 @@ import { useFormikContext } from 'formik';
 
 import { FieldLabel } from 'tg.component/FormField';
 import { RuleFormValues } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
-import { RuleSegmented } from 'tg.ee.module/aiReview/rules/dialog/RuleSegmented';
+import { SegmentedControl } from 'tg.component/common/SegmentedControl';
 
 export const RuleModeSelect = () => {
   const { t } = useTranslate();
@@ -13,7 +13,7 @@ export const RuleModeSelect = () => {
   return (
     <Box display="grid" gap={1}>
       <FieldLabel>{t('ai_review_rule_form_mode_label', 'Mode')}</FieldLabel>
-      <RuleSegmented
+      <SegmentedControl
         dataCy="ai-review-rule-form-mode"
         value={values.mode}
         onChange={(mode) => setFieldValue('mode', mode)}

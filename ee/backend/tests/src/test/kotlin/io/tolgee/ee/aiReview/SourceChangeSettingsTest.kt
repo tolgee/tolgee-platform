@@ -4,7 +4,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiReviewTestData
-import io.tolgee.ee.service.aiReview.SourceChangeSettingsService
+import io.tolgee.ee.service.aiReview.SourceChangeSettingsProviderEeImpl
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -34,7 +34,7 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
   private lateinit var sourceChangeSettingsProvider: SourceChangeSettingsProvider
 
   @Autowired
-  private lateinit var sourceChangeSettingsService: SourceChangeSettingsService
+  private lateinit var sourceChangeSettingsProviderEeImpl: SourceChangeSettingsProviderEeImpl
 
   lateinit var testData: AiReviewTestData
   lateinit var promptsEditor: UserAccount
@@ -171,7 +171,7 @@ class SourceChangeSettingsTest : AuthorizedControllerTest() {
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
     executeInNewTransaction(platformTransactionManager) {
-      sourceChangeSettingsService.update(
+      sourceChangeSettingsProviderEeImpl.update(
         testData.project.id,
         aiApproved = SourceChangeAction.MARK_OUTDATED,
         humanEdited = SourceChangeAction.RETRANSLATE,

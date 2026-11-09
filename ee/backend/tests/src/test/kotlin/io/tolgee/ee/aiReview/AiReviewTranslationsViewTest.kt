@@ -2,8 +2,10 @@ package io.tolgee.ee.aiReview
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.development.AiReviewTranslationsViewTestData
+import io.tolgee.ee.service.aiReview.AiReviewEligibility
 import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
+import io.tolgee.ee.service.aiReview.AiReviewRuleStatsService
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -30,37 +32,17 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @org.springframework.beans.factory.annotation.Autowired
   private lateinit var evaluator: AiReviewRuleEvaluator
 
-  lateinit var testData: AiReviewTestData
+  @org.springframework.beans.factory.annotation.Autowired
+  private lateinit var statsService: AiReviewRuleStatsService
+
+  lateinit var testData: AiReviewTranslationsViewTestData
 
   private val projectUrl get() = "/v2/projects/${testData.project.id}"
 
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW)
-    testData = AiReviewTestData()
-    row("k.approved", AiReviewStatus.APPROVED, 90)
-    row("k.below", AiReviewStatus.BELOW_THRESHOLD, 40)
-    row("k.drypass", AiReviewStatus.DRY_RUN_PASS, 90)
-    row("k.dryfail", AiReviewStatus.DRY_RUN_FAIL, 30)
-    row("k.failed", AiReviewStatus.FAILED, null)
-    row("k.pending", AiReviewStatus.PENDING, null)
-    row("k.skipped", AiReviewStatus.SKIPPED_QA_ISSUES, null)
-    row("k.confirmed", AiReviewStatus.CONFIRMED, 92)
-    row("k.rejected", AiReviewStatus.REJECTED, 91)
-    testData.addKeyWithTranslations("k.none")
-    testData.addKeyWithTranslations("k.untagged", tags = emptyList())
-    testData.addRule {
-      name = "Never legal"
-      never = true
-      tagIn = mutableListOf("legal")
-    }
-    testData.addKeyWithTranslations("k.never", tags = listOf("ui", "legal"))
-    testData
-      .addKeyWithTranslations("k.outdated")
-      .de.self.outdated = true
-    testData
-      .addKeyWithTranslations("k.reviewed")
-      .de.self.state = TranslationState.REVIEWED
+    testData = AiReviewTranslationsViewTestData()
   }
 
   @AfterEach
@@ -92,6 +74,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @Test
   fun `the summary reports lastFailed and dryRun`() {
     testData.addKeyWithTranslations("k.lastfailed").let {
+      it.de.self.state = TranslationState.REVIEWED
       testData.addReview(it.de, AiReviewStatus.APPROVED, 88) {
         lastFailureReason = AiReviewFailureReason.PROVIDER_ERROR
       }
@@ -141,6 +124,87 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `the BELOW_THRESHOLD filter lists Reviewed texts whatever auto is and the FAILED filter skips them`() {
+    listOf("k.humanTextBelow" to AiReviewStatus.BELOW_THRESHOLD, "k.reviewedFailed" to AiReviewStatus.FAILED)
+      .forEach { (name, status) ->
+        val key = testData.addKeyWithTranslations(name)
+        key.de.self.state = TranslationState.REVIEWED
+        testData.addReview(key.de, status, 40) { rule = testData.rule }
+      }
+    testData.addKeyWithTranslations("k.aiBelow").let {
+      it.de.self.state = TranslationState.REVIEWED
+      it.de.self.auto = true
+      testData.addReview(it.de, AiReviewStatus.BELOW_THRESHOLD, 40) { rule = testData.rule }
+    }
+    save()
+    keysFor("filterAiReviewStatus=BELOW_THRESHOLD")
+      .assert
+      .containsExactlyInAnyOrder("k.below", "k.humanTextBelow", "k.aiBelow")
+    keysFor("filterAiReviewStatus=FAILED").assert.containsExactly("k.failed")
+  }
+
+  @Test
+  fun `an APPROVED row on a Translated translation shows no badge, is not filtered and is not counted`() {
+    testData.addKeyWithTranslations("k.unreviewed").let {
+      testData.addReview(it.de, AiReviewStatus.APPROVED, 90) { rule = testData.rule }
+    }
+    save()
+    fetch("search=k.unreviewed").andIsOk.andAssertThatJson {
+      node("_embedded.keys[0].translations.de.aiReview").isNull()
+    }
+    keysFor("filterAiReviewStatus=REVIEWED_BY_AI").assert.containsExactly("k.approved")
+    statsService
+      .getCounts(testData.project.id)[testData.rule.id]!!
+      .autoReviewed.assert
+      .isEqualTo(0)
+  }
+
+  @Test
+  fun `the outcome filters and the cell summaries agree for every state`() {
+    val statuses = listOf(AiReviewStatus.APPROVED, AiReviewStatus.BELOW_THRESHOLD, AiReviewStatus.FAILED)
+    statuses.forEach { status ->
+      listOf(TranslationState.TRANSLATED, TranslationState.REVIEWED).forEach { state ->
+        listOf(true, false).forEach { auto ->
+          testData.addKeyWithTranslations("p.$status.$state.$auto").let {
+            it.de.self.state = state
+            it.de.self.auto = auto
+            testData.addReview(it.de, status, 50) { rule = testData.rule }
+          }
+        }
+      }
+    }
+    save()
+
+    val summaries = summaryStatusesOfKeys("search=p.")
+    mapOf(
+      "REVIEWED_BY_AI" to AiReviewStatus.APPROVED,
+      "BELOW_THRESHOLD" to AiReviewStatus.BELOW_THRESHOLD,
+      "FAILED" to AiReviewStatus.FAILED,
+    ).forEach { (outcome, status) ->
+      val filtered = keysFor("filterAiReviewStatus=$outcome").filter { it.startsWith("p.") }
+      val withBadge = summaries.filterValues { it == status.name }.keys
+      filtered.assert.containsExactlyInAnyOrderElementsOf(withBadge)
+    }
+  }
+
+  @Test
+  fun `a whitespace-only text is not reviewable in the filter, the backlog or the eligibility check`() {
+    val blank = testData.addKeyWithTranslations("k.blank", deText = "  \n ").de
+    save()
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de").assert.doesNotContain("k.blank")
+    val backlog = mutableListOf<Long>()
+    statsService.forEachBacklogItem(testData.project.id, testData.rule.id) { backlog += it }
+    backlog.assert.doesNotContain(blank.self.id)
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.get(blank.self.id)
+      AiReviewEligibility
+        .isEligible(translation, testData.englishTranslationBuilder.self.language.id, null)
+        .assert
+        .isFalse()
+    }
+  }
+
+  @Test
   fun `the outcome filters match only rows for the current text`() {
     testData.addKeyWithTranslations("k.stalehash").let {
       testData.addReview(it.de, AiReviewStatus.APPROVED, 90) {
@@ -149,7 +213,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     }
     save()
     keysFor("filterAiReviewStatus=REVIEWED_BY_AI").assert.containsExactly("k.approved")
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
       .assert
       .contains("k.stalehash")
   }
@@ -157,7 +221,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @Test
   fun `a filter aimed only at the base language returns no keys`() {
     save()
-    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewLanguage=en").assert.isEmpty()
+    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewInLang=en").assert.isEmpty()
   }
 
   @Test
@@ -166,7 +230,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     testData.project.useBranching = true
     testData.rule.branchIn = mutableListOf("main")
     save()
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
       .assert
       .contains("checkout.pay")
   }
@@ -174,7 +238,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @Test
   fun `NOT_REVIEWED_YET returns covered translations without a result`() {
     save()
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de").assert.containsExactlyInAnyOrder(
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de").assert.containsExactlyInAnyOrder(
       "checkout.pay",
       "k.none",
       "k.pending",
@@ -203,10 +267,10 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
       .keyBuilder.self.branch = notMatching
     save()
 
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de&branch=fix_1")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de&branch=fix_1")
       .assert
       .contains("k.onbranch")
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de&branch=fixX1")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de&branch=fixX1")
       .assert
       .doesNotContain("k.offbranch")
   }
@@ -214,13 +278,14 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @Test
   fun `two outcomes combine with OR and the language filter limits the search`() {
     testData.addKeyWithTranslations("k.fr-only").let {
+      it.fr.self.state = TranslationState.REVIEWED
       testData.addReview(it.fr, AiReviewStatus.APPROVED, 91)
     }
     save()
     keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewStatus=FAILED")
       .assert
       .containsExactlyInAnyOrder("k.approved", "k.failed", "k.fr-only")
-    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewLanguage=de")
+    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewInLang=de")
       .assert
       .containsExactly("k.approved")
   }
@@ -243,7 +308,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     }
     save()
 
-    val keys = keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+    val keys = keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
     keys.assert.contains("checkout.pay")
     keys.assert.doesNotContain("k.taggedout")
     keys.assert.contains("k.untagged")
@@ -258,7 +323,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     testData.addKeyWithTranslations("k.outns").keyBuilder.setNamespace("internal")
     save()
 
-    val keys = keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+    val keys = keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
     keys.assert.contains("k.inns")
     keys.assert.contains("checkout.pay")
     keys.assert.doesNotContain("k.outns")
@@ -284,10 +349,10 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
       .keyBuilder.self.branch = excluded
     save()
 
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de&branch=main")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de&branch=main")
       .assert
       .contains("k.onmain")
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de&branch=fix_1")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de&branch=fix_1")
       .assert
       .doesNotContain("k.onfix")
   }
@@ -303,10 +368,10 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
       }.addOverride(testData.french, never = true)
     save()
 
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
       .assert
       .contains("checkout.pay")
-    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=fr")
+    keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=fr")
       .assert
       .isEmpty()
   }
@@ -314,7 +379,7 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   @Test
   fun `the count query agrees with the page content for NOT_REVIEWED_YET`() {
     save()
-    val query = "filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de"
+    val query = "filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de"
     val keys = keysFor(query)
     totalFor(query).assert.isEqualTo(keys.size.toLong())
   }
@@ -358,22 +423,10 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     expected.assert.isNotEmpty()
 
     val sqlKeys =
-      keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewLanguage=de")
+      keysFor("filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de")
         .filter { it.startsWith("parity.") }
         .toSet()
     sqlKeys.assert.isEqualTo(expected)
-  }
-
-  private fun row(
-    keyName: String,
-    status: AiReviewStatus,
-    score: Int?,
-  ) {
-    val key = testData.addKeyWithTranslations(keyName)
-    testData.addReview(key.de, status, score) {
-      rule = testData.rule
-      if (status == AiReviewStatus.FAILED) failureReason = AiReviewFailureReason.PROVIDER_ERROR
-    }
   }
 
   private fun fetch(query: String): ResultActions =
@@ -390,6 +443,25 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
       .path("page")
       .path("totalElements")
       .asLong()
+  }
+
+  private fun summaryStatusesOfKeys(query: String): Map<String, String?> {
+    val response =
+      fetch(query)
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
+    val keys = jacksonObjectMapper().readTree(response).path("_embedded").path("keys")
+    return (0 until keys.size()).associate {
+      val key = keys.get(it)
+      val status =
+        key
+          .path("translations")
+          .path("de")
+          .path("aiReview")
+          .path("status")
+      key.path("keyName").asString() to status.takeIf { node -> node.isString }?.asString()
+    }
   }
 
   private fun keysFor(query: String): List<String> {

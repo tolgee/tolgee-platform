@@ -5,7 +5,10 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiReviewTestData
-import io.tolgee.ee.service.aiReview.AiReviewDemotionServiceImpl
+import io.tolgee.ee.service.aiReview.AiReviewDemotionServiceEeImpl
+import io.tolgee.ee.service.aiReview.AiReviewEligibility
+import io.tolgee.ee.service.aiReview.AiReviewUpdate
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.aiReview.AiReviewRule
@@ -20,12 +23,18 @@ import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.websocket.WebsocketEvent
+import io.tolgee.websocket.WebsocketEventPublisher
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,7 +46,11 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
 
   @Autowired
-  private lateinit var demotionService: AiReviewDemotionServiceImpl
+  private lateinit var demotionService: AiReviewDemotionServiceEeImpl
+
+  @Autowired
+  @MockitoBean
+  private lateinit var websocketEventPublisher: WebsocketEventPublisher
 
   lateinit var testData: AiReviewTestData
 
@@ -110,7 +123,7 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a narrowed scope with another Active rule keeps the approval and updates the rule`() {
+  fun `a narrowed scope with another Active rule keeps the approval and its rule`() {
     val other =
       testData
         .addRule {
@@ -122,16 +135,58 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
     save()
     updateRule(threshold = 85, tagIn = listOf("other"))
 
-    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
-      val row = review(testData.deTranslation.id)!!
-      row.rule!!
-        .id.assert
-        .isEqualTo(other.id)
-      row.threshold.assert.isEqualTo(80)
-    }
+    waitForDemotionJobs()
     val row = review(testData.deTranslation.id)!!
     row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    row.rule!!
+      .id.assert
+      .isEqualTo(testData.rule.id)
+    row.threshold.assert.isEqualTo(85)
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+  }
+
+  @Test
+  fun `an Active rule raised next to a stricter Dry run rule demotes`() {
+    testData.addRule {
+      name = "Stricter dry run"
+      mode = AiReviewRuleMode.DRY_RUN
+      threshold = 95
+      tagIn = mutableListOf("ui")
+    }
+    save()
+    updateRule(threshold = 90)
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val row = review(testData.deTranslation.id)!!
+      row.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
+      row.threshold.assert.isEqualTo(90)
+    }
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+  }
+
+  @Test
+  fun `demotion publishes the changed and the deleted rows`() {
+    val neverKey = testData.addKeyWithTranslations("legal", tags = listOf("ui", "legal"))
+    approve(neverKey.de)
+    testData.addRule {
+      name = "Legal never"
+      never = true
+      tagIn = mutableListOf("legal")
+    }
+    save()
+    setRuleThresholdDirectly(90)
+    demoteDirectly(testData.key.id, neverKey.key.id)
+
+    val destination = argumentCaptor<String>()
+    val event = argumentCaptor<WebsocketEvent>()
+    verify(websocketEventPublisher, atLeastOnce()).invoke(destination.capture(), event.capture())
+    val index = destination.allValues.indexOf("/projects/${testData.project.id}/ai-review-updated")
+    index.assert.isGreaterThanOrEqualTo(0)
+    @Suppress("UNCHECKED_CAST")
+    val updates = (event.allValues[index].data as List<AiReviewUpdate>).associateBy { it.translationId }
+    updates.keys.assert.containsExactlyInAnyOrder(testData.deTranslation.id, neverKey.de.self.id)
+    updates[testData.deTranslation.id]!!.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
+    updates[neverKey.de.self.id]!!.status.assert.isNull()
   }
 
   @Test
@@ -288,6 +343,43 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `approvals of a deleted rule stay when another rule is edited later`() {
+    val other = addOtherRule()
+    save()
+    performAuthDelete(ruleUrl).andIsOk
+
+    editOtherRule(other)
+
+    waitForDemotionJobs()
+    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+  }
+
+  @Test
+  fun `approvals of a disabled rule stay when another rule is edited later`() {
+    val other = addOtherRule()
+    save()
+    performAuthPut("$ruleUrl/enabled", mapOf("enabled" to false)).andIsOk
+
+    editOtherRule(other)
+
+    waitForDemotionJobs()
+    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+  }
+
+  @Test
+  fun `a rename starts no demotion job`() {
+    save()
+    performAuthPut(
+      ruleUrl,
+      mapOf("name" to "UI renamed", "mode" to "ACTIVE", "threshold" to 85, "tagIn" to listOf("ui")),
+    ).andIsOk
+
+    demotionJobCount().assert.isZero()
+  }
+
+  @Test
   fun `demotion is logged with the system actor AI_REVIEWER`() {
     save()
     updateRule(threshold = 90)
@@ -326,6 +418,28 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `under Protect reviewed a demoted approval of human-written text stays AI-managed and shows its badge`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    testData.deTranslation.auto = false
+    save()
+    setRuleThresholdDirectly(90)
+    demoteDirectly(testData.key.id)
+
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.get(testData.deTranslation.id)
+      val row = translationAiReviewRepository.findByTranslationId(translation.id)!!
+      row.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
+      translation.state.assert.isEqualTo(TranslationState.REVIEWED)
+      AiReviewEligibility.isAiManagedReview(translation, row).assert.isTrue()
+    }
+    performAuthGet("$projectUrl/translations?languages=de&filterKeyName=${testData.key.name}")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].translations.de.aiReview.status").isEqualTo("BELOW_THRESHOLD")
+      }
+  }
+
+  @Test
   fun `under Protect reviewed no rule changes nothing`() {
     testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
     save()
@@ -337,6 +451,22 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
 
     review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+  }
+
+  private fun addOtherRule(): AiReviewRule =
+    testData
+      .addRule {
+        name = "Other"
+        mode = AiReviewRuleMode.ACTIVE
+        threshold = 80
+        tagIn = mutableListOf("other")
+      }.self
+
+  private fun editOtherRule(other: AiReviewRule) {
+    performAuthPut(
+      "$projectUrl/ai-review-rules/${other.id}",
+      mapOf("name" to "Other", "mode" to "ACTIVE", "threshold" to 90, "tagIn" to listOf("other")),
+    ).andIsOk
   }
 
   private fun approve(builder: TranslationBuilder) {
@@ -388,9 +518,9 @@ class AiReviewDemotionTest : AuthorizedControllerTest() {
     }
   }
 
-  private fun demoteDirectly(keyId: Long) {
+  private fun demoteDirectly(vararg keyIds: Long) {
     executeInNewTransaction(platformTransactionManager) {
-      demotionService.demoteKeys(testData.project.id, listOf(keyId))
+      demotionService.demoteKeys(testData.project.id, keyIds.toList())
     }
   }
 

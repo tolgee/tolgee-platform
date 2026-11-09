@@ -2,16 +2,21 @@ package io.tolgee.ee.aiReview
 
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.batch.request.AiReviewRequest
+import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.component.aiReview.AiReviewActivityListener
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.service.aiReview.AiReviewActionService
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.Prompt
+import io.tolgee.model.UserAccount
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJobStatus
@@ -31,6 +36,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -38,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.util.Date
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -54,11 +63,19 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
 
   @Autowired
+  private lateinit var aiReviewActionService: AiReviewActionService
+
+  @Autowired
   @MockitoBean
   private lateinit var openaiApiService: OpenaiApiService
 
+  @Autowired
+  @MockitoSpyBean
+  private lateinit var aiReviewActivityListener: AiReviewActivityListener
+
   lateinit var testData: AiReviewTestData
   lateinit var strictRule: AiReviewRule
+  lateinit var pendingRow: TranslationAiReview
 
   @BeforeEach
   fun setup() {
@@ -86,11 +103,12 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
           enabled = false
           tagIn = mutableListOf("ui")
         }.self
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    pendingRow = testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING).self
   }
 
   @AfterEach
   fun cleanup() {
+    reset(aiReviewActivityListener)
     testDataService.cleanTestData(testData.root)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
@@ -189,16 +207,119 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a human review during the call drops the result and keeps the human review`() {
+    testData.rule.threshold = 95
+    testData.deTranslation.auto = true
+    save()
+    stubWithMidFlightChange {
+      val translation = entityManager.find(Translation::class.java, testData.deTranslation.id)
+      translation.state = TranslationState.REVIEWED
+    }
+
+    runJob(testData.deTranslation.id)
+
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+    review(testData.deTranslation.id).assert.isNull()
+    verify(openaiApiService, times(1)).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `a human reject during a re-review of an approval keeps the rejection`() {
+    approvalQueuedForReReview()
+    save()
+    stubWithMidFlightChange {
+      val translation = entityManager.find(Translation::class.java, testData.deTranslation.id)
+      aiReviewActionService.reject(translation, testData.user.id)
+    }
+
+    runJob(testData.deTranslation.id)
+
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.REJECTED)
+    row.batchJobId.assert.isNull()
+    rule().autoReviewedCount.assert.isEqualTo(0)
+    rule().rejectedCount.assert.isEqualTo(1)
+    verify(openaiApiService, times(1)).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an un-review during a re-review of an approval drops the result`() {
+    approvalQueuedForReReview()
+    save()
+    stubWithMidFlightChange {
+      val translation = entityManager.find(Translation::class.java, testData.deTranslation.id)
+      translation.state = TranslationState.TRANSLATED
+    }
+
+    runJob(testData.deTranslation.id)
+
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+    val row = review(testData.deTranslation.id)!!
+    row.batchJobId.assert.isNull()
+    row.reReviewRequested.assert.isFalse()
+    row.reviewedAt.assert.isNull()
+    rule().autoReviewedCount.assert.isEqualTo(0)
+    verify(openaiApiService, times(1)).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an un-review during a re-review of a FAILED marker deletes the marker`() {
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    pendingRow.status = AiReviewStatus.FAILED
+    pendingRow.reReviewRequested = true
+    save()
+    stubWithMidFlightChange {
+      val translation = entityManager.find(Translation::class.java, testData.deTranslation.id)
+      translation.state = TranslationState.TRANSLATED
+    }
+
+    runJob(testData.deTranslation.id)
+
+    review(testData.deTranslation.id).assert.isNull()
+    verify(openaiApiService, times(1)).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an AI claim after a bulk review chunk commits keeps the human review`() {
+    testData.rule.threshold = 95
+    testData.deTranslation.auto = true
+    save()
+    doNothing().whenever(aiReviewActivityListener).onBatchJobFinalized(any<OnBatchJobFinalized>())
+    stubWithMidFlightChange {}
+
+    bulkSetGermanState(TranslationState.REVIEWED)
+    runJob(testData.deTranslation.id)
+
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+    review(testData.deTranslation.id).assert.isNull()
+    verify(openaiApiService, never()).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an AI claim after a bulk un-review chunk commits keeps the rejection`() {
+    approvalQueuedForReReview()
+    save()
+    doNothing().whenever(aiReviewActivityListener).onBatchJobFinalized(any<OnBatchJobFinalized>())
+    stubWithMidFlightChange {}
+
+    bulkSetGermanState(TranslationState.TRANSLATED)
+    runJob(testData.deTranslation.id)
+
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.REJECTED)
+    rule().rejectedCount.assert.isEqualTo(1)
+    verify(openaiApiService, never()).translate(any(), any(), any())
+  }
+
+  @Test
   fun `a stale-hash claim clears the previous failure fields`() {
+    pendingRow.textHash = "stale-hash"
+    pendingRow.lastFailureReason = AiReviewFailureReason.PARSE_ERROR
+    pendingRow.lastFailedAt = Date()
     save()
     llmProperties.providers = mutableListOf()
-    executeInNewTransaction(platformTransactionManager) {
-      val row = translationAiReviewRepository.findByTranslationId(testData.deTranslation.id)!!
-      row.textHash = "stale-hash"
-      row.lastFailureReason = AiReviewFailureReason.PARSE_ERROR
-      row.lastFailedAt = Date()
-      translationAiReviewRepository.save(row)
-    }
 
     runJob(testData.deTranslation.id)
 
@@ -227,6 +348,21 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
     verify(openaiApiService, times(1)).translate(any(), any(), any())
   }
 
+  private fun approvalQueuedForReReview() {
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    pendingRow.status = AiReviewStatus.APPROVED
+    pendingRow.score = 90
+    pendingRow.rule = testData.rule
+    pendingRow.threshold = 85
+    pendingRow.reReviewRequested = true
+  }
+
+  private fun rule(): AiReviewRule =
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager.find(AiReviewRule::class.java, testData.rule.id)
+    }
+
   private fun stubWithMidFlightChange(change: () -> Unit) {
     val changed = AtomicBoolean(false)
     whenever(openaiApiService.translate(any(), any(), any())).thenAnswer {
@@ -249,6 +385,30 @@ class AiReviewMidFlightChangeTest : AuthorizedControllerTest() {
           author = null,
           type = BatchJobType.AI_REVIEW,
           isHidden = true,
+        )
+      }
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      batchJobService
+        .getJobDtoNoCache(job.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+    }
+  }
+
+  private fun bulkSetGermanState(state: TranslationState) {
+    val job =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService.startJob(
+          request =
+            SetTranslationsStateStateRequest().apply {
+              keyIds = listOf(testData.key.id)
+              languageIds = listOf(testData.german.id)
+              this.state = state
+            },
+          project = entityManager.getReference(Project::class.java, testData.project.id),
+          author = entityManager.getReference(UserAccount::class.java, testData.user.id),
+          type = BatchJobType.SET_TRANSLATIONS_STATE,
+          isHidden = false,
         )
       }
     waitForNotThrowing(pollTime = 100, timeout = 30_000) {

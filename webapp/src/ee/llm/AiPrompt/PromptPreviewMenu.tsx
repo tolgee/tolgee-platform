@@ -17,6 +17,7 @@ import { useTranslationsSelector } from 'tg.views/projects/translations/context/
 
 import { PreviewBatchDialog } from './PreviewBatchDialog';
 import { BasicPromptOption } from './TabBasic';
+import { PromptType } from './PromptTypeToggle';
 import { PreviewDatasetDialog } from './PreviewDatasetDialog';
 
 const StyledArrowButton = styled(Button)`
@@ -31,7 +32,7 @@ type Props = {
   templateValue: string | undefined;
   options: BasicPromptOption[] | undefined;
   providerName: string;
-  promptType: 'TRANSLATE' | 'REVIEW';
+  promptType: PromptType;
   reviewCriteria?: string;
   onBatchFinished: () => void;
   onTestPrompt: () => void;

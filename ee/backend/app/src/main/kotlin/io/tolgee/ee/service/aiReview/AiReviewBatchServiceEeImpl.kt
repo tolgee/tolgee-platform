@@ -16,6 +16,7 @@ import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.AiReviewIssue
+import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.enums.LlmProviderPriority
@@ -27,6 +28,7 @@ import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.PromptRepository
+import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.service.aiReview.AiReviewBatchService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -39,10 +41,11 @@ import org.springframework.transaction.PlatformTransactionManager
 
 @Primary
 @Service
-class AiReviewBatchServiceImpl(
+class AiReviewBatchServiceEeImpl(
   private val evaluator: AiReviewRuleEvaluator,
   private val aiReviewPromptService: AiReviewPromptService,
   private val reviewRepository: TranslationAiReviewRepository,
+  private val ruleRepository: AiReviewRuleRepository,
   private val promptRepository: PromptRepository,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val qaGate: AiReviewQaGate,
@@ -61,9 +64,13 @@ class AiReviewBatchServiceImpl(
     val ruleId: Long,
     val ruleMode: AiReviewRuleMode,
     val promptId: Long?,
+    val promptName: String,
     val promptRevision: Int?,
     val aiManaged: Boolean,
+    val requeuedHumanDecision: Boolean,
   )
+
+  private enum class QaGateResult { PASS, WAIT_FOR_FRESH_QA, OPEN_ISSUES }
 
   private sealed interface LlmOutcome {
     data class Success(
@@ -86,7 +93,7 @@ class AiReviewBatchServiceImpl(
     val chunkExecutionId = activityHolder.activityRevision.batchJobChunkExecution?.id
     val assignment = claimOrSettle(job, translationId) ?: return
     val outcome = callLlm(assignment)
-    save(job, assignment, outcome, chunkExecutionId)
+    saveIfStillCurrent(job, assignment, outcome, chunkExecutionId)
   }
 
   private fun claimOrSettle(
@@ -100,8 +107,7 @@ class AiReviewBatchServiceImpl(
       if (!AiReviewEligibility.isQueued(row)) return@executeInNewTransaction null
       val textHash = AiReviewEligibility.currentTextHash(translation)
       if (row.textHash != textHash) {
-        // A missed text-change event leaves the hash stale and the row queued forever, so the
-        // claim re-points the row at the current text and reviews that.
+        // A missed text-change event leaves the hash stale and the row queued forever.
         refreshForCurrentText(row, textHash)
         entityManager.flush()
       }
@@ -115,8 +121,23 @@ class AiReviewBatchServiceImpl(
       val decision =
         decideOrSettle(translation, row, aiManaged, project.baseLanguage?.id)
           ?: return@executeInNewTransaction null
-      if (skippedForQa(translation, row, project, decision)) return@executeInNewTransaction null
-      claim(job, translation, project, decision, textHash, aiManaged)
+      when (qaGateFor(translation, project, decision)) {
+        QaGateResult.PASS -> Unit
+        QaGateResult.WAIT_FOR_FRESH_QA -> return@executeInNewTransaction null
+        QaGateResult.OPEN_ISSUES -> {
+          markSkippedForQaIssues(row)
+          return@executeInNewTransaction null
+        }
+      }
+      claim(
+        job,
+        translation,
+        project,
+        decision,
+        textHash,
+        aiManaged,
+        requeuedHumanDecision = AiReviewEligibility.isRequeuedHumanDecision(row),
+      )
     }
 
   private fun decideOrSettle(
@@ -125,11 +146,8 @@ class AiReviewBatchServiceImpl(
     aiManaged: Boolean,
     baseLanguageId: Long?,
   ): RuleDecision.Review? {
-    if (!AiReviewEligibility.isEligible(translation, baseLanguageId, row)) {
-      deleteUnlessResolved(row)
-      return null
-    }
-    val decision = evaluator.evaluate(translation, activeOnly = aiManaged)
+    if (AiReviewEligibility.isTrashed(translation)) return null
+    val decision = decisionIfEligible(translation, row, aiManaged, baseLanguageId)
     if (decision is RuleDecision.Review) return decision
     if (aiManaged) {
       leaveQueueAiManaged(row)
@@ -137,6 +155,16 @@ class AiReviewBatchServiceImpl(
     }
     deleteUnlessResolved(row)
     return null
+  }
+
+  private fun decisionIfEligible(
+    translation: Translation,
+    row: TranslationAiReview,
+    aiManaged: Boolean,
+    baseLanguageId: Long?,
+  ): RuleDecision? {
+    if (!AiReviewEligibility.isEligible(translation, baseLanguageId, row)) return null
+    return evaluator.evaluate(translation, activeOnly = aiManaged)
   }
 
   /**
@@ -148,19 +176,21 @@ class AiReviewBatchServiceImpl(
     if (row.status == AiReviewStatus.PENDING) row.status = AiReviewStatus.FAILED
   }
 
-  private fun skippedForQa(
+  private fun qaGateFor(
     translation: Translation,
-    row: TranslationAiReview,
     project: Project,
     decision: RuleDecision.Review,
-  ): Boolean {
-    if (!qaGate.isQaOnForLanguage(project, translation.language.id)) return false
-    if (translation.qaChecksStale) return true
-    if (!decision.rule.skipOpenQaIssues) return false
-    if (!qaGate.hasOpenQaIssues(translation.id)) return false
+  ): QaGateResult {
+    if (!qaGate.isQaOnForLanguage(project, translation.language.id)) return QaGateResult.PASS
+    if (translation.qaChecksStale) return QaGateResult.WAIT_FOR_FRESH_QA
+    if (!decision.rule.skipOpenQaIssues) return QaGateResult.PASS
+    if (!qaGate.hasOpenQaIssues(translation.id)) return QaGateResult.PASS
+    return QaGateResult.OPEN_ISSUES
+  }
+
+  private fun markSkippedForQaIssues(row: TranslationAiReview) {
     row.status = AiReviewStatus.SKIPPED_QA_ISSUES
     row.reReviewRequested = false
-    return true
   }
 
   private fun claim(
@@ -170,20 +200,10 @@ class AiReviewBatchServiceImpl(
     decision: RuleDecision.Review,
     textHash: String,
     aiManaged: Boolean,
+    requeuedHumanDecision: Boolean,
   ): Assignment? {
     val prompt = decision.rule.promptId?.let { promptRepository.findById(it).orElse(null) }
-    val assigned =
-      reviewRepository.claimForJob(
-        jobId = job.id,
-        translationId = translation.id,
-        textHash = textHash,
-        ruleId = decision.rule.id,
-        ruleMode = decision.rule.mode.name,
-        promptId = prompt?.id,
-        promptName = prompt?.name ?: DefaultReviewPromptHelper.NAME,
-        promptRevision = prompt?.revision,
-        threshold = decision.threshold,
-      )
+    val assigned = reviewRepository.claimForJob(jobId = job.id, translationId = translation.id, textHash = textHash)
     if (assigned == 0) return null
 
     return Assignment(
@@ -195,8 +215,10 @@ class AiReviewBatchServiceImpl(
       ruleId = decision.rule.id,
       ruleMode = decision.rule.mode,
       promptId = prompt?.id,
+      promptName = prompt?.name ?: DefaultReviewPromptHelper.NAME,
       promptRevision = prompt?.revision,
       aiManaged = aiManaged,
+      requeuedHumanDecision = requeuedHumanDecision,
     )
   }
 
@@ -212,6 +234,7 @@ class AiReviewBatchServiceImpl(
         )
       return LlmOutcome.Success(result.issues, result.score, result.providerName, result.model)
     } catch (e: LlmRateLimitedException) {
+      // Must stay before its parent FailedDependencyException: AiReviewChunkProcessor retries after retryAt.
       throw e
     } catch (e: OutOfCreditsException) {
       return LlmOutcome.Failure(AiReviewFailureReason.OUT_OF_CREDITS)
@@ -229,11 +252,11 @@ class AiReviewBatchServiceImpl(
     }
   }
 
-  private fun save(
+  private fun saveIfStillCurrent(
     job: BatchJobDto,
     assignment: Assignment,
     outcome: LlmOutcome,
-    chunkExecutionId: Long? = null,
+    chunkExecutionId: Long?,
   ) {
     val update =
       executeInNewTransaction(transactionManager) {
@@ -244,34 +267,82 @@ class AiReviewBatchServiceImpl(
         entityManager.lock(row, LockModeType.PESSIMISTIC_WRITE)
 
         if (row.batchJobId != job.id || row.textHash != assignment.textHash) return@executeInNewTransaction null
-        if (AiReviewEligibility.currentTextHash(translation) != assignment.textHash ||
-          !AiReviewEligibility.isEligible(translation, assignment.baseLanguageId, row)
-        ) {
-          row.batchJobId = null
-          return@executeInNewTransaction null
+        if (reviewedByHumanSinceClaim(translation, assignment)) {
+          return@executeInNewTransaction releaseToHumanReview(row)
         }
-
-        val project = translation.key.project
-        if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)) {
-          row.batchJobId = null
-          return@executeInNewTransaction null
+        if (unReviewedByHumanSinceClaim(translation, row, assignment)) {
+          return@executeInNewTransaction releaseToUnReview(row)
         }
-
-        val decision = evaluator.evaluate(translation, activeOnly = assignment.aiManaged)
-        if (decision !is RuleDecision.Review || winnerChanged(decision, assignment)) {
-          row.batchJobId = null
-          return@executeInNewTransaction null
-        }
-        if (skippedForQa(translation, row, project, decision)) {
-          row.batchJobId = null
-          return@executeInNewTransaction null
+        val decision =
+          currentDecisionOrNull(translation, row, assignment) ?: return@executeInNewTransaction releaseClaim(row)
+        when (qaGateFor(translation, translation.key.project, decision)) {
+          QaGateResult.PASS -> Unit
+          QaGateResult.WAIT_FOR_FRESH_QA -> return@executeInNewTransaction releaseClaim(row)
+          QaGateResult.OPEN_ISSUES -> {
+            markSkippedForQaIssues(row)
+            return@executeInNewTransaction releaseClaim(row)
+          }
         }
 
         markActivityAsAiReviewer(job, assignment, chunkExecutionId)
-        recordOutcome(translation, row, outcome, decision)
-        toUpdate(translation, row, decision)
+        recordOutcome(translation, row, outcome, decision, assignment)
+        AiReviewUpdate.of(row, dryRun = decision.rule.mode == AiReviewRuleMode.DRY_RUN)
       } ?: return
     websocketPublisher.publishAfterCommit(assignment.projectId, listOf(update))
+  }
+
+  private fun currentDecisionOrNull(
+    translation: Translation,
+    row: TranslationAiReview,
+    assignment: Assignment,
+  ): RuleDecision.Review? {
+    if (AiReviewEligibility.currentTextHash(translation) != assignment.textHash) return null
+    if (!AiReviewEligibility.isEligible(translation, assignment.baseLanguageId, row)) return null
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, translation.key.project)) return null
+    val decision = evaluator.evaluate(translation, activeOnly = assignment.aiManaged)
+    if (decision !is RuleDecision.Review || winnerChanged(decision, assignment)) return null
+    return decision
+  }
+
+  private fun releaseClaim(row: TranslationAiReview): AiReviewUpdate? {
+    row.batchJobId = null
+    return null
+  }
+
+  /**
+   * Only a human can set Reviewed while the AI holds the claim. A claim that started as a requeued
+   * human decision is already Reviewed, so the state says nothing there.
+   */
+  private fun reviewedByHumanSinceClaim(
+    translation: Translation,
+    assignment: Assignment,
+  ): Boolean =
+    !assignment.aiManaged &&
+      !assignment.requeuedHumanDecision &&
+      translation.state == TranslationState.REVIEWED
+
+  private fun unReviewedByHumanSinceClaim(
+    translation: Translation,
+    row: TranslationAiReview,
+    assignment: Assignment,
+  ): Boolean {
+    if (AiReviewEligibility.isHumanDecision(row) && !assignment.requeuedHumanDecision) return true
+    return assignment.aiManaged && translation.state != TranslationState.REVIEWED
+  }
+
+  private fun releaseToHumanReview(row: TranslationAiReview): AiReviewUpdate? {
+    if (!AiReviewEligibility.keepsAiManaged(row)) return releaseClaim(row)
+    reviewRepository.delete(row)
+    return AiReviewUpdate.removed(row.translation)
+  }
+
+  private fun releaseToUnReview(row: TranslationAiReview): AiReviewUpdate? {
+    if (!AiReviewEligibility.isMarker(row)) {
+      row.reReviewRequested = false
+      return releaseClaim(row)
+    }
+    reviewRepository.delete(row)
+    return AiReviewUpdate.removed(row.translation)
   }
 
   private fun markActivityAsAiReviewer(
@@ -307,6 +378,7 @@ class AiReviewBatchServiceImpl(
     row: TranslationAiReview,
     outcome: LlmOutcome,
     decision: RuleDecision.Review,
+    assignment: Assignment,
   ) {
     val keepsPreviousResult = outcome is LlmOutcome.Failure && row.score != null
     when (outcome) {
@@ -314,10 +386,10 @@ class AiReviewBatchServiceImpl(
       is LlmOutcome.Failure -> applyFailure(row, outcome)
     }
     if (!keepsPreviousResult) {
+      attributeResult(row, decision, assignment)
       row.resolvedBy = null
       row.resolvedAt = null
     }
-    row.threshold = decision.threshold
     row.batchJobId = null
     row.reReviewRequested = false
     row.reviewedAt = currentDateProvider.date
@@ -331,6 +403,9 @@ class AiReviewBatchServiceImpl(
   ) {
     val status = AiReviewScoring.outcome(decision.rule.mode, outcome.score, decision.threshold)
     val wasAiManagedReview = AiReviewEligibility.isAiManagedReview(translation, row)
+    if (status == AiReviewStatus.APPROVED && !isApprovalOf(row, decision.rule.id)) {
+      ruleRepository.addToAutoReviewedCount(decision.rule.id, 1)
+    }
     row.status = status
     row.score = outcome.score
     row.issues = outcome.issues.toMutableList()
@@ -351,6 +426,24 @@ class AiReviewBatchServiceImpl(
     }
   }
 
+  private fun isApprovalOf(
+    row: TranslationAiReview,
+    ruleId: Long,
+  ): Boolean = row.status == AiReviewStatus.APPROVED && row.rule?.id == ruleId
+
+  private fun attributeResult(
+    row: TranslationAiReview,
+    decision: RuleDecision.Review,
+    assignment: Assignment,
+  ) {
+    row.rule = entityManager.getReference(AiReviewRule::class.java, decision.rule.id)
+    row.ruleMode = decision.rule.mode
+    row.threshold = decision.threshold
+    row.promptId = assignment.promptId
+    row.promptName = assignment.promptName
+    row.promptRevision = assignment.promptRevision
+  }
+
   private fun applyFailure(
     row: TranslationAiReview,
     outcome: LlmOutcome.Failure,
@@ -363,20 +456,6 @@ class AiReviewBatchServiceImpl(
     row.status = AiReviewStatus.FAILED
     row.failureReason = outcome.reason
   }
-
-  private fun toUpdate(
-    translation: Translation,
-    row: TranslationAiReview,
-    decision: RuleDecision.Review,
-  ) = AiReviewUpdate(
-    translationId = translation.id,
-    keyId = translation.key.id,
-    languageTag = translation.language.tag,
-    status = row.status,
-    score = row.score,
-    dryRun = decision.rule.mode == AiReviewRuleMode.DRY_RUN,
-    lastFailed = row.lastFailureReason != null,
-  )
 
   private fun refreshForCurrentText(
     row: TranslationAiReview,

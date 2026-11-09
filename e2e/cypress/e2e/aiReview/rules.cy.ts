@@ -6,15 +6,16 @@ import { login } from '../../common/apiCalls/common';
 import { confirmStandard, gcy, gcyAdvanced } from '../../common/shared';
 import {
   restoreAiReviewFeature,
-  visitAiReviewRules,
   withoutAiReviewFeature,
 } from '../../common/aiReview';
+import { E2AiReviewRulesView } from '../../compounds/aiReview/E2AiReviewRulesView';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 
 describe('AI review rules page', () => {
   let projectId: number;
   let emptyProjectId: number;
+  const rulesView = new E2AiReviewRulesView();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -52,13 +53,13 @@ describe('AI review rules page', () => {
 
   it('shows the empty state for a project without rules', () => {
     login('test_username');
-    visitAiReviewRules(emptyProjectId);
+    rulesView.visit(emptyProjectId);
     gcy('ai-review-empty-state').should('be.visible');
   });
 
   it('lists the rules with label, chips, counts and backlog', () => {
     login('test_username');
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcy('ai-review-rule-item').should('have.length', 2);
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).within(
       () => {
@@ -85,7 +86,7 @@ describe('AI review rules page', () => {
 
   it('toggles a rule enabled state', () => {
     login('test_username');
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcyAdvanced({ value: 'ai-review-rule-switch', name: 'UI rule' })
       .find('input')
       .should('be.checked');
@@ -99,7 +100,7 @@ describe('AI review rules page', () => {
 
   it('deletes a rule with confirmation', () => {
     login('test_username');
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcyAdvanced({ value: 'ai-review-rule-menu', name: 'UI rule' }).click();
     gcy('ai-review-rule-menu-delete').click();
     confirmStandard();
@@ -109,7 +110,7 @@ describe('AI review rules page', () => {
 
   it('a user with prompt edit scopes sees the list and edit controls', () => {
     login('reviewer_username');
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcy('ai-review-rule-item').should('have.length', 2);
     gcy('ai-review-add-rule-button').should('be.visible');
     gcyAdvanced({ value: 'ai-review-rule-switch', name: 'UI rule' }).should(

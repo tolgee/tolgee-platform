@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import {
   AiReviewCellButtonProps,
-  AiReviewIssueListProps,
+  AiReviewPlaygroundResultProps,
   SubfilterAiReviewProps,
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
@@ -108,14 +108,13 @@ export const AiReviewCellButton = (_props: AiReviewCellButtonProps) =>
 export const getAiReviewCellVisibility = (
   _aiReview:
     | components['schemas']['TranslationAiReviewSummaryModel']
-    | undefined,
-  _state: components['schemas']['TranslationViewModel']['state'] | undefined,
-  _auto: boolean | undefined
+    | undefined
 ): 'badge' | 'hover' | 'none' => 'none';
 export const SubfilterAiReview = (_props: SubfilterAiReviewProps) =>
   Empty() as JSX.Element;
-export const AiReviewIssueList = (_props: AiReviewIssueListProps) =>
-  Empty() as JSX.Element;
+export const AiReviewPlaygroundResult = (
+  _props: AiReviewPlaygroundResultProps
+) => Empty() as JSX.Element;
 export const getAiReviewFiltersLength = (_value: FiltersInternal) => 0;
 export const getAiReviewFiltersName = (
   _value: FiltersInternal

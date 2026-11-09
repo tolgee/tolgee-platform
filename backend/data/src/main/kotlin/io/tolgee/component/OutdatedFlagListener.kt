@@ -1,9 +1,9 @@
 package io.tolgee.component
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnTranslationsSet
-import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.enums.SourceChangeAction
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
@@ -33,6 +33,7 @@ class OutdatedFlagListener(
   private val projectFeatureGuard: ProjectFeatureGuard,
   @Lazy
   private val autoTranslationService: AutoTranslationService,
+  private val activityHolder: ActivityHolder,
 ) {
   private enum class Kind {
     AI_APPROVED,
@@ -54,12 +55,38 @@ class OutdatedFlagListener(
     val projectDto = ProjectDto.fromEntity(project)
     val settings = sourceChangeSettingsProvider.getEffective(projectDto)
     val protect = project.translationProtection == TranslationProtection.PROTECT_REVIEWED
-    val configs by lazy { autoTranslationService.getConfigs(project) }
+    val autoTranslatedLanguageIds by lazy { autoTranslatedLanguageIds(event, newBaseValue) }
     val rowStates = reviewRowStates(event, excluded, baseLanguage.id, projectDto)
 
-    translationService.setOutdated(event.key, excluded) { translation ->
-      decide(translation, settings, protect, configs, rowStates[translation.id] ?: AiReviewRowState.NONE)
+    translationService.applySourceChange(event.key, excluded) { translation ->
+      decide(
+        translation,
+        settings,
+        protect,
+        { translation.language.id in autoTranslatedLanguageIds },
+        rowStates[translation.id] ?: AiReviewRowState.NONE,
+      )
     }
+  }
+
+  private fun autoTranslatedLanguageIds(
+    event: OnTranslationsSet,
+    newBaseValue: String?,
+  ): Set<Long> {
+    if (newBaseValue.isNullOrBlank()) return emptySet()
+    val project = event.key.project
+    val activityType = activityHolder.activityRevision.type
+    if (!autoTranslationService.startsForActivity(activityType, autoTranslationService.getConfigs(project))) {
+      return emptySet()
+    }
+    val languageIds =
+      event.key.translations
+        .map { it.language.id }
+        .distinct()
+    return autoTranslationService
+      .getConfigs(project, languageIds)
+      .filterValues { autoTranslationService.translatesLanguage(it) }
+      .keys
   }
 
   private fun reviewRowStates(
@@ -77,12 +104,12 @@ class OutdatedFlagListener(
     translation: Translation,
     settings: EffectiveSourceChangeSettings,
     protect: Boolean,
-    configs: List<AutoTranslationConfig>,
+    autoTranslated: () -> Boolean,
     rowState: AiReviewRowState,
   ): SourceChangeDecision {
     val kind = kindOf(translation, rowState)
     val keepsState = protect && translation.state == TranslationState.REVIEWED
-    if (kind == Kind.MACHINE) return keepOrDropState(keepsState)
+    if (kind == Kind.MACHINE) return SourceChangeDecision.keepOrTranslated(keepsState)
 
     var action =
       when (kind) {
@@ -91,7 +118,7 @@ class OutdatedFlagListener(
         else -> settings.humanEdited
       }
     // Nothing may be marked auto that no auto translation will replace.
-    if (action == SourceChangeAction.RETRANSLATE && !autoTranslationEnabled(translation, configs)) {
+    if (action == SourceChangeAction.RETRANSLATE && !autoTranslated()) {
       action = SourceChangeAction.MARK_OUTDATED
     }
 
@@ -123,10 +150,6 @@ class OutdatedFlagListener(
     )
   }
 
-  /**
-   * Spec order, first match wins. A human-written text that the AI approved has no auto flag and
-   * falls through to "Edited by a human": an AI approval does not count as a human touch.
-   */
   private fun kindOf(
     translation: Translation,
     rowState: AiReviewRowState,
@@ -135,21 +158,5 @@ class OutdatedFlagListener(
     if (translation.state == TranslationState.REVIEWED && !rowState.aiManaged) return Kind.HUMAN_REVIEWED
     if (translation.auto) return Kind.MACHINE
     return Kind.HUMAN_EDITED
-  }
-
-  private fun keepOrDropState(keepsState: Boolean): SourceChangeDecision {
-    if (keepsState) return SourceChangeDecision(newState = null)
-    return SourceChangeDecision(newState = TranslationState.TRANSLATED)
-  }
-
-  private fun autoTranslationEnabled(
-    translation: Translation,
-    configs: List<AutoTranslationConfig>,
-  ): Boolean {
-    val config =
-      configs.find { it.targetLanguage?.id == translation.language.id }
-        ?: configs.find { it.targetLanguage == null }
-        ?: return false
-    return config.usingTm || config.usingPrimaryMtService
   }
 }

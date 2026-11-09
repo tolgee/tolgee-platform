@@ -33,7 +33,7 @@ class AiReviewRuleModelAssembler {
         rule.overrides
           .sortedBy { it.language.id }
           .map { AiReviewRuleOverrideModel(it.language.id, it.threshold, it.never) },
-      counts = (counts ?: AiReviewRuleCounts(ruleId = rule.id)).toModel(),
+      counts = counts?.toModel(),
     )
 
   private fun AiReviewRuleCounts.toModel() =

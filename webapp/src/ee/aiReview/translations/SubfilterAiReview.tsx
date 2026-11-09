@@ -11,18 +11,92 @@ import {
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
 import { SubfilterAiReviewProps } from 'eeSetup/EeModuleType';
+import { components } from 'tg.service/apiSchema.generated';
 import { AiReviewBadge } from 'tg.ee.module/aiReview/translations/AiReviewBadge';
 
-const OUTCOME_BADGE_STATUS = {
-  REVIEWED_BY_AI: 'APPROVED',
-  BELOW_THRESHOLD: 'BELOW_THRESHOLD',
-  DRY_RUN_PASS: 'DRY_RUN_PASS',
-  DRY_RUN_FAIL: 'DRY_RUN_FAIL',
-  FAILED: 'FAILED',
-  CONFIRMED: 'CONFIRMED',
-  REJECTED: 'REJECTED',
-  NOT_REVIEWED_YET: undefined,
-} as const;
+type AiReviewStatus =
+  components['schemas']['TranslationAiReviewSummaryModel']['status'];
+
+const OUTCOMES: {
+  outcome: AiReviewFilterOutcome;
+  label: React.ReactElement;
+  badgeStatus?: AiReviewStatus;
+}[] = [
+  {
+    outcome: 'REVIEWED_BY_AI',
+    label: (
+      <T
+        keyName="ai_review_filter_reviewed_by_ai"
+        defaultValue="Reviewed by AI"
+      />
+    ),
+    badgeStatus: 'APPROVED',
+  },
+  {
+    outcome: 'BELOW_THRESHOLD',
+    label: (
+      <T
+        keyName="ai_review_filter_below_threshold"
+        defaultValue="Below threshold"
+      />
+    ),
+    badgeStatus: 'BELOW_THRESHOLD',
+  },
+  {
+    outcome: 'DRY_RUN_PASS',
+    label: (
+      <T
+        keyName="ai_review_filter_dry_run_pass"
+        defaultValue="Dry run: would be auto-reviewed"
+      />
+    ),
+    badgeStatus: 'DRY_RUN_PASS',
+  },
+  {
+    outcome: 'DRY_RUN_FAIL',
+    label: (
+      <T
+        keyName="ai_review_filter_dry_run_fail"
+        defaultValue="Dry run: would not be auto-reviewed"
+      />
+    ),
+    badgeStatus: 'DRY_RUN_FAIL',
+  },
+  {
+    outcome: 'FAILED',
+    label: <T keyName="ai_review_filter_failed" defaultValue="Failed" />,
+    badgeStatus: 'FAILED',
+  },
+  {
+    outcome: 'CONFIRMED',
+    label: (
+      <T
+        keyName="ai_review_filter_confirmed"
+        defaultValue="Confirmed by a human"
+      />
+    ),
+    badgeStatus: 'CONFIRMED',
+  },
+  {
+    outcome: 'REJECTED',
+    label: (
+      <T
+        keyName="ai_review_filter_rejected"
+        defaultValue="Rejected by a human"
+      />
+    ),
+    badgeStatus: 'REJECTED',
+  },
+  {
+    outcome: 'NOT_REVIEWED_YET',
+    label: (
+      <T
+        keyName="ai_review_filter_not_reviewed_yet"
+        defaultValue="Not reviewed yet"
+      />
+    ),
+  },
+];
 
 export const SubfilterAiReview = ({
   value,
@@ -35,44 +109,6 @@ export const SubfilterAiReview = ({
   const [expanded, setExpanded] = useState(
     value.filterAiReviewOutcomeLanguage !== undefined
   );
-
-  const outcomes: { outcome: AiReviewFilterOutcome; label: string }[] = [
-    {
-      outcome: 'REVIEWED_BY_AI',
-      label: t('ai_review_filter_reviewed_by_ai', 'Reviewed by AI'),
-    },
-    {
-      outcome: 'BELOW_THRESHOLD',
-      label: t('ai_review_filter_below_threshold', 'Below threshold'),
-    },
-    {
-      outcome: 'DRY_RUN_PASS',
-      label: t(
-        'ai_review_filter_dry_run_pass',
-        'Dry run: would be auto-reviewed'
-      ),
-    },
-    {
-      outcome: 'DRY_RUN_FAIL',
-      label: t(
-        'ai_review_filter_dry_run_fail',
-        'Dry run: would not be auto-reviewed'
-      ),
-    },
-    { outcome: 'FAILED', label: t('ai_review_filter_failed', 'Failed') },
-    {
-      outcome: 'CONFIRMED',
-      label: t('ai_review_filter_confirmed', 'Confirmed by a human'),
-    },
-    {
-      outcome: 'REJECTED',
-      label: t('ai_review_filter_rejected', 'Rejected by a human'),
-    },
-    {
-      outcome: 'NOT_REVIEWED_YET',
-      label: t('ai_review_filter_not_reviewed_yet', 'Not reviewed yet'),
-    },
-  ];
 
   function handleToggleOutcome(outcome: AiReviewFilterOutcome) {
     if (value.filterAiReviewOutcomes?.includes(outcome)) {
@@ -120,32 +156,29 @@ export const SubfilterAiReview = ({
           slotProps={{ paper: { style: { minWidth: 250 } } }}
         >
           <Box display="grid">
-            {outcomes.map(({ outcome, label }) => {
-              const badgeStatus = OUTCOME_BADGE_STATUS[outcome];
-              return (
-                <FilterItem
-                  key={outcome}
-                  label={label}
-                  selected={Boolean(
-                    value.filterAiReviewOutcomes?.includes(outcome)
-                  )}
-                  onClick={() => handleToggleOutcome(outcome)}
-                  indicator={
-                    badgeStatus && (
-                      <AiReviewBadge
-                        aiReview={{
-                          status: badgeStatus,
-                          dryRun: badgeStatus.startsWith('DRY_RUN'),
-                          lastFailed: false,
-                        }}
-                      />
-                    )
-                  }
-                  data-cy="ai-review-filter-item"
-                  data-cy-outcome={outcome}
-                />
-              );
-            })}
+            {OUTCOMES.map(({ outcome, label, badgeStatus }) => (
+              <FilterItem
+                key={outcome}
+                label={label}
+                selected={Boolean(
+                  value.filterAiReviewOutcomes?.includes(outcome)
+                )}
+                onClick={() => handleToggleOutcome(outcome)}
+                indicator={
+                  badgeStatus && (
+                    <AiReviewBadge
+                      aiReview={{
+                        status: badgeStatus,
+                        dryRun: badgeStatus.startsWith('DRY_RUN'),
+                        lastFailed: false,
+                      }}
+                    />
+                  )
+                }
+                data-cy="ai-review-filter-item"
+                data-cy-outcome={outcome}
+              />
+            ))}
             <CompactListSubheader>
               <Box display="flex" justifyContent="space-between">
                 <Box>{t('translations_filter_languages_select_title')}</Box>
@@ -207,45 +240,6 @@ export function getAiReviewFiltersLength(value: FiltersInternal) {
 }
 
 export function getAiReviewFiltersName(value: FiltersInternal) {
-  if (value.filterAiReviewOutcomes?.length) {
-    switch (value.filterAiReviewOutcomes[0]) {
-      case 'REVIEWED_BY_AI':
-        return (
-          <T
-            keyName="ai_review_filter_reviewed_by_ai"
-            defaultValue="Reviewed by AI"
-          />
-        );
-      case 'BELOW_THRESHOLD':
-        return (
-          <T
-            keyName="ai_review_filter_below_threshold"
-            defaultValue="Below threshold"
-          />
-        );
-      case 'DRY_RUN_PASS':
-        return (
-          <T
-            keyName="ai_review_filter_dry_run_pass"
-            defaultValue="Dry run: would be auto-reviewed"
-          />
-        );
-      case 'DRY_RUN_FAIL':
-        return (
-          <T
-            keyName="ai_review_filter_dry_run_fail"
-            defaultValue="Dry run: would not be auto-reviewed"
-          />
-        );
-      case 'FAILED':
-        return <T keyName="ai_review_filter_failed" defaultValue="Failed" />;
-      case 'NOT_REVIEWED_YET':
-        return (
-          <T
-            keyName="ai_review_filter_not_reviewed_yet"
-            defaultValue="Not reviewed yet"
-          />
-        );
-    }
-  }
+  const first = value.filterAiReviewOutcomes?.[0];
+  return OUTCOMES.find(({ outcome }) => outcome === first)?.label;
 }

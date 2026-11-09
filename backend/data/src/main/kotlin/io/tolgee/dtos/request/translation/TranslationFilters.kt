@@ -271,7 +271,7 @@ A key matches if any of the selected check types is present in any of the select
   @field:Parameter(
     description = "Limit the AI review filter to these language tags.",
   )
-  var filterAiReviewLanguage: List<String>? = null
+  var filterAiReviewInLang: List<String>? = null
 
   @field:Parameter(
     description =

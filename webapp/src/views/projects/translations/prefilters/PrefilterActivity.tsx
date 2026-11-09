@@ -5,12 +5,7 @@ import { ActivityTitle } from 'tg.component/activity/ActivityTitle';
 import { buildActivity } from 'tg.component/activity/activityTools';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import {
-  SystemActorAvatar,
-  SystemActorLabel,
-} from 'tg.component/activity/SystemActor';
-import { UserName } from 'tg.component/common/UserName';
+import { ActorAvatar, ActorName } from 'tg.component/activity/SystemActor';
 
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PrefilterContainer } from './ContainerPrefilter';
@@ -66,36 +61,19 @@ export const PrefilterActivity = ({ revisionId }: Props) => {
       title={<T keyName="activity_filter_indicator_label" />}
       content={
         <StyledDescription>
-          {systemActor ? (
-            <Box gridArea="avatar" sx={{ marginRight: '6px', display: 'flex' }}>
-              <SystemActorAvatar systemActor={systemActor} />
+          {(systemActor || data.author) && (
+            <Box
+              gridArea="avatar"
+              sx={{
+                marginRight: '6px',
+                display: systemActor ? 'flex' : undefined,
+              }}
+            >
+              <ActorAvatar systemActor={systemActor} author={data.author} />
             </Box>
-          ) : (
-            data.author && (
-              <Box gridArea="avatar" sx={{ marginRight: '6px' }}>
-                <AvatarImg
-                  size={24}
-                  owner={{
-                    type: 'USER',
-                    id: data.author.id,
-                    avatar: data.author.avatar,
-                    deleted: data.author.deleted,
-                  }}
-                />
-              </Box>
-            )
           )}
           <StyledUser>
-            {systemActor ? (
-              <SystemActorLabel
-                systemActor={systemActor}
-                authorName={data.author?.name}
-              />
-            ) : data.author?.deleted ? (
-              <UserName {...data.author} />
-            ) : (
-              data.author?.name
-            )}
+            <ActorName systemActor={systemActor} author={data.author} />
           </StyledUser>
           <Box sx={{ marginLeft: '12px' }}>
             <ActivityTitle activity={activity} />

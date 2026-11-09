@@ -6389,9 +6389,6 @@
             <column name="issues" type="JSONB"/>
         </addColumn>
     </changeSet>
-    <changeSet author="bdshadow" id="1792666143000-9">
-        <dropUniqueConstraint constraintName="UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL" tableName="activity_revision"/>
-    </changeSet>
     <changeSet author="bdshadow" id="1792666143000-10" runInTransaction="false">
         <sql>
             create index concurrently if not exists IDX_activity_revision_batch_job_chunk_execution_id on public.activity_revision (batch_job_chunk_execution_id);
@@ -6401,5 +6398,20 @@
         <sql>
             create index concurrently if not exists IDX_translation_ai_review_re_review_requested on public.translation_ai_review (translation_id) where re_review_requested;
         </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-12">
+        <sql>
+            alter table activity_revision drop constraint if exists UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL;
+        </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-13">
+        <addColumn tableName="ai_review_rule">
+            <column name="auto_reviewed_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rejected_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

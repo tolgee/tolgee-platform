@@ -4,12 +4,15 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.aiReview.AiReviewActivityListener
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRunService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
@@ -232,7 +235,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
 
   @Test
   fun `retry failed queues the FAILED rows and failing approvals of the rule only`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.FAILED, null) {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.FAILED) {
       rule = testData.rule
       failureReason = AiReviewFailureReason.PROVIDER_ERROR
     }
@@ -249,7 +252,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
           tagIn = mutableListOf("other")
         }.self
     val otherKey = testData.addKeyWithTranslations("other.key", tags = listOf("other"))
-    testData.addReview(otherKey.de, AiReviewStatus.FAILED, null) {
+    testData.addReview(otherKey.de, AiReviewStatus.FAILED) {
       rule = otherRule
       failureReason = AiReviewFailureReason.PROVIDER_ERROR
     }
@@ -291,7 +294,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
     val withResult = testData.addKeyWithTranslations("k.result")
     testData.addReview(withResult.de, AiReviewStatus.APPROVED, 90)
     val queued = testData.addKeyWithTranslations("k.queued")
-    testData.addReview(queued.de, AiReviewStatus.PENDING, null)
+    testData.addReview(queued.de, AiReviewStatus.PENDING)
     val humanReviewed = testData.addKeyWithTranslations("k.human")
     humanReviewed.de.self.state = TranslationState.REVIEWED
     val noRule = testData.addKeyWithTranslations("k.norule", tags = emptyList())
@@ -518,6 +521,77 @@ class AiReviewRunTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a run or a retry with nothing to review starts no job`() {
+    testData.deTranslation.outdated = true
+    save()
+
+    performAuthPost(
+      "$projectUrl/ai-review/run",
+      runBody(translationIds = listOf(testData.deTranslation.id)),
+    ).andIsBadRequest.andHasErrorMessage(Message.AI_REVIEW_NOTHING_TO_REVIEW)
+    performAuthPost("$projectUrl/translations/${testData.deTranslation.id}/ai-review/retry", null)
+      .andIsBadRequest
+      .andHasErrorMessage(Message.AI_REVIEW_NOTHING_TO_REVIEW)
+
+    aiReviewJobCount().assert.isZero()
+  }
+
+  @Test
+  fun `a run and its preview skip the translations of a trashed key`() {
+    testData.key.deletedAt = Date()
+    save()
+    val bodies =
+      listOf(
+        runBody(translationIds = listOf(testData.deTranslation.id)),
+        runBody(keyIds = listOf(testData.key.id), languageIds = listOf(testData.german.id)),
+      )
+
+    bodies.forEach { body ->
+      performAuthPost("$projectUrl/ai-review/run/preview", body).andIsOk.andAssertThatJson {
+        node("toReview").isEqualTo(0)
+      }
+      performAuthPost("$projectUrl/ai-review/run", body)
+        .andIsBadRequest
+        .andHasErrorMessage(Message.AI_REVIEW_NOTHING_TO_REVIEW)
+    }
+    aiReviewJobCount().assert.isZero()
+  }
+
+  @Test
+  fun `a run never reaches the translations of another project`() {
+    testData.addReview(testData.otherProjectTranslationBuilder, AiReviewStatus.FAILED) {
+      rule = testData.otherProjectRule
+    }
+    save()
+    val other = testData.otherProjectTranslation
+    val bodies =
+      listOf(
+        runBody(translationIds = listOf(other.id)),
+        runBody(keyIds = listOf(testData.otherProjectKey.id), languageIds = listOf(testData.otherProjectLanguage.id)),
+        runBody(ruleId = testData.otherProjectRule.id, failedOnly = true),
+      )
+
+    bodies.forEach { body ->
+      performAuthPost("$projectUrl/ai-review/run/preview", body).andIsOk.andAssertThatJson {
+        node("toReview").isEqualTo(0)
+      }
+      performAuthPost("$projectUrl/ai-review/run", body)
+        .andIsBadRequest
+        .andHasErrorMessage(Message.AI_REVIEW_NOTHING_TO_REVIEW)
+    }
+
+    val row = review(other.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    row.reReviewRequested.assert.isFalse()
+    executeInNewTransaction(platformTransactionManager) {
+      translationService
+        .get(other.id)
+        .state.assert
+        .isEqualTo(TranslationState.TRANSLATED)
+    }
+  }
+
+  @Test
   fun `the popover retry checks branch modify`() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.AI_REVIEW, Feature.BRANCHING)
     testData.project.useBranching = true
@@ -555,7 +629,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
 
   @Test
   fun `cancelling a run deletes its queued rows and clears re-review requests`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null) {
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING) {
       manualRunBatchJobId = 777
     }
     testData.addReview(testData.frTranslationBuilder, AiReviewStatus.APPROVED, 90) {
@@ -563,7 +637,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
       manualRunBatchJobId = 777
     }
     val other = testData.addKeyWithTranslations("other.key")
-    testData.addReview(other.de, AiReviewStatus.PENDING, null)
+    testData.addReview(other.de, AiReviewStatus.PENDING)
     save()
 
     aiReviewActivityListener.onBatchJobCancelled(
@@ -648,6 +722,18 @@ class AiReviewRunTest : AuthorizedControllerTest() {
       "reReview" to reReview,
       "failedOnly" to failedOnly,
     )
+
+  private fun aiReviewJobCount(): Long =
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager
+        .createQuery(
+          "select count(j) from BatchJob j where j.project.id = :projectId and j.type = :type",
+          java.lang.Long::class.java,
+        ).setParameter("projectId", testData.project.id)
+        .setParameter("type", BatchJobType.AI_REVIEW)
+        .singleResult
+        .toLong()
+    }
 
   private fun review(translationId: Long): TranslationAiReview? =
     executeInNewTransaction(platformTransactionManager) {

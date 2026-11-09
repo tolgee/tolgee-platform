@@ -62,7 +62,9 @@ export const RuleLanguageOverrides = () => {
           <Box
             key={index}
             display="grid"
-            gridTemplateColumns="160px 1fr auto auto"
+            sx={(theme) => ({
+              gridTemplateColumns: `${theme.spacing(20)} 1fr auto auto`,
+            })}
             gap={1}
             alignItems="center"
             data-cy="ai-review-rule-form-override-row"

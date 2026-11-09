@@ -13,10 +13,7 @@ import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 
-/**
- * Everything the AI review filters need besides the request parameters. Null means the feature is
- * off and the filters are silently ignored.
- */
+/** Null means the feature is off and the AI review filters are ignored. */
 data class AiReviewFilterData(
   val rules: List<AiReviewRule>,
   val branchingEnabled: Boolean,
@@ -24,11 +21,7 @@ data class AiReviewFilterData(
   val baseLanguageId: Long?,
 )
 
-/**
- * Builds the SQL side of rule matching for the "Not reviewed yet" filter: one predicate per
- * enabled rule, mirroring RuleScopeMatcher. The effective Never value per language is computed in
- * Kotlin from the rule and its overrides.
- */
+/** Must match RuleScopeMatcher, or the "Not reviewed yet" filter disagrees with the rules. */
 class AiReviewRuleSqlPredicates(
   private val cb: CriteriaBuilder,
   private val subquery: AbstractQuery<*>,
@@ -145,7 +138,6 @@ class AiReviewRuleSqlPredicates(
           cb.like(branch.get("name"), like, ESCAPE_CHAR),
         )
         val onNamedBranch = cb.exists(sub)
-        // A key without a branch belongs to the default branch; the LIKE runs on its name.
         val onDefaultBranch =
           cb.and(
             cb.isNull(key.get(Key_.branch)),

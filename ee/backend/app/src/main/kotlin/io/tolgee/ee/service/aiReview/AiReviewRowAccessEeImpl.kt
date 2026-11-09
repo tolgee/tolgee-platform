@@ -12,14 +12,6 @@ import org.springframework.stereotype.Service
 class AiReviewRowAccessEeImpl(
   private val reviewRepository: TranslationAiReviewRepository,
 ) : AiReviewRowAccess {
-  override fun isAiManagedReview(translation: Translation): Boolean =
-    AiReviewEligibility.isAiManagedReview(translation, reviewRepository.findByTranslationId(translation.id))
-
-  override fun hasCurrentApproval(translation: Translation): Boolean {
-    val row = reviewRepository.findByTranslationId(translation.id) ?: return false
-    return AiReviewEligibility.isAiApproval(translation, row)
-  }
-
   override fun reviewStates(translations: Collection<Translation>): Map<Long, AiReviewRowState> {
     if (translations.isEmpty()) return emptyMap()
     val rows =

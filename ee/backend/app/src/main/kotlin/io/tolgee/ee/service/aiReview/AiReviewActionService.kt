@@ -9,6 +9,7 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AiReviewActionService(
   private val reviewRepository: TranslationAiReviewRepository,
+  private val ruleRepository: AiReviewRuleRepository,
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
@@ -39,37 +41,66 @@ class AiReviewActionService(
     reviewRepository.findByTranslationId(translationId) ?: throw NotFoundException()
 
   @Transactional
-  fun markRejectedByStateChange(
+  fun settleHumanUnReview(
+    projectId: Long,
     translationIds: Collection<Long>,
+    textChangedIds: Set<Long>,
     resolvedById: Long?,
+    aiReviewOn: Boolean,
   ) {
-    var changed = false
+    val updates = mutableListOf<AiReviewUpdate>()
+    // Sorted: parallel chunks of one bulk job must lock the rule rows in the same order, or they deadlock.
+    val rejectedByRule = sortedMapOf<Long, Long>()
     translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
-      reviewRepository.findAllByTranslationIdIn(chunk).forEach { row ->
-        if (row.status != AiReviewStatus.APPROVED) return@forEach
+      val rows = reviewRepository.findAllWithTranslationByTranslationIdIn(chunk)
+      val (deletedApprovals, rejectedApprovals) =
+        rows
+          .filter { it.status == AiReviewStatus.APPROVED }
+          .partition { !aiReviewOn || isMachineOverwrite(it, textChangedIds) }
+      rejectedApprovals.forEach { row ->
         resolve(row, AiReviewStatus.REJECTED, resolvedById)
-        publishRow(row)
-        changed = true
+        updates += AiReviewUpdate.of(row, dryRun = false)
+        row.rule?.id?.let { rejectedByRule.merge(it, 1L, Long::plus) }
       }
+      deleteAndCollectRemovals(rows.filter { AiReviewEligibility.isMarker(it) } + deletedApprovals, updates)
     }
-    if (changed) entityManager.flush()
+    websocketPublisher.publishAfterCommit(projectId, updates)
+    if (rejectedByRule.isEmpty()) return
+    entityManager.flush()
+    rejectedByRule.forEach { (ruleId, count) -> ruleRepository.addToRejectedCount(ruleId, count) }
+  }
+
+  private fun isMachineOverwrite(
+    row: TranslationAiReview,
+    textChangedIds: Set<Long>,
+  ): Boolean = row.translation.id in textChangedIds && row.translation.auto
+
+  @Transactional
+  fun releaseToHumanReview(
+    projectId: Long,
+    translationIds: Collection<Long>,
+  ) {
+    val updates = mutableListOf<AiReviewUpdate>()
+    translationIds.chunked(IN_CLAUSE_CHUNK).forEach { chunk ->
+      val rows = reviewRepository.findAllWithTranslationByTranslationIdIn(chunk)
+      deleteAndCollectRemovals(rows.filter { AiReviewEligibility.keepsAiManaged(it) }, updates)
+    }
+    websocketPublisher.publishAfterCommit(projectId, updates)
+  }
+
+  private fun deleteAndCollectRemovals(
+    rows: List<TranslationAiReview>,
+    updates: MutableList<AiReviewUpdate>,
+  ) {
+    if (rows.isEmpty()) return
+    rows.forEach { updates += AiReviewUpdate.removed(it.translation) }
+    reviewRepository.deleteAllByIdInBatch(rows.map { it.id })
   }
 
   private fun publishRow(row: TranslationAiReview) {
-    val translation = row.translation
     websocketPublisher.publishAfterCommit(
-      translation.key.project.id,
-      listOf(
-        AiReviewUpdate(
-          translationId = translation.id,
-          keyId = translation.key.id,
-          languageTag = translation.language.tag,
-          status = row.status,
-          score = row.score,
-          dryRun = false,
-          lastFailed = row.lastFailureReason != null,
-        ),
-      ),
+      row.translation.key.project.id,
+      listOf(AiReviewUpdate.of(row, dryRun = false)),
     )
   }
 
@@ -79,14 +110,13 @@ class AiReviewActionService(
     state: TranslationState,
     status: AiReviewStatus,
   ): TranslationAiReview {
-    val row = reviewRepository.findByTranslationId(translation.id) ?: throw NotFoundException()
-    if (row.status != AiReviewStatus.APPROVED ||
-      !AiReviewEligibility.isReviewForCurrentText(translation, row)
-    ) {
+    val row = get(translation.id)
+    if (!AiReviewEligibility.isAiApproval(translation, row)) {
       throw BadRequestException(Message.AI_REVIEW_NOT_AN_APPROVAL)
     }
     translationService.setStateBatch(translation, state)
     resolve(row, status, userId)
+    if (status == AiReviewStatus.REJECTED) row.rule?.id?.let { ruleRepository.addToRejectedCount(it, 1) }
     publishRow(row)
     return row
   }

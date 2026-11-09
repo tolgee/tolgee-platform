@@ -7,7 +7,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.ee.api.v2.hateoas.model.aiReview.SourceChangeSettingsModel
 import io.tolgee.ee.data.aiReview.SourceChangeSettingsRequest
-import io.tolgee.ee.service.aiReview.SourceChangeSettingsService
+import io.tolgee.ee.service.aiReview.SourceChangeSettingsProviderEeImpl
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "AI review source change settings")
 @OpenApiUnstableOperationExtension
 class SourceChangeSettingsController(
-  private val sourceChangeSettingsService: SourceChangeSettingsService,
+  private val sourceChangeSettingsProvider: SourceChangeSettingsProviderEeImpl,
   private val projectHolder: ProjectHolder,
 ) {
   @GetMapping("")
@@ -48,7 +48,7 @@ class SourceChangeSettingsController(
     @RequestBody @Valid request: SourceChangeSettingsRequest,
   ): SourceChangeSettingsModel {
     val project =
-      sourceChangeSettingsService.update(
+      sourceChangeSettingsProvider.update(
         projectHolder.project.id,
         aiApproved = request.aiApproved,
         humanEdited = request.humanEdited,
@@ -58,8 +58,8 @@ class SourceChangeSettingsController(
   }
 
   private fun toModel(project: ProjectDto): SourceChangeSettingsModel {
-    val effective = sourceChangeSettingsService.getEffective(project)
-    val locked = sourceChangeSettingsService.isProtectReviewed(project.id)
+    val effective = sourceChangeSettingsProvider.getEffective(project)
+    val locked = sourceChangeSettingsProvider.isProtectReviewed(project.id)
     return SourceChangeSettingsModel(
       aiApproved = effective.aiApproved,
       humanEdited = effective.humanEdited,

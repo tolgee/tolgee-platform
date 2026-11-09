@@ -155,6 +155,7 @@ declare namespace DataCy {
         "ai-review-rule-form-prompt-item": true;
         "ai-review-rule-form-prompt-playground": true;
         "ai-review-rule-form-save": true;
+        "ai-review-rule-form-scope-option": true;
         "ai-review-rule-form-skip-qa": true;
         "ai-review-rule-form-tag-in": true;
         "ai-review-rule-form-tag-not-in": true;

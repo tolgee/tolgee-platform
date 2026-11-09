@@ -12,7 +12,7 @@ import {
 } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 import { RuleLanguageOverrides } from 'tg.ee.module/aiReview/rules/dialog/RuleLanguageOverrides';
 import { RulePromptSelect } from 'tg.ee.module/aiReview/rules/dialog/RulePromptSelect';
-import { RuleSummarySection } from 'tg.ee.module/aiReview/rules/dialog/RuleSummarySection';
+import { CollapsibleSummaryRow } from 'tg.component/common/CollapsibleSummaryRow';
 
 export const RuleAdvancedSection = () => {
   const { t } = useTranslate();
@@ -53,10 +53,17 @@ export const RuleAdvancedSection = () => {
       );
 
   return (
-    <RuleSummarySection
+    <CollapsibleSummaryRow
       label={t('ai_review_rule_form_advanced_title', 'Advanced')}
       primary={promptName}
-      secondaryLines={[[overridesPart, qaPart].filter(Boolean).join(' • ')]}
+      secondaryLines={[
+        qaPart
+          ? t('ai_review_rule_summary_advanced', '{overrides} • {qa}', {
+              overrides: overridesPart,
+              qa: qaPart,
+            })
+          : overridesPart,
+      ]}
       expanded={expanded}
       onToggle={() => setExpanded(!expanded)}
       dataCy="ai-review-rule-form-advanced-toggle"
@@ -81,7 +88,7 @@ export const RuleAdvancedSection = () => {
             sx={{ alignItems: 'flex-start', marginLeft: 0, gap: 1 }}
             control={
               <Checkbox
-                sx={{ padding: 0, marginTop: '1px' }}
+                sx={{ padding: 0 }}
                 checked={values.skipOpenQaIssues}
                 disabled={fullNever}
                 onChange={(_, checked) =>
@@ -109,6 +116,6 @@ export const RuleAdvancedSection = () => {
           />
         )}
       </Box>
-    </RuleSummarySection>
+    </CollapsibleSummaryRow>
   );
 };

@@ -3,6 +3,7 @@ package io.tolgee.ee.component.aiReview
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionRef
+import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
@@ -26,12 +27,13 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.KeyMetaRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.runSentryCatching
-import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -44,8 +46,9 @@ class AiReviewActivityListener(
   private val projectService: ProjectService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val translationRepository: TranslationRepository,
+  private val reviewRepository: TranslationAiReviewRepository,
   private val objectMapper: ObjectMapper,
-  private val entityManager: EntityManager,
+  private val keyMetaRepository: KeyMetaRepository,
   private val aiReviewActionService: AiReviewActionService,
   private val aiReviewRunService: AiReviewRunService,
 ) : BypassableActivityListener {
@@ -56,16 +59,17 @@ class AiReviewActivityListener(
   fun onActivity(event: OnProjectActivityEvent) {
     if (bypass) return
     runSentryCatching {
-      val projectId = event.activityRevision.projectId ?: return
-      if (event.activityRevision.batchJobChunkExecution != null) return
+      val revision = event.activityRevision
+      val projectId = revision.projectId ?: return
+      val entities = event.modifiedEntities.values.flatMap { it.values }
+      if (revision.batchJobChunkExecution != null) {
+        applyHumanStateChanges(projectId, entities, revision.systemActor, revision.authorId)
+        return
+      }
 
       handleBaseLanguageChanged(event, projectId)
-      applyTranslationChanges(
-        projectId,
-        event.modifiedEntities.values.flatMap { it.values },
-        systemActor = event.activityRevision.systemActor,
-        authorId = event.activityRevision.authorId,
-      )
+      applyHumanStateChanges(projectId, entities, revision.systemActor, revision.authorId)
+      applyModifiedEntities(projectId, entities)
     }
   }
 
@@ -74,7 +78,11 @@ class AiReviewActivityListener(
     if (bypass) return
     runSentryCatching {
       val projectId = event.job.projectId ?: return
-      handleFinalizedActivity(event, projectId)
+      when (event.job.type) {
+        BatchJobType.AI_REVIEW -> Unit
+        BatchJobType.QA_CHECK -> startReviewsReadyAfterQa(event, projectId)
+        else -> applyActivityOfJob(event, projectId)
+      }
       selfHealAfterJob(event, projectId)
     }
   }
@@ -96,24 +104,13 @@ class AiReviewActivityListener(
     }
   }
 
-  private fun handleFinalizedActivity(
+  private fun applyActivityOfJob(
     event: OnBatchJobFinalized,
     projectId: Long,
   ) {
-    if (event.job.type == BatchJobType.AI_REVIEW) return
-    if (event.job.type == BatchJobType.QA_CHECK) {
-      handleQaFinalized(event, projectId)
-      return
-    }
-
     val activityRevisionId = event.activityRevisionId ?: return
-    val entities = activityService.findModifiedEntitiesByRevisionId(activityRevisionId)
-    applyTranslationChanges(
-      projectId,
-      entities,
-      systemActor = event.job.type.systemActor,
-      authorId = event.job.authorId,
-    )
+    if (!isAiReviewOn(projectId) && !reviewRepository.existsOnKeysOfRevisionTranslations(activityRevisionId)) return
+    applyModifiedEntities(projectId, activityService.findModifiedEntitiesByRevisionId(activityRevisionId))
   }
 
   private fun selfHealAfterJob(
@@ -133,7 +130,7 @@ class AiReviewActivityListener(
     return objectMapper.convertValue(params, QaCheckJobParams::class.java).handlingStuckStaleItems
   }
 
-  private fun handleQaFinalized(
+  private fun startReviewsReadyAfterQa(
     event: OnBatchJobFinalized,
     projectId: Long,
   ) {
@@ -147,42 +144,62 @@ class AiReviewActivityListener(
     aiReviewQueueService.startJobsForReady(projectId, translationIds)
   }
 
-  private fun applyTranslationChanges(
+  private fun applyModifiedEntities(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
-    systemActor: SystemActor?,
-    authorId: Long?,
   ) {
-    if (isAiReviewOn(projectId)) handleHumanUnReview(entities, systemActor, authorId)
-    handleKeyScopeChanged(projectId, entities)
+    startDemotionForKeyScopeChanges(projectId, entities)
     val textChanged = textChangedTranslations(entities)
     if (textChanged.isEmpty()) return
+    // README 3.4: a text change deletes rows even while the feature is off.
+    if (!isAiReviewOn(projectId) && !hasRowsOnKeysOf(textChanged)) return
 
     val baseLanguageId = languageService.getProjectBaseLanguage(projectId).id
     aiReviewQueueService.onSourceChanged(projectId, baseTextKeyIds(textChanged, baseLanguageId))
     aiReviewQueueService.onTextChanged(projectId, textChanged.map { it.entityId })
   }
 
-  private fun handleHumanUnReview(
+  private fun applyHumanStateChanges(
+    projectId: Long,
     entities: List<ActivityModifiedEntity>,
     systemActor: SystemActor?,
     authorId: Long?,
   ) {
     if (systemActor != null) return
-    val unReviewedIds = entities.filter { isHumanUnReview(it) }.map { it.entityId }
-    if (unReviewedIds.isEmpty()) return
-    aiReviewActionService.markRejectedByStateChange(unReviewedIds, authorId)
+    // Also while the feature is off: a kept row would make the human review AI-managed again
+    // when the feature comes back.
+    val reviewedIds = entities.filter { isReview(it) }.map { it.entityId }
+    if (reviewedIds.isNotEmpty()) aiReviewActionService.releaseToHumanReview(projectId, reviewedIds)
+    val unReviews = entities.filter { isUnReview(it) }
+    if (unReviews.isEmpty()) return
+    aiReviewActionService.settleHumanUnReview(
+      projectId,
+      unReviews.map { it.entityId },
+      unReviews.filter { it.modifications.containsKey("text") }.map { it.entityId }.toSet(),
+      authorId,
+      isAiReviewOn(projectId),
+    )
   }
 
-  private fun isHumanUnReview(entity: ActivityModifiedEntity): Boolean {
-    if (entity.entityClass != Translation::class.simpleName) return false
-    if (entity.revisionType != RevisionType.MOD) return false
-    val stateChange = entity.modifications["state"] ?: return false
+  private fun isUnReview(entity: ActivityModifiedEntity): Boolean {
+    val stateChange = translationStateChange(entity) ?: return false
     return stateChange.old?.toString() == TranslationState.REVIEWED.name &&
       stateChange.new?.toString() == TranslationState.TRANSLATED.name
   }
 
-  private fun handleKeyScopeChanged(
+  private fun isReview(entity: ActivityModifiedEntity): Boolean {
+    val stateChange = translationStateChange(entity) ?: return false
+    return stateChange.old?.toString() != TranslationState.REVIEWED.name &&
+      stateChange.new?.toString() == TranslationState.REVIEWED.name
+  }
+
+  private fun translationStateChange(entity: ActivityModifiedEntity): PropertyModification? {
+    if (entity.entityClass != Translation::class.simpleName) return null
+    if (entity.revisionType != RevisionType.MOD) return null
+    return entity.modifications["state"]
+  }
+
+  private fun startDemotionForKeyScopeChanges(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
   ) {
@@ -200,20 +217,13 @@ class AiReviewActivityListener(
             it.revisionType != RevisionType.DEL &&
             it.modifications.containsKey("tags")
         }.map { it.entityId }
-    val keyIds = namespaceChangedKeyIds + keyIdsOfKeyMetas(tagsChangedKeyMetaIds)
+    if (namespaceChangedKeyIds.isEmpty() && tagsChangedKeyMetaIds.isEmpty()) return
+    if (!isAiReviewOn(projectId)) return
+    val keyIds =
+      namespaceChangedKeyIds +
+        tagsChangedKeyMetaIds.chunked(IN_CLAUSE_CHUNK).flatMap { keyMetaRepository.findKeyIdsByIds(it) }
     if (keyIds.isEmpty()) return
     aiReviewQueueService.startDemotionJob(projectId, keyIds.distinct())
-  }
-
-  private fun keyIdsOfKeyMetas(keyMetaIds: List<Long>): List<Long> {
-    if (keyMetaIds.isEmpty()) return emptyList()
-    return keyMetaIds.chunked(IN_CLAUSE_CHUNK).flatMap { chunk ->
-      entityManager
-        .createNativeQuery("select key_id from key_meta where id in :ids")
-        .setParameter("ids", chunk)
-        .resultList
-        .map { (it as Number).toLong() }
-    }
   }
 
   /**
@@ -248,6 +258,12 @@ class AiReviewActivityListener(
         it.revisionType != RevisionType.DEL &&
         it.modifications.containsKey("text")
     }
+
+  private fun hasRowsOnKeysOf(textChanged: List<ActivityModifiedEntity>): Boolean =
+    textChanged
+      .map { it.entityId }
+      .chunked(IN_CLAUSE_CHUNK)
+      .any { reviewRepository.existsOnKeysOfTranslations(it) }
 
   private fun isAiReviewOn(projectId: Long): Boolean {
     // The activity can describe a project hard-delete, so the project may be gone already.

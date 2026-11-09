@@ -213,7 +213,7 @@ class AnthropicApiServiceTest {
 
   private fun createParams(
     shouldOutputJson: Boolean,
-    responseSchema: LlmResponseSchema? = null,
+    responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION,
   ): LlmParams {
     return LlmParams(
       messages =

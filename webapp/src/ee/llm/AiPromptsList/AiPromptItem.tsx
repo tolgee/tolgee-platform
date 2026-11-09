@@ -82,22 +82,23 @@ export const AiPromptItem = ({ prompt }: Props) => {
     setMenuOpen(false);
     confirmation({
       message: (
-        <span>
-          <T
-            keyName="ai_prompts_delete_message"
-            params={{ name: prompt.name }}
-          />
+        <Box display="grid" gap={1}>
+          <div>
+            <T
+              keyName="ai_prompts_delete_message"
+              params={{ name: prompt.name }}
+            />
+          </div>
           {prompt.activeRuleCount > 0 && (
-            <span data-cy="ai-review-prompt-delete-warning">
-              {' '}
+            <div data-cy="ai-review-prompt-delete-warning">
               <T
                 keyName="ai_review_prompt_delete_warning"
                 defaultValue="{count, plural, one {# active rule uses this prompt. It will switch to Dry run with the default review prompt.} other {# active rules use this prompt. They will switch to Dry run with the default review prompt.}}"
                 params={{ count: prompt.activeRuleCount }}
               />
-            </span>
+            </div>
           )}
-        </span>
+        </Box>
       ),
       confirmButtonText: <T keyName="ai_prompt_delete_confirm" />,
       onConfirm() {

@@ -84,63 +84,6 @@ class AiReviewRuleEvaluatorTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `forEachDecision visits every non-base key-language pair once`() {
-    testData.addKeyWithTranslations("checkout.cancel")
-    testDataService.saveTestData(testData.root)
-
-    val visited = mutableListOf<Pair<Long, Long>>()
-    evaluator.forEachDecision(testData.project.id, null, null) { keyId, languageId, _ ->
-      visited.add(keyId to languageId)
-    }
-    visited.size.assert.isEqualTo(4)
-    visited
-      .toSet()
-      .size.assert
-      .isEqualTo(4)
-    visited
-      .map { it.second }
-      .toSet()
-      .assert
-      .containsExactlyInAnyOrder(testData.german.id, testData.french.id)
-  }
-
-  @Test
-  fun `forEachDecision respects keyIds and languageIds filters`() {
-    testData.addKeyWithTranslations("checkout.cancel")
-    testDataService.saveTestData(testData.root)
-
-    val visited = mutableListOf<Pair<Long, Long>>()
-    evaluator.forEachDecision(testData.project.id, listOf(testData.key.id), listOf(testData.french.id)) { k, l, _ ->
-      visited.add(k to l)
-    }
-    visited.assert.containsExactly(testData.key.id to testData.french.id)
-  }
-
-  @Test
-  fun `countDecisions groups keys with the same scope`() {
-    testData.addKeyWithTranslations("checkout.cancel")
-    testData.addKeyWithTranslations("checkout.back")
-    testData.addKeyWithTranslations("legal.terms", tags = listOf("legal"))
-    testDataService.saveTestData(testData.root)
-
-    val counts = evaluator.countDecisions(testData.project.id, null, listOf(testData.german.id))
-    val reviewCount = counts.filter { it.decision is RuleDecision.Review }.sumOf { it.keyCount }
-    val noRuleCount = counts.filter { it.decision == RuleDecision.NoRule }.sumOf { it.keyCount }
-    reviewCount.assert.isEqualTo(3)
-    noRuleCount.assert.isEqualTo(1)
-    counts
-      .single { it.decision is RuleDecision.Review }
-      .keyCount.assert
-      .isEqualTo(3)
-
-    var perKeyReviews = 0L
-    evaluator.forEachDecision(testData.project.id, null, listOf(testData.german.id)) { _, _, decision ->
-      if (decision is RuleDecision.Review) perKeyReviews++
-    }
-    perKeyReviews.assert.isEqualTo(reviewCount)
-  }
-
-  @Test
   fun `translations that are not eligible`() {
     val base = testData.englishTranslationBuilder
     val empty = testData.addKeyWithTranslations("k.empty", deText = "").de

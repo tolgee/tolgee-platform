@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight } from '@untitled-ui/icons-react';
 
 const StyledHeader = styled('button')`
   display: grid;
-  grid-template-columns: 110px 1fr auto;
+  grid-template-columns: ${({ theme }) => theme.spacing(14)} 1fr auto;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(1.5)};
   width: 100%;
@@ -23,7 +23,7 @@ const StyledHeader = styled('button')`
 
 const StyledLabel = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
-  font-size: 13px;
+  font-size: ${({ theme }) => theme.typography.caption.fontSize}px;
 `;
 
 const StyledSecondary = styled(Typography)`
@@ -43,7 +43,7 @@ type Props = {
   children: ReactNode;
 };
 
-export const RuleSummarySection = ({
+export const CollapsibleSummaryRow = ({
   label,
   primary,
   secondaryLines,
@@ -70,7 +70,7 @@ export const RuleSummarySection = ({
       )}
     </StyledHeader>
     <Collapse in={expanded}>
-      <Box padding="4px 14px 16px">{children}</Box>
+      <Box sx={{ px: 1.75, pt: 0.5, pb: 2 }}>{children}</Box>
     </Collapse>
   </div>
 );

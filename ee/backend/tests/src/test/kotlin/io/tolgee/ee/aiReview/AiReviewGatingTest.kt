@@ -116,7 +116,7 @@ class AiReviewGatingTest : AuthorizedControllerTest() {
 
   @Test
   fun `losing the feature keeps the rows and stops processing`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
 
@@ -144,7 +144,7 @@ class AiReviewGatingTest : AuthorizedControllerTest() {
 
   @Test
   fun `regaining the feature reviews the queued rows`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     executeInNewTransaction(platformTransactionManager) {

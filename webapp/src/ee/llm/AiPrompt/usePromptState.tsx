@@ -5,6 +5,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOpenedPrompt } from './useOpenedPrompt';
 import { useProject } from 'tg.hooks/useProject';
 import { PromptItem } from './PromptLoadMenu';
+import { PromptType } from './PromptTypeToggle';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
@@ -28,6 +29,9 @@ const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
   'GLOSSARY',
   'SCREENSHOT',
 ];
+
+const storedBasicOptions = (item: PromptItem) =>
+  item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS;
 
 type Props = {
   language: LanguageModel;
@@ -56,7 +60,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const [provider, setProvider] = useState<string>('default');
   const [errors, setErrors] = useState<EditorError[]>();
-  const [promptType, setPromptType] = useState<'TRANSLATE' | 'REVIEW'>(
+  const [promptType, setPromptType] = useState<PromptType>(
     openPromptType ?? 'TRANSLATE'
   );
   const [reviewCriteria, setReviewCriteria] = useState('');
@@ -108,11 +112,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
         return true;
       }
       if (type === 'basic') {
-        // Mirrors updateForm, which falls back to the defaults: a prompt
-        // without stored options must not count as an unsaved change.
-        const lastOptions = new Set(
-          openPromptData.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS
-        );
+        const lastOptions = new Set(storedBasicOptions(openPromptData));
         const newOptions = new Set(options);
         return !(
           lastOptions.size === newOptions.size &&
@@ -163,7 +163,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
     setOpenPrompt(item.id);
     setProvider(item.providerName);
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
-    setOptions(item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS);
+    setOptions(storedBasicOptions(item));
     setPromptType(item.type ?? 'TRANSLATE');
     setReviewCriteria(item.reviewCriteria ?? '');
     if (!tab || overrideTab) {

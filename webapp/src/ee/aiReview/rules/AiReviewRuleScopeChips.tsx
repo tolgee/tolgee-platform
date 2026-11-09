@@ -3,6 +3,7 @@ import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { useListFormatter } from 'tg.hooks/useLocale';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
 
@@ -13,6 +14,7 @@ type Props = {
 export const AiReviewRuleScopeChips = ({ rule }: Props) => {
   const { t } = useTranslate();
   const languages = useProjectLanguages();
+  const formatList = useListFormatter();
 
   const tagLabel = (tag: string) =>
     tag === '' ? t('ai_review_chip_without_tags', 'Without tags') : tag;
@@ -26,11 +28,11 @@ export const AiReviewRuleScopeChips = ({ rule }: Props) => {
   const languagesLabel =
     rule.languageIds.length === 0
       ? t('ai_review_chip_all_languages', 'All languages')
-      : rule.languageIds
-          .map(
+      : formatList(
+          rule.languageIds.map(
             (id) => languages.find((l) => l.id === id)?.name ?? id.toString()
           )
-          .join(', ');
+        );
 
   const chips: {
     key: string;

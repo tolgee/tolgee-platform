@@ -9,15 +9,14 @@ import {
   selectAll,
 } from '../../common/batchOperations';
 import {
-  assertRunDialogVariant,
   restoreAiReviewFeature,
-  startRun,
   withoutAiReviewFeature,
 } from '../../common/aiReview';
-import { HOST } from '../../common/constants';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 describe('AI review batch operation', () => {
   let projectId: number;
+  const view = new E2TranslationsView();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -36,22 +35,12 @@ describe('AI review batch operation', () => {
   });
 
   function visit() {
-    cy.visit(
-      `${HOST}/projects/${projectId}/translations?languages=en&languages=de`
-    );
-  }
-
-  function openRunDialog() {
-    selectAll();
-    openBatchOperationMenu();
-    gcyAdvanced({ value: 'batch-select-item', id: 'ai_review' }).click();
-    gcy('batch-operations-submit-button').click();
-    assertRunDialogVariant('review');
+    view.visit(projectId, { languages: ['en', 'de'] });
   }
 
   it('preview shows counts and skip reasons', () => {
     visit();
-    openRunDialog();
+    view.openAiReviewRunDialog().assertVariant('review');
     gcy('ai-review-run-to-review').should('be.visible');
     gcyAdvanced({
       value: 'ai-review-run-skip-reason',
@@ -73,27 +62,23 @@ describe('AI review batch operation', () => {
       statusCode: 200,
       body: { toReview: 1500, dryRunOnly: 0, skipped: {} },
     });
-    openRunDialog();
+    view.openAiReviewRunDialog().assertVariant('review');
     gcy('ai-review-run-warning').should('be.visible');
   });
 
   it('start runs a visible job to completion', () => {
     visit();
-    openRunDialog();
-    startRun();
+    view.openAiReviewRunDialog().assertVariant('review').start();
     cy.gcy('batch-operation-dialog-ok', { timeout: 60_000 }).click();
   });
 
   it('re-review checkbox changes the counts', () => {
     visit();
-    selectAll();
-    openBatchOperationMenu();
-    gcyAdvanced({ value: 'batch-select-item', id: 'ai_review' }).click();
-    gcy('batch-operations-submit-button').click();
+    const runDialog = view.openAiReviewRunDialog();
     gcy('ai-review-run-to-review')
       .invoke('attr', 'data-cy-count')
       .then((withoutReReview) => {
-        gcy('ai-review-run-cancel').click();
+        runDialog.cancel();
         gcy('ai-review-batch-re-review').click();
         gcy('batch-operations-submit-button').click();
         gcy('ai-review-run-to-review')

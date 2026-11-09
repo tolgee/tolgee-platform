@@ -1,10 +1,14 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.AbstractChunkProcessor
+import io.tolgee.batch.ChunkItemFailedException
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.AiReviewRequest
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.model.batch.params.AiReviewJobParams
 import io.tolgee.service.aiReview.AiReviewBatchService
 import kotlinx.coroutines.ensureActive
@@ -16,6 +20,7 @@ import kotlin.coroutines.CoroutineContext
 class AiReviewChunkProcessor(
   private val aiReviewBatchService: AiReviewBatchService,
   private val progressManager: ProgressManager,
+  private val currentDateProvider: CurrentDateProvider,
   objectMapper: ObjectMapper,
 ) : AbstractChunkProcessor<AiReviewRequest, AiReviewJobParams, Long>(objectMapper) {
   override fun process(
@@ -23,9 +28,22 @@ class AiReviewChunkProcessor(
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
   ) {
+    val successfulTargets = mutableListOf<Long>()
     chunk.forEach { translationId ->
       coroutineContext.ensureActive()
-      aiReviewBatchService.reviewTranslation(job, translationId)
+      try {
+        aiReviewBatchService.reviewTranslation(job, translationId)
+      } catch (e: LlmRateLimitedException) {
+        throw ChunkItemFailedException(
+          Message.LLM_RATE_LIMITED,
+          successfulTargets,
+          e,
+          (e.retryAt - currentDateProvider.date.time).toInt(),
+          increaseFactor = 1,
+          maxRetries = -1,
+        )
+      }
+      successfulTargets += translationId
       progressManager.reportSingleChunkProgress(job.id)
     }
   }

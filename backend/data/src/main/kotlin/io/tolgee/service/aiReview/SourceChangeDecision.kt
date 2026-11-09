@@ -10,4 +10,11 @@ data class SourceChangeDecision(
   val newState: TranslationState? = TranslationState.TRANSLATED,
   val setAuto: Boolean? = null,
   val deleteAiReviewRow: Boolean = false,
-)
+) {
+  companion object {
+    fun keepOrTranslated(keepState: Boolean): SourceChangeDecision {
+      if (keepState) return SourceChangeDecision(newState = null)
+      return SourceChangeDecision()
+    }
+  }
+}

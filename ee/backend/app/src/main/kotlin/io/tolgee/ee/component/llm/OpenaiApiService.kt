@@ -50,7 +50,7 @@ class OpenaiApiService :
         response_format =
           if (params.shouldOutputJson) {
             when (config.format) {
-              "json_schema" -> RequestResponseFormat.of(params.responseSchema ?: TRANSLATION_RESPONSE_SCHEMA)
+              "json_schema" -> RequestResponseFormat.of(params.responseSchema)
               else -> null
             }
           } else {

@@ -13,6 +13,9 @@ import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { components } from 'tg.service/apiSchema.generated';
 import { Label } from './Label';
 import { AiPlaygroundPreview } from 'tg.views/projects/translations/translationVisual/AiPlaygroundPreview';
+import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
+import { AiReviewPlaygroundResult } from 'tg.ee.module/aiReview/translations/AiReviewPlaygroundResult';
+import { PromptType } from './PromptTypeToggle';
 
 const StyledPre = styled(Box)`
   flex-grow: 1;
@@ -34,7 +37,7 @@ type Props = {
   isPlural: boolean;
   locale: string;
   loading: boolean;
-  promptType?: 'TRANSLATE' | 'REVIEW';
+  promptType?: PromptType;
   issues?: AiReviewIssueModel[] | null;
   score?: number | null;
 };
@@ -56,12 +59,7 @@ export const AiResult = ({
   });
 
   const isReview = promptType === 'REVIEW';
-  const reviewIssues = isReview ? issues ?? undefined : undefined;
-  const reviewScore = isReview ? score ?? undefined : undefined;
-
-  const hasParsedResult = isReview
-    ? reviewScore !== undefined
-    : Boolean(json?.output);
+  const hasParsedResult = isReview ? score != null : Boolean(json?.output);
   const mode = hasParsedResult ? _mode : 'raw';
 
   return (
@@ -113,23 +111,26 @@ export const AiResult = ({
             </Box>
           )}
         </Box>
-      ) : isReview ? (
+      ) : isReview && score != null ? (
         <Box display="grid" gap={1} data-cy="ai-prompt-result-review">
-          <AiPlaygroundPreview
-            locale={locale}
-            isPlural={isPlural}
-            translation={undefined}
-            score={reviewScore}
-            issues={reviewIssues}
-          />
+          <AiPlaygroundPreview>
+            <AiReviewPlaygroundResult
+              score={score}
+              issues={issues ?? undefined}
+            />
+          </AiPlaygroundPreview>
         </Box>
       ) : (
         <Box display="grid" gap={1} data-cy="ai-prompt-result-translation">
-          <AiPlaygroundPreview
-            locale={locale}
-            isPlural={isPlural}
-            translation={json?.output}
-          />
+          <AiPlaygroundPreview>
+            <TranslationVisual
+              text={json?.output}
+              isPlural={isPlural}
+              locale={locale}
+              maxLines={3}
+              extraPadding={false}
+            />
+          </AiPlaygroundPreview>
           {json?.contextDescription && (
             <StyledDescription>{json?.contextDescription}</StyledDescription>
           )}

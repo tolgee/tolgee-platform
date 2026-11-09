@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Box, styled, Tooltip } from '@mui/material';
 import { DotsVertical } from '@untitled-ui/icons-react';
 
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 import { getTextDiff } from 'tg.component/activity/types/getTextDiff';
 import { getStateChange } from 'tg.component/activity/types/getStateChange';
@@ -12,13 +11,9 @@ import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/Activ
 import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../../common/SmallActionButton';
 import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
-import { UserName } from 'tg.component/common/UserName';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
-import {
-  SystemActorAvatar,
-  SystemActorLabel,
-} from 'tg.component/activity/SystemActor';
+import { ActorAvatar, ActorName } from 'tg.component/activity/SystemActor';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -125,31 +120,20 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
     <StyledContainer data-cy="translation-history-item">
       <Tooltip
         title={
-          systemActor ? (
-            <SystemActorLabel
-              systemActor={systemActor}
-              authorName={entry.author?.name}
-              dataCySpans={false}
-            />
-          ) : (
-            <UserName {...entry.author} />
-          )
+          <ActorName
+            systemActor={systemActor}
+            author={entry.author}
+            dataCySpans={false}
+          />
         }
       >
         {systemActor ? (
           <StyledAvatar data-cy="activity-system-actor">
-            <SystemActorAvatar systemActor={systemActor} />
+            <ActorAvatar systemActor={systemActor} />
           </StyledAvatar>
         ) : (
           <StyledAvatar>
-            <AvatarImg
-              owner={{
-                ...entry.author,
-                type: 'USER',
-                id: entry.author?.id as number,
-              }}
-              size={24}
-            />
+            <ActorAvatar author={entry.author} />
           </StyledAvatar>
         )}
       </Tooltip>

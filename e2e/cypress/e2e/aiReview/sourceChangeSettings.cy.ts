@@ -3,17 +3,16 @@ import {
   getProjectByNameFromTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { HOST } from '../../common/constants';
-import { gcy, gcyAdvanced } from '../../common/shared';
+import {
+  gcy,
+  gcyAdvanced,
+  visitProjectSettingsAdvanced,
+} from '../../common/shared';
 import {
   restoreAiReviewFeature,
   withoutAiReviewFeature,
 } from '../../common/aiReview';
 import { waitForGlobalLoading } from '../../common/loading';
-
-function visitAdvancedSettings(projectId: number) {
-  return cy.visit(`${HOST}/projects/${projectId}/manage/edit/advanced`);
-}
 
 describe('AI review source change settings', () => {
   let projectId: number;
@@ -40,7 +39,7 @@ describe('AI review source change settings', () => {
   });
 
   it('shows the defaults in the advanced project settings', () => {
-    visitAdvancedSettings(projectId);
+    visitProjectSettingsAdvanced(projectId);
     gcy('ai-review-source-change-settings').should('be.visible');
     gcyAdvanced({
       value: 'source-change-select',
@@ -60,7 +59,7 @@ describe('AI review source change settings', () => {
   });
 
   it('a maintainer changes a value and it survives a reload', () => {
-    visitAdvancedSettings(projectId);
+    visitProjectSettingsAdvanced(projectId);
     gcyAdvanced({
       value: 'source-change-select',
       field: 'humanEdited',
@@ -80,7 +79,7 @@ describe('AI review source change settings', () => {
 
   it('hides the AI approved row without the AI review feature', () => {
     withoutAiReviewFeature();
-    visitAdvancedSettings(projectId);
+    visitProjectSettingsAdvanced(projectId);
     gcy('ai-review-source-change-settings').should('be.visible');
     gcyAdvanced({
       value: 'source-change-select',
@@ -93,7 +92,7 @@ describe('AI review source change settings', () => {
   });
 
   it('locks the protected rows under protect reviewed with helper texts', () => {
-    visitAdvancedSettings(protectedProjectId);
+    visitProjectSettingsAdvanced(protectedProjectId);
     gcyAdvanced({ value: 'source-change-select', field: 'aiApproved' }).should(
       'have.attr',
       'aria-disabled',

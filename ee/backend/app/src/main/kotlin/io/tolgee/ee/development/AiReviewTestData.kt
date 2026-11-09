@@ -8,18 +8,20 @@ import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.Language
 import io.tolgee.model.Prompt
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.UserAccount
 import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 
-class AiReviewTestData : BaseTestData() {
+open class AiReviewTestData : BaseTestData() {
   lateinit var german: Language
   lateinit var french: Language
   lateinit var key: Key
@@ -29,6 +31,10 @@ class AiReviewTestData : BaseTestData() {
   lateinit var translatePrompt: Prompt
   lateinit var reviewPrompt: Prompt
   lateinit var otherProjectLanguage: Language
+  lateinit var otherProjectKey: Key
+  lateinit var otherProjectTranslationBuilder: TranslationBuilder
+  lateinit var otherProjectRuleBuilder: AiReviewRuleBuilder
+  lateinit var otherProjectReviewPrompt: Prompt
   lateinit var translator: UserAccount
   lateinit var promptsViewer: UserAccount
   lateinit var englishTranslationBuilder: TranslationBuilder
@@ -94,16 +100,50 @@ class AiReviewTestData : BaseTestData() {
     root
       .addProject(userAccountBuilder.defaultOrganizationBuilder.self) { name = "Other project" }
       .build {
+        self.baseLanguage = addEnglish().self
         otherProjectLanguage = addGerman().self
+        otherProjectKey =
+          addKey { name = "other.key" }
+            .build {
+              addTag("ui")
+              addTranslation("en", "Other")
+              otherProjectTranslationBuilder = addTranslation("de", "Andere")
+            }.self
+        otherProjectRuleBuilder =
+          addAiReviewRule {
+            name = "Other UI"
+            mode = AiReviewRuleMode.ACTIVE
+            threshold = 85
+            tagIn = mutableListOf("ui")
+          }
+        otherProjectReviewPrompt =
+          addPrompt {
+            name = "Other review"
+            providerName = "default"
+            type = PromptType.REVIEW
+          }.self
       }
   }
 
+  val otherProjectTranslation: Translation get() = otherProjectTranslationBuilder.self
+  val otherProjectRule: AiReviewRule get() = otherProjectRuleBuilder.self
+
   fun addRule(ft: FT<AiReviewRule>): AiReviewRuleBuilder = projectBuilder.addAiReviewRule(ft)
+
+  fun addBaseSuggestion(text: String): TranslationSuggestion =
+    projectBuilder.data.keys
+      .single { it.self === key }
+      .addSuggestion {
+        language = englishLanguage
+        author = user
+        translation = text
+        state = TranslationSuggestionState.ACTIVE
+      }.self
 
   fun addReview(
     translationBuilder: TranslationBuilder,
     status: AiReviewStatus,
-    score: Int?,
+    score: Int? = null,
     ft: FT<TranslationAiReview> = {},
   ): TranslationAiReviewBuilder =
     translationBuilder.addAiReview {

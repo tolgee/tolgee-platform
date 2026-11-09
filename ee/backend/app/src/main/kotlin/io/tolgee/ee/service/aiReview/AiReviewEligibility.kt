@@ -5,6 +5,8 @@ import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.aiReview.AiReviewManaged
+import io.tolgee.service.aiReview.AiReviewQueued
 import io.tolgee.service.aiReview.AiReviewTextHash
 
 object AiReviewEligibility {
@@ -14,6 +16,7 @@ object AiReviewEligibility {
     review: TranslationAiReview?,
   ): Boolean {
     if (translation.language.id == baseLanguageId) return false
+    if (isTrashed(translation)) return false
     if (translation.text.isNullOrBlank()) return false
     if (translation.state == TranslationState.DISABLED) return false
     if (translation.outdated) return false
@@ -24,42 +27,38 @@ object AiReviewEligibility {
   fun isRequeuedHumanDecision(review: TranslationAiReview?): Boolean =
     review != null && review.status in HUMAN_DECISIONS && review.reReviewRequested
 
+  fun isTrashed(translation: Translation): Boolean =
+    translation.key.deletedAt != null || translation.key.branch?.deletedAt != null
+
   fun isHumanReviewed(
     translation: Translation,
     review: TranslationAiReview?,
   ): Boolean = translation.state == TranslationState.REVIEWED && !isAiManagedReview(translation, review)
 
-  /**
-   * A Reviewed machine translation whose state the AI set and still manages: an AI approval, an
-   * approval whose text MT replaced under Protect reviewed, or its queued or failed re-review. A human
-   * review clears `auto`, so it never matches.
-   */
+  /** See docs/ai-review/README.md 3.3 "AI-managed review". */
   fun isAiManagedReview(
     translation: Translation,
     review: TranslationAiReview?,
-  ): Boolean {
-    if (isAiApproval(translation, review)) return true
-    if (translation.state != TranslationState.REVIEWED || !translation.auto) return false
-    return review != null && review.status !in NOT_AI_MANAGED
-  }
+  ): Boolean = AiReviewManaged.of(translation, review)
+
+  fun keepsAiManaged(review: TranslationAiReview): Boolean = AiReviewManaged.keepsAiManaged(review)
 
   fun isAiApproval(
     translation: Translation,
     review: TranslationAiReview?,
-  ): Boolean {
-    if (translation.state != TranslationState.REVIEWED) return false
-    if (review == null || review.status != AiReviewStatus.APPROVED) return false
-    return isReviewForCurrentText(translation, review)
-  }
+  ): Boolean = AiReviewManaged.isAiApproval(translation, review)
 
   fun isHumanDecision(review: TranslationAiReview): Boolean = review.status in HUMAN_DECISIONS
+
+  /** See docs/ai-review/README.md 3.4 "A `FAILED` row without a failure reason is only a marker". */
+  fun isMarker(review: TranslationAiReview): Boolean =
+    review.status == AiReviewStatus.FAILED && review.failureReason == null
 
   fun isProtectedReviewed(translation: Translation): Boolean =
     translation.key.project.translationProtection == TranslationProtection.PROTECT_REVIEWED &&
       translation.state == TranslationState.REVIEWED
 
-  fun isQueued(review: TranslationAiReview): Boolean =
-    review.status == AiReviewStatus.PENDING || review.reReviewRequested
+  fun isQueued(review: TranslationAiReview): Boolean = AiReviewQueued.of(review)
 
   fun isReviewForCurrentText(
     translation: Translation,
@@ -68,7 +67,5 @@ object AiReviewEligibility {
 
   fun currentTextHash(translation: Translation): String = AiReviewTextHash.of(translation)
 
-  val HUMAN_DECISIONS = setOf(AiReviewStatus.CONFIRMED, AiReviewStatus.REJECTED)
-
-  private val NOT_AI_MANAGED = HUMAN_DECISIONS + setOf(AiReviewStatus.DRY_RUN_PASS, AiReviewStatus.DRY_RUN_FAIL)
+  val HUMAN_DECISIONS = AiReviewManaged.HUMAN_DECISIONS
 }

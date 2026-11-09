@@ -12,12 +12,15 @@ import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.development.AiReviewTestData
+import io.tolgee.ee.service.aiReview.AiReviewActionService
+import io.tolgee.ee.service.aiReview.AiReviewEligibility
 import io.tolgee.ee.service.aiReview.AiReviewUpdate
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.aiReview.AiReviewRule
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
@@ -65,6 +68,9 @@ class AiReviewJobTest : AbstractSpringTest() {
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
 
   @Autowired
+  private lateinit var aiReviewActionService: AiReviewActionService
+
+  @Autowired
   @MockitoBean
   private lateinit var openaiApiService: OpenaiApiService
 
@@ -106,7 +112,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   fun `Active pass sets REVIEWED, keeps auto and mtProvider, row APPROVED with its snapshot`() {
     testData.deTranslation.auto = true
     testData.deTranslation.mtProvider = MtServiceType.GOOGLE
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -133,7 +139,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `Active fail keeps TRANSLATED, row BELOW_THRESHOLD with issues`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubFail()
 
@@ -152,7 +158,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   @Test
   fun `Dry run pass never changes state`() {
     testData.rule.mode = AiReviewRuleMode.DRY_RUN
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -165,7 +171,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   @Test
   fun `Dry run fail never changes state`() {
     testData.rule.mode = AiReviewRuleMode.DRY_RUN
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubFail()
 
@@ -177,7 +183,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `parse failure on a first review gives FAILED PARSE_ERROR and no state change`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubResponse("this is not json at all")
 
@@ -193,7 +199,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   @Test
   fun `out of credits gives FAILED OUT_OF_CREDITS without an LLM call`() {
     machineTranslationProperties.freeCreditsAmount = 0
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -214,7 +220,7 @@ class AiReviewJobTest : AbstractSpringTest() {
           type = PromptType.REVIEW
         }.self
     testData.rule.prompt = prompt
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -235,7 +241,7 @@ class AiReviewJobTest : AbstractSpringTest() {
           template = "{{#if}}"
         }.self
     testData.rule.prompt = prompt
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -247,7 +253,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `a provider error gives FAILED PROVIDER_ERROR`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     whenever(openaiApiService.translate(any(), any(), any()))
       .thenThrow(FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf("boom")))
@@ -261,7 +267,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `the claim guard lets only one job claim a row`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     val textHash = review(testData.deTranslation.id)!!.textHash
 
@@ -279,12 +285,6 @@ class AiReviewJobTest : AbstractSpringTest() {
         jobId = jobId,
         translationId = testData.deTranslation.id,
         textHash = textHash,
-        ruleId = testData.rule.id,
-        ruleMode = AiReviewRuleMode.ACTIVE.name,
-        promptId = null,
-        promptName = "Default review prompt",
-        promptRevision = null,
-        threshold = 85,
       )
     }
 
@@ -406,11 +406,41 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `under Protect reviewed a failing re-review of human-written text stays AI-managed and sends its badge`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    approvedReviewedTranslation(reReviewRequested = true)
+    testData.deTranslation.auto = false
+    save()
+    stubFail()
+
+    runJob(testData.deTranslation.id)
+
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.get(testData.deTranslation.id)
+      val row = translationAiReviewRepository.findByTranslationId(translation.id)!!
+      row.status.assert.isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
+      translation.state.assert.isEqualTo(TranslationState.REVIEWED)
+      AiReviewEligibility.isAiManagedReview(translation, row).assert.isTrue()
+    }
+    val destination = argumentCaptor<String>()
+    val event = argumentCaptor<WebsocketEvent>()
+    verify(websocketEventPublisher, atLeastOnce()).invoke(destination.capture(), event.capture())
+    val index = destination.allValues.lastIndexOf("/projects/${testData.project.id}/ai-review-updated")
+
+    @Suppress("UNCHECKED_CAST")
+    val updates = event.allValues[index].data as List<AiReviewUpdate>
+    updates
+      .single()
+      .status.assert
+      .isEqualTo(AiReviewStatus.BELOW_THRESHOLD)
+  }
+
+  @Test
   fun `under Protect reviewed a PENDING row on a Reviewed auto text is reviewed with Active rules`() {
     testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
     testData.deTranslation.state = TranslationState.REVIEWED
     testData.deTranslation.auto = true
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -435,7 +465,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   @Test
   fun `deletes the row of a human-reviewed translation without calling the LLM`() {
     testData.deTranslation.state = TranslationState.REVIEWED
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -448,7 +478,7 @@ class AiReviewJobTest : AbstractSpringTest() {
   @Test
   fun `deletes the row when no rule matches any more`() {
     val other = testData.addKeyWithTranslations("plain.key", tags = emptyList())
-    testData.addReview(other.de, AiReviewStatus.PENDING, null)
+    testData.addReview(other.de, AiReviewStatus.PENDING)
     save()
 
     runJob(other.de.self.id)
@@ -459,7 +489,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `text changed during the LLM call drops the result and reviews the new text`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     whenever(openaiApiService.translate(any(), any(), any())).thenAnswer {
       executeInNewTransaction(platformTransactionManager) {
@@ -483,7 +513,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `two jobs on the same row call the LLM once`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -498,7 +528,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `a retried chunk of the same job can claim its item again`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     var calls = 0
     whenever(openaiApiService.translate(any(), any(), any())).thenAnswer {
@@ -514,7 +544,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `key deleted while the job runs is skipped and the job succeeds`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     whenever(openaiApiService.translate(any(), any(), any())).thenAnswer {
       executeInNewTransaction(platformTransactionManager) {
@@ -542,7 +572,7 @@ class AiReviewJobTest : AbstractSpringTest() {
 
   @Test
   fun `state change is logged with the system actor AI_REVIEWER`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -567,8 +597,94 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `an outdated AI approval queued for a re-review keeps its row and leaves the queue`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    approvedReviewedTranslation(reReviewRequested = true)
+    testData.deTranslation.outdated = true
+    save()
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    row.reReviewRequested.assert.isFalse()
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+    verify(openaiApiService, never()).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `an outdated AI-managed PENDING row becomes FAILED and stays`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    testData.deTranslation.outdated = true
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
+    save()
+
+    runJob(testData.deTranslation.id)
+
+    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+    verify(openaiApiService, never()).translate(any(), any(), any())
+  }
+
+  @Test
+  fun `a failed re-review keeps the rule, threshold and prompt of the kept result`() {
+    val stricter = addStricterRuleThatKeepsTheApproval()
+    approvedReviewedTranslation(reReviewRequested = true) {
+      rule = testData.rule
+      promptName = "Old prompt"
+    }
+    save()
+    stubResponse("broken")
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    row.lastFailureReason.assert.isEqualTo(AiReviewFailureReason.PARSE_ERROR)
+    row.rule!!
+      .id.assert
+      .isEqualTo(testData.rule.id)
+    row.threshold.assert.isEqualTo(85)
+    row.promptName.assert.isEqualTo("Old prompt")
+    rejectedCount(stricter.id).assert.isEqualTo(0)
+  }
+
+  @Test
+  fun `a reject after a kept approval charges the approving rule`() {
+    val stricter = addStricterRuleThatKeepsTheApproval()
+    approvedReviewedTranslation(reReviewRequested = true) { rule = testData.rule }
+    save()
+    stubResponse("broken")
+    runJob(testData.deTranslation.id)
+
+    executeInNewTransaction(platformTransactionManager) {
+      aiReviewActionService.reject(translationService.get(testData.deTranslation.id), testData.user.id)
+    }
+
+    rejectedCount(testData.rule.id).assert.isEqualTo(1)
+    rejectedCount(stricter.id).assert.isEqualTo(0)
+  }
+
+  @Test
+  fun `a passing re-review of an approval does not count it again`() {
+    approvedReviewedTranslation(reReviewRequested = true) { rule = testData.rule }
+    save()
+    stubPass()
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    row.score.assert.isEqualTo(100)
+    row.reReviewRequested.assert.isFalse()
+    autoReviewedCount(testData.rule.id).assert.isEqualTo(0)
+  }
+
+  @Test
   fun `websocket event is published after the job`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
     stubPass()
 
@@ -604,6 +720,25 @@ class AiReviewJobTest : AbstractSpringTest() {
       ft(this)
     }
   }
+
+  private fun addStricterRuleThatKeepsTheApproval(): AiReviewRule =
+    testData
+      .addRule {
+        name = "Stricter"
+        mode = AiReviewRuleMode.ACTIVE
+        threshold = APPROVED_SCORE - 2
+        tagIn = mutableListOf("ui")
+      }.self
+
+  private fun rejectedCount(ruleId: Long): Long =
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager.find(AiReviewRule::class.java, ruleId).rejectedCount
+    }
+
+  private fun autoReviewedCount(ruleId: Long): Long =
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager.find(AiReviewRule::class.java, ruleId).autoReviewedCount
+    }
 
   private fun startJob(
     vararg translationIds: Long,

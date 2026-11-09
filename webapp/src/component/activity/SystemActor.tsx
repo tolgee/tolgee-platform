@@ -2,6 +2,63 @@ import { useTheme } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { Stars } from 'tg.component/CustomIcons';
+import { components } from 'tg.service/apiSchema.generated';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { UserName } from 'tg.component/common/UserName';
+
+type Author = {
+  id: number;
+  name?: string;
+  username?: string;
+  avatar?: components['schemas']['Avatar'];
+  deleted?: boolean;
+};
+
+type ActorProps = {
+  systemActor?: string;
+  author?: Author;
+};
+
+export const ActorAvatar = ({ systemActor, author }: ActorProps) => {
+  if (systemActor) {
+    return <SystemActorAvatar systemActor={systemActor} />;
+  }
+  if (!author) {
+    return null;
+  }
+  return (
+    <AvatarImg
+      size={24}
+      owner={{
+        type: 'USER',
+        id: author.id,
+        name: author.name,
+        avatar: author.avatar,
+        deleted: author.deleted,
+      }}
+    />
+  );
+};
+
+export const ActorName = ({
+  systemActor,
+  author,
+  dataCySpans,
+}: ActorProps & { dataCySpans?: boolean }) => {
+  if (systemActor) {
+    return (
+      <SystemActorLabel
+        systemActor={systemActor}
+        authorName={author?.name}
+        dataCySpans={dataCySpans}
+      />
+    );
+  }
+  if (author?.deleted) {
+    return <UserName {...author} />;
+  }
+  return <>{author?.name}</>;
+};
 
 type AvatarProps = {
   systemActor: string;
@@ -47,14 +104,11 @@ const AiReviewerLabel = ({ authorName, dataCySpans }: AiReviewerLabelProps) => {
   const { t } = useTranslate();
 
   if (!authorName) {
+    const label = t('activity_system_actor_ai_reviewer', 'AI reviewer');
     if (dataCySpans) {
-      return (
-        <span data-cy="activity-system-actor">
-          {t('activity_system_actor_ai_reviewer', 'AI reviewer')}
-        </span>
-      );
+      return <span data-cy="activity-system-actor">{label}</span>;
     }
-    return <span>{t('activity_system_actor_ai_reviewer', 'AI reviewer')}</span>;
+    return <span>{label}</span>;
   }
 
   const params = dataCySpans

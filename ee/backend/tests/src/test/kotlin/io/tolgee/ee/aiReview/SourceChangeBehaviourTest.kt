@@ -9,6 +9,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.model.enums.SourceChangeAction
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewStatus
@@ -144,6 +145,28 @@ class SourceChangeBehaviourTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `under Protect reviewed an AI-managed review below threshold is translated and reviewed again`() {
+    testData.project.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.BELOW_THRESHOLD, 40) {
+      rule = testData.rule
+      threshold = 85
+    }
+    save()
+    changeBaseText()
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val de = translation(testData.deTranslation.id)
+      de.text.assert.isNotEqualTo("Jetzt bezahlen")
+      de.state.assert.isEqualTo(TranslationState.REVIEWED)
+      val row = review(testData.deTranslation.id)
+      row?.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+      row!!.textHash.assert.isEqualTo(sha256Hex(de.text!!))
+    }
+  }
+
+  @Test
   fun `a bulk-reviewed text with auto is replaced like in main`() {
     testData.deTranslation.state = TranslationState.REVIEWED
     testData.deTranslation.auto = true
@@ -259,6 +282,70 @@ class SourceChangeBehaviourTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `RETRANSLATE uses the project-wide auto translation config`() {
+    germanConfig().targetLanguage = null
+    setHumanEditedAction(SourceChangeAction.RETRANSLATE)
+    save()
+    changeBaseText()
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      translation(testData.deTranslation.id).text.assert.isNotEqualTo("Jetzt bezahlen")
+      translation(testData.frTranslation.id).text.assert.isNotEqualTo("Payer maintenant")
+    }
+  }
+
+  @Test
+  fun `RETRANSLATE falls back to Keep when the language config turns off the project-wide one`() {
+    germanConfig().usingPrimaryMtService = false
+    testData.projectBuilder.addAutoTranslationConfig { usingPrimaryMtService = true }
+    setHumanEditedAction(SourceChangeAction.RETRANSLATE)
+    save()
+    changeBaseText()
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      translation(testData.frTranslation.id).text.assert.isNotEqualTo("Payer maintenant")
+    }
+    val de = translation(testData.deTranslation.id)
+    de.outdated.assert.isTrue()
+    de.auto.assert.isFalse()
+    de.text.assert.isEqualTo("Jetzt bezahlen")
+  }
+
+  @Test
+  fun `RETRANSLATE falls back to Keep when the change starts no auto translation`() {
+    setHumanEditedAction(SourceChangeAction.RETRANSLATE)
+    save()
+    changeBaseText("")
+
+    waitForNotThrowing(pollTime = 100, timeout = 10_000) {
+      val de = translation(testData.deTranslation.id)
+      de.outdated.assert.isTrue()
+      de.auto.assert.isFalse()
+    }
+  }
+
+  @Test
+  fun `RETRANSLATE falls back to Keep when an accepted suggestion changes the base text`() {
+    setHumanEditedAction(SourceChangeAction.RETRANSLATE)
+    testData.project.suggestionsMode = SuggestionsMode.ENABLED
+    val suggestion = testData.addBaseSuggestion("Pay immediately")
+    save()
+
+    performAuthPut(
+      "$projectUrl/languages/${testData.englishLanguage.id}/key/${testData.key.id}/suggestion/${suggestion.id}/accept",
+      null,
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 100, timeout = 10_000) {
+      val de = translation(testData.deTranslation.id)
+      de.outdated.assert.isTrue()
+      de.auto.assert.isFalse()
+    }
+    Thread.sleep(2000)
+    translation(testData.deTranslation.id).text.assert.isEqualTo("Jetzt bezahlen")
+  }
+
+  @Test
   fun `with AI review off an AI approval behaves like today and loses its row`() {
     aiApproval()
     save()
@@ -293,12 +380,17 @@ class SourceChangeBehaviourTest : AuthorizedControllerTest() {
     testData.project.humanReviewedSourceChangeAction = action
   }
 
-  private fun changeBaseText() {
+  private fun changeBaseText(text: String = "Pay immediately") {
     performAuthPut(
       "$projectUrl/translations",
-      mapOf("key" to "checkout.pay", "translations" to mapOf("en" to "Pay immediately")),
+      mapOf("key" to "checkout.pay", "translations" to mapOf("en" to text)),
     ).andIsOk
   }
+
+  private fun germanConfig() =
+    testData.projectBuilder.data.autoTranslationConfigBuilders
+      .single()
+      .self
 
   private fun sha256Hex(text: String): String =
     MessageDigest

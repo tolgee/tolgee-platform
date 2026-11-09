@@ -1413,6 +1413,7 @@ export interface components {
       points: number;
       severity: string;
     };
+    /** @description Null in the create, update and enable responses. The rule list has the counts. */
     AiReviewRuleCountsModel: {
       /** Format: int64 */
       autoReviewed: number;
@@ -1433,7 +1434,7 @@ export interface components {
     AiReviewRuleModel: {
       branchIn: string[];
       branchNotIn: string[];
-      counts: components["schemas"]["AiReviewRuleCountsModel"];
+      counts?: components["schemas"]["AiReviewRuleCountsModel"];
       enabled: boolean;
       /** Format: int64 */
       id: number;
@@ -2112,7 +2113,7 @@ export interface components {
     };
     CollectionModelAiReviewRuleModel: {
       _embedded?: {
-        rules?: components["schemas"]["AiReviewRuleModel"][];
+        aiReviewRules?: components["schemas"]["AiReviewRuleModel"][];
       };
     };
     CollectionModelAutoTranslationConfigModel: {
@@ -3450,6 +3451,7 @@ export interface components {
         | "ai_review_rule_base_language"
         | "ai_review_duplicate_language_override"
         | "ai_review_not_an_approval"
+        | "ai_review_nothing_to_review"
         | "prompt_type_cannot_be_changed"
         | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
@@ -7455,6 +7457,7 @@ export interface components {
         | "ai_review_rule_base_language"
         | "ai_review_duplicate_language_override"
         | "ai_review_not_an_approval"
+        | "ai_review_nothing_to_review"
         | "prompt_type_cannot_be_changed"
         | "review_prompt_cannot_translate";
       params?: { [key: string]: unknown }[];
@@ -20640,7 +20643,7 @@ export interface operations {
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
-        filterAiReviewLanguage?: string[];
+        filterAiReviewInLang?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -20930,7 +20933,7 @@ export interface operations {
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
-        filterAiReviewLanguage?: string[];
+        filterAiReviewInLang?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21264,7 +21267,7 @@ export interface operations {
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
-        filterAiReviewLanguage?: string[];
+        filterAiReviewInLang?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -27468,7 +27471,7 @@ export interface operations {
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
-        filterAiReviewLanguage?: string[];
+        filterAiReviewInLang?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -27970,7 +27973,7 @@ export interface operations {
           | "NOT_REVIEWED_YET"
         )[];
         /** Limit the AI review filter to these language tags. */
-        filterAiReviewLanguage?: string[];
+        filterAiReviewInLang?: string[];
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */

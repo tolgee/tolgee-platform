@@ -1,10 +1,11 @@
 package io.tolgee.ee.api.v2.hateoas.model.aiReview
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-@Relation(collectionRelation = "rules", itemRelation = "rule")
+@Relation(collectionRelation = "aiReviewRules", itemRelation = "aiReviewRule")
 class AiReviewRuleModel(
   val id: Long,
   val name: String?,
@@ -22,7 +23,8 @@ class AiReviewRuleModel(
   val promptId: Long?,
   val skipOpenQaIssues: Boolean,
   val overrides: List<AiReviewRuleOverrideModel>,
-  val counts: AiReviewRuleCountsModel,
+  @Schema(description = "Null in the create, update and enable responses. The rule list has the counts.")
+  val counts: AiReviewRuleCountsModel?,
 ) : RepresentationModel<AiReviewRuleModel>()
 
 class AiReviewRuleOverrideModel(

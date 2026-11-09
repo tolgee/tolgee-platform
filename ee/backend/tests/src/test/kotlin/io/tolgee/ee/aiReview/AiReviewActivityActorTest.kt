@@ -82,6 +82,16 @@ class AiReviewActivityActorTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `translation history hides a revision with no author and no system actor`() {
+    saveRevision(systemActor = null)
+    performAuthGet("$projectUrl/translations/${testData.deTranslation.id}/history")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded").isAbsent()
+      }
+  }
+
+  @Test
   fun `translation history keeps the author when both are set`() {
     saveRevision(systemActor = SystemActor.AI_REVIEWER, withAuthor = true)
     performAuthGet("$projectUrl/translations/${testData.deTranslation.id}/history")

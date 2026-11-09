@@ -386,11 +386,10 @@ export const useTranslationFilters = ({
             return tag === filters.filterAiReviewOutcomeLanguage;
         }
       });
-      // Sent even with no matching language: the backend then matches nothing
-      // and returns no keys. Omitting the status would return all keys instead.
+      // Always send the status: without it the backend returns all keys.
       filtersQuery.filterAiReviewStatus = filters.filterAiReviewOutcomes;
       if (aiReviewLanguages.length) {
-        filtersQuery.filterAiReviewLanguage = aiReviewLanguages;
+        filtersQuery.filterAiReviewInLang = aiReviewLanguages;
       }
     }
     selectedLanguages

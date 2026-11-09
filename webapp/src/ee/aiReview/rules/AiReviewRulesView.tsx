@@ -15,6 +15,7 @@ import { AiReviewRuleDialog } from 'tg.ee.module/aiReview/rules/dialog/AiReviewR
 import {
   AiReviewRunDialog,
   AiReviewRunVariant,
+  runVariantForMode,
 } from 'tg.ee.module/aiReview/runs/AiReviewRunDialog';
 
 export const AiReviewRulesView = () => {
@@ -59,7 +60,7 @@ export const AiReviewRulesView = () => {
     return <BoxLoading />;
   }
 
-  const rules = rulesLoadable.data?._embedded?.rules ?? [];
+  const rules = rulesLoadable.data?._embedded?.aiReviewRules ?? [];
   const promptNames = Object.fromEntries(
     (promptsLoadable.data?._embedded?.prompts ?? []).map((prompt) => [
       prompt.id,
@@ -142,7 +143,7 @@ export const AiReviewRulesView = () => {
             onRequestRun={(saved) =>
               setRun({
                 ruleId: saved.id,
-                variant: saved.mode === 'DRY_RUN' ? 'score' : 'review',
+                variant: runVariantForMode(saved.mode),
               })
             }
           />

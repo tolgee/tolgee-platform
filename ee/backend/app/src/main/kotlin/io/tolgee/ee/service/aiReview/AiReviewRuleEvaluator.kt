@@ -8,7 +8,6 @@ import io.tolgee.ee.service.aiReview.matching.StrictestRuleSelector
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.branching.BranchService
-import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Service
@@ -17,18 +16,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AiReviewRuleEvaluator(
   private val aiReviewRuleCache: AiReviewRuleCache,
-  private val keyScopeQuery: AiReviewKeyScopeQuery,
-  private val languageService: LanguageService,
   private val branchService: BranchService,
   private val projectService: ProjectService,
   private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
-  data class DecisionCount(
-    val languageId: Long,
-    val decision: RuleDecision,
-    val keyCount: Long,
-  )
-
   class ProjectRules(
     val rules: List<RuleSnapshot>,
     private val branchingEnabled: Boolean,
@@ -60,12 +51,6 @@ class AiReviewRuleEvaluator(
     }
   }
 
-  fun loadRules(projectId: Long): List<RuleSnapshot> = aiReviewRuleCache.get(projectId)
-
-  @Transactional(readOnly = true)
-  fun forProject(projectId: Long): ProjectRules =
-    ProjectRules(loadRules(projectId), isBranchingEnabled(projectId), defaultBranchName(projectId))
-
   @Transactional(readOnly = true)
   fun evaluate(
     translation: Translation,
@@ -76,47 +61,8 @@ class AiReviewRuleEvaluator(
     ).evaluate(translation, activeOnly)
 
   @Transactional(readOnly = true)
-  fun forEachDecision(
-    projectId: Long,
-    keyIds: Collection<Long>?,
-    languageIds: Collection<Long>?,
-    activeOnly: Boolean = false,
-    fn: (keyId: Long, languageId: Long, decision: RuleDecision) -> Unit,
-  ) {
-    val rules = loadRules(projectId)
-    val targetLanguageIds = targetLanguageIds(projectId, languageIds)
-    val branchingEnabled = isBranchingEnabled(projectId)
-    keyScopeQuery.forEachKeyScope(projectId, keyIds, defaultBranchName(projectId)) { scope ->
-      targetLanguageIds.forEach { languageId ->
-        fn(
-          scope.keyId,
-          languageId,
-          StrictestRuleSelector.decide(rules, scope, languageId, branchingEnabled, activeOnly),
-        )
-      }
-    }
-  }
-
-  @Transactional(readOnly = true)
-  fun countDecisions(
-    projectId: Long,
-    keyIds: Collection<Long>?,
-    languageIds: Collection<Long>?,
-  ): List<DecisionCount> {
-    val rules = loadRules(projectId)
-    val targetLanguageIds = targetLanguageIds(projectId, languageIds)
-    val branchingEnabled = isBranchingEnabled(projectId)
-    val counts = mutableMapOf<Pair<Long, RuleDecision>, Long>()
-    keyScopeQuery.groupKeyScopes(projectId, keyIds, defaultBranchName(projectId)).forEach { group ->
-      targetLanguageIds.forEach { languageId ->
-        val decision = StrictestRuleSelector.decide(rules, group.scope, languageId, branchingEnabled)
-        counts.merge(languageId to decision, group.keyCount, Long::plus)
-      }
-    }
-    return counts.map { (languageAndDecision, count) ->
-      DecisionCount(languageAndDecision.first, languageAndDecision.second, count)
-    }
-  }
+  fun forProject(projectId: Long): ProjectRules =
+    ProjectRules(loadRules(projectId), isBranchingEnabled(projectId), defaultBranchName(projectId))
 
   fun decider(projectId: Long): (KeyScope, Long) -> RuleDecision {
     val rules = loadRules(projectId)
@@ -124,15 +70,7 @@ class AiReviewRuleEvaluator(
     return { scope, languageId -> StrictestRuleSelector.decide(rules, scope, languageId, branchingEnabled) }
   }
 
-  private fun targetLanguageIds(
-    projectId: Long,
-    languageIds: Collection<Long>?,
-  ): List<Long> =
-    languageService
-      .getProjectLanguages(projectId)
-      .filter { !it.base }
-      .map { it.id }
-      .filter { languageIds == null || it in languageIds }
+  fun loadRules(projectId: Long): List<RuleSnapshot> = aiReviewRuleCache.get(projectId)
 
   fun defaultBranchName(projectId: Long): String =
     branchService.getDefaultBranch(projectId)?.name ?: Branch.DEFAULT_BRANCH_NAME

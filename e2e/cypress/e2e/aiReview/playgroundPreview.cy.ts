@@ -4,7 +4,7 @@ import {
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import { loadPrompt, openPlayground } from '../../common/aiPlayground';
+import { loadPrompt, openPlayground } from '../../common/prompt';
 
 describe('AI review playground preview', () => {
   let projectId: number;

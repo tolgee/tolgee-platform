@@ -8,9 +8,11 @@ import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRuleCache
 import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
 import io.tolgee.ee.service.aiReview.AiReviewRuleService
+import io.tolgee.ee.service.aiReview.SourceChangeSettingsProviderEeImpl
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.model.enums.PromptType
+import io.tolgee.model.enums.SourceChangeAction
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.testing.assert
@@ -41,6 +43,9 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var promptService: PromptServiceEeImpl
+
+  @Autowired
+  lateinit var sourceChangeSettingsProvider: SourceChangeSettingsProviderEeImpl
 
   lateinit var testData: AiReviewTestData
 
@@ -186,6 +191,27 @@ class AiReviewRuleCacheTest : AbstractSpringTest() {
       .single()
       .promptId.assert
       .isNull()
+  }
+
+  @Test
+  fun `a source change settings update evicts the cached project`() {
+    val projectId = testData.project.id
+    projectService
+      .getDto(projectId)
+      .humanEditedSourceChangeAction.assert
+      .isEqualTo(SourceChangeAction.MARK_OUTDATED)
+
+    sourceChangeSettingsProvider.update(
+      projectId,
+      aiApproved = SourceChangeAction.MARK_OUTDATED,
+      humanEdited = SourceChangeAction.RETRANSLATE,
+      humanReviewed = SourceChangeAction.RETRANSLATE,
+    )
+
+    projectService
+      .getDto(projectId)
+      .humanEditedSourceChangeAction.assert
+      .isEqualTo(SourceChangeAction.RETRANSLATE)
   }
 
   private fun rules() = evaluator.loadRules(testData.project.id)

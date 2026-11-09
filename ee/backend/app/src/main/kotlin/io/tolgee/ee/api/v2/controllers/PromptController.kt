@@ -77,7 +77,7 @@ class PromptController(
     @RequestParam search: String?,
     @RequestParam type: PromptType?,
   ): PagedModel<PromptModel> {
-    if (type == PromptType.REVIEW) checkAiReviewEnabled()
+    checkAiReviewEnabledFor(type)
     val result = promptService.getAllPaged(projectHolder.project.id, pageable, search, visibleTypes(type))
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
@@ -114,7 +114,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
-    if (dto.type == PromptType.REVIEW) checkAiReviewEnabled()
+    checkAiReviewEnabledFor(dto.type)
 
     val result = promptService.createPrompt(projectHolder.project.id, dto)
     return promptModelAssembler.toModel(result)
@@ -127,7 +127,7 @@ class PromptController(
     @PathVariable promptId: Long,
   ): PromptModel {
     val result = promptService.findPromptWithResolvedProvider(projectHolder.project.id, promptId)
-    if (result.type == PromptType.REVIEW) checkAiReviewEnabled()
+    checkAiReviewEnabledFor(result.type)
     return promptModelAssembler.toModel(result)
   }
 
@@ -153,7 +153,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
-    if (promptService.findPrompt(projectHolder.project.id, promptId).type == PromptType.REVIEW) checkAiReviewEnabled()
+    checkAiReviewEnabledForPrompt(promptId)
     val result = promptService.updatePrompt(projectHolder.project.id, promptId, dto)
     return promptModelAssembler.toModel(result)
   }
@@ -172,9 +172,7 @@ class PromptController(
       ),
     )
 
-    if (promptService.findPrompt(projectHolder.project.id, promptId).type == PromptType.REVIEW) {
-      checkAiReviewEnabled()
-    }
+    checkAiReviewEnabledForPrompt(promptId)
     promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 
@@ -246,6 +244,13 @@ class PromptController(
     enabledFeaturesProvider.checkFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
   }
 
+  private fun checkAiReviewEnabledFor(type: PromptType?) {
+    if (type == PromptType.REVIEW) checkAiReviewEnabled()
+  }
+
+  private fun checkAiReviewEnabledForPrompt(promptId: Long) =
+    checkAiReviewEnabledFor(promptService.findPrompt(projectHolder.project.id, promptId).type)
+
   private fun visibleTypes(type: PromptType?): List<PromptType> {
     if (type != null) return listOf(type)
     if (isAiReviewEnabled()) return PromptType.entries
@@ -258,7 +263,7 @@ class PromptController(
   private fun runReviewPrompt(data: PromptRunDto): PromptResponseModel {
     checkAiReviewEnabled()
     val result =
-      aiReviewPromptService.runReview(
+      aiReviewPromptService.runPlaygroundReview(
         projectHolder.project.organizationOwnerId,
         projectHolder.project.id,
         data,

@@ -19,6 +19,7 @@ import {
   useTranslationsSelector,
 } from 'tg.views/projects/translations/context/TranslationsContext';
 import { BasicPromptOption } from './TabBasic';
+import { PromptType } from './PromptTypeToggle';
 import { AI_PLAYGROUND_TAG } from './PreviewDatasetDialog';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
 
@@ -32,7 +33,7 @@ type Props = {
   options: BasicPromptOption[] | undefined;
   projectId: number;
   numberOfKeys: number;
-  promptType: 'TRANSLATE' | 'REVIEW';
+  promptType: PromptType;
   reviewCriteria?: string;
 };
 

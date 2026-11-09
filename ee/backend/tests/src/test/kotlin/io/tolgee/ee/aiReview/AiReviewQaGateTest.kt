@@ -96,7 +96,7 @@ class AiReviewQaGateTest : AuthorizedControllerTest() {
 
   @Test
   fun `an open QA issue with skipOpenQaIssues gives SKIPPED_QA_ISSUES and no LLM call`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -108,7 +108,7 @@ class AiReviewQaGateTest : AuthorizedControllerTest() {
   @Test
   fun `with skipOpenQaIssues off the review runs despite open issues`() {
     testData.rule.skipOpenQaIssues = false
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -120,7 +120,7 @@ class AiReviewQaGateTest : AuthorizedControllerTest() {
   fun `the option is ignored when QA is off for the project`() {
     testData.project.useQaChecks = false
     testData.deTranslation.qaChecksStale = true
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING)
     save()
 
     runJob(testData.deTranslation.id)
@@ -130,7 +130,7 @@ class AiReviewQaGateTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignoring the last open issue reviews the translation`() {
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.SKIPPED_QA_ISSUES, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.SKIPPED_QA_ISSUES)
     save()
 
     ignoreIssue(openIssue.id)
@@ -143,7 +143,7 @@ class AiReviewQaGateTest : AuthorizedControllerTest() {
   @Test
   fun `ignoring one of two open issues does not review`() {
     val secondIssue = testData.deTranslationBuilder.addQaIssue { state = QaIssueState.OPEN }.self
-    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.SKIPPED_QA_ISSUES, null)
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.SKIPPED_QA_ISSUES)
     save()
 
     ignoreIssue(secondIssue.id)

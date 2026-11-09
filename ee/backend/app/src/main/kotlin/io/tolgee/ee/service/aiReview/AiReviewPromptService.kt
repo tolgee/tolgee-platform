@@ -20,7 +20,7 @@ class AiReviewPromptService(
   private val translationService: TranslationService,
   private val objectMapper: ObjectMapper,
 ) {
-  fun runReview(
+  fun runPlaygroundReview(
     organizationId: Long,
     projectId: Long,
     data: PromptRunDto,
@@ -33,7 +33,14 @@ class AiReviewPromptService(
         basicPromptOptions = data.basicPromptOptions,
         reviewCriteria = data.reviewCriteria,
       )
-    return runReview(organizationId, projectId, translation, prompt, LlmProviderPriority.HIGH)
+    return reviewWithPrompt(
+      organizationId,
+      projectId,
+      translation,
+      prompt,
+      LlmProviderPriority.HIGH,
+      savedPrompt = null,
+    )
   }
 
   fun runReview(
@@ -45,16 +52,16 @@ class AiReviewPromptService(
   ): ReviewRunResult {
     val prompt = promptId?.let { promptService.findPrompt(projectId, it) }
     val promptDto = prompt?.toDto() ?: DefaultReviewPromptHelper.get()
-    return runReview(organizationId, projectId, translation, promptDto, priority)
-      .copy(promptId = prompt?.id, promptRevision = prompt?.revision)
+    return reviewWithPrompt(organizationId, projectId, translation, promptDto, priority, savedPrompt = prompt)
   }
 
-  fun runReview(
+  fun reviewWithPrompt(
     organizationId: Long,
     projectId: Long,
     translation: Translation,
     prompt: PromptDto,
     priority: LlmProviderPriority,
+    savedPrompt: Prompt?,
   ): ReviewRunResult {
     val rendered = renderReviewPrompt(projectId, translation, prompt)
     val params = promptService.getLlmParamsFromPrompt(rendered, translation.key.id, priority)
@@ -71,9 +78,9 @@ class AiReviewPromptService(
       rawResponse = result.response,
       providerName = result.providerName,
       model = result.model,
-      promptId = null,
+      promptId = savedPrompt?.id,
       promptName = prompt.name,
-      promptRevision = null,
+      promptRevision = savedPrompt?.revision,
       renderedPrompt = rendered,
       price = result.price,
       usage = result.usage,

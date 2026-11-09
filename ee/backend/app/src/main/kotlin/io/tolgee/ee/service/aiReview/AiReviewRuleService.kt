@@ -60,8 +60,9 @@ class AiReviewRuleService(
     request: AiReviewRuleRequest,
   ): AiReviewRule {
     val rule = get(projectId, ruleId)
+    val before = rule.toSnapshot()
     applyRequest(projectId, rule, request)
-    saveAndEvict(projectId, rule, startDemotion = rule.enabled)
+    saveAndEvict(projectId, rule, startDemotion = rule.enabled && rule.toSnapshot() != before)
     return rule
   }
 
@@ -72,8 +73,9 @@ class AiReviewRuleService(
     enabled: Boolean,
   ): AiReviewRule {
     val rule = get(projectId, ruleId)
+    val wasEnabled = rule.enabled
     rule.enabled = enabled
-    saveAndEvict(projectId, rule, startDemotion = enabled)
+    saveAndEvict(projectId, rule, startDemotion = enabled && !wasEnabled)
     return rule
   }
 
@@ -83,9 +85,7 @@ class AiReviewRuleService(
     ruleId: Long,
   ) {
     val rule = get(projectId, ruleId)
-    // Result rows survive with rule = null (FK SET NULL): deleting approvals would make their
-    // translations look human-reviewed. Transient rows carry no decision and go away.
-    translationAiReviewRepository.deleteByRuleAndStatuses(ruleId, TRANSIENT_STATUSES)
+    translationAiReviewRepository.deleteByRuleAndStatusesUnlessAiManaged(ruleId, TRANSIENT_STATUSES)
     aiReviewRuleRepository.delete(rule)
     aiReviewRuleCache.evict(projectId)
   }
@@ -154,7 +154,7 @@ class AiReviewRuleService(
   private fun List<String>.renamed(
     oldName: String,
     newName: String,
-  ): MutableList<String> = map { if (it == oldName) newName else it }.distinct().toMutableList()
+  ): MutableList<String> = map { name -> newName.takeIf { name == oldName } ?: name }.distinct().toMutableList()
 
   private fun saveAndEvict(
     projectId: Long,

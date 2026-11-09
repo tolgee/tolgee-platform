@@ -6,7 +6,8 @@ import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.AiReviewTestData
-import io.tolgee.ee.service.aiReview.AiReviewDemotionServiceImpl
+import io.tolgee.ee.service.aiReview.AiReviewDemotionServiceEeImpl
+import io.tolgee.ee.service.aiReview.AiReviewEligibility
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -44,7 +45,7 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
   private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
 
   @Autowired
-  private lateinit var demotionService: AiReviewDemotionServiceImpl
+  private lateinit var demotionService: AiReviewDemotionServiceEeImpl
 
   lateinit var testData: AiReviewTestData
   lateinit var reviewer: UserAccount
@@ -139,6 +140,18 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `confirm and reject on a current approval of a Translated text return 400`() {
+    testData.deTranslation.state = TranslationState.TRANSLATED
+    save()
+
+    performAuthPut("$aiReviewUrl/confirm", null).andIsBadRequest
+    performAuthPut("$aiReviewUrl/reject", null).andIsBadRequest
+    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+    rejectedCount().assert.isEqualTo(0)
+  }
+
+  @Test
   fun `confirm on a BELOW_THRESHOLD row returns 400`() {
     testData.addReview(testData.frTranslationBuilder, AiReviewStatus.BELOW_THRESHOLD, 50)
     save()
@@ -192,10 +205,11 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
       .id.assert
       .isEqualTo(testData.user.id)
     translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+    rejectedCount().assert.isEqualTo(1)
   }
 
   @Test
-  fun `un-review without the feature does not mark REJECTED`() {
+  fun `un-review without the feature deletes the approval and does not count a rejection`() {
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthPut(
@@ -203,7 +217,23 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
       null,
     ).andIsOk
 
-    review(testData.deTranslation.id)!!.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+    review(testData.deTranslation.id).assert.isNull()
+    rejectedCount().assert.isEqualTo(0)
+  }
+
+  @Test
+  fun `a bulk un-review without the feature deletes a FAILED marker`() {
+    testData.frTranslation.state = TranslationState.REVIEWED
+    testData.frTranslation.auto = true
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.FAILED)
+    save()
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    bulkSetFrenchState(TranslationState.TRANSLATED)
+
+    waitForNotThrowing(pollTime = 100, timeout = 10_000) {
+      review(testData.frTranslation.id).assert.isNull()
+    }
   }
 
   @Test
@@ -239,6 +269,89 @@ class AiReviewHumanActionsTest : AuthorizedControllerTest() {
       .id.assert
       .isEqualTo(testData.user.id)
     translation(testData.deTranslation.id).auto.assert.isTrue()
+    rejectedCount().assert.isEqualTo(1)
+  }
+
+  private fun rejectedCount(): Long =
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager.find(AiReviewRule::class.java, testData.rule.id).rejectedCount
+    }
+
+  @Test
+  fun `a bulk un-review deletes a FAILED marker so the text is not shown as failed`() {
+    testData.frTranslation.state = TranslationState.REVIEWED
+    testData.frTranslation.auto = true
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.FAILED)
+    save()
+
+    bulkSetFrenchState(TranslationState.TRANSLATED)
+
+    waitForNotThrowing(pollTime = 100, timeout = 10_000) {
+      review(testData.frTranslation.id).assert.isNull()
+    }
+    translation(testData.frTranslation.id).state.assert.isEqualTo(TranslationState.TRANSLATED)
+  }
+
+  @Test
+  fun `a bulk human review of an MT text with an AI row makes it a human review`() {
+    saveFrenchMtTextWithBelowThresholdRow()
+    bulkReviewFrench()
+
+    assertFrenchIsHumanReviewed()
+  }
+
+  @Test
+  fun `a bulk human review while AI review is off still makes it a human review`() {
+    saveFrenchMtTextWithBelowThresholdRow()
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    bulkReviewFrench()
+
+    assertFrenchIsHumanReviewed()
+  }
+
+  private fun saveFrenchMtTextWithBelowThresholdRow() {
+    testData.frTranslation.auto = true
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.BELOW_THRESHOLD, 40) {
+      rule = testData.rule
+    }
+    save()
+  }
+
+  private fun bulkReviewFrench() = bulkSetFrenchState(TranslationState.REVIEWED)
+
+  private fun bulkSetFrenchState(state: TranslationState) {
+    val job =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService.startJob(
+          request =
+            SetTranslationsStateStateRequest().apply {
+              keyIds = listOf(testData.key.id)
+              languageIds = listOf(testData.french.id)
+              this.state = state
+            },
+          project = entityManager.getReference(Project::class.java, testData.project.id),
+          author = entityManager.getReference(UserAccount::class.java, testData.user.id),
+          type = BatchJobType.SET_TRANSLATIONS_STATE,
+          isHidden = false,
+        )
+      }
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      batchJobService
+        .getJobDtoNoCache(job.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
+    }
+  }
+
+  private fun assertFrenchIsHumanReviewed() {
+    waitForNotThrowing(pollTime = 100, timeout = 10_000) {
+      review(testData.frTranslation.id).assert.isNull()
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.get(testData.frTranslation.id)
+      translation.state.assert.isEqualTo(TranslationState.REVIEWED)
+      AiReviewEligibility.isHumanReviewed(translation, null).assert.isTrue()
+    }
   }
 
   @Test

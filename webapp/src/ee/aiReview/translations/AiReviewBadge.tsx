@@ -15,11 +15,11 @@ type AiReviewSummary = components['schemas']['TranslationAiReviewSummaryModel'];
 const StyledPill = styled('span')`
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: ${({ theme }) => theme.spacing(0.25)};
   border-radius: 10px;
-  padding: 3px 6px;
-  font-size: 10px;
-  font-weight: 600;
+  padding: ${({ theme }) => theme.spacing(0.375, 0.75)};
+  font-size: ${({ theme }) => theme.typography.overline.fontSize}px;
+  font-weight: ${({ theme }) => theme.typography.fontWeightMedium};
   line-height: 1;
 
   & svg {

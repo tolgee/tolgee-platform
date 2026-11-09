@@ -39,7 +39,7 @@ class AnthropicApiService :
         thinking = Thinking(type = "disabled"),
         output_config =
           if (params.shouldOutputJson && config.format == "json_schema") {
-            OutputConfig(format = OutputFormat(schema = (params.responseSchema ?: TRANSLATION_RESPONSE_SCHEMA).schema))
+            OutputConfig(format = OutputFormat(schema = params.responseSchema.schema))
           } else {
             null
           },

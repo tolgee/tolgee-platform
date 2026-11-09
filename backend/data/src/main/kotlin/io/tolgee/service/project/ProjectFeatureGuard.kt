@@ -22,13 +22,7 @@ class ProjectFeatureGuard(
     checkEnabled(feature)
   }
 
-  fun checkEnabled(feature: Feature) {
-    val project = projectHolder.projectEntity
-    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
-    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
-    }
-  }
+  fun checkEnabled(feature: Feature) = checkEnabled(feature, projectHolder.projectEntity)
 
   fun checkEnabled(
     feature: Feature,

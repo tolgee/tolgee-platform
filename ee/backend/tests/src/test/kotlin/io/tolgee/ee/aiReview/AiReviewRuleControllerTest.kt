@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.repository.aiReview.AiReviewRuleRepository
 import io.tolgee.testing.AuthorizedControllerTest
@@ -112,6 +113,30 @@ class AiReviewRuleControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `a rule of another project is not found`() {
+    val otherRuleUrl = "$rulesUrl/${testData.otherProjectRule.id}"
+    val body = mapOf("tagIn" to listOf("ui"))
+    performAuthGet(otherRuleUrl).andIsNotFound
+    performAuthPut(otherRuleUrl, body).andIsNotFound
+    performAuthPut("$otherRuleUrl/enabled", mapOf("enabled" to false)).andIsNotFound
+    performAuthDelete(otherRuleUrl).andIsNotFound
+    executeInNewTransaction(platformTransactionManager) {
+      aiReviewRuleRepository
+        .findById(testData.otherProjectRule.id)
+        .get()
+        .enabled.assert
+        .isTrue()
+    }
+  }
+
+  @Test
+  fun `rejects a review prompt of another project`() {
+    performAuthPost(rulesUrl, mapOf("promptId" to testData.otherProjectReviewPrompt.id)).andIsNotFound
+    performAuthPut("$rulesUrl/${testData.rule.id}", mapOf("promptId" to testData.otherProjectReviewPrompt.id))
+      .andIsNotFound
+  }
+
+  @Test
   fun `rejects the base language`() {
     performAuthPost(rulesUrl, mapOf("languageIds" to listOf(testData.englishLanguage.id)))
       .andIsBadRequest
@@ -167,8 +192,8 @@ class AiReviewRuleControllerTest : AuthorizedControllerTest() {
   @Test
   fun `lists and gets rules`() {
     performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
-      node("_embedded.rules").isArray.hasSize(1)
-      node("_embedded.rules[0].name").isEqualTo("UI")
+      node("_embedded.aiReviewRules").isArray.hasSize(1)
+      node("_embedded.aiReviewRules[0].name").isEqualTo("UI")
     }
     performAuthGet("$rulesUrl/${testData.rule.id}").andIsOk.andAssertThatJson {
       node("name").isEqualTo("UI")

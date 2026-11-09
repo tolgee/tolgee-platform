@@ -31,7 +31,6 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
   lateinit var approvedTranslation: TranslationBuilder
 
   init {
-    // The dashboard shows "started by {name}" only for an author with a name.
     user.name = "Test User"
     project.useQaChecks = false
 
@@ -168,7 +167,7 @@ class AiReviewE2eTestData : BaseTestData("test_username", "ai_review_project") {
         rule = activeRule
         threshold = 85
       }
-      addReviewedKey("key_human_below", AiReviewStatus.BELOW_THRESHOLD, 40, auto = false) {
+      addReviewedKey("key_human_text_below", AiReviewStatus.BELOW_THRESHOLD, 40, auto = false) {
         rule = activeRule
         threshold = 85
       }

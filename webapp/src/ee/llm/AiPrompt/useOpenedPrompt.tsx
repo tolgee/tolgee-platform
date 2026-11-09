@@ -2,11 +2,12 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { PromptItem } from './PromptLoadMenu';
+import { PromptType } from './PromptTypeToggle';
 import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptState';
 
 type Props = {
   projectId: number;
-  type?: 'TRANSLATE' | 'REVIEW';
+  type?: PromptType;
 };
 
 export const useOpenedPrompt = ({ projectId, type }: Props) => {

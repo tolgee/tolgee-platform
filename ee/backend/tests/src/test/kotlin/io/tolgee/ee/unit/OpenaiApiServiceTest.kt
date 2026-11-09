@@ -131,7 +131,7 @@ class OpenaiApiServiceTest {
     }
   }
 
-  private fun createParams(responseSchema: LlmResponseSchema? = null): LlmParams {
+  private fun createParams(responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION): LlmParams {
     return LlmParams(
       messages =
         listOf(

@@ -11,8 +11,10 @@ import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewStatus
+import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,6 +30,9 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var statsService: AiReviewRuleStatsService
+
+  @Autowired
+  private lateinit var translationAiReviewRepository: TranslationAiReviewRepository
 
   lateinit var testData: AiReviewTestData
 
@@ -67,22 +72,21 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `counts follow the statuses`() {
+  fun `counts follow the statuses and the rule counters`() {
+    testData.rule.autoReviewedCount = 4
+    testData.rule.rejectedCount = 1
     review("k.approved1", AiReviewStatus.APPROVED, reviewed = true)
-    review("k.approved2", AiReviewStatus.APPROVED, reviewed = true)
-    review("k.confirmed", AiReviewStatus.CONFIRMED, reviewed = true)
-    review("k.rejected", AiReviewStatus.REJECTED)
-    review("k.failed", AiReviewStatus.FAILED)
+    review("k.failed", AiReviewStatus.FAILED) { failureReason = AiReviewFailureReason.PROVIDER_ERROR }
     review("k.dryPass", AiReviewStatus.DRY_RUN_PASS)
     review("k.dryFail", AiReviewStatus.DRY_RUN_FAIL)
     save()
 
     performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
-      node("_embedded.rules[0].counts.autoReviewed").isEqualTo(4)
-      node("_embedded.rules[0].counts.rejected").isEqualTo(1)
-      node("_embedded.rules[0].counts.failed").isEqualTo(1)
-      node("_embedded.rules[0].counts.scored").isEqualTo(2)
-      node("_embedded.rules[0].counts.wouldBeAutoReviewed").isEqualTo(1)
+      node("_embedded.aiReviewRules[0].counts.autoReviewed").isEqualTo(4)
+      node("_embedded.aiReviewRules[0].counts.rejected").isEqualTo(1)
+      node("_embedded.aiReviewRules[0].counts.failed").isEqualTo(1)
+      node("_embedded.aiReviewRules[0].counts.scored").isEqualTo(2)
+      node("_embedded.aiReviewRules[0].counts.wouldBeAutoReviewed").isEqualTo(1)
     }
   }
 
@@ -94,18 +98,51 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
     save()
 
     performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
-      node("_embedded.rules[0].counts.autoReviewed").isEqualTo(1)
-      node("_embedded.rules[0].counts.failed").isEqualTo(1)
+      node("_embedded.aiReviewRules[0].counts.failed").isEqualTo(1)
     }
   }
 
   @Test
-  fun `rows with a stale hash are not counted`() {
-    review("k.stale", AiReviewStatus.APPROVED, reviewed = true) { textHash = "old" }
+  fun `a FAILED marker without a failure reason is not counted and not retried`() {
+    val marker = review("k.marker", AiReviewStatus.FAILED, reviewed = true)
+    marker.self.auto = true
     save()
 
     performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
-      node("_embedded.rules[0].counts.autoReviewed").isEqualTo(0)
+      node("_embedded.aiReviewRules[0].counts.failed").isEqualTo(0)
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      translationAiReviewRepository.findFailedTranslationIdsByRule(testData.rule.id)
+    }.assert.isEmpty()
+  }
+
+  @Test
+  fun `rows with a stale hash are not counted`() {
+    review("k.stale", AiReviewStatus.FAILED) {
+      textHash = "old"
+      failureReason = AiReviewFailureReason.PROVIDER_ERROR
+    }
+    save()
+
+    performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
+      node("_embedded.aiReviewRules[0].counts.failed").isEqualTo(0)
+    }
+  }
+
+  @Test
+  fun `a rejection still counts after the text is edited`() {
+    val de = review("k.approved", AiReviewStatus.APPROVED, reviewed = true)
+    de.self.auto = true
+    save()
+
+    performAuthPut("/v2/projects/${testData.project.id}/translations/${de.self.id}/ai-review/reject", null).andIsOk
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations",
+      mapOf("key" to "k.approved", "translations" to mapOf("de" to "Korrigierter Text")),
+    ).andIsOk
+
+    performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
+      node("_embedded.aiReviewRules[0].counts.rejected").isEqualTo(1)
     }
   }
 
@@ -121,24 +158,43 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
       .de.self.state = TranslationState.REVIEWED
     review("k.hasRow", AiReviewStatus.BELOW_THRESHOLD)
     review("k.staleRow", AiReviewStatus.BELOW_THRESHOLD) { textHash = "old" }
-    testData.addRule {
-      name = "Checkout"
-      tagIn = mutableListOf("checkout")
-      threshold = 92
-    }
+    val checkoutRule =
+      testData.addRule {
+        name = "Checkout"
+        tagIn = mutableListOf("checkout")
+        threshold = 92
+      }
     save()
 
-    // UI wins for: checkout.pay (de, fr), k.plain (de, fr), k.outdated (fr), k.humanReviewed (fr),
-    // k.hasRow (fr), k.staleRow (de, fr) — the stale row does not count as a result
+    backlogOf(testData.rule.id).assert.containsExactlyInAnyOrder(
+      "checkout.pay/de",
+      "checkout.pay/fr",
+      "k.plain/de",
+      "k.plain/fr",
+      "k.outdated/fr",
+      "k.humanReviewed/fr",
+      "k.hasRow/fr",
+      "k.staleRow/de",
+      "k.staleRow/fr",
+    )
+    backlogOf(checkoutRule.self.id).assert.containsExactlyInAnyOrder("k.checkout/de", "k.checkout/fr")
     val counts = statsService.getCounts(testData.project.id)
     counts
       .getValue(testData.rule.id)
       .backlog.assert
       .isEqualTo(9)
-    counts.values
-      .single { it.ruleId != testData.rule.id }
+    counts
+      .getValue(checkoutRule.self.id)
       .backlog.assert
       .isEqualTo(2)
+  }
+
+  private fun backlogOf(ruleId: Long): Set<String> {
+    val ids = mutableListOf<Long>()
+    statsService.forEachBacklogItem(testData.project.id, ruleId) { ids.add(it) }
+    return executeInNewTransaction(platformTransactionManager) {
+      ids.map { translationService.get(it) }.map { "${it.key.name}/${it.language.tag}" }.toSet()
+    }
   }
 
   @Test
@@ -158,8 +214,9 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
     testData.rule.tagIn = mutableListOf()
     save()
 
+    backlogOf(featureRule.self.id).assert.containsExactlyInAnyOrder("k.onFeature/de", "k.onFeature/fr")
+    backlogOf(testData.rule.id).assert.containsExactlyInAnyOrder("checkout.pay/de", "checkout.pay/fr")
     val counts = statsService.getCounts(testData.project.id)
-    // the feature rule covers only the key on feature/x, the other rule the key on the default branch
     counts
       .getValue(featureRule.self.id)
       .backlog.assert
@@ -182,11 +239,14 @@ class AiReviewRuleStatsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `POST response contains the backlog count`() {
+  fun `the POST response has no counts and the list has them`() {
     save()
     performAuthPost(rulesUrl, mapOf("tagIn" to listOf("ui"), "threshold" to 95)).andIsOk.andAssertThatJson {
-      node("counts.backlog").isEqualTo(2)
-      node("counts.autoReviewed").isEqualTo(0)
+      node("counts").isNull()
+    }
+    performAuthGet(rulesUrl).andIsOk.andAssertThatJson {
+      node("_embedded.aiReviewRules[1].counts.backlog").isEqualTo(2)
+      node("_embedded.aiReviewRules[1].counts.autoReviewed").isEqualTo(0)
     }
   }
 }

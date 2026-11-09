@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Primary
 @Service
-class SourceChangeSettingsService(
+class SourceChangeSettingsProviderEeImpl(
   private val projectService: ProjectService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val entityManager: EntityManager,
@@ -28,13 +28,16 @@ class SourceChangeSettingsService(
     val aiApprovedApplies = !protect && projectFeatureGuard.isFeatureEnabled(Feature.AI_REVIEW, project)
     return EffectiveSourceChangeSettings(
       aiApproved =
-        if (aiApprovedApplies) {
-          project.aiApprovedSourceChangeAction
-        } else {
-          EffectiveSourceChangeSettings.DEFAULTS.aiApproved
+        when {
+          aiApprovedApplies -> project.aiApprovedSourceChangeAction
+          else -> EffectiveSourceChangeSettings.DEFAULTS.aiApproved
         },
       humanEdited = project.humanEditedSourceChangeAction,
-      humanReviewed = if (protect) SourceChangeAction.MARK_OUTDATED else project.humanReviewedSourceChangeAction,
+      humanReviewed =
+        when {
+          protect -> SourceChangeAction.MARK_OUTDATED
+          else -> project.humanReviewedSourceChangeAction
+        },
     )
   }
 

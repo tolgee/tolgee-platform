@@ -4,14 +4,13 @@ import {
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy, gcyAdvanced } from '../../common/shared';
-import {
-  assertRunDialogVariant,
-  startRun,
-  visitAiReviewRules,
-} from '../../common/aiReview';
+import { E2AiReviewRulesView } from '../../compounds/aiReview/E2AiReviewRulesView';
+import { E2AiReviewRunDialog } from '../../compounds/aiReview/E2AiReviewRunDialog';
 
 describe('AI review rule runs', () => {
   let projectId: number;
+  const rulesView = new E2AiReviewRulesView();
+  const runDialog = new E2AiReviewRunDialog();
 
   beforeEach(() => {
     aiReviewTestData.clean();
@@ -29,15 +28,15 @@ describe('AI review rule runs', () => {
   });
 
   it('Review now shows the preview and starts a visible job', () => {
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).within(
       () => {
         gcy('ai-review-rule-review-now').click();
       }
     );
-    assertRunDialogVariant('review');
+    runDialog.assertVariant('review');
     gcy('ai-review-run-to-review').should('be.visible');
-    startRun();
+    runDialog.start();
     gcy('batch-operations-summary').should('exist');
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).within(
       () => {
@@ -47,15 +46,14 @@ describe('AI review rule runs', () => {
   });
 
   it('Score now on a Dry run rule', () => {
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcyAdvanced({
       value: 'ai-review-rule-item',
       name: 'Legal dry run',
     }).within(() => {
       gcy('ai-review-rule-review-now').click();
     });
-    assertRunDialogVariant('score');
-    startRun();
+    runDialog.assertVariant('score').start();
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'Legal dry run' }).within(
       () => {
         gcy('ai-review-rule-backlog', { timeout: 60_000 }).should('not.exist');
@@ -64,14 +62,13 @@ describe('AI review rule runs', () => {
   });
 
   it('Retry failed reviews brings the failed count to 0', () => {
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcyAdvanced({ value: 'ai-review-rule-item', name: 'UI rule' }).within(
       () => {
         gcy('ai-review-rule-retry-failed').click();
       }
     );
-    assertRunDialogVariant('retry');
-    startRun();
+    runDialog.assertVariant('retry').start();
     gcyAdvanced(
       { value: 'ai-review-rule-counts-active', failed: '0' },
       { timeout: 60_000 }
@@ -79,27 +76,22 @@ describe('AI review rule runs', () => {
   });
 
   it('after save with backlog opens the run dialog and Cancel closes it', () => {
-    visitAiReviewRules(projectId);
-    gcyAdvanced({ value: 'ai-review-rule-edit', name: 'UI rule' }).click();
-    gcy('ai-review-rule-form-save').click();
-    assertRunDialogVariant('review');
-    gcy('ai-review-run-cancel').click();
+    rulesView.visit(projectId);
+    rulesView.openEditDialog('UI rule').save();
+    runDialog.assertVariant('review');
+    runDialog.cancel();
     gcy('ai-review-run-dialog').should('not.exist');
   });
 
   it('after save on a dry run rule opens the run dialog with score wording', () => {
-    visitAiReviewRules(projectId);
-    gcyAdvanced({
-      value: 'ai-review-rule-edit',
-      name: 'Legal dry run',
-    }).click();
-    gcy('ai-review-rule-form-save').click();
-    assertRunDialogVariant('score');
+    rulesView.visit(projectId);
+    rulesView.openEditDialog('Legal dry run').save();
+    runDialog.assertVariant('score');
   });
 
   it('run links are hidden without the batch machine translate scope', () => {
     login('prompts_viewer_username');
-    visitAiReviewRules(projectId);
+    rulesView.visit(projectId);
     gcy('ai-review-rule-item').should('have.length', 2);
     gcy('ai-review-rule-review-now').should('not.exist');
     gcy('ai-review-rule-retry-failed').should('not.exist');

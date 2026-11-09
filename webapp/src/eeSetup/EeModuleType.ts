@@ -76,15 +76,15 @@ export type QaBadgeProps = {
   darkWhenNoIssues?: boolean;
 };
 
-export type AiReviewIssueListProps = {
-  issues: components['schemas']['AiReviewIssueModel'][];
+export type AiReviewPlaygroundResultProps = {
+  score: number;
+  issues?: components['schemas']['AiReviewIssueModel'][];
 };
 
 export type AiReviewCellButtonProps = {
   aiReview: components['schemas']['TranslationAiReviewSummaryModel'];
   translationId: number;
   state?: components['schemas']['TranslationViewModel']['state'];
-  auto?: boolean;
   stateChangeEnabled?: boolean;
   style?: React.CSSProperties;
   className?: string;

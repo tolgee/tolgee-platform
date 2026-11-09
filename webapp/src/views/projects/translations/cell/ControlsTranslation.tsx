@@ -79,7 +79,6 @@ type ControlsProps = {
   qaChecksStale?: boolean;
   aiReview?: AiReviewSummary;
   translationId?: number;
-  translationAuto?: boolean;
   // render last focusable button
   lastFocusable: boolean;
   active?: boolean;
@@ -105,7 +104,6 @@ export const ControlsTranslation: React.FC<
   qaChecksStale,
   aiReview,
   translationId,
-  translationAuto,
   lastFocusable,
   active,
   className,
@@ -118,7 +116,7 @@ export const ControlsTranslation: React.FC<
   const aiReviewEnabled = useAiReviewEnabled();
   const aiReviewVisibility =
     aiReviewEnabled && translationId !== undefined
-      ? getAiReviewCellVisibility(aiReview, state, translationAuto)
+      ? getAiReviewCellVisibility(aiReview)
       : 'none';
   const displayAiReview = aiReviewVisibility !== 'none';
   const displayTransitionButtons = stateChangeEnabled && state;
@@ -251,7 +249,6 @@ export const ControlsTranslation: React.FC<
           aiReview={aiReview!}
           translationId={translationId!}
           state={state}
-          auto={translationAuto}
           stateChangeEnabled={stateChangeEnabled}
         />
       )}
