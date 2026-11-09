@@ -132,11 +132,20 @@ class AiReviewBatchServiceImpl(
     val decision = evaluator.evaluate(translation, activeOnly = aiManaged)
     if (decision is RuleDecision.Review) return decision
     if (aiManaged) {
-      row.reReviewRequested = false
+      leaveQueueAiManaged(row)
       return null
     }
     deleteUnlessResolved(row)
     return null
+  }
+
+  /**
+   * The row must stay, or the Reviewed state would look like a human review. A PENDING row has no
+   * result to fall back to, so it becomes FAILED, which keeps it AI-managed but out of the queue.
+   */
+  private fun leaveQueueAiManaged(row: TranslationAiReview) {
+    row.reReviewRequested = false
+    if (row.status == AiReviewStatus.PENDING) row.status = AiReviewStatus.FAILED
   }
 
   private fun skippedForQa(

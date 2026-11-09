@@ -360,6 +360,23 @@ class AiReviewJobTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `an AI-managed PENDING row with no Active rule becomes FAILED and leaves the queue`() {
+    testData.rule.mode = AiReviewRuleMode.DRY_RUN
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.deTranslation.auto = true
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.PENDING, null)
+    save()
+
+    runJob(testData.deTranslation.id)
+
+    val row = review(testData.deTranslation.id)!!
+    row.status.assert.isEqualTo(AiReviewStatus.FAILED)
+    row.reReviewRequested.assert.isFalse()
+    translation(testData.deTranslation.id).state.assert.isEqualTo(TranslationState.REVIEWED)
+    verify(openaiApiService, never()).translate(any(), any(), any())
+  }
+
+  @Test
   fun `re-review of an APPROVED row that now fails sets TRANSLATED and BELOW_THRESHOLD`() {
     approvedReviewedTranslation(reReviewRequested = true)
     save()
