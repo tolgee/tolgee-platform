@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { Box, Button, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { useUser } from 'tg.globalContext/helpers';
+import { useIsEmailVerified, useUser } from 'tg.globalContext/helpers';
 import { LINKS } from 'tg.constants/links';
 
 const StyledEnabled = styled('span')`
@@ -17,6 +17,7 @@ export const MfaSettings: FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
   const user = useUser();
+  const isEmailVerified = useIsEmailVerified();
   if (!user) return null;
 
   return (
@@ -48,15 +49,17 @@ export const MfaSettings: FunctionComponent<
         <Box display="flex" gap={2}>
           {user.mfaEnabled ? (
             <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                data-cy="mfa-recovery-button"
-                component={Link}
-                to={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.build()}
-              >
-                <T keyName="account-security-mfa-view-recovery" />
-              </Button>
+              {isEmailVerified && (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  data-cy="mfa-recovery-button"
+                  component={Link}
+                  to={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.build()}
+                >
+                  <T keyName="account-security-mfa-view-recovery" />
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 color="error"
@@ -68,15 +71,17 @@ export const MfaSettings: FunctionComponent<
               </Button>
             </>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              data-cy="mfa-enable-button"
-              component={Link}
-              to={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.build()}
-            >
-              <T keyName="account-security-mfa-enable-mfa-button" />
-            </Button>
+            isEmailVerified && (
+              <Button
+                variant="contained"
+                color="primary"
+                data-cy="mfa-enable-button"
+                component={Link}
+                to={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.build()}
+              >
+                <T keyName="account-security-mfa-enable-mfa-button" />
+              </Button>
+            )
           )}
         </Box>
       </Box>

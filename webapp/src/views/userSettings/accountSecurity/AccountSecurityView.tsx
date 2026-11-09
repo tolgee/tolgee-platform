@@ -4,7 +4,11 @@ import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS } from 'tg.constants/links';
-import { useConfig, useUser } from 'tg.globalContext/helpers';
+import {
+  useConfig,
+  useIsEmailVerified,
+  useUser,
+} from 'tg.globalContext/helpers';
 import { Alert } from 'tg.component/common/Alert';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -24,6 +28,7 @@ export const AccountSecurityView: FunctionComponent<
   const { t } = useTranslate();
   const user = useUser();
   const config = useConfig();
+  const isEmailVerified = useIsEmailVerified();
   const resetResetLoadable = useApiMutation({
     url: '/api/public/reset_password_request',
     method: 'post',
@@ -125,12 +130,16 @@ export const AccountSecurityView: FunctionComponent<
         </>
       )}
 
-      <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
-        <EnableMfaDialog />
-      </Route>
-      <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.template}>
-        <MfaRecoveryCodesDialog />
-      </Route>
+      {isEmailVerified && (
+        <>
+          <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_ENABLE.template}>
+            <EnableMfaDialog />
+          </Route>
+          <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_RECOVERY.template}>
+            <MfaRecoveryCodesDialog />
+          </Route>
+        </>
+      )}
       <Route exact path={LINKS.USER_ACCOUNT_SECURITY_MFA_DISABLE.template}>
         <DisableMfaDialog />
       </Route>
