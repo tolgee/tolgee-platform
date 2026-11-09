@@ -38,6 +38,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -79,6 +80,7 @@ class BranchController(
   private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val securityService: SecurityService,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create branch")
@@ -320,6 +322,8 @@ class BranchController(
     @RequestBody(required = false) request: ApplyBranchMergeRequest?,
   ) {
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    val merge = branchService.getBranchMergeView(projectHolder.project.id, mergeId)
+    securityService.checkBranchModify(merge.targetBranch, projectHolder.project.id)
     branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch ?: true)
   }
 }

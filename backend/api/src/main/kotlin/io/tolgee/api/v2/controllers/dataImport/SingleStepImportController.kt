@@ -76,6 +76,7 @@ class SingleStepImportController(
     @Valid params: SingleStepImportRequest,
   ): ImportResult {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, params.branch)
     val filteredFiles = filterFiles(files.map { (it.originalFilename ?: "") to it })
     val fileDtos =
       filteredFiles.map {
@@ -106,6 +107,7 @@ class SingleStepImportController(
     @RequestBody @Valid params: SingleStepImportResolvableRequest,
   ): ImportResult {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, params.branch)
     return singleStepImportService.singleStepImportResolvable(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
