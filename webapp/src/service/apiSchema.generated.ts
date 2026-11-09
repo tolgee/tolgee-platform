@@ -1489,7 +1489,11 @@ export interface components {
     };
     AiReviewRunPreviewModel: {
       /** Format: int64 */
+      confirmedToReReview: number;
+      /** Format: int64 */
       dryRunOnly: number;
+      /** Format: int64 */
+      rejectedToReReview: number;
       skipped: { [key: string]: number };
       /** Format: int64 */
       toReview: number;

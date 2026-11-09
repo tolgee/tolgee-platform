@@ -174,6 +174,7 @@ declare namespace DataCy {
         "ai-review-run-cancel": true;
         "ai-review-run-dialog": true;
         "ai-review-run-dry-run-only": true;
+        "ai-review-run-includes-resolved": true;
         "ai-review-run-skip-reason": true;
         "ai-review-run-start": true;
         "ai-review-run-to-review": true;

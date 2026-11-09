@@ -25,6 +25,7 @@ import io.tolgee.model.enums.aiReview.AiReviewFailureReason
 import io.tolgee.model.enums.aiReview.AiReviewRuleMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.enums.qa.QaIssueState
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.aiReview.TranslationAiReviewRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -414,7 +416,7 @@ class AiReviewRunTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `reReview re-queues result rows but never CONFIRMED or REJECTED, and the old status stays on failure`() {
+  fun `reReview re-runs human-resolved rows too and a failure keeps the old result`() {
     llmProperties.providers = mutableListOf()
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, 90) {
       rule = testData.rule
@@ -438,11 +440,68 @@ class AiReviewRunTest : AuthorizedControllerTest() {
       de.status.assert.isEqualTo(AiReviewStatus.APPROVED)
       de.score.assert.isEqualTo(90)
       de.lastFailureReason.assert.isEqualTo(AiReviewFailureReason.NO_PROVIDER)
+      val fr = review(testData.frTranslation.id)!!
+      fr.status.assert.isEqualTo(AiReviewStatus.CONFIRMED)
+      fr.score.assert.isEqualTo(95)
+      fr.reReviewRequested.assert.isFalse()
+      fr.lastFailureReason.assert.isEqualTo(AiReviewFailureReason.NO_PROVIDER)
     }
-    val fr = review(testData.frTranslation.id)!!
-    fr.status.assert.isEqualTo(AiReviewStatus.CONFIRMED)
-    fr.reReviewRequested.assert.isFalse()
-    fr.lastFailureReason.assert.isNull()
+  }
+
+  @Test
+  fun `reReview replaces human-resolved results and clears who resolved them`() {
+    testData.deTranslation.state = TranslationState.REVIEWED
+    testData.addReview(testData.deTranslationBuilder, AiReviewStatus.CONFIRMED, 60) {
+      rule = testData.rule
+      resolvedBy = testData.user
+      resolvedAt = Date()
+    }
+    testData.addReview(testData.frTranslationBuilder, AiReviewStatus.REJECTED, 95) {
+      rule = testData.rule
+      resolvedBy = testData.user
+      resolvedAt = Date()
+    }
+    save()
+
+    performAuthPost(
+      "$projectUrl/ai-review/run/preview",
+      runBody(
+        keyIds = listOf(testData.key.id),
+        languageIds = listOf(testData.german.id, testData.french.id),
+        reReview = true,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("toReview").isEqualTo(2)
+      node("confirmedToReReview").isEqualTo(1)
+      node("rejectedToReReview").isEqualTo(1)
+    }
+
+    performAuthPost(
+      "$projectUrl/ai-review/run",
+      runBody(
+        keyIds = listOf(testData.key.id),
+        languageIds = listOf(testData.german.id, testData.french.id),
+        reReview = true,
+      ),
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 100, timeout = 30_000) {
+      val de = review(testData.deTranslation.id)!!
+      de.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+      de.resolvedBy.assert.isNull()
+      de.resolvedAt.assert.isNull()
+      de.reReviewRequested.assert.isFalse()
+      val fr = review(testData.frTranslation.id)!!
+      fr.status.assert.isEqualTo(AiReviewStatus.APPROVED)
+      fr.resolvedBy.assert.isNull()
+      fr.resolvedAt.assert.isNull()
+    }
+    executeInNewTransaction(platformTransactionManager) {
+      entityManager
+        .find(Translation::class.java, testData.deTranslation.id)
+        .state.assert
+        .isEqualTo(TranslationState.REVIEWED)
+    }
   }
 
   @Test

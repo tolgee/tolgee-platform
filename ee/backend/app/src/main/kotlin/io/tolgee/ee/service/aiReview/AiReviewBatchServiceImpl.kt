@@ -308,9 +308,14 @@ class AiReviewBatchServiceImpl(
     outcome: LlmOutcome,
     decision: RuleDecision.Review,
   ) {
+    val keepsPreviousResult = outcome is LlmOutcome.Failure && row.score != null
     when (outcome) {
       is LlmOutcome.Success -> applySuccess(translation, row, outcome, decision)
       is LlmOutcome.Failure -> applyFailure(row, outcome)
+    }
+    if (!keepsPreviousResult) {
+      row.resolvedBy = null
+      row.resolvedAt = null
     }
     row.threshold = decision.threshold
     row.batchJobId = null
@@ -387,7 +392,11 @@ class AiReviewBatchServiceImpl(
   }
 
   private fun deleteUnlessResolved(row: TranslationAiReview) {
-    if (AiReviewEligibility.isHumanDecision(row)) return
+    if (AiReviewEligibility.isHumanDecision(row)) {
+      // A requeued human decision with no winner any more must still leave the queue.
+      row.reReviewRequested = false
+      return
+    }
     reviewRepository.delete(row)
   }
 }

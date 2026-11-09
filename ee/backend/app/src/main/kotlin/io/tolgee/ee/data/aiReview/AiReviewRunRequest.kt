@@ -27,4 +27,6 @@ data class AiReviewRunPreviewModel(
   val toReview: Long,
   val dryRunOnly: Long,
   val skipped: Map<AiReviewSkipReason, Long>,
+  val confirmedToReReview: Long,
+  val rejectedToReReview: Long,
 )

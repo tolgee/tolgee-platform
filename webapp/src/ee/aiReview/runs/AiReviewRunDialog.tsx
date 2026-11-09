@@ -100,6 +100,8 @@ export const AiReviewRunDialog = ({
   const data = preview.data;
   const toReview = data?.toReview ?? 0;
   const dryRunOnly = data?.dryRunOnly ?? 0;
+  const confirmedToReReview = data?.confirmedToReReview ?? 0;
+  const rejectedToReReview = data?.rejectedToReReview ?? 0;
   const skipped = Object.entries(data?.skipped ?? {}).filter(
     ([, count]) => Number(count) > 0
   );
@@ -204,6 +206,22 @@ export const AiReviewRunDialog = ({
             >
               {config.countLine(toReview)}
             </Typography>
+            {confirmedToReReview + rejectedToReReview > 0 && (
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                data-cy="ai-review-run-includes-resolved"
+              >
+                {t(
+                  'ai_review_run_includes_resolved',
+                  'Includes {confirmed, plural, one {# confirmed} other {# confirmed}} and {rejected, plural, one {# rejected} other {# rejected}} by a human.',
+                  {
+                    confirmed: confirmedToReReview,
+                    rejected: rejectedToReReview,
+                  }
+                )}
+              </Typography>
+            )}
             {config.showsDryRunLine && dryRunOnly > 0 && (
               <Typography data-cy="ai-review-run-dry-run-only">
                 {t(

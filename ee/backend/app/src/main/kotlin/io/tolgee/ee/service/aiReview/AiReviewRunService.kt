@@ -46,6 +46,8 @@ class AiReviewRunService(
     val toReview: List<ToReview>,
     val dryRunOnly: Long,
     val skipped: Map<AiReviewSkipReason, Long>,
+    val confirmedToReReview: Long,
+    val rejectedToReReview: Long,
   )
 
   private data class ToReview(
@@ -63,6 +65,8 @@ class AiReviewRunService(
       toReview = classified.toReview.size.toLong(),
       dryRunOnly = classified.dryRunOnly,
       skipped = classified.skipped,
+      confirmedToReReview = classified.confirmedToReReview,
+      rejectedToReReview = classified.rejectedToReReview,
     )
   }
 
@@ -122,6 +126,8 @@ class AiReviewRunService(
     val toReview = mutableListOf<ToReview>()
     var dryRunOnly = 0L
     val skipped = mutableMapOf<AiReviewSkipReason, Long>()
+    var confirmedToReReview = 0L
+    var rejectedToReReview = 0L
 
     candidateTranslationIds(projectId, request).distinct().chunked(CHUNK).forEach { chunk ->
       val rows = reviewRepository.findAllByTranslationIdIn(chunk).associateBy { it.translation.id }
@@ -131,6 +137,11 @@ class AiReviewRunService(
           is CandidateResult.Skipped -> skipped.merge(result.reason, 1L, Long::plus)
           is CandidateResult.Review -> {
             if (result.dryRun) dryRunOnly++
+            when (rows[translation.id]?.status) {
+              AiReviewStatus.CONFIRMED -> confirmedToReReview++
+              AiReviewStatus.REJECTED -> rejectedToReReview++
+              else -> Unit
+            }
             toReview += ToReview(translation.id, hasRow = result.hasRow)
           }
           CandidateResult.NotACandidate -> Unit
@@ -138,7 +149,7 @@ class AiReviewRunService(
       }
       entityManager.clear()
     }
-    return Classified(toReview, dryRunOnly, skipped)
+    return Classified(toReview, dryRunOnly, skipped, confirmedToReReview, rejectedToReReview)
   }
 
   private fun openQaIssueIds(
@@ -206,14 +217,21 @@ class AiReviewRunService(
         return AiReviewSkipReason.EMPTY
       }
       if (translation.outdated) return AiReviewSkipReason.OUTDATED
-      if (AiReviewEligibility.isHumanReviewed(translation, row)) return AiReviewSkipReason.HUMAN_REVIEWED
+      if (AiReviewEligibility.isHumanReviewed(translation, row) && !reRunsHumanDecision(row)) {
+        return AiReviewSkipReason.HUMAN_REVIEWED
+      }
       return null
     }
 
+    private fun reRunsHumanDecision(row: TranslationAiReview?): Boolean =
+      request.reReview && row != null && AiReviewEligibility.isHumanDecision(row)
+
     private fun rowSkipReason(row: TranslationAiReview?): AiReviewSkipReason? {
       if (row == null) return null
-      if (row.status == AiReviewStatus.CONFIRMED) return AiReviewSkipReason.CONFIRMED_BY_HUMAN
-      if (row.status == AiReviewStatus.REJECTED) return AiReviewSkipReason.REJECTED_BY_HUMAN
+      if (!request.reReview) {
+        if (row.status == AiReviewStatus.CONFIRMED) return AiReviewSkipReason.CONFIRMED_BY_HUMAN
+        if (row.status == AiReviewStatus.REJECTED) return AiReviewSkipReason.REJECTED_BY_HUMAN
+      }
       if (AiReviewEligibility.isQueued(row)) return AiReviewSkipReason.ALREADY_QUEUED
       val hasResult = row.status in RESULT_STATUSES
       val reRun = request.reReview || (request.failedOnly && row.lastFailureReason != null)

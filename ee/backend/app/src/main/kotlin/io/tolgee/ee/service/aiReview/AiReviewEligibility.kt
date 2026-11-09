@@ -17,8 +17,12 @@ object AiReviewEligibility {
     if (translation.text.isNullOrBlank()) return false
     if (translation.state == TranslationState.DISABLED) return false
     if (translation.outdated) return false
-    return !isHumanReviewed(translation, review)
+    return isRequeuedHumanDecision(review) || !isHumanReviewed(translation, review)
   }
+
+  /** A manual run with the re-review option queues human decisions; only then they run again. */
+  fun isRequeuedHumanDecision(review: TranslationAiReview?): Boolean =
+    review != null && review.status in HUMAN_DECISIONS && review.reReviewRequested
 
   fun isHumanReviewed(
     translation: Translation,

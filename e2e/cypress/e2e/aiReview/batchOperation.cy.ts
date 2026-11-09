@@ -99,6 +99,7 @@ describe('AI review batch operation', () => {
         gcy('ai-review-run-to-review')
           .invoke('attr', 'data-cy-count')
           .should('not.eq', withoutReReview);
+        gcy('ai-review-run-includes-resolved').should('be.visible');
       });
   });
 
