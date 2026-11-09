@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.aiReview
 
+import io.tolgee.constants.Caches
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.Project
@@ -10,6 +11,7 @@ import io.tolgee.service.aiReview.SourceChangeSettingsProvider
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,6 +42,7 @@ class SourceChangeSettingsService(
     projectService.getDto(projectId).translationProtection == TranslationProtection.PROTECT_REVIEWED
 
   @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun update(
     projectId: Long,
     aiApproved: SourceChangeAction,
