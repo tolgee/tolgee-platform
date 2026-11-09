@@ -167,4 +167,20 @@ class PluralTranslationUtilTest {
       .assert
       .isEqualTo("<a> 'b' \"c\"")
   }
+
+  @Test
+  fun `decodes hex entities whatever the case of the x and the digits`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder("&#x3c;a&#X3e; &#x27;b&#X27; &#x026;", htmlEscaped = true)
+      .assert
+      .isEqualTo("<a> 'b' &")
+  }
+
+  @Test
+  fun `keeps a code point that only truncates onto an escaped character`() {
+    PluralTranslationUtil
+      .restoreNumberPlaceholder("a &#x1003C; b", htmlEscaped = true)
+      .assert
+      .isEqualTo("a &#x1003C; b")
+  }
 }

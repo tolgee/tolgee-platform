@@ -92,27 +92,47 @@ class PluralTranslationUtil(
       return unescapeMarkup(translated).replace(TOLGEE_TAG_REGEX, "#")
     }
 
+    private const val MARKUP_CHARS = "<>\"'&"
+
+    private val NAMED_MARKUP_ENTITIES =
+      mapOf(
+        "lt" to '<',
+        "gt" to '>',
+        "quot" to '"',
+        "apos" to '\'',
+        "amp" to '&',
+      )
+
+    private val MARKUP_ENTITY_REGEX = "&(?:([a-zA-Z]+)|#([xX])?([0-9a-fA-F]+));".toRegex()
+
     /**
      * Reverses [escapeMarkup] and nothing else, covering only the five characters it escapes in their
      * named, decimal and hex forms (plus XML `&apos;`, which an XML-mode engine may serialize instead).
      * A full HTML unescape would also decode entities the engine introduced on its own (`&nbsp;` into
      * U+00A0, say), which would then sit invisibly in the stored ICU string and break exact-match
      * comparison on re-import.
+     *
+     * One pass over the text, so `&amp;lt;` decodes to `&lt;` and not to `<`.
      */
-    private val MARKUP_ENTITIES =
-      listOf(
-        "<" to listOf("&lt;", "&#60;", "&#x3C;"),
-        ">" to listOf("&gt;", "&#62;", "&#x3E;"),
-        "\"" to listOf("&quot;", "&#34;", "&#x22;"),
-        "'" to listOf("&#39;", "&apos;", "&#x27;"),
-        // must come last, so "&amp;lt;" decodes to "&lt;" and not to "<"
-        "&" to listOf("&amp;", "&#38;", "&#x26;"),
-      )
-
     private fun unescapeMarkup(text: String): String =
-      MARKUP_ENTITIES.fold(text) { acc, (char, entities) ->
-        entities.fold(acc) { inner, entity -> inner.replace(entity, char) }
+      MARKUP_ENTITY_REGEX.replace(text) { match ->
+        decodeMarkupEntity(match)?.toString() ?: match.value
       }
+
+    private fun decodeMarkupEntity(match: MatchResult): Char? {
+      val (name, hexPrefix, digits) = match.destructured
+      if (name.isNotEmpty()) return NAMED_MARKUP_ENTITIES[name.lowercase()]
+      if (hexPrefix.isEmpty()) return digits.toMarkupCharOrNull(radix = 10)
+      return digits.toMarkupCharOrNull(radix = 16)
+    }
+
+    private fun String.toMarkupCharOrNull(radix: Int): Char? {
+      val code = this.toIntOrNull(radix) ?: return null
+      val char = code.toChar()
+      if (char.code != code) return null
+      if (char !in MARKUP_CHARS) return null
+      return char
+    }
 
     private fun escapeMarkup(text: String): String = HtmlUtils.htmlEscape(text, Charsets.UTF_8.name())
 
