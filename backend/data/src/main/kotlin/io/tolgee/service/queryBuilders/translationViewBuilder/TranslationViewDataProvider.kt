@@ -88,9 +88,6 @@ class TranslationViewDataProvider(
     deleteFailedKeysInJobTempTable()
 
     val keyIds = views.map { it.keyId }
-    // Fetch translations + all per-translation counts (comments, suggestions, QA issues)
-    // in a single query. The inline count subqueries are cheap because they only run on
-    // the page's translations (~pageSize × langCount rows, typically <500).
     populateTranslationsWithCounts(keyIds, languages, views, qaEnabled, qaDisabledLanguageIds)
 
     val translationIds =
@@ -120,20 +117,21 @@ class TranslationViewDataProvider(
    * are cheap because they only run on the page's translations (~pageSize × langCount rows,
    * typically <500), not on the entire project's translation set.
    *
-   * Missing `(key, language)` pairs are filled in with a placeholder [TranslationView] in the
-   * `UNTRANSLATED` state so that every returned view has an entry for every requested language.
+   * Every `(key, language)` pair starts as a placeholder [TranslationView] in the `UNTRANSLATED`
+   * state, so that every returned view has an entry for every requested language. The query only
+   * returns the pairs carrying data: the full join adds the pairs that have suggestions but no
+   * translation, and those only get their suggestion counts set on the placeholder.
    *
-   * This combines what would otherwise be 4 separate queries (translation fetch + 3 count
-   * queries) into 1. The QA issue count expression ([qaCountExpr]) has three shapes: a literal
-   * `0L` when QA is off project-wide, a plain count subquery when enabled, and a count subquery
-   * with a `language.id not in (:qaDisabledLanguageIds)` exclusion when some languages have QA
-   * disabled. The `0L` shape keeps the column layout (and the `COL_*` indices) stable.
+   * Both sides of the full join must filter on the page's keys and languages themselves. A filter
+   * outside the join would have to let the unmatched rows through, which forces a scan of the whole
+   * translation table. A row per `(key, language)` pair (`key × language left join translation`)
+   * was measured up to 20× slower on projects with 100+ selected languages, where its cost estimate
+   * crosses Postgres' `jit_above_cost`.
    *
-   * Uses plain JPQL rather than Criteria API because the query has 5 inline correlated count
-   * subqueries. The only dynamic parts are the `qaCountExpr` shape above and its two conditional
-   * parameter binds (`openQa`, and `qaDisabledLanguageIds` only when the exclusion clause is
-   * present); expressing the 5 correlated subqueries in Criteria API would require dozens of lines
-   * of nested `subquery.correlate()`, so the JPQL string stays more readable.
+   * The QA issue count expression ([qaCountExpr]) has three shapes: a literal `0L` when QA is off
+   * project-wide, a plain count subquery when enabled, and a count subquery with a
+   * `languageId not in (:qaDisabledLanguageIds)` exclusion when some languages have QA disabled.
+   * The `0L` shape keeps the column layout stable.
    */
   @Suppress("LongMethod")
   private fun populateTranslationsWithCounts(
@@ -166,19 +164,29 @@ class TranslationViewDataProvider(
           .createQuery(
             """
             select t.id, t.text, t.state, t.auto, t.mtProvider, t.outdated, t.qaChecksStale,
-                   t.key.id, t.language.id,
+                   coalesce(t.keyId, s.keyId), coalesce(t.languageId, s.languageId),
                    (select count(tc) from TranslationComment tc
                     where tc.translation.id = t.id),
                    (select sum(case when tc2.state = :unresolved then 1L else 0L end)
                     from TranslationComment tc2 where tc2.translation.id = t.id),
-                   (select count(ts) from TranslationSuggestion ts
-                    where ts.key.id = t.key.id and ts.language.id = t.language.id),
-                   (select sum(case when ts2.state = :activeSuggestion then 1L else 0L end)
-                    from TranslationSuggestion ts2
-                    where ts2.key.id = t.key.id and ts2.language.id = t.language.id),
+                   s.total,
+                   s.active,
                    $qaCountExpr
-            from Translation t
-            where t.key.id in :keyIds and t.language.id in :languageIds
+            from (
+              select tr.id as id, tr.text as text, tr.state as state, tr.auto as auto,
+                     tr.mtProvider as mtProvider, tr.outdated as outdated,
+                     tr.qaChecksStale as qaChecksStale,
+                     tr.key.id as keyId, tr.language.id as languageId
+              from Translation tr
+              where tr.key.id in :keyIds and tr.language.id in :languageIds
+            ) t
+            full join (
+              select ts.key.id as keyId, ts.language.id as languageId, count(ts) as total,
+                     sum(case when ts.state = :activeSuggestion then 1L else 0L end) as active
+              from TranslationSuggestion ts
+              where ts.key.id in :keyIds and ts.language.id in :languageIds
+              group by ts.key.id, ts.language.id
+            ) s on s.keyId = t.keyId and s.languageId = t.languageId
             """.trimIndent(),
             Tuple::class.java,
           ).setParameter("keyIds", keyIdChunk)
@@ -197,9 +205,17 @@ class TranslationViewDataProvider(
         val langId = row.get(8) as Long
         val view = viewsByKeyId[keyId] ?: continue
         val tag = tagById[langId] ?: continue
+        val translationId = row.get(0) as Long?
+        if (translationId == null) {
+          view.translations[tag]?.apply {
+            activeSuggestionCount = (row.get(12) as Number?)?.toLong() ?: 0L
+            totalSuggestionCount = (row.get(11) as Number?)?.toLong() ?: 0L
+          }
+          continue
+        }
         view.translations[tag] =
           TranslationView(
-            id = row.get(0) as Long?,
+            id = translationId,
             text = row.get(1) as String?,
             state = row.get(2) as TranslationState,
             auto = row.get(3) as Boolean,
@@ -255,7 +271,7 @@ class TranslationViewDataProvider(
     }
     return """(select count(qa) from TranslationQaIssue qa
             where qa.translation.id = t.id and qa.state = :openQa
-              and t.language.id not in :qaDisabledLanguageIds)"""
+              and t.languageId not in :qaDisabledLanguageIds)"""
   }
 
   /**
