@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Box, Button, styled, Toolbar, Typography, useTheme } from '@mui/material';
+import { Box, styled, Toolbar, Typography, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
-import { T } from '@tolgee/react';
 
-import { useConfig } from 'tg.globalContext/helpers';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useConfig, useIsGuest } from 'tg.globalContext/helpers';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { LanguageMenu } from 'tg.component/layout/TopBar/LanguageMenu';
 import { UserMenu } from 'tg.component/security/UserMenu/UserMenu';
+import { LoginSignUpButtons } from 'tg.component/layout/TopBar/LoginSignUpButtons';
 import { LINKS } from 'tg.constants/links';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -41,7 +40,7 @@ const StyledTolgeeLink = styled(Link)`
 export const PublicTopBar = () => {
   const theme = useTheme();
   const config = useConfig();
-  const allowPrivate = useGlobalContext((c) => c.auth.allowPrivate);
+  const isGuest = useIsGuest();
 
   return (
     <StyledAppBar position="sticky">
@@ -60,29 +59,7 @@ export const PublicTopBar = () => {
           </StyledTolgeeLink>
         </Box>
         <LanguageMenu />
-        {allowPrivate ? (
-          <UserMenu />
-        ) : (
-          <>
-            <Button
-              component={Link}
-              to={LINKS.LOGIN.build()}
-              variant="outlined"
-              data-cy="public-projects-login-button"
-            >
-              <T keyName="public_projects_login_button" />
-            </Button>
-            <Button
-              component={Link}
-              to={LINKS.SIGN_UP.build()}
-              variant="contained"
-              color="primary"
-              data-cy="public-projects-sign-up-button"
-            >
-              <T keyName="public_projects_sign_up_button" />
-            </Button>
-          </>
-        )}
+        {isGuest ? <LoginSignUpButtons /> : <UserMenu />}
       </StyledToolbar>
     </StyledAppBar>
   );
