@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.ContributorsTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
@@ -197,6 +198,10 @@ class ProjectContributorsControllerTest : AuthorizedControllerTest() {
       "/v2/projects/${testData.project.id}/keys",
       CreateKeyDto(name = "contributor.pipeline.key"),
     ).andIsCreated
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations",
+      SetTranslationsWithKeyDto(key = "contributor.pipeline.key", translations = mapOf("en" to "Translated")),
+    ).andIsOk
 
     val count =
       jdbcTemplate.queryForObject(

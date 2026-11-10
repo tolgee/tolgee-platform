@@ -33,7 +33,8 @@ class ProjectContributorsController(
   @Operation(
     summary = "Get project contributors",
     description =
-      "Returns users who have activity on the project but are not currently its members. " +
+      "Returns users with translation contributions on the project (translations, state changes, comments, " +
+        "suggestions and their moderation) who are not currently its members. " +
         "Deleted and disabled users are excluded. " +
         "Sortable by lastContributionAt and firstContributionAt only; any other sort property " +
         "falls back to lastContributionAt descending.",

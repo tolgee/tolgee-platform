@@ -450,7 +450,7 @@ export interface paths {
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/activity": {
-    get: operations["getActivity"];
+    get: operations["getActivity_1"];
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
     get: operations["getSingleRevision"];
@@ -551,6 +551,10 @@ export interface paths {
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
   };
+  "/v2/projects/{projectId}/community/activity": {
+    /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given). By default there is one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
+    get: operations["getActivity"];
+  };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
     post: operations["create_10"];
@@ -579,7 +583,7 @@ export interface paths {
     post: operations["testExisting"];
   };
   "/v2/projects/{projectId}/contributors": {
-    /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+    /** Returns users with translation contributions on the project (translations, state changes, comments, suggestions and their moderation) who are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
     get: operations["getContributors"];
   };
   "/v2/projects/{projectId}/current-batch-jobs": {
@@ -1934,6 +1938,17 @@ export interface components {
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
     };
+    Bucket: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      start: string;
+      /** Format: int64 */
+      suggested: number;
+    };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
       data?: { [key: string]: { [key: string]: unknown } };
@@ -2124,6 +2139,13 @@ export interface components {
       _embedded?: {
         workspaces?: components["schemas"]["WorkspaceModel"][];
       };
+    };
+    CommunityActivityStatsModel: {
+      buckets: components["schemas"]["Bucket"][];
+      /** Format: int64 */
+      translationsWithAnySuggestion: number;
+      /** Format: int64 */
+      translationsWithPendingSuggestion: number;
     };
     ComplexEditKeyDto: {
       /** @description Branch of the key. If not provided, default branch will be used */
@@ -15481,7 +15503,7 @@ export interface operations {
       };
     };
   };
-  getActivity: {
+  getActivity_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -17215,6 +17237,64 @@ export interface operations {
       };
     };
   };
+  /** Counts of contributions, suggestions, and accepted and declined suggestions for each day or week of the range, oldest first, with zeros where nothing happened. Also two exact counts of translations, where a translation is one key in one language: `translationsWithAnySuggestion` counts the translations that received a suggestion within the range, and `translationsWithPendingSuggestion` counts those of them that still have a pending suggestion. A pending suggestion created before the range is not counted. By default, the range is the 12 weeks ending with the week of `to` (today, unless given). By default there is one bucket per week. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. The counts of contributions, suggestions, and accepted and declined suggestions are approximate: they come from the activity log and never go down, so a suggestion made in one period and accepted or declined in a later one counts in both. The two translation counts are exact: they are read from the suggestions as they are now. */
+  getActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. A `to` before 1970-01-01 or more than a year after today is moved to that bound. */
+        to?: string;
+        /** Count only these languages, in the buckets and in both translation counts. */
+        languageIds?: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityActivityStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   list_2: {
     parameters: {
       query: {
@@ -17870,7 +17950,7 @@ export interface operations {
       };
     };
   };
-  /** Returns users who have activity on the project but are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
+  /** Returns users with translation contributions on the project (translations, state changes, comments, suggestions and their moderation) who are not currently its members. Deleted and disabled users are excluded. Sortable by lastContributionAt and firstContributionAt only; any other sort property falls back to lastContributionAt descending. */
   getContributors: {
     parameters: {
       path: {
