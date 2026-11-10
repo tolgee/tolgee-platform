@@ -1,22 +1,12 @@
-import {
-  Box,
-  FormControl,
-  Link as MuiLink,
-  MenuItem,
-  Select,
-} from '@mui/material';
+import { Box, FormControl, Link, MenuItem, Select } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { Link } from 'react-router-dom';
 
 import { getAiPlaygroundUrl } from 'tg.constants/links';
 import { FieldLabel } from 'tg.component/FormField';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import {
-  RuleFormValues,
-  ruleNeverFullyApplies,
-} from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
+import { RuleFormValues } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 
 export const RulePromptSelect = () => {
   const { t } = useTranslate();
@@ -32,15 +22,37 @@ export const RulePromptSelect = () => {
 
   const prompts = promptsLoadable.data?._embedded?.prompts ?? [];
   const label = t('ai_review_rule_form_prompt_label', 'Review prompt');
-  const disabled = ruleNeverFullyApplies(values);
 
   return (
-    <Box display="grid" gap={0.5} justifyItems="start">
-      <FieldLabel>{label}</FieldLabel>
-      <FormControl size="small" disabled={disabled} fullWidth>
+    <Box display="grid" gap={0.5}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="baseline"
+        gap={2}
+      >
+        <FieldLabel>{label}</FieldLabel>
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          href={getAiPlaygroundUrl(
+            project.id,
+            values.promptId === '' ? undefined : values.promptId,
+            undefined,
+            'REVIEW'
+          )}
+          variant="body2"
+          data-cy="ai-review-rule-form-prompt-playground"
+        >
+          {t('ai_review_rule_form_prompt_playground_short', 'AI playground')}
+        </Link>
+      </Box>
+      <FormControl size="small" fullWidth>
         <Select
           value={values.promptId}
           displayEmpty
+          // A prompt made in the playground tab should show up without a reload.
+          onOpen={() => promptsLoadable.refetch()}
           onChange={(e) =>
             setFieldValue(
               'promptId',
@@ -65,19 +77,6 @@ export const RulePromptSelect = () => {
           ))}
         </Select>
       </FormControl>
-      <MuiLink
-        component={Link}
-        to={getAiPlaygroundUrl(
-          project.id,
-          values.promptId === '' ? undefined : values.promptId,
-          undefined,
-          'REVIEW'
-        )}
-        variant="body2"
-        data-cy="ai-review-rule-form-prompt-playground"
-      >
-        {t('ai_review_rule_form_prompt_playground', 'Open in AI playground')}
-      </MuiLink>
     </Box>
   );
 };

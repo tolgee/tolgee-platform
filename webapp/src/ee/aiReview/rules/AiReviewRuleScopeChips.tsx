@@ -1,9 +1,26 @@
-import { Box, Chip } from '@mui/material';
+import { Box, styled, Tooltip, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { useListFormatter } from 'tg.hooks/useLocale';
+
+const MAX_FLAGS = 5;
+
+const StyledScopeLine = styled(Typography)`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: ${({ theme }) => theme.spacing(0.75)};
+  row-gap: ${({ theme }) => theme.spacing(0.5)};
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledFlag = styled(FlagImage)`
+  display: block;
+  border-radius: 2px;
+`;
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
 
@@ -22,83 +39,123 @@ export const AiReviewRuleScopeChips = ({ rule }: Props) => {
     namespace === ''
       ? t('ai_review_chip_default_namespace', 'Default namespace')
       : namespace;
-  const excluded = (label: string) =>
-    t('ai_review_chip_except', 'except {value}', { value: label });
+  const ruleLanguages = rule.languageIds
+    .map((id) => languages.find((l) => l.id === id))
+    .filter(Boolean) as typeof languages;
+  const visibleLanguages =
+    ruleLanguages.length > MAX_FLAGS
+      ? ruleLanguages.slice(0, MAX_FLAGS - 1)
+      : ruleLanguages;
+  const hiddenLanguages = ruleLanguages.slice(visibleLanguages.length);
 
-  const languagesLabel =
-    rule.languageIds.length === 0
-      ? t('ai_review_chip_all_languages', 'All languages')
-      : formatList(
-          rule.languageIds.map(
-            (id) => languages.find((l) => l.id === id)?.name ?? id.toString()
-          )
-        );
-
-  const chips: {
+  const scopeParts: {
     key: string;
     scope: string;
-    label: string;
     kind: string;
-    value?: string;
+    label: string;
   }[] = [
     ...rule.tagIn.map((tag) => ({
       key: `tag-${tag}`,
       scope: tag,
-      label: tagLabel(tag),
       kind: 'include',
+      label: t('ai_review_scope_tag', 'Tag: {value}', { value: tagLabel(tag) }),
     })),
     ...rule.tagNotIn.map((tag) => ({
       key: `tag-not-${tag}`,
       scope: tag,
-      label: excluded(tagLabel(tag)),
       kind: 'exclude',
+      label: t('ai_review_scope_tag_except', 'Except tag: {value}', {
+        value: tagLabel(tag),
+      }),
     })),
     ...rule.namespaceIn.map((namespace) => ({
       key: `ns-${namespace}`,
       scope: namespace,
-      label: namespaceLabel(namespace),
       kind: 'include',
+      label: t('ai_review_scope_namespace', 'Namespace: {value}', {
+        value: namespaceLabel(namespace),
+      }),
     })),
     ...rule.namespaceNotIn.map((namespace) => ({
       key: `ns-not-${namespace}`,
       scope: namespace,
-      label: excluded(namespaceLabel(namespace)),
       kind: 'exclude',
+      label: t(
+        'ai_review_scope_namespace_except',
+        'Except namespace: {value}',
+        {
+          value: namespaceLabel(namespace),
+        }
+      ),
     })),
     ...rule.branchIn.map((branch) => ({
       key: `branch-${branch}`,
       scope: branch,
-      label: branch,
       kind: 'include',
+      label: t('ai_review_scope_branch', 'Branch: {value}', { value: branch }),
     })),
     ...rule.branchNotIn.map((branch) => ({
       key: `branch-not-${branch}`,
       scope: branch,
-      label: excluded(branch),
       kind: 'exclude',
+      label: t('ai_review_scope_branch_except', 'Except branch: {value}', {
+        value: branch,
+      }),
     })),
-    {
-      key: 'languages',
-      scope: 'languages',
-      label: languagesLabel,
-      kind: 'include',
-      value: languagesLabel,
-    },
   ];
 
   return (
-    <Box display="flex" flexWrap="wrap" gap={0.5}>
-      {chips.map((chip) => (
-        <Chip
-          key={chip.key}
-          size="small"
-          label={chip.label}
+    <StyledScopeLine variant="body2" data-cy="ai-review-rule-scope">
+      {rule.languageIds.length === 0 ? (
+        <span data-cy="ai-review-scope-chip" data-cy-scope="languages">
+          {t('ai_review_chip_all_languages', 'All languages')}
+        </span>
+      ) : (
+        <Box
+          component="span"
+          display="inline-flex"
+          alignItems="center"
+          gap={0.5}
+          data-cy="ai-review-rule-languages"
+        >
+          {visibleLanguages.map((language) => (
+            <Tooltip key={language.id} title={language.name} disableInteractive>
+              <span data-cy="ai-review-rule-language-flag">
+                <StyledFlag flagEmoji={language.flagEmoji ?? ''} height={16} />
+              </span>
+            </Tooltip>
+          ))}
+          {hiddenLanguages.length > 0 && (
+            <Tooltip
+              title={formatList(hiddenLanguages.map((l) => l.name))}
+              disableInteractive
+            >
+              <span data-cy="ai-review-rule-languages-more">
+                {t('ai_review_rule_languages_more', '+{count}', {
+                  count: hiddenLanguages.length,
+                })}
+              </span>
+            </Tooltip>
+          )}
+        </Box>
+      )}
+      {scopeParts.length === 0 && (
+        <span data-cy="ai-review-scope-chip" data-cy-scope="keys">
+          <span aria-hidden="true">· </span>
+          {t('ai_review_scope_all_keys', 'All keys')}
+        </span>
+      )}
+      {scopeParts.map((part) => (
+        <span
+          key={part.key}
           data-cy="ai-review-scope-chip"
-          data-cy-scope={chip.scope}
-          data-cy-kind={chip.kind}
-          data-cy-value={chip.value}
-        />
+          data-cy-scope={part.scope}
+          data-cy-kind={part.kind}
+        >
+          <span aria-hidden="true">· </span>
+          {part.label}
+        </span>
       ))}
-    </Box>
+    </StyledScopeLine>
   );
 };

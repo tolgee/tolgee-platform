@@ -1,46 +1,52 @@
-import { Box, FormHelperText } from '@mui/material';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 
 import { FieldLabel } from 'tg.component/FormField';
 import { RuleFormValues } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
-import { SegmentedControl } from 'tg.component/common/SegmentedControl';
 
 export const RuleModeSelect = () => {
   const { t } = useTranslate();
   const { values, setFieldValue } = useFormikContext<RuleFormValues>();
 
   return (
-    <Box display="grid" gap={1}>
-      <FieldLabel>{t('ai_review_rule_form_mode_label', 'Mode')}</FieldLabel>
-      <SegmentedControl
-        dataCy="ai-review-rule-form-mode"
+    <Box display="grid">
+      <FieldLabel>
+        {t('ai_review_rule_form_review_mode_label', 'Review mode')}
+      </FieldLabel>
+      <RadioGroup
         value={values.mode}
-        onChange={(mode) => setFieldValue('mode', mode)}
-        options={[
-          {
-            value: 'DRY_RUN',
-            title: t('ai_review_rule_form_mode_dry_run', 'Dry run'),
-            dataCy: 'ai-review-rule-form-mode-dry-run',
-          },
-          {
-            value: 'ACTIVE',
-            title: t('ai_review_rule_form_mode_active', 'Active'),
-            dataCy: 'ai-review-rule-form-mode-active',
-          },
-        ]}
-      />
-      <FormHelperText sx={{ marginTop: -0.5 }}>
-        {values.mode === 'DRY_RUN'
-          ? t(
-              'ai_review_rule_form_mode_dry_run_hint',
-              'The AI only scores translations. Nothing is marked as reviewed.'
-            )
-          : t(
-              'ai_review_rule_form_mode_active_hint',
-              'Translations that pass are marked as reviewed.'
-            )}
-      </FormHelperText>
+        onChange={(_, mode) => setFieldValue('mode', mode)}
+        data-cy="ai-review-rule-form-mode"
+      >
+        <FormControlLabel
+          value="DRY_RUN"
+          sx={{ justifySelf: 'start' }}
+          control={
+            <Radio
+              size="small"
+              sx={{ py: 0.25 }}
+              data-cy="ai-review-rule-form-mode-dry-run"
+            />
+          }
+          label={t('ai_review_rule_mode_score_only', 'AI score only')}
+        />
+        <FormControlLabel
+          value="ACTIVE"
+          sx={{ justifySelf: 'start' }}
+          control={
+            <Radio
+              size="small"
+              sx={{ py: 0.25 }}
+              data-cy="ai-review-rule-form-mode-active"
+            />
+          }
+          label={t(
+            'ai_review_rule_form_score_and_mark_label',
+            'Score and mark as reviewed'
+          )}
+        />
+      </RadioGroup>
     </Box>
   );
 };

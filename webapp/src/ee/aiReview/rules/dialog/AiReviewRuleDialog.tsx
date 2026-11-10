@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -20,13 +21,16 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 
 import { RuleAppliesTo } from 'tg.ee.module/aiReview/rules/dialog/RuleAppliesTo';
 import { RuleThresholdField } from 'tg.ee.module/aiReview/rules/dialog/RuleThresholdField';
-import { RuleAdvancedSection } from 'tg.ee.module/aiReview/rules/dialog/RuleAdvancedSection';
+import { RulePromptSelect } from 'tg.ee.module/aiReview/rules/dialog/RulePromptSelect';
+import { RuleQaCheckbox } from 'tg.ee.module/aiReview/rules/dialog/RuleQaCheckbox';
 import { RuleModeSelect } from 'tg.ee.module/aiReview/rules/dialog/RuleModeSelect';
-import { RuleNeverCard } from 'tg.ee.module/aiReview/rules/dialog/RuleNeverCard';
+import {
+  RuleNeverCheckbox,
+  RuleNeverInfo,
+} from 'tg.ee.module/aiReview/rules/dialog/RuleNeverCheckbox';
 import {
   getRuleInitialValues,
   RuleFormValues,
-  ruleNeverFullyApplies,
   ruleValuesToRequest,
 } from 'tg.ee.module/aiReview/rules/dialog/useRuleFormValues';
 
@@ -39,29 +43,35 @@ const RULES_URL = '/v2/projects/{projectId}/ai-review-rules';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
-  gap: ${({ theme }) => theme.spacing(2.5)};
+  gap: ${({ theme }) => theme.spacing(2)};
   margin-top: ${({ theme }) => theme.spacing(1)};
   width: 85vw;
   max-width: 600px;
 `;
 
-const StyledSections = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.divider1};
-  border-radius: ${({ theme }) => theme.shape.borderRadius * 2}px;
-  overflow: hidden;
-
-  & > * + * {
-    border-top: 1px solid ${({ theme }) => theme.palette.divider1};
-  }
-`;
-
 type Props = {
   onClose: () => void;
   rule?: AiReviewRuleModel;
+  /** Creates a new rule prefilled from this one. */
+  duplicateOf?: AiReviewRuleModel;
   onRequestRun?: (saved: AiReviewRuleModel) => void;
 };
 
-export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
+// "Checkout" -> "Checkout 2", "Checkout 2" -> "Checkout 3"; an unnamed rule stays unnamed.
+function duplicateName(name?: string) {
+  if (!name) {
+    return '';
+  }
+  const numbered = name.match(/^(.*\S)\s+(\d+)$/);
+  return numbered ? `${numbered[1]} ${Number(numbered[2]) + 1}` : `${name} 2`;
+}
+
+export const AiReviewRuleDialog = ({
+  onClose,
+  rule,
+  duplicateOf,
+  onRequestRun,
+}: Props) => {
   const { t } = useTranslate();
   const project = useProject();
   const messaging = useMessage();
@@ -72,7 +82,8 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
 
   async function offerRun(saved: AiReviewRuleModel) {
     await queryClient.invalidateQueries(matchUrlPrefix(RULES_URL));
-    if (!onRequestRun || !canRun) {
+    // A rule that keeps AI away has nothing to score, so there is no run to offer.
+    if (saved.never || !onRequestRun || !canRun) {
       return;
     }
     const rules = queryClient.getQueryData<RulesList>([
@@ -102,7 +113,12 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
 
   function handleSaved(data: AiReviewRuleModel) {
     messaging.success(
-      rule ? (
+      data.never ? (
+        <T
+          keyName="ai_review_rule_never_saved"
+          defaultValue="Selected translations are excluded from AI review"
+        />
+      ) : rule ? (
         <T keyName="ai_review_rule_update_success" defaultValue="Rule saved" />
       ) : (
         <T
@@ -143,40 +159,82 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
       data-cy="ai-review-rule-dialog"
     >
       <Formik
-        initialValues={getRuleInitialValues(rule)}
+        initialValues={
+          duplicateOf
+            ? {
+                ...getRuleInitialValues(duplicateOf),
+                name: duplicateName(duplicateOf.name),
+              }
+            : getRuleInitialValues(rule)
+        }
         onSubmit={handleSubmit}
       >
         {({ isSubmitting, handleSubmit, values }) => {
-          const fullNever = ruleNeverFullyApplies(values);
           return (
             <>
-              <DialogTitle>
-                {rule
-                  ? t('ai_review_rule_dialog_edit_title', 'Edit AI review rule')
-                  : t(
-                      'ai_review_rule_dialog_create_title',
-                      'Create AI review rule'
-                    )}
+              <DialogTitle
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  columnGap: 2,
+                }}
+              >
+                <span>
+                  {rule
+                    ? t(
+                        'ai_review_rule_dialog_edit_title',
+                        'Edit AI review rule'
+                      )
+                    : duplicateOf
+                    ? t(
+                        'ai_review_rule_dialog_duplicate_title',
+                        'Duplicate AI review rule'
+                      )
+                    : t(
+                        'ai_review_rule_dialog_create_title',
+                        'Create AI review rule'
+                      )}
+                </span>
+                <RuleNeverCheckbox />
               </DialogTitle>
               <StyledDialogContent>
                 <TextField
                   name="name"
                   size="small"
                   minHeight={false}
-                  label={t('ai_review_rule_form_name_label', 'Name')}
+                  label={t('ai_review_rule_form_rule_name_label', 'Rule name')}
                   data-cy="ai-review-rule-form-name"
                 />
-                <RuleNeverCard />
-                {!fullNever && (
+                <RuleAppliesTo />
+                <RuleNeverInfo />
+                {!values.never && (
                   <>
-                    <RuleThresholdField />
-                    <RuleModeSelect />
+                    <RulePromptSelect />
+                    <Box display="grid" gap={0.5}>
+                      <RuleModeSelect />
+                      {values.mode === 'ACTIVE' && (
+                        // A light panel across the form for the settings of the selected mode.
+                        <Box
+                          display="grid"
+                          gap={1}
+                          mt={0.5}
+                          px={2}
+                          py={1.5}
+                          sx={(theme) => ({
+                            borderRadius: `${theme.shape.borderRadius * 2}px`,
+                            background: theme.palette.tokens.text._states.hover,
+                          })}
+                        >
+                          <RuleThresholdField />
+                        </Box>
+                      )}
+                      {/* Applies to both modes: AI skips these translations entirely. */}
+                      <RuleQaCheckbox />
+                    </Box>
                   </>
                 )}
-                <StyledSections>
-                  <RuleAppliesTo />
-                  <RuleAdvancedSection />
-                </StyledSections>
               </StyledDialogContent>
               <DialogActions>
                 <Button onClick={onClose} data-cy="ai-review-rule-form-cancel">
@@ -184,6 +242,8 @@ export const AiReviewRuleDialog = ({ onClose, rule, onRequestRun }: Props) => {
                 </Button>
                 <LoadingButton
                   loading={isSubmitting}
+                  // The name is how rules are told apart in the list; a rule needs a language.
+                  disabled={!values.name.trim() || values.noLanguages}
                   variant="contained"
                   color="primary"
                   onClick={() => handleSubmit()}

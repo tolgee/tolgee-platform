@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { useRef, useState } from 'react';
 import {
   Box,
@@ -5,13 +6,16 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Paper,
-  Switch,
+  Tooltip,
   Typography,
   styled,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { DotsVertical, Edit02 } from '@untitled-ui/icons-react';
+import {
+  CheckCircleBroken,
+  DotsVertical,
+  Edit02,
+} from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -26,20 +30,63 @@ import {
   AiReviewRunVariant,
   runVariantForMode,
 } from 'tg.ee.module/aiReview/runs/AiReviewRunDialog';
-import {
-  AiReviewRuleCounts,
-  Dot,
-  StyledInfoLine,
-} from 'tg.ee.module/aiReview/rules/AiReviewRuleCounts';
+import { AiReviewRuleCounts } from 'tg.ee.module/aiReview/rules/AiReviewRuleCounts';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useRuleLabel } from 'tg.ee.module/aiReview/rules/useRuleLabel';
 
 type AiReviewRuleModel = components['schemas']['AiReviewRuleModel'];
 
-const StyledItem = styled(Paper)`
+const StyledItem = styled(Box)`
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: ${({ theme }) => theme.spacing(1)};
-  padding: ${({ theme }) => theme.spacing(2)};
+  gap: 8px;
+  padding: 16px 20px;
+
+  // Rows in one list, like projects: a line between them, none after the last.
+  &:not(:last-of-type) {
+    border-bottom: 1px solid
+      ${({ theme }) => theme.palette.tokens.border.secondary};
+  }
+  color: ${({ theme }) => theme.palette.text.primary};
+
+  &.clickable {
+    cursor: pointer;
+  }
+
+  .showOnHover {
+    opacity: 0;
+    transition: opacity ease-in-out 0.3s;
+  }
+
+  &:hover .showOnHover,
+  &:focus-within .showOnHover,
+  .showOnHover.open {
+    opacity: 1;
+  }
+
+  &.clickable:hover,
+  &.clickable:focus-within {
+    background: ${({ theme }) => theme.palette.tokens.background.hover};
+  }
+
+  &.disabled .dim {
+    opacity: 0.6;
+    filter: grayscale(1);
+  }
+`;
+
+const StyledRow = styled(Box)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+`;
+
+const StyledName = styled(Box)`
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 type Props = {
@@ -56,6 +103,11 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
   const label = ruleLabel(rule);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [duplicateOpen, setDuplicateOpen] = useState(false);
+  const [duplicateRun, setDuplicateRun] = useState<{
+    ruleId: number;
+    variant: AiReviewRunVariant;
+  }>();
   const [runVariant, setRunVariant] = useState<AiReviewRunVariant>();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const canRun = satisfiesPermission('translations.batch-machine');
@@ -73,14 +125,40 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
   });
 
   const isDryRun = rule.mode === 'DRY_RUN';
-  const promptName =
-    (rule.promptId != null && promptNames[rule.promptId]) ||
-    t('ai_review_rule_default_prompt', 'Default review prompt');
-  const scoreInfo = rule.never
-    ? t('ai_review_rule_never_info', 'Never auto-review')
-    : t('ai_review_rule_score_info', 'Score ≥ {threshold}', {
-        threshold: rule.threshold,
-      });
+  const customPromptName =
+    rule.promptId != null ? promptNames[rule.promptId] : undefined;
+
+  function modeLabel() {
+    if (rule.never) {
+      return t('ai_review_rule_mode_no_review', 'No AI review');
+    }
+    return isDryRun
+      ? t('ai_review_rule_mode_score_only', 'AI score only')
+      : t(
+          'ai_review_rule_mode_auto_mark_threshold',
+          'Auto-mark as reviewed · {threshold}+',
+          { threshold: rule.threshold }
+        );
+  }
+
+  function modeHint() {
+    if (rule.never) {
+      return t(
+        'ai_review_rule_mode_no_review_hint',
+        'AI never scores or reviews these keys and languages, even if another rule matches them.'
+      );
+    }
+    return isDryRun
+      ? t(
+          'ai_review_rule_mode_score_only_hint',
+          'AI scores translations and lists issues. Nothing else changes.'
+        )
+      : t(
+          'ai_review_rule_mode_auto_mark_hint',
+          'Translations scoring {threshold} or more are marked as reviewed. The rest wait for your team.',
+          { threshold: rule.threshold }
+        );
+  }
 
   function handleToggle() {
     enabledLoadable.mutate({
@@ -119,101 +197,181 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
 
   return (
     <StyledItem
-      variant="outlined"
       data-cy="ai-review-rule-item"
       data-cy-name={label}
+      className={clsx({ clickable: canEdit, disabled: !rule.enabled })}
+      onClick={canEdit ? () => setEditOpen(true) : undefined}
     >
-      <Box display="grid" gap={1}>
-        <Typography variant="h6" data-cy="ai-review-rule-label">
-          {label}
-        </Typography>
-        <AiReviewRuleScopeChips rule={rule} />
-        <StyledInfoLine>
-          <span>{scoreInfo}</span>
-          {rule.overrides.length > 0 && (
-            <>
-              <Dot />
-              <span>
-                {t(
-                  'ai_review_rule_overrides_info',
-                  '{count, plural, one {# language override} other {# language overrides}}',
-                  { count: rule.overrides.length }
-                )}
-              </span>
-            </>
+      <StyledRow>
+        <Box display="flex" alignItems="center" gap={1} minWidth={0}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}
+            minWidth={0}
+            className="dim"
+          >
+            <StyledName data-cy="ai-review-rule-label">{label}</StyledName>
+            <Tooltip title={modeHint()} disableInteractive>
+              <Chip
+                size="small"
+                data-cy="ai-review-rule-mode"
+                data-cy-mode={rule.mode}
+                label={modeLabel()}
+                icon={
+                  !rule.never && !isDryRun ? (
+                    <CheckCircleBroken width={16} height={16} />
+                  ) : undefined
+                }
+                sx={
+                  rule.never
+                    ? undefined
+                    : (theme) => ({
+                        '& .MuiChip-icon': { color: 'inherit' },
+                        color: isDryRun
+                          ? theme.palette.tokens.secondary.contrast
+                          : theme.palette.tokens.success.contrast,
+                        backgroundColor: isDryRun
+                          ? theme.palette.tokens.secondary.main
+                          : theme.palette.tokens.success.main,
+                      })
+                }
+              />
+            </Tooltip>
+          </Box>
+          {!rule.enabled && (
+            <Tooltip
+              title={t(
+                'ai_review_rule_disabled_hint',
+                'This rule is off. Turn it on from the menu.'
+              )}
+              disableInteractive
+            >
+              <Chip
+                size="small"
+                variant="outlined"
+                label={t('ai_review_rule_disabled', 'Disabled')}
+                data-cy="ai-review-rule-disabled"
+              />
+            </Tooltip>
           )}
-          <Dot />
-          <span>{promptName}</span>
-        </StyledInfoLine>
-        <AiReviewRuleCounts rule={rule} canRun={canRun} onRun={setRunVariant} />
-      </Box>
-      <Box display="flex" alignItems="start" gap={1}>
-        <Chip
-          size="small"
-          data-cy="ai-review-rule-mode"
-          data-cy-mode={rule.mode}
-          label={
-            isDryRun
-              ? t('ai_review_rule_mode_dry_run', 'Dry run')
-              : t('ai_review_rule_mode_active', 'Active')
-          }
-          color={isDryRun ? 'default' : 'primary'}
-        />
-        <Switch
-          size="small"
-          checked={rule.enabled}
-          disabled={!canEdit || enabledLoadable.isLoading}
-          onChange={handleToggle}
-          data-cy="ai-review-rule-switch"
-          data-cy-name={label}
-        />
-        {canEdit && (
-          <>
+        </Box>
+        <Box display="flex" alignItems="center" gap={1} onClick={stopBubble()}>
+          {canEdit && (
             <IconButton
               size="small"
+              className="showOnHover"
               onClick={() => setEditOpen(true)}
               data-cy="ai-review-rule-edit"
               data-cy-name={label}
+              aria-label={t('ai_review_rule_edit_label', 'Edit rule')}
             >
-              <Edit02 width={18} height={18} />
+              <Edit02 width={20} height={20} />
             </IconButton>
+          )}
+          {canEdit && (
             <IconButton
               size="small"
               ref={menuButtonRef}
               onClick={() => setMenuOpen(true)}
               data-cy="ai-review-rule-menu"
               data-cy-name={label}
+              aria-label={t('ai_review_rule_menu_label', 'Rule actions')}
+              sx={{ marginRight: -1 }}
             >
-              <DotsVertical width={18} height={18} />
+              <DotsVertical width={20} height={20} />
             </IconButton>
-          </>
+          )}
+        </Box>
+      </StyledRow>
+      <StyledRow className="dim">
+        <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
+          <AiReviewRuleScopeChips rule={rule} />
+          {!rule.never && customPromptName && (
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {customPromptName}
+            </Typography>
+          )}
+        </Box>
+        {!rule.never && (
+          <AiReviewRuleCounts
+            rule={rule}
+            canRun={canRun}
+            onRun={setRunVariant}
+          />
         )}
-      </Box>
+      </StyledRow>
       {menuOpen && (
         <Menu
+          onClick={stopBubble()}
           anchorEl={menuButtonRef.current}
           open
           onClose={() => setMenuOpen(false)}
         >
+          <MenuItem
+            onClick={() => {
+              setMenuOpen(false);
+              handleToggle();
+            }}
+            disabled={enabledLoadable.isLoading}
+            data-cy="ai-review-rule-switch"
+            data-cy-name={label}
+          >
+            {rule.enabled
+              ? t('ai_review_rule_menu_disable', 'Disable')
+              : t('ai_review_rule_menu_enable', 'Enable')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setMenuOpen(false);
+              setDuplicateOpen(true);
+            }}
+            data-cy="ai-review-rule-menu-duplicate"
+          >
+            {t('ai_review_rule_duplicate', 'Duplicate')}
+          </MenuItem>
           <MenuItem onClick={handleDelete} data-cy="ai-review-rule-menu-delete">
             {t('ai_review_rule_delete', 'Delete')}
           </MenuItem>
         </Menu>
       )}
-      {editOpen && (
-        <AiReviewRuleDialog
-          rule={rule}
-          onClose={() => setEditOpen(false)}
-          onRequestRun={(saved) => setRunVariant(runVariantForMode(saved.mode))}
-        />
-      )}
-      {runVariant && (
-        <AiReviewRunDialog
-          variant={runVariant}
-          request={{ ruleId: rule.id }}
-          onClose={() => setRunVariant(undefined)}
-        />
-      )}
+      <div style={{ display: 'contents' }} onClick={stopBubble()}>
+        {editOpen && (
+          <AiReviewRuleDialog
+            rule={rule}
+            onClose={() => setEditOpen(false)}
+            onRequestRun={(saved) =>
+              setRunVariant(runVariantForMode(saved.mode))
+            }
+          />
+        )}
+        {duplicateOpen && (
+          <AiReviewRuleDialog
+            duplicateOf={rule}
+            onClose={() => setDuplicateOpen(false)}
+            onRequestRun={(saved) =>
+              setDuplicateRun({
+                ruleId: saved.id,
+                variant: runVariantForMode(saved.mode),
+              })
+            }
+          />
+        )}
+        {duplicateRun && (
+          <AiReviewRunDialog
+            variant={duplicateRun.variant}
+            request={{ ruleId: duplicateRun.ruleId }}
+            onClose={() => setDuplicateRun(undefined)}
+          />
+        )}
+        {runVariant && (
+          <AiReviewRunDialog
+            variant={runVariant}
+            request={{ ruleId: rule.id }}
+            onClose={() => setRunVariant(undefined)}
+          />
+        )}
+      </div>
     </StyledItem>
   );
 };

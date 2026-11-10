@@ -34,80 +34,87 @@ export const AiReviewRuleCounts = ({ rule, canRun, onRun }: Props) => {
     return null;
   }
 
+  const parts: string[] = isDryRun
+    ? [
+        t('ai_review_rule_counts_scored', '{count, plural, other {# scored}}', {
+          count: counts.scored,
+        }),
+      ]
+    : [
+        t(
+          'ai_review_rule_counts_marked',
+          '{count, plural, other {# marked as reviewed}}',
+          { count: counts.autoReviewed }
+        ),
+        ...(counts.rejected > 0
+          ? [
+              t(
+                'ai_review_rule_counts_rejected',
+                '{count, plural, other {# rejected}}',
+                { count: counts.rejected }
+              ),
+            ]
+          : []),
+        ...(counts.failed > 0
+          ? [
+              t(
+                'ai_review_rule_counts_failed',
+                '{count, plural, other {# failed}}',
+                { count: counts.failed }
+              ),
+            ]
+          : []),
+      ];
+
   return (
-    <>
-      {isDryRun ? (
-        <StyledInfoLine data-cy="ai-review-rule-counts-dry-run">
-          {t(
-            'ai_review_rule_counts_dry_run',
-            '{scored, plural, one {# scored} other {# scored}} · {wouldBeAutoReviewed, plural, one {# would be auto-reviewed} other {# would be auto-reviewed}}',
-            {
-              scored: counts.scored,
-              wouldBeAutoReviewed: counts.wouldBeAutoReviewed,
-            }
-          )}
-        </StyledInfoLine>
-      ) : (
-        <StyledInfoLine
-          data-cy="ai-review-rule-counts-active"
-          data-cy-failed={String(counts.failed)}
-        >
-          <span>
-            {t(
-              'ai_review_rule_counts_active',
-              '{autoReviewed, plural, one {# auto-reviewed} other {# auto-reviewed}} · {rejected, plural, one {# rejected} other {# rejected}} · {failed, plural, one {# failed} other {# failed}}',
-              {
-                autoReviewed: counts.autoReviewed,
-                rejected: counts.rejected,
-                failed: counts.failed,
-              }
-            )}
-          </span>
-          {canRun && counts.failed > 0 && (
-            <>
-              <Dot />
-              <MuiLink
-                component="button"
-                onClick={() => onRun('retry')}
-                data-cy="ai-review-rule-retry-failed"
-              >
-                {t('ai_review_rule_retry_failed', 'Retry failed reviews')}
-              </MuiLink>
-            </>
-          )}
-        </StyledInfoLine>
+    <StyledInfoLine
+      data-cy={
+        isDryRun
+          ? 'ai-review-rule-counts-dry-run'
+          : 'ai-review-rule-counts-active'
+      }
+      data-cy-failed={String(counts.failed)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {parts.map((part, index) => (
+        <span key={index}>
+          {index > 0 && <Dot />} {part}
+        </span>
+      ))}
+      {canRun && !isDryRun && counts.failed > 0 && (
+        <>
+          <Dot />
+          <MuiLink
+            component="button"
+            onClick={() => onRun('retry')}
+            data-cy="ai-review-rule-retry-failed"
+          >
+            {t('ai_review_rule_retry_failed', 'Retry failed reviews')}
+          </MuiLink>
+        </>
       )}
-      {counts.backlog > 0 && (
-        <StyledInfoLine data-cy="ai-review-rule-backlog">
-          <span>
+      {canRun && counts.backlog > 0 && (
+        <>
+          <Dot />
+          <MuiLink
+            component="button"
+            onClick={() => onRun(runVariantForMode(rule.mode))}
+            data-cy="ai-review-rule-review-now"
+          >
             {isDryRun
               ? t(
-                  'ai_review_rule_backlog_dry_run',
-                  '{count, plural, one {# existing translation not scored} other {# existing translations not scored}}',
+                  'ai_review_rule_score_waiting',
+                  '{count, plural, other {Score # waiting}}',
                   { count: counts.backlog }
                 )
               : t(
-                  'ai_review_rule_backlog_active',
-                  '{count, plural, one {# existing translation not reviewed} other {# existing translations not reviewed}}',
+                  'ai_review_rule_review_waiting',
+                  '{count, plural, other {Review # waiting}}',
                   { count: counts.backlog }
                 )}
-          </span>
-          {canRun && (
-            <>
-              <Dot />
-              <MuiLink
-                component="button"
-                onClick={() => onRun(runVariantForMode(rule.mode))}
-                data-cy="ai-review-rule-review-now"
-              >
-                {isDryRun
-                  ? t('ai_review_rule_score_now', 'Score now')
-                  : t('ai_review_rule_review_now', 'Review now')}
-              </MuiLink>
-            </>
-          )}
-        </StyledInfoLine>
+          </MuiLink>
+        </>
       )}
-    </>
+    </StyledInfoLine>
   );
 };

@@ -16,6 +16,8 @@ export type RuleFormValues = {
   namespaceIn: string[];
   namespaceNotIn: string[];
   languageIds: number[];
+  /** Every language unchecked; the rule can't be saved like that. */
+  noLanguages: boolean;
   branchIn: string[];
   branchNotIn: string[];
   threshold: number | string;
@@ -35,6 +37,7 @@ export const getRuleInitialValues = (
   namespaceIn: rule?.namespaceIn ?? [],
   namespaceNotIn: rule?.namespaceNotIn ?? [],
   languageIds: rule?.languageIds ?? [],
+  noLanguages: false,
   branchIn: rule?.branchIn ?? [],
   branchNotIn: rule?.branchNotIn ?? [],
   threshold: rule?.threshold ?? 85,
@@ -79,9 +82,3 @@ function toThreshold(value: number | string): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && value !== '' ? parsed : 85;
 }
-
-export const hasThresholdOverride = (values: RuleFormValues) =>
-  values.overrides.some((override) => !override.never);
-
-export const ruleNeverFullyApplies = (values: RuleFormValues) =>
-  values.never && !hasThresholdOverride(values);
