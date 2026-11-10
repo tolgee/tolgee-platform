@@ -1345,6 +1345,14 @@ export interface paths {
     /** Returns information about sso configuration affecting the user. */
     get: operations["getSso"];
   };
+  "/v2/users/{userId}/community-activity": {
+    /** The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry has the shape of an entry in the project activity log, with the project added and the author left out. Returns 404 whenever the community profile does. */
+    get: operations["getActivityFeed"];
+  };
+  "/v2/users/{userId}/community-profile": {
+    /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A user without contributions to public projects returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
+    get: operations["getProfile"];
+  };
 }
 
 export interface components {
@@ -2140,12 +2148,147 @@ export interface components {
         workspaces?: components["schemas"]["WorkspaceModel"][];
       };
     };
+    CommunityActivityModel: {
+      counts?: { [key: string]: number };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      params?: { [key: string]: unknown };
+      project: components["schemas"]["SimpleProjectModel"];
+      /** Format: int64 */
+      revisionId: number;
+      /** Format: int64 */
+      timestamp: number;
+      /** @enum {string} */
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "SET_OUTDATED_FLAG"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_CHARACTER_LIMIT_EDIT"
+        | "KEY_DELETE"
+        | "KEY_SOFT_DELETE"
+        | "KEY_RESTORE"
+        | "KEY_HARD_DELETE"
+        | "BATCH_KEY_RESTORE"
+        | "BATCH_KEY_HARD_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "HARD_DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT"
+        | "NAMESPACE_EDIT"
+        | "BATCH_PRE_TRANSLATE_BY_TM"
+        | "BATCH_MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "BATCH_CLEAR_TRANSLATIONS"
+        | "BATCH_COPY_TRANSLATIONS"
+        | "BATCH_SET_TRANSLATION_STATE"
+        | "BATCH_TAG_KEYS"
+        | "BATCH_UNTAG_KEYS"
+        | "BATCH_SET_KEYS_NAMESPACE"
+        | "BATCH_ASSIGN_TRANSLATION_LABEL"
+        | "BATCH_UNASSIGN_TRANSLATION_LABEL"
+        | "AUTOMATION"
+        | "CONTENT_DELIVERY_CONFIG_CREATE"
+        | "CONTENT_DELIVERY_CONFIG_UPDATE"
+        | "CONTENT_DELIVERY_CONFIG_DELETE"
+        | "CONTENT_STORAGE_CREATE"
+        | "CONTENT_STORAGE_UPDATE"
+        | "CONTENT_STORAGE_DELETE"
+        | "WEBHOOK_CONFIG_CREATE"
+        | "WEBHOOK_CONFIG_UPDATE"
+        | "WEBHOOK_CONFIG_DELETE"
+        | "COMPLEX_TAG_OPERATION"
+        | "TASKS_CREATE"
+        | "TASK_CREATE"
+        | "TASK_UPDATE"
+        | "TASK_KEYS_UPDATE"
+        | "TASK_FINISH"
+        | "TASK_CLOSE"
+        | "TASK_REOPEN"
+        | "TASK_KEY_UPDATE"
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_IMPORT"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "TRANSLATION_MEMORY_CREATE"
+        | "TRANSLATION_MEMORY_UPDATE"
+        | "TRANSLATION_MEMORY_DELETE"
+        | "TRANSLATION_MEMORY_ASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UNASSIGN_PROJECT"
+        | "TRANSLATION_MEMORY_UPDATE_PROJECT_CONFIG"
+        | "TRANSLATION_MEMORY_ENTRY_CREATE"
+        | "TRANSLATION_MEMORY_ENTRY_UPDATE"
+        | "TRANSLATION_MEMORY_ENTRY_DELETE"
+        | "TRANSLATION_MEMORY_IMPORT"
+        | "TRANSLATION_MEMORY_COPY_FROM_PROJECT"
+        | "TRANSLATION_LABELS_EDIT"
+        | "TRANSLATION_LABEL_ASSIGN"
+        | "TRANSLATION_LABEL_CREATE"
+        | "TRANSLATION_LABEL_UPDATE"
+        | "TRANSLATION_LABEL_DELETE"
+        | "CREATE_SUGGESTION"
+        | "DECLINE_SUGGESTION"
+        | "ACCEPT_SUGGESTION"
+        | "REVERSE_SUGGESTION"
+        | "DELETE_SUGGESTION"
+        | "SUGGESTION_SET_ACTIVE"
+        | "AI_PROMPT_CREATE"
+        | "AI_PROMPT_UPDATE"
+        | "AI_PROMPT_DELETE"
+        | "BRANCH_CREATE"
+        | "BRANCH_RENAME"
+        | "BRANCH_DELETE"
+        | "BRANCH_PROTECTION_CHANGE"
+        | "BRANCH_MERGE"
+        | "QA_ISSUE_IGNORE"
+        | "QA_ISSUE_UNIGNORE";
+    };
     CommunityActivityStatsModel: {
       buckets: components["schemas"]["Bucket"][];
       /** Format: int64 */
       translationsWithAnySuggestion: number;
       /** Format: int64 */
       translationsWithPendingSuggestion: number;
+    };
+    CommunityProfileModel: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      active: number;
+      avatar?: components["schemas"]["Avatar"];
+      buckets: components["schemas"]["Bucket"][];
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      id: number;
+      languages: components["schemas"]["ProfileLanguage"][];
+      name?: string;
+      projects: components["schemas"]["ProfileProject"][];
+      /** Format: int64 */
+      suggested: number;
     };
     ComplexEditKeyDto: {
       /** @description Branch of the key. If not provided, default branch will be used */
@@ -3366,7 +3509,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "community_profile_private";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4894,6 +5038,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelCommunityActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["CommunityActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelContentDeliveryConfigModel: {
       _embedded?: {
         contentDeliveryConfigs?: components["schemas"]["ContentDeliveryConfigModel"][];
@@ -5512,6 +5662,38 @@ export interface components {
         | "SSO_GLOBAL";
       username: string;
     };
+    ProfileLanguage: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
+      tag: string;
+    };
+    ProfileProject: {
+      /** Format: int64 */
+      accepted: number;
+      /** Format: int64 */
+      active: number;
+      avatar?: components["schemas"]["Avatar"];
+      /** Format: int64 */
+      contributions: number;
+      /** Format: int64 */
+      declined: number;
+      /** Format: int64 */
+      firstContributionAt?: number;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      lastContributionAt?: number;
+      name: string;
+      /** Format: int64 */
+      suggested: number;
+    };
     ProjectActivityAuthorModel: {
       avatar?: components["schemas"]["Avatar"];
       deleted: boolean;
@@ -5918,7 +6100,6 @@ export interface components {
       type: "FRAGMENT" | "OBJECT" | "STRING";
       value?: string;
     };
-    /** @description Modified fields */
     PropertyModification: {
       new?: { [key: string]: unknown };
       old?: { [key: string]: unknown };
@@ -7371,7 +7552,8 @@ export interface components {
         | "suggestions_disabled"
         | "project_storage_invalid_field_name"
         | "project_storage_value_too_large"
-        | "project_storage_too_many_fields";
+        | "project_storage_too_many_fields"
+        | "community_profile_private";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -30978,6 +31160,118 @@ export interface operations {
       };
       /** No SSO configuration available for this user */
       204: never;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry has the shape of an entry in the project activity log, with the project added and the author left out. Returns 404 whenever the community profile does. */
+  getActivityFeed: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelCommunityActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A user without contributions to public projects returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
+  getProfile: {
+    parameters: {
+      path: {
+        userId: number;
+      };
+      query: {
+        /** One bucket per day (`DAY`) or one per week starting on Monday (`WEEK`). */
+        granularity?: "DAY" | "WEEK";
+        /** First day of the range, as an ISO date, included. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. */
+        from?: string;
+        /** Last day of the range, as an ISO date, included. Defaults to today. A `to` before 1970-01-01 or more than a year after today is moved to that bound. */
+        to?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CommunityProfileModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

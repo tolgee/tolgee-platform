@@ -1,21 +1,43 @@
 package io.tolgee.service.contributor
 
+import io.tolgee.activity.ActivityService
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.dtos.community.Bucket
 import io.tolgee.dtos.community.CommunityActivity
+import io.tolgee.dtos.community.CommunityActivityItem
+import io.tolgee.dtos.community.CommunityProfile
 import io.tolgee.dtos.community.Granularity
+import io.tolgee.dtos.community.ProfileLanguage
+import io.tolgee.dtos.community.ProfileProject
 import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.dtos.request.community.RangeParams
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.UserAccount
+import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
+import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.AvatarService
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.security.UserAccountService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
+/** The counters are approximate and `active` is an exact live count, so never compute one from the other. */
 @Service
 class CommunityStatsService(
   private val repository: CommunityContributionDayRepository,
+  private val activityService: ActivityService,
+  private val avatarService: AvatarService,
+  private val userAccountService: UserAccountService,
+  private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   fun getActivity(
     projectId: Long,
@@ -33,17 +55,108 @@ class CommunityStatsService(
     )
   }
 
-  private fun languageFilter(languageIds: Collection<Long>?) = languageIds?.takeIf { it.isNotEmpty() }
-
-  private fun period(params: PeriodParams): Period {
-    val (from, to) = range(params)
-    return Period(from, to, params.granularity ?: Granularity.WEEK)
+  fun getProfile(
+    userId: Long,
+    params: PeriodParams,
+  ): CommunityProfile {
+    val user = requireVisibleUser(userId)
+    // ponytail: one query, all of the user's public rows, aggregated here; ceiling = days × languages × projects.
+    val rows = repository.findPublicRowsOfUser(userId)
+    val totals = rows.map { it.counts() }.sum()
+    val activeByProject = repository.findPublicActiveSuggestionsOfUser(userId).associate { it.projectId to it.active }
+    val period =
+      period(
+        params,
+        defaultFrom = { to -> to.minusDays(HEATMAP_DAYS - 1) },
+        defaultGranularity = Granularity.DAY,
+      )
+    return CommunityProfile(
+      id = user.id,
+      name = user.name,
+      avatar = avatarService.getAvatarLinks(user.avatarHash),
+      contributions = totals.contributions,
+      suggested = totals.suggested,
+      accepted = totals.accepted,
+      declined = totals.declined,
+      active = activeByProject.values.sum(),
+      languages = profileLanguages(rows),
+      projects = profileProjects(rows, activeByProject),
+      buckets = buckets(period, rows.map { it.day to it.counts() }),
+    )
   }
 
-  private fun range(params: RangeParams): Pair<LocalDate, LocalDate> {
+  fun getActivityFeed(
+    userId: Long,
+    pageable: Pageable,
+  ): Page<CommunityActivityItem> {
+    requireVisibleUser(userId)
+    val newestFirst = PageRequest.of(pageable.pageNumber, pageable.pageSize.coerceAtMost(MAX_PAGE_SIZE))
+    val page = activityService.findPublicContributionsOfUser(userId, CONTRIBUTION_TYPES, newestFirst)
+    val projects = projectService.findAll(page.content.mapNotNull { it.projectId }.toSet()).associateBy { it.id }
+    return page.map { CommunityActivityItem(projects.getValue(it.projectId!!), it) }
+  }
+
+  fun hasPublicContribution(userId: Long): Boolean = repository.hasPublicRow(userId)
+
+  private fun requireVisibleUser(userId: Long): UserAccount {
+    val user = userAccountService.get(userId)
+    if (!isVisibleToViewer(user)) throw NotFoundException(Message.COMMUNITY_PROFILE_PRIVATE)
+    return user
+  }
+
+  private fun isVisibleToViewer(user: UserAccount): Boolean {
+    if (authenticationFacade.authenticatedUserOrNull?.id == user.id) return true
+    return hasPublicContribution(user.id)
+  }
+
+  private fun profileLanguages(rows: List<CommunityProfileRowView>): List<ProfileLanguage> =
+    rows
+      .groupBy { it.languageTag }
+      .map { (tag, r) ->
+        val c = r.map { it.counts() }.sum()
+        ProfileLanguage(tag, r.first().languageName, c.contributions, c.suggested, c.accepted, c.declined)
+      }.sortedWith(compareByDescending<ProfileLanguage> { it.contributions }.thenBy { it.tag })
+
+  private fun profileProjects(
+    rows: List<CommunityProfileRowView>,
+    activeByProject: Map<Long, Long>,
+  ): List<ProfileProject> =
+    rows
+      .groupBy { it.projectId }
+      .map { (id, r) ->
+        val c = r.map { it.counts() }.sum()
+        ProfileProject(
+          id,
+          r.first().projectName,
+          avatarService.getAvatarLinks(r.first().projectAvatarHash),
+          c.contributions,
+          c.suggested,
+          c.accepted,
+          c.declined,
+          activeByProject[id] ?: 0,
+          r.first().firstContributionAt,
+          r.first().lastContributionAt,
+        )
+      }.sortedWith(compareByDescending<ProfileProject> { it.contributions }.thenBy { it.id })
+
+  private fun languageFilter(languageIds: Collection<Long>?) = languageIds?.takeIf { it.isNotEmpty() }
+
+  private fun period(
+    params: PeriodParams,
+    defaultFrom: (LocalDate) -> LocalDate = DEFAULT_FROM,
+    defaultGranularity: Granularity = Granularity.WEEK,
+  ): Period {
+    val (from, to) = range(params, defaultFrom)
+    return Period(from, to, params.granularity ?: defaultGranularity)
+  }
+
+  private fun range(
+    params: RangeParams,
+    defaultFrom: (LocalDate) -> LocalDate = DEFAULT_FROM,
+  ): Pair<LocalDate, LocalDate> {
     val today = currentDateProvider.localDate
     val to = (params.to ?: today).coerceIn(LocalDate.EPOCH, today.plusYears(1))
-    val from = params.from?.coerceIn(to.minusYears(MAX_YEARS), to) ?: DEFAULT_FROM(to)
+    val from = params.from?.coerceIn(to.minusYears(MAX_YEARS), to) ?: defaultFrom(to)
     return Pair(from, to)
   }
 
@@ -82,6 +195,9 @@ class CommunityStatsService(
 
   private fun Iterable<Counts>.sum() = fold(Counts(0, 0, 0, 0)) { a, b -> a + b }
 
+  private fun CommunityProfileRowView.counts() =
+    Counts(contributions.toLong(), suggested.toLong(), accepted.toLong(), declined.toLong())
+
   private fun DayCountsView.counts() = Counts(contributions, suggested, accepted, declined)
 
   companion object {
@@ -89,6 +205,8 @@ class CommunityStatsService(
     private const val MAX_YEARS = 2L
     private val DEFAULT_FROM: (LocalDate) -> LocalDate =
       { to -> Granularity.WEEK.start(to).minusWeeks(DEFAULT_WEEKS - 1) }
+    private const val MAX_PAGE_SIZE = 100
+    private const val HEATMAP_DAYS = 365L
 
     /** Mirrors `is_translation_contribution` (`db/changelog/isTranslationContribution.sql`). */
     val CONTRIBUTION_TYPES =

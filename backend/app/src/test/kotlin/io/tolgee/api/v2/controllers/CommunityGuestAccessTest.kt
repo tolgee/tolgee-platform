@@ -74,6 +74,12 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     performGet("$project/community/activity?granularity=DAY").andIsOk.andAssertThatJson {
       node("buckets").isArray.isNotEmpty
     }
+    performGet("/v2/users/${testData.alice.id}/community-profile").andIsOk.andAssertThatJson {
+      node("id").isEqualTo(testData.alice.id)
+    }
+    performGet("/v2/users/${testData.alice.id}/community-activity").andIsOk.andAssertThatJson {
+      node("_embedded.activities").isArray.isNotEmpty
+    }
   }
 
   @Test
@@ -141,6 +147,12 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     userAccount = testData.bob
     performAuthGet(privateProject).andIsNotFound
     performAuthGet("/v2/projects/999999999").andIsBadRequest
+  }
+
+  @Test
+  fun `a profile hidden from members is hidden from guests the same way`() {
+    performGet("/v2/users/${testData.carol.id}/community-profile").andIsNotFound
+    performGet("/v2/users/${testData.carol.id}/community-activity").andIsNotFound
   }
 
   @Test

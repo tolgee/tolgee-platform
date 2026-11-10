@@ -130,6 +130,28 @@ open class CommunityStatsTestData : BaseTestData(OWNER_USERNAME, "Community Stat
       .executeUpdate()
   }
 
+  fun moveCounterDays(
+    entityManager: EntityManager,
+    user: UserAccount,
+    language: Language,
+    day: LocalDate,
+  ) {
+    entityManager
+      .createNativeQuery(
+        "update community_contribution_day set day = :day where user_id = :userId and language_id = :languageId",
+      ).setParameter("day", day)
+      .setParameter("userId", user.id)
+      .setParameter("languageId", language.id)
+      .executeUpdate()
+  }
+
+  fun softDeleteGerman(entityManager: EntityManager) {
+    entityManager
+      .createNativeQuery("update language set deleted_at = now() where id = :id")
+      .setParameter("id", german.id)
+      .executeUpdate()
+  }
+
   protected fun suggest(
     key: KeyBuilder,
     author: UserAccount,
