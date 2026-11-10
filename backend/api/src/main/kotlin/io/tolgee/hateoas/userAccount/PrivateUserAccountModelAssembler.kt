@@ -31,6 +31,7 @@ class PrivateUserAccountModelAssembler(
       globalServerRole = view.role ?: UserAccount.Role.USER,
       deletable = view.isDeletable,
       needsSuperJwtToken = view.needsSuperJwt,
+      profileVisibility = view.profileVisibility,
     )
   }
 }

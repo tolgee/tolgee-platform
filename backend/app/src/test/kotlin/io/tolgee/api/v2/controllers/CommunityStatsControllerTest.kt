@@ -38,6 +38,16 @@ class CommunityStatsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `hasPublicContribution counts members and non-members alike, public projects only`() {
+    for ((user, expected) in listOf(testData.alice to true, testData.user to true, testData.carol to false)) {
+      userAccount = user
+      performAuthGet("/v2/public/initial-data").andIsOk.andAssertThatJson {
+        node("hasPublicContribution").isEqualTo(expected)
+      }
+    }
+  }
+
+  @Test
   fun `activity returns zero-filled buckets ending with the current week and live tile counts`() {
     performAuthGet(activity)
       .andIsOk

@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.enums.TranslationSuggestionState
 
 /** Dates are spread over past weeks and the activity is replayed afterwards by `CommunityStatsE2eDataController`. */
@@ -13,6 +14,11 @@ class CommunityStatsE2eData : CommunityStatsTestData() {
             this.name = name
           }.self
       }
+    root.addUserAccountWithoutOrganization {
+      username = "henry.public@community.test"
+      name = "Henry Public"
+      profileVisibility = ProfileVisibility.PUBLIC
+    }
     publicProjectBuilder.apply {
       val french =
         addLanguage {

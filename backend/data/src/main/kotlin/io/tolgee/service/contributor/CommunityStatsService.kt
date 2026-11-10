@@ -15,6 +15,7 @@ import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.dtos.request.community.RangeParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
@@ -106,8 +107,18 @@ class CommunityStatsService(
 
   private fun isVisibleToViewer(user: UserAccount): Boolean {
     if (authenticationFacade.authenticatedUserOrNull?.id == user.id) return true
-    return hasPublicContribution(user.id)
+    return isProfilePublic(user.profileVisibility) { hasPublicContribution(user.id) }
   }
+
+  private fun isProfilePublic(
+    visibility: ProfileVisibility,
+    whenDefault: () -> Boolean,
+  ): Boolean =
+    when (visibility) {
+      ProfileVisibility.PUBLIC -> true
+      ProfileVisibility.PRIVATE -> false
+      ProfileVisibility.DEFAULT -> whenDefault()
+    }
 
   private fun profileLanguages(rows: List<CommunityProfileRowView>): List<ProfileLanguage> =
     rows

@@ -5,6 +5,8 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -137,6 +139,58 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/users/${testData.dave.id}/community-profile")
       .andIsNotFound
       .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+  }
+
+  @Test
+  fun `default visibility hides a user without public contributions as private`() {
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `private visibility hides a populated profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `public visibility shows an empty profile`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson {
+        node("name").isEqualTo("Carol Clark")
+        node("suggested").isEqualTo(0)
+        node("languages").isArray.isEmpty()
+        node("projects").isArray.isEmpty()
+        node("active").isEqualTo(0)
+        node("buckets").isArray.hasSize(365)
+        node("buckets[364].contributions").isEqualTo(0)
+      }
+  }
+
+  @Test
+  fun `users always see their own profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    userAccount = testData.carol
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile").andIsOk
+    userAccount = testData.alice
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson { node("suggested").isEqualTo(4) }
+  }
+
+  private fun setVisibility(
+    user: UserAccount,
+    visibility: ProfileVisibility,
+  ) {
+    executeInNewTransaction { testData.setProfileVisibility(entityManager, user, visibility) }
   }
 
   @Test

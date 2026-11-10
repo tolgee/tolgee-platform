@@ -7,9 +7,13 @@ import {
   getParsedEmailVerification,
   login,
 } from '../../common/apiCalls/common';
+import { communityStatsData } from '../../common/apiCalls/testData/testData';
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage } from '../../common/shared';
+import { E2UserProfile } from '../../compounds/userSettings/E2UserProfile';
+
+const profile = new E2UserProfile();
 
 describe('User profile', () => {
   const INITIAL_EMAIL = 'honza@honza.com';
@@ -120,6 +124,14 @@ describe('User profile', () => {
     cy.xpath("//*[@name='email']").should('have.value', 'honza@honza.com');
   });
 
+  it('profile visibility switch waits for the first contribution', () => {
+    profile
+      .getVisibilitySwitchInput()
+      .should('be.disabled')
+      .and('not.be.checked');
+    cy.gcy('user-profile-visibility-find-link').should('be.visible');
+  });
+
   it('will fail when user exists', () => {
     createUser(NEW_EMAIL);
     cy.visit(`${HOST}/account/profile`);
@@ -131,5 +143,82 @@ describe('User profile', () => {
     cy.contains('User name already exists.').should('be.visible');
     cy.reload();
     cy.xpath("//*[@name='email']").should('have.value', INITIAL_EMAIL);
+  });
+});
+
+describe('Profile visibility of a contributor', () => {
+  beforeEach(() => {
+    communityStatsData.clean();
+    communityStatsData.generateStandard();
+    login('alice@community.test', 'admin');
+    cy.visit(HOST + '/account/profile');
+  });
+
+  afterEach(() => {
+    communityStatsData.clean();
+  });
+
+  it('turns the profile private and back on as default', () => {
+    profile.getVisibilitySwitchInput().should('be.enabled').and('be.checked');
+    cy.gcy('user-profile-visibility-find-link').should('not.exist');
+
+    profile.getVisibilitySwitch().click();
+    profile.getVisibilitySwitchInput().should('not.be.checked');
+    cy.gcy('global-form-save-button').click();
+    assertMessage('User data updated');
+
+    cy.reload();
+    profile
+      .getVisibilitySwitchInput()
+      .should('be.enabled')
+      .and('not.be.checked');
+
+    cy.intercept('PUT', '**/v2/user').as('saveUser');
+    profile.getVisibilitySwitch().click();
+    cy.gcy('global-form-save-button').click();
+    cy.wait('@saveUser')
+      .its('request.body.profileVisibility')
+      .should('eq', 'DEFAULT');
+    assertMessage('User data updated');
+    cy.reload();
+    profile.getVisibilitySwitchInput().should('be.enabled').and('be.checked');
+  });
+
+  it('a private profile without a counted contribution stays editable', () => {
+    profile.getVisibilitySwitch().click();
+    cy.gcy('global-form-save-button').click();
+    assertMessage('User data updated');
+    cy.intercept('GET', '**/v2/public/initial-data', (req) =>
+      req.continue((res) => {
+        res.body.hasPublicContribution = false;
+      })
+    );
+    cy.reload();
+    profile
+      .getVisibilitySwitchInput()
+      .should('be.enabled')
+      .and('not.be.checked');
+    cy.gcy('user-profile-visibility-find-link').should('not.exist');
+
+    profile.getVisibilitySwitch().click();
+    cy.gcy('user-profile-visibility-find-link').should('be.visible');
+  });
+
+  it('keeps an explicitly public profile public without a contribution', () => {
+    login('henry.public@community.test', 'admin');
+    cy.visit(HOST + '/account/profile');
+    profile.getVisibilitySwitchInput().should('be.enabled').and('be.checked');
+
+    profile.getVisibilitySwitch().click();
+    profile
+      .getVisibilitySwitchInput()
+      .should('be.enabled')
+      .and('not.be.checked');
+    profile.getVisibilitySwitch().click();
+    cy.gcy('global-form-save-button').click();
+    assertMessage('User data updated');
+
+    cy.reload();
+    profile.getVisibilitySwitchInput().should('be.enabled').and('be.checked');
   });
 });

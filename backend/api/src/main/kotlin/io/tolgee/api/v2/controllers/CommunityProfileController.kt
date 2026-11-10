@@ -49,8 +49,8 @@ class CommunityProfileController(
         "365 days ending with `to` (today, unless given), with one bucket per day. " +
         RangeParams.RANGE_LIMITS + " " +
         "Only contributions to public projects count. An unknown, deleted or disabled user returns 404 " +
-        "`user_not_found`. A user without contributions to public projects returns 404 " +
-        "`community_profile_private`; users always see their own " +
+        "`user_not_found`. A profile set to private, or one left on the default visibility by a user without " +
+        "contributions to public projects, returns 404 `community_profile_private`; users always see their own " +
         "profile. The counts are approximate: they come from the activity " +
         "log and never go down, so a suggestion made on one day and accepted or declined on a later day counts " +
         "on both. `active` is exact: the number of the user's suggestions that are pending right now, in total " +

@@ -1350,7 +1350,7 @@ export interface paths {
     get: operations["getActivityFeed"];
   };
   "/v2/users/{userId}/community-profile": {
-    /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A user without contributions to public projects returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
+    /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A profile set to private, or one left on the default visibility by a user without contributions to public projects, returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
     get: operations["getProfile"];
   };
 }
@@ -4054,7 +4054,10 @@ export interface components {
       announcement?: components["schemas"]["AnnouncementDto"];
       authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
+      /** @description Whether the user has contributed to a community (public) project they are not a member of. Drives the "Community projects" entry in the organization switcher. */
       hasCommunityContributions: boolean;
+      /** @description Whether the user has at least one counted contribution in a community (public) project, as a member or not. This is the rule that makes a community profile visible by default. */
+      hasPublicContribution: boolean;
       languageTag?: string;
       /** @enum {string} */
       onboardingSurveyVersion?: "default_v1" | "invited_v1";
@@ -5653,6 +5656,8 @@ export interface components {
       mfaEnabled: boolean;
       name?: string;
       needsSuperJwtToken: boolean;
+      /** @enum {string} */
+      profileVisibility: "PUBLIC" | "PRIVATE" | "DEFAULT";
       /** @enum {string} */
       thirdPartyAuthType?:
         | "GOOGLE"
@@ -8367,6 +8372,11 @@ export interface components {
       currentPassword?: string;
       email: string;
       name: string;
+      /**
+       * @description Who can open the user's community profile. Omitted = unchanged.
+       * @enum {string}
+       */
+      profileVisibility?: "PUBLIC" | "PRIVATE" | "DEFAULT";
     };
     V2EditApiKeyDto: {
       description?: string;
@@ -31250,7 +31260,7 @@ export interface operations {
       };
     };
   };
-  /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A user without contributions to public projects returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
+  /** The user's contribution counts, languages and the public projects they contributed to, over their whole history, plus one bucket of counts per day or week of the range. By default, the range is the 365 days ending with `to` (today, unless given), with one bucket per day. The range may cover at most 2 years; an earlier `from` is adjusted to 2 years before `to`. If `from` is after `to`, the range is just the day `to`. Only contributions to public projects count. An unknown, deleted or disabled user returns 404 `user_not_found`. A profile set to private, or one left on the default visibility by a user without contributions to public projects, returns 404 `community_profile_private`; users always see their own profile. The counts are approximate: they come from the activity log and never go down, so a suggestion made on one day and accepted or declined on a later day counts on both. `active` is exact: the number of the user's suggestions that are pending right now, in total and per project. */
   getProfile: {
     parameters: {
       path: {
