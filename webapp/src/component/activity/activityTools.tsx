@@ -166,9 +166,10 @@ export const buildActivity = (
   filter = false
 ): Activity => {
   const options = actionsConfiguration[data.type];
+  const title = options?.title?.(data);
 
   const result: Activity = {
-    translation: options?.label,
+    translation: title ? () => title : options?.label,
     type: data.type,
     entities: [],
     references: [],
