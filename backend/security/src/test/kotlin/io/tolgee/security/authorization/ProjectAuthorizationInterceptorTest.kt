@@ -97,6 +97,7 @@ class ProjectAuthorizationInterceptorTest {
       requestContextService,
       projectContextService,
       tracingContext,
+      authenticationFacade,
     )
 
   private val mockMvc =
@@ -109,6 +110,7 @@ class ProjectAuthorizationInterceptorTest {
   fun setupMocks() {
     Mockito.`when`(authenticationFacade.authentication).thenReturn(authentication)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
+    Mockito.`when`(authenticationFacade.authenticatedUserOrGuest).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
     Mockito.`when`(authenticationFacade.isOAuthTokenAuth).thenReturn(false)

@@ -57,6 +57,7 @@ class TolgeeAuthentication(
   }
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
+    if (isGuest) return emptyList()
     return when (userAccount.role) {
       UserAccount.Role.USER ->
         listOf(
@@ -103,6 +104,9 @@ class TolgeeAuthentication(
     return userAccount
   }
 
+  val isGuest: Boolean
+    get() = userAccount.id == GUEST_USER_ID
+
   override fun isAuthenticated(): Boolean {
     return true
   }
@@ -117,5 +121,35 @@ class TolgeeAuthentication(
     const val ROLE_ADMIN = "ROLE_ADMIN"
     const val ROLE_READ_ONLY = "ROLE_READ_ONLY"
     const val ROLE_READ_WRITE = "ROLE_READ_WRITE"
+
+    // Must never match a real user_account id: per-user queries (permissions, roles, counters) are keyed on it.
+    const val GUEST_USER_ID = -1L
+
+    val GUEST_PRINCIPAL =
+      UserAccountDto(
+        name = "Guest",
+        username = "guest",
+        domain = null,
+        role = null,
+        id = GUEST_USER_ID,
+        needsSuperJwt = false,
+        avatarHash = null,
+        deleted = false,
+        tokensValidNotBefore = null,
+        emailVerified = false,
+        thirdPartyAuth = null,
+        ssoRefreshToken = null,
+        ssoSessionExpiry = null,
+      )
+
+    fun guest() =
+      TolgeeAuthentication(
+        credentials = null,
+        deviceId = null,
+        userAccount = GUEST_PRINCIPAL,
+        actingAsUserAccount = null,
+        isReadOnly = false,
+        isSuperToken = false,
+      )
   }
 }

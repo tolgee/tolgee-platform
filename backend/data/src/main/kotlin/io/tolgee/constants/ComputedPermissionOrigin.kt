@@ -8,4 +8,5 @@ enum class ComputedPermissionOrigin {
   SERVER_ADMIN,
   SERVER_SUPPORTER,
   COMMUNITY,
+  GUEST,
 }
