@@ -1215,7 +1215,7 @@ export interface paths {
     get: operations["getInfo_4"];
   };
   "/v2/public/projects/with-stats": {
-    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+    /** Returns all public projects (including statistics), discoverable by anyone — no authentication required. Ordered by key count on the default branch (largest first), then name and id; the sort parameter is ignored. */
     get: operations["getAllPublicWithStatistics"];
   };
   "/v2/public/scope-info/hierarchy": {
@@ -29148,7 +29148,7 @@ export interface operations {
       };
     };
   };
-  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required */
+  /** Returns all public projects (including statistics), discoverable by anyone — no authentication required. Ordered by key count on the default branch (largest first), then name and id; the sort parameter is ignored. */
   getAllPublicWithStatistics: {
     parameters: {
       query: {
