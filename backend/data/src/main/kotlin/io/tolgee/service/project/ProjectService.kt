@@ -21,6 +21,7 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
@@ -248,6 +249,9 @@ class ProjectService(
     public: Boolean,
   ): Project {
     val project = get(id)
+    if (project.public != public) {
+      if (public) project.suggestionsMode = SuggestionsMode.ENABLED
+    }
     project.public = public
     return projectRepository.save(project)
   }

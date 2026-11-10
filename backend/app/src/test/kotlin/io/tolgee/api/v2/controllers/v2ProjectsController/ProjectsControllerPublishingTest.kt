@@ -11,8 +11,10 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,6 +30,11 @@ class ProjectsControllerPublishingTest : ProjectAuthControllerTest("/v2/projects
     testData = ProjectPublishingTestData()
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.project }
+  }
+
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -102,6 +109,29 @@ class ProjectsControllerPublishingTest : ProjectAuthControllerTest("/v2/projects
     val publicModification = publicModifications.single()["public"]!!
     publicModification.old.assert.isEqualTo(false)
     publicModification.new.assert.isEqualTo(true)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `opening the project to the community turns suggestions on and closing leaves them on`() {
+    userAccount = testData.owner
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk.andAssertThatJson {
+      node("suggestionsMode").isEqualTo("ENABLED")
+    }
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = false)).andIsOk.andAssertThatJson {
+      node("suggestionsMode").isEqualTo("ENABLED")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `re-publishing an already public project does not touch suggestions`() {
+    userAccount = testData.owner
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk
+    executeInNewTransaction { projectService.get(testData.project.id).suggestionsMode = SuggestionsMode.DISABLED }
+    performProjectAuthPut("/publishing", SetProjectPublicRequest(public = true)).andIsOk.andAssertThatJson {
+      node("suggestionsMode").isEqualTo("DISABLED")
+    }
   }
 
   @Suppress("UNCHECKED_CAST")

@@ -42,8 +42,9 @@ class ProjectsPublishingController(
   @Operation(
     summary = "Set project publishing state",
     description =
-      "Marks the project as public or private. " +
-        "Only the organization owner or a server admin can change this.",
+      "Marks the project as public or private. Opening a private project also turns suggestions on " +
+        "(`suggestionsMode` becomes `ENABLED`); closing it, or opening an already public project, leaves " +
+        "`suggestionsMode` as it is. Only the organization owner or a server admin can change this.",
   )
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
