@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion, Long> {
+  fun existsByAuthorId(authorId: Long): Boolean
+
   @Query(
     """
       select id, keyId, languageId, languageTag, translation, state, plural,
