@@ -1,3 +1,10 @@
+## [3.242.5](https://github.com/tolgee/tolgee-platform/compare/v3.242.4...v3.242.5) (2026-11-10)
+
+
+### Performance Improvements
+
+* merge preview loads keys and snapshots as plain rows instead of entities ([#4041](https://github.com/tolgee/tolgee-platform/issues/4041)) ([065b111](https://github.com/tolgee/tolgee-platform/commit/065b1119ed985866bd72ad283e06b56d193efd28))
+
 ## [3.242.4](https://github.com/tolgee/tolgee-platform/compare/v3.242.3...v3.242.4) (2026-11-06)
 
 
