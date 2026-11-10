@@ -7,8 +7,10 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.community.Bucket
 import io.tolgee.dtos.community.CommunityActivity
 import io.tolgee.dtos.community.CommunityActivityItem
+import io.tolgee.dtos.community.CommunityContributorStats
 import io.tolgee.dtos.community.CommunityProfile
 import io.tolgee.dtos.community.Granularity
+import io.tolgee.dtos.community.LanguageCounts
 import io.tolgee.dtos.community.ProfileLanguage
 import io.tolgee.dtos.community.ProfileProject
 import io.tolgee.dtos.request.community.PeriodParams
@@ -16,6 +18,8 @@ import io.tolgee.dtos.request.community.RangeParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProfileVisibility
+import io.tolgee.model.views.CommunityContributorTotalsView
+import io.tolgee.model.views.CommunityDayRowView
 import io.tolgee.model.views.CommunityProfileRowView
 import io.tolgee.model.views.DayCountsView
 import io.tolgee.repository.CommunityContributionDayRepository
@@ -23,9 +27,11 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.nullIfBlank
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -40,6 +46,74 @@ class CommunityStatsService(
   private val currentDateProvider: CurrentDateProvider,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  fun getContributors(
+    projectId: Long,
+    pageable: Pageable,
+    params: RangeParams,
+    languageIds: Collection<Long>?,
+    withSuggestionsOnly: Boolean,
+    search: String?,
+  ): Page<CommunityContributorStats> {
+    val (from, to) = range(params)
+    val languages = languageFilter(languageIds)
+    val totals =
+      repository.findContributorTotals(
+        projectId,
+        from,
+        to,
+        languages,
+        withSuggestionsOnly,
+        search.nullIfBlank,
+        allowedSort(pageable),
+      )
+    val userIds = totals.content.map { it.id }.takeIf { it.isNotEmpty() }
+    // ponytail: loads every counter row of the page's users; fine while a user has days × languages rows.
+    val dayRowsByUser =
+      userIds
+        ?.let { repository.findDayRows(projectId, it, from, to, languages).groupBy { row -> row.userId } }
+        .orEmpty()
+    val publicUsers = userIds?.let { repository.findUserIdsWithPublicRows(it) }.orEmpty().toSet()
+    return totals.map { total ->
+      val profilePublic = isProfilePublic(total.profileVisibility) { total.id in publicUsers }
+      contributorStats(total, dayRowsByUser[total.id].orEmpty(), profilePublic)
+    }
+  }
+
+  fun getContributor(
+    projectId: Long,
+    userId: Long,
+    params: RangeParams,
+    languageIds: Collection<Long>?,
+  ): CommunityContributorStats? {
+    val (from, to) = range(params, defaultFrom = { LocalDate.EPOCH })
+    val languages = languageFilter(languageIds)
+    val total = repository.findContributorTotal(projectId, userId, from, to, languages) ?: return null
+    // ponytail: without `from` this is the user's whole-history rows (active days × languages), read only to sum
+    // them per language; group by language in SQL if a contributor's row count ever shows.
+    val dayRows = repository.findDayRows(projectId, listOf(userId), from, to, languages)
+    val profilePublic = isProfilePublic(total.profileVisibility) { hasPublicContribution(userId) }
+    return contributorStats(total, dayRows, profilePublic)
+  }
+
+  private fun contributorStats(
+    total: CommunityContributorTotalsView,
+    dayRows: List<CommunityDayRowView>,
+    profilePublic: Boolean,
+  ) = CommunityContributorStats(
+    id = total.id,
+    name = total.name,
+    avatar = avatarService.getAvatarLinks(total.avatarHash),
+    contributions = total.contributions,
+    suggested = total.suggested,
+    accepted = total.accepted,
+    declined = total.declined,
+    active = total.active,
+    profilePublic = profilePublic,
+    firstContributionAt = total.firstContributionAt,
+    lastContributionAt = total.lastContributionAt,
+    languages = languageCounts(dayRows),
+  )
+
   fun getActivity(
     projectId: Long,
     params: PeriodParams,
@@ -120,6 +194,14 @@ class CommunityStatsService(
       ProfileVisibility.DEFAULT -> whenDefault()
     }
 
+  private fun languageCounts(dayRows: List<CommunityDayRowView>): List<LanguageCounts> =
+    dayRows
+      .groupBy { it.languageId }
+      .map { (languageId, rows) ->
+        val c = rows.map { it.counts() }.sum()
+        LanguageCounts(languageId, c.contributions, c.suggested, c.accepted, c.declined)
+      }.sortedWith(compareByDescending<LanguageCounts> { it.contributions }.thenBy { it.languageId })
+
   private fun profileLanguages(rows: List<CommunityProfileRowView>): List<ProfileLanguage> =
     rows
       .groupBy { it.languageTag }
@@ -188,6 +270,20 @@ class CommunityStatsService(
       }.toList()
   }
 
+  private fun allowedSort(pageable: Pageable): Pageable {
+    val orders =
+      pageable.sort
+        .filter { it.property in SORTABLE }
+        .map { it.nullsLast() }
+        .toMutableList()
+    if (orders.isEmpty()) {
+      orders.add(Sort.Order.desc("contributions"))
+      orders.add(Sort.Order.desc("suggested"))
+    }
+    orders.add(Sort.Order.asc("id"))
+    return PageRequest.of(pageable.pageNumber, pageable.pageSize.coerceAtMost(MAX_PAGE_SIZE), Sort.by(orders))
+  }
+
   private data class Period(
     val from: LocalDate,
     val to: LocalDate,
@@ -206,6 +302,9 @@ class CommunityStatsService(
 
   private fun Iterable<Counts>.sum() = fold(Counts(0, 0, 0, 0)) { a, b -> a + b }
 
+  private fun CommunityDayRowView.counts() =
+    Counts(contributions.toLong(), suggested.toLong(), accepted.toLong(), declined.toLong())
+
   private fun CommunityProfileRowView.counts() =
     Counts(contributions.toLong(), suggested.toLong(), accepted.toLong(), declined.toLong())
 
@@ -218,6 +317,7 @@ class CommunityStatsService(
       { to -> Granularity.WEEK.start(to).minusWeeks(DEFAULT_WEEKS - 1) }
     private const val MAX_PAGE_SIZE = 100
     private const val HEATMAP_DAYS = 365L
+    private val SORTABLE = setOf("contributions", "suggested", "accepted", "declined", "active", "lastContributionAt")
 
     /** Mirrors `is_translation_contribution` (`db/changelog/isTranslationContribution.sql`). */
     val CONTRIBUTION_TYPES =

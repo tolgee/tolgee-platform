@@ -158,6 +158,39 @@ class CommunityProfileControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `private visibility still lists the user among project contributors, with profilePublic false`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          isArray.hasSize(3)
+          node("[0].id").isEqualTo(testData.user.id)
+          node("[0].profilePublic").isEqualTo(true)
+          node("[1].id").isEqualTo(testData.alice.id)
+          node("[1].name").isEqualTo("Alice Adams")
+          node("[1].profilePublic").isEqualTo(false)
+        }
+      }
+  }
+
+  @Test
+  fun `public visibility lists a user without public contributions with profilePublic true`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    userAccount = testData.user
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors?sort=suggested,desc")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          node("[1].id").isEqualTo(testData.carol.id)
+          node("[1].profilePublic").isEqualTo(true)
+        }
+      }
+  }
+
+  @Test
   fun `public visibility shows an empty profile`() {
     setVisibility(testData.carol, ProfileVisibility.PUBLIC)
 

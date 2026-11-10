@@ -71,6 +71,10 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     }
     performGet("$project/machine-translation-service-settings").andIsOk
     performGet("$project/keys/${testData.publicKeys[0].self.id}/screenshots").andIsOk
+    performGet("$project/community/contributors").andIsOk.andAssertThatJson {
+      node("_embedded.contributors").isArray.isNotEmpty
+      node("_embedded.contributors[0].contributions").isNumber
+    }
     performGet("$project/community/activity?granularity=DAY").andIsOk.andAssertThatJson {
       node("buckets").isArray.isNotEmpty
     }
@@ -140,6 +144,7 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     val privateProject = url(testData.privateProject)
     performGet(privateProject).andIsUnauthorized
     performGet("$privateProject/translations").andIsUnauthorized
+    performGet("$privateProject/community/contributors").andIsUnauthorized
 
     performGet("/v2/projects/999999999").andIsUnauthorized
     performGet("/v2/projects/999999999/translations").andIsUnauthorized
