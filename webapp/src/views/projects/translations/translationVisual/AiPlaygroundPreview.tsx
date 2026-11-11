@@ -1,6 +1,5 @@
 import { Box, styled, SxProps, Tooltip, useTheme } from '@mui/material';
 import { Stars } from 'tg.component/CustomIcons';
-import { TranslationVisual } from './TranslationVisual';
 
 const StyledAiPreview = styled(Box)`
   display: grid;
@@ -17,33 +16,17 @@ const StyledContent = styled('div')`
 `;
 
 type Props = {
-  translation: string | undefined;
   tooltip?: React.ReactNode;
-  isPlural: boolean;
-  locale: string;
   sx?: SxProps;
+  children: React.ReactNode;
 };
 
-export const AiPlaygroundPreview = ({
-  translation,
-  tooltip,
-  isPlural,
-  locale,
-  sx,
-}: Props) => {
+export const AiPlaygroundPreview = ({ tooltip, sx, children }: Props) => {
   const theme = useTheme();
   const content = (
     <StyledAiPreview {...{ sx }} data-cy="ai-playground-preview">
       <Stars width={24} height={24} color={theme.palette.secondary.main} />
-      <StyledContent>
-        <TranslationVisual
-          text={translation}
-          isPlural={isPlural}
-          locale={locale}
-          maxLines={3}
-          extraPadding={false}
-        />
-      </StyledContent>
+      <StyledContent>{children}</StyledContent>
     </StyledAiPreview>
   );
   return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
