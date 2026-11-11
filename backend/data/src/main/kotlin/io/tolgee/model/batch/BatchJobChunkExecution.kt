@@ -3,7 +3,6 @@ package io.tolgee.model.batch
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.constants.Message
 import io.tolgee.model.StandardAuditModel
-import io.tolgee.model.activity.ActivityRevision
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -11,7 +10,6 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
@@ -57,7 +55,4 @@ class BatchJobChunkExecution : StandardAuditModel() {
 
   @ColumnDefault("false")
   var retry: Boolean = false
-
-  @OneToOne(fetch = FetchType.LAZY, mappedBy = "batchJobChunkExecution")
-  var activityRevision: ActivityRevision? = null
 }
