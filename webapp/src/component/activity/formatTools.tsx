@@ -22,6 +22,7 @@ import { getTaskStateChange } from './types/getTaskStateChange';
 import { getTaskTypeChange } from './types/getTaskTypeChange';
 import { getTranslationLabelChange } from 'tg.component/activity/types/getTranslationLabelsChange';
 import { getBranchProtected } from 'tg.component/activity/types/getBranchProtectedChange';
+import { getAiReviewEnabled } from 'tg.component/activity/types/getAiReviewEnabledChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -81,6 +82,8 @@ export const formatDiff = ({
       return getTranslationLabelChange(value);
     case 'branch_protected':
       return getBranchProtected(value);
+    case 'ai_review_enabled':
+      return getAiReviewEnabled(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
