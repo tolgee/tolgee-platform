@@ -28,4 +28,7 @@ interface KeyMetaRepository : JpaRepository<KeyMeta, Long> {
 
   @Query("from KeyCodeReference c left join fetch c.author a where c.keyMeta.id = :keyMetaId")
   fun getCodeReferencesByKeyMetaId(keyMetaId: Long): List<KeyCodeReference>
+
+  @Query("select km.key.id from KeyMeta km where km.id in :ids and km.key is not null")
+  fun findKeyIdsByIds(ids: Collection<Long>): List<Long>
 }
