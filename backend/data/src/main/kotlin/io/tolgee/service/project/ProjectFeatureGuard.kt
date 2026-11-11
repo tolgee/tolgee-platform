@@ -22,13 +22,7 @@ class ProjectFeatureGuard(
     checkEnabled(feature)
   }
 
-  fun checkEnabled(feature: Feature) {
-    val project = projectHolder.projectEntity
-    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
-    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
-    }
-  }
+  fun checkEnabled(feature: Feature) = checkEnabled(feature, projectHolder.projectEntity)
 
   fun checkEnabled(
     feature: Feature,
@@ -40,31 +34,29 @@ class ProjectFeatureGuard(
     }
   }
 
-  fun isFeatureEnabled(
+  fun checkEnabled(
     feature: Feature,
-    project: Project = projectHolder.projectEntity,
-  ): Boolean {
-    if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwner.id, feature)) {
-      return false
-    }
+    project: ProjectDto,
+  ) {
+    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwnerId, feature)
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      return false
+      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
     }
-    return true
   }
 
   fun isFeatureEnabled(
     feature: Feature,
+    project: Project = projectHolder.projectEntity,
+  ): Boolean =
+    enabledFeaturesProvider.isFeatureEnabled(project.organizationOwner.id, feature) &&
+      ProjectFeatureRegistry.isEnabledOnProject(feature, project)
+
+  fun isFeatureEnabled(
+    feature: Feature,
     project: ProjectDto = projectHolder.project,
-  ): Boolean {
-    if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, feature)) {
-      return false
-    }
-    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      return false
-    }
-    return true
-  }
+  ): Boolean =
+    enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, feature) &&
+      ProjectFeatureRegistry.isEnabledOnProject(feature, project)
 
   private fun isValueUsed(value: Any?): Boolean {
     return when (value) {
