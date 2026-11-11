@@ -1,6 +1,7 @@
 package io.tolgee.model.views.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.model.enums.SystemActor
 
 class ProjectActivityView(
   val revisionId: Long,
@@ -11,6 +12,7 @@ class ProjectActivityView(
   var authorUsername: String? = null,
   var authorAvatarHash: String? = null,
   val authorDeleted: Boolean = false,
+  val systemActor: SystemActor? = null,
   var modifications: List<ModifiedEntityView>? = null,
   val meta: Map<String, Any?>? = null,
   val counts: MutableMap<String, Long>? = null,
