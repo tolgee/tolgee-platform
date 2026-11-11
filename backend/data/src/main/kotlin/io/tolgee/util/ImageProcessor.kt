@@ -18,6 +18,7 @@ abstract class ImageProcessor(
   protected val imageStream: InputStream,
 ) {
   private var imageInput: ImageInputStream? = null
+  private var imageReader: ImageReader? = null
 
   private val reader: ImageReader by lazy {
     closingOnFailure {
@@ -25,7 +26,10 @@ abstract class ImageProcessor(
       imageInput = stream
       val readers = ImageIO.getImageReaders(stream)
       if (!readers.hasNext()) throw BadRequestException(Message.FILE_NOT_IMAGE)
-      readers.next().apply { input = stream }
+      readers.next().also {
+        it.setInput(stream, true, true)
+        imageReader = it
+      }
     }
   }
 
@@ -45,15 +49,17 @@ abstract class ImageProcessor(
       val pixels = originalDimension.width.toLong() * originalDimension.height
       val step = sqrt(pixels.toDouble() / MAX_STORED_PIXELS).toInt().coerceAtLeast(1)
       val params = reader.defaultReadParam.apply { setSourceSubsampling(step, step, 0, 0) }
-      reader.read(0, params).also { reader.dispose() }
+      reader.read(0, params)
     } finally {
-      closeInput()
+      close()
     }
   }
 
-  private fun <T> closingOnFailure(block: () -> T): T = runCatching(block).onFailure { closeInput() }.getOrThrow()
+  private fun <T> closingOnFailure(block: () -> T): T = runCatching(block).onFailure { close() }.getOrThrow()
 
-  private fun closeInput() {
+  private fun close() {
+    imageReader?.dispose()
+    imageReader = null
     imageInput?.close()
     imageInput = null
   }
