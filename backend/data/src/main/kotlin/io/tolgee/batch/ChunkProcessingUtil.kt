@@ -72,6 +72,7 @@ open class ChunkProcessingUtil(
     }
     activityHolder.activity = job.type.activityType
     activityRevision.authorId = job.authorId
+    activityRevision.systemActor = job.type.systemActor
   }
 
   private fun handleException(exception: Throwable) {
