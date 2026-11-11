@@ -2,6 +2,7 @@ package io.tolgee.model.views
 
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Label
 
@@ -22,6 +23,11 @@ data class TranslationView(
   var totalSuggestionCount: Long,
   var qaIssueCount: Long = 0,
   var qaChecksStale: Boolean = false,
+  var aiReviewStatus: AiReviewStatus? = null,
+  var aiReviewScore: Int? = null,
+  var aiReviewScoreOnlyRun: Boolean = false,
+  var aiReviewLastFailed: Boolean = false,
+  var aiReviewQueued: Boolean = false,
 ) {
   var suggestions: List<TranslationSuggestionView>? = null
   var qaIssues: List<TranslationQaIssue> = emptyList()
