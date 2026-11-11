@@ -11,20 +11,25 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.aiReview.AiReviewIssueModel
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseModel
 import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
+import io.tolgee.ee.service.aiReview.AiReviewPromptService
 import io.tolgee.ee.service.prompt.DefaultPromptHelper
+import io.tolgee.ee.service.prompt.DefaultReviewPromptHelper
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.ee.service.prompt.PromptVariablesHelper
 import io.tolgee.hateoas.prompt.PromptModel
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.project.ProjectFeatureGuard
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -63,6 +68,8 @@ class PromptController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val authenticationFacade: AuthenticationFacade,
   private val promptResponseUsageModelAssembler: PromptResponseUsageModelAssembler,
+  private val aiReviewPromptService: AiReviewPromptService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
@@ -70,16 +77,22 @@ class PromptController(
   fun getAllPaged(
     @ParameterObject pageable: Pageable,
     @RequestParam search: String?,
+    @RequestParam type: PromptType?,
   ): PagedModel<PromptModel> {
-    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search)
+    checkAiReviewEnabledFor(type)
+    val result = promptService.getAllPaged(projectHolder.project.id, pageable, search, visibleTypes(type))
     return arrayResourcesAssembler.toModel(result, promptModelAssembler)
   }
 
   @GetMapping("default")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
   @Operation(summary = "Get default prompt")
-  fun getDefaultPrompt(): PromptDto {
-    return promptService.getDefaultPrompt()
+  fun getDefaultPrompt(
+    @RequestParam type: PromptType?,
+  ): PromptDto {
+    if (type != PromptType.REVIEW) return promptService.getDefaultPrompt()
+    checkAiReviewEnabled()
+    return DefaultReviewPromptHelper.get()
   }
 
   @PostMapping("")
@@ -103,6 +116,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+    checkAiReviewEnabledFor(dto.type)
 
     val result = promptService.createPrompt(projectHolder.project.id, dto)
     return promptModelAssembler.toModel(result)
@@ -115,6 +129,7 @@ class PromptController(
     @PathVariable promptId: Long,
   ): PromptModel {
     val result = promptService.findPromptWithResolvedProvider(projectHolder.project.id, promptId)
+    checkAiReviewEnabledFor(result.type)
     return promptModelAssembler.toModel(result)
   }
 
@@ -140,6 +155,7 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+    checkAiReviewEnabledForPrompt(promptId)
     val result = promptService.updatePrompt(projectHolder.project.id, promptId, dto)
     return promptModelAssembler.toModel(result)
   }
@@ -158,6 +174,7 @@ class PromptController(
       ),
     )
 
+    checkAiReviewEnabledForPrompt(promptId)
     promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 
@@ -181,6 +198,8 @@ class PromptController(
         Feature.AI_PROMPT_CUSTOMIZATION,
       )
     }
+
+    if (data.type == PromptType.REVIEW) return runReviewPrompt(data)
 
     val projectId = projectHolder.project.id
     val prompt =
@@ -220,6 +239,45 @@ class PromptController(
         .getVariables(projectHolder.project.id, keyId, targetLanguageId)
         .map { it.toPromptVariableDto() }
         .toMutableList(),
+    )
+  }
+
+  private fun checkAiReviewEnabled() {
+    enabledFeaturesProvider.checkFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
+  }
+
+  private fun checkAiReviewEnabledFor(type: PromptType?) {
+    if (type == PromptType.REVIEW) checkAiReviewEnabled()
+  }
+
+  private fun checkAiReviewEnabledForPrompt(promptId: Long) =
+    checkAiReviewEnabledFor(promptService.findPrompt(projectHolder.project.id, promptId).type)
+
+  private fun visibleTypes(type: PromptType?): List<PromptType> {
+    if (type != null) return listOf(type)
+    if (isAiReviewEnabled()) return PromptType.entries
+    return listOf(PromptType.TRANSLATE)
+  }
+
+  private fun isAiReviewEnabled(): Boolean =
+    enabledFeaturesProvider.isFeatureEnabled(projectHolder.project.organizationOwnerId, Feature.AI_REVIEW)
+
+  private fun runReviewPrompt(data: PromptRunDto): PromptResponseModel {
+    projectFeatureGuard.checkEnabled(Feature.AI_REVIEW)
+    val result =
+      aiReviewPromptService.runPlaygroundReview(
+        projectHolder.project.organizationOwnerId,
+        projectHolder.project.id,
+        data,
+      )
+    return PromptResponseModel(
+      prompt = result.renderedPrompt,
+      result = result.rawResponse,
+      parsedJson = null,
+      price = result.price,
+      usage = result.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
+      issues = result.issues.map { AiReviewIssueModel.of(it) },
+      score = result.score,
     )
   }
 }
