@@ -16,6 +16,7 @@ interface ProjectView {
   val useNamespaces: Boolean
   val useBranching: Boolean
   val useQaChecks: Boolean
+  val useAiReview: Boolean
   val public: Boolean
   val defaultNamespace: Namespace?
   val organizationOwner: Organization
