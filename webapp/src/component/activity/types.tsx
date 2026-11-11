@@ -59,7 +59,8 @@ export type EntityEnum =
   | 'Label'
   | 'TranslationSuggestion'
   | 'TranslationQaIssue'
-  | 'Branch';
+  | 'Branch'
+  | 'AiReviewRule';
 
 export type FieldTypeEnum =
   | 'text'
@@ -85,7 +86,8 @@ export type FieldTypeEnum =
   | 'task_type'
   | 'translation_labels'
   | 'qa_issue_state'
-  | 'branch_protected';
+  | 'branch_protected'
+  | 'ai_review_enabled';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;

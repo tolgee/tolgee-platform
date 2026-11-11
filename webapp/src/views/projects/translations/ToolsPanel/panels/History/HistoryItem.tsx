@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Box, styled, Tooltip } from '@mui/material';
 import { DotsVertical } from '@untitled-ui/icons-react';
 
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 import { getTextDiff } from 'tg.component/activity/types/getTextDiff';
 import { getStateChange } from 'tg.component/activity/types/getStateChange';
@@ -12,9 +11,9 @@ import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/Activ
 import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../../common/SmallActionButton';
 import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
-import { UserName } from 'tg.component/common/UserName';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { ActorAvatar, ActorName } from 'tg.component/activity/SystemActor';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -100,6 +99,7 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
   const [detailOpen, setDetailOpen] = useState(false);
 
   const date = new Date(entry.timestamp);
+  const systemActor = entry.systemActor;
 
   const textChanges = entry.modifications?.['text'] as DiffInput;
   const stateChanges = entry.modifications?.['state'] as DiffInput;
@@ -118,17 +118,24 @@ export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
 
   return textDiff || stateDiff || mtProviderDiff ? (
     <StyledContainer data-cy="translation-history-item">
-      <Tooltip title={<UserName {...entry.author} />}>
-        <StyledAvatar>
-          <AvatarImg
-            owner={{
-              ...entry.author,
-              type: 'USER',
-              id: entry.author?.id as number,
-            }}
-            size={24}
+      <Tooltip
+        title={
+          <ActorName
+            systemActor={systemActor}
+            author={entry.author}
+            dataCySpans={false}
           />
-        </StyledAvatar>
+        }
+      >
+        {systemActor ? (
+          <StyledAvatar data-cy="activity-system-actor">
+            <ActorAvatar systemActor={systemActor} />
+          </StyledAvatar>
+        ) : (
+          <StyledAvatar>
+            <ActorAvatar author={entry.author} />
+          </StyledAvatar>
+        )}
       </Tooltip>
 
       <StyledChanges>
