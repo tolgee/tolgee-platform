@@ -1,7 +1,6 @@
 package io.tolgee.component.autoTranslation
 
 import com.google.cloud.translate.Translation
-import io.tolgee.activity.data.ActivityType
 import io.tolgee.events.OnProjectActivityStoredEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -56,24 +55,11 @@ class AutoTranslationEventHandler(
       autoTranslationService.getConfigs(
         entityManager.getReference(Project::class.java, projectId),
       )
-
-    val usingPrimaryMtService = configs.any { it.usingPrimaryMtService }
-    val usingTm = configs.any { it.usingTm }
-
-    if (!usingPrimaryMtService && !usingTm) {
-      return false
-    }
-
-    if (event.isLowVolumeActivity()) {
-      return true
-    }
-
-    val hasEnabledForImport = configs.any { it.enableForImport }
-
-    return hasEnabledForImport && event.activityRevision.type in IMPORT_ACTIVITIES
+    return autoTranslationService.startsForActivity(event.activityRevision.type, configs)
   }
 
-  private fun OnProjectActivityStoredEvent.isLowVolumeActivity() = activityRevision.type in LOW_VOLUME_ACTIVITIES
+  private fun OnProjectActivityStoredEvent.isLowVolumeActivity() =
+    activityRevision.type in AutoTranslationService.LOW_VOLUME_ACTIVITIES
 
   private fun getKeyIdsToAutoTranslate(): List<Long> {
     return event.activityRevision.modifiedEntities.mapNotNull { modifiedEntity ->
@@ -123,18 +109,5 @@ class AutoTranslationEventHandler(
 
   private val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  companion object {
-    /**
-     * import activities start visible batch job
-     */
-    private val IMPORT_ACTIVITIES = listOf(ActivityType.IMPORT)
-
-    /**
-     * Low volume activities start hidden batch job
-     */
-    private val LOW_VOLUME_ACTIVITIES =
-      listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY, ActivityType.COMPLEX_EDIT)
   }
 }
