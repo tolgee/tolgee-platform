@@ -63,6 +63,7 @@ class QueryBase<T>(
   private val qaEnabled: Boolean,
   val qaDisabledLanguageIds: Set<Long>,
   private val tasksEnabled: Boolean,
+  private val aiReviewFilterData: AiReviewFilterData? = null,
   val isCountQuery: Boolean = false,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
@@ -153,6 +154,9 @@ class QueryBase<T>(
       queryTranslationFiltering.applyQaFilters()
     }
     queryTranslationFiltering.applyOutdatedFilters()
+    if (aiReviewFilterData != null) {
+      queryTranslationFiltering.applyAiReviewFilters(aiReviewFilterData)
+    }
   }
 
   /**

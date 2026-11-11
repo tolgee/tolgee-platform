@@ -42,6 +42,8 @@ open class TranslationViewModel(
   val suggestions: List<TranslationSuggestionSimpleModel>? = null,
   @Schema(description = "Detailed QA issues for inline highlighting (only when includeQaIssues=true)")
   val qaIssues: List<QaIssueModel>? = null,
+  @Schema(description = "AI review result for the current text. Null without a current result or the feature.")
+  val aiReview: TranslationAiReviewSummaryModel? = null,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

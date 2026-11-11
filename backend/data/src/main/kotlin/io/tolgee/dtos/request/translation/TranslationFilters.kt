@@ -2,6 +2,7 @@ package io.tolgee.dtos.request.translation
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.tolgee.model.enums.aiReview.AiReviewFilterOutcome
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
 
 open class TranslationFilters(
@@ -261,6 +262,16 @@ A key matches if any of the selected check types is present in any of the select
     ],
   )
   var filterQaCheckType: List<String>? = null
+
+  @field:Parameter(
+    description = "Filter by AI review outcome. Several values combine with OR. Current results only.",
+  )
+  var filterAiReviewStatus: List<AiReviewFilterOutcome>? = null
+
+  @field:Parameter(
+    description = "Limit the AI review filter to these language tags.",
+  )
+  var filterAiReviewInLang: List<String>? = null
 
   @field:Parameter(
     description =
