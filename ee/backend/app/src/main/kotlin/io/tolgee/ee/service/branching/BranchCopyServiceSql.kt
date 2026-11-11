@@ -2,6 +2,7 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.model.branching.Branch
 import io.tolgee.service.branching.BranchCopyService
+import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -9,7 +10,8 @@ import org.springframework.stereotype.Service
 @Service
 class BranchCopyServiceSql(
   private val entityManager: EntityManager,
-) : BranchCopyService {
+) : BranchCopyService,
+  Logging {
   /**
    * Copies keys and its related entities from a source branch to target branch
    * - translations
@@ -28,17 +30,17 @@ class BranchCopyServiceSql(
   ) {
     require(sourceBranch.id != targetBranch.id) { "Source and target branch must differ" }
 
-    createKeyMapping(projectId, sourceBranch)
-    copyKeys(projectId, targetBranch)
-    copyTranslations(targetBranch)
-    copyTranslationLabels()
-    copyKeyMetas(targetBranch)
-    copyKeyMetaTags()
-    copyKeyMetaComments(targetBranch)
-    copyKeyMetaCodeReferences(targetBranch)
-    copyKeyScreenshotReferences()
-    copyTranslationComments(targetBranch)
-    copyTranslationQaIssues(targetBranch)
+    traceLogMeasureTime("branchCopyService: createKeyMapping") { createKeyMapping(projectId, sourceBranch) }
+    traceLogMeasureTime("branchCopyService: copyKeys") { copyKeys(projectId, targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyTranslations") { copyTranslations(targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyTranslationLabels") { copyTranslationLabels() }
+    traceLogMeasureTime("branchCopyService: copyKeyMetas") { copyKeyMetas(targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyKeyMetaTags") { copyKeyMetaTags() }
+    traceLogMeasureTime("branchCopyService: copyKeyMetaComments") { copyKeyMetaComments(targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyKeyMetaCodeReferences") { copyKeyMetaCodeReferences(targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyKeyScreenshotReferences") { copyKeyScreenshotReferences() }
+    traceLogMeasureTime("branchCopyService: copyTranslationComments") { copyTranslationComments(targetBranch) }
+    traceLogMeasureTime("branchCopyService: copyTranslationQaIssues") { copyTranslationQaIssues(targetBranch) }
   }
 
   private fun createKeyMapping(
