@@ -3,6 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BaseProjectView } from '../BaseProjectView';
 import { useAiViewItems } from './aiViewItems';
 
@@ -16,6 +17,7 @@ const StyledTabWrapper = styled(Box)`
 
 export const AiView = () => {
   const project = useProject();
+  const { satisfiesPermission } = useProjectPermissions();
   const { t } = useTranslate();
 
   const { ActiveComponent, items, value } = useAiViewItems();
@@ -37,7 +39,7 @@ export const AiView = () => {
       <StyledTabWrapper>
         <StyledTabs value={value}>
           {items.map((item) => {
-            if (!item.tab.condition) {
+            if (!item.tab.condition({ satisfiesPermission })) {
               return null;
             }
 

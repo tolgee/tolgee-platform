@@ -1,5 +1,8 @@
 import React, { ReactElement } from 'react';
 import {
+  AiReviewCellButtonProps,
+  AiReviewPlaygroundResultProps,
+  SubfilterAiReviewProps,
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
@@ -12,6 +15,7 @@ import {
   SubfilterTasksProps,
 } from './EeModuleType';
 import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
+import type { components } from 'tg.service/apiSchema.generated';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
   function NotIncludedInOss(props: any, ref: any) {
@@ -97,6 +101,25 @@ export const usePastDueBanner = Empty;
 export const AiPrompt = Empty;
 export const AiContextData = Empty;
 export const AiPromptsList = Empty;
+export const AiReviewRulesView = Empty;
+export const useAiReviewFeatureEnabled = () => false;
+export const useAiReviewActive = () => false;
+export const AiReviewCellButton = (_props: AiReviewCellButtonProps) =>
+  Empty() as JSX.Element;
+export const getAiReviewCellVisibility = (
+  _aiReview:
+    | components['schemas']['TranslationAiReviewSummaryModel']
+    | undefined
+): 'badge' | 'hover' | 'none' => 'none';
+export const SubfilterAiReview = (_props: SubfilterAiReviewProps) =>
+  Empty() as JSX.Element;
+export const AiReviewPlaygroundResult = (
+  _props: AiReviewPlaygroundResultProps
+) => Empty() as JSX.Element;
+export const getAiReviewFiltersLength = (_value: FiltersInternal) => 0;
+export const getAiReviewFiltersName = (
+  _value: FiltersInternal
+): JSX.Element | undefined => undefined;
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
@@ -105,6 +128,7 @@ export const useGlossaryTermHighlights = (
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');
 export const ProjectSettingsTranslationMemory = Empty;
+export const ProjectSettingsSourceChange = Empty;
 
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
