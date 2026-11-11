@@ -4,6 +4,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
+import io.tolgee.events.OnQaIssuesIgnored
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.ALLOCATION_SIZE
@@ -19,6 +20,7 @@ import io.tolgee.websocket.WebsocketEvent
 import io.tolgee.websocket.WebsocketEventPublisher
 import io.tolgee.websocket.WebsocketEventType
 import org.postgresql.util.PGobject
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,6 +38,7 @@ class QaIssueService(
   private val businessEventPublisher: BusinessEventPublisher,
   private val jdbcTemplate: JdbcTemplate,
   private val objectMapper: ObjectMapper,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @Transactional
   fun replaceIssuesForTranslation(
@@ -105,6 +108,7 @@ class QaIssueService(
     qaIssueRepository.save(issue)
     publishQaIssuesUpdated(issue.translation)
     publishQaIssueStateChange("QA_ISSUE_IGNORED", projectId, issue.type, issue.virtual)
+    applicationEventPublisher.publishEvent(OnQaIssuesIgnored(projectId, listOf(translationId)))
   }
 
   @Transactional
@@ -160,6 +164,7 @@ class QaIssueService(
     publishQaIssuesUpdated(translation)
     val isVirtual = issue?.virtual ?: true
     publishQaIssueStateChange("QA_ISSUE_IGNORED", projectId, request.type, isVirtual)
+    applicationEventPublisher.publishEvent(OnQaIssuesIgnored(projectId, listOf(translationId)))
   }
 
   @Transactional
