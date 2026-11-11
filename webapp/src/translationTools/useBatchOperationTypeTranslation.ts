@@ -14,6 +14,8 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_machine_translation');
       case 'AI_PLAYGROUND_TRANSLATE':
         return t('batch_operation_type_ai_playground_translate');
+      case 'AI_PLAYGROUND_REVIEW':
+        return t('batch_operation_type_ai_playground_review', 'Review preview');
       case 'PRE_TRANSLATE_BT_TM':
         return t('batch_operation_type_machine_pre_translate_by_tm');
       case 'COPY_TRANSLATIONS':
@@ -42,6 +44,13 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_hard_delete_keys');
       case 'QA_CHECK':
         return t('batch_operation_type_qa_check');
+      case 'AI_REVIEW':
+        return t('batch_operation_type_ai_review', 'AI review');
+      case 'AI_REVIEW_DEMOTION':
+        return t(
+          'batch_operation_type_ai_review_demotion',
+          'AI review cleanup'
+        );
       default:
         return type;
     }

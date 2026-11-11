@@ -69,6 +69,7 @@ export const BatchOperationDialog = ({
   const getActionPhrase = useBatchOperationActionPhrase();
   const isAiJob = [
     'AI_PLAYGROUND_TRANSLATE',
+    'AI_PLAYGROUND_REVIEW',
     'MACHINE_TRANSLATE',
     'AUTO_TRANSLATE',
   ].includes(data.type);
