@@ -242,22 +242,7 @@ class LlmProviderService(
     name: String,
     priority: LlmProviderPriority?,
   ): LlmProviderDto {
-    val customProviders =
-      if (adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
-        emptyList()
-      } else {
-        getAll(organizationId)
-      }
-    val serverProviders = getAllServerProviders()
-
-    val providersOfTheName =
-      if (customProviders.find { it.name == name } != null) {
-        customProviders
-      } else {
-        serverProviders
-      }.filter {
-        it.name == name
-      }
+    val providersOfTheName = getProvidersByName(organizationId, name)
 
     val providersWithPriority =
       if (providersOfTheName.find { it.priority == priority } != null) {
@@ -291,6 +276,35 @@ class LlmProviderService(
     val provider = providers.get(newIndex)
     lastUsedMap.set(name, provider.id)
     return provider
+  }
+
+  private fun getProvidersByName(
+    organizationId: Long,
+    name: String,
+  ): List<LlmProviderDto> {
+    if (!adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
+      val customProviders = getAll(organizationId).filter { it.name == name }
+      if (customProviders.isNotEmpty()) return customProviders
+    }
+    return getAllServerProviders().filter { it.name == name }
+  }
+
+  fun consumesCredits(
+    organizationId: Long,
+    provider: String,
+  ): Boolean {
+    val name =
+      try {
+        llmProviderResolver.resolveProviderName(organizationId, provider)
+      } catch (e: LlmProviderNotFoundException) {
+        return true
+      }
+    return getProvidersByName(organizationId, name).any { it.consumesCredits() }
+  }
+
+  private fun LlmProviderDto.consumesCredits(): Boolean {
+    if (type == LlmProviderType.TOLGEE) return true
+    return (tokenPriceInCreditsInput ?: 0.0) > 0 || (tokenPriceInCreditsOutput ?: 0.0) > 0
   }
 
   fun getProviderResponse(
