@@ -1,3 +1,10 @@
+## [3.242.6](https://github.com/tolgee/tolgee-platform/compare/v3.242.5...v3.242.6) (2026-11-11)
+
+
+### Bug Fixes
+
+* self-hosted AI translation of long texts times out too early ([#4045](https://github.com/tolgee/tolgee-platform/issues/4045)) ([d5fd514](https://github.com/tolgee/tolgee-platform/commit/d5fd5149267c70b5aeb54936c48975a75231576b)), closes [#4042](https://github.com/tolgee/tolgee-platform/issues/4042)
+
 ## [3.242.5](https://github.com/tolgee/tolgee-platform/compare/v3.242.4...v3.242.5) (2026-11-10)
 
 
