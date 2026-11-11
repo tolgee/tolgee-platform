@@ -12,9 +12,11 @@ import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.model.batch.params.AiPlaygroundJobParams
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.key.Key
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.PromptService
+import io.tolgee.service.aiReview.AiReviewPlaygroundReviewer
 import io.tolgee.service.key.KeyService
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -26,6 +28,7 @@ class AiPlaygroundChunkProcessor(
   private val promptService: PromptService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val mtProviderCatching: MtProviderCatching,
+  private val aiReviewPlaygroundReviewer: AiReviewPlaygroundReviewer,
   private val progressManager: ProgressManager,
   objectMapper: ObjectMapper,
 ) : AbstractChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem>(objectMapper) {
@@ -51,6 +54,10 @@ class AiPlaygroundChunkProcessor(
     key: Key,
     languageId: Long,
   ) {
+    if (llmPrompt.type == PromptType.REVIEW) {
+      reviewAndSetResult(job, llmPrompt, key, languageId)
+      return
+    }
     val result =
       promptService.translate(
         job.projectId!!,
@@ -71,6 +78,26 @@ class AiPlaygroundChunkProcessor(
       languageId = languageId,
       translation = result.translated,
       contextDescription = result.contextDescription,
+    )
+  }
+
+  private fun reviewAndSetResult(
+    job: BatchJobDto,
+    llmPrompt: PromptDto,
+    key: Key,
+    languageId: Long,
+  ) {
+    val review =
+      aiReviewPlaygroundReviewer.review(job.projectId!!, key.id, languageId, llmPrompt) ?: return
+    aiPlaygroundResultService.setResult(
+      projectId = job.projectId,
+      userId = job.authorId!!,
+      keyId = key.id,
+      languageId = languageId,
+      translation = null,
+      contextDescription = null,
+      score = review.score,
+      issues = review.issues,
     )
   }
 
