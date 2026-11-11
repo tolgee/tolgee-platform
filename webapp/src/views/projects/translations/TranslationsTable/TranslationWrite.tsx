@@ -14,7 +14,12 @@ import { useInvalidPlaceholders } from '../cell/useInvalidPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
-import { TaskInfoMessage } from 'tg.ee';
+import {
+  AiReviewCellButton,
+  getAiReviewCellVisibility,
+  TaskInfoMessage,
+  useAiReviewFeatureEnabled,
+} from 'tg.ee';
 import { SuggestionsList } from '../Suggestions/SuggestionsList';
 
 const StyledContainer = styled('div')`
@@ -111,6 +116,11 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
     (t) => t.languageTag === language.tag
   );
 
+  const aiReviewFeature = useAiReviewFeatureEnabled();
+  const displayAiReview =
+    aiReviewFeature &&
+    getAiReviewCellVisibility(translation?.aiReview) !== 'none';
+
   const handleModeToggle = () => {
     setMode((mode) => (mode === 'syntax' ? 'placeholders' : 'syntax'));
   };
@@ -194,7 +204,15 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
                 (t) => t.languageTag === language.tag
               )}
               onTaskStateChange={setAssignedTaskState}
-            />
+            >
+              {displayAiReview && (
+                <AiReviewCellButton
+                  aiReview={translation!.aiReview!}
+                  translationId={translation!.id!}
+                  state={state}
+                />
+              )}
+            </ControlsEditorSmall>
             {editEnabled ? (
               <ControlsEditorMain
                 onSave={handleSaveWithConfirmation}

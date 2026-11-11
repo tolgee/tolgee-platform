@@ -54,6 +54,7 @@ export const ControlsEditorSmall: React.FC<
   controlsProps,
   tasks,
   onTaskStateChange,
+  children,
 }) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -125,6 +126,7 @@ export const ControlsEditorSmall: React.FC<
             <ClipboardCheck />
           </ControlsButton>
         )}
+        {children}
       </StyledIcons>
     </StyledContainer>
   );
