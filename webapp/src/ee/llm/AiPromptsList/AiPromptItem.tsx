@@ -11,6 +11,8 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { PromptRename } from '../AiPrompt/PromptRename';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { SecondaryChip } from 'tg.component/common/chips/SecondaryChip';
+import { useAiReviewFeatureEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewFeatureEnabled';
 
 type PromptModel = components['schemas']['PromptModel'];
 
@@ -60,6 +62,7 @@ export const AiPromptItem = ({ prompt }: Props) => {
   const { t } = useTranslate();
   const history = useHistory();
   const { satisfiesPermission } = useProjectPermissions();
+  const aiReviewFeatureEnabled = useAiReviewFeatureEnabled();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/{promptId}',
@@ -81,7 +84,23 @@ export const AiPromptItem = ({ prompt }: Props) => {
     setMenuOpen(false);
     confirmation({
       message: (
-        <T keyName="ai_prompts_delete_message" params={{ name: prompt.name }} />
+        <Box display="grid" gap={1}>
+          <div>
+            <T
+              keyName="ai_prompts_delete_message"
+              params={{ name: prompt.name }}
+            />
+          </div>
+          {prompt.activeRuleCount > 0 && (
+            <div data-cy="ai-review-prompt-delete-warning">
+              <T
+                keyName="ai_review_prompt_delete_warning"
+                defaultValue="{count, plural, one {# active rule uses this prompt. It will switch to Score only with the default review prompt.} other {# active rules use this prompt. They will switch to Score only with the default review prompt.}}"
+                params={{ count: prompt.activeRuleCount }}
+              />
+            </div>
+          )}
+        </Box>
       ),
       confirmButtonText: <T keyName="ai_prompt_delete_confirm" />,
       onConfirm() {
@@ -106,6 +125,20 @@ export const AiPromptItem = ({ prompt }: Props) => {
     <StyledContainer>
       <StyledName {...linkProps} data-cy="ai-prompt-item-name">
         {prompt.name}
+        {prompt.type === 'REVIEW' && (
+          <SecondaryChip
+            size="small"
+            label={t('ai_prompts_review_chip', 'Review')}
+            data-cy="ai-prompt-review-chip"
+          />
+        )}
+        {aiReviewFeatureEnabled && prompt.type === 'TRANSLATE' && (
+          <SecondaryChip
+            size="small"
+            label={t('ai_prompts_translate_chip', 'Translate')}
+            data-cy="ai-prompt-translate-chip"
+          />
+        )}
       </StyledName>
       <StyledModel {...linkProps}>{prompt.providerName}</StyledModel>
       <StyledAction sx={{ pr: 1 }}>
