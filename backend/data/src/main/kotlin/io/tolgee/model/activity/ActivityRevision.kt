@@ -5,6 +5,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
+import io.tolgee.model.enums.SystemActor
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -15,6 +16,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
@@ -67,6 +69,9 @@ class ActivityRevision : java.io.Serializable {
   @Enumerated(EnumType.STRING)
   var type: ActivityType? = null
 
+  @Enumerated(EnumType.STRING)
+  var systemActor: SystemActor? = null
+
   /**
    * Project of the change
    */
@@ -87,8 +92,11 @@ class ActivityRevision : java.io.Serializable {
    * this field is set to null.
    *
    * Instead, [batchJob] is set.
+   *
+   * AI review chunks write one extra revision per translation in nested transactions, so one
+   * execution can have several revisions.
    */
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   var batchJobChunkExecution: BatchJobChunkExecution? = null
 
   @OneToOne(fetch = FetchType.LAZY)
