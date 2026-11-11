@@ -26,6 +26,8 @@ open class ProjectModel(
   val useNamespaces: Boolean,
   val useBranching: Boolean,
   val useQaChecks: Boolean,
+  @Schema(description = "Whether AI review runs in this project")
+  val useAiReview: Boolean,
   @Schema(description = "Whether the project is public — discoverable and open to community suggestions")
   val public: Boolean,
   val defaultNamespace: NamespaceModel?,

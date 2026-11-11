@@ -9,12 +9,14 @@ object ProjectFeatureRegistry {
     mapOf(
       Feature.BRANCHING to { it.useBranching },
       Feature.QA_CHECKS to { it.useQaChecks },
+      Feature.AI_REVIEW to { it.useAiReview },
     )
 
   private val projectDtoFeatureChecks: Map<Feature, (ProjectDto) -> Boolean> =
     mapOf(
       Feature.BRANCHING to { it.useBranching },
       Feature.QA_CHECKS to { it.useQaChecks },
+      Feature.AI_REVIEW to { it.useAiReview },
     )
 
   fun isEnabledOnProject(
