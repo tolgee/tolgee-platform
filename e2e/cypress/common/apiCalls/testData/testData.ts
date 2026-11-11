@@ -20,6 +20,7 @@ export const ssoOrganizationsLoginTestData = generateTestDataObject(
 );
 
 export const organizationTestData = generateTestDataObject('organizations');
+export const aiReviewTestData = generateTestDataObject('ai-review');
 
 export const communityContributionData = generateTestDataObject(
   'community-contribution'

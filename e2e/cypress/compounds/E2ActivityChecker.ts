@@ -1,6 +1,17 @@
-import { gcy, selectInProjectMenu } from '../common/shared';
+import { gcy, gcyAdvanced, selectInProjectMenu } from '../common/shared';
+import { HOST } from '../common/constants';
 
 export class E2ActivityChecker {
+  visitDashboard(projectId: number) {
+    cy.visit(`${HOST}/projects/${projectId}`);
+    gcy('project-dashboard-activity-list').should('be.visible');
+    return this;
+  }
+
+  getActivity(type: string) {
+    return gcyAdvanced({ value: 'activity-compact', type });
+  }
+
   checkActivity(activityText: string) {
     selectInProjectMenu('Project Dashboard');
     cy.waitForDom();
