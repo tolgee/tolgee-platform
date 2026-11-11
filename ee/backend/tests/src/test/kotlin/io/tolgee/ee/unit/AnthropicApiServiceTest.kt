@@ -2,6 +2,7 @@ package io.tolgee.ee.unit
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.LlmResponseSchema
 import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.exceptions.LlmProviderMaxTokensExceededException
 import io.tolgee.model.enums.LlmProviderPriority
@@ -64,6 +65,20 @@ class AnthropicApiServiceTest {
     assertThat(properties).containsKey("contextDescription")
     assertThat(schema["required"]).isEqualTo(listOf("output", "contextDescription"))
     assertThat(schema["additionalProperties"]).isEqualTo(false)
+  }
+
+  @Test
+  fun `sends the response schema from params when it is set`() {
+    val schema = mapOf<String, Any>("type" to "object", "properties" to mapOf("issues" to mapOf("type" to "array")))
+    val params = createParams(shouldOutputJson = true, responseSchema = LlmResponseSchema("review_response", schema))
+
+    service.translate(params, createConfig(format = "json_schema"), createCapturingRestTemplate())
+
+    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+
+    @Suppress("UNCHECKED_CAST")
+    val format = (bodyMap["output_config"] as Map<String, Any>)["format"] as Map<String, Any>
+    assertThat(format["schema"]).isEqualTo(schema)
   }
 
   @Test
@@ -196,7 +211,10 @@ class AnthropicApiServiceTest {
     }
   }
 
-  private fun createParams(shouldOutputJson: Boolean): LlmParams {
+  private fun createParams(
+    shouldOutputJson: Boolean,
+    responseSchema: LlmResponseSchema = LlmResponseSchema.TRANSLATION,
+  ): LlmParams {
     return LlmParams(
       messages =
         listOf(
@@ -207,6 +225,7 @@ class AnthropicApiServiceTest {
         ),
       shouldOutputJson = shouldOutputJson,
       priority = LlmProviderPriority.HIGH,
+      responseSchema = responseSchema,
     )
   }
 
