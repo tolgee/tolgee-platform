@@ -13,6 +13,7 @@ import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.constants.Feature
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaRecheckService
+import io.tolgee.events.OnBranchCreated
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -26,7 +27,10 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.runSentryCatching
 import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionPhase
+import org.springframework.transaction.event.TransactionalEventListener
 
 /**
  * QA event listener that reacts to:
@@ -101,6 +105,15 @@ class QaActivityListener(
       if (entities.isEmpty()) return@runSentryCatching
 
       processModifiedEntities(projectId, entities)
+    }
+  }
+
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @Async
+  fun onBranchCreated(event: OnBranchCreated) {
+    if (bypass) return
+    runSentryCatching {
+      qaRecheckService.recheckStaleTranslationsOnBranch(event.projectId, event.branchId)
     }
   }
 
