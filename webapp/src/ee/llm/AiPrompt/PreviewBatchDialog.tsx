@@ -19,6 +19,7 @@ import {
   useTranslationsSelector,
 } from 'tg.views/projects/translations/context/TranslationsContext';
 import { BasicPromptOption } from './TabBasic';
+import { PromptType } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
 import { AI_PLAYGROUND_TAG } from './PreviewDatasetDialog';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
 
@@ -32,6 +33,7 @@ type Props = {
   options: BasicPromptOption[] | undefined;
   projectId: number;
   numberOfKeys: number;
+  promptType: PromptType;
 };
 
 export const PreviewBatchDialog = ({
@@ -42,6 +44,7 @@ export const PreviewBatchDialog = ({
   options,
   projectId,
   numberOfKeys,
+  promptType,
 }: Props) => {
   const { getAllIds } = useTranslationsActions();
   const { t } = useTranslate();
@@ -76,6 +79,7 @@ export const PreviewBatchDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type: promptType,
             },
           },
         },

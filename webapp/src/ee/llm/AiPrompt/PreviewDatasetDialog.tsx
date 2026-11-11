@@ -14,6 +14,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { BatchJobModel } from 'tg.views/projects/translations/BatchOperations/types';
 import { BasicPromptOption } from './TabBasic';
+import { PromptType } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { Lightbulb02 } from '@untitled-ui/icons-react';
 import { BatchOperationsLanguagesSelect } from 'tg.views/projects/translations/BatchOperations/components/BatchOperationsLanguagesSelect';
@@ -37,6 +38,7 @@ type Props = {
   providerName: string;
   template: string | undefined;
   options: BasicPromptOption[] | undefined;
+  promptType: PromptType;
 };
 
 export const PreviewDatasetDialog = ({
@@ -46,6 +48,7 @@ export const PreviewDatasetDialog = ({
   providerName,
   onStart,
   options,
+  promptType,
 }: Props) => {
   const { setFilters } = useTranslationsActions();
   const { t } = useTranslate();
@@ -92,6 +95,7 @@ export const PreviewDatasetDialog = ({
               template,
               basicPromptOptions: options,
               providerName,
+              type: promptType,
             },
           },
         },

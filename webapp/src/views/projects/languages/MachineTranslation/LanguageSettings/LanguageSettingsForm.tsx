@@ -175,13 +175,19 @@ export const LanguageSettingsForm = ({
                     onChange={(e) => setFieldValue('promptId', e.target.value)}
                     displayEmpty
                     minHeight={false}
+                    data-cy="mt-language-dialog-prompt-select"
                   >
                     <MenuItem value={null as any}>
                       {t('ai_prompt_default_name')}
                     </MenuItem>
                     {prompts?.map((item) => {
                       return (
-                        <MenuItem key={item.id} value={item.id}>
+                        <MenuItem
+                          key={item.id}
+                          value={item.id}
+                          data-cy="mt-language-dialog-prompt-item"
+                          data-cy-name={item.name}
+                        >
                           {item.name}
                         </MenuItem>
                       );
