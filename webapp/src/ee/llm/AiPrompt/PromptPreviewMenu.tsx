@@ -17,6 +17,7 @@ import { useTranslationsSelector } from 'tg.views/projects/translations/context/
 
 import { PreviewBatchDialog } from './PreviewBatchDialog';
 import { BasicPromptOption } from './TabBasic';
+import { PromptType } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
 import { PreviewDatasetDialog } from './PreviewDatasetDialog';
 
 const StyledArrowButton = styled(Button)`
@@ -31,6 +32,7 @@ type Props = {
   templateValue: string | undefined;
   options: BasicPromptOption[] | undefined;
   providerName: string;
+  promptType: PromptType;
   onBatchFinished: () => void;
   onTestPrompt: () => void;
   loading?: boolean;
@@ -43,6 +45,7 @@ export const PromptPreviewMenu = ({
   templateValue,
   options,
   providerName,
+  promptType,
   onBatchFinished,
   onTestPrompt,
   loading,
@@ -135,6 +138,7 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          promptType={promptType}
           onStart={(data) => setRunningOperation(data)}
         />
       )}
@@ -157,6 +161,7 @@ export const PromptPreviewMenu = ({
           providerName={providerName}
           template={templateValue}
           options={options}
+          promptType={promptType}
           onStart={(data) => setRunningOperation(data)}
         />
       )}

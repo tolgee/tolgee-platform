@@ -2,13 +2,15 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { PromptItem } from './PromptLoadMenu';
+import { PromptType } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
 import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptState';
 
 type Props = {
   projectId: number;
+  type?: PromptType;
 };
 
-export const useOpenedPrompt = ({ projectId }: Props) => {
+export const useOpenedPrompt = ({ projectId, type }: Props) => {
   const { openPrompt, setOpenPrompt } = usePromptUrlState();
 
   const defaultPromptLoadable = useApiQuery({
@@ -16,6 +18,9 @@ export const useOpenedPrompt = ({ projectId }: Props) => {
     method: 'get',
     path: {
       projectId,
+    },
+    query: {
+      type: type ?? 'TRANSLATE',
     },
   });
 
