@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
+import io.tolgee.model.enums.SystemActor
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -17,4 +18,6 @@ open class TranslationHistoryModel(
   @Schema(description = "Author of the change")
   val author: SimpleUserAccountModel?,
   val revisionType: RevisionType,
+  @Schema(description = "System actor of the change, when the platform itself made it")
+  val systemActor: SystemActor? = null,
 ) : RepresentationModel<TranslationHistoryModel>()
