@@ -207,6 +207,7 @@ class AiReviewRunService(
         projectRules.evaluate(translation, activeOnly = AiReviewEligibility.isAiManagedReview(translation, row))
       if (decision is RuleDecision.Never) return CandidateResult.Skipped(AiReviewSkipReason.NEVER)
       if (decision !is RuleDecision.Review) return CandidateResult.Skipped(AiReviewSkipReason.NO_RULE)
+      if (request.ruleId != null && decision.rule.id != request.ruleId) return CandidateResult.NotACandidate
       val reason =
         rowSkipReason(row, decision)
           ?: qaSkipReason(decision, translation, openQaIssueIds)
@@ -290,12 +291,16 @@ class AiReviewRunService(
     request.translationIds?.let { return it }
     request.ruleId?.let { ruleId ->
       if (request.failedOnly) return reviewRepository.findFailedTranslationIdsByRule(ruleId)
+      // The classifier keeps only the translations this rule wins.
+      if (request.reReview) return translationRepository.getIdsByProject(projectId)
       val ids = mutableListOf<Long>()
       statsService.forEachBacklogItem(projectId, ruleId) { ids += it }
       return ids
     }
-    val keyIds = request.keyIds ?: return emptyList()
-    if (keyIds.isEmpty() || request.languageIds.isEmpty()) return emptyList()
+    if (request.languageIds.isEmpty()) return emptyList()
+    val keyIds =
+      request.keyIds ?: return translationRepository.getIdsByProjectAndLanguageIds(projectId, request.languageIds)
+    if (keyIds.isEmpty()) return emptyList()
     return keyIds.chunked(IN_CLAUSE_CHUNK).flatMap {
       translationRepository.getIdsByKeyIdsAndLanguageIds(it, request.languageIds)
     }
