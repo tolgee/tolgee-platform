@@ -9,7 +9,6 @@ class BatchJobDto(
   override var id: Long,
   val projectId: Long?,
   val authorId: Long?,
-  val target: List<Any>,
   val totalItems: Int,
   val totalChunks: Int,
   val chunkSize: Int,
@@ -25,15 +24,12 @@ class BatchJobDto(
   val debounceDurationInMs: Long? = null,
   var debounceMaxWaitTimeInMs: Long? = null,
 ) : IBatchJob {
-  val chunkedTarget get() = BatchJob.chunkTarget(chunkSize, target)
-
   companion object {
     fun fromEntity(entity: BatchJob): BatchJobDto {
       return BatchJobDto(
         id = entity.id,
         projectId = entity.project?.id,
         authorId = entity.author?.id,
-        target = entity.target,
         totalItems = entity.totalItems,
         totalChunks = entity.totalChunks,
         chunkSize = entity.chunkSize,

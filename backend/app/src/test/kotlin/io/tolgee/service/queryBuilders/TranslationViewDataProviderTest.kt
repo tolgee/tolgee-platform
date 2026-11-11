@@ -134,6 +134,52 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
       .isEqualTo("A key")
   }
 
+  @Test
+  fun `returns failed keys of a job stored as key and language product`() {
+    val testData = TranslationsTestData()
+    val job = testData.addFailedProductBatchJob()
+    testDataService.saveTestData(testData.root)
+
+    try {
+      getKeyNamesFailedInJob(testData, job.id).assert.containsExactly("A key")
+    } finally {
+      testDataService.cleanTestData(testData.root)
+    }
+  }
+
+  @Test
+  fun `does not return succeeded keys of a job stored as key and language product`() {
+    val testData = TranslationsTestData()
+    val job = testData.addFailedProductBatchJob(keySucceeded = true)
+    testDataService.saveTestData(testData.root)
+
+    try {
+      getKeyNamesFailedInJob(testData, job.id).assert.isEmpty()
+    } finally {
+      testDataService.cleanTestData(testData.root)
+    }
+  }
+
+  private fun getKeyNamesFailedInJob(
+    testData: TranslationsTestData,
+    jobId: Long,
+  ) = translationViewDataProvider
+    .getData(
+      projectId = testData.project.id,
+      languages =
+        languageService
+          .dtosFromEntities(
+            listOf(testData.germanLanguage),
+            testData.project.id,
+          ).toSet(),
+      PageRequest.of(0, 10),
+      params =
+        GetTranslationsParams().apply {
+          filterFailedKeysOfJob = jobId
+        },
+    ).content
+    .map { it.keyName }
+
   private fun generateCommentStatesTestData(): TranslationsTestData {
     val testData = TranslationsTestData()
     testData.addCommentStatesData()

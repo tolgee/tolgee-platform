@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.request.LabelTranslationsRequest
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.batch.request.QaRecheckByKeysRequest
@@ -118,10 +118,7 @@ class EeStartBatchJobController(
       data.languageIds
         ?: languageService.getProjectLanguages(projectId).map { it.id }
 
-    val target =
-      data.keyIds.flatMap { keyId ->
-        languageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
-      }
+    val target = TranslationTargetProduct(data.keyIds, languageIds)
     if (target.isEmpty()) {
       throw BadRequestException(Message.NO_TRANSLATIONS_TO_RECHECK)
     }

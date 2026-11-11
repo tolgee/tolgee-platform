@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -69,5 +70,35 @@ class BatchMtTranslateTest : ProjectAuthControllerTest("/v2/projects/") {
         .modifiedEntities.assert
         .hasSize(2000)
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `stores the materialized target for nodes that read only the target column`() {
+    val keys = testData.addTranslationOperationData(3)
+    batchJobTestBase.saveAndPrepare(this)
+    val keyIds = keys.map { it.id }
+    val languageIds =
+      listOf("cs", "de").map {
+        testData.projectBuilder
+          .getLanguageByTag(it)!!
+          .self.id
+      }
+
+    performProjectAuthPost(
+      "start-batch-job/machine-translate",
+      mapOf("keyIds" to keyIds, "targetLanguageIds" to languageIds),
+    ).andIsOk
+
+    batchJobTestBase.waitForAllTranslated(keyIds, keyIds.size)
+    val storedTarget =
+      entityManager
+        .createNativeQuery("select cast(target as text) from tolgee_batch_job")
+        .singleResult as String
+    objectMapper
+      .readValue(storedTarget, Array<BatchTranslationTargetItem>::class.java)
+      .toList()
+      .assert
+      .containsExactlyElementsOf(keyIds.flatMap { keyId -> languageIds.map { BatchTranslationTargetItem(keyId, it) } })
   }
 }

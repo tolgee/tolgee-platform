@@ -7,6 +7,7 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -237,6 +238,37 @@ class BatchJobChunkExecutionQueueTest {
 
     assertThat(queue.size).isEqualTo(1)
     assertThat(queue.getAllQueueItems().map { it.chunkExecutionId }).containsExactly(2)
+  }
+
+  @Test
+  fun `REMOVE event for items that are not queued keeps the queue intact`() {
+    val i1 = item(1, jobId = 1)
+    val i2 = item(2, jobId = 1)
+    queue.addItemsToLocalQueue(listOf(i1, i2))
+    queue.pollRoundRobin()
+
+    queue.onJobItemEvent(JobQueueItemsEvent(listOf(i1, item(99, jobId = 1)), QueueEventType.REMOVE))
+
+    queue.size.assert.isEqualTo(1)
+    queue
+      .getAllQueueItems()
+      .map { it.chunkExecutionId }
+      .assert
+      .containsExactly(2)
+  }
+
+  @Test
+  fun `REMOVE event removes an item from the middle of a job queue`() {
+    queue.addItemsToLocalQueue((1L..5L).map { item(it, jobId = 1) })
+
+    queue.onJobItemEvent(JobQueueItemsEvent(listOf(item(3, jobId = 1)), QueueEventType.REMOVE))
+
+    queue
+      .getQueuedJobItems(1)
+      .map { it.chunkExecutionId }
+      .assert
+      .containsExactly(1, 2, 4, 5)
+    queue.contains(item(3, jobId = 1)).assert.isFalse()
   }
 
   // ── clear ─────────────────────────────────────────────────────────────────
