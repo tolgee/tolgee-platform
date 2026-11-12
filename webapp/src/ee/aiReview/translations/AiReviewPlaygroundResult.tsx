@@ -2,8 +2,10 @@ import { Box, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { AiReviewPlaygroundResultProps } from 'eeSetup/EeModuleType';
-import { AiReviewIssueList } from 'tg.ee.module/aiReview/translations/AiReviewIssueList';
+import { AiReviewIssues } from 'tg.ee.module/aiReview/translations/AiReviewIssues';
+import { AiReviewScoreTitle } from 'tg.ee.module/aiReview/translations/AiReviewScoreTitle';
 
+// The same parts as the AI review card: the score title, then the issues.
 export const AiReviewPlaygroundResult = ({
   score,
   issues,
@@ -11,22 +13,21 @@ export const AiReviewPlaygroundResult = ({
   const { t } = useTranslate();
 
   return (
-    <Box display="grid" gap={1}>
-      <Typography
-        fontWeight={500}
-        data-cy="ai-playground-preview-score"
-        data-cy-score={String(score)}
-      >
-        {t('ai_playground_preview_score', 'Score {score} / 100', {
-          score,
-        })}
-      </Typography>
+    <Box display="grid" gap={1.5}>
+      <AiReviewScoreTitle
+        title={t('ai_review_popover_title_score', 'AI review score')}
+        score={score}
+        scoreProps={{
+          'data-cy': 'ai-playground-preview-score',
+          'data-cy-score': String(score),
+        }}
+      />
       {issues?.length ? (
-        <AiReviewIssueList issues={issues} />
+        <AiReviewIssues issues={issues} />
       ) : (
         <Typography
-          variant="body2"
-          color="textSecondary"
+          color="text.secondary"
+          sx={{ fontSize: 13, lineHeight: '18px', mt: -1 }}
           data-cy="ai-playground-preview-no-issues"
         >
           {t('ai_playground_preview_no_issues', 'No issues found')}
