@@ -7,7 +7,6 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Typography,
   styled,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
@@ -79,6 +78,8 @@ const StyledRow = styled(Box)`
 
 const StyledName = styled(Box)`
   font-size: ${({ theme }) => theme.typography.body1.fontSize}px;
+  /* On narrow screens the mode chip shortens too, so the name never disappears. */
+  min-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -224,15 +225,15 @@ export const AiReviewRuleItem = ({ rule, promptNames }: Props) => {
           )}
         </Box>
       </StyledRow>
-      <StyledRow className="dim">
-        <Box display="flex" alignItems="center" gap={1.5} minWidth={0}>
-          <AiReviewRuleScopeChips rule={rule} />
-          {!rule.never && customPromptName && (
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {customPromptName}
-            </Typography>
-          )}
-        </Box>
+      {/* On narrow screens the counts move under the scope instead of pushing it away. */}
+      <StyledRow
+        className="dim"
+        sx={{ columnGap: 3, rowGap: 0.5, flexWrap: 'wrap' }}
+      >
+        <AiReviewRuleScopeChips
+          rule={rule}
+          promptName={rule.never ? undefined : customPromptName}
+        />
         {!rule.never && (
           <AiReviewRuleCounts
             rule={rule}
