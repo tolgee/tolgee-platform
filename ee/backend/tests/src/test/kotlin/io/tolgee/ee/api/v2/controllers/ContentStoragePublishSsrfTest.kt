@@ -70,10 +70,42 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `routes a publish through the operator proxy instead of refusing the private proxy host`() {
+    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { proxy ->
+      val reachedProxy = CountDownLatch(1)
+      acceptOnce(proxy) { reachedProxy.countDown() }
+      withProxyProperties("127.0.0.1", proxy.localPort) {
+        // With an http proxy configured the client connects to the proxy, so the resolver is handed the private
+        // proxy host for a public endpoint; the proxy hop must be exempted, not blocked.
+        val configId = saveConfigWithEndpoint("http://93.184.216.34/")
+
+        runCatching { contentDeliveryUploader.upload(configId) }
+
+        reachedProxy.await(10, TimeUnit.SECONDS).assert.isTrue()
+      }
+    }
+  }
+
   private fun saveConfigWithEndpoint(endpoint: String): Long {
     testData = PublishSsrfTestData(endpoint)
     testDataService.saveTestData(testData.root)
     return testData.contentDeliveryConfig.self.id
+  }
+
+  private fun <T> withProxyProperties(
+    host: String,
+    port: Int,
+    block: () -> T,
+  ): T {
+    System.setProperty("http.proxyHost", host)
+    System.setProperty("http.proxyPort", port.toString())
+    return try {
+      block()
+    } finally {
+      System.clearProperty("http.proxyHost")
+      System.clearProperty("http.proxyPort")
+    }
   }
 
   /** Accepts a single connection on a daemon thread and signals it; stays quietly blocked if none ever arrives. */

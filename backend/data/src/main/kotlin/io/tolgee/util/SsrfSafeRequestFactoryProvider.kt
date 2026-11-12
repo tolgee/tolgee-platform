@@ -114,11 +114,16 @@ class SsrfSafeRequestFactoryProvider(
      * Only the proxy hop is exempt. The resolver cannot tell that hop from a direct request whose target merely
      * carries the same name, which `http.nonProxyHosts` or an https URL under an http-only proxy would send straight
      * out; [ProxyHopOnlyRoutePlanner] refuses those before the resolver sees them.
+     *
+     * `internal` so the S3 content-storage client can reuse the exact same proxy-hop exemption instead of duplicating.
      */
-    private fun isOperatorProxy(host: String): Boolean {
+    internal fun isOperatorProxy(host: String): Boolean {
       if (host.isBlank()) return false
       return PROXY_HOST_PROPERTIES.any { host.equals(System.getProperty(it)?.trim(), ignoreCase = true) }
     }
+
+    // Exposed so the S3 content-storage client can install the same direct-to-proxy guard via Apache5HttpClient.
+    internal fun proxyHopOnlyRoutePlanner(): HttpRoutePlanner = ProxyHopOnlyRoutePlanner
 
     private object ProxyHopOnlyRoutePlanner : HttpRoutePlanner {
       private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, null)
