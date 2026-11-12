@@ -11,7 +11,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { PromptRename } from '../AiPrompt/PromptRename';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { SecondaryChip } from 'tg.component/common/chips/SecondaryChip';
+import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { useAiReviewFeatureEnabled } from 'tg.ee.module/aiReview/hooks/useAiReviewFeatureEnabled';
 
 type PromptModel = components['schemas']['PromptModel'];
@@ -125,19 +125,13 @@ export const AiPromptItem = ({ prompt }: Props) => {
     <StyledContainer>
       <StyledName {...linkProps} data-cy="ai-prompt-item-name">
         {prompt.name}
+        {/* Same badge as the task type, since prompt types match task types. */}
+        {/* Literal data-cy values, so the generated e2e selector types keep them. */}
         {prompt.type === 'REVIEW' && (
-          <SecondaryChip
-            size="small"
-            label={t('ai_prompts_review_chip', 'Review')}
-            data-cy="ai-prompt-review-chip"
-          />
+          <TaskTypeChip type="REVIEW" data-cy="ai-prompt-review-chip" />
         )}
         {aiReviewFeatureEnabled && prompt.type === 'TRANSLATE' && (
-          <SecondaryChip
-            size="small"
-            label={t('ai_prompts_translate_chip', 'Translate')}
-            data-cy="ai-prompt-translate-chip"
-          />
+          <TaskTypeChip type="TRANSLATE" data-cy="ai-prompt-translate-chip" />
         )}
       </StyledName>
       <StyledModel {...linkProps}>{prompt.providerName}</StyledModel>

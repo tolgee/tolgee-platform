@@ -112,6 +112,7 @@ declare namespace DataCy {
         "ai-review-popover": true;
         "ai-review-popover-failure-reason": true;
         "ai-review-popover-model": true;
+        "ai-review-popover-points-off": true;
         "ai-review-popover-prompt": true;
         "ai-review-popover-protected-note": true;
         "ai-review-popover-queued": true;
@@ -120,7 +121,10 @@ declare namespace DataCy {
         "ai-review-popover-retry": true;
         "ai-review-popover-reviewed": true;
         "ai-review-popover-rule": true;
+        "ai-review-popover-rule-name": true;
         "ai-review-popover-score": true;
+        "ai-review-popover-score-only": true;
+        "ai-review-popover-score-value": true;
         "ai-review-popover-status": true;
         "ai-review-prompt-delete-warning": true;
         "ai-review-prompt-save-warning": true;
@@ -129,6 +133,9 @@ declare namespace DataCy {
         "ai-review-rule-dialog-content": true;
         "ai-review-rule-disabled": true;
         "ai-review-rule-edit": true;
+        "ai-review-rule-failed": true;
+        "ai-review-rule-filters-count": true;
+        "ai-review-rule-filters-tooltip": true;
         "ai-review-rule-form-branch-in": true;
         "ai-review-rule-form-branch-not-in": true;
         "ai-review-rule-form-cancel": true;
@@ -158,14 +165,18 @@ declare namespace DataCy {
         "ai-review-rule-language-flag": true;
         "ai-review-rule-languages": true;
         "ai-review-rule-languages-more": true;
+        "ai-review-rule-marked": true;
         "ai-review-rule-menu": true;
         "ai-review-rule-menu-delete": true;
         "ai-review-rule-menu-duplicate": true;
         "ai-review-rule-mode": true;
+        "ai-review-rule-prompt": true;
         "ai-review-rule-retry-failed": true;
         "ai-review-rule-review-now": true;
         "ai-review-rule-scope": true;
+        "ai-review-rule-scored": true;
         "ai-review-rule-switch": true;
+        "ai-review-rule-waiting": true;
         "ai-review-rules-view": true;
         "ai-review-run-button": true;
         "ai-review-run-cancel": true;
@@ -178,6 +189,7 @@ declare namespace DataCy {
         "ai-review-run-to-review": true;
         "ai-review-run-warning": true;
         "ai-review-scope-chip": true;
+        "ai-review-severity-badge": true;
         "ai-review-source-change-settings": true;
         "api-key-expiry-info": true;
         "api-key-list-item": true;
