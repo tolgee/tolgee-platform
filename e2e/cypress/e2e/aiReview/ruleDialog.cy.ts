@@ -63,6 +63,13 @@ describe('AI review rule dialog', () => {
     waitForGlobalLoading();
 
     rulesView.getRule('Branch rule').within(() => {
+      gcy('ai-review-rule-language-flag').should('have.length', 1);
+      // Two or more filters are shown as a count; the tooltip lists them.
+      gcy('ai-review-rule-filters-count')
+        .should('contain', '3 filters')
+        .trigger('mouseover');
+    });
+    gcy('ai-review-rule-filters-tooltip').within(() => {
       gcyAdvanced({
         value: 'ai-review-scope-chip',
         scope: 'ui',
@@ -78,7 +85,6 @@ describe('AI review rule dialog', () => {
         scope: 'feature/*',
         kind: 'exclude',
       }).should('exist');
-      gcy('ai-review-rule-language-flag').should('have.length', 1);
     });
 
     rulesView
