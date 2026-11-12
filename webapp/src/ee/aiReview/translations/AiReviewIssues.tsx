@@ -37,9 +37,11 @@ export const AiReviewIssues = ({ issues }: Props) => {
             style={{ fontVariantNumeric: 'tabular-nums' }}
             data-cy="ai-review-popover-points-off"
           >
-            {t('ai_review_popover_points_off', '{points} points off', {
-              points: pointsOff,
-            })}
+            {t(
+              'ai_review_popover_points_off',
+              '{points, plural, one {# point off} other {# points off}}',
+              { points: pointsOff }
+            )}
           </span>
         )}
       </Box>
