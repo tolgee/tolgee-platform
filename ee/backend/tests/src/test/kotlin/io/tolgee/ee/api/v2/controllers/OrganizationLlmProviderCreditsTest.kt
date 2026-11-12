@@ -22,10 +22,17 @@ import org.springframework.test.web.servlet.ResultActions
 class OrganizationLlmProviderCreditsTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: OrganizationLlmProviderCreditsTestData
 
+  private var llmEnabledBefore: Boolean? = null
+  private lateinit var llmProvidersBefore: MutableList<LlmProperties.LlmProvider>
+  private var fakeLlmProvidersBefore = false
+
   @BeforeEach
   fun setup() {
     testData = OrganizationLlmProviderCreditsTestData()
     testDataService.saveTestData(testData.root)
+    llmEnabledBefore = llmProperties.enabled
+    llmProvidersBefore = llmProperties.providers
+    fakeLlmProvidersBefore = internalProperties.fakeLlmProviders
     llmProperties.enabled = true
     llmProperties.providers =
       mutableListOf(
@@ -50,6 +57,9 @@ class OrganizationLlmProviderCreditsTest : ProjectAuthControllerTest("/v2/projec
   fun cleanup() {
     testDataService.cleanTestData(testData.root)
     machineTranslationProperties.freeCreditsAmount = -1
+    llmProperties.enabled = llmEnabledBefore
+    llmProperties.providers = llmProvidersBefore
+    internalProperties.fakeLlmProviders = fakeLlmProvidersBefore
   }
 
   @Test

@@ -302,11 +302,6 @@ class LlmProviderService(
     return getProvidersByName(organizationId, name).any { it.consumesCredits() }
   }
 
-  private fun LlmProviderDto.consumesCredits(): Boolean {
-    if (type == LlmProviderType.TOLGEE) return true
-    return (tokenPriceInCreditsInput ?: 0.0) > 0 || (tokenPriceInCreditsOutput ?: 0.0) > 0
-  }
-
   fun getProviderResponse(
     providerService: AbstractLlmApiService,
     params: LlmParams,
@@ -333,19 +328,27 @@ class LlmProviderService(
     providerConfig: LlmProviderDto,
     usage: PromptResult.Usage?,
   ): Int {
-    val tokenPriceInCreditsInput: Double = (providerConfig.tokenPriceInCreditsInput ?: 0.0)
-    val tokenPriceInCreditsOutput: Double = (providerConfig.tokenPriceInCreditsOutput ?: 0.0)
     val inputTokens: Long = usage?.inputTokens ?: 0L
     val outputTokens: Long = usage?.outputTokens ?: 0L
     val cachedTokens: Long = usage?.cachedTokens ?: 0L
 
-    val inputPrice = (inputTokens - cachedTokens) * tokenPriceInCreditsInput
-    val outputPrice = (outputTokens) * tokenPriceInCreditsOutput
+    val inputPrice = (inputTokens - cachedTokens) * providerConfig.inputTokenPrice
+    val outputPrice = (outputTokens) * providerConfig.outputTokenPrice
 
     val price = inputPrice + outputPrice
 
     return (price * 100).roundToInt()
   }
+
+  private fun LlmProviderDto.consumesCredits(): Boolean {
+    // a TOLGEE provider returns its own price in the response, see callProviderInternal
+    if (type == LlmProviderType.TOLGEE) return true
+    return inputTokenPrice > 0 || outputTokenPrice > 0
+  }
+
+  private val LlmProviderDto.inputTokenPrice: Double get() = tokenPriceInCreditsInput ?: 0.0
+
+  private val LlmProviderDto.outputTokenPrice: Double get() = tokenPriceInCreditsOutput ?: 0.0
 
   fun suspendProvider(
     name: String,
