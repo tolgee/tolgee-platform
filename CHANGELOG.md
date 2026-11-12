@@ -1,3 +1,10 @@
+## [3.242.7](https://github.com/tolgee/tolgee-platform/compare/v3.242.6...v3.242.7) (2026-11-12)
+
+
+### Performance Improvements
+
+* drop indexes that no query can use ([#4046](https://github.com/tolgee/tolgee-platform/issues/4046)) ([a67f725](https://github.com/tolgee/tolgee-platform/commit/a67f725eee307b7e7ed2d63c94566c4a84d34879))
+
 ## [3.242.6](https://github.com/tolgee/tolgee-platform/compare/v3.242.5...v3.242.6) (2026-11-11)
 
 
