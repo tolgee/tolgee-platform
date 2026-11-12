@@ -2,6 +2,7 @@ package io.tolgee.component.fileStorage
 
 import io.tolgee.model.contentDelivery.S3Config
 import org.apache.hc.client5.http.DnsResolver
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
 import org.apache.hc.client5.http.routing.HttpRoutePlanner
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
@@ -43,7 +44,9 @@ class S3ClientProvider internal constructor(
         // Make the route planner the single proxy authority: it reads the JVM proxy properties itself and refuses a
         // direct connection to the proxy host. The SDK rejects httpRoutePlanner together with an enabled
         // proxyConfiguration, and its default proxyConfiguration is enabled whenever http(s).proxyHost is set, so turn
-        // the SDK's own proxy resolution off here. Mirrors SsrfSafeRequestFactoryProvider.
+        // the SDK's own proxy resolution off here. Restore proxy authentication (http.proxyUser/http.proxyPassword)
+        // that the disabled proxyConfiguration would otherwise have supplied, via the same system-default credentials
+        // provider SsrfSafeRequestFactoryProvider gets from useSystemProperties(). Mirrors SsrfSafeRequestFactoryProvider.
         httpClientBuilder
           .httpRoutePlanner(it)
           .proxyConfiguration(
@@ -52,7 +55,7 @@ class S3ClientProvider internal constructor(
               .useSystemPropertyValues(false)
               .useEnvironmentVariableValues(false)
               .build(),
-          )
+          ).credentialsProvider(SystemDefaultCredentialsProvider())
       }
       builder.httpClientBuilder(httpClientBuilder)
     }
