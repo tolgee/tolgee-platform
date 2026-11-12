@@ -1,11 +1,13 @@
 package io.tolgee.component.fileStorage
 
 import io.tolgee.model.contentDelivery.S3Config
+import org.apache.hc.client5.http.DnsResolver
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.core.checksums.RequestChecksumCalculation
+import software.amazon.awssdk.http.apache5.Apache5HttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.LegacyMd5Plugin
 import software.amazon.awssdk.services.s3.S3Client
@@ -13,9 +15,15 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder
 import software.amazon.awssdk.services.s3.S3Configuration
 import java.net.URI
 
-class S3ClientProvider(
+class S3ClientProvider internal constructor(
   private val s3config: S3Config,
+  // When set, pins the client's DNS so it connects only to pre-validated addresses. Null keeps the SDK default
+  // resolver. Kept internal so the Apache HttpClient 5 type stays inside this module; callers outside use the
+  // single-argument constructor and the S3FileStorageFactory overloads to opt into pinning.
+  private val dnsResolver: DnsResolver?,
 ) {
+  constructor(s3config: S3Config) : this(s3config, null)
+
   fun provide(): S3Client {
     val credentialsProvider = getCredentialsProvider()
 
@@ -23,6 +31,9 @@ class S3ClientProvider(
       S3Client.builder().credentialsProvider(credentialsProvider).serviceConfiguration(
         S3Configuration.builder().pathStyleAccessEnabled(true).build(),
       )
+    dnsResolver?.let {
+      builder.httpClientBuilder(Apache5HttpClient.builder().dnsResolver(it))
+    }
     if (!s3config.endpoint.isNullOrEmpty()) {
       builder.configureForCustomEndpoint()
     }

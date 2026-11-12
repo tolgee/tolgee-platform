@@ -80,7 +80,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   fun `creates Content Storage with custom path`() {
     doAnswer {
       mock<S3FileStorage>()
-    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any(), any())
 
     performProjectAuthPost(
       "content-storages",
@@ -113,7 +113,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   fun `creates S3 Content Storage with public read`() {
     doAnswer {
       mock<S3FileStorage>()
-    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any(), any())
 
     performProjectAuthPost(
       "content-storages",
@@ -383,7 +383,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   private fun performCreate(): Pair<ContentStorage, ResultActions> {
     doAnswer {
       mock<AzureBlobFileStorage>()
-    }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+    }.whenever(contentDeliveryFileStorageProvider).getStorage(any(), any())
 
     var id: Long? = null
 

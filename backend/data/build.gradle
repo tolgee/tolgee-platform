@@ -223,6 +223,9 @@ dependencies {
      * AWS
      */
     implementation libs.amazonS3
+    // Already pulled in transitively by the S3 SDK as its runtime sync HTTP client; declared here so the content
+    // storage client can reference Apache5HttpClient to pin DNS at connect time.
+    implementation libs.amazonApache5Client
     implementation libs.amazonTranslate
     implementation libs.cloudfront
 

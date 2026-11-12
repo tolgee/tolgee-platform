@@ -36,8 +36,6 @@ import org.apache.hc.core5.util.Timeout
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Component
-import java.net.InetAddress
-import java.net.UnknownHostException
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -53,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap
 class SsrfSafeRequestFactoryProvider(
   private val urlSecurity: UrlSecurity,
   private val internalProperties: InternalProperties,
+  private val dnsResolverFactory: SsrfSafeDnsResolver = SsrfSafeDnsResolver(urlSecurity, internalProperties),
 ) : Logging {
   private data class ClientKey(
     val allowLocalAddresses: Boolean,
@@ -88,21 +87,10 @@ class SsrfSafeRequestFactoryProvider(
     return HttpComponentsClientHttpRequestFactory(client)
   }
 
+  // The operator's egress proxy host is exempt from the address rules (see isOperatorProxy); everything else is pinned
+  // to the addresses UrlSecurity vets, through the same resolver the S3 content-storage client uses.
   private fun validatingResolver(allowLocalAddresses: Boolean): DnsResolver =
-    object : DnsResolver {
-      override fun resolve(host: String): Array<InetAddress> =
-        try {
-          val skip = allowLocalAddresses || skipValidation || isOperatorProxy(host)
-          urlSecurity.resolveAndValidateHost(host, skip).toTypedArray()
-        } catch (e: Exception) {
-          logger.warn("Refusing an outbound connection to {}: {}", host, e.message)
-          throw UnknownHostException(host).apply { initCause(e) }
-        }
-
-      override fun resolveCanonicalHostname(host: String): String = host
-    }
-
-  private val skipValidation: Boolean get() = internalProperties.disableUrlSsrfProtection
+    dnsResolverFactory.create(allowLocalAddresses) { isOperatorProxy(it) }
 
   internal fun pooledClientCount(): Int = clients.size
 
