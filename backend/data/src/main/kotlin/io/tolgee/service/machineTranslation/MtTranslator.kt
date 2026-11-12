@@ -84,11 +84,6 @@ class MtTranslator(
     return batchItems
   }
 
-  private fun getLlmProviders(batchItems: List<MtBatchItemParams>): Set<String> {
-    val promptIds = batchItems.filter { it.service == MtServiceType.PROMPT }.map { it.promptId }.toSet()
-    return promptIds.map { promptService.findPromptOrDefaultDto(context.project.id, it).providerName }.toSet()
-  }
-
   private val promptService: PromptService by lazy {
     applicationContext.getBean(PromptService::class.java)
   }
@@ -120,6 +115,11 @@ class MtTranslator(
         llmProviders = getLlmProviders(batchItems),
       ),
     )
+  }
+
+  private fun getLlmProviders(batchItems: List<MtBatchItemParams>): Set<String> {
+    val promptIds = batchItems.filter { it.service == MtServiceType.PROMPT }.map { it.promptId }.toSet()
+    return promptIds.map { promptService.findPromptOrDefaultDto(context.project.id, it).providerName }.toSet()
   }
 
   private fun publishAfterEvent(

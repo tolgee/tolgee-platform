@@ -278,17 +278,6 @@ class LlmProviderService(
     return provider
   }
 
-  private fun getProvidersByName(
-    organizationId: Long,
-    name: String,
-  ): List<LlmProviderDto> {
-    if (!adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
-      val customProviders = getAll(organizationId).filter { it.name == name }
-      if (customProviders.isNotEmpty()) return customProviders
-    }
-    return getAllServerProviders().filter { it.name == name }
-  }
-
   fun consumesCredits(
     organizationId: Long,
     provider: String,
@@ -300,6 +289,17 @@ class LlmProviderService(
         return true
       }
     return getProvidersByName(organizationId, name).any { it.consumesCredits() }
+  }
+
+  private fun getProvidersByName(
+    organizationId: Long,
+    name: String,
+  ): List<LlmProviderDto> {
+    if (!adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
+      val customProviders = getAll(organizationId).filter { it.name == name }
+      if (customProviders.isNotEmpty()) return customProviders
+    }
+    return getAllServerProviders().filter { it.name == name }
   }
 
   fun getProviderResponse(
