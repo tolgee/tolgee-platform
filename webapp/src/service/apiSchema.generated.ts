@@ -19908,31 +19908,13 @@ export interface operations {
         /**
          * Selects only keys with a comment on a translation in any of the returned languages
          * matching the provided pattern. Each pattern can be matched by a different comment.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterCommentPattern?: string[];
         /**
          * Selects only keys with no comment on a translation in any of the returned languages
          * matching the provided pattern. Keys without comments always match.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
@@ -20215,31 +20197,13 @@ export interface operations {
         /**
          * Selects only keys with a comment on a translation in any of the returned languages
          * matching the provided pattern. Each pattern can be matched by a different comment.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterCommentPattern?: string[];
         /**
          * Selects only keys with no comment on a translation in any of the returned languages
          * matching the provided pattern. Keys without comments always match.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
@@ -20566,31 +20530,13 @@ export interface operations {
         /**
          * Selects only keys with a comment on a translation in any of the returned languages
          * matching the provided pattern. Each pattern can be matched by a different comment.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterCommentPattern?: string[];
         /**
          * Selects only keys with no comment on a translation in any of the returned languages
          * matching the provided pattern. Keys without comments always match.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
@@ -26683,31 +26629,13 @@ export interface operations {
         /**
          * Selects only keys with a comment on a translation in any of the returned languages
          * matching the provided pattern. Each pattern can be matched by a different comment.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterCommentPattern?: string[];
         /**
          * Selects only keys with no comment on a translation in any of the returned languages
          * matching the provided pattern. Keys without comments always match.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
@@ -27202,31 +27130,13 @@ export interface operations {
         /**
          * Selects only keys with a comment on a translation in any of the returned languages
          * matching the provided pattern. Each pattern can be matched by a different comment.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterCommentPattern?: string[];
         /**
          * Selects only keys with no comment on a translation in any of the returned languages
          * matching the provided pattern. Keys without comments always match.
-         *
-         * Pattern syntax: `*` matches any sequence of characters
-         * (`cart*` = starts with, `*_title` = ends with). A pattern without `*` matches anywhere in the value.
-         * A leading `=` matches the whole value (`=cart` = exactly "cart"); `*` still works inside it.
-         * To match a value that itself starts with `=`, use `*=…*`.
-         * Matching is case-insensitive. `%` and `_` are matched literally.
-         * You can use this parameter multiple times; all patterns must match (logical AND).
-         * Limits: a pattern must not be empty, may be at most 500 characters long
-         * with at most 5 wildcards, and at most 20
-         * patterns may be provided per parameter; violations fail with 400.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
          */
         filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */

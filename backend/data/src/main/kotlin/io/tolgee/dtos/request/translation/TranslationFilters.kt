@@ -173,16 +173,14 @@ $PATTERN_GRAMMAR_DOC""",
   @field:Parameter(
     description = """Selects only keys with a comment on a translation in any of the returned languages
 matching the provided pattern. Each pattern can be matched by a different comment.
-
-$PATTERN_GRAMMAR_DOC""",
+Pattern syntax and limits are the same as for `filterKeyPattern`.""",
   )
   var filterCommentPattern: List<String>? = null
 
   @field:Parameter(
     description = """Selects only keys with no comment on a translation in any of the returned languages
 matching the provided pattern. Keys without comments always match.
-
-$PATTERN_GRAMMAR_DOC""",
+Pattern syntax and limits are the same as for `filterKeyPattern`.""",
   )
   var filterNoCommentPattern: List<String>? = null
 
