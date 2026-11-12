@@ -6144,4 +6144,32 @@
             <column name="hosted_words" type="BIGINT"/>
         </addColumn>
     </changeSet>
+    <changeSet author="dkrizan" id="drop-unused-indexes" runInTransaction="false">
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS translation_text_unaccent_gin_trgm_index;</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS key_name_unaccent_gin_trgm_index;</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS namespace_name_unaccent_gin_trgm_index;</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS key_description_gin_trgm_index;</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS empty_modifications;</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXau6hururiosck0in4s0bintp4";</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXap0ps5tn0jl23nssur72nydku";</sql>
+        <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXsvrkfl6d1di82cuhtmtnwghtl";</sql>
+        <rollback>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS translation_text_unaccent_gin_trgm_index;</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY translation_text_unaccent_gin_trgm_index ON translation USING gin (lower(f_unaccent(text)) gin_trgm_ops);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS key_name_unaccent_gin_trgm_index;</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY key_name_unaccent_gin_trgm_index ON key USING gin (lower(f_unaccent(name)) gin_trgm_ops);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS namespace_name_unaccent_gin_trgm_index;</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY namespace_name_unaccent_gin_trgm_index ON namespace USING gin (lower(f_unaccent(name)) gin_trgm_ops);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS key_description_gin_trgm_index;</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY key_description_gin_trgm_index ON key_meta USING gin (lower(f_unaccent(description)) gin_trgm_ops);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS empty_modifications;</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY empty_modifications ON activity_modified_entity (empty_json(modifications));</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXau6hururiosck0in4s0bintp4";</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY "IDXau6hururiosck0in4s0bintp4" ON activity_revision (type);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXap0ps5tn0jl23nssur72nydku";</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY "IDXap0ps5tn0jl23nssur72nydku" ON activity_revision (organization_id);</sql>
+            <sql dbms="postgresql">DROP INDEX CONCURRENTLY IF EXISTS "IDXsvrkfl6d1di82cuhtmtnwghtl";</sql>
+            <sql dbms="postgresql">CREATE INDEX CONCURRENTLY "IDXsvrkfl6d1di82cuhtmtnwghtl" ON branch_translation_snapshot (language);</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
