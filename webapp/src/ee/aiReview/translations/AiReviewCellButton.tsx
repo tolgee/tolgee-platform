@@ -23,6 +23,16 @@ export const AiReviewCellButton = ({
       <ControlsButton
         style={style}
         className={className}
+        // The badge is wider than an icon: the button takes its width, and the badge keeps 12px to the icon before it, like icons do.
+        sx={{
+          width: 'auto',
+          ml: 0,
+          pl: 0,
+          pr: 1,
+          // The badge shows the hover itself (see AiReviewBadge), so no grey circle behind it.
+          '&:hover': { background: 'transparent' },
+        }}
+        disableRipple
         ref={buttonRef}
         onClick={() => setOpen(true)}
         tooltip={

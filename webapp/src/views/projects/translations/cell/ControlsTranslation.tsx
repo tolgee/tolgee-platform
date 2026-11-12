@@ -159,7 +159,10 @@ export const ControlsTranslation: React.FC<
   const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = Array(spots.length).fill('28px').join(' ');
+  // The AI review badge is wider than an icon, so its column fits the badge.
+  const gridTemplateColumns = spots
+    .map((spot) => (spot === 'aiReview' ? 'auto' : '28px'))
+    .join(' ');
 
   const { t } = useTranslate();
 
