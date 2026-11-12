@@ -87,6 +87,23 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `routes an https publish through an http-only operator proxy`() {
+    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { proxy ->
+      val reachedProxy = CountDownLatch(1)
+      acceptOnce(proxy) { reachedProxy.countDown() }
+      // Only http.proxyHost/http.proxyPort are set, yet the endpoint is https: the client must still route through
+      // the proxy (an http proxy tunnels https via CONNECT), as the SDK's own proxy selection would.
+      withProxyProperties("127.0.0.1", proxy.localPort) {
+        val configId = saveConfigWithEndpoint("https://93.184.216.34/")
+
+        runCatching { contentDeliveryUploader.upload(configId) }
+
+        reachedProxy.await(10, TimeUnit.SECONDS).assert.isTrue()
+      }
+    }
+  }
+
   private fun saveConfigWithEndpoint(endpoint: String): Long {
     testData = PublishSsrfTestData(endpoint)
     testDataService.saveTestData(testData.root)

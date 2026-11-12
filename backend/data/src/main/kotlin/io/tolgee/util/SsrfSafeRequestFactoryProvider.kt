@@ -36,6 +36,11 @@ import org.apache.hc.core5.util.Timeout
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Component
+import java.io.IOException
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.SocketAddress
+import java.net.URI
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -125,8 +130,35 @@ class SsrfSafeRequestFactoryProvider(
     // Exposed so the S3 content-storage client can install the same direct-to-proxy guard via Apache5HttpClient.
     internal fun proxyHopOnlyRoutePlanner(): HttpRoutePlanner = ProxyHopOnlyRoutePlanner
 
+    /**
+     * The JDK's default proxy selector is scheme-strict: an https target is only proxied via `https.proxyHost`. The
+     * AWS SDK and many operators set a lone `http.proxyHost` and expect it to cover https targets too. This mirrors
+     * that — when the default selector would send an https target direct, it retries the lookup as http, so a bare
+     * `http.proxyHost` (still honouring `http.nonProxyHosts`) applies — while keeping scheme-specific `https.proxyHost`
+     * and all other default behaviour unchanged.
+     */
+    private object SchemeFallbackProxySelector : ProxySelector() {
+      override fun select(uri: URI): MutableList<Proxy> {
+        val default = ProxySelector.getDefault()
+        val selected = default.select(uri)
+        if (!"https".equals(uri.scheme, ignoreCase = true) || selected.any { it.type() != Proxy.Type.DIRECT }) {
+          return selected
+        }
+        val asHttp =
+          runCatching { URI("http", uri.userInfo, uri.host, uri.port, uri.path, uri.query, uri.fragment) }
+            .getOrNull() ?: return selected
+        return default.select(asHttp)
+      }
+
+      override fun connectFailed(
+        uri: URI,
+        sa: SocketAddress,
+        e: IOException,
+      ) = ProxySelector.getDefault().connectFailed(uri, sa, e)
+    }
+
     private object ProxyHopOnlyRoutePlanner : HttpRoutePlanner {
-      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, null)
+      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, SchemeFallbackProxySelector)
 
       override fun determineRoute(
         target: HttpHost,
