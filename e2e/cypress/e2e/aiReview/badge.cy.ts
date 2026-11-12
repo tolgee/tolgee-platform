@@ -98,9 +98,10 @@ describe('AI review badge', () => {
       value: 'ai-review-popover-score',
       'with-threshold': 'true',
     }).should('be.visible');
-    gcyAdvanced({ value: 'ai-review-popover-rule', rule: 'UI rule' }).should(
-      'be.visible'
-    );
+    gcyAdvanced({ value: 'ai-review-popover-rule', rule: 'UI rule' })
+      .should('be.visible')
+      // Prompt and model are in the rule's tooltip.
+      .trigger('mouseover');
     gcy('ai-review-popover-prompt').should('be.visible');
     gcy('ai-review-popover-model').should('be.visible');
     gcy('ai-review-issue').should('have.length', 2);
@@ -111,16 +112,15 @@ describe('AI review badge', () => {
     }).should('be.visible');
   });
 
-  it('a score only popover shows the score without the threshold', () => {
+  it('a score only popover shows the status without a threshold line', () => {
     visitKey('key_score_only_pass');
     new E2AiReviewBadge('key_score_only_pass').openPopover('SCORE_ONLY_PASS');
-    gcyAdvanced({
-      value: 'ai-review-popover-score',
-      'with-threshold': 'false',
-    }).should('be.visible');
+    gcy('ai-review-popover-status').should('be.visible');
+    // The title says it was only scored; no outcome or threshold line.
+    gcy('ai-review-popover-score').should('not.exist');
   });
 
-  it('shows "Rule: deleted" when the rule no longer exists', () => {
+  it('shows "Deleted rule" when the rule no longer exists', () => {
     visitKey('key_rule_deleted');
     new E2AiReviewBadge('key_rule_deleted').openPopover('APPROVED');
     gcyAdvanced({ value: 'ai-review-popover-rule', rule: 'deleted' }).should(

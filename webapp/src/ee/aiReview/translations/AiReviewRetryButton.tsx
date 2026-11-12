@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { RefreshCw01 } from '@untitled-ui/icons-react';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -25,6 +26,8 @@ export const AiReviewRetryButton = ({ translationId, onClose }: Props) => {
     <Box display="flex" justifyContent="end" gap={1}>
       <LoadingButton
         size="small"
+        variant="outlined"
+        startIcon={<RefreshCw01 width={16} height={16} />}
         loading={retryMutation.isLoading}
         onClick={() =>
           retryMutation.mutate({ path }, { onSuccess: () => onClose() })
