@@ -21,7 +21,6 @@ import org.hibernate.annotations.Type
   name = "branch_translation_snapshot",
   indexes = [
     Index(columnList = "key_snapshot_id"),
-    Index(columnList = "language"),
   ],
 )
 class TranslationSnapshot(

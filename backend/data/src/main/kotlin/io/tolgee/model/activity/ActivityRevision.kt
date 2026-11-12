@@ -32,8 +32,6 @@ import java.util.Date
   indexes = [
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
-    Index(columnList = "type"),
-    Index(columnList = "organizationId"),
     Index(columnList = "timestamp"),
   ],
 )
