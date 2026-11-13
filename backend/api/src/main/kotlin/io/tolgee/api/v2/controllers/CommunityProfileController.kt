@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.community.CommunityActivityItem
 import io.tolgee.dtos.request.community.PeriodParams
 import io.tolgee.dtos.request.community.RangeParams
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -36,7 +34,6 @@ class CommunityProfileController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<CommunityActivityItem>,
   private val communityActivityModelAssembler: CommunityActivityModelAssembler,
   private val rateLimitService: RateLimitService,
-  private val tolgeeProperties: TolgeeProperties,
   private val communityProfileModelAssembler: CommunityProfileModelAssembler,
 ) {
   @GetMapping("/community-profile")
@@ -59,7 +56,10 @@ class CommunityProfileController(
   fun getProfile(
     @PathVariable userId: Long,
     @ParameterObject period: PeriodParams,
-  ): CommunityProfileModel = communityProfileModelAssembler.toModel(communityStatsService.getProfile(userId, period))
+  ): CommunityProfileModel {
+    rateLimitService.checkActivityRateLimit("community-profile")
+    return communityProfileModelAssembler.toModel(communityStatsService.getProfile(userId, period))
+  }
 
   @GetMapping("/community-activity")
   @AllowGuestAccess
@@ -74,11 +74,7 @@ class CommunityProfileController(
     @PathVariable userId: Long,
     @ParameterObject pageable: Pageable,
   ): PagedModel<CommunityActivityModel> {
-    rateLimitService.checkPerUserRateLimit(
-      "activity",
-      limit = tolgeeProperties.rateLimits.activityRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
-    )
+    rateLimitService.checkActivityRateLimit("activity")
     val page = communityStatsService.getActivityFeed(userId, pageable)
     return pagedResourcesAssembler.toModel(page, communityActivityModelAssembler)
   }

@@ -15,6 +15,7 @@ import io.tolgee.hateoas.community.CommunityContributorModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.contributor.CommunityStatsService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -36,6 +37,7 @@ class CommunityStatsController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<CommunityContributorStats>,
   private val communityContributorModelAssembler: CommunityContributorModelAssembler,
   private val communityActivityStatsModelAssembler: CommunityActivityStatsModelAssembler,
+  private val rateLimitService: RateLimitService,
 ) {
   @GetMapping("/contributors")
   @Operation(
@@ -66,6 +68,7 @@ class CommunityStatsController(
     @Parameter(description = "Only users whose name contains this text, ignoring case.")
     @RequestParam(required = false) search: String?,
   ): PagedModel<CommunityContributorModel> {
+    rateLimitService.checkActivityRateLimit("community-contributors")
     val page =
       communityStatsService.getContributors(
         projectId,
@@ -126,8 +129,12 @@ class CommunityStatsController(
     @ParameterObject period: PeriodParams,
     @Parameter(description = "Count only these languages, in the buckets and in both translation counts.")
     @RequestParam(required = false) languageIds: List<Long>?,
-  ): CommunityActivityStatsModel =
-    communityActivityStatsModelAssembler.toModel(communityStatsService.getActivity(projectId, period, languageIds))
+  ): CommunityActivityStatsModel {
+    rateLimitService.checkActivityRateLimit("community-activity")
+    return communityActivityStatsModelAssembler.toModel(
+      communityStatsService.getActivity(projectId, period, languageIds),
+    )
+  }
 
   companion object {
     private const val DEFAULT_RANGE =

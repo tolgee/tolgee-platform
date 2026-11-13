@@ -28,6 +28,8 @@ import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -244,6 +246,26 @@ class RateLimitService(
 
     consumeBucket(policy)
   }
+
+  /** Behind a proxy that hides client addresses, all callers without an account share one bucket. */
+  fun checkActivityRateLimit(bucketName: String) {
+    if (!shouldRateLimit(false)) return
+    val caller =
+      authenticationFacade.authenticatedUserOrNull?.let { "user.${it.id}" }
+        ?: currentRequestAddress()?.let { "ip.$it" }
+        ?: return
+    consumeBucket(
+      RateLimitPolicy(
+        "$bucketName::$caller",
+        rateLimitProperties.activityRequestLimit,
+        Duration.ofMillis(rateLimitProperties.activityRequestWindow),
+        false,
+      ),
+    )
+  }
+
+  private fun currentRequestAddress(): String? =
+    (RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes)?.request?.remoteAddr
 
   /**
    * Consumes a token from a bucket according to the rate limit policy.

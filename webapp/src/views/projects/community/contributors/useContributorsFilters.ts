@@ -1,4 +1,5 @@
 import { formatISO, subDays, subMonths } from 'date-fns';
+import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -30,7 +31,7 @@ export const useContributorsFilters = (
   const [searchInput, setSearchInput] = useUrlSearchState('search', {
     defaultVal: '',
   });
-  const search = searchInput.trim();
+  const [search] = useDebounce(searchInput.trim(), 500);
 
   const languagesFromUrl = targetLanguages.filter((l) =>
     languagesParam?.includes(l.tag)

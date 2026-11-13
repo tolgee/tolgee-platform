@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -52,7 +50,6 @@ class ProjectActivityController(
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val rateLimitService: RateLimitService,
-  private val tolgeeProperties: TolgeeProperties,
 ) {
   @Operation(summary = "Get project activity")
   @GetMapping("")
@@ -62,11 +59,7 @@ class ProjectActivityController(
     @ParameterObject pageable: Pageable,
     @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
-    rateLimitService.checkPerUserRateLimit(
-      "activity",
-      limit = tolgeeProperties.rateLimits.activityRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
-    )
+    rateLimitService.checkActivityRateLimit("activity")
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val views =
       activityService.findProjectActivity(
