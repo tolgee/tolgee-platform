@@ -24,10 +24,12 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.SetTranslationTextUtil
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionServiceOssImpl
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -46,6 +48,8 @@ class TranslationSuggestionServiceEeImpl(
   private val tolgeeProperties: TolgeeProperties,
   private val permissionService: PermissionService,
   private val businessEventPublisher: BusinessEventPublisher,
+  @Lazy
+  private val securityService: SecurityService,
 ) : TranslationSuggestionServiceOssImpl(entityManager) {
   override fun getKeysWithSuggestions(
     projectId: Long,
@@ -183,6 +187,7 @@ class TranslationSuggestionServiceEeImpl(
       languageService.findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     val suggestion = getSuggestion(projectId, languageId, keyId, suggestionId)
+    securityService.checkBranchModify(key)
     if (key.isPlural != suggestion.isPlural) {
       if (suggestion.isPlural) {
         throw BadRequestException(Message.SUGGESTION_CANT_BE_PLURAL)
