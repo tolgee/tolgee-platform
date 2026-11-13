@@ -7,6 +7,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.service.PromptService
 import org.springframework.context.ApplicationContext
 
 /**
@@ -24,9 +25,9 @@ class MtTranslator(
 
   fun translate(paramsList: List<MachineTranslationParams>): List<MtTranslatorResult> {
     validate(paramsList)
-    publishBeforeEvent(context.project)
     context.preparePossibleTargetLanguages(paramsList)
     val batchItems = expandParams(paramsList)
+    publishBeforeEvent(context.project, batchItems)
     val result = MtBatchTranslator(context).translate(batchItems)
     publishAfterEvent(
       context.project,
@@ -83,6 +84,10 @@ class MtTranslator(
     return batchItems
   }
 
+  private val promptService: PromptService by lazy {
+    applicationContext.getBean(PromptService::class.java)
+  }
+
   private val tolgeeProperties: TolgeeProperties by lazy {
     applicationContext.getBean(TolgeeProperties::class.java)
   }
@@ -98,10 +103,23 @@ class MtTranslator(
     params.forEach { it.baseTranslationText?.let { baseTranslationText -> checkTextLength(baseTranslationText) } }
   }
 
-  private fun publishBeforeEvent(project: ProjectDto) {
+  private fun publishBeforeEvent(
+    project: ProjectDto,
+    batchItems: List<MtBatchItemParams>,
+  ) {
     applicationContext.publishEvent(
-      OnBeforeMachineTranslationEvent(this, project.organizationOwnerId),
+      OnBeforeMachineTranslationEvent(
+        this,
+        project.organizationOwnerId,
+        services = batchItems.map { it.service }.toSet(),
+        llmProviders = getLlmProviders(batchItems),
+      ),
     )
+  }
+
+  private fun getLlmProviders(batchItems: List<MtBatchItemParams>): Set<String> {
+    val promptIds = batchItems.filter { it.service == MtServiceType.PROMPT }.map { it.promptId }.toSet()
+    return promptIds.map { promptService.findPromptOrDefaultDto(context.project.id, it).providerName }.toSet()
   }
 
   private fun publishAfterEvent(

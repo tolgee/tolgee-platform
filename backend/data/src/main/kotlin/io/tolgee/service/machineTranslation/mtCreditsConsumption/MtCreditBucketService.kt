@@ -3,6 +3,7 @@ package io.tolgee.service.machineTranslation.mtCreditsConsumption
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
@@ -29,6 +30,7 @@ class MtCreditBucketService(
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
   private val machineTranslationProperties: MachineTranslationProperties,
+  private val mtCreditConsumptionChecker: MtCreditConsumptionChecker,
 ) : Logging,
   MtCreditsService {
   override fun consumeCredits(
@@ -55,10 +57,15 @@ class MtCreditBucketService(
 
   @Transactional(noRollbackFor = [OutOfCreditsException::class])
   @ExperimentalTime
-  override fun checkCanConsumeCredits(organizationId: Long) {
+  override fun checkCanConsumeCredits(
+    organizationId: Long,
+    services: Set<MtServiceType>,
+    llmProviders: Set<String>,
+  ) {
     if (!shouldConsumeCredits()) {
       return
     }
+    if (!mtCreditConsumptionChecker.consumesCredits(organizationId, services, llmProviders)) return
 
     lockingProvider.withLocking(getMtCreditBucketLockName(organizationId)) {
       tryUntilItDoesntBreakConstraint {

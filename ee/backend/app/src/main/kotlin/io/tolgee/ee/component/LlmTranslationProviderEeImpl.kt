@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.dtos.LlmParams
+import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.ee.service.prompt.DefaultPromptHelper
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.model.enums.LlmProviderPriority
@@ -21,6 +22,7 @@ class LlmTranslationProviderEeImpl(
   private val promptService: PromptServiceEeImpl,
   private val llmPropertiesService: LlmPropertiesService,
   private val defaultPromptHelper: DefaultPromptHelper,
+  private val llmProviderService: LlmProviderService,
 ) : LlmTranslationProvider() {
   override val isEnabled: Boolean get() = llmPropertiesService.isEnabled()
 
@@ -65,6 +67,11 @@ class LlmTranslationProviderEeImpl(
       )
     return MtMetadata(prompt, promptDto.providerName, keyId, organizationId)
   }
+
+  override fun consumesCredits(
+    organizationId: Long,
+    provider: String,
+  ): Boolean = llmProviderService.consumesCredits(organizationId, provider)
 
   override fun isLanguageSupported(tag: String): Boolean = true
 
