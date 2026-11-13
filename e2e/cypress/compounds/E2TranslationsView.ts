@@ -4,6 +4,8 @@ import { getTranslationCell } from '../common/translations';
 import { gcy, gcyAdvanced } from '../common/shared';
 import { E2GlossaryPanel } from './glossaries/E2GlossaryPanel';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { openBatchOperationMenu, selectAll } from '../common/batchOperations';
+import { E2AiReviewRunDialog } from './aiReview/E2AiReviewRunDialog';
 
 type TaskType = components['schemas']['TaskModel']['type'];
 
@@ -15,8 +17,19 @@ type TaskStatusFilter =
   | 'NEVER_IN_TASK';
 
 export class E2TranslationsView {
-  visit(projectId: number) {
-    return cy.visit(`${HOST}/projects/${projectId}/translations`);
+  visit(
+    projectId: number,
+    { languages = [], search }: { languages?: string[]; search?: string } = {}
+  ) {
+    const params = new URLSearchParams();
+    languages.forEach((language) => params.append('languages', language));
+    if (search) {
+      params.append('search', search);
+    }
+    const query = params.toString();
+    return cy.visit(
+      `${HOST}/projects/${projectId}/translations${query ? `?${query}` : ''}`
+    );
   }
 
   getAddButton() {
@@ -61,6 +74,25 @@ export class E2TranslationsView {
     return this;
   }
 
+  openAiReviewFilter() {
+    this.openFilterSelect();
+    gcyAdvanced({ value: 'submenu-item', id: 'ai-review' }).click();
+    return this;
+  }
+
+  toggleAiReviewOutcome(outcome: string) {
+    gcyAdvanced({ value: 'ai-review-filter-item', outcome }).click();
+    return this;
+  }
+
+  openAiReviewRunDialog() {
+    selectAll();
+    openBatchOperationMenu();
+    gcyAdvanced({ value: 'batch-select-item', id: 'ai_review' }).click();
+    gcy('batch-operations-submit-button').click();
+    return new E2AiReviewRunDialog();
+  }
+
   applyFilterForExpand() {
     gcy('translations-filter-apply-for-expand').click();
     return this;
@@ -73,6 +105,14 @@ export class E2TranslationsView {
 
   applyFilterForLanguage(language: string) {
     gcy('translations-filter-apply-for-language').contains(language).click();
+    return this;
+  }
+
+  applyAiReviewFilterForLanguage(tag: string) {
+    gcyAdvanced({
+      value: 'translations-filter-apply-for-language',
+      language: tag,
+    }).click();
     return this;
   }
 

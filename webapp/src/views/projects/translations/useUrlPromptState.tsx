@@ -17,6 +17,14 @@ export const usePromptUrlState = () => {
       history: false,
     }
   );
+
+  const [_openPromptType] = useUrlSearchState(
+    QUERY.TRANSLATIONS_AI_PLAYGROUND_TYPE,
+    {
+      defaultVal: undefined,
+      history: false,
+    }
+  );
   function setAiPlayground(value: boolean | undefined) {
     _setAiPlayground(value ? '1' : undefined);
   }
@@ -27,6 +35,14 @@ export const usePromptUrlState = () => {
     ? undefined
     : Number(_openPrompt);
   const aiPlayground = _aiPlayground ? true : false;
+  const openPromptType: 'REVIEW' | undefined =
+    _openPromptType === 'REVIEW' ? 'REVIEW' : undefined;
 
-  return { setAiPlayground, setOpenPrompt, openPrompt, aiPlayground };
+  return {
+    setAiPlayground,
+    setOpenPrompt,
+    openPrompt,
+    aiPlayground,
+    openPromptType,
+  };
 };

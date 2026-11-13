@@ -283,6 +283,104 @@ export const actionsConfiguration: Partial<
       );
     },
   },
+  AI_REVIEW: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review"
+          defaultValue="{TranslationCount, plural, one {AI reviewed # translation} other {AI reviewed # translations}}"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  AI_REVIEW_DEMOTION: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_demotion"
+          defaultValue="AI review cleanup"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  AI_REVIEW_RULE_CREATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_create"
+          defaultValue="Created AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+    },
+  },
+  AI_REVIEW_RULE_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_update"
+          defaultValue="Updated AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+    },
+  },
+  AI_REVIEW_RULE_DELETE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_rule_delete"
+          defaultValue="Deleted AI review rule"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      AiReviewRule: [],
+    },
+  },
+  AI_REVIEW_SETTINGS_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_settings_update"
+          defaultValue="Updated AI review source change settings"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      Project: [
+        'aiApprovedSourceChangeAction',
+        'humanEditedSourceChangeAction',
+        'humanReviewedSourceChangeAction',
+      ],
+    },
+  },
+  AI_REVIEW_ENABLED_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_review_enabled_update"
+          defaultValue="Turned AI review on or off"
+          params={params}
+        />
+      );
+    },
+    entities: {
+      Project: ['useAiReview'],
+    },
+  },
   CONTENT_DELIVERY_CONFIG_CREATE: {
     label(params) {
       return (

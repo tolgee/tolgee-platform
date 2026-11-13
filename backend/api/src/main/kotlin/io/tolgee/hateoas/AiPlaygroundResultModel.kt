@@ -1,5 +1,6 @@
 package io.tolgee.hateoas
 
+import io.tolgee.model.aiReview.AiReviewIssue
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -9,4 +10,6 @@ class AiPlaygroundResultModel(
   val languageId: Long,
   val translation: String?,
   val contextDescription: String?,
+  val score: Int? = null,
+  val issues: List<AiReviewIssue>? = null,
 ) : RepresentationModel<AiPlaygroundResultModel>()

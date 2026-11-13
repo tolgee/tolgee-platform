@@ -17,9 +17,10 @@ export function getBackgroundColor(type: TaskType, theme: Theme) {
 
 type Props = {
   type: TaskType;
+  'data-cy'?: string;
 };
 
-export const TaskTypeChip = ({ type }: Props) => {
+export const TaskTypeChip = ({ type, 'data-cy': dataCy }: Props) => {
   const translateTaskType = useTaskTypeTranslation();
   const theme = useTheme();
 
@@ -28,6 +29,7 @@ export const TaskTypeChip = ({ type }: Props) => {
       size="small"
       label={translateTaskType(type)}
       sx={{ background: getBackgroundColor(type, theme) }}
+      data-cy={dataCy}
     />
   );
 };

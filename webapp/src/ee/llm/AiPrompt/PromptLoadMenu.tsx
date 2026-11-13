@@ -9,7 +9,10 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type PromptDto = components['schemas']['PromptDto'];
 
-export type PromptItem = PromptDto & { id?: number };
+export type PromptItem = PromptDto & {
+  id?: number;
+  activeRuleCount?: number;
+};
 
 type Props = {
   onSelect: (prompt: PromptItem) => void;
@@ -37,6 +40,9 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
     method: 'get',
     path: {
       projectId,
+    },
+    query: {
+      type: 'TRANSLATE',
     },
   });
 
@@ -74,6 +80,7 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
           {prompts?.map((item) => (
             <MenuItem
               data-cy="ai-prompt-open-existing-prompt-item"
+              data-cy-name={item.name}
               key={item.id ?? -1}
               onClick={() => {
                 setOpen(false);

@@ -591,6 +591,41 @@ export function useErrorTranslation() {
         return t('translation_memory_name_already_exists', {
           value: params?.[0] || '',
         });
+
+      case 'ai_review_rule_not_found':
+        return t('ai_review_rule_not_found', 'AI review rule not found');
+      case 'ai_review_prompt_must_be_review_type':
+        return t(
+          'ai_review_prompt_must_be_review_type',
+          'The prompt must be a review prompt'
+        );
+      case 'ai_review_rule_base_language':
+        return t(
+          'ai_review_rule_base_language',
+          'A rule cannot apply to the base language'
+        );
+      case 'ai_review_not_an_approval':
+        return t(
+          'ai_review_not_an_approval',
+          'This translation is no longer approved by AI. Reload and try again.'
+        );
+      case 'ai_review_nothing_to_review':
+        return t('ai_review_nothing_to_review', 'There is nothing to review');
+      case 'ai_review_disabled':
+        return t(
+          'ai_review_disabled',
+          'AI review is turned off for this project'
+        );
+      case 'prompt_type_cannot_be_changed':
+        return t(
+          'prompt_type_cannot_be_changed',
+          'The prompt type cannot be changed'
+        );
+      case 'review_prompt_cannot_translate':
+        return t(
+          'review_prompt_cannot_translate',
+          'A review prompt cannot be used to translate'
+        );
       default:
         return code;
     }

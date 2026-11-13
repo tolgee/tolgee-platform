@@ -19,8 +19,10 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.service.TenantService
+import io.tolgee.service.aiReview.AiReviewTextHash
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
@@ -395,6 +397,7 @@ class TestDataService(
     saveImportSettings(builder)
     saveQaConfigs(builder)
     saveBatchJobs(builder)
+    saveActivityRevisions(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
     savePrompts(builder)
@@ -402,6 +405,23 @@ class TestDataService(
     saveLabels(builder)
     saveTags(builder)
     saveSuggestions(builder)
+    saveAiReviewRules(builder)
+    saveAiReviews(builder)
+  }
+
+  private fun saveAiReviewRules(builder: ProjectBuilder) {
+    builder.data.aiReviewRules.forEach { entityManager.persist(it.self) }
+  }
+
+  private fun saveAiReviews(builder: ProjectBuilder) {
+    builder.data.translations
+      .flatMap { it.data.aiReviews }
+      .forEach {
+        if (it.self.textHash.isEmpty()) {
+          it.self.textHash = AiReviewTextHash.of(it.self.translation)
+        }
+        entityManager.persist(it.self)
+      }
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -676,6 +696,22 @@ class TestDataService(
       }
       entityManager.persist(it.self)
       saveChunkExecutions(it)
+    }
+  }
+
+  private fun saveActivityRevisions(builder: ProjectBuilder) {
+    builder.data.activityRevisions.forEach { revisionBuilder ->
+      val revision = revisionBuilder.self
+      if (revision.projectId == null) revision.projectId = builder.self.id
+      if (revision.organizationId == null) revision.organizationId = builder.self.organizationOwner.id
+      if (revision.authorId == null) revision.authorId = revisionBuilder.authorIdProvider()
+      entityManager.persist(revision)
+      revisionBuilder.modifiedEntities.forEach { ref ->
+        val entity = ActivityModifiedEntity(revision, ref.entityClass, ref.entityIdProvider())
+        entity.revisionType = ref.revisionType
+        ref.modifications.forEach { (name, oldNew) -> entity.modifications.put(name, oldNew.first, oldNew.second) }
+        entityManager.persist(entity)
+      }
     }
   }
 

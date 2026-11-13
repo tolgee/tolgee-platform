@@ -6172,4 +6172,241 @@
             <sql dbms="postgresql">CREATE INDEX CONCURRENTLY "IDXsvrkfl6d1di82cuhtmtnwghtl" ON branch_translation_snapshot (language);</sql>
         </rollback>
     </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-1">
+        <createTable tableName="ai_review_rule">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_rulePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_not_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="namespace_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="namespace_not_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branch_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branch_not_in" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="threshold" type="INTEGER" defaultValueNumeric="85">
+                <constraints nullable="false"/>
+            </column>
+            <column name="never" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mode" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="skip_open_qa_issues" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-2">
+        <createTable tableName="ai_review_rule_language">
+            <column name="rule_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_rule_languagePK"/>
+            </column>
+            <column name="language_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_review_rule_languagePK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-4">
+        <createTable tableName="translation_ai_review">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_ai_reviewPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="score" type="INTEGER"/>
+            <column name="issues" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_id" type="BIGINT"/>
+            <column name="rule_mode" type="VARCHAR(255)"/>
+            <column name="threshold" type="INTEGER"/>
+            <column name="prompt_id" type="BIGINT"/>
+            <column name="prompt_name" type="VARCHAR(255)"/>
+            <column name="prompt_revision" type="INTEGER"/>
+            <column name="provider_name" type="VARCHAR(255)"/>
+            <column name="model" type="VARCHAR(255)"/>
+            <column name="failure_reason" type="VARCHAR(255)"/>
+            <column name="last_failure_reason" type="VARCHAR(255)"/>
+            <column name="last_failed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="re_review_requested" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manual_run_batch_job_id" type="BIGINT"/>
+            <column name="batch_job_id" type="BIGINT"/>
+            <column name="resolved_by_id" type="BIGINT"/>
+            <column name="resolved_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="reviewed_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-6">
+        <addUniqueConstraint columnNames="translation_id" constraintName="translation_ai_review_translation" tableName="translation_ai_review"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-7">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_review_rule" constraintName="FK_ai_review_rule_project_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-8">
+        <addForeignKeyConstraint baseColumnNames="prompt_id" baseTableName="ai_review_rule" constraintName="FK_ai_review_rule_prompt_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="prompt" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-9">
+        <addForeignKeyConstraint baseColumnNames="rule_id" baseTableName="ai_review_rule_language" constraintName="FK_ai_review_rule_language_rule_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="ai_review_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-10">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="ai_review_rule_language" constraintName="FK_ai_review_rule_language_language_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-13">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_translation_id" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-14">
+        <addForeignKeyConstraint baseColumnNames="rule_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_rule_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="ai_review_rule" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-15">
+        <addForeignKeyConstraint baseColumnNames="resolved_by_id" baseTableName="translation_ai_review" constraintName="FK_translation_ai_review_resolved_by_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-16">
+        <createIndex indexName="IDX_ai_review_rule_project_id" tableName="ai_review_rule">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-17">
+        <createIndex indexName="IDX_ai_review_rule_language_language_id" tableName="ai_review_rule_language">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-18">
+        <createIndex indexName="IDX_translation_ai_review_status" tableName="translation_ai_review">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-19">
+        <createIndex indexName="IDX_translation_ai_review_rule_id" tableName="translation_ai_review">
+            <column name="rule_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-20">
+        <createIndex indexName="IDX_translation_ai_review_batch_job_id" tableName="translation_ai_review">
+            <column name="batch_job_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666142000-21">
+        <createIndex indexName="IDX_translation_ai_review_manual_run_batch_job_id" tableName="translation_ai_review">
+            <column name="manual_run_batch_job_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-1">
+        <addColumn tableName="prompt">
+            <column name="type" type="VARCHAR(255)" defaultValue="TRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-3">
+        <addColumn tableName="prompt">
+            <column name="revision" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-4">
+        <addColumn tableName="activity_revision">
+            <column name="system_actor" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-5">
+        <addColumn tableName="project">
+            <column name="ai_approved_source_change_action" type="VARCHAR(255)" defaultValue="RETRANSLATE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-6">
+        <addColumn tableName="project">
+            <column name="human_edited_source_change_action" type="VARCHAR(255)" defaultValue="MARK_OUTDATED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-7">
+        <addColumn tableName="project">
+            <column name="human_reviewed_source_change_action" type="VARCHAR(255)" defaultValue="MARK_OUTDATED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-8">
+        <addColumn tableName="ai_playground_result">
+            <column name="score" type="INTEGER"/>
+            <column name="issues" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-10" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists IDX_activity_revision_batch_job_chunk_execution_id on public.activity_revision (batch_job_chunk_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-11" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists IDX_translation_ai_review_re_review_requested on public.translation_ai_review (translation_id) where re_review_requested;
+        </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-12">
+        <sql>
+            alter table activity_revision drop constraint if exists UC_ACTIVITY_REVISIONBATCH_JOB_CHUNK_EXECUTION_ID_COL;
+        </sql>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-13">
+        <addColumn tableName="ai_review_rule">
+            <column name="auto_reviewed_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bdshadow" id="1792666143000-14">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="use_ai_review" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

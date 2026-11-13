@@ -18,12 +18,14 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     """
     select ame.modifications as modifications, ar.timestamp as timestamp,
     u.name as authorName, u.avatarHash as authorAvatarHash, u.username as authorEmail,
-    u.id as authorId, u.deletedAt as authorDeletedAt, ame.revisionType as revisionType
+    u.id as authorId, u.deletedAt as authorDeletedAt, ame.revisionType as revisionType,
+    ar.systemActor as systemActor
     from ActivityModifiedEntity ame 
     join ame.activityRevision ar
-    join UserAccount u on ar.authorId = u.id
+    left join UserAccount u on ar.authorId = u.id
     where ame.entityClass = 'Translation' and ame.entityId = :translationId
     and ar.type not in :ignoredActivityTypes
+    and (u.id is not null or ar.systemActor is not null)
   """,
   )
   fun getTranslationHistory(

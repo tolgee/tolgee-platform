@@ -33,6 +33,7 @@ class ProjectActivityModelAssembler(
             deleted = view.authorDeleted,
           )
         },
+      systemActor = view.systemActor,
       modifiedEntities = getModifiedEntities(view),
       meta = view.meta,
       counts = view.counts,

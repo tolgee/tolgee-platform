@@ -1,13 +1,13 @@
 import { Box, styled, SxProps, Tooltip, useTheme } from '@mui/material';
 import { Stars } from 'tg.component/CustomIcons';
-import { TranslationVisual } from './TranslationVisual';
 
 const StyledAiPreview = styled(Box)`
   display: grid;
   background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
   grid-template-columns: auto 1fr;
   gap: 8px;
-  padding: 8px;
+  /* More room on the right, so the score and points do not touch the edge. */
+  padding: 8px 16px 8px 8px;
   border-radius: 8px;
 `;
 
@@ -17,33 +17,23 @@ const StyledContent = styled('div')`
 `;
 
 type Props = {
-  translation: string | undefined;
   tooltip?: React.ReactNode;
-  isPlural: boolean;
-  locale: string;
   sx?: SxProps;
+  children: React.ReactNode;
 };
 
-export const AiPlaygroundPreview = ({
-  translation,
-  tooltip,
-  isPlural,
-  locale,
-  sx,
-}: Props) => {
+export const AiPlaygroundPreview = ({ tooltip, sx, children }: Props) => {
   const theme = useTheme();
   const content = (
     <StyledAiPreview {...{ sx }} data-cy="ai-playground-preview">
-      <Stars width={24} height={24} color={theme.palette.secondary.main} />
-      <StyledContent>
-        <TranslationVisual
-          text={translation}
-          isPlural={isPlural}
-          locale={locale}
-          maxLines={3}
-          extraPadding={false}
-        />
-      </StyledContent>
+      {/* 20px, centred on the first 24px line of the content (2px padding + 2px). */}
+      <Stars
+        width={20}
+        height={20}
+        color={theme.palette.secondary.main}
+        style={{ marginTop: 4 }}
+      />
+      <StyledContent>{children}</StyledContent>
     </StyledAiPreview>
   );
   return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;

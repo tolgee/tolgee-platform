@@ -87,6 +87,8 @@ class LlmProviderService(
         repeatWithTimeouts(resolvedAttempts, providerConfig) { restTemplate ->
           val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
           result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
+          result.providerName = providerConfig.name
+          result.model = providerConfig.model
           result
         }
       }
@@ -347,7 +349,8 @@ class LlmProviderService(
       """
       {
         "output": "response from: ${config.name}",
-        "contextDescription": "context description from: ${config.name}"
+        "contextDescription": "context description from: ${config.name}",
+        "issues": []
       }
       """.trimIndent()
     return PromptResult(

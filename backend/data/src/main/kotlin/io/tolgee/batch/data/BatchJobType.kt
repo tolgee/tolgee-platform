@@ -3,6 +3,8 @@ package io.tolgee.batch.data
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
+import io.tolgee.batch.processors.AiReviewChunkProcessor
+import io.tolgee.batch.processors.AiReviewDemotionChunkProcessor
 import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.AutoTranslateChunkProcessor
 import io.tolgee.batch.processors.AutoUpgradeNoticeProcessor
@@ -23,6 +25,7 @@ import io.tolgee.batch.processors.TagKeysChunkProcessor
 import io.tolgee.batch.processors.TrialExpirationNoticeProcessor
 import io.tolgee.batch.processors.UnassignTranslationLabelChunkProcessor
 import io.tolgee.batch.processors.UntagKeysChunkProcessor
+import io.tolgee.model.enums.SystemActor
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
@@ -41,8 +44,30 @@ enum class BatchJobType(
    * Use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] to get the effective value.
    */
   val defaultExclusive: Boolean = true,
+  /**
+   * Recorded on the activity revisions of the job. The author stays the user who started it.
+   */
+  val systemActor: SystemActor? = null,
 ) {
+  AI_REVIEW(
+    activityType = ActivityType.AI_REVIEW,
+    maxRetries = 3,
+    processor = AiReviewChunkProcessor::class,
+    defaultExclusive = false,
+    systemActor = SystemActor.AI_REVIEWER,
+  ),
+  AI_REVIEW_DEMOTION(
+    activityType = ActivityType.AI_REVIEW_DEMOTION,
+    maxRetries = 3,
+    processor = AiReviewDemotionChunkProcessor::class,
+    defaultExclusive = false,
+    systemActor = SystemActor.AI_REVIEWER,
+  ),
   AI_PLAYGROUND_TRANSLATE(
+    maxRetries = 3,
+    processor = AiPlaygroundChunkProcessor::class,
+  ),
+  AI_PLAYGROUND_REVIEW(
     maxRetries = 3,
     processor = AiPlaygroundChunkProcessor::class,
   ),
