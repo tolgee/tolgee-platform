@@ -210,7 +210,7 @@ class SuggestionMcpTools(
     registrar.addTool(
       "decline_suggestion",
       "Decline suggestion",
-      McpToolEffect.ADDITIVE,
+      McpToolEffect.DESTRUCTIVE,
       "Decline a translation suggestion.",
       toolSchema {
         projectId()
