@@ -130,6 +130,16 @@ class PermissionService(
     )
   }
 
+  @Transactional(readOnly = true)
+  fun currentCredentialHasScopeWithoutCommunityFloor(
+    project: ProjectDto,
+    scope: Scope,
+  ): Boolean {
+    val callerId = authenticationFacade.authenticatedUserOrGuest.id
+    val ownPermissions = getProjectPermissionData(project.copy(public = false), callerId).computedPermissions
+    return ownPermissions.expandedScopes.contains(scope)
+  }
+
   private fun computedPermissionOf(
     project: ProjectDto,
     userAccountId: Long,

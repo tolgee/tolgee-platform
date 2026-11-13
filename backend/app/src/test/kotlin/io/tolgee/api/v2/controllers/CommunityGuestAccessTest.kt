@@ -1,8 +1,11 @@
 package io.tolgee.api.v2.controllers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.development.testDataBuilder.data.CommunityGuestTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -12,12 +15,14 @@ import io.tolgee.model.Project
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
+import org.springframework.test.web.servlet.ResultActions
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -131,6 +136,53 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `the activity log shows translation work only to whoever sees it just because the project is public`() {
+    val project = url(testData.publicProject)
+    userAccount = testData.user
+    performAuthPost("$project/keys/create", mapOf("name" to "configured-by-the-owner")).andIsCreated
+    val revisionId =
+      executeInNewTransaction {
+        entityManager
+          .createNativeQuery("select id from activity_revision where project_id = :id and type = 'CREATE_KEY'")
+          .setParameter("id", testData.publicProject.id)
+          .singleResult
+      }
+    assertThat(activityTypes(performAuthGet("$project/activity?size=100"))).contains("CREATE_KEY")
+    performAuthGet("$project/activity/revisions/$revisionId").andIsOk
+    performAuthGet("$project/activity/revisions/$revisionId/modified-entities").andIsOk
+    performAuthGet("$project/activity/revisions/999999999/modified-entities").andIsOk
+
+    fun assertTranslationWorkOnly(get: (String) -> ResultActions) {
+      assertThat(activityTypes(get("$project/activity?size=100")))
+        .contains("CREATE_SUGGESTION")
+        .doesNotContain("CREATE_KEY")
+      get("$project/activity/revisions/$revisionId").andIsNotFound
+      get("$project/activity/revisions/$revisionId/modified-entities").andIsNotFound
+    }
+    assertTranslationWorkOnly { performGet(it) }
+    userAccount = testData.bob
+    assertTranslationWorkOnly { performAuthGet(it) }
+    userAccount = testData.memberWithoutActivityScope
+    assertTranslationWorkOnly { performAuthGet(it) }
+  }
+
+  @Test
+  fun `a server admin sees the whole activity log signed in, and translation work only through a project API key`() {
+    val activity = "${url(testData.publicProject)}/activity?size=100"
+    userAccount = testData.user
+    performAuthPost("${url(testData.publicProject)}/keys/create", mapOf("name" to "configured-by-the-owner"))
+      .andIsCreated
+    val projectApiKey =
+      HttpHeaders().apply { add("X-API-Key", "tgpak_" + testData.serverAdminApiKey.encodedKey) }
+
+    userAccount = testData.serverAdmin
+    assertThat(activityTypes(performAuthGet(activity))).contains("CREATE_KEY")
+    assertThat(activityTypes(performGet(activity, projectApiKey)))
+      .contains("CREATE_SUGGESTION")
+      .doesNotContain("CREATE_KEY")
+  }
+
+  @Test
   fun `a guest is told to sign in to export a public project, also on a conditional request`() {
     val project = url(testData.publicProject)
     performGet("$project/export?zip=false&languages=en&format=JSON").andIsUnauthorized
@@ -208,6 +260,13 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     rowsAttributedToGuest("activity_revision", "author_id").assert.isZero()
     rowsAttributedToGuest("project_contributor", "user_id").assert.isZero()
   }
+
+  private fun activityTypes(response: ResultActions): List<String> =
+    jacksonObjectMapper()
+      .readTree(response.andIsOk.andGetContentAsString)
+      .path("_embedded")
+      .path("activities")
+      .map { it.path("type").asText() }
 
   private fun url(project: Project) = "/v2/projects/${project.id}"
 

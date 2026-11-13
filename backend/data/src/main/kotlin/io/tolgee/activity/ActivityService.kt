@@ -119,6 +119,7 @@ class ActivityService(
     projectId: Long,
     pageable: Pageable,
     branchName: String? = null,
+    types: Collection<ActivityType> = ActivityType.entries,
   ): Page<ProjectActivityView> {
     val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     val defaultBranchId = if (branch == null) branchService.getDefaultBranch(projectId)?.id else null
@@ -128,8 +129,15 @@ class ActivityService(
       pageable = pageable,
       branchId = branch?.id,
       defaultBranchId = defaultBranchId,
+      types = types,
     ).get()
   }
+
+  @Transactional(readOnly = true)
+  fun findRevisionType(
+    projectId: Long,
+    revisionId: Long,
+  ): ActivityType? = activityRevisionRepository.find(projectId, revisionId)?.type
 
   @Transactional(readOnly = true)
   fun findPublicContributionsOfUser(

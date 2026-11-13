@@ -2,7 +2,10 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.Scope
 
 class CommunityGuestTestData : CommunityStatsTestData() {
   lateinit var deletedPublicProject: Project
@@ -10,7 +13,35 @@ class CommunityGuestTestData : CommunityStatsTestData() {
   lateinit var softDeletedBaseProject: Project
   lateinit var noBaseLanguageProject: Project
 
+  val memberWithoutActivityScope: UserAccount =
+    root
+      .addUserAccountWithoutOrganization {
+        username = "rita@community.test"
+        name = "Rita Restricted"
+      }.self
+
+  val serverAdmin: UserAccount =
+    root
+      .addUserAccountWithoutOrganization {
+        username = "admin@community.test"
+        name = "Ada Admin"
+        role = UserAccount.Role.ADMIN
+      }.self
+
+  val serverAdminApiKey: ApiKey =
+    publicProjectBuilder
+      .addApiKey {
+        key = "server-admin-activity-api-key"
+        scopesEnum = mutableSetOf(Scope.ACTIVITY_VIEW)
+        userAccount = serverAdmin
+      }.self
+
   init {
+    publicProjectBuilder.addPermission {
+      user = memberWithoutActivityScope
+      type = null
+      scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+    }
     publicKeys[0].addTranslation {
       language = publicProject.baseLanguage!!
       text = "Hello"
