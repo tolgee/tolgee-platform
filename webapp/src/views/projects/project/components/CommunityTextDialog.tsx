@@ -14,7 +14,7 @@ import {
 } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { CharacterCounter } from 'tg.component/common/CharacterCounter';
-import { PROJECT_DESCRIPTION_MAX_LENGTH } from 'tg.constants/GlobalValidationSchema';
+import { COMMUNITY_TEXT_MAX_LENGTH } from 'tg.constants/GlobalValidationSchema';
 
 export const CommunityTextDialog = (props: {
   title: string;
@@ -40,7 +40,7 @@ export const CommunityTextDialog = (props: {
         <StandardForm
           initialValues={{ text: props.value }}
           validationSchema={Yup.object({
-            text: Yup.string().max(PROJECT_DESCRIPTION_MAX_LENGTH),
+            text: Yup.string().max(COMMUNITY_TEXT_MAX_LENGTH),
           })}
           saveActionLoadable={props.saveActionLoadable}
           onSubmit={(values) => props.onSave(values.text)}
@@ -64,7 +64,7 @@ export const CommunityTextDialog = (props: {
               />
               <CharacterCounter
                 currentCount={values.text.length}
-                maxLimit={PROJECT_DESCRIPTION_MAX_LENGTH}
+                maxLimit={COMMUNITY_TEXT_MAX_LENGTH}
               />
             </Box>
           )}

@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Size
 
 data class CommunityPageRequest(
   @Schema(description = "Markdown shown on the community page. Empty or missing clears it.")
-  @field:Size(max = 2000)
+  @field:Size(max = 10000)
   var communityDescription: String? = null,
   @Schema(
     description = "Markdown on how to contribute. Empty or missing clears it, and the page shows its default text.",
   )
-  @field:Size(max = 2000)
+  @field:Size(max = 10000)
   var communityGuidelines: String? = null,
   @Schema(description = "Whether the owner marked the community page as shared outside Tolgee.")
   var communityShared: Boolean = false,

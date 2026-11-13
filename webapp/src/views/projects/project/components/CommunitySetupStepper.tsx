@@ -18,7 +18,7 @@ import { useTranslate } from '@tolgee/react';
 import { FieldLabel } from 'tg.component/FormField';
 import { TextField } from 'tg.component/common/TextField';
 import { CharacterCounter } from 'tg.component/common/CharacterCounter';
-import { PROJECT_DESCRIPTION_MAX_LENGTH } from 'tg.constants/GlobalValidationSchema';
+import { COMMUNITY_TEXT_MAX_LENGTH } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   isInContextValueValid,
@@ -51,12 +51,12 @@ const TextStep = (props: {
       fullWidth
       placeholder={props.placeholder}
       minHeight={false}
-      inputProps={{ maxLength: PROJECT_DESCRIPTION_MAX_LENGTH }}
+      inputProps={{ maxLength: COMMUNITY_TEXT_MAX_LENGTH }}
       data-cy={props['data-cy']}
     />
     <CharacterCounter
       currentCount={props.value.length}
-      maxLimit={PROJECT_DESCRIPTION_MAX_LENGTH}
+      maxLimit={COMMUNITY_TEXT_MAX_LENGTH}
     />
   </Box>
 );

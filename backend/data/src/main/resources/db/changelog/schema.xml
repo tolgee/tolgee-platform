@@ -6227,4 +6227,8 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jirikuchynka" id="1793100000000-1">
+        <modifyDataType columnName="community_description" newDataType="varchar(10000)" tableName="project"/>
+        <modifyDataType columnName="community_guidelines" newDataType="varchar(10000)" tableName="project"/>
+    </changeSet>
 </databaseChangeLog>

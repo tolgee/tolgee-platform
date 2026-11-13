@@ -174,11 +174,11 @@ class Project(
   @ActivityLoggedProp
   var public: Boolean = false
 
-  @Column(length = 2000)
+  @Column(length = 10000)
   @ActivityLoggedProp
   var communityDescription: String? = null
 
-  @Column(length = 2000)
+  @Column(length = 10000)
   @ActivityLoggedProp
   var communityGuidelines: String? = null
 

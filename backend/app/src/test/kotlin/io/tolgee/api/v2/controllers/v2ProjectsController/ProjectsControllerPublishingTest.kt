@@ -217,7 +217,8 @@ class ProjectsControllerPublishingTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `community page rejects an overlong text and a non-http URL`() {
     userAccount = testData.owner
-    performProjectAuthPut("/community-page", communityPage(communityDescription = "x".repeat(2001))).andIsBadRequest
+    performProjectAuthPut("/community-page", communityPage(communityDescription = "x".repeat(10001))).andIsBadRequest
+    performProjectAuthPut("/community-page", communityPage(communityDescription = "x".repeat(10000))).andIsOk
     performProjectAuthPut("/community-page", communityPage(communityAppUrl = "javascript:alert(1)")).andIsBadRequest
     performProjectAuthPut("/community-page", communityPage(communityAppUrl = "ftp://files.example.com")).andIsBadRequest
     performProjectAuthPut("/community-page", communityPage(communityAppUrl = "http://app.example.com")).andIsOk
