@@ -117,6 +117,18 @@ class SlackNotificationBlocksProvider(
       ).color("#00000000")
       .build()
 
+  fun getHiddenLanguagesAttachment(hiddenCount: Int): Attachment =
+    Attachment
+      .builder()
+      .blocks(
+        withBlocks {
+          context {
+            markdownText(i18n.translate("slack.common.message.hidden-languages").format(hiddenCount))
+          }
+        },
+      ).color("#00000000")
+      .build()
+
   private fun ActionsBlockBuilder.redirectOnPlatformButton(tolgeeUrl: String) {
     button {
       text(i18n.translate("slack.common.text.button.tolgee_redirect"), emoji = true)
