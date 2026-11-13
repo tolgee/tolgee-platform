@@ -47,7 +47,7 @@ class PublicProjectsControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `orders by live key count on the default branch, biggest first, ignoring the client sort`() {
+  fun `orders by key count on the default branch, biggest first, ignoring the client sort`() {
     performGet("/v2/public/projects/with-stats?sort=doesNotExist,asc").andIsOk.andAssertThatJson {
       node("_embedded.projects") {
         node("[0].id").isEqualTo(testData.publicProject.id)

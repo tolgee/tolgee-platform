@@ -38,7 +38,6 @@ class ProjectStatsService(
       }.toMap()
   }
 
-  /** The key rule here is mirrored by `ProjectRepository.PUBLIC_PROJECT_ORDER`; change both. */
   fun getProjectsTotals(projectIds: Iterable<Long>): Map<Long, ProjectTotals> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createTupleQuery()

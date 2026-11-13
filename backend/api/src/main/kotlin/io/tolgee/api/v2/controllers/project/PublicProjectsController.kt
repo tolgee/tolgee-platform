@@ -30,7 +30,8 @@ class PublicProjectsController(
     summary = "Get all public projects with stats",
     description =
       "Returns all public projects (including statistics), discoverable by anyone — no authentication required. " +
-        "Ordered by key count on the default branch (largest first), then name and id; the sort parameter is ignored.",
+        "Ordered by the key count in the base language's statistics (largest first), which can briefly lag behind " +
+        "the `keyCount` of each project, then by name and id; the sort parameter is ignored.",
   )
   @GetMapping("/with-stats")
   @Transactional(readOnly = true)

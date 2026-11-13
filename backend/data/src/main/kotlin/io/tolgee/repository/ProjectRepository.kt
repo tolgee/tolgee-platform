@@ -63,15 +63,13 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         and o.deletedAt is null
         """
 
-    /**
-     * The count mirrors `ProjectStatsService.getProjectsTotals`, so the order matches the `keyCount` each row shows.
-     * ponytail: counted live on every request; rank on the base language's `LanguageStats` once public key volume hurts.
-     */
+    /** `max`: a base language can carry a stats row for the default branch and one without a branch. */
     const val PUBLIC_PROJECT_ORDER = """
-        order by (
-          select count(k.id) from Key k left join k.branch b
-          where k.project = r and k.deletedAt is null and (b is null or b.isDefault = true)
-        ) desc, r.name asc, r.id asc
+        order by coalesce((
+          select max(ls.untranslatedKeys + ls.translatedKeys + ls.reviewedKeys)
+          from LanguageStats ls left join ls.branch b
+          where ls.language = bl and (b is null or b.isDefault = true)
+        ), 0) desc, r.name asc, r.id asc
         """
 
     const val NON_MEMBER_FILTER = """
