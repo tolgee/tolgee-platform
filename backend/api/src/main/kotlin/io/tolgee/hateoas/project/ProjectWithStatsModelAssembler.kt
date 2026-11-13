@@ -43,6 +43,7 @@ class ProjectWithStatsModelAssembler(
         authenticationFacade.authenticatedUserOrNull?.role,
         asScopedCredential = authenticationFacade.isScopedCredential,
         isProjectPublic = view.public,
+        isGuest = authenticationFacade.isGuest,
       )
 
     return ProjectWithStatsModel(

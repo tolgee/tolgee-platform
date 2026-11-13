@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import { securityService } from 'tg.service/SecurityService';
+import { canReturnToAfterLogin } from 'tg.service/afterLoginLink';
 import {
   ADMIN_JWT_LOCAL_STORAGE_KEY,
   tokenService,
@@ -347,8 +348,12 @@ export const useAuthService = (
       history.replace(link);
       securityService.removeAfterLoginLink();
     },
-    saveAfterLoginLink(url: string) {
-      securityService.saveAfterLoginLink({ url, userId });
+    returnHereAfterLogin(
+      location = history.location.pathname + history.location.search
+    ) {
+      if (canReturnToAfterLogin(location)) {
+        securityService.saveAfterLoginLink({ url: location, userId });
+      }
     },
     logout() {
       return setJwtToken(undefined);

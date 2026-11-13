@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
-import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
@@ -24,7 +24,9 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.branching.BranchService
+import io.tolgee.service.contributor.CommunityStatsService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.security.SecurityService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -35,7 +37,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -52,40 +53,45 @@ class ProjectActivityController(
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val rateLimitService: RateLimitService,
-  private val tolgeeProperties: TolgeeProperties,
+  private val securityService: SecurityService,
 ) {
-  @Operation(summary = "Get project activity")
+  @Operation(
+    summary = "Get project activity",
+    description =
+      "With `activity-contributions.view` alone, which is what a public project gives everyone, only translation " +
+        "work is listed: translating, changing translation states, commenting, suggesting and edits made in the " +
+        "key dialog. " +
+        "`activity.view` lists everything.",
+  )
   @GetMapping("")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable,
     @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
-    rateLimitService.checkPerUserRateLimit(
-      "activity",
-      limit = tolgeeProperties.rateLimits.activityRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
-    )
+    rateLimitService.checkActivityRateLimit("activity")
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val views =
       activityService.findProjectActivity(
         projectId = projectHolder.project.id,
         pageable = pageable,
         branchName = branch,
+        types = typesVisibleToViewer(),
       )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
   @Operation(summary = "Get one revision data")
   @GetMapping("/revisions/{revisionId}")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getSingleRevision(
     @PathVariable revisionId: Long,
     @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    checkRevisionVisibleToViewer(revisionId)
     val views =
       activityService.findProjectActivity(
         projectId = projectHolder.project.id,
@@ -98,7 +104,7 @@ class ProjectActivityController(
 
   @Operation(summary = "Get modified entities in revision")
   @GetMapping("/revisions/{revisionId}/modified-entities")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,
@@ -113,6 +119,7 @@ class ProjectActivityController(
     branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    checkRevisionVisibleToViewer(revisionId)
     val page =
       activityService.getRevisionModifications(
         projectId = projectHolder.project.id,
@@ -123,4 +130,17 @@ class ProjectActivityController(
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
   }
+
+  private fun checkRevisionVisibleToViewer(revisionId: Long) {
+    if (viewerSeesAllActivity()) return
+    val type = activityService.findRevisionType(projectHolder.project.id, revisionId)
+    if (type !in CommunityStatsService.CONTRIBUTION_TYPES) throw NotFoundException()
+  }
+
+  private fun typesVisibleToViewer(): List<ActivityType> {
+    if (viewerSeesAllActivity()) return ActivityType.entries
+    return CommunityStatsService.CONTRIBUTION_TYPES
+  }
+
+  private fun viewerSeesAllActivity(): Boolean = securityService.currentPermittedScopesContain(Scope.ACTIVITY_VIEW)
 }

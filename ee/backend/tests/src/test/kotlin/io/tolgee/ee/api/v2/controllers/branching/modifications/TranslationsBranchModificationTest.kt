@@ -69,6 +69,26 @@ class TranslationsBranchModificationTest : BranchModificationTestBase() {
     }
   }
 
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT])
+  @Test
+  fun `forbid accepting a suggestion on protected branch without protected scope`() {
+    expectForbidden { acceptProtectedKeySuggestion() }
+  }
+
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_EDIT, Scope.TRANSLATIONS_STATE_EDIT, Scope.BRANCH_PROTECTED_MODIFY],
+  )
+  @Test
+  fun `allow accepting a suggestion on protected branch with protected scope`() {
+    expectOk { acceptProtectedKeySuggestion() }
+  }
+
+  private fun acceptProtectedKeySuggestion() =
+    performProjectAuthPut(
+      "languages/${testData.de.id}/key/${testData.protectedKey.id}/suggestion/" +
+        "${testData.protectedKeySuggestion.id}/accept",
+    )
+
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_STATE_EDIT])
   @Test
   fun `forbid setting translation state on protected branch without protected scope`() {

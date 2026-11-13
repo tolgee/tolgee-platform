@@ -29,6 +29,8 @@ import { BatchOperationsChangeIndicator } from './BatchOperations/BatchOperation
 import { FloatingToolsPanel } from './ToolsPanel/FloatingToolsPanel';
 import { countFilters } from './TranslationFilters/summary';
 import { AiPlayground } from './ToolsPanel/AiPlayground';
+import { GuestSuggestBar } from 'tg.views/projects/translations/GuestSuggestBar';
+import { useIsGuest } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -39,6 +41,7 @@ export const Translations = () => {
   const { setQuickStartFloatingForced } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
+  const isGuest = useIsGuest();
   const { t } = useTranslate();
   const project = useProject();
   const projectPermissions = useProjectPermissions();
@@ -165,6 +168,7 @@ export const Translations = () => {
       branching={!branchingDisabled}
     >
       <BatchOperationsChangeIndicator />
+      {isGuest && <GuestSuggestBar />}
       <TranslationsHeader />
       <StyledContainer>
         {translationsEmpty ? (

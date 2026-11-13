@@ -2,6 +2,7 @@ package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.activity.projectActivity.ActivityViewByRevisionsProvider
 import io.tolgee.activity.projectActivity.ModificationsByRevisionsProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByPageableProvider
 import io.tolgee.activity.projectActivity.ProjectActivityViewByRevisionProvider
@@ -21,6 +22,7 @@ import jakarta.persistence.EntityManager
 import org.postgresql.util.PGobject
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
@@ -117,6 +119,7 @@ class ActivityService(
     projectId: Long,
     pageable: Pageable,
     branchName: String? = null,
+    types: Collection<ActivityType> = ActivityType.entries,
   ): Page<ProjectActivityView> {
     val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     val defaultBranchId = if (branch == null) branchService.getDefaultBranch(projectId)?.id else null
@@ -126,7 +129,25 @@ class ActivityService(
       pageable = pageable,
       branchId = branch?.id,
       defaultBranchId = defaultBranchId,
+      types = types,
     ).get()
+  }
+
+  @Transactional(readOnly = true)
+  fun findRevisionType(
+    projectId: Long,
+    revisionId: Long,
+  ): ActivityType? = activityRevisionRepository.find(projectId, revisionId)?.type
+
+  @Transactional(readOnly = true)
+  fun findPublicContributionsOfUser(
+    userId: Long,
+    types: Collection<ActivityType>,
+    pageable: Pageable,
+  ): Page<ProjectActivityView> {
+    val revisions = activityRevisionRepository.getPublicContributionsOfUser(userId, types, pageable)
+    val views = ActivityViewByRevisionsProvider(applicationContext, revisions.content).get()
+    return PageImpl(views, revisions.pageable, revisions.totalElements)
   }
 
   @Transactional(readOnly = true)

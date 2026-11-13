@@ -11,7 +11,9 @@ const HEIGHT = 8;
 const BORDER_RADIUS = HEIGHT / 2;
 const DOT_SIZE = 8;
 
-const StyledContainer = styled('div')`
+// The .bar / .state / .loadedState class names are also rendered by
+// tg.component/community/ContributorCard; rename them there too.
+export const StatesBarContainer = styled('div')`
   width: 100%;
 
   & .bar {
@@ -124,7 +126,7 @@ export function TranslationStatesBar(props: {
   ).filter((state) => TRANSLATION_STATES[state]);
 
   return (
-    <StyledContainer data-cy="project-states-bar-root">
+    <StatesBarContainer data-cy="project-states-bar-root">
       <div className="bar" data-cy="project-states-bar-bar">
         {visibleStates.map((state, idx) => (
           <Tooltip
@@ -154,6 +156,6 @@ export function TranslationStatesBar(props: {
           ))}
         </Box>
       )}
-    </StyledContainer>
+    </StatesBarContainer>
   );
 }

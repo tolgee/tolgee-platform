@@ -137,6 +137,18 @@ export const actionsConfiguration: Partial<
     },
     entities: { TranslationComment: ['text'] },
   },
+  TRANSLATION_COMMENT_EDIT: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_translation_comment_edit"
+          defaultValue="Comment edited"
+          params={params}
+        />
+      );
+    },
+    entities: { TranslationComment: ['text'] },
+  },
   TRANSLATION_COMMENT_SET_STATE: {
     label(params) {
       return (
@@ -186,6 +198,27 @@ export const actionsConfiguration: Partial<
   EDIT_PROJECT: {
     label(params) {
       return <T keyName="activity_edit_project" params={params} />;
+    },
+    title(data) {
+      const isPublic: unknown =
+        data.modifiedEntities?.Project?.[0]?.modifications?.public?.new;
+      if (isPublic === true) {
+        return (
+          <T
+            keyName="activity_project_opened"
+            defaultValue="Project opened to community translation"
+          />
+        );
+      }
+      if (isPublic === false) {
+        return (
+          <T
+            keyName="activity_project_closed"
+            defaultValue="Project closed to community translation"
+          />
+        );
+      }
+      return undefined;
     },
     entities: { Project: ['name'] },
   },

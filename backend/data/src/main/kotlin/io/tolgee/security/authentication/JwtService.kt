@@ -269,12 +269,21 @@ class JwtService(
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    val userAccount = validateJwt(jws.payload)
+    val userAccount = guestImageTicketPrincipal(jws.payload, jwsType) ?: validateJwt(jws.payload)
 
     @Suppress("UNCHECKED_CAST") // Type safety: safe to do as the JWT comes from a trusted source (ourselves).
     val data = jws.payload.get(JWT_TICKET_DATA_CLAIM, Map::class.java) as? Map<String, String?>
 
     return TicketAuthentication(userAccount, data)
+  }
+
+  private fun guestImageTicketPrincipal(
+    claims: Claims,
+    type: TicketType,
+  ): UserAccountDto? {
+    if (type != TicketType.IMG_ACCESS) return null
+    if (claims.subject.toLong() != TolgeeAuthentication.GUEST_USER_ID) return null
+    return TolgeeAuthentication.GUEST_PRINCIPAL
   }
 
   private fun validateJwt(claims: Claims): UserAccountDto {

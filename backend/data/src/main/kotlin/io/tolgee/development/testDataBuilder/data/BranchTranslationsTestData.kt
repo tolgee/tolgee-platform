@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
@@ -28,6 +29,7 @@ class BranchTranslationsTestData {
   lateinit var protectedBranch: Branch
   lateinit var unprotectedBranch: Branch
   lateinit var protectedKey: Key
+  lateinit var protectedKeySuggestion: TranslationSuggestion
   lateinit var branchedKey: Key
   lateinit var unprotectedBranchedKey: Key
   lateinit var branchedScreenshotReference: KeyScreenshotReference
@@ -123,6 +125,12 @@ class BranchTranslationsTestData {
                 name = "protected-key"
                 branch = this@build.self
               }.build {
+                protectedKeySuggestion =
+                  addSuggestion {
+                    language = de
+                    author = user
+                    translation = "Suggested protected translation"
+                  }.self
                 addMeta {
                   description = "description of protected key"
                   tags.add(firstTag)

@@ -75,6 +75,7 @@ class KeyTrashController(
     @ModelAttribute
     params: TranslationFilters,
   ): PagedModel<TrashedKeyWithTranslationsModel> {
+    authenticationFacade.requireNotGuest()
     val data =
       keyTrashService.getTrashedKeysWithTranslations(
         projectId = projectHolder.project.id,
@@ -94,6 +95,7 @@ class KeyTrashController(
     @ModelAttribute
     params: TranslationFilters,
   ): SelectAllResponse {
+    authenticationFacade.requireNotGuest()
     params.trashed = true
     val languages =
       languageService.getLanguagesForTranslationsView(
@@ -117,6 +119,7 @@ class KeyTrashController(
   fun listDeleters(
     @RequestParam(required = false) branch: String?,
   ): CollectionModel<SimpleUserAccountModel> {
+    authenticationFacade.requireNotGuest()
     val users = keyService.findDistinctDeleters(projectHolder.project.id, branch)
     return simpleUserAccountModelAssembler.toCollectionModel(users)
   }

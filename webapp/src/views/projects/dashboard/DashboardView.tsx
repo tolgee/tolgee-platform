@@ -18,6 +18,7 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useEffect } from 'react';
 import { ProjectNameAndId } from './ProjectNameAndId';
 import { ProjectSettingsRight } from './ProjectSettingsRight';
+import { canOpenProjectSettings } from 'tg.views/projects/projectMenu/ProjectMenu';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -67,7 +68,7 @@ export const DashboardView = () => {
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
 
-  const canViewActivity = satisfiesPermission('activity.view');
+  const canViewActivity = satisfiesPermission('activity-contributions.view');
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'], branch };
@@ -137,7 +138,9 @@ export const DashboardView = () => {
           <StyledContainer>
             <StyledTopInfo>
               <ProjectNameAndId project={project} />
-              <ProjectSettingsRight project={project} />
+              {canOpenProjectSettings(satisfiesPermission) && (
+                <ProjectSettingsRight project={project} />
+              )}
             </StyledTopInfo>
             <Box gridArea="totalStats">
               <ProjectTotals stats={statsLoadable.data!} />

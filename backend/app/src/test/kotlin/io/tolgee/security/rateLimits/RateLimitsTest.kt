@@ -1,6 +1,7 @@
 package io.tolgee.security.rateLimits
 
 import io.tolgee.constants.Caches
+import io.tolgee.development.testDataBuilder.data.CommunityGuestTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
@@ -18,6 +19,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @AutoConfigureMockMvc
@@ -33,6 +35,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
     "tolgee.rate-limits.email-verification-request-window=10000",
     "tolgee.rate-limits.export-request-limit=5",
     "tolgee.rate-limits.export-request-window=10000",
+    "tolgee.rate-limits.activity-request-limit=3",
+    "tolgee.rate-limits.activity-request-window=10000",
     "tolgee.rate-limits.max-strikes-before-block=3",
     "tolgee.rate-limits.strike-reset-window-ms=10000",
   ],
@@ -63,6 +67,31 @@ class RateLimitsTest : AuthorizedControllerTest() {
       performGet("/api/public/configuration").andIsOk
     }
     performGet("/api/public/configuration").andIsRateLimited
+  }
+
+  @Test
+  fun `activity and community endpoints limit a guest per IP address and a signed-in user per account`() {
+    val testData = CommunityGuestTestData()
+    testDataService.saveTestData(testData.root)
+    try {
+      val activity = "/v2/projects/${testData.publicProject.id}/activity"
+      (1..3).forEach { _ -> performGet(activity).andIsOk }
+      performGet(activity).andIsRateLimited
+      mvc.perform(get(activity).with { it.apply { remoteAddr = "10.0.0.2" } }).andIsOk
+      userAccount = testData.bob
+      performAuthGet(activity).andIsOk
+      listOf(
+        "/v2/users/${testData.bob.id}/community-profile",
+        "/v2/projects/${testData.publicProject.id}/community/contributors",
+        "/v2/projects/${testData.publicProject.id}/community/activity",
+      ).forEach { limited ->
+        clearCache()
+        (1..3).forEach { _ -> performAuthGet(limited).andIsOk }
+        performAuthGet(limited).andIsRateLimited
+      }
+    } finally {
+      testDataService.cleanTestData(testData.root)
+    }
   }
 
   @Test

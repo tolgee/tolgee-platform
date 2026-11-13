@@ -6,6 +6,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.key.Namespace
+import java.util.Date
 
 interface ProjectView {
   val id: Long
@@ -24,4 +25,10 @@ interface ProjectView {
   var icuPlaceholders: Boolean
   var suggestionsMode: SuggestionsMode
   var translationProtection: TranslationProtection
+  val communityDescription: String?
+  val communityGuidelines: String?
+  val communityShared: Boolean
+  val communityInContext: Boolean
+  val communityAppUrl: String?
+  val createdAt: Date?
 }

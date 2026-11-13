@@ -3,7 +3,10 @@ import {
   deleteProject,
   login,
 } from '../../common/apiCalls/common';
-import { visitProjectSettingsAdvanced } from '../../common/shared';
+import { gcyAdvanced, visitProjectSettingsAdvanced } from '../../common/shared';
+import { E2CommunityPageSettings } from '../../compounds/projectSettings/E2CommunityPageSettings';
+
+const settings = new E2CommunityPageSettings();
 
 const PROJECT_NAME = 'Public Toggle E2E';
 
@@ -57,6 +60,9 @@ describe('Project public toggle', () => {
     cy.gcy('project-settings-public-switch').click();
     cy.gcy('global-confirmation-confirm').click();
     publicSwitchInput().should('be.checked');
+    cy.gcy('community-setup-dialog').should('be.visible');
+    cy.gcy('community-setup-later').click();
+    cy.gcy('community-setup-dialog').should('not.exist');
     cy.reload();
     publicSwitchInput().should('be.checked');
 
@@ -65,5 +71,57 @@ describe('Project public toggle', () => {
     publicSwitchInput().should('not.be.checked');
     cy.reload();
     publicSwitchInput().should('not.be.checked');
+  });
+
+  it('keeps the setup text typed before "Finish later"', () => {
+    visitAdvanced();
+
+    cy.gcy('project-settings-public-switch').click();
+    cy.gcy('global-confirmation-confirm').click();
+    settings.getSetupDescription().type('Typed before finishing later.');
+    cy.gcy('community-setup-later').click();
+    cy.gcy('community-setup-dialog').should('not.exist');
+    settings.getItemStates(true).should('have.length', 1);
+  });
+
+  it('keeps the setup open on its step when the save is rejected', () => {
+    visitAdvanced();
+
+    cy.gcy('project-settings-public-switch').click();
+    cy.gcy('global-confirmation-confirm').click();
+    cy.intercept('PUT', '**/community-page', {
+      statusCode: 400,
+      body: { STANDARD_VALIDATION: { communityDescription: 'invalid' } },
+    }).as('rejectedSave');
+    settings.getSetupDescription().type('Kept after a rejected save.');
+    cy.gcy('community-setup-next').click();
+    cy.wait('@rejectedSave');
+    cy.gcy('community-setup-next').should('not.be.disabled');
+    cy.gcy('community-setup-dialog').should('be.visible');
+    settings
+      .getSetupDescription()
+      .should('be.visible')
+      .and('have.value', 'Kept after a rejected save.');
+  });
+
+  it('blocks leaving the setup on an invalid app link and saves a bare host with https://', () => {
+    visitAdvanced();
+
+    cy.gcy('project-settings-public-switch').click();
+    cy.gcy('global-confirmation-confirm').click();
+    gcyAdvanced({ value: 'community-setup-step', step: '3' }).click();
+    settings.getInContextSwitch().click();
+    settings.getInContextAppUrl().type('ftp://orbit');
+    cy.gcy('community-setup-next').should('be.disabled');
+    cy.gcy('community-setup-later').should('be.disabled');
+    settings.getInContextAppUrl().clear().type('localhost:3000');
+    cy.gcy('community-setup-next').click();
+    cy.gcy('community-setup-dialog').should('not.exist');
+
+    cy.reload();
+    settings.openEditor('inContext');
+    settings
+      .getInContextAppUrl()
+      .should('have.value', 'https://localhost:3000');
   });
 });

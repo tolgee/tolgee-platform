@@ -14,6 +14,7 @@ import {
 } from 'tg.views/projects/translations/BatchOperations/OperationsSummary/utils';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { useIsGuest } from 'tg.globalContext/helpers';
 
 type Props = {
   id: number;
@@ -24,6 +25,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     const [knownJobs, setKnownJobs] = useState<number[]>([]);
     const client = useGlobalContext((c) => c.wsClient.client);
     const connected = useGlobalContext((c) => c.wsClient.clientConnected);
+    const isGuest = useIsGuest();
 
     const project = useApiQuery({
       url: '/v2/projects/{projectId}',
@@ -81,7 +83,7 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
     const { updatePreferredOrganization } = usePreferredOrganization();
 
     useEffect(() => {
-      if (project.data?.organizationOwner) {
+      if (project.data?.organizationOwner && !isGuest) {
         updatePreferredOrganization(project.data.organizationOwner.id);
       }
     }, [project.data]);

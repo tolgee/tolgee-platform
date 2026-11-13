@@ -54,4 +54,14 @@ class OpenApiTest : AbstractControllerTest() {
         .containsKey("/v2/projects/{projectId}/languages")
     }
   }
+
+  @Test
+  fun `java util Date fields are described as the epoch millis they are serialized as`() {
+    performGet("/v3/api-docs/All Internal - for Tolgee Web application").andIsOk.andAssertThatJson {
+      val createdAt = "components.schemas.TranslationCommentModel.properties.createdAt"
+      node("$createdAt.type").isEqualTo("integer")
+      node("$createdAt.format").isEqualTo("int64")
+      node("$createdAt.description").isEqualTo("Date when it was created")
+    }
+  }
 }

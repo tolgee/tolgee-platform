@@ -12,12 +12,14 @@ import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.configuration.openApi.OpenApiGroupBuilder.Companion.PROJECT_ID_PARAMETER
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import org.springdoc.core.converters.CollectionModelContentConverter
+import org.springdoc.core.customizers.PropertyCustomizer
 import org.springdoc.core.data.SpringDocJackson2HalModule
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.hateoas.server.LinkRelationProvider
 import org.springframework.web.method.HandlerMethod
+import java.util.Date
 
 @Configuration
 class OpenApiConfiguration {
@@ -29,6 +31,18 @@ class OpenApiConfiguration {
     }
     return ModelResolver(mapper)
   }
+
+  // java.util.Date goes out as epoch millis (WRITE_DATES_AS_TIMESTAMPS in WebConfiguration); keep the two in step
+  @Bean
+  fun epochMillisDates() =
+    PropertyCustomizer { property, type ->
+      if (Date::class.java.isAssignableFrom(Json.mapper().constructType(type.type).rawClass)) {
+        property.type = "integer"
+        property.types = setOf("integer")
+        property.format = "int64"
+      }
+      property
+    }
 
   @Bean
   fun collectionModelContentConverter(linkRelationProvider: LinkRelationProvider): CollectionModelContentConverter {

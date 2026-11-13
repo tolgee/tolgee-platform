@@ -1,4 +1,4 @@
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { HelpMenu } from 'tg.component/HelpMenu';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
@@ -16,9 +16,9 @@ export const DashboardRouter = () => {
         <PrivateRoute exact path={LINKS.PROJECTS.template}>
           <Redirect to={LINKS.ROOT.template} />
         </PrivateRoute>
-        <PrivateRoute path={LINKS.PROJECTS.template}>
+        <Route path={LINKS.PROJECTS.template}>
           <ProjectsRouter />
-        </PrivateRoute>
+        </Route>
         <PrivateRoute exact path={LINKS.COMMUNITY_PROJECTS.template}>
           <CommunityProjectsView />
         </PrivateRoute>

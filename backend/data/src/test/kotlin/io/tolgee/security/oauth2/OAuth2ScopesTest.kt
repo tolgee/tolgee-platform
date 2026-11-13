@@ -20,6 +20,7 @@ class OAuth2ScopesTest {
       "screenshots.delete",
       "screenshots.view",
       "activity.view",
+      "activity-contributions.view",
       "languages.edit",
       "admin",
       "project.edit",

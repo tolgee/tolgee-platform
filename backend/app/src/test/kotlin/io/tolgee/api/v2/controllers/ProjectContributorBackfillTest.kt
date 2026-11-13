@@ -29,7 +29,7 @@ class ProjectContributorBackfillTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `backfill counts every revision with a project and an author, whatever its type`() {
+  fun `the historical backfill, which is not re-run, counted every revision with a project and an author`() {
     val projectId = testData.project.id
     val userId = testData.user.id
     val t1 = Timestamp(1_600_000_000_000)
@@ -59,20 +59,19 @@ class ProjectContributorBackfillTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `the trigger and the backfill agree - both record every revision with a project and an author`() {
+  fun `the trigger records only translation-related revisions`() {
     val projectId = testData.project.id
     val userId = testData.user.id
     jdbcTemplate.update("DELETE FROM project_contributor WHERE project_id = ?", projectId)
 
     insertRevision(projectId, userId, null, Timestamp(1_600_000_000_000))
+    insertRevision(projectId, userId, "KEY_NAME_EDIT", Timestamp(1_600_000_100_000))
+    assertThat(contributorRows(projectId)).isEmpty()
+
     insertRevision(projectId, userId, "COMPLEX_EDIT", Timestamp(1_600_000_200_000))
-    val fromTrigger = contributorRows(projectId)
-
-    jdbcTemplate.update("DELETE FROM project_contributor WHERE project_id = ?", projectId)
-    jdbcTemplate.execute(backfillSql())
-
-    assertThat(fromTrigger).hasSize(1)
-    assertThat(fromTrigger).isEqualTo(contributorRows(projectId))
+    val row = contributorRows(projectId).single()
+    assertThat(row["first_contribution_at"]).isEqualTo(Timestamp(1_600_000_200_000))
+    assertThat(row["last_contribution_at"]).isEqualTo(Timestamp(1_600_000_200_000))
   }
 
   @Test

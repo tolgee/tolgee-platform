@@ -28,7 +28,7 @@ export function testDashboard(projectInfo: ProjectInfo) {
     tryClickable('project-dashboard-languages-edit', true);
   }
 
-  if (scopes.includes('activity.view')) {
+  if (scopes.includes('activity-contributions.view')) {
     cy.gcy('project-dashboard-activity-list').should('be.visible');
     cy.gcy('project-dashboard-activity-chart').should('be.visible');
   }

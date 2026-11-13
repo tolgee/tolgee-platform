@@ -71,7 +71,7 @@ class McpOAuthAccessTest : AbstractMcpTest() {
 
   @Test
   fun `a project-scoped tool is refused for a token that does not carry the scope`() {
-    // activity.view is standalone in the scope hierarchy; translations.view would expand to keys.view and pass.
+    // activity.view implies no key or translation scope; translations.view would expand to keys.view and pass.
     val token = tokenFor(listOf(Scope.ACTIVITY_VIEW.value), testData.project.id)
 
     assertToolFails(createMcpClientWithBearer(token), "list_keys", projectArgument())
