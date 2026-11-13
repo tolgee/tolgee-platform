@@ -5,6 +5,7 @@ import io.tolgee.formats.PluralForms
 import io.tolgee.formats.getPluralFormExamples
 import io.tolgee.formats.getULocaleFromTag
 import io.tolgee.formats.toIcuPluralString
+import org.springframework.web.util.HtmlUtils
 
 class PluralTranslationUtil(
   private val context: MtTranslatorContext,
@@ -19,13 +20,23 @@ class PluralTranslationUtil(
   private val preparedFormSourceStrings: Sequence<Pair<String, String>> by lazy {
     val targetLanguageTag = context.getLanguage(item.targetLanguageId).tag
     val sourceLanguageTag = context.baseLanguage.tag
-    getPreparedSourceStrings(sourceLanguageTag, targetLanguageTag, forms)
+    getPreparedSourceStrings(sourceLanguageTag, targetLanguageTag, forms, item.service.escapesMarkup)
   }
 
   private val translated by lazy {
-    preparedFormSourceStrings.map {
-      it.first to translateFn(it.second)
-    }
+    val escaped = item.service.escapesMarkup
+    preparedFormSourceStrings
+      .map { (form, prepared) ->
+        val result = translateFn(prepared)
+        result.translatedText =
+          result.translatedText?.let {
+            restoreNumberPlaceholder(
+              it,
+              htmlEscaped = escaped && containsNumberTag(prepared),
+            )
+          }
+        form to result
+      }.toList()
   }
 
   private val forms by lazy {
@@ -34,12 +45,7 @@ class PluralTranslationUtil(
   }
 
   private val result: MtTranslatorResult by lazy {
-    val result =
-      translated
-        .map { (form, result) ->
-          result.translatedText = result.translatedText?.replaceNumberTags()
-          form to result
-        }.toList()
+    val result = translated
 
     val resultForms = result.map { it.first to (it.second.translatedText ?: "") }.toMap()
 
@@ -59,15 +65,76 @@ class PluralTranslationUtil(
     )
   }
 
-  private fun String.replaceNumberTags(): String {
-    return this.replace(TOLGEE_TAG_REGEX, "#")
-  }
-
   companion object {
     const val REPLACE_NUMBER_PLACEHOLDER = "{%{REPLACE_NUMBER}%}"
-    private const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
+    const val TOLGEE_TAG_OPEN = "<x id=\"tolgee-number\">"
     private const val TOLGEE_TAG_CLOSE = "</x>"
     val TOLGEE_TAG_REGEX = "$TOLGEE_TAG_OPEN.*?$TOLGEE_TAG_CLOSE".toRegex()
+
+    /**
+     * Whether the text contains the [TOLGEE_TAG_OPEN] marker used to protect the ICU plural
+     * "replace number" (`#`) placeholder while translating plural forms one by one. Providers must be
+     * told (via their own tag-handling/HTML mode) to leave this tag untouched, otherwise the engine is
+     * free to mangle or drop it, breaking [MtBatchTranslator] restoration of the `#` placeholder.
+     */
+    fun containsNumberTag(text: String): Boolean = text.contains(TOLGEE_TAG_OPEN)
+
+    /**
+     * Providers run in tag-handling mode when the number tag is present and then return `<`, `>`, `&`
+     * and quotes as HTML entities, so the escaping applied in [replaceReplaceNumberPlaceholderWithExample]
+     * has to be reversed here. Without it, `&lt;` ends up stored in the translation.
+     */
+    fun restoreNumberPlaceholder(
+      translated: String,
+      htmlEscaped: Boolean,
+    ): String {
+      if (!htmlEscaped) return translated.replace(TOLGEE_TAG_REGEX, "#")
+      return unescapeMarkup(translated).replace(TOLGEE_TAG_REGEX, "#")
+    }
+
+    private const val MARKUP_CHARS = "<>\"'&"
+
+    private val NAMED_MARKUP_ENTITIES =
+      mapOf(
+        "lt" to '<',
+        "gt" to '>',
+        "quot" to '"',
+        "apos" to '\'',
+        "amp" to '&',
+      )
+
+    private val MARKUP_ENTITY_REGEX = "&(?:([a-zA-Z]+)|#([xX])?([0-9a-fA-F]+));".toRegex()
+
+    /**
+     * Reverses [escapeMarkup] and nothing else, covering only the five characters it escapes in their
+     * named, decimal and hex forms (plus XML `&apos;`, which an XML-mode engine may serialize instead).
+     * A full HTML unescape would also decode entities the engine introduced on its own (`&nbsp;` into
+     * U+00A0, say), which would then sit invisibly in the stored ICU string and break exact-match
+     * comparison on re-import.
+     *
+     * One pass over the text, so `&amp;lt;` decodes to `&lt;` and not to `<`.
+     */
+    private fun unescapeMarkup(text: String): String =
+      MARKUP_ENTITY_REGEX.replace(text) { match ->
+        decodeMarkupEntity(match)?.toString() ?: match.value
+      }
+
+    private fun decodeMarkupEntity(match: MatchResult): Char? {
+      val (name, hexPrefix, digits) = match.destructured
+      if (name.isNotEmpty()) return NAMED_MARKUP_ENTITIES[name.lowercase()]
+      if (hexPrefix.isEmpty()) return digits.toMarkupCharOrNull(radix = 10)
+      return digits.toMarkupCharOrNull(radix = 16)
+    }
+
+    private fun String.toMarkupCharOrNull(radix: Int): Char? {
+      val code = this.toIntOrNull(radix) ?: return null
+      val char = code.toChar()
+      if (char.code != code) return null
+      if (char !in MARKUP_CHARS) return null
+      return char
+    }
+
+    private fun escapeMarkup(text: String): String = HtmlUtils.htmlEscape(text, Charsets.UTF_8.name())
 
     /**
      * Returns all target forms with examples from source
@@ -95,12 +162,14 @@ class PluralTranslationUtil(
     private fun String.replaceReplaceNumberPlaceholderWithExample(
       example: Number,
       addTag: Boolean = true,
+      escapeMarkup: Boolean = false,
     ): String {
-      val tagOpenString = if (addTag) TOLGEE_TAG_OPEN else ""
-      val tagCloseString = if (addTag) TOLGEE_TAG_CLOSE else ""
-      return this.replace(
+      if (!addTag) return this.replace(REPLACE_NUMBER_PLACEHOLDER, example.toString())
+      if (!this.contains(REPLACE_NUMBER_PLACEHOLDER)) return this
+      val body = if (escapeMarkup) escapeMarkup(this) else this
+      return body.replace(
         REPLACE_NUMBER_PLACEHOLDER,
-        "$tagOpenString${example}$tagCloseString",
+        "$TOLGEE_TAG_OPEN$example$TOLGEE_TAG_CLOSE",
       )
     }
 
@@ -119,13 +188,14 @@ class PluralTranslationUtil(
       sourceLanguageTag: String,
       targetLanguageTag: String,
       forms: PluralForms,
+      escapeMarkup: Boolean,
     ): Sequence<Pair<String, String>> {
       val sourceRules = getRulesByTag(sourceLanguageTag)
       val keywordCases =
         getTargetExamples(targetLanguageTag).asSequence().map {
           val form = sourceRules?.select(it.value.toDouble())
           val formValue = forms.forms[form] ?: forms.forms[PluralRules.KEYWORD_OTHER] ?: ""
-          it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value)
+          it.key to formValue.replaceReplaceNumberPlaceholderWithExample(it.value, escapeMarkup = escapeMarkup)
         }
 
       val exactCases =
@@ -135,7 +205,7 @@ class PluralTranslationUtil(
             it.key.startsWith("=")
           }.mapNotNull {
             val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
-            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
+            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number, escapeMarkup = escapeMarkup)
           }
 
       return keywordCases + exactCases
