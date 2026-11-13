@@ -13,12 +13,20 @@ import { InviteDialog } from './InviteDialog';
 import { InvitationItem } from './InvitationItem';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { useIsAdmin, useIsAdminOrSupporter } from 'tg.globalContext/helpers';
 
 export const OrganizationMembersView: FunctionComponent<
   React.PropsWithChildren<unknown>
 > = () => {
   const organization = useOrganization();
   const { t } = useTranslate();
+  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
+  const isOwner = organization?.currentUserRole === 'OWNER';
+  const canViewInvitations = isOwner || isAdminOrSupporter;
+  // A SUPPORTER's bypass is read-only (OrganizationAuthorizationInterceptor.canBypass), so
+  // inviting, cancelling invitations and changing members would 403 for them.
+  const canManageMembers = isOwner || isAdmin;
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -45,6 +53,7 @@ export const OrganizationMembersView: FunctionComponent<
     path: { organizationId: organization!.id },
     options: {
       keepPreviousData: true,
+      enabled: canViewInvitations,
     },
   });
 
@@ -72,40 +81,51 @@ export const OrganizationMembersView: FunctionComponent<
         ],
       ]}
     >
-      <Box
-        mb={1}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Typography variant="h6">{t('invitations_title')}</Typography>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => setInviteOpen(true)}
-          data-cy="invite-generate-button"
-        >
-          {t('invitations_invite_button')}
-        </Button>
-      </Box>
+      {canViewInvitations && (
+        <>
+          <Box
+            mb={1}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6">{t('invitations_title')}</Typography>
+            {canManageMembers && (
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={() => setInviteOpen(true)}
+                data-cy="invite-generate-button"
+              >
+                {t('invitations_invite_button')}
+              </Button>
+            )}
+          </Box>
 
-      {!invitations && !invitationsLoadable.isLoading && (
-        <Box m={4} display="flex" justifyContent="center">
-          <Typography color="textSecondary">
-            {t('invite_user_nothing_found')}
-          </Typography>
-        </Box>
+          {!invitations && !invitationsLoadable.isLoading && (
+            <Box m={4} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                {t('invite_user_nothing_found')}
+              </Typography>
+            </Box>
+          )}
+
+          {!!invitations?.length && (
+            <SimpleList
+              data={invitations}
+              renderItem={(i) => (
+                <InvitationItem invitation={i} canManage={canManageMembers} />
+              )}
+            />
+          )}
+          <InviteDialog
+            onClose={() => setInviteOpen(false)}
+            open={inviteOpen}
+          />
+
+          <Box mt={4} />
+        </>
       )}
-
-      {invitations?.length && (
-        <SimpleList
-          data={invitations}
-          renderItem={(i) => <InvitationItem invitation={i} />}
-        />
-      )}
-      <InviteDialog onClose={() => setInviteOpen(false)} open={inviteOpen} />
-
-      <Box mt={4} />
       <PaginatedHateoasList
         loadable={membersLoadable}
         title={<T keyName="organization_members_view_title" />}
@@ -118,7 +138,9 @@ export const OrganizationMembersView: FunctionComponent<
             </Typography>
           </Box>
         }
-        renderItem={(user) => <MemberItem user={user} />}
+        renderItem={(user) => (
+          <MemberItem user={user} canManage={canManageMembers} />
+        )}
       />
     </BaseOrganizationSettingsView>
   );

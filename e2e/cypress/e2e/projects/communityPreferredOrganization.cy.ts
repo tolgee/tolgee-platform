@@ -80,7 +80,7 @@ describe('Community preferred organization', () => {
     gcy('global-base-view-content').should('exist');
   });
 
-  it('shows glossaries but hides translation memories in the foreign org settings', () => {
+  it('shows glossaries but hides translation memories and members in the foreign org settings', () => {
     openPublicProject('Community Alpha');
     cy.visit(
       `${HOST}/organizations/${organizations['publicProjectsUser'].slug}/profile`
@@ -96,6 +96,9 @@ describe('Community preferred organization', () => {
       value: 'settings-menu-item',
       item: 'translation-memories',
     }).should('not.exist');
+    gcyAdvanced({ value: 'settings-menu-item', item: 'members' }).should(
+      'not.exist'
+    );
     gcy('organization-profile-leave-button').should('be.disabled');
   });
 });

@@ -49,10 +49,12 @@ const StyledPermission = styled('div')`
 
 type Props = {
   invitation: OrganizationInvitationModel;
+  canManage: boolean;
 };
 
 export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
   invitation,
+  canManage,
 }) => {
   const { t } = useTranslate();
   const translateRole = useOrgRoleTranslation();
@@ -98,15 +100,17 @@ export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
           </Tooltip>
         )}
 
-        <Tooltip title={t('invite_user_invitation_cancel_button')}>
-          <IconButton
-            data-cy="organization-invitation-cancel-button"
-            size="small"
-            onClick={handleCancel}
-          >
-            <XClose />
-          </IconButton>
-        </Tooltip>
+        {canManage && (
+          <Tooltip title={t('invite_user_invitation_cancel_button')}>
+            <IconButton
+              data-cy="organization-invitation-cancel-button"
+              size="small"
+              onClick={handleCancel}
+            >
+              <XClose />
+            </IconButton>
+          </Tooltip>
+        )}
       </StyledItemActions>
     </StyledListItem>
   );
