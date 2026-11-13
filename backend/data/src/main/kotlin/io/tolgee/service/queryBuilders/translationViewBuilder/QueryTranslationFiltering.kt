@@ -1,6 +1,7 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.translation.AutoTranslatedBy
 import io.tolgee.dtos.request.translation.TranslationFilterByLabel
 import io.tolgee.dtos.request.translation.TranslationFilterByQaCheckType
 import io.tolgee.dtos.request.translation.TranslationFilterByState
@@ -74,9 +75,18 @@ class QueryTranslationFiltering(
   fun applyAutoTranslatedFilter() {
     val langIds = languageIdsForTags(params.filterAutoTranslatedInLang) ?: return
     queryBase.translationConditions.add(
-      buildTranslationExists(langIds) { t -> cb.isTrue(t.get(Translation_.auto)) },
+      buildTranslationExists(langIds) { t ->
+        cb.and(cb.isTrue(t.get(Translation_.auto)), autoTranslatedByCondition(t))
+      },
     )
   }
+
+  private fun autoTranslatedByCondition(t: Root<Translation>): Predicate =
+    when (params.filterAutoTranslatedBy) {
+      null -> cb.conjunction()
+      AutoTranslatedBy.TRANSLATION_MEMORY -> cb.isNull(t.get(Translation_.mtProvider))
+      AutoTranslatedBy.MACHINE_TRANSLATION -> cb.isNotNull(t.get(Translation_.mtProvider))
+    }
 
   /** `filterUntranslatedInLang` — single-language `NOT EXISTS` of a non-empty row. */
   fun applyUntranslatedInLangFilter() {

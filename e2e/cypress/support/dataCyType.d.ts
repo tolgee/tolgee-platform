@@ -986,6 +986,7 @@ declare namespace DataCy {
         "translations-filter-apply-for-expand": true;
         "translations-filter-apply-for-language": true;
         "translations-filter-apply-no-base": true;
+        "translations-filter-auto-translated-by": true;
         "translations-filter-select": true;
         "translations-filter-select-clear": true;
         "translations-filter-task-status": true;
