@@ -36,8 +36,11 @@ import org.apache.hc.core5.util.Timeout
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Component
-import java.net.InetAddress
-import java.net.UnknownHostException
+import java.io.IOException
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.SocketAddress
+import java.net.URI
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -53,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap
 class SsrfSafeRequestFactoryProvider(
   private val urlSecurity: UrlSecurity,
   private val internalProperties: InternalProperties,
+  private val dnsResolverFactory: SsrfSafeDnsResolver = SsrfSafeDnsResolver(urlSecurity, internalProperties),
 ) : Logging {
   private data class ClientKey(
     val allowLocalAddresses: Boolean,
@@ -88,21 +92,10 @@ class SsrfSafeRequestFactoryProvider(
     return HttpComponentsClientHttpRequestFactory(client)
   }
 
+  // The operator's egress proxy host is exempt from the address rules (see isOperatorProxy); everything else is pinned
+  // to the addresses UrlSecurity vets, through the same resolver the S3 content-storage client uses.
   private fun validatingResolver(allowLocalAddresses: Boolean): DnsResolver =
-    object : DnsResolver {
-      override fun resolve(host: String): Array<InetAddress> =
-        try {
-          val skip = allowLocalAddresses || skipValidation || isOperatorProxy(host)
-          urlSecurity.resolveAndValidateHost(host, skip).toTypedArray()
-        } catch (e: Exception) {
-          logger.warn("Refusing an outbound connection to {}: {}", host, e.message)
-          throw UnknownHostException(host).apply { initCause(e) }
-        }
-
-      override fun resolveCanonicalHostname(host: String): String = host
-    }
-
-  private val skipValidation: Boolean get() = internalProperties.disableUrlSsrfProtection
+    dnsResolverFactory.create(allowLocalAddresses) { isOperatorProxy(it) }
 
   internal fun pooledClientCount(): Int = clients.size
 
@@ -126,14 +119,46 @@ class SsrfSafeRequestFactoryProvider(
      * Only the proxy hop is exempt. The resolver cannot tell that hop from a direct request whose target merely
      * carries the same name, which `http.nonProxyHosts` or an https URL under an http-only proxy would send straight
      * out; [ProxyHopOnlyRoutePlanner] refuses those before the resolver sees them.
+     *
+     * `internal` so the S3 content-storage client can reuse the exact same proxy-hop exemption instead of duplicating.
      */
-    private fun isOperatorProxy(host: String): Boolean {
+    internal fun isOperatorProxy(host: String): Boolean {
       if (host.isBlank()) return false
       return PROXY_HOST_PROPERTIES.any { host.equals(System.getProperty(it)?.trim(), ignoreCase = true) }
     }
 
+    // Exposed so the S3 content-storage client can install the same direct-to-proxy guard via Apache5HttpClient.
+    internal fun proxyHopOnlyRoutePlanner(): HttpRoutePlanner = ProxyHopOnlyRoutePlanner
+
+    /**
+     * The JDK's default proxy selector is scheme-strict: an https target is only proxied via `https.proxyHost`. The
+     * AWS SDK and many operators set a lone `http.proxyHost` and expect it to cover https targets too. This mirrors
+     * that — when the default selector would send an https target direct, it retries the lookup as http, so a bare
+     * `http.proxyHost` (still honouring `http.nonProxyHosts`) applies — while keeping scheme-specific `https.proxyHost`
+     * and all other default behaviour unchanged.
+     */
+    private object SchemeFallbackProxySelector : ProxySelector() {
+      override fun select(uri: URI): MutableList<Proxy> {
+        val default = ProxySelector.getDefault()
+        val selected = default.select(uri)
+        if (!"https".equals(uri.scheme, ignoreCase = true) || selected.any { it.type() != Proxy.Type.DIRECT }) {
+          return selected
+        }
+        val asHttp =
+          runCatching { URI("http", uri.userInfo, uri.host, uri.port, uri.path, uri.query, uri.fragment) }
+            .getOrNull() ?: return selected
+        return default.select(asHttp)
+      }
+
+      override fun connectFailed(
+        uri: URI,
+        sa: SocketAddress,
+        e: IOException,
+      ) = ProxySelector.getDefault().connectFailed(uri, sa, e)
+    }
+
     private object ProxyHopOnlyRoutePlanner : HttpRoutePlanner {
-      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, null)
+      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, SchemeFallbackProxySelector)
 
       override fun determineRoute(
         target: HttpHost,

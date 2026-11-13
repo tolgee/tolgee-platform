@@ -3,6 +3,7 @@ package io.tolgee.component.contentDelivery
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.contentDelivery.cachePurging.ContentDeliveryCachePurgingProvider
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -23,6 +24,7 @@ class ContentDeliveryUploader(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val contentDeliveryCachePurgingProvider: ContentDeliveryCachePurgingProvider,
   private val currentDateProvider: CurrentDateProvider,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   fun upload(contentDeliveryConfigId: Long) {
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
@@ -102,6 +104,7 @@ class ContentDeliveryUploader(
       ?.let {
         contentDeliveryFileStorageProvider.getStorage(
           config = it.storageConfig ?: throw IllegalStateException("No storage config stored"),
+          allowLocalAddresses = tolgeeProperties.contentDelivery.storage.allowLocalAddresses,
         )
       }
       ?: contentDeliveryFileStorageProvider.getContentStorageWithDefaultClient()
