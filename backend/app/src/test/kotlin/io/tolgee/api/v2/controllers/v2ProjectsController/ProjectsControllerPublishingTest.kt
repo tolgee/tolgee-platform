@@ -228,14 +228,16 @@ class ProjectsControllerPublishingTest : ProjectAuthControllerTest("/v2/projects
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `community page needs no super token, unlike publishing`() {
+  fun `publishing and the community page both need a super token`() {
     val headers = HttpHeaders()
     headers.setBearerAuth(jwtService.emitToken(testData.owner.id, isSuper = false))
     val url = "/v2/projects/${testData.project.id}"
     performPut("$url/publishing", SetProjectPublicRequest(public = true), headers)
       .andIsForbidden
       .andHasErrorMessage(Message.EXPIRED_SUPER_JWT_TOKEN)
-    performPut("$url/community-page", communityPage(), headers).andIsOk
+    performPut("$url/community-page", communityPage(), headers)
+      .andIsForbidden
+      .andHasErrorMessage(Message.EXPIRED_SUPER_JWT_TOKEN)
   }
 
   @Test

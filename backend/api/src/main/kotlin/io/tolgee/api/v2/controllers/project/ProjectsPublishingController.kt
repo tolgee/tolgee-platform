@@ -71,6 +71,7 @@ class ProjectsPublishingController(
   )
   @RequestActivity(ActivityType.EDIT_PROJECT)
   @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @RequiresSuperAuthentication
   fun setCommunityPage(
     @RequestBody @Valid
     dto: CommunityPageRequest,
