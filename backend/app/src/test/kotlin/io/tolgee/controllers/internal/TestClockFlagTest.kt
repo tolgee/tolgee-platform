@@ -48,6 +48,20 @@ class TestClockFlagTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `admin reads the clock`() {
+    loginAsUser(testData.admin)
+    performAuthGet("/internal/time").andIsOk.andAssertThatJson {
+      node("forced").isEqualTo(false)
+      node("currentTimestamp").isNumber
+    }
+    currentDateProvider.forcedDate = Date(1700000000000)
+    performAuthGet("/internal/time").andIsOk.andAssertThatJson {
+      node("forced").isEqualTo(true)
+      node("currentTimestamp").isEqualTo(1700000000000)
+    }
+  }
+
+  @Test
   fun `regular user cannot set the clock`() {
     loginAsUser(testData.user)
     performAuthPut("/internal/time/1700000000000", null).andIsForbidden

@@ -17,7 +17,7 @@ class NotificationDigestState(
   var userId: Long = 0,
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  @ColumnDefault("DAILY")
-  var frequency: NotificationDigestFrequency = NotificationDigestFrequency.DAILY,
+  @ColumnDefault("SOON")
+  var frequency: NotificationDigestFrequency = NotificationDigestFrequency.SOON,
   var lastDigestSentAt: Date? = null,
 )

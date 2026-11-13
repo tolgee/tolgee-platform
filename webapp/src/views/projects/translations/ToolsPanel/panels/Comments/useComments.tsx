@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { T } from '@tolgee/react';
 
@@ -22,15 +21,25 @@ type Props = {
   keyId: number;
   translation: TranslationViewModel | undefined;
   language: LanguageModel;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  prepareText?: (text: string) => string;
+  onCommentAdded?: () => void;
 };
 
-export const useComments = ({ keyId, translation, language }: Props) => {
+export const useComments = ({
+  keyId,
+  translation,
+  language,
+  inputValue,
+  setInputValue,
+  prepareText,
+  onCommentAdded,
+}: Props) => {
   const project = useProject();
 
   const queryClient = useQueryClient();
   const { updateTranslation } = useTranslationsActions();
-
-  const [inputValue, setInputValue] = useState('');
 
   const translationId = translation?.id as number;
 
@@ -138,7 +147,7 @@ export const useComments = ({ keyId, translation, language }: Props) => {
             'application/json': {
               keyId,
               languageId: language.id,
-              text: inputValue,
+              text: prepareText ? prepareText(inputValue) : inputValue,
               state: 'NEEDS_RESOLUTION',
             },
           },
@@ -146,6 +155,7 @@ export const useComments = ({ keyId, translation, language }: Props) => {
         {
           onSuccess() {
             setInputValue('');
+            onCommentAdded?.();
             // keep just first page and refetch it
             queryClient.setQueriesData(
               '/v2/projects/{projectId}/translations/{translationId}/comments',
@@ -240,8 +250,6 @@ export const useComments = ({ keyId, translation, language }: Props) => {
   };
 
   return {
-    inputValue,
-    setInputValue,
     comments,
     fetchMore,
     handleKeyDown,

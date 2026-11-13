@@ -6228,4 +6228,147 @@
             <dropColumn tableName="notification" columnName="seen_at"/>
         </rollback>
     </changeSet>
+    <changeSet author="jancizmar" id="1793100000000-1">
+        <addColumn tableName="notification">
+            <column name="email_due_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="emailed_count" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_revision_ids" type="BIGINT[]"/>
+            <column name="linked_comment_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="notification" baseColumnNames="linked_comment_id"
+                                 constraintName="notification_linked_comment_fk"
+                                 referencedTableName="translation_comment" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <sql>
+            CREATE INDEX notification_linked_comment_id_idx ON notification (linked_comment_id)
+            WHERE linked_comment_id IS NOT NULL;
+            CREATE INDEX notification_email_due_at_idx ON notification (email_due_at)
+            WHERE email_pending = true AND seen = false;
+            UPDATE notification SET email_due_at = updated_at WHERE email_pending = true;
+            UPDATE notification_digest_state SET frequency = 'SOON' WHERE frequency = 'DAILY';
+            ALTER TABLE notification_digest_state ALTER COLUMN frequency SET DEFAULT 'SOON';
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE notification_digest_state ALTER COLUMN frequency SET DEFAULT 'DAILY';
+                DROP INDEX notification_email_due_at_idx;
+                DROP INDEX notification_linked_comment_id_idx;
+            </sql>
+            <dropForeignKeyConstraint baseTableName="notification" constraintName="notification_linked_comment_fk"/>
+            <dropColumn tableName="notification" columnName="linked_comment_id"/>
+            <dropColumn tableName="notification" columnName="activity_revision_ids"/>
+            <dropColumn tableName="notification" columnName="emailed_count"/>
+            <dropColumn tableName="notification" columnName="email_due_at"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1793200000000-1">
+        <addColumn tableName="notification">
+            <column name="email_window_started_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="email_only" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>
+            UPDATE notification SET email_window_started_at = created_at WHERE email_pending = true;
+        </sql>
+        <rollback>
+            <dropColumn tableName="notification" columnName="email_only"/>
+            <dropColumn tableName="notification" columnName="email_window_started_at"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1793300000000-1">
+        <createTable tableName="notification_project_preference">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_project_preference_pk"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_project_preference_pk"/>
+            </column>
+            <column name="language_ids" type="BIGINT[]">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_default" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="notification_project_preference" baseColumnNames="user_id"
+                                 constraintName="notification_project_preference_user_fk"
+                                 referencedTableName="user_account" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="notification_project_preference" baseColumnNames="project_id"
+                                 constraintName="notification_project_preference_project_fk"
+                                 referencedTableName="project" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+        <createIndex tableName="notification_project_preference"
+                     indexName="notification_project_preference_project_idx">
+            <column name="project_id"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="notification_project_preference"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1793400000000-1">
+        <dropTable tableName="notification_activity_queue"/>
+        <rollback>
+            <createTable tableName="notification_activity_queue">
+                <column name="activity_revision_id" type="BIGINT">
+                    <constraints nullable="false" primaryKey="true" primaryKeyName="notification_activity_queue_pk"/>
+                </column>
+                <column name="attempts" type="INT" defaultValueNumeric="0">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1793500000000-1">
+        <sql>
+            DELETE FROM notification WHERE type = 'BULK_CHANGED';
+            DELETE FROM notification_setting WHERE type = 'BULK_CHANGED';
+            DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+            CREATE UNIQUE INDEX notification_grouped_unseen_idx ON notification (user_id, project_id, type)
+            WHERE seen = false
+              AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                           'AUTOMATICALLY_TRANSLATED');
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+                CREATE UNIQUE INDEX notification_grouped_unseen_idx ON notification (user_id, project_id, type)
+                WHERE seen = false
+                  AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                               'AUTOMATICALLY_TRANSLATED', 'BULK_CHANGED');
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="jancizmar" id="1793600000000-1">
+        <createTable tableName="notification_mention_mute">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_mention_mute_pkey"
+                             foreignKeyName="notification_mention_mute_user_fk"
+                             referencedTableName="user_account" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_mention_mute_pkey"
+                             foreignKeyName="notification_mention_mute_project_fk"
+                             referencedTableName="project" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="notification_mention_mute" indexName="notification_mention_mute_project_idx">
+            <column name="project_id"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="notification_mention_mute"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

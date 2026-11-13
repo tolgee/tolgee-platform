@@ -9,6 +9,7 @@ import io.tolgee.model.notifications.NotificationDigestFrequency
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.service.notification.NotificationDigestStateService
 import io.tolgee.service.notification.NotificationSettingsService
+import io.tolgee.service.notification.activity.GroupedNotificationWrite
 import io.tolgee.service.notification.activity.GroupedNotificationWriter
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -42,7 +43,9 @@ class LocalizationNotificationsApiTest : AuthorizedControllerTest() {
     type: NotificationType,
     ids: List<Long>,
   ) = executeInNewTransaction(platformTransactionManager) {
-    writer.write(testData.reviewerAll.id, testData.project.id, testData.author.id, type, ids, true)
+    writer.write(
+      GroupedNotificationWrite(testData.reviewerAll.id, testData.project.id, testData.author.id, type, ids, true),
+    )
   }
 
   @Test
@@ -56,12 +59,32 @@ class LocalizationNotificationsApiTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `automatic and bulk types show languages and no count`() {
-    write(NotificationType.BULK_CHANGED, listOf(testData.existingFrench.id))
+  fun `automatically translated shows languages and no count`() {
+    write(NotificationType.AUTOMATICALLY_TRANSLATED, listOf(testData.existingFrench.id))
     performAuthGet("/v2/notification").andIsOk.andAssertThatJson {
       node("_embedded.notificationModelList[0].entityCount").isNull()
       node("_embedded.notificationModelList[0].languages[0].tag").isEqualTo("fr")
       node("_embedded.notificationModelList[0].branches").isArray.isEmpty()
+    }
+  }
+
+  @Test
+  fun `new keys show the first two keys with their base text`() {
+    write(NotificationType.KEYS_ADDED, listOf(testData.existingKey.id, testData.branchKey.id, 1L))
+    performAuthGet("/v2/notification").andIsOk.andAssertThatJson {
+      node("_embedded.notificationModelList[0].entityCount").isEqualTo(3)
+      node("_embedded.notificationModelList[0].sampleKeys").isArray.hasSize(2)
+      node("_embedded.notificationModelList[0].sampleKeys[0].name").isEqualTo("existing-key")
+      node("_embedded.notificationModelList[0].sampleKeys[0].baseText").isEqualTo("Hello")
+      node("_embedded.notificationModelList[0].sampleKeys[1].name").isEqualTo("branch-key")
+    }
+  }
+
+  @Test
+  fun `only new keys carry key samples`() {
+    write(NotificationType.SOURCE_CHANGED, listOf(testData.existingKey.id))
+    performAuthGet("/v2/notification").andIsOk.andAssertThatJson {
+      node("_embedded.notificationModelList[0].sampleKeys").isNull()
     }
   }
 
@@ -112,28 +135,28 @@ class LocalizationNotificationsApiTest : AuthorizedControllerTest() {
     ObjectMapper().readValue(result.andReturn().response.contentAsString, Map::class.java)["nextCursor"] as String
 
   @Test
-  fun `marking seen resets the digest window`() {
+  fun `marking seen keeps the work email limit`() {
     val n = write(NotificationType.KEYS_ADDED, listOf(1L))
     digestStateService.markSent(testData.reviewerAll.id, Date())
     performAuthPut("/v2/notifications-mark-seen", mapOf("notificationIds" to listOf(n.id))).andIsOk
     digestStateService
       .find(listOf(testData.reviewerAll.id))[testData.reviewerAll.id]!!
       .lastDigestSentAt.assert
-      .isNull()
+      .isNotNull()
   }
 
   @Test
   fun `settings list localization types and save per type`() {
     performAuthGet("/v2/notification-settings").andIsOk.andAssertThatJson {
       node("localization").isArray.hasSize(NotificationType.GROUPED.size)
-      node("digestFrequency").isEqualTo("DAILY")
+      node("digestFrequency").isEqualTo("SOON")
     }
     performAuthPut(
       "/v2/notification-settings",
-      mapOf("group" to "LOCALIZATION", "type" to "BULK_CHANGED", "channel" to "EMAIL", "enabled" to true),
+      mapOf("group" to "LOCALIZATION", "type" to "STRINGS_REVIEWED", "channel" to "EMAIL", "enabled" to true),
     ).andIsOk
     settingsService
-      .isEnabled(testData.reviewerAll.id, NotificationType.BULK_CHANGED, NotificationChannel.EMAIL)
+      .isEnabled(testData.reviewerAll.id, NotificationType.STRINGS_REVIEWED, NotificationChannel.EMAIL)
       .assert
       .isTrue()
   }

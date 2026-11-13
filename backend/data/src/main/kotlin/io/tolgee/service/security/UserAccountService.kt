@@ -500,6 +500,14 @@ class UserAccountService(
     )
   }
 
+  fun findInProjectByName(
+    projectId: Long,
+    search: String?,
+    exceptUserId: Long,
+    pageable: Pageable,
+  ): Page<UserAccountInProjectView> =
+    userAccountRepository.findInProjectByName(projectId, search?.trim()?.ifEmpty { null }, exceptUserId, pageable)
+
   fun getAllInProjectWithPermittedLanguages(
     projectId: Long,
     pageable: Pageable,

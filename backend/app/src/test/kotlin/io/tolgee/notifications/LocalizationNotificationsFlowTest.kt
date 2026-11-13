@@ -7,8 +7,7 @@ import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.repository.notification.NotificationRepository
-import io.tolgee.service.notification.activity.ActivityNotificationProcessor
-import io.tolgee.service.notification.digest.NotificationDigestJob
+import io.tolgee.service.notification.digest.NotificationEmailJob
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -25,10 +24,7 @@ import java.util.Date
 
 class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
-  private lateinit var processor: ActivityNotificationProcessor
-
-  @Autowired
-  private lateinit var digestJob: NotificationDigestJob
+  private lateinit var emailJob: NotificationEmailJob
 
   @Autowired
   private lateinit var notificationRepository: NotificationRepository
@@ -49,7 +45,6 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
     testDataService.saveTestData(testData.root)
     userAccount = testData.author
     projectSupplier = { testData.project }
-    jdbcTemplate.update("delete from notification_activity_queue")
     setForcedDate(Date())
   }
 
@@ -57,14 +52,15 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
   fun after() {
     clearForcedDate()
     tolgeeProperties.smtp.host = null
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `import of many keys creates one capped row per recipient and one digest each`() {
+  fun `import of many keys creates one capped row per recipient and one email each`() {
     val json = (1..1500).joinToString(",", "{", "}") { "\"key$it\": \"text $it\"" }
     importJson(json).andIsOk
-    processor.processQueue()
+    NotificationFanoutJobs(jdbcTemplate).waitForAllSucceeded(testData.project.id).assert.hasSize(1)
 
     val all = notificationRepository.findAll()
     all.groupBy { it.user.id to it.type }.forEach { (_, rows) -> rows.assert.hasSize(1) }
@@ -84,11 +80,11 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
         .isEqualTo(100)
     }
 
-    digestJob.sendDueDigests()
+    emailJob.sendDueEmails()
     emailTestUtil.verifyTimesEmailSent(0)
 
-    moveCurrentDate(Duration.ofMinutes(11))
-    digestJob.sendDueDigests()
+    moveCurrentDate(Duration.ofMinutes(16))
+    emailJob.sendDueEmails()
     emailTestUtil.verifyTimesEmailSent(3)
     emailTestUtil.messageArgumentCaptor.allValues
       .map { it.getHeader("To")[0] }
@@ -99,7 +95,7 @@ class LocalizationNotificationsFlowTest : ProjectAuthControllerTest("/v2/project
         testData.reviewerAll.username,
       )
 
-    digestJob.sendDueDigests()
+    emailJob.sendDueEmails()
     emailTestUtil.verifyTimesEmailSent(3)
   }
 

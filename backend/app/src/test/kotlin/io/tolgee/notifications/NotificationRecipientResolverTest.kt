@@ -62,14 +62,21 @@ class NotificationRecipientResolverTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `bulk changed goes to viewers of the language, including org members`() {
+  fun `strings reviewed goes to viewers of the language, including org members`() {
     val de = testData.german.id
-    val result = resolve(mapOf(NotificationType.BULK_CHANGED to mapOf(de to listOf(de))))
+    val result = resolve(mapOf(NotificationType.STRINGS_REVIEWED to mapOf(de to listOf(de))))
     result.map { it.userId }.assert.containsExactlyInAnyOrder(
       testData.reviewerAll.id,
       testData.viewerDe.id,
       testData.orgMember.id,
     )
+  }
+
+  @Test
+  fun `automatically translated goes only to users who can review that language`() {
+    val fr = testData.french.id
+    val result = resolve(mapOf(NotificationType.AUTOMATICALLY_TRANSLATED to mapOf(fr to listOf(1L))))
+    result.map { it.userId }.assert.containsExactlyInAnyOrder(testData.reviewerFr.id, testData.reviewerAll.id)
   }
 
   @Test

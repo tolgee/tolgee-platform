@@ -6,6 +6,7 @@ export type PrefilterType = {
   failedJob?: number;
   task?: number;
   taskFilterNotDone?: boolean;
+  notification?: number;
   clear: () => void;
 };
 
@@ -40,6 +41,14 @@ export const usePrefilter = (): PrefilterType | undefined => {
     }
   );
 
+  const [notification, setNotification] = useUrlSearchState(
+    QUERY.TRANSLATIONS_PREFILTERS_NOTIFICATION,
+    {
+      defaultVal: undefined,
+      history: true,
+    }
+  );
+
   const [taskHideDone, setTaskHideDone] = useUrlSearchState(
     QUERY.TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED,
     {
@@ -50,12 +59,14 @@ export const usePrefilter = (): PrefilterType | undefined => {
   const activityId = stringToNumber(activity);
   const failedJobId = stringToNumber(failedJob);
   const taskNumber = stringToNumber(task);
+  const notificationId = stringToNumber(notification);
 
   function clear() {
     setActivity(undefined);
     setFailedJob(undefined);
     setTask(undefined);
     setTaskHideDone(undefined);
+    setNotification(undefined);
   }
 
   if (activityId !== undefined) {
@@ -72,6 +83,11 @@ export const usePrefilter = (): PrefilterType | undefined => {
     return {
       task: taskNumber,
       taskFilterNotDone: taskHideDone === 'true',
+      clear,
+    };
+  } else if (notificationId !== undefined) {
+    return {
+      notification: notificationId,
       clear,
     };
   }

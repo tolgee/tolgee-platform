@@ -22,4 +22,9 @@ open class TranslationCommentModel(
   val createdAt: Date,
   @Schema(description = "Date when it was updated")
   val updatedAt: Date,
+  @Schema(
+    description =
+      "Users mentioned in the text by the `<@userId>` token. Tokens of users who cannot be mentioned are not listed.",
+  )
+  val mentions: List<MentionedUserModel> = emptyList(),
 ) : RepresentationModel<TranslationCommentModel>()

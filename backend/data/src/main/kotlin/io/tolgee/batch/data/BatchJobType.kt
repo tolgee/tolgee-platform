@@ -14,6 +14,7 @@ import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.HardDeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.NoOpChunkProcessor
+import io.tolgee.batch.processors.NotificationFanoutChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.processors.QaCheckChunkProcessor
 import io.tolgee.batch.processors.RestoreKeysChunkProcessor
@@ -41,6 +42,10 @@ enum class BatchJobType(
    * Use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] to get the effective value.
    */
   val defaultExclusive: Boolean = true,
+  /**
+   * False for internal system jobs, which never appear in project job listings, even when they fail.
+   */
+  val userVisible: Boolean = true,
 ) {
   AI_PLAYGROUND_TRANSLATE(
     maxRetries = 3,
@@ -143,10 +148,22 @@ enum class BatchJobType(
     processor = QaCheckChunkProcessor::class,
     defaultExclusive = false,
   ),
+  NOTIFICATION_FANOUT(
+    maxRetries = 5,
+    processor = NotificationFanoutChunkProcessor::class,
+    defaultRetryWaitTimeInMs = 10_000,
+    defaultExclusive = false,
+    userVisible = false,
+  ),
   NO_OP(
     activityType = null,
     maxRetries = 0,
     processor = NoOpChunkProcessor::class,
     defaultExclusive = false,
   ),
+  ;
+
+  companion object {
+    val internalTypes: List<BatchJobType> by lazy { entries.filter { !it.userVisible } }
+  }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Component
 class FrontendUrlProvider(
@@ -51,6 +53,20 @@ class FrontendUrlProvider(
   fun getNotificationSettingsUrl(): String = "${this.requestDerivedUrl}/account/notifications"
 
   fun getProjectUrl(projectId: Long): String = "${this.requestDerivedUrl}/projects/$projectId"
+
+  fun getNotificationTranslationsUrl(
+    projectId: Long,
+    notificationId: Long,
+  ): String = "${getProjectUrl(projectId)}/translations?notification=$notificationId"
+
+  fun getKeyCommentsUrl(
+    projectId: Long,
+    keyId: Long,
+    languageTag: String,
+  ): String {
+    val tag = URLEncoder.encode(languageTag, StandardCharsets.UTF_8)
+    return "${getProjectUrl(projectId)}/translations/single?id=$keyId&languages=$tag&comments=$tag"
+  }
 
   fun getMembersUrl(projectId: Long): String = "${getProjectUrl(projectId)}/manage/permissions"
 

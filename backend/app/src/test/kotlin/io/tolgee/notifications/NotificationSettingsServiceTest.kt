@@ -32,8 +32,14 @@ class NotificationSettingsServiceTest : AbstractSpringTest() {
   fun `localization types use their own defaults`() {
     val userId = testData.user.id
     settingsService.isEnabled(userId, NotificationType.KEYS_ADDED, NotificationChannel.EMAIL).assert.isTrue()
-    settingsService.isEnabled(userId, NotificationType.BULK_CHANGED, NotificationChannel.EMAIL).assert.isFalse()
-    settingsService.isEnabled(userId, NotificationType.BULK_CHANGED, NotificationChannel.IN_APP).assert.isTrue()
+    settingsService.isEnabled(userId, NotificationType.STRINGS_REVIEWED, NotificationChannel.EMAIL).assert.isFalse()
+    settingsService.isEnabled(userId, NotificationType.STRINGS_REVIEWED, NotificationChannel.IN_APP).assert.isTrue()
+    settingsService
+      .isEnabled(userId, NotificationType.AUTOMATICALLY_TRANSLATED, NotificationChannel.EMAIL)
+      .assert
+      .isTrue()
+    settingsService.isEnabled(userId, NotificationType.SOURCE_CHANGED, NotificationChannel.EMAIL).assert.isFalse()
+    settingsService.isEnabled(userId, NotificationType.COMMENT_MENTION, NotificationChannel.EMAIL).assert.isTrue()
   }
 
   @Test
@@ -56,19 +62,15 @@ class NotificationSettingsServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `digest state defaults to daily and resets window`() {
+  fun `digest state defaults to soon and records the last work email`() {
     val userId = testData.user.id
-    digestStateService.getFrequency(userId).assert.isEqualTo(NotificationDigestFrequency.DAILY)
+    digestStateService.getFrequency(userId).assert.isEqualTo(NotificationDigestFrequency.SOON)
     digestStateService.markSent(userId, Date())
     digestStateService
       .find(listOf(userId))[userId]!!
       .lastDigestSentAt.assert
       .isNotNull()
-    digestStateService.resetWindow(userId)
-    digestStateService
-      .find(listOf(userId))[userId]!!
-      .lastDigestSentAt.assert
-      .isNull()
+    digestStateService.getFrequency(userId).assert.isEqualTo(NotificationDigestFrequency.SOON)
     digestStateService.setFrequency(userId, NotificationDigestFrequency.OFF)
     digestStateService.getFrequency(userId).assert.isEqualTo(NotificationDigestFrequency.OFF)
   }

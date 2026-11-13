@@ -38,7 +38,7 @@ class NotificationDigestE2eTestData : BaseTestData("notification_digest_user", "
         .addNotification {
           user = this@NotificationDigestE2eTestData.user
           project = this@NotificationDigestE2eTestData.project
-          type = NotificationType.BULK_CHANGED
+          type = NotificationType.STRINGS_TRANSLATED
         }.self
   }
 }

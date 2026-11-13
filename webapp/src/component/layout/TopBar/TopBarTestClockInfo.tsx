@@ -4,17 +4,14 @@ import { useDateFormatter } from 'tg.hooks/useLocale';
 import { Box, Button, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { LINKS } from 'tg.constants/links';
 
 export const TopBarTestClockInfo: FC<React.PropsWithChildren<unknown>> = () => {
   const testClock = useTestClock();
 
   const formatDate = useDateFormatter();
 
-  const organization = usePreferredOrganization()?.preferredOrganization;
-
-  if (!testClock || !organization) {
+  if (!testClock) {
     return null;
   }
 
@@ -22,9 +19,8 @@ export const TopBarTestClockInfo: FC<React.PropsWithChildren<unknown>> = () => {
     <Tooltip title={<T keyName="development-test-clock-topbar-info-tooltip" />}>
       <Button
         component={Link}
-        to={LINKS.ORGANIZATION_BILLING_TEST_CLOCK_HELPER.build({
-          [PARAMS.ORGANIZATION_SLUG]: organization.slug,
-        })}
+        to={LINKS.TEST_CLOCK.build()}
+        data-cy="top-bar-test-clock"
         sx={(theme) => ({
           p: 0,
           mr: 1,

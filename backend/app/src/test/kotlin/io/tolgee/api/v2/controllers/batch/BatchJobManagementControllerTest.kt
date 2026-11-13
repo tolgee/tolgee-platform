@@ -69,12 +69,12 @@ class BatchJobManagementControllerTest :
         // lets move time fast
         setForcedDate(currentDateProvider.date.addMinutes(1))
         util
-          .getSingleJob()
+          .getSingleUserVisibleJob()
           .status.assert
           .isEqualTo(BatchJobStatus.FAILED)
       }
 
-      val executions = batchJobService.getExecutions(util.getSingleJob().id)
+      val executions = batchJobService.getExecutions(util.getSingleUserVisibleJob().id)
       executions.assert.hasSize(80)
       executions.forEach {
         it.status.assert.isEqualTo(BatchJobChunkExecutionStatus.FAILED)
@@ -255,7 +255,7 @@ class BatchJobManagementControllerTest :
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       util
-        .getSingleJob()
+        .getSingleUserVisibleJob()
         .status.assert
         .isEqualTo(BatchJobStatus.SUCCESS)
     }
@@ -276,7 +276,7 @@ class BatchJobManagementControllerTest :
 
     waitForNotThrowing(pollTime = 100, timeout = 10000) {
       util
-        .getSingleJob()
+        .getSingleUserVisibleJob()
         .status.assert
         .isEqualTo(BatchJobStatus.SUCCESS)
     }

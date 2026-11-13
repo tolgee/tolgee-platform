@@ -14,7 +14,7 @@ class NotificationDigestStateService(
   private val entityManager: EntityManager,
 ) {
   fun getFrequency(userId: Long): NotificationDigestFrequency =
-    repository.findById(userId).orElse(null)?.frequency ?: NotificationDigestFrequency.DAILY
+    repository.findById(userId).orElse(null)?.frequency ?: NotificationDigestFrequency.SOON
 
   @Transactional
   fun setFrequency(
@@ -23,11 +23,6 @@ class NotificationDigestStateService(
   ) {
     repository.upsertFrequency(userId, frequency.name)
     refreshLoaded(userId)
-  }
-
-  @Transactional
-  fun resetWindow(userId: Long) {
-    repository.resetWindow(userId)
   }
 
   @Transactional

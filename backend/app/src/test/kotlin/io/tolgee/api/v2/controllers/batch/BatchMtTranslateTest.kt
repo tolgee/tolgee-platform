@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.findUserVisibleBatchJobs
 import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -57,10 +58,7 @@ class BatchMtTranslateTest : ProjectAuthControllerTest("/v2/projects/") {
 
     batchJobTestBase.waitForAllTranslated(keyIds, keyCount)
     executeInNewTransaction {
-      val jobs =
-        entityManager
-          .createQuery("""from BatchJob""", BatchJob::class.java)
-          .resultList
+      val jobs = entityManager.findUserVisibleBatchJobs()
       jobs.assert.hasSize(1)
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)

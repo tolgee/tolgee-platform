@@ -14,6 +14,18 @@ import org.springframework.stereotype.Repository
 interface TranslationCommentRepository : JpaRepository<TranslationComment, Long> {
   fun deleteAllByIdIn(ids: List<Long>)
 
+  @Query(
+    """
+    select c from TranslationComment c
+    join fetch c.translation t
+    join fetch t.key k
+    left join fetch k.namespace
+    join fetch t.language
+    where c.id in :ids
+    """,
+  )
+  fun findAllWithKeyAndLanguage(ids: Collection<Long>): List<TranslationComment>
+
   @Query("select tc from TranslationComment tc left join fetch tc.author where tc.translation = :translation")
   fun getPagedByTranslation(
     translation: Translation,

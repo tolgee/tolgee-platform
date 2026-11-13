@@ -48,4 +48,6 @@ class SmtpProperties {
 
   @DocProperty(description = "The sender name and address in standard SMTP format.")
   var from: String? = null
+
+  fun hasHostAndSender(): Boolean = !host.isNullOrBlank() && !from.isNullOrBlank()
 }

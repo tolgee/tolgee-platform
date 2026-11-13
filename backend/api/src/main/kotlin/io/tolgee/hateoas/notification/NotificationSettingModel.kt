@@ -7,6 +7,7 @@ import java.io.Serializable
 data class NotificationSettingModel(
   var accountSecurity: NotificationSettingGroupModel,
   var tasks: NotificationSettingGroupModel,
+  var comments: NotificationSettingGroupModel,
   var localization: List<NotificationTypeSettingModel>,
   var digestFrequency: NotificationDigestFrequency,
 ) : RepresentationModel<NotificationSettingModel>(),

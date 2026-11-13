@@ -118,6 +118,8 @@ export class LINKS {
 
   static GO_TO_PREFERRED_ORGANIZATION = Link.ofRoot('preferred-organization');
 
+  static TEST_CLOCK = Link.ofRoot('test-clock');
+
   /**
    * Authenticated user stuff
    */
@@ -472,6 +474,8 @@ export enum QUERY {
   TRANSLATIONS_PREFILTERS_FAILED_JOB = 'failedJob',
   TRANSLATIONS_PREFILTERS_TASK = 'task',
   TRANSLATIONS_PREFILTERS_TASK_HIDE_CLOSED = 'taskHideClosed',
+  TRANSLATIONS_PREFILTERS_NOTIFICATION = 'notification',
+  TRANSLATIONS_OPEN_COMMENTS = 'comments',
   TRANSLATIONS_TASK_DETAIL = 'taskDetail',
   TRANSLATIONS_VIEW = 'view',
   TASKS_FILTERS_SHOW_ALL = 'showAll',
@@ -498,6 +502,36 @@ export const getProjectTranslationsUrl = (
   }
   const query = params.toString();
   return query ? `${base}?${query}` : base;
+};
+
+export const getNotificationTranslationsUrl = (
+  projectId: number,
+  notificationId: number,
+  languages?: string[]
+) => {
+  const params = new URLSearchParams();
+  params.set(
+    QUERY.TRANSLATIONS_PREFILTERS_NOTIFICATION,
+    String(notificationId)
+  );
+  languages?.forEach((l) => params.append('languages', l));
+  return `${LINKS.PROJECT_TRANSLATIONS.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?${params.toString()}`;
+};
+
+export const getKeyCommentsUrl = (
+  projectId: number,
+  keyId: number,
+  languageTag: string
+) => {
+  const params = new URLSearchParams();
+  params.set('id', String(keyId));
+  params.set('languages', languageTag);
+  params.set(QUERY.TRANSLATIONS_OPEN_COMMENTS, languageTag);
+  return `${LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+    [PARAMS.PROJECT_ID]: projectId,
+  })}?${params.toString()}`;
 };
 
 export const getTaskUrl = (projectId: number, taskNumber: number) => {

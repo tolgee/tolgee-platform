@@ -10,12 +10,14 @@ type Channel = 'IN_APP' | 'EMAIL';
 type Props = {
   setting: Setting;
   label: string;
+  description?: string;
   afterChange: () => void;
 };
 
 export const LocalizationSettingsRow = ({
   setting,
   label,
+  description,
   afterChange,
 }: Props) => {
   const saveMutation = useApiMutation({
@@ -50,6 +52,11 @@ export const LocalizationSettingsRow = ({
     <>
       <Box>
         <Typography variant="body1">{label}</Typography>
+        {description && (
+          <Typography variant="body2" color="text.secondary">
+            {description}
+          </Typography>
+        )}
       </Box>
       <Box textAlign="center">
         <Switch

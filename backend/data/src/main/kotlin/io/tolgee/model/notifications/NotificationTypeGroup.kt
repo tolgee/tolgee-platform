@@ -4,4 +4,5 @@ enum class NotificationTypeGroup {
   ACCOUNT_SECURITY,
   TASKS,
   LOCALIZATION,
+  COMMENTS,
 }

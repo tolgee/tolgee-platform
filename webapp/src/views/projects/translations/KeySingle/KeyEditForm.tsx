@@ -22,6 +22,7 @@ import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelec
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { FloatingToolsPanel } from '../ToolsPanel/FloatingToolsPanel';
+import { useOpenCommentsFromUrl } from 'tg.views/projects/translations/KeySingle/useOpenCommentsFromUrl';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -82,6 +83,8 @@ export const KeyEditForm: React.FC<React.PropsWithChildren<unknown>> = () => {
   const sidePanelWidth = useTranslationsSelector(
     (c) => c.layout.sidePanelWidth
   );
+
+  useOpenCommentsFromUrl(keyData?.keyId);
 
   const urlId = useUrlSearch().id as string | undefined;
   const [_urlKey, setUrlKey] = useUrlSearchState('key');

@@ -5,4 +5,5 @@ data class NotificationLanguageDto(
   val tag: String,
   val name: String,
   val flagEmoji: String?,
+  val entityCount: Int,
 )

@@ -23,6 +23,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
      WHERE u.id = :userId
+        AND n.emailOnly = false
         AND u.deletedAt is null
         AND u.disabledAt is null
         AND (
@@ -44,6 +45,41 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     cursorUpdatedAt: Timestamp? = null,
     cursorId: Long? = null,
   ): Page<Notification>
+
+  @Query(
+    """
+    SELECT n
+     FROM Notification n
+     LEFT JOIN FETCH n.originatingUser
+     LEFT JOIN FETCH n.linkedTask
+     WHERE n.id = :id
+        AND n.user.id = :userId
+        AND n.emailOnly = false
+    """,
+  )
+  fun findVisibleToUser(
+    id: Long,
+    userId: Long,
+  ): Notification?
+
+  @Modifying
+  @Query("DELETE FROM Notification n WHERE n.user.id = :userId")
+  fun deleteAllOfUser(userId: Long)
+
+  @Modifying
+  @Query(
+    """
+    DELETE FROM Notification n
+    WHERE n.linkedComment.id = :commentId
+        AND n.type = io.tolgee.model.notifications.NotificationType.COMMENT_MENTION
+        AND n.seen = false
+        AND n.user.id NOT IN :keepUserIds
+    """,
+  )
+  fun deleteUnseenMentionsOfCommentExcept(
+    commentId: Long,
+    keepUserIds: Collection<Long>,
+  )
 
   @Query(
     """

@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.notification
 
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationEntityKind
 import io.tolgee.model.notifications.NotificationType
 import io.tolgee.service.notification.NotificationEntitiesQueryService
 import org.springframework.stereotype.Component
@@ -17,18 +18,26 @@ class NotificationEntitiesEnhancer(
     val counts = queryService.getCounts(ids)
     val languages = queryService.getLanguages(ids)
     val branches = queryService.getBranchNames(ids)
+    val keySamples = queryService.getKeySamples(ids)
 
     grouped.forEach { (source, target) ->
       if (source.type.countable) target.entityCount = counts[source.id] ?: 0
-      if (source.type !in KEY_TYPES) {
+      if (source.type.entityKind == NotificationEntityKind.TRANSLATION) {
         target.languages =
           languages[source.id].orEmpty().map { NotificationLanguageModel(it.id, it.tag, it.name, it.flagEmoji) }
       }
       target.branches = branches[source.id].orEmpty()
+      if (source.type == NotificationType.KEYS_ADDED) {
+        target.sampleKeys =
+          keySamples[source.id].orEmpty().map {
+            NotificationKeySampleModel(
+              it.keyId,
+              it.name,
+              it.namespace,
+              it.baseText,
+            )
+          }
+      }
     }
-  }
-
-  companion object {
-    private val KEY_TYPES = setOf(NotificationType.KEYS_ADDED, NotificationType.SOURCE_CHANGED)
   }
 }

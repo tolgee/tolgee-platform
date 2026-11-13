@@ -15,7 +15,6 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.branching.BranchService
-import io.tolgee.service.notification.activity.ActivityNotificationQueue
 import io.tolgee.util.Logging
 import io.tolgee.util.flushAndClear
 import jakarta.persistence.EntityManager
@@ -37,7 +36,6 @@ class ActivityService(
   private val jdbcTemplate: JdbcTemplate,
   private val activityRevisionRepository: ActivityRevisionRepository,
   private val branchService: BranchService,
-  private val activityNotificationQueue: ActivityNotificationQueue,
 ) : Logging {
   @Transactional
   fun storeActivityData(
@@ -55,7 +53,6 @@ class ActivityService(
 
     persistDescribingRelations(mergedActivityRevision)
     mergedActivityRevision.modifiedEntities = persistModifiedEntities(modifiedEntities)
-    activityNotificationQueue.addIfRelevant(mergedActivityRevision, modifiedEntities)
     applicationContext.publishEvent(OnProjectActivityStoredEvent(this, mergedActivityRevision))
   }
 

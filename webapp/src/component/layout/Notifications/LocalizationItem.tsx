@@ -6,7 +6,8 @@ import {
   NotificationItem,
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { getNotificationTranslationsUrl } from 'tg.constants/links';
+import { KeysAddedText } from 'tg.component/layout/Notifications/KeysAddedText';
 
 const ENTITY_CAP = 100;
 
@@ -37,13 +38,13 @@ export const LocalizationItem: FunctionComponent<Props> = ({
 }) => {
   const { t } = useTranslate();
   const projectId = notification.project!.id;
-  const toActivity =
-    notification.type === 'AUTOMATICALLY_TRANSLATED' ||
-    notification.type === 'BULK_CHANGED';
-  const destinationUrl = toActivity
-    ? LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: projectId })
-    : LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: projectId });
+  const destinationUrl = getNotificationTranslationsUrl(
+    projectId,
+    notification.id,
+    notification.languages?.map((l) => l.tag)
+  );
   const count = notification.entityCount;
+  const isKeysAdded = notification.type === 'KEYS_ADDED';
 
   return (
     <NotificationItem
@@ -52,9 +53,13 @@ export const LocalizationItem: FunctionComponent<Props> = ({
       {...props}
     >
       <Box data-cy="notifications-localization-item">
-        <Box>
-          <b>{label}</b>
-        </Box>
+        {isKeysAdded ? (
+          <KeysAddedText notification={notification} entityCap={ENTITY_CAP} />
+        ) : (
+          <Box>
+            <b>{label}</b>
+          </Box>
+        )}
         <Box>
           {notification.languages?.map((language) => (
             <StyledFlag
@@ -69,7 +74,7 @@ export const LocalizationItem: FunctionComponent<Props> = ({
               />
             </StyledFlag>
           ))}
-          {count !== undefined && count !== null && (
+          {!isKeysAdded && count !== undefined && count !== null && (
             <StyledCount data-cy="notifications-localization-count">
               {count >= ENTITY_CAP
                 ? t('notifications-count-capped', '100+')

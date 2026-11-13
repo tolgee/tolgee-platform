@@ -7,6 +7,7 @@ import io.tolgee.component.CurrentDateProvider
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,6 +22,16 @@ import java.util.Date
 class TestClockController(
   val currentDateProvider: CurrentDateProvider,
 ) {
+  @GetMapping(value = [""])
+  @Operation(description = "Returns the time the app is using as current date and whether it is forced")
+  fun getTime(): TestClockModel {
+    val forcedDate = currentDateProvider.forcedDate
+    return TestClockModel(
+      currentTimestamp = (forcedDate ?: currentDateProvider.date).time,
+      forced = forcedDate != null,
+    )
+  }
+
   @PutMapping(value = ["/{dateTimeString}"])
   @Operation(description = "Set's the time machine, so the app is using this date as current date")
   fun setTime(
@@ -41,3 +52,8 @@ class TestClockController(
     currentDateProvider.forcedDate = null
   }
 }
+
+data class TestClockModel(
+  val currentTimestamp: Long,
+  val forced: Boolean,
+)

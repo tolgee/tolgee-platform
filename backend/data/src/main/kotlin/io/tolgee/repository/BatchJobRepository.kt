@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.model.views.JobErrorMessagesView
@@ -20,11 +21,13 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     left join fetch j.author
     left join fetch j.activityRevision
     where j.project.id = :projectId
+    and j.type not in :internalTypes
     and (:userAccountId is null or j.author.id = :userAccountId)
     """,
     countQuery = """
     select count(j) from BatchJob j
     where j.project.id = :projectId
+    and j.type not in :internalTypes
     and (:userAccountId is null or j.author.id = :userAccountId)
     """,
   )
@@ -32,6 +35,7 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     projectId: Long,
     userAccountId: Long?,
     pageable: Pageable,
+    internalTypes: List<BatchJobType>,
   ): Page<BatchJob>
 
   @Query(
@@ -40,6 +44,7 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     left join fetch j.author
     left join fetch j.activityRevision
     where j.project.id = :projectId and (j.hidden = false or j.status = 'FAILED')
+    and j.type not in :internalTypes
     and (:userAccountId is null or j.author.id = :userAccountId)
     and (j.status not in :completedStatuses or j.updatedAt > :oneHourAgo)
     order by j.updatedAt
@@ -50,6 +55,7 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     userAccountId: Long?,
     oneHourAgo: Date,
     completedStatuses: List<BatchJobStatus>,
+    internalTypes: List<BatchJobType>,
   ): List<BatchJob>
 
   @Query(

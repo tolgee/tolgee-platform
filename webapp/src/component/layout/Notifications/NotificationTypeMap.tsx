@@ -7,68 +7,16 @@ import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordC
 import { components } from 'tg.service/apiSchema.generated';
 import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
 import React from 'react';
-import { useTranslate } from '@tolgee/react';
+import { useLocalizationNotificationLabel } from 'tg.component/layout/Notifications/useLocalizationNotificationLabel';
 import { LocalizationItem } from 'tg.component/layout/Notifications/LocalizationItem';
+import { CommentMentionItem } from 'tg.component/layout/Notifications/CommentMentionItem';
 
-const KeysAddedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
+const LocalizationTypeItem = (props: NotificationItemProps) => {
+  const getLabel = useLocalizationNotificationLabel();
   return (
     <LocalizationItem
       {...props}
-      label={t('notifications-keys-added', 'New keys added')}
-    />
-  );
-};
-
-const SourceChangedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
-  return (
-    <LocalizationItem
-      {...props}
-      label={t('notifications-source-changed', 'Base text changed')}
-    />
-  );
-};
-
-const StringsTranslatedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
-  return (
-    <LocalizationItem
-      {...props}
-      label={t('notifications-strings-translated', 'Strings translated')}
-    />
-  );
-};
-
-const StringsReviewedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
-  return (
-    <LocalizationItem
-      {...props}
-      label={t('notifications-strings-reviewed', 'Strings reviewed')}
-    />
-  );
-};
-
-const AutomaticallyTranslatedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
-  return (
-    <LocalizationItem
-      {...props}
-      label={t(
-        'notifications-automatically-translated',
-        'Automatically translated'
-      )}
-    />
-  );
-};
-
-const BulkChangedItem = (props: NotificationItemProps) => {
-  const { t } = useTranslate();
-  return (
-    <LocalizationItem
-      {...props}
-      label={t('notifications-bulk-changed', 'Changed in bulk')}
+      label={getLabel(props.notification.type) ?? ''}
     />
   );
 };
@@ -85,10 +33,10 @@ export const notificationComponents: NotificationsComponentMap = {
   MFA_ENABLED: MfaEnabledItem,
   MFA_DISABLED: MfaDisabledItem,
   PASSWORD_CHANGED: PasswordChangedItem,
-  KEYS_ADDED: KeysAddedItem,
-  SOURCE_CHANGED: SourceChangedItem,
-  STRINGS_TRANSLATED: StringsTranslatedItem,
-  STRINGS_REVIEWED: StringsReviewedItem,
-  AUTOMATICALLY_TRANSLATED: AutomaticallyTranslatedItem,
-  BULK_CHANGED: BulkChangedItem,
+  COMMENT_MENTION: CommentMentionItem,
+  KEYS_ADDED: LocalizationTypeItem,
+  SOURCE_CHANGED: LocalizationTypeItem,
+  STRINGS_TRANSLATED: LocalizationTypeItem,
+  STRINGS_REVIEWED: LocalizationTypeItem,
+  AUTOMATICALLY_TRANSLATED: LocalizationTypeItem,
 };

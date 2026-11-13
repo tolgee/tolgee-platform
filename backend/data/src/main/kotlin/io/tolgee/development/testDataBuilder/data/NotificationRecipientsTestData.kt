@@ -9,7 +9,9 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 
-class NotificationRecipientsTestData : BaseTestData("notification_author", "Notification project") {
+class NotificationRecipientsTestData(
+  frenchOnlyViewerCount: Int = 0,
+) : BaseTestData("notification_author", "Notification project") {
   lateinit var french: Language
   lateinit var german: Language
   lateinit var defaultBranch: Branch
@@ -102,6 +104,14 @@ class NotificationRecipientsTestData : BaseTestData("notification_author", "Noti
       }
 
   val outsider: UserAccount = root.addUserAccount { username = "outsider" }.self
+
+  val frenchOnlyViewers: List<UserAccount> =
+    (1..frenchOnlyViewerCount).map { index ->
+      addUser("frenchOnlyViewer$index") {
+        type = ProjectPermissionType.VIEW
+        viewLanguages = mutableSetOf(french)
+      }
+    }
 
   private fun addUser(
     name: String,

@@ -1,10 +1,14 @@
 import { waitForGlobalLoading } from './loading';
-import { confirmStandard, gcyAdvanced } from './shared';
+import { confirmStandard, gcy, gcyAdvanced } from './shared';
 
 export function commentsButton(key: string, language: string) {
   return gcyAdvanced({ value: 'translations-table-cell', language, key })
     .trigger('mouseover')
     .findDcy('translations-cell-comments-button');
+}
+
+export function getCommentInputField() {
+  return gcy('translations-comments-input-field');
 }
 
 export function createComment(text: string, key: string, lang: string) {
@@ -54,4 +58,15 @@ export function resolveComment(text: string) {
     .closestDcy('comment')
     .findDcy('comment-resolve')
     .should('not.exist');
+}
+
+export function mentionPickerItem(userId: number) {
+  return gcyAdvanced({
+    value: 'comment-mention-picker-item',
+    'user-id': String(userId),
+  });
+}
+
+export function commentMention(userId: number) {
+  return gcyAdvanced({ value: 'comment-mention', 'user-id': String(userId) });
 }

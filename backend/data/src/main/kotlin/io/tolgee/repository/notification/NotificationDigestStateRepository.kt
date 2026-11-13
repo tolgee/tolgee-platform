@@ -12,14 +12,10 @@ import java.util.Date
 @Lazy
 interface NotificationDigestStateRepository : JpaRepository<NotificationDigestState, Long> {
   @Modifying
-  @Query("UPDATE NotificationDigestState s SET s.lastDigestSentAt = null WHERE s.userId = :userId")
-  fun resetWindow(userId: Long): Int
-
-  @Modifying
   @Query(
     """
     insert into notification_digest_state (user_id, frequency, last_digest_sent_at)
-    values (:userId, 'DAILY', :sentAt)
+    values (:userId, 'SOON', :sentAt)
     on conflict (user_id) do update set last_digest_sent_at = excluded.last_digest_sent_at
     """,
     nativeQuery = true,

@@ -90,15 +90,12 @@ class RevisionNotificationClassifierTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `batch set state is bulk changed with language entities`() {
+  fun `batch set state to reviewed is strings reviewed`() {
     val revisionId = runSetStateBatch()
     val result = classifier.classify(revisionId)!!
     result.items.keys.assert
-      .containsExactly(NotificationType.BULK_CHANGED)
-    result.items[NotificationType.BULK_CHANGED]!!
-      .keys.assert
-      .containsExactlyInAnyOrder(testData.french.id, testData.german.id)
-    result.items[NotificationType.BULK_CHANGED]!![testData.french.id]!!.assert.containsExactly(
+      .containsExactly(NotificationType.STRINGS_REVIEWED)
+    result.items[NotificationType.STRINGS_REVIEWED]!![testData.french.id]!!.assert.containsExactly(
       testData.existingFrench.id,
     )
   }

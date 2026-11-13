@@ -65,8 +65,22 @@ class ProjectBuilder(
     val at: Date?,
   )
 
+  class NotificationLanguageChoice(
+    val user: UserAccount,
+    val languages: Set<Language>,
+  )
+
+  /** Stored as raw activity rows, see NotificationPreferenceTestDataSaver. */
+  class TranslationReview(
+    val author: UserAccount,
+    val translation: Translation,
+    val at: Date?,
+  )
+
   class DATA {
     val contributions = mutableListOf<Contribution>()
+    val notificationLanguageChoices = mutableListOf<NotificationLanguageChoice>()
+    val translationReviews = mutableListOf<TranslationReview>()
     val permissions = mutableListOf<PermissionBuilder>()
     val languages = mutableListOf<LanguageBuilder>()
     val imports = mutableListOf<ImportBuilder>()
@@ -116,6 +130,21 @@ class ProjectBuilder(
     at: Date? = null,
   ) {
     data.contributions.add(Contribution(author, at))
+  }
+
+  fun addNotificationLanguageChoice(
+    user: UserAccount,
+    languages: Set<Language>,
+  ) {
+    data.notificationLanguageChoices.add(NotificationLanguageChoice(user, languages))
+  }
+
+  fun addTranslationReview(
+    author: UserAccount,
+    translation: Translation,
+    at: Date? = null,
+  ) {
+    data.translationReviews.add(TranslationReview(author, translation, at))
   }
 
   fun addKey(ft: FT<Key>) = addOperation(data.keys, ft)

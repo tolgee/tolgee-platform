@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request.translation
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
@@ -193,6 +194,18 @@ $PATTERN_GRAMMAR_DOC""",
     example = "1234567",
   )
   var filterRevisionId: List<Long>? = null
+
+  @field:Parameter(
+    description =
+      "Selects only keys affected by the changes of a notification of the current user. " +
+        "When the notification does not belong to the current user or project, no keys are returned.",
+    example = "1234567",
+  )
+  var filterNotificationId: Long? = null
+
+  @field:Parameter(hidden = true)
+  @get:JsonIgnore
+  var notificationKeyIds: Set<Long>? = null
 
   @field:Parameter(
     description = "Select only keys which were not successfully translated by batch job with provided id",

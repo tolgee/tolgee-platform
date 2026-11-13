@@ -229,10 +229,17 @@ class BatchJobService(
     projectId: Long,
     id: Long,
   ): BatchJobDto {
-    val job =
-      batchJobRepository.findByIdAndProjectId(id, projectId)
-        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
-    return BatchJobDto.fromEntity(job)
+    return BatchJobDto.fromEntity(getUserVisibleJob(projectId, id))
+  }
+
+  private fun getUserVisibleJob(
+    projectId: Long,
+    id: Long,
+  ): BatchJob {
+    return batchJobRepository
+      .findByIdAndProjectId(id, projectId)
+      ?.takeIf { it.type.userVisible }
+      ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
   /**
@@ -250,7 +257,7 @@ class BatchJobService(
     userAccount: UserAccountDto?,
     pageable: Pageable,
   ): Page<BatchJobView> {
-    val jobs = batchJobRepository.getJobs(projectId, userAccount?.id, pageable)
+    val jobs = batchJobRepository.getJobs(projectId, userAccount?.id, pageable, BatchJobType.internalTypes)
 
     val progresses = getProgresses(jobs)
     val errorMessages = getErrorMessages(jobs)
@@ -267,6 +274,7 @@ class BatchJobService(
         userAccountId = getUserAccountIdForCurrentJobView(projectId),
         oneHourAgo = currentDateProvider.date.addMinutes(-60),
         completedStatuses = BatchJobStatus.entries.filter { it.completed },
+        internalTypes = BatchJobType.internalTypes,
       )
 
     val progresses = getProgresses(jobs)
@@ -329,10 +337,7 @@ class BatchJobService(
     projectId: Long,
     jobId: Long,
   ): BatchJobView {
-    val job =
-      batchJobRepository.findByIdAndProjectId(jobId, projectId)
-        ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
-    return getView(job)
+    return getView(getUserVisibleJob(projectId, jobId))
   }
 
   fun getView(job: BatchJob): BatchJobView {

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { T } from '@tolgee/react';
 import { Box, IconButton, styled, TextField } from '@mui/material';
 import { Send03 } from '@untitled-ui/icons-react';
@@ -10,6 +10,8 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 import { Comment } from './Comment';
 import { useComments } from './useComments';
+import { useMentionInput } from 'tg.views/projects/translations/ToolsPanel/panels/Comments/useMentionInput';
+import { MentionPicker } from 'tg.views/projects/translations/ToolsPanel/panels/Comments/MentionPicker';
 import {
   PanelContentData,
   PanelContentProps,
@@ -65,6 +67,15 @@ export const Comments: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
     satisfiesPermission('translation-comments.set-state') || isAssignedToTask;
 
   const keyId = keyData.keyId;
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const [inputValue, setInputValue] = useState('');
+
+  const mention = useMentionInput({
+    keyId,
+    language,
+    value: inputValue,
+    setValue: setInputValue,
+  });
 
   const {
     commentsList,
@@ -74,14 +85,16 @@ export const Comments: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
     handleKeyDown,
     changeState,
     isAddingComment,
-    inputValue,
-    setInputValue,
     fetchMore,
     isLoading,
   } = useComments({
     keyId,
     language,
     translation,
+    inputValue,
+    setInputValue,
+    prepareText: mention.toTokens,
+    onCommentAdded: mention.reset,
   });
 
   useEffect(() => {
@@ -151,12 +164,23 @@ export const Comments: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
 
       {canAddComment && (
         <StyledTextField
+          ref={fieldRef}
+          inputRef={mention.inputRef}
           multiline
           variant="outlined"
           size="small"
           value={inputValue}
-          onChange={(e) => setInputValue(e.currentTarget.value)}
-          onKeyDown={handleKeyDown}
+          onChange={mention.handleChange}
+          inputProps={{
+            onSelect: mention.handleSelect,
+            'data-cy': 'translations-comments-input-field',
+          }}
+          onBlur={mention.close}
+          onKeyDown={(e) => {
+            if (!mention.consumePickerKey(e)) {
+              handleKeyDown(e);
+            }
+          }}
           data-cy="translations-comments-input"
           InputProps={{
             sx: {
@@ -175,6 +199,18 @@ export const Comments: React.FC<React.PropsWithChildren<PanelContentProps>> = ({
               </IconButton>
             ),
           }}
+        />
+      )}
+      {canAddComment && (
+        <MentionPicker
+          anchorEl={fieldRef.current}
+          open={mention.pickerOpen}
+          users={mention.users}
+          highlighted={mention.highlighted}
+          isLoading={mention.isLoading}
+          language={language}
+          onHighlight={mention.setHighlighted}
+          onSelect={mention.selectUser}
         />
       )}
     </StyledContainer>

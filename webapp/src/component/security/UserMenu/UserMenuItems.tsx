@@ -11,6 +11,7 @@ import { MenuItem } from '@mui/material';
 import React, { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddUserMenuItems } from 'tg.ee';
+import { useTestClockAvailable } from 'tg.component/testClock/useTestClockState';
 
 export const UserMenuItems: FC<
   React.PropsWithChildren<{ onClose: () => void }>
@@ -21,6 +22,7 @@ export const UserMenuItems: FC<
   const config = useConfig();
   const user = useUser();
   const isEmailVerified = useIsEmailVerified();
+  const testClockAvailable = useTestClockAvailable();
 
   const addEeItems = useAddUserMenuItems();
 
@@ -67,6 +69,21 @@ export const UserMenuItems: FC<
           data-cy="user-menu-pats"
         >
           {t('user_menu_pats')}
+        </MenuItem>
+      ),
+    },
+    {
+      id: 'test-clock',
+      enabled: testClockAvailable,
+      Component: (props: { onClose: () => void }) => (
+        <MenuItem
+          component={Link}
+          to={LINKS.TEST_CLOCK.build()}
+          selected={location.pathname === LINKS.TEST_CLOCK.build()}
+          onClick={props.onClose}
+          data-cy="user-menu-test-clock"
+        >
+          {t('user_menu_test_clock', 'Test clock')}
         </MenuItem>
       ),
     },

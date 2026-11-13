@@ -3,6 +3,7 @@ package io.tolgee.service.key
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.notification.NotificationLinkResolver
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -14,6 +15,7 @@ class KeyTrashService(
   private val languageService: LanguageService,
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val screenshotService: ScreenshotService,
+  private val notificationLinkResolver: NotificationLinkResolver,
 ) {
   @Transactional
   fun getTrashedKeysWithTranslations(
@@ -23,6 +25,7 @@ class KeyTrashService(
     params: TranslationFilters,
   ): Page<KeyWithTranslationsView> {
     params.trashed = true
+    params.notificationKeyIds = notificationLinkResolver.keyIdsFor(projectId, params.filterNotificationId)
     val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,

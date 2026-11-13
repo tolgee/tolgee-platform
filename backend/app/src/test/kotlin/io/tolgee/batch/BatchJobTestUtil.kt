@@ -450,7 +450,7 @@ class BatchJobTestUtil(
     maxObserved.assert.isLessThanOrEqualTo(maxConcurrency)
   }
 
-  fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
+  fun getSingleUserVisibleJob(): BatchJob = entityManager.findUserVisibleBatchJobs().single()
 
   fun runSingleChunkJob(keyCount: Int): BatchJob {
     return executeInNewTransaction(transactionManager) {

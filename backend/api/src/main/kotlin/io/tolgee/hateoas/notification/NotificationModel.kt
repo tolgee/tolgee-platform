@@ -15,11 +15,13 @@ data class NotificationModel(
   var type: NotificationType,
   var originatingUser: SimpleUserAccountModel? = null,
   var linkedTask: TaskModel? = null,
+  var linkedComment: LinkedCommentModel? = null,
   var createdAt: Date?,
   var updatedAt: Date? = null,
   var entityCount: Int? = null,
   var languages: List<NotificationLanguageModel>? = null,
   var branches: List<String>? = null,
+  var sampleKeys: List<NotificationKeySampleModel>? = null,
 ) : RepresentationModel<NotificationModel>(),
   Serializable,
   Cursorable {

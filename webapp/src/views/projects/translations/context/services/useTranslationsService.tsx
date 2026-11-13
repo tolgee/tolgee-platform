@@ -172,6 +172,7 @@ export const useTranslationsService = (props: Props) => {
         ? [props.prefilter.activity]
         : undefined,
     filterFailedKeysOfJob: props.prefilter?.failedJob,
+    filterNotificationId: props.prefilter?.notification,
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
     // the task filter is hidden while prefiltered by a task, so it must not apply unseen

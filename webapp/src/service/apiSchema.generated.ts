@@ -178,6 +178,24 @@ export interface paths {
     /** Sets how often the notification digest email is sent */
     put: operations["putDigestFrequency"];
   };
+  "/v2/notification-settings/languages": {
+    /** Returns, per project, the languages the user can follow for work notifications */
+    get: operations["getNotificationLanguages"];
+  };
+  "/v2/notification-settings/languages/{projectId}": {
+    /** Sets the followed languages of the project. Empty mutes it, null goes back to the default. */
+    put: operations["putNotificationLanguages"];
+  };
+  "/v2/notification-settings/mentions": {
+    /** Returns the projects where the user commented or was mentioned, and whether their mentions are muted */
+    get: operations["getMentionSettings"];
+  };
+  "/v2/notification-settings/mentions/{projectId}": {
+    put: operations["putMentionSetting"];
+  };
+  "/v2/notification/{notificationId}": {
+    get: operations["getNotification"];
+  };
   "/v2/notifications-mark-seen": {
     put: operations["markNotificationsAsSeen"];
   };
@@ -873,6 +891,10 @@ export interface paths {
   };
   "/v2/projects/{projectId}/machine-translation-service-settings/set-default-prompt/{promptId}": {
     put: operations["setMachineTranslationSettings_1"];
+  };
+  "/v2/projects/{projectId}/mentionable-users": {
+    /** Returns people who can view the given language, except the current user: earlier commenters on the given key in that language first, then project members. `page.totalElements` is exact on the last page; on earlier pages it is a lower bound. */
+    get: operations["getMentionableUsers"];
   };
   "/v2/projects/{projectId}/my-batch-jobs": {
     /** List all batch operations started by current user */
@@ -1743,6 +1765,7 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
+        | "NOTIFICATION_FANOUT"
         | "NO_OP";
       /**
        * Format: int64
@@ -3876,6 +3899,7 @@ export interface components {
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
         | "QA_CHECK"
+        | "NOTIFICATION_FANOUT"
         | "NO_OP";
     };
     JsonNode: {
@@ -4449,6 +4473,21 @@ export interface components {
       /** Format: int64 */
       untranslatedWordCount: number;
     };
+    LinkedCommentModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      keyId: number;
+      keyName: string;
+      keyNamespace?: string;
+      /** Format: int64 */
+      languageId: number;
+      languageTag: string;
+      mentions: components["schemas"]["MentionedUserModel"][];
+      text: string;
+      /** Format: int64 */
+      translationId: number;
+    };
     LlmProviderModel: {
       apiKey?: string;
       apiUrl?: string;
@@ -4544,6 +4583,18 @@ export interface components {
       llmPrompt?: components["schemas"]["PromptDto"];
       targetLanguageIds: number[];
     };
+    /** @description Users mentioned in the text by the `<@userId>` token. Tokens of users who cannot be mentioned are not listed. */
+    MentionedUserModel: {
+      avatar?: components["schemas"]["Avatar"];
+      /**
+       * Format: int64
+       * @description Id of the user, used in the mention token `<@id>`
+       */
+      id: number;
+      /** @description The user already commented on this translation */
+      inThread: boolean;
+      name: string;
+    };
     ModifiedEntityModel: {
       description?: { [key: string]: { [key: string]: unknown } };
       entityClass: string;
@@ -4590,10 +4641,17 @@ export interface components {
     };
     NotificationDigestFrequencyRequest: {
       /**
-       * @example DAILY
+       * @example SOON
        * @enum {string}
        */
-      frequency: "DAILY" | "OFF";
+      frequency: "SOON" | "DAILY" | "OFF";
+    };
+    NotificationKeySampleModel: {
+      baseText?: string;
+      /** Format: int64 */
+      keyId: number;
+      name: string;
+      namespace?: string;
     };
     NotificationLanguageModel: {
       flagEmoji?: string;
@@ -4601,6 +4659,15 @@ export interface components {
       id: number;
       name: string;
       tag: string;
+    };
+    NotificationLanguagesRequest: {
+      /**
+       * @description Languages to follow for work notifications. Empty mutes the project, null goes back to the default picked from recent work.
+       * @example [
+       *   1000000001
+       * ]
+       */
+      languageIds?: number[];
     };
     NotificationModel: {
       branches?: string[];
@@ -4611,9 +4678,11 @@ export interface components {
       /** Format: int64 */
       id: number;
       languages?: components["schemas"]["NotificationLanguageModel"][];
+      linkedComment?: components["schemas"]["LinkedCommentModel"];
       linkedTask?: components["schemas"]["TaskModel"];
       originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
+      sampleKeys?: components["schemas"]["NotificationKeySampleModel"][];
       /** @enum {string} */
       type:
         | "TASK_ASSIGNED"
@@ -4622,12 +4691,12 @@ export interface components {
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED"
+        | "COMMENT_MENTION"
         | "KEYS_ADDED"
         | "SOURCE_CHANGED"
         | "STRINGS_TRANSLATED"
         | "STRINGS_REVIEWED"
-        | "AUTOMATICALLY_TRANSLATED"
-        | "BULK_CHANGED";
+        | "AUTOMATICALLY_TRANSLATED";
       /** Format: date-time */
       updatedAt?: string;
     };
@@ -4637,8 +4706,9 @@ export interface components {
     };
     NotificationSettingModel: {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      comments: components["schemas"]["NotificationSettingGroupModel"];
       /** @enum {string} */
-      digestFrequency: "DAILY" | "OFF";
+      digestFrequency: "SOON" | "DAILY" | "OFF";
       localization: components["schemas"]["NotificationTypeSettingModel"][];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
@@ -4657,7 +4727,7 @@ export interface components {
        * @example TASKS
        * @enum {string}
        */
-      group: "ACCOUNT_SECURITY" | "TASKS" | "LOCALIZATION";
+      group: "ACCOUNT_SECURITY" | "TASKS" | "LOCALIZATION" | "COMMENTS";
       /**
        * @description Required when group is LOCALIZATION
        * @example KEYS_ADDED
@@ -4670,12 +4740,12 @@ export interface components {
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED"
+        | "COMMENT_MENTION"
         | "KEYS_ADDED"
         | "SOURCE_CHANGED"
         | "STRINGS_TRANSLATED"
         | "STRINGS_REVIEWED"
-        | "AUTOMATICALLY_TRANSLATED"
-        | "BULK_CHANGED";
+        | "AUTOMATICALLY_TRANSLATED";
     };
     NotificationTypeSettingModel: {
       email: boolean;
@@ -4688,12 +4758,12 @@ export interface components {
         | "MFA_ENABLED"
         | "MFA_DISABLED"
         | "PASSWORD_CHANGED"
+        | "COMMENT_MENTION"
         | "KEYS_ADDED"
         | "SOURCE_CHANGED"
         | "STRINGS_TRANSLATED"
         | "STRINGS_REVIEWED"
-        | "AUTOMATICALLY_TRANSLATED"
-        | "BULK_CHANGED";
+        | "AUTOMATICALLY_TRANSLATED";
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -4949,6 +5019,12 @@ export interface components {
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelMentionedUserModel: {
+      _embedded?: {
+        users?: components["schemas"]["MentionedUserModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5722,6 +5798,16 @@ export interface components {
       /** Format: int64 */
       projectId: number;
     };
+    ProjectMentionSettingModel: {
+      /** @description Mentions from this project do not notify the user */
+      muted: boolean;
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+    };
+    ProjectMentionSettingRequest: {
+      muted: boolean;
+    };
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
@@ -5753,6 +5839,19 @@ export interface components {
       useBranching: boolean;
       useNamespaces: boolean;
       useQaChecks: boolean;
+    };
+    ProjectNotificationLanguagesModel: {
+      /** @description Non-base languages the user can edit or review in this project */
+      availableLanguages: components["schemas"]["NotificationLanguageModel"][];
+      followedLanguageIds: number[];
+      /** Format: int64 */
+      projectId: number;
+      projectName: string;
+      /**
+       * @description DEFAULT: picked from recent work until the user chooses, CHOSEN: the user's choice, MUTED: the user chose no languages
+       * @enum {string}
+       */
+      state: "DEFAULT" | "CHOSEN" | "MUTED";
     };
     ProjectStatistics: {
       /** Format: int64 */
@@ -7537,6 +7636,8 @@ export interface components {
        * @description Id of translation comment record
        */
       id: number;
+      /** @description Users mentioned in the text by the `<@userId>` token. Tokens of users who cannot be mentioned are not listed. */
+      mentions: components["schemas"]["MentionedUserModel"][];
       /**
        * @description State of translation
        * @enum {string}
@@ -10637,6 +10738,236 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NotificationDigestFrequencyRequest"];
+      };
+    };
+  };
+  /** Returns, per project, the languages the user can follow for work notifications */
+  getNotificationLanguages: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectNotificationLanguagesModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Sets the followed languages of the project. Empty mutes it, null goes back to the default. */
+  putNotificationLanguages: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationLanguagesRequest"];
+      };
+    };
+  };
+  /** Returns the projects where the user commented or was mentioned, and whether their mentions are muted */
+  getMentionSettings: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ProjectMentionSettingModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  putMentionSetting: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProjectMentionSettingRequest"];
+      };
+    };
+  };
+  getNotification: {
+    parameters: {
+      path: {
+        notificationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["NotificationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -20028,6 +20359,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Selects only keys affected by the changes of a notification of the current user. When the notification does not belong to the current user or project, no keys are returned. */
+        filterNotificationId?: number;
         /** Select only keys which were not successfully translated by batch job with provided id */
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
@@ -20305,6 +20638,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Selects only keys affected by the changes of a notification of the current user. When the notification does not belong to the current user or project, no keys are returned. */
+        filterNotificationId?: number;
         /** Select only keys which were not successfully translated by batch job with provided id */
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
@@ -20626,6 +20961,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Selects only keys affected by the changes of a notification of the current user. When the notification does not belong to the current user or project, no keys are returned. */
+        filterNotificationId?: number;
         /** Select only keys which were not successfully translated by batch job with provided id */
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
@@ -22632,6 +22969,68 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns people who can view the given language, except the current user: earlier commenters on the given key in that language first, then project members. `page.totalElements` is exact on the last page; on earlier pages it is a lower bound. */
+  getMentionableUsers: {
+    parameters: {
+      query: {
+        /** Language of the commented translation */
+        languageId: number;
+        /** Key of the commented translation, its earlier commenters are listed first */
+        keyId?: number;
+        /** Case-insensitive part of the user name */
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelMentionedUserModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -26713,6 +27112,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Selects only keys affected by the changes of a notification of the current user. When the notification does not belong to the current user or project, no keys are returned. */
+        filterNotificationId?: number;
         /** Select only keys which were not successfully translated by batch job with provided id */
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */
@@ -27202,6 +27603,8 @@ export interface operations {
         filterNotOutdatedLanguage?: string[];
         /** Selects only key affected by activity with specidfied revision ID */
         filterRevisionId?: number[];
+        /** Selects only keys affected by the changes of a notification of the current user. When the notification does not belong to the current user or project, no keys are returned. */
+        filterNotificationId?: number;
         /** Select only keys which were not successfully translated by batch job with provided id */
         filterFailedKeysOfJob?: number;
         /** Select only keys which are in specified task */

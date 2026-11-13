@@ -22,6 +22,7 @@ class NotificationSettingsModelAssembler :
     NotificationSettingModel(
       accountSecurity = view.groupModel(NotificationTypeGroup.ACCOUNT_SECURITY),
       tasks = view.groupModel(NotificationTypeGroup.TASKS),
+      comments = view.groupModel(NotificationTypeGroup.COMMENTS),
       localization =
         NotificationType.GROUPED.map { type ->
           NotificationTypeSettingModel(

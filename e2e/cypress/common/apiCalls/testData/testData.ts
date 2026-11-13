@@ -289,3 +289,6 @@ export const qaTestData = generateTestDataObject('qa');
 export const notificationDigestTestData = generateTestDataObject(
   'notification-digest'
 );
+
+export const notificationsPocTestData =
+  generateTestDataObject('notifications-poc');

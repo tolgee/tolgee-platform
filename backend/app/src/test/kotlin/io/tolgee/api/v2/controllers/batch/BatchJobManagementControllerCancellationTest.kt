@@ -84,13 +84,13 @@ class BatchJobManagementControllerCancellationTest :
         batchJobConcurrentLauncher.runningJobs.size >= 5
       }
 
-      val job = util.getSingleJob()
+      val job = util.getSingleUserVisibleJob()
       performProjectAuthPut("batch-jobs/${job.id}/cancel")
         .andIsOk
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          val currentJob = util.getSingleJob()
+          val currentJob = util.getSingleUserVisibleJob()
           currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
 
           verify(batchJobActivityFinalizer, times(1))
@@ -145,7 +145,7 @@ class BatchJobManagementControllerCancellationTest :
     performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
 
     util
-      .getSingleJob()
+      .getSingleUserVisibleJob()
       .status.assert
       .isEqualTo(BatchJobStatus.CANCELLED)
   }
