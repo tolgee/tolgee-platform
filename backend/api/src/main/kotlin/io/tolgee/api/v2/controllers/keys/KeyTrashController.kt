@@ -75,10 +75,11 @@ class KeyTrashController(
     @ModelAttribute
     params: TranslationFilters,
   ): PagedModel<TrashedKeyWithTranslationsModel> {
+    authenticationFacade.requireNotGuest()
     val data =
       keyTrashService.getTrashedKeysWithTranslations(
         projectId = projectHolder.project.id,
-        userId = authenticationFacade.authenticatedUserOrGuest.id,
+        userId = authenticationFacade.authenticatedUser.id,
         pageable = pageable,
         params = params,
       )
@@ -94,12 +95,13 @@ class KeyTrashController(
     @ModelAttribute
     params: TranslationFilters,
   ): SelectAllResponse {
+    authenticationFacade.requireNotGuest()
     params.trashed = true
     val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,
         projectHolder.project.id,
-        authenticationFacade.authenticatedUserOrGuest.id,
+        authenticationFacade.authenticatedUser.id,
       )
     return SelectAllResponse(
       translationService.getSelectAllKeys(
@@ -117,6 +119,7 @@ class KeyTrashController(
   fun listDeleters(
     @RequestParam(required = false) branch: String?,
   ): CollectionModel<SimpleUserAccountModel> {
+    authenticationFacade.requireNotGuest()
     val users = keyService.findDistinctDeleters(projectHolder.project.id, branch)
     return simpleUserAccountModelAssembler.toCollectionModel(users)
   }

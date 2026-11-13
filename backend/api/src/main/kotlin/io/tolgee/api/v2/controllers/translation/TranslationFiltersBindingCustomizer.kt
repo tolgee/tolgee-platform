@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.InitBinder
  * different default attribute name for every [TranslationFilters] subclass, so name-keyed
  * registration silently misses future endpoints. With constructor data binding the binder
  * initializes before the target instance exists, so `targetType` must be checked too.
+ *
+ * `trashed` is set by the trash endpoints only. Binding it from a request would turn every endpoint
+ * that takes these filters into a trash listing, also for callers the trash is closed to.
  */
 @ControllerAdvice
 class TranslationFiltersBindingCustomizer {
@@ -23,6 +26,7 @@ class TranslationFiltersBindingCustomizer {
     if (!bindsTranslationFilters(binder)) {
       return
     }
+    binder.setDisallowedFields(TranslationFilters::trashed.name)
     TranslationFilters.VERBATIM_LIST_PARAMS.forEach { param ->
       binder.registerCustomEditor(
         List::class.java,

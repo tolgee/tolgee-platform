@@ -64,7 +64,6 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     performGet("$project/translations/en,cs").andIsOk.andAssertThatJson {
       node("en").isObject.containsValue("Hello")
     }
-    performGet("$project/keys/trash").andIsOk
     performGet("$project/languages").andIsOk
     performGet("$project/stats").andIsOk.andAssertThatJson {
       node("membersCount").isEqualTo(0)
@@ -109,6 +108,26 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
       "$project/keys/${key.id}/complex-update",
       mapOf("name" to "renamed-by-guest"),
     ).andIsForbidden
+  }
+
+  @Test
+  fun `the trash is closed to a guest and stays open to a signed-in non-member`() {
+    val project = url(testData.publicProject)
+    val trash = "$project/keys/trash"
+    userAccount = testData.user
+    performAuthDelete("$project/keys/${testData.publicKeys[2].self.id}").andIsOk
+
+    performGet(trash).andIsUnauthorized
+    performGet("$trash/select-all").andIsUnauthorized
+    performGet("$trash/deleters").andIsUnauthorized
+    performGet("$project/translations?trashed=true").andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(2)
+    }
+
+    userAccount = testData.bob
+    performAuthGet(trash).andIsOk.andAssertThatJson {
+      node("_embedded.keys").isArray.hasSize(1)
+    }
   }
 
   @Test
