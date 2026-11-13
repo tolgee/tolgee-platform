@@ -7,6 +7,7 @@ import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
 import { billingModule } from 'tg.billing/billingModule';
+import { moduleErrorTranslator } from '../translationTools/moduleErrorTranslator';
 
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { PublicOnlyRoute } from '../component/common/PublicOnlyRoute';
@@ -111,6 +112,8 @@ export { usePastDueBanner } from '../ee/billing/component/PastDueBanner';
 export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
 export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 export { OnboardingSurveyGate } from 'tg.billing/onboardingSurvey/OnboardingSurveyGate';
+
+moduleErrorTranslator.translate = billingModule.translateError;
 
 export const billingMenuItems = billingModule.billingMenuItems as React.FC<
   React.PropsWithChildren<BillingMenuItemsProps>

@@ -1,3 +1,52 @@
+## [3.242.7](https://github.com/tolgee/tolgee-platform/compare/v3.242.6...v3.242.7) (2026-11-12)
+
+
+### Performance Improvements
+
+* drop indexes that no query can use ([#4046](https://github.com/tolgee/tolgee-platform/issues/4046)) ([a67f725](https://github.com/tolgee/tolgee-platform/commit/a67f725eee307b7e7ed2d63c94566c4a84d34879))
+
+## [3.242.6](https://github.com/tolgee/tolgee-platform/compare/v3.242.5...v3.242.6) (2026-11-11)
+
+
+### Bug Fixes
+
+* self-hosted AI translation of long texts times out too early ([#4045](https://github.com/tolgee/tolgee-platform/issues/4045)) ([d5fd514](https://github.com/tolgee/tolgee-platform/commit/d5fd5149267c70b5aeb54936c48975a75231576b)), closes [#4042](https://github.com/tolgee/tolgee-platform/issues/4042)
+
+## [3.242.5](https://github.com/tolgee/tolgee-platform/compare/v3.242.4...v3.242.5) (2026-11-10)
+
+
+### Performance Improvements
+
+* merge preview loads keys and snapshots as plain rows instead of entities ([#4041](https://github.com/tolgee/tolgee-platform/issues/4041)) ([065b111](https://github.com/tolgee/tolgee-platform/commit/065b1119ed985866bd72ad283e06b56d193efd28))
+
+## [3.242.4](https://github.com/tolgee/tolgee-platform/compare/v3.242.3...v3.242.4) (2026-11-06)
+
+
+### Bug Fixes
+
+* accept current passwords longer than 50 characters in account settings ([#4034](https://github.com/tolgee/tolgee-platform/issues/4034)) ([4845416](https://github.com/tolgee/tolgee-platform/commit/48454167968b89ecf426937da366cac2a51621cd)), closes [#4015](https://github.com/tolgee/tolgee-platform/issues/4015)
+
+## [3.242.3](https://github.com/tolgee/tolgee-platform/compare/v3.242.2...v3.242.3) (2026-11-06)
+
+
+### Bug Fixes
+
+* update Tolgee SDK to 7.3.0 for in-context suggestions ([#4036](https://github.com/tolgee/tolgee-platform/issues/4036)) ([4c271b3](https://github.com/tolgee/tolgee-platform/commit/4c271b39acf38eed6f23d8fd586a6095a7013a73)), closes [tolgee/tolgee-js#3539](https://github.com/tolgee/tolgee-js/issues/3539) [#3780](https://github.com/tolgee/tolgee-platform/issues/3780)
+
+## [3.242.2](https://github.com/tolgee/tolgee-platform/compare/v3.242.1...v3.242.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* set projectId in the webapp Tolgee SDK config ([#4035](https://github.com/tolgee/tolgee-platform/issues/4035)) ([b47f6ce](https://github.com/tolgee/tolgee-platform/commit/b47f6cef56113ee92cca2b126d79957791a40ad0))
+
+## [3.242.1](https://github.com/tolgee/tolgee-platform/compare/v3.242.0...v3.242.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* Baidu machine translation drops lines and breaks HTML tags ([#4022](https://github.com/tolgee/tolgee-platform/issues/4022)) ([870181e](https://github.com/tolgee/tolgee-platform/commit/870181e6348c204146b42c332289e5d6686207ee))
+
 # [3.242.0](https://github.com/tolgee/tolgee-platform/compare/v3.241.4...v3.242.0) (2026-11-03)
 
 

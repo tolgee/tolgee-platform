@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -28,6 +29,7 @@ import java.util.Date
 class UserMfaControllerTest : AuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"
+    private val LONG_PASSWORD = "a".repeat(60)
   }
 
   private val encodedKey: ByteArray = Base32().decode(TOTP_KEY)
@@ -54,6 +56,26 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   private fun persistedUser(): UserAccount = userAccountService.findActive(initialUsername)!!
+
+  private fun loginAsUserWithLongPassword(): UserAccount =
+    dbPopulator.createUserIfNotExists("long-password@test.com", LONG_PASSWORD).also { loginAsUser(it) }
+
+  private fun withUnverifiedEmail(fn: () -> Unit) {
+    val needsEmailVerification = tolgeeProperties.authentication.needsEmailVerification
+    tolgeeProperties.authentication.needsEmailVerification = true
+    val code =
+      executeInNewTransaction {
+        emailVerificationService.createForUser(userAccountService.get(userAccount!!.id))!!.code!!
+      }
+    try {
+      fn()
+    } finally {
+      tolgeeProperties.authentication.needsEmailVerification = needsEmailVerification
+      // UserAccount.emailVerification is the inverse side, so the row cannot be
+      // deleted directly without a TransientPropertyValueException on commit.
+      executeInNewTransaction { emailVerificationService.verify(userAccount!!.id, code) }
+    }
+  }
 
   @BeforeEach
   fun setUp() {
@@ -126,6 +148,78 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
 
     performAuthPut("/v2/user/mfa/recovery", requestDto).andIsOk
     assertThat(persistedUser().mfaRecoveryCodes).isNotEmpty
+  }
+
+  @Test
+  fun `it refuses to enable MFA for an unverified email`() {
+    val requestDto =
+      UserTotpEnableRequestDto(
+        totpKey = TOTP_KEY,
+        otp = mfaService.generateStringCode(encodedKey),
+        password = initialPassword,
+      )
+
+    withUnverifiedEmail {
+      performAuthPut("/v2/user/mfa/totp", requestDto).andIsForbidden.andAssertThatJson {
+        node("code").isEqualTo("email_not_verified")
+      }
+    }
+    assertThat(persistedUser().totpKey).isNull()
+  }
+
+  @Test
+  fun `it refuses to regenerate MFA recovery codes for an unverified email`() {
+    enableMfa()
+    val requestDto = UserMfaRecoveryRequestDto(password = initialPassword)
+
+    withUnverifiedEmail {
+      performAuthPut("/v2/user/mfa/recovery", requestDto).andIsForbidden.andAssertThatJson {
+        node("code").isEqualTo("email_not_verified")
+      }
+    }
+    assertThat(persistedUser().mfaRecoveryCodes).isEmpty()
+  }
+
+  @Test
+  fun `it disables MFA for an unverified email`() {
+    enableMfa()
+    val requestDto = UserTotpDisableRequestDto(password = initialPassword)
+
+    withUnverifiedEmail {
+      performAuthDelete("/v2/user/mfa/totp", requestDto).andIsOk
+    }
+    assertThat(persistedUser().totpKey).isNull()
+  }
+
+  @Test
+  fun `it enables MFA with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    retry {
+      val requestDto =
+        UserTotpEnableRequestDto(
+          totpKey = TOTP_KEY,
+          otp = mfaService.generateStringCode(encodedKey),
+          password = LONG_PASSWORD,
+        )
+      performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
+    }
+    assertThat(userAccountService.get(user.id).totpKey).isEqualTo(encodedKey)
+  }
+
+  @Test
+  fun `it disables MFA with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    enableMfa()
+    performAuthDelete("/v2/user/mfa/totp", UserTotpDisableRequestDto(password = LONG_PASSWORD)).andIsOk
+    assertThat(userAccountService.get(user.id).totpKey).isNull()
+  }
+
+  @Test
+  fun `it regenerates MFA recovery codes with a password longer than 50 characters`() {
+    val user = loginAsUserWithLongPassword()
+    enableMfa()
+    performAuthPut("/v2/user/mfa/recovery", UserMfaRecoveryRequestDto(password = LONG_PASSWORD)).andIsOk
+    assertThat(userAccountService.get(user.id).mfaRecoveryCodes).isNotEmpty
   }
 
   @Test

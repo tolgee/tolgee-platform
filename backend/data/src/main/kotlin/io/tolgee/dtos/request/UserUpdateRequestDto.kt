@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.ProfileVisibility
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserUpdateRequestDto(
@@ -12,7 +11,6 @@ data class UserUpdateRequestDto(
   var name: String = "",
   @field:NotBlank
   var email: String = "",
-  @field:Size(max = 50)
   var currentPassword: String? = null,
   @Schema(
     description =

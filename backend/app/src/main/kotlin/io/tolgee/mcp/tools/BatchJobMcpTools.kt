@@ -8,6 +8,7 @@ import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
@@ -47,20 +48,22 @@ class BatchJobMcpTools(
     ) { request ->
       mcpRequestContext.executeAs(getBatchJobSpec, request.arguments.getProjectId()) {
         val jobId = request.arguments.requireLong("jobId")
-        val view = batchJobService.getView(jobId)
-        if (view.batchJob.project?.id != projectHolder.project.id) {
-          return@executeAs errorResult("Batch job $jobId does not belong to this project")
+        executeInNewTransaction(transactionManager) {
+          val view = batchJobService.getView(projectHolder.project.id, jobId)
+          if (!authenticationFacade.isAuthorSelfAccess(view.batchJob.author?.id)) {
+            securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_VIEW)
+          }
+          val result =
+            mapOf(
+              "id" to view.batchJob.id,
+              "status" to view.batchJob.status.name,
+              "type" to view.batchJob.type.name,
+              "progress" to view.progress,
+              "totalItems" to view.batchJob.totalItems,
+              "errorMessage" to view.errorMessage?.code,
+            )
+          textResult(objectMapper.writeValueAsString(result))
         }
-        val result =
-          mapOf(
-            "id" to view.batchJob.id,
-            "status" to view.batchJob.status.name,
-            "type" to view.batchJob.type.name,
-            "progress" to view.progress,
-            "totalItems" to view.batchJob.totalItems,
-            "errorMessage" to view.errorMessage?.code,
-          )
-        textResult(objectMapper.writeValueAsString(result))
       }
     }
 

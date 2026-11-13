@@ -1,18 +1,15 @@
 package io.tolgee.ee.service.branching.merging
 
-import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
-import io.tolgee.repository.KeyRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BranchMergeAnalyzer(
-  private val keyRepository: KeyRepository,
-  private val branchSnapshotService: BranchSnapshotService,
+  private val branchMergeKeyLoader: BranchMergeKeyLoader,
 ) {
   private data class KeySignature(
     val namespace: String?,
@@ -21,24 +18,12 @@ class BranchMergeAnalyzer(
 
   @Transactional
   fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
-    val snapshots = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id)
-    val sourceBranch = merge.sourceBranch
-    val targetBranch = merge.targetBranch
+    val loaded = branchMergeKeyLoader.load(merge)
+    val snapshots = loaded.snapshots
+    val sourceKeys = loaded.sourceKeys
+    val targetKeys = loaded.targetKeys
 
     val changes = mutableListOf<BranchMergeChange>()
-
-    val sourceKeys =
-      keyRepository.findAllDetailedByBranch(
-        projectId = sourceBranch.project.id,
-        branchId = sourceBranch.id,
-        includeOrphanDefault = sourceBranch.isDefault,
-      )
-    val targetKeys =
-      keyRepository.findAllDetailedByBranch(
-        projectId = targetBranch.project.id,
-        branchId = targetBranch.id,
-        includeOrphanDefault = targetBranch.isDefault,
-      )
 
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }

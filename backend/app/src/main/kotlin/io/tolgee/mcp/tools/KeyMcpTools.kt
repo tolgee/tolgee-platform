@@ -9,6 +9,7 @@ import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
@@ -19,6 +20,7 @@ import tools.jackson.databind.ObjectMapper
 class KeyMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
+  private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
@@ -94,26 +96,35 @@ class KeyMcpTools(
       spec = searchKeysSpec,
     ) { request ->
       mcpRequestContext.executeAs(searchKeysSpec, request.arguments.getProjectId()) {
-        val pageNum = request.arguments.getInt("page") ?: 0
-        val results =
-          keyService.searchKeys(
-            search = request.arguments.requireString("query"),
-            languageTag = request.arguments.getString("languageTag"),
-            project = projectHolder.project,
-            branch = request.arguments.getString("branch"),
-            pageable = PageRequest.of(pageNum, 50),
-          )
-        val result =
-          pagedResponse(results) { r ->
-            mapOf(
-              "keyId" to r.id,
-              "keyName" to r.name,
-              "keyNamespace" to r.namespace,
-              "baseTranslation" to r.baseTranslation,
-              "translation" to r.translation,
-            )
+        executeInNewTransaction(transactionManager) {
+          val languageTag = request.arguments.getString("languageTag")
+          languageTag?.let {
+            securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it))
           }
-        textResult(objectMapper.writeValueAsString(result))
+          projectHolder.projectEntity.baseLanguage?.let {
+            securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
+          }
+          val pageNum = request.arguments.getInt("page") ?: 0
+          val results =
+            keyService.searchKeys(
+              search = request.arguments.requireString("query"),
+              languageTag = languageTag,
+              project = projectHolder.project,
+              branch = request.arguments.getString("branch"),
+              pageable = PageRequest.of(pageNum, 50),
+            )
+          val result =
+            pagedResponse(results) { r ->
+              mapOf(
+                "keyId" to r.id,
+                "keyName" to r.name,
+                "keyNamespace" to r.namespace,
+                "baseTranslation" to r.baseTranslation,
+                "translation" to r.translation,
+              )
+            }
+          textResult(objectMapper.writeValueAsString(result))
+        }
       }
     }
 
@@ -265,8 +276,9 @@ class KeyMcpTools(
           if (notFound.isNotEmpty()) {
             errorResult("Keys not found: ${notFound.joinToString(", ")}")
           } else {
+            keys.forEach { securityService.checkBranchModify(it) }
             val ids = keys.map { it.id }.toSet()
-            keyService.hardDeleteMultiple(ids)
+            keyService.softDeleteMultiple(ids)
             textResult(
               objectMapper.writeValueAsString(
                 mapOf("deleted" to true, "keyCount" to ids.size),

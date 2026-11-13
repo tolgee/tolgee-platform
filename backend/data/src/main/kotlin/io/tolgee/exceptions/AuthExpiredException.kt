@@ -1,7 +1,7 @@
 package io.tolgee.exceptions
 
-import io.tolgee.constants.Message
+import io.tolgee.constants.MessageInterface
 
 class AuthExpiredException(
-  message: Message,
+  message: MessageInterface,
 ) : AuthenticationException(message)

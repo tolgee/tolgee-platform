@@ -35,6 +35,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @ContextRecreatingTest
 @SpringBootTest
 class V2UserControllerTest : AuthorizedControllerTest() {
+  companion object {
+    private val LONG_PASSWORD = "a".repeat(60)
+  }
+
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
 
@@ -99,6 +103,32 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     performAuthPut("/v2/user", requestDTO).andIsOk
     assertThat(userAccountService.findActive("ben.new@example.com")!!.username)
       .isEqualTo("ben.new@example.com")
+  }
+
+  @Test
+  fun `it updates the user profile with a current password longer than 50 characters`() {
+    loginAsUser(dbPopulator.createUserIfNotExists("long-password@test.com", LONG_PASSWORD))
+    val requestDTO =
+      UserUpdateRequestDto(
+        email = "long-password-new@test.com",
+        name = "Long password user",
+        currentPassword = LONG_PASSWORD,
+      )
+    performAuthPut("/v2/user", requestDTO).andIsOk
+    assertThat(userAccountService.findActive(requestDTO.email)).isNotNull
+  }
+
+  @Test
+  fun `it updates the user password with a current password longer than 50 characters`() {
+    val user = dbPopulator.createUserIfNotExists("long-password-change@test.com", LONG_PASSWORD)
+    loginAsUser(user)
+    val requestDTO =
+      UserUpdatePasswordRequestDto(
+        password = "super new password",
+        currentPassword = LONG_PASSWORD,
+      )
+    performAuthPut("/v2/user/password", requestDTO).andIsOk
+    assertThat(passwordEncoder.matches(requestDTO.password, userAccountService.get(user.id).password)).isTrue
   }
 
   @Test
