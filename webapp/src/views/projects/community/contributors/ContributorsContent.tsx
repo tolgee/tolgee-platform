@@ -269,7 +269,9 @@ export const ContributorsContent = () => {
           <CommunityActivityChart
             buckets={activity.data.buckets}
             granularity={isDaily ? 'day' : 'week'}
-            axisRange={typeof period === 'number' ? dates : undefined}
+            axisRange={
+              dates.to ? { from: dates.from, to: dates.to } : undefined
+            }
           />
         ) : activity.isError ? (
           <QueryErrorAlert code={activity.error?.code} />

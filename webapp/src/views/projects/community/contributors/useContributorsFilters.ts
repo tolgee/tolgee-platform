@@ -84,7 +84,7 @@ export const useContributorsFilters = (
   };
 };
 
-const periodRange = (period: Period) => {
+const periodRange = (period: Period): { from: string; to?: string } => {
   if (typeof period === 'number') {
     return { from: `${period}-01-01`, to: `${period}-12-31` };
   }
@@ -93,10 +93,7 @@ const periodRange = (period: Period) => {
     period === 'month'
       ? subDays(today, 29)
       : subMonths(today, period === 'quarter' ? 3 : 12);
-  return {
-    from: formatISO(from, { representation: 'date' }),
-    to: formatISO(today, { representation: 'date' }),
-  };
+  return { from: formatISO(from, { representation: 'date' }) };
 };
 
 const SORT_PARAMS: Record<SortValue, string[]> = {
