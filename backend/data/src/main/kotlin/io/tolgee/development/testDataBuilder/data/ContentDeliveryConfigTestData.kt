@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.formats.ExportFormat
 import io.tolgee.model.automations.AutomationAction
 import io.tolgee.model.automations.AutomationTrigger
 import io.tolgee.model.automations.AutomationTriggerType
@@ -76,7 +77,37 @@ class ContentDeliveryConfigTestData : BaseTestData() {
   val keyWithTranslation =
     this.projectBuilder.addKey("key") {
       addTranslation("en", "Hello")
+      addTag("release")
+      addTag("wip")
     }
+
+  val hiddenParamsContentDeliveryConfig =
+    projectBuilder.addContentDeliveryConfig {
+      name = "Hidden params"
+      format = ExportFormat.JSON
+      structureDelimiter = '/'
+      filterKeyPrefix = "release."
+      filterKeyIdNot = listOf(999999L)
+      fileStructureTemplate = "{languageTag}/messages.{extension}"
+    }
+
+  val legacyTagContentDeliveryConfig =
+    projectBuilder.addContentDeliveryConfig {
+      name = "Legacy tag"
+      filterTag = "legacy"
+      filterTagIn = listOf("in-list")
+    }
+
+  init {
+    root.rawUpdateAfterSave(
+      "update content_delivery_config set filter_key_id = cast(:filterKeyId as jsonb) where id = :id",
+    ) {
+      mapOf(
+        "filterKeyId" to "[${keyWithTranslation.self.id}]",
+        "id" to hiddenParamsContentDeliveryConfig.self.id,
+      )
+    }
+  }
 
   // A separate project (owned by an unrelated organization) with its own storage.
   // Used to verify that access to a storage by id from another project is rejected.

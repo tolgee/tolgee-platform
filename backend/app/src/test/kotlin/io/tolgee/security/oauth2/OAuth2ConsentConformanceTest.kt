@@ -8,6 +8,30 @@ import org.junit.jupiter.api.Test
  * The consent submission: who may resolve a pending authorization, what they may approve, and what a denial does.
  */
 class OAuth2ConsentConformanceTest : AbstractOAuth2ConformanceTest() {
+  private fun consentInfo(state: String) = json(driver.consentInfo(jwt(), state).andReturn())
+
+  @Test
+  fun `the consent screen is told when the code goes to something on the user's own machine`() {
+    val loopback = driver.startPendingConsent(jwt(), OTHER_CLIENT_ID, OTHER_REDIRECT)
+
+    consentInfo(loopback.state)
+      .get("redirectsToLocalApp")
+      .asBoolean()
+      .assert
+      .isTrue()
+  }
+
+  @Test
+  fun `a redirect to a website is not reported as a local application`() {
+    val website = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
+
+    consentInfo(website.state)
+      .get("redirectsToLocalApp")
+      .asBoolean()
+      .assert
+      .isFalse()
+  }
+
   @Test
   fun `denying consent redirects to the client with access_denied and leaves nothing to approve later`() {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
@@ -35,6 +59,16 @@ class OAuth2ConsentConformanceTest : AbstractOAuth2ConformanceTest() {
       .andReturn()
       .response.status.assert
       .isEqualTo(404)
+  }
+
+  @Test
+  fun `consent cannot approve a scope the server dropped as unknown`() {
+    val pending =
+      driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT, scope = "translations.view not.a.tolgee.scope")
+    driver
+      .consentRedirect(pending, approvedScopes = listOf("translations.view", "not.a.tolgee.scope"))
+      .assert
+      .contains("error=invalid_scope")
   }
 
   @Test

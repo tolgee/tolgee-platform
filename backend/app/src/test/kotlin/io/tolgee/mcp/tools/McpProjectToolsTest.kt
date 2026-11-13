@@ -2,13 +2,17 @@ package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
+import io.tolgee.development.testDataBuilder.data.ProjectStatsBranchingTestData
+import io.tolgee.model.Pat
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class McpProjectToolsTest : AbstractMcpTest() {
   lateinit var data: McpPatTestData
   lateinit var client: McpSyncClient
+  var branchedData: ProjectStatsBranchingTestData? = null
 
   @BeforeEach
   fun setup() {
@@ -80,5 +84,32 @@ class McpProjectToolsTest : AbstractMcpTest() {
     assertThat(json.isArray).isTrue()
     assertThat(json.size()).isGreaterThan(0)
     assertThat(json[0].has("languageTag")).isTrue()
+  }
+
+  @Test
+  fun `get_project_language_statistics returns one entry per language when null-branch rows exist`() {
+    var pat: Pat? = null
+    val branched = ProjectStatsBranchingTestData()
+    branchedData = branched
+    branched.userAccountBuilder.build { addPat { pat = this } }
+    testDataService.saveTestData(branched.root)
+    val projectId = branched.project.id
+    languageStatsService.refreshLanguageStats(projectId, null)
+    languageStatsService.refreshLanguageStats(projectId, branched.mainBranch.id)
+
+    val json =
+      callToolAndGetJson(
+        createMcpClientWithPat(pat!!.token!!),
+        "get_project_language_statistics",
+        mapOf("projectId" to projectId),
+      )
+
+    val tags = (0 until json.size()).map { json[it]["languageTag"].asString() }
+    assertThat(tags).containsExactlyInAnyOrder("en", "de")
+  }
+
+  @AfterEach
+  fun cleanupBranchedData() {
+    branchedData?.let { testDataService.cleanTestData(it.root) }
   }
 }

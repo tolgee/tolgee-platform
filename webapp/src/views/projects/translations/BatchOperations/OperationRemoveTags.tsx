@@ -79,7 +79,7 @@ export const OperationRemoveTags = ({ disabled, onStart }: Props) => {
         <TagInput
           onAdd={handleAddTag}
           placeholder={t('batch_operation_tag_remove_input_placeholder')}
-          noNew
+          canAddNew={() => false}
           filtered={tags}
         />
       </StyledTags>

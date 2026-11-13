@@ -20,9 +20,12 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     setForcedDate(Date())
   }
 
+  private var testData: ImportTestData? = null
+
   @AfterEach
   fun clear() {
     clearForcedDate()
+    testData?.let { testDataService.cleanTestData(it.root) }
   }
 
   @Test
@@ -251,6 +254,24 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     ).andIsOk
       .andPrettyPrint
       .andAssertThatJson { node("_embedded.translations").isArray.hasSize(3) }
+  }
+
+  @Test
+  fun `translations are not duplicated when multiple users stored import settings`() {
+    val testData = ImportTestData()
+    testData.addImportSettingsOfTwoMembers()
+    testDataService.saveTestData(testData.root)
+    this.testData = testData
+
+    loginAsUser(testData.userAccount.username)
+    performAuthGet(
+      "/v2/projects/${testData.project.id}" +
+        "/import/result/languages/${testData.importEnglish.id}/translations",
+    ).andIsOk
+      .andAssertThatJson {
+        node("_embedded.translations").isArray.hasSize(5)
+        node("page.totalElements").isEqualTo(5)
+      }
   }
 
   @Test

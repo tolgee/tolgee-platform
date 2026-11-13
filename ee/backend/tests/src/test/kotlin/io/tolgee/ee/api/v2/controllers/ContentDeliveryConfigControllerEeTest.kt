@@ -188,7 +188,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   fun `lists content delivery configs`() {
     performProjectAuthGet("content-delivery-configs").andIsOk.andAssertThatJson {
       node("_embedded.contentDeliveryConfigs") {
-        isArray.hasSize(5)
+        isArray.hasSize(7)
       }
     }
   }

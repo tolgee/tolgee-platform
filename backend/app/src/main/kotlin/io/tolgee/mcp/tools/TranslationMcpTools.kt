@@ -1,6 +1,6 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
+import io.tolgee.api.v2.controllers.translation.CreateOrUpdateTranslationsFacade
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
@@ -8,6 +8,8 @@ import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
@@ -19,6 +21,9 @@ class TranslationMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val translationService: TranslationService,
+  private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
+  private val securityService: SecurityService,
+  private val languageService: LanguageService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
@@ -26,12 +31,14 @@ class TranslationMcpTools(
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
   private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
 
-  override fun register(server: McpSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "get_translations",
+      "Get translations",
+      McpToolEffect.READ_ONLY,
       "Get translations for a specific key in a Tolgee project. Returns translations in all project languages, or only the specified languages if provided.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
@@ -40,6 +47,7 @@ class TranslationMcpTools(
           "Optional: language tags to filter by (e.g. ['en', 'de']). If omitted, returns all languages.",
         )
       },
+      spec = getTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getTranslationsSpec, request.arguments.getProjectId()) {
         val key =
@@ -53,13 +61,19 @@ class TranslationMcpTools(
         if (key == null) {
           errorResult("Key not found")
         } else {
-          val languageTags = request.arguments.getStringList("languages")
+          val requestedTags =
+            request.arguments
+              .getStringList("languages")
+              ?.takeIf { it.isNotEmpty() }
+              ?.toSet()
+              ?: languageService.findAll(projectHolder.project.id).map { it.tag }.toSet()
+          val permittedTags =
+            securityService.filterViewPermissionByTag(projectHolder.project.id, requestedTags)
           val translations =
-            if (languageTags.isNullOrEmpty()) {
-              translationService.getAllByKeyId(key.id)
-            } else {
-              translationService.findForKeyByLanguages(key, languageTags)
-            }
+            permittedTags
+              .takeIf { it.isNotEmpty() }
+              ?.let { translationService.findForKeyByLanguages(key, it) }
+              .orEmpty()
           val result =
             mapOf(
               "keyId" to key.id,
@@ -79,11 +93,13 @@ class TranslationMcpTools(
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "set_translation",
+      "Set translation",
+      McpToolEffect.DESTRUCTIVE,
       "Set or update translations for a key in one or more languages. The key must already exist — use create_keys to create it first.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         stringMap(
@@ -93,6 +109,7 @@ class TranslationMcpTools(
         )
         string("branch", "Optional: branch name")
       },
+      spec = setTranslationsSpec,
     ) { request ->
       mcpRequestContext.executeAs(setTranslationsSpec, request.arguments.getProjectId()) {
         val dto =
@@ -113,13 +130,13 @@ class TranslationMcpTools(
             )
 
           if (key != null) {
-            val translations = translationService.setForKey(key, dto.translations)
+            val response = createOrUpdateTranslationsFacade.setTranslations(dto, key)
             val result =
               mapOf(
-                "keyId" to key.id,
-                "keyName" to key.name,
+                "keyId" to response.keyId,
+                "keyName" to response.keyName,
                 "translations" to
-                  translations.map { (tag, t) ->
+                  response.translations.map { (tag, t) ->
                     mapOf("languageTag" to tag, "text" to t.text, "state" to t.state.name)
                   },
               )

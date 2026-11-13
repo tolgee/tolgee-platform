@@ -1,16 +1,8 @@
 import { Field } from 'formik';
-import {
-  MenuItem,
-  Select,
-  Checkbox,
-  ListItemText,
-  FormControl,
-  InputLabel,
-  FormHelperText,
-} from '@mui/material';
+import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { StateType } from 'tg.constants/translationStates';
+import { Select } from 'tg.component/common/Select';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -30,17 +22,15 @@ export const LanguageSelector: React.FC<React.PropsWithChildren<Props>> = ({
     <Field name="languages">
       {({ field, meta }) => {
         return (
-          <FormControl
-            className={className}
-            error={meta.error}
-            variant="standard"
-          >
-            <InputLabel>{t('export_translations_languages_label')}</InputLabel>
+          <div className={className}>
             <Select
               {...field}
-              variant="standard"
+              label={t('export_translations_languages_label')}
+              error={meta.error}
+              minHeight={false}
+              shrinkable
               data-cy="export-language-selector"
-              renderValue={(values: StateType[]) => values.join(', ')}
+              renderValue={(values: string[]) => values.join(', ')}
               multiple
             >
               {languages?.map((lang) => (
@@ -48,14 +38,14 @@ export const LanguageSelector: React.FC<React.PropsWithChildren<Props>> = ({
                   key={lang.id}
                   value={lang.tag}
                   data-cy="export-language-selector-item"
+                  data-cy-language={lang.tag}
                 >
                   <Checkbox checked={field.value.includes(lang.tag)} />
                   <ListItemText primary={lang.name} />
                 </MenuItem>
               ))}
             </Select>
-            <FormHelperText>{meta.error}</FormHelperText>
-          </FormControl>
+          </div>
         );
       }}
     </Field>

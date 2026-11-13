@@ -40,6 +40,19 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     @Param("codeHash") codeHash: String,
   ): OAuth2Grant?
 
+  /**
+   * The client of the live grant this refresh token belongs to. It loads no entity and takes no lock. The document
+   * check writes to this grant's row from its own transaction, and the refresh locks and loads the row afterwards.
+   */
+  @Query(
+    """SELECT g.clientId FROM OAuth2Grant g
+       WHERE g.refreshTokenHash = :hash AND g.refreshTokenExpiresAt > :now""",
+  )
+  fun findLiveClientIdByRefreshTokenHash(
+    @Param("hash") hash: String,
+    @Param("now") now: Date,
+  ): String?
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT g FROM OAuth2Grant g WHERE g.refreshTokenHash = :hash")
   fun findAndLockByRefreshTokenHash(
@@ -66,10 +79,7 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
   )
   fun deleteExpiredBefore(cutoff: Date): Int
 
-  /**
-   * A consent the user never completed holds no code and no tokens, so nothing can revive it once its own short
-   * deadline passes — it does not wait for the retention window that exists to keep a spent code's replay evidence.
-   */
+  /** A consent the user never completed holds no code and no tokens, so it skips the replay-evidence retention. */
   @Modifying
   @Query(
     """
@@ -79,4 +89,49 @@ interface OAuth2GrantRepository : JpaRepository<OAuth2Grant, Long> {
     """,
   )
   fun deleteExpiredPendingConsents(now: Date): Int
+
+  /**
+   * How many different document-backed clients this user already holds a **live** grant for. A grant is
+   * document-backed when it carries the hash of the document it was consented against, which
+   * [io.tolgee.security.oauth2.OAuth2AuthorizationService.startAuthorization] writes for every client that came
+   * through the CIMD path and for no other. A withdrawn
+   * client drops out even while its mark could still be lifted: counting fewer is the safe direction for a cap.
+   */
+  @Query(
+    """
+    SELECT COUNT(DISTINCT g.clientId) FROM OAuth2Grant g
+    WHERE g.userAccount.id = :userId AND g.clientMetadataHash IS NOT NULL AND g.clientId <> :exceptClientId
+      AND NOT EXISTS (
+        SELECT 1 FROM OAuth2ClientDocumentCheck c
+        WHERE c.clientId = g.clientId AND c.withdrawnAt IS NOT NULL AND c.withdrawnAt >= g.createdAt
+      )
+      AND GREATEST(g.refreshTokenExpiresAt, g.accessTokenExpiresAt, g.codeExpiresAt) > :now
+    """,
+  )
+  fun countDocumentBackedClientsOfUser(
+    @Param("userId") userId: Long,
+    @Param("exceptClientId") exceptClientId: String,
+    @Param("now") now: Date,
+  ): Long
+
+  /**
+   * Revokes every grant of this client whose consented terms the document no longer matches: its stored hash differs
+   * from [currentHash].
+   *
+   * Only hashes matching [reproducibleHashPattern] (a `LIKE` pattern such as `v1:%`) are compared. A hash written
+   * by an older scheme cannot be recomputed by this build, so a mismatch there proves nothing, and reading it as
+   * drift would revoke every grant an earlier release issued.
+   */
+  @Modifying
+  @Query(
+    """DELETE FROM OAuth2Grant g
+       WHERE g.clientId = :clientId
+         AND g.clientMetadataHash LIKE :reproducibleHashPattern
+         AND g.clientMetadataHash <> :currentHash""",
+  )
+  fun deleteDriftedFromDocument(
+    @Param("clientId") clientId: String,
+    @Param("currentHash") currentHash: String,
+    @Param("reproducibleHashPattern") reproducibleHashPattern: String,
+  ): Int
 }

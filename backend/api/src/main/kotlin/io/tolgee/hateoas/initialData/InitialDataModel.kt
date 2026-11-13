@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.initialData
 
+import io.tolgee.api.OnboardingQuestionnaireVersion
 import io.tolgee.api.publicConfiguration.PublicConfigurationDTO
 import io.tolgee.dtos.response.AnnouncementDto
 import io.tolgee.hateoas.auth.AuthInfoModel
@@ -19,4 +20,5 @@ class InitialDataModel(
   var eeSubscription: InitialDataEeSubscriptionModel? = null,
   var qaCheckCategories: List<QaCheckCategoryModel>? = null,
   var hasCommunityContributions: Boolean = false,
+  var onboardingSurveyVersion: OnboardingQuestionnaireVersion? = null,
 )

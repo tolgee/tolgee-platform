@@ -326,6 +326,9 @@ export const findByExportParams = (params: ExportParamsWithoutZip) => {
   );
 };
 
+export const getStructureDelimiter = (format: FormatItem) =>
+  format.structured ? format.defaultStructureDelimiter : '';
+
 export const getFormatById = (id: string): FormatItem => {
   for (const group of formatGroups) {
     for (const format of group.formats) {

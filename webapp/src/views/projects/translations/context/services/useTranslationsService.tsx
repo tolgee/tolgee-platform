@@ -130,7 +130,7 @@ export const useTranslationsService = (props: Props) => {
     addFilter,
     removeFilter,
     setFilters,
-    updateSelectedLanguages,
+    clearFiltersForRemovedLanguages,
   } = useTranslationFiltersService({
     selectedLanguages: query.languages,
     baseLang: props.baseLang,
@@ -174,6 +174,11 @@ export const useTranslationsService = (props: Props) => {
     filterFailedKeysOfJob: props.prefilter?.failedJob,
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
+    // the task filter is hidden while prefiltered by a task, so it must not apply unseen
+    filterTaskInLang:
+      props.prefilter?.task !== undefined
+        ? undefined
+        : filtersQuery.filterTaskInLang,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
     branch: props.branchName,
     sort: ['keyNamespace', order, 'keyId'],
@@ -344,7 +349,7 @@ export const useTranslationsService = (props: Props) => {
   const updateQuery = (q: Partial<typeof query>) => {
     refetchTranslations(() => {
       const combined = { ...query, ...q };
-      updateSelectedLanguages(combined.languages);
+      clearFiltersForRemovedLanguages(combined.languages);
       setQuery(combined);
     });
   };

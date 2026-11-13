@@ -144,6 +144,7 @@ export const TranslationControlsCompact: React.FC<
     setSearch(value);
   };
   const filters = useTranslationsSelector((c) => c.filters);
+  const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const { setFilters, addFilter, removeFilter } = useTranslationsActions();
 
   const handleLanguageChange = (languages: string[]) => {
@@ -218,6 +219,9 @@ export const TranslationControlsCompact: React.FC<
                   actions={{ setFilters, removeFilter, addFilter }}
                   projectId={project.id}
                   selectedLanguages={selectedLanguagesMapped}
+                  filterOptions={{
+                    taskPrefiltered: prefilteredTask !== undefined,
+                  }}
                   showClearButton
                 />
               )}

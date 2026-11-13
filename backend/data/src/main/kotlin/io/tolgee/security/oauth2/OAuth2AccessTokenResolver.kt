@@ -25,18 +25,23 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.security.OAUTH_ACCESS_TOKEN_PREFIX
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.service.security.UserAccountService
 import org.springframework.stereotype.Component
 
 @Component
 class OAuth2AccessTokenResolver(
   private val repository: OAuth2GrantRepository,
-  private val clientRegistry: OAuth2ClientRegistry,
+  private val oauth2ClientRegistry: OAuth2ClientRegistry,
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
+  private val cimdClientLifecycleService: CimdClientLifecycleService,
 ) {
-  fun tryResolve(token: String): TolgeeAuthentication? {
+  fun tryResolve(
+    token: String,
+    expectedAudience: OAuth2Audience,
+  ): TolgeeAuthentication? {
     // Tolgee's own JWTs are the other kind of Bearer token on this path; the prefix is what tells the two apart
     // without a store lookup.
     if (!token.startsWith(OAUTH_ACCESS_TOKEN_PREFIX)) return null
@@ -49,8 +54,14 @@ class OAuth2AccessTokenResolver(
       throw AuthExpiredException(Message.OAUTH_TOKEN_EXPIRED)
     }
 
-    // A grant outlives the client it was issued to, so this is checked per request rather than at issue time.
-    if (!clientRegistry.isStillAuthorized(grant.clientId)) {
+    // A grant outlives the client it was issued to, so both are checked per request rather than at issue time:
+    // whether this instance still serves the client at all, and the withdrawal mark on the client's row.
+    if (!oauth2ClientRegistry.servesClient(grant.clientId)) throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    if (oauth2ClientRegistry.servesCimdClient(grant.clientId) && cimdClientLifecycleService.isGrantWithdrawn(grant)) {
+      throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
+    }
+
+    if (grant.audience != expectedAudience) {
       throw AuthenticationException(Message.INVALID_OAUTH_TOKEN)
     }
 

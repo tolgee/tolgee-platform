@@ -11,7 +11,7 @@ import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
+import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditsService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.springframework.context.ApplicationContext
@@ -25,7 +25,7 @@ class MachineTranslationSuggestionFacade(
   private val mtService: MtService,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
-  private val mtCreditBucketService: MtCreditBucketService,
+  private val mtCreditsService: MtCreditsService,
   private val applicationContext: ApplicationContext,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
 ) {
@@ -99,7 +99,7 @@ class MachineTranslationSuggestionFacade(
           Message.CREDIT_SPENDING_LIMIT_EXCEEDED,
         )
       }
-      val balance = mtCreditBucketService.getCreditBalances(organizationId)
+      val balance = mtCreditsService.getCreditBalances(organizationId)
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
         listOf(

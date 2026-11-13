@@ -1,12 +1,18 @@
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import {
+  findByExportParams,
   getFormatById,
+  getStructureDelimiter,
   normalizeSelectedMessageFormat,
-} from '../../export/components/formatGroups';
+} from 'tg.views/projects/export/components/formatGroups';
+import { getTagFilterParams } from 'tg.views/projects/export/exportSettings';
 import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { CdValues } from './getCdEditInitialValues';
+import {
+  CdValues,
+  ContentDeliveryConfigModel,
+} from 'tg.views/projects/developer/contentDelivery/getCdEditInitialValues';
 import { FormikHelpers } from 'formik/dist/types';
 import { ReactNode } from 'react';
 
@@ -32,20 +38,29 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
 
   const messaging = useMessage();
 
-  function getRequestBody(values: CdValues) {
+  function getRequestBody(
+    values: CdValues,
+    original?: ContentDeliveryConfigModel
+  ) {
     const format = getFormatById(values.format);
-    return {
+    const keepsFormat =
+      original !== undefined && findByExportParams(original).id === format.id;
+    const formParams = {
       name: values.name,
       format: format.format,
       filterState: values.states,
       languages: values.languages,
-      structureDelimiter: format.structured
-        ? format.defaultStructureDelimiter
-        : '',
+      structureDelimiter: keepsFormat
+        ? original.structureDelimiter
+        : getStructureDelimiter(format),
+      fileStructureTemplate: keepsFormat
+        ? original.fileStructureTemplate
+        : undefined,
       filterNamespace: undefinedIfAllNamespaces(
         values.namespaces,
         allNamespaces
       ),
+      ...getTagFilterParams(values),
       autoPublish: values.autoPublish,
       contentStorageId: values.contentStorageId,
       supportArrays: values.supportArrays || false,
@@ -58,6 +73,7 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
       escapeHtml: values.escapeHtml ?? false,
       filterBranch: values.filterBranch || undefined,
     };
+    return { ...getSavedExportParams(original), ...formParams };
   }
 
   function getOptions(
@@ -93,13 +109,13 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
     update(
       values: CdValues,
       formikHelpers: FormikHelpers<CdValues>,
-      id: number
+      original: ContentDeliveryConfigModel
     ) {
       updateCd.mutate(
         {
-          path: { projectId: project.id, id },
+          path: { projectId: project.id, id: original.id },
           content: {
-            'application/json': getRequestBody(values),
+            'application/json': getRequestBody(values, original),
           },
         },
         getOptions(
@@ -122,4 +138,21 @@ function undefinedIfAllNamespaces(
     return undefined;
   }
   return selectedNamespaces;
+}
+
+function getSavedExportParams(original?: ContentDeliveryConfigModel) {
+  if (!original) {
+    return {};
+  }
+  const {
+    id: _id,
+    storage: _storage,
+    publicUrl: _publicUrl,
+    lastPublished: _lastPublished,
+    lastPublishedFiles: _lastPublishedFiles,
+    branchName: _branchName,
+    filterTag: _filterTag,
+    ...exportParams
+  } = original;
+  return exportParams;
 }

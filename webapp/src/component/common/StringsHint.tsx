@@ -34,3 +34,20 @@ export const SeatsHint: React.FC<React.PropsWithChildren<unknown>> = ({
     </Tooltip>
   );
 };
+
+export const WordsHint: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
+  const { t } = useTranslate();
+  return (
+    <Tooltip
+      disableInteractive
+      title={t(
+        'global_words_hint',
+        'Words in all filled translations of this project, counted in each language separately.'
+      )}
+    >
+      <StyledBillingHint>{children}</StyledBillingHint>
+    </Tooltip>
+  );
+};

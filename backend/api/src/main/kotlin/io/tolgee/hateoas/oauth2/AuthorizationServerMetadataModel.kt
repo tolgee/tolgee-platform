@@ -28,4 +28,7 @@ data class AuthorizationServerMetadataModel(
   /** RFC 8414 §2: omitting this would default the endpoint to `client_secret_basic`, and every client here is public. */
   @get:JsonProperty("revocation_endpoint_auth_methods_supported")
   val revocationEndpointAuthMethodsSupported: List<String>,
+  /** Tells a client it may present an HTTPS URL as its `client_id` (a Client ID Metadata Document) with no prior registration. */
+  @get:JsonProperty("client_id_metadata_document_supported")
+  val clientIdMetadataDocumentSupported: Boolean,
 )

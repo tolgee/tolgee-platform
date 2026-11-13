@@ -79,8 +79,6 @@ class TolgeeProperties(
   var capterraTracker: String? = null,
   @DocProperty(hidden = true)
   var ga4Tag: String? = null,
-  @DocProperty(hidden = true, description = "Ask user where did they found Tolgee in SignUp form")
-  var userSourceField: Boolean = false,
   @DocProperty(hidden = true)
   var internal: InternalProperties = InternalProperties(),
   @DocProperty(
@@ -91,7 +89,7 @@ class TolgeeProperties(
   @DocProperty(description = "Maximum size of uploaded files (in kilobytes).", defaultExplanation = "≈ 50MB")
   var maxUploadFileSize: Int = 51200,
   @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
-  val maxScreenshotsPerKey: Int = 20,
+  var maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
   @DocProperty(
     description =
@@ -123,6 +121,7 @@ class TolgeeProperties(
   @DocProperty(hidden = true)
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
+  var reviewAsk: ReviewAskProperties = ReviewAskProperties(),
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
   var webhook: WebhookProperties = WebhookProperties(),
   var slack: SlackProperties = SlackProperties(),

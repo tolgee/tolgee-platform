@@ -79,6 +79,12 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   @field:Parameter(description = "Selects only keys without a description")
   var filterHasNoDescription: Boolean? = false
 
+  @field:Parameter(description = "Selects only plural keys")
+  var filterIsPlural: Boolean? = false
+
+  @field:Parameter(description = "Selects only non-plural keys")
+  var filterIsNotPlural: Boolean? = false
+
   @field:Parameter(
     description = """Selects only keys with provided namespaces. 
 
@@ -207,6 +213,19 @@ $PATTERN_GRAMMAR_DOC""",
     description = "Filter task keys which are `done`",
   )
   var filterTaskKeysDone: Boolean? = null
+
+  @field:Parameter(
+    description =
+      "Filter by task membership, as `languageTag,taskType,status` — e.g. `en,TRANSLATE,NEVER_IN_TASK`. " +
+        "Status is one of IN_OPEN_TASK, NOT_IN_OPEN_TASK, HAS_BEEN_IN_TASK, NEVER_IN_TASK; a task " +
+        "counts as open while it is NEW or IN_PROGRESS. Conditions on different task types are " +
+        "combined with AND, so TRANSLATE,HAS_BEEN_IN_TASK together with REVIEW,NEVER_IN_TASK selects " +
+        "keys that were translated but never reviewed. Across languages, IN_OPEN_TASK and " +
+        "HAS_BEEN_IN_TASK match a key tasked in any of the given languages, while NOT_IN_OPEN_TASK " +
+        "and NEVER_IN_TASK require the key to be free in all of them. Does not affect " +
+        "filterTaskNumber.",
+  )
+  var filterTaskInLang: List<String>? = null
 
   @field:Parameter(
     description = "Filter keys with unresolved comments in lang",

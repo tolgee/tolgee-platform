@@ -1,6 +1,5 @@
 package io.tolgee.mcp.tools
 
-import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.batch.BatchJobManagementController
 import io.tolgee.api.v2.controllers.batch.StartBatchJobController
 import io.tolgee.batch.BatchJobService
@@ -9,6 +8,7 @@ import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
@@ -34,44 +34,53 @@ class BatchJobMcpTools(
   private val getBatchJobSpec = buildSpec(BatchJobManagementController::get, "get_batch_job_status")
   private val machineTranslateSpec = buildSpec(StartBatchJobController::machineTranslation, "machine_translate")
 
-  override fun register(server: McpSyncServer) {
-    server.addTool(
+  override fun register(registrar: McpToolRegistrar) {
+    registrar.addTool(
       "get_batch_job_status",
+      "Get batch job status",
+      McpToolEffect.READ_ONLY,
       "Get the status of a batch job (e.g. machine translation) by its ID. Use to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         number("jobId", "ID of the batch job", required = true)
       },
+      spec = getBatchJobSpec,
     ) { request ->
       mcpRequestContext.executeAs(getBatchJobSpec, request.arguments.getProjectId()) {
         val jobId = request.arguments.requireLong("jobId")
-        val view = batchJobService.getView(jobId)
-        if (view.batchJob.project?.id != projectHolder.project.id) {
-          return@executeAs errorResult("Batch job $jobId does not belong to this project")
+        executeInNewTransaction(transactionManager) {
+          val view = batchJobService.getView(projectHolder.project.id, jobId)
+          if (!authenticationFacade.isAuthorSelfAccess(view.batchJob.author?.id)) {
+            securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_VIEW)
+          }
+          val result =
+            mapOf(
+              "id" to view.batchJob.id,
+              "status" to view.batchJob.status.name,
+              "type" to view.batchJob.type.name,
+              "progress" to view.progress,
+              "totalItems" to view.batchJob.totalItems,
+              "errorMessage" to view.errorMessage?.code,
+            )
+          textResult(objectMapper.writeValueAsString(result))
         }
-        val result =
-          mapOf(
-            "id" to view.batchJob.id,
-            "status" to view.batchJob.status.name,
-            "type" to view.batchJob.type.name,
-            "progress" to view.progress,
-            "totalItems" to view.batchJob.totalItems,
-            "errorMessage" to view.errorMessage?.code,
-          )
-        textResult(objectMapper.writeValueAsString(result))
       }
     }
 
-    server.addTool(
+    registrar.addTool(
       "machine_translate",
+      "Machine translate keys",
+      McpToolEffect.DESTRUCTIVE,
       "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
+        projectId()
         stringArray("keyNames", "Names of keys to translate", required = true)
         stringArray("targetLanguageTags", "Language tags to translate into (e.g. ['de', 'fr'])", required = true)
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
+      openWorld = true,
+      spec = machineTranslateSpec,
     ) { request ->
       mcpRequestContext.executeAs(machineTranslateSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")

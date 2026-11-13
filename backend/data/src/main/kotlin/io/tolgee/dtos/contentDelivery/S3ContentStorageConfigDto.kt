@@ -29,4 +29,9 @@ class S3ContentStorageConfigDto : S3Config {
   )
   @field:Size(max = 255)
   override var path: String = ""
+
+  @field:Schema(
+    description = "Uploads files with the public-read ACL, for storages that make new files private by default",
+  )
+  override var publicRead: Boolean = false
 }

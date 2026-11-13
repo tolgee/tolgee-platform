@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.ApiKeyBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.SuggestionBuilder
@@ -28,9 +29,14 @@ class SuggestionsTestData(
   var serverAdmin: UserAccountBuilder
   var projectEditor: UserAccountBuilder
   var viewOnlyUser: UserAccountBuilder
+  var granularSuggester: UserAccountBuilder
   var relatedProject: ProjectBuilder
+  lateinit var ownAccessApiKey: ApiKeyBuilder
+  lateinit var ownAccessOnlyApiKey: ApiKeyBuilder
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
+  lateinit var translatorsCzechSuggestion: SuggestionBuilder
+  lateinit var reviewersCzechSuggestion: SuggestionBuilder
   val englishSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
   var czechReviewerEnglishSuggestion: SuggestionBuilder
   val czechTranslations: MutableList<TranslationBuilder> = mutableListOf()
@@ -119,6 +125,12 @@ class SuggestionsTestData(
         name = "View only user"
       }
 
+    granularSuggester =
+      root.addUserAccount {
+        username = "granular.suggester@test.com"
+        name = "Granular suggester"
+      }
+
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = orgMember.self
@@ -135,6 +147,19 @@ class SuggestionsTestData(
       relatedProject = this
 
       this.self.suggestionsMode = suggestionsMode
+
+      ownAccessApiKey =
+        addApiKey {
+          key = "own-access-api-key"
+          scopesEnum = mutableSetOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
+          userAccount = projectReviewer.self
+        }
+      ownAccessOnlyApiKey =
+        addApiKey {
+          key = "own-access-only-api-key"
+          scopesEnum = mutableSetOf(Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
+          userAccount = projectReviewer.self
+        }
 
       addLanguage {
         name = "Czech"
@@ -192,6 +217,12 @@ class SuggestionsTestData(
         suggestManageLanguages = mutableSetOf(czechLanguage)
       }
 
+      addPermission {
+        user = granularSuggester.self
+        type = null
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_SUGGEST)
+      }
+
       (0 until 4).forEach {
         keys.add(
           addKey(null, "key $it").apply {
@@ -207,21 +238,21 @@ class SuggestionsTestData(
       }
 
       keys[0].apply {
-        czechSuggestions.add(
+        translatorsCzechSuggestion =
           addSuggestion {
             this.language = czechLanguage
             this.author = projectTranslator.self
             this.translation = "Navržený překlad 0-1"
-          },
-        )
+          }
+        czechSuggestions.add(translatorsCzechSuggestion)
 
-        czechSuggestions.add(
+        reviewersCzechSuggestion =
           addSuggestion {
             this.language = czechLanguage
             this.author = projectReviewer.self
             this.translation = "Navržený překlad 0-2"
-          },
-        )
+          }
+        czechSuggestions.add(reviewersCzechSuggestion)
 
         englishSuggestions.add(
           addSuggestion {
@@ -277,17 +308,14 @@ class SuggestionsTestData(
           self.isPlural = true
           addTranslation("en", "{value, plural, one {# key} other {# keys}}")
           addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
+          pluralSuggestion =
+            addSuggestion {
+              this.language = czechLanguage
+              this.author = projectTranslator.self
+              this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
+              this.isPlural = true
+            }
         }
-
-      pluralKey.apply {
-        pluralSuggestion =
-          addSuggestion {
-            this.language = czechLanguage
-            this.author = projectTranslator.self
-            this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
-            this.isPlural = true
-          }
-      }
     }
 
     val unrelatedUser =

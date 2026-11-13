@@ -9,6 +9,11 @@ import {
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { TASK_TYPES } from 'tg.service/apiSchemaTypes';
+import {
+  PINNED_TYPE_STATUSES,
+  taskScopeFiltersQuery,
+} from 'tg.ee.module/task/hooks/useTaskCreationFilters';
 import { Select as FormSelect } from 'tg.component/common/form/fields/Select';
 import { useTaskTypeTranslation } from 'tg.translationTools/useTaskTranslation';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -18,7 +23,7 @@ import { TaskPreview } from './TaskPreview';
 import { Field, useFormikContext } from 'formik';
 import {
   FilterActions,
-  FiltersType,
+  FiltersInternal,
 } from 'tg.views/projects/translations/TranslationFilters/tools';
 import { Select } from 'tg.component/common/Select';
 import { useEffect } from 'react';
@@ -28,11 +33,8 @@ import { stringHash } from 'tg.fixtures/stringHash';
 import { StateType } from 'tg.constants/translationStates';
 import { TranslationFilters } from 'tg.views/projects/translations/TranslationFilters/TranslationFilters';
 
-type TaskType = components['schemas']['TaskModel']['type'];
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeysScopeView = components['schemas']['KeysScopeView'];
-
-const TASK_TYPES: TaskType[] = ['TRANSLATE', 'REVIEW'];
 
 export const DEFAULT_STATE_FILTERS_TRANSLATE: StateType[] = ['UNTRANSLATED'];
 export const DEFAULT_STATE_FILTERS_REVIEW: StateType[] = ['TRANSLATED'];
@@ -63,8 +65,9 @@ type Props = {
   languages: number[];
   setLanguages: (languages: number[]) => void;
   allLanguages: LanguageModel[];
-  filters: FiltersType;
+  filters: FiltersInternal;
   filterActions?: FilterActions;
+  keysPreselected?: boolean;
   stateFilters: TranslationStateType[];
   setStateFilters: (filters: TranslationStateType[]) => void;
   projectId: number;
@@ -82,6 +85,7 @@ export const TaskCreateForm = ({
   allLanguages,
   filters,
   filterActions,
+  keysPreselected,
   stateFilters,
   setStateFilters,
   projectId,
@@ -115,6 +119,7 @@ export const TaskCreateForm = ({
             (i) => i !== 'OUTDATED' && i !== 'AUTO_TRANSLATED'
           ),
           filterOutdated: stateFilters.includes('OUTDATED'),
+          ...taskScopeFiltersQuery(filters, values.type, !keysPreselected),
         },
       };
     })
@@ -135,6 +140,25 @@ export const TaskCreateForm = ({
       setLanguages(languages.filter((l) => l !== baseLang.id));
     }
   }, [values.type, languages, allLanguages]);
+
+  useEffect(() => {
+    // the type being created cannot carry a condition that keeps its open-task conflicts, so one
+    // picked while another type was being created has to go — the summary reads the stored value
+    if (keysPreselected || !filterActions) {
+      return;
+    }
+    const byType = filters.filterTaskStatus;
+    const status = byType?.[values.type];
+    if (status === undefined || PINNED_TYPE_STATUSES.includes(status)) {
+      return;
+    }
+    const next = { ...byType };
+    delete next[values.type];
+    filterActions.setFilters({
+      ...filters,
+      filterTaskStatus: Object.keys(next).length ? next : undefined,
+    });
+  }, [values.type, filters, keysPreselected]);
 
   return (
     <>
@@ -241,10 +265,18 @@ export const TaskCreateForm = ({
               <TranslationFilters
                 value={filters}
                 actions={filterActions}
-                selectedLanguages={[]}
+                selectedLanguages={allLanguages.filter((l) =>
+                  languages.includes(l.id)
+                )}
                 projectId={projectId}
                 placeholder={t('create_task_filter_keys_placeholder')}
-                filterOptions={{ keyRelatedOnly: true }}
+                filterOptions={{
+                  keyRelatedOnly: true,
+                  // preselected keys get no forced condition, so advertising one would
+                  // claim a constraint the scope query never applies
+                  taskCreation: !keysPreselected,
+                  pinnedTaskType: keysPreselected ? undefined : values.type,
+                }}
                 sx={{ width: '100%', maxWidth: '270px' }}
               />
             )}
@@ -264,7 +296,6 @@ export const TaskCreateForm = ({
                 <TaskPreview
                   key={language}
                   language={allLanguages.find((l) => l.id === language)!}
-                  type={values.type}
                   projectId={projectId}
                   assignees={values.assignees[language] ?? []}
                   onUpdateAssignees={(users) => {
@@ -272,6 +303,7 @@ export const TaskCreateForm = ({
                   }}
                   hideAssignees={hideAssignees}
                   scope={taskScopes[i]?.data}
+                  type={values.type}
                 />
               ))}
             </Box>

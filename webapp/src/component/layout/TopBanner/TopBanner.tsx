@@ -14,6 +14,7 @@ import { tokenService } from 'tg.service/TokenService';
 import { PendingInvitationBanner } from './PendingInvitationBanner';
 import { useTranslate } from '@tolgee/react';
 import { Announcement } from './Announcement';
+import { usePastDueBanner, usePlanLimitBanner } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   position: fixed;
@@ -26,7 +27,7 @@ const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.drawer + 2};
   background: ${(props) => props.theme.palette.topBanner.background};
 
-  &.emailNotVerified {
+  &.important {
     color: ${({ theme }) =>
       theme.palette.tokens._components.noticeBar.importantColor};
     background-color: ${({ theme }) =>
@@ -66,12 +67,15 @@ export function TopBanner() {
 
   const getAnnouncement = useAnnouncement();
   const isEmailVerified = useIsEmailVerified();
+  const pastDueBanner = usePastDueBanner();
+  const planLimitBanner = usePlanLimitBanner();
+  const billingBanner = pastDueBanner ?? planLimitBanner;
 
   const showEmailVerificationBanner = !isEmailVerified && isAuthenticated;
 
   const announcement = bannerType && getAnnouncement(bannerType);
   const showCloseButton =
-    !showEmailVerificationBanner && !pendingInvitationCode;
+    !showEmailVerificationBanner && !pendingInvitationCode && !billingBanner;
 
   useResizeObserver({
     ref: bannerRef,
@@ -83,9 +87,19 @@ export function TopBanner() {
   useEffect(() => {
     const height = bannerRef.current?.offsetHeight;
     setTopBannerHeight(height ?? 0);
-  }, [announcement, isEmailVerified, pendingInvitationCode]);
+  }, [
+    announcement,
+    isEmailVerified,
+    pendingInvitationCode,
+    Boolean(billingBanner),
+  ]);
 
-  if (!announcement && !pendingInvitationCode && !showEmailVerificationBanner) {
+  if (
+    !announcement &&
+    !pendingInvitationCode &&
+    !showEmailVerificationBanner &&
+    !billingBanner
+  ) {
     return null;
   }
 
@@ -93,7 +107,11 @@ export function TopBanner() {
     <StyledContainer
       ref={bannerRef}
       data-cy="top-banner"
-      className={clsx({ emailNotVerified: showEmailVerificationBanner })}
+      className={clsx({
+        important:
+          showEmailVerificationBanner ||
+          (!pendingInvitationCode && Boolean(billingBanner)),
+      })}
     >
       <div />
       <StyledContent data-cy="top-banner-content">
@@ -106,7 +124,7 @@ export function TopBanner() {
         ) : pendingInvitationCode ? (
           <PendingInvitationBanner code={pendingInvitationCode} />
         ) : (
-          announcement
+          billingBanner ?? announcement
         )}
       </StyledContent>
       {showCloseButton && (

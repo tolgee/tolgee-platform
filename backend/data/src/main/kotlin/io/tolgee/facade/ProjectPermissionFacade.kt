@@ -27,7 +27,7 @@ class ProjectPermissionFacade(
     languages?.let {
       val languageEntities = languageService.findByIdIn(languages)
       languageEntities.forEach {
-        if (it.project.id != projectId) {
+        if (it.project.id != projectId || it.deletedAt != null) {
           throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
         }
       }

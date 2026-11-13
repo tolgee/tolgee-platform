@@ -13,6 +13,9 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.security.MessageDigest
 
+private val htmlTagRegex = Regex("<[^<>]+>")
+private val tagTokenRegex = Regex("\\w+|\\s+|[^\\w\\s]")
+
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class BaiduApiService(
@@ -49,11 +52,50 @@ class BaiduApiService(
         requestBody,
       )
 
-    return response.body
-      ?.transResult
-      ?.first()
-      ?.dst
-      ?: throw RuntimeException(response.toString())
+    val results =
+      response.body
+        ?.transResult
+        ?.takeIf { it.isNotEmpty() }
+        ?: throw RuntimeException(response.toString())
+
+    return restoreSourceTags(text, joinLines(text, results))
+  }
+
+  // Baidu splits the query on newlines and returns one result per non-blank line only.
+  private fun joinLines(
+    source: String,
+    results: List<BaiduTranslation>,
+  ): String {
+    val remaining = results.iterator()
+    return source.split("\n").joinToString("\n") { line ->
+      if (line.isBlank()) return@joinToString line
+      if (!remaining.hasNext()) throw RuntimeException("Baidu returned fewer results than lines")
+      remaining.next().dst ?: throw RuntimeException("Baidu returned no translation")
+    }
+  }
+
+  // Baidu treats HTML as plain text and may return `<br>` as `< br >`.
+  private fun restoreSourceTags(
+    source: String,
+    translated: String,
+  ): String {
+    val tags = htmlTagRegex.findAll(source).map { it.value }.toSet()
+    return tags.fold(translated) { result, tag ->
+      spacedTagRegex(tag).replace(result) { match ->
+        if (match.value in tags) return@replace match.value
+        tag
+      }
+    }
+  }
+
+  private fun spacedTagRegex(tag: String): Regex {
+    val pattern =
+      tagTokenRegex
+        .findAll(tag)
+        .map { it.value }
+        .filter { it.isNotBlank() }
+        .joinToString("\\s*") { Regex.escape(it) }
+    return Regex(pattern)
   }
 
   private fun getSalt(): String {

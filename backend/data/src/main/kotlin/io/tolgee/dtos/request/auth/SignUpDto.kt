@@ -1,6 +1,5 @@
 package io.tolgee.dtos.request.auth
 
-import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.ValidationConstants
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -18,9 +17,6 @@ data class SignUpDto(
   var password: String? = null,
   var invitationCode: String? = null,
   var callbackUrl: String? = null,
-  @field:Size(max = 255)
-  @Schema(description = "Where did the user find us?")
-  var userSource: String? = null,
 ) {
   var recaptchaToken: String? = null
 }

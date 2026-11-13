@@ -181,12 +181,13 @@ class BranchTranslationsTestData {
     return addKey {
       name = "$prefix $num"
       this.branch = branch
+      maxCharLimit = 100
     }.build {
       addMeta {
         description = "description of key number $num"
         tags.add(firstTag)
         tags.add(secondTag)
-        addComment {
+        addComment(user) {
           text = "text comment"
         }
         addCodeReference {

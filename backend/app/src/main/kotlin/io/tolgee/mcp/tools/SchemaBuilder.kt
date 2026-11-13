@@ -24,6 +24,14 @@ class SchemaBuilder {
     if (required) requiredFields += name
   }
 
+  fun projectId() {
+    number(
+      "projectId",
+      "ID of the project. Can be left out when the credential is bound to one project: " +
+        "a project API key, or an OAuth token for one project.",
+    )
+  }
+
   fun boolean(
     name: String,
     description: String,

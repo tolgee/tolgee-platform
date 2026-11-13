@@ -9,8 +9,8 @@ import io.tolgee.model.key.Key
  *
  * Creates a project with English (base) and German, 10 numbered keys ("key 01"–"key 10") with
  * translations in both languages, a second user with MANAGE permission, 3 tagged keys
- * ("Key with tag", "Another key with tag", "Key with tag 2"), and one key with a description
- * ("Key with description").
+ * ("Key with tag", "Another key with tag", "Key with tag 2"), one key with a description
+ * ("Key with description"), and one plural key ("Plural key").
  *
  * All keys and users are exposed as public fields so tests can reference them directly without
  * calling service lookups.
@@ -33,6 +33,7 @@ class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
   var anotherKeyWithTag: Key
   var keyWithTag2: Key
   var keyWithDescription: Key
+  var pluralKey: Key
 
   init {
     root.apply {
@@ -123,6 +124,18 @@ class KeyTrashTestData : BaseTestData("franta", "Franta's project") {
           addTranslation {
             language = englishLanguage
             text = "Key with description EN"
+          }
+        }.self
+
+      pluralKey =
+        addKey {
+          name = "Plural key"
+          isPlural = true
+          pluralArgName = "count"
+        }.build {
+          addTranslation {
+            language = englishLanguage
+            text = "{count, plural, one {# item} other {# items}}"
           }
         }.self
     }

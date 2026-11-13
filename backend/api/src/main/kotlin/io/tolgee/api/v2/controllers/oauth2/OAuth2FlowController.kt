@@ -18,11 +18,13 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.oauth2.OAuth2AuthorizationService
+import io.tolgee.security.oauth2.OAuth2Client
 import io.tolgee.security.oauth2.OAuth2ClientRegistry
 import io.tolgee.security.oauth2.OAuth2Error
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.OAuth2Redirects
 import io.tolgee.security.oauth2.OAuth2Scopes
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.nullIfBlank
@@ -47,19 +49,20 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "OAuth2 flow")
 class OAuth2FlowController(
   private val authenticationFacade: AuthenticationFacade,
-  private val clientRegistry: OAuth2ClientRegistry,
-  private val authorizationService: OAuth2AuthorizationService,
+  private val oauth2ClientRegistry: OAuth2ClientRegistry,
+  private val oauth2AuthorizationService: OAuth2AuthorizationService,
   private val projectService: ProjectService,
   private val securityService: SecurityService,
-  private val issuerResolver: OAuth2IssuerResolver,
+  private val oauth2IssuerResolver: OAuth2IssuerResolver,
 ) : IController {
   @PostMapping("/authorize")
   @Operation(summary = "Record the pending grant the consent screen will act on")
+  @RateLimited(limit = 40, refillDurationInMs = 60_000)
   fun authorize(
     @RequestBody @Valid request: OAuth2AuthorizeRequest,
   ): OAuth2AuthorizeResultModel {
     val userId = authenticationFacade.authenticatedUser.id
-    val client = clientRegistry.find(request.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val client = oauth2ClientRegistry.find(request.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
     if (!client.allowsRedirectUri(request.redirectUri)) {
       throw BadRequestException(Message.OAUTH_REDIRECT_URI_NOT_REGISTERED)
     }
@@ -71,10 +74,11 @@ class OAuth2FlowController(
         state = request.state.nullIfBlank,
         codeChallenge = request.codeChallenge.nullIfBlank,
         codeChallengeMethod = request.codeChallengeMethod.nullIfBlank,
+        resource = request.resource.nullIfBlank,
       )
     val grant =
       try {
-        authorizationService.startAuthorization(
+        oauth2AuthorizationService.startAuthorization(
           userId,
           client,
           request.redirectUri,
@@ -84,7 +88,7 @@ class OAuth2FlowController(
       } catch (e: OAuth2Error) {
         return OAuth2AuthorizeResultModel(
           consentState = null,
-          redirectUrl = OAuth2Redirects.error(request.redirectUri, e, issuerResolver.issuerUrl, params.state),
+          redirectUrl = OAuth2Redirects.error(request.redirectUri, e, oauth2IssuerResolver.issuerUrl, params.state),
         )
       }
     return OAuth2AuthorizeResultModel(consentState = grant.consentState, redirectUrl = null)
@@ -92,11 +96,20 @@ class OAuth2FlowController(
 
   @GetMapping("/consent-info")
   @Operation(summary = "Describe the app, capabilities and project being requested, for the consent screen")
+  @RateLimited(limit = 40, refillDurationInMs = 60_000)
   fun consentInfo(
     @RequestParam state: String,
   ): ConsentInfoModel {
-    val grant = authorizationService.findOwnPendingByConsentState(state, authenticationFacade.authenticatedUser.id)
-    val client = clientRegistry.find(grant.clientId) ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
+    val grant =
+      oauth2AuthorizationService.findOwnPendingByConsentState(
+        state,
+        authenticationFacade.authenticatedUser.id,
+      )
+    val cimd = oauth2ClientRegistry.findCimd(grant.clientId)
+    val client =
+      cimd?.client
+        ?: oauth2ClientRegistry.findForExistingGrant(grant.clientId)
+        ?: throw NotFoundException(Message.OAUTH_UNKNOWN_CLIENT)
     val scopes = grant.requestedScopeValues
     val requestedProjectId = grant.projectHint
     return ConsentInfoModel(
@@ -105,6 +118,9 @@ class OAuth2FlowController(
       requiredScopes = client.requiredScopes.map { it.value }.filter { it in scopes },
       project = requestedProjectId?.let { hintedProject(it) },
       requestedProjectId = requestedProjectId,
+      verified = client.verified,
+      redirectsToLocalApp = OAuth2Client.redirectsToLocalApp(grant.redirectUri),
+      clientOrigin = cimd?.clientOrigin,
     )
   }
 
@@ -120,9 +136,19 @@ class OAuth2FlowController(
     val target =
       when (resolved) {
         is OAuth2AuthorizationService.ResolvedConsent.Granted ->
-          OAuth2Redirects.code(resolved.redirectUri, resolved.code, issuerResolver.issuerUrl, resolved.clientState)
+          OAuth2Redirects.code(
+            resolved.redirectUri,
+            resolved.code,
+            oauth2IssuerResolver.issuerUrl,
+            resolved.clientState,
+          )
         is OAuth2AuthorizationService.ResolvedConsent.Refused ->
-          OAuth2Redirects.error(resolved.redirectUri, resolved.error, issuerResolver.issuerUrl, resolved.clientState)
+          OAuth2Redirects.error(
+            resolved.redirectUri,
+            resolved.error,
+            oauth2IssuerResolver.issuerUrl,
+            resolved.clientState,
+          )
       }
     return OAuth2RedirectModel(target)
   }
@@ -135,9 +161,9 @@ class OAuth2FlowController(
     userId: Long,
     approved: List<String>,
   ): OAuth2AuthorizationService.ResolvedConsent {
-    if (approved.isEmpty()) return authorizationService.denyConsent(request.state, userId)
+    if (approved.isEmpty()) return oauth2AuthorizationService.denyConsent(request.state, userId)
     val projectIds = requireAccessibleSelection(requireProjectSelection(request))
-    return authorizationService.approveConsent(request.state, userId, approved, projectIds)
+    return oauth2AuthorizationService.approveConsent(request.state, userId, approved, projectIds)
   }
 
   private fun requireProjectSelection(request: OAuth2ConsentRequest): Long? {

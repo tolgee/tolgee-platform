@@ -1,7 +1,6 @@
 package io.tolgee.ee.security.thirdParty
 
-import io.jsonwebtoken.JwtParser
-import io.jsonwebtoken.Jwts
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -26,6 +25,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -39,6 +39,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.util.Base64
 import java.util.Date
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -47,7 +48,10 @@ import java.util.Date
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class SsoDelegateEe(
   private val jwtService: JwtService,
+  @Qualifier("ssoRestTemplate")
   private val restTemplate: RestTemplate,
+  @Qualifier("ssoGlobalRestTemplate")
+  private val globalRestTemplate: RestTemplate,
   private val tolgeeProperties: TolgeeProperties,
   private val organizationRoleService: OrganizationRoleService,
   private val tenantService: TenantService,
@@ -55,14 +59,9 @@ class SsoDelegateEe(
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val objectMapper: ObjectMapper,
 ) : SsoDelegate,
   Logging {
-  private val jwtParser: JwtParser =
-    Jwts
-      .parserBuilder()
-      .setClock { currentDateProvider.date }
-      .build()
-
   override fun getTokenResponse(
     receivedCode: String?,
     invitationCode: String?,
@@ -111,7 +110,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     return try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -127,25 +126,45 @@ class SsoDelegateEe(
   private fun decodeIdTokenUnsafe(idToken: String): GenericUserResponse {
     // We assume the token was received directly from the SSO provider and is safe - no need to verify the signature.
     try {
-      val jwt = idToken.substring(0, idToken.lastIndexOf('.') + 1)
-      val claims = jwtParser.parseClaimsJwt(jwt).body
+      val payload = idToken.split('.')[1]
+      val claims = objectMapper.readValue(Base64.getUrlDecoder().decode(payload), Map::class.java)
 
-      val expirationTime: Date? = claims.expiration
+      val expirationTime = epochSecondsClaimToDate(claims["exp"])
       if (expirationTime?.before(currentDateProvider.date) == true) {
         throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
       }
 
+      val notBeforeTime = epochSecondsClaimToDate(claims["nbf"])
+      if (notBeforeTime?.after(currentDateProvider.date) == true) {
+        throw SsoAuthorizationException(Message.SSO_ID_TOKEN_EXPIRED)
+      }
+
       return GenericUserResponse().apply {
-        sub = claims.subject
-        name = claims.get("name", String::class.java)
-        given_name = claims.get("given_name", String::class.java)
-        family_name = claims.get("family_name", String::class.java)
-        email = claims.get("email", String::class.java)
+        sub = claims["sub"] as? String
+        name = claims["name"] as? String
+        given_name = claims["given_name"] as? String
+        family_name = claims["family_name"] as? String
+        email = claims["email"] as? String
       }
     } catch (e: Exception) {
       logger.warn(e.stackTraceToString())
       throw SsoAuthorizationException(Message.SSO_USER_INFO_RETRIEVAL_FAILED, cause = e)
     }
+  }
+
+  /**
+   * RFC 7519 wants date claims as epoch seconds in a JSON number, but some providers
+   * send them as a numeric string, and jjwt used to accept that too.
+   */
+  private fun epochSecondsClaimToDate(claim: Any?): Date? {
+    val seconds =
+      when (claim) {
+        null -> return null
+        is Number -> claim.toLong()
+        is String -> claim.toLong()
+        else -> throw IllegalArgumentException("Unsupported date claim: $claim")
+      }
+    return Date(seconds * 1000)
   }
 
   private fun getTokenResponseForUser(
@@ -253,7 +272,7 @@ class SsoDelegateEe(
     val request = HttpEntity(body, headers)
     try {
       val response: ResponseEntity<OAuth2TokenResponse> =
-        restTemplate.exchange(
+        restTemplateFor(requireHttpsTokenUri(tenant)).exchange(
           tenant.tokenUri,
           HttpMethod.POST,
           request,
@@ -264,6 +283,26 @@ class SsoDelegateEe(
       logger.info("Failed to refresh token: ${e.message}")
     }
     return null
+  }
+
+  /**
+   * The token endpoint receives the client secret and a code or refresh token. Over plain http they travel in the
+   * clear, so an organization's endpoint must be https: an organization owner configures it. The global endpoint is
+   * operator configuration, where an on-prem provider on plain http is the normal case, and the two switches that
+   * let organization SSO reach local providers let it use plain http too.
+   */
+  private fun requireHttpsTokenUri(tenant: SsoTenantConfig): SsoTenantConfig {
+    if (tenant.global) return tenant
+    if (tolgeeProperties.internal.disableUrlSsrfProtection) return tenant
+    if (tolgeeProperties.authentication.ssoOrganizations.allowLocalAddresses) return tenant
+    if (tenant.tokenUri.startsWith("https://", ignoreCase = true)) return tenant
+    logger.warn("Refusing the SSO token exchange for {}: the token endpoint is not https", tenant.domain)
+    throw SsoAuthorizationException(Message.SSO_TOKEN_EXCHANGE_FAILED)
+  }
+
+  private fun restTemplateFor(tenant: SsoTenantConfig): RestTemplate {
+    if (tenant.global) return globalRestTemplate
+    return restTemplate
   }
 
   private fun getRefreshScope(tenant: SsoTenantConfig): String {

@@ -105,6 +105,31 @@ export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
     });
 };
 
+const LANGUAGE_ITEM = 'li[data-cy="translations-language-select-item"]';
+
+const languageLabel = ($li: JQuery) =>
+  $li.find('.MuiListItemText-primary').text();
+
+const setLanguageItem = (index: number, checked: boolean) =>
+  cy
+    .get(LANGUAGE_ITEM)
+    .eq(index)
+    .find('input')
+    .then(($input) => {
+      if ($input.is(':checked') !== checked) {
+        cy.get(LANGUAGE_ITEM).eq(index).click();
+      }
+    });
+
+const assertLanguageItems = (values: string[]) =>
+  cy.get(LANGUAGE_ITEM).each(($li) => {
+    cy.wrap($li)
+      .find('input')
+      .should(
+        values.includes(languageLabel($li)) ? 'be.checked' : 'not.be.checked'
+      );
+  });
+
 export const toggleInMultiselect = (
   chainable: Chainable,
   renderedValues: string[]
@@ -112,25 +137,20 @@ export const toggleInMultiselect = (
   chainable.find('div').first().click();
 
   getPopover().within(() => {
-    // first select all (only real language items, not the All/Base/None actions)
-    getPopover()
-      .get('li[data-cy="translations-language-select-item"] input')
-      .each(($input) => {
-        const isChecked = $input.is(':checked');
-        if (!isChecked) {
-          cy.wrap($input).click();
-        }
-      });
+    cy.get(LANGUAGE_ITEM).then(($items) => {
+      const labels = $items.map((_, li) => languageLabel(Cypress.$(li))).get();
+      const indexes = labels.map((_, index) => index);
+      const wanted = (index: number) => renderedValues.includes(labels[index]);
 
-    // unselect necessary
-    getPopover()
-      .get('li[data-cy="translations-language-select-item"]')
-      .each(($li) => {
-        const labelText = $li.find('.MuiListItemText-primary').text();
-        if (!renderedValues.includes(labelText)) {
-          cy.wrap($li).find('.MuiListItemText-primary').click();
-        }
-      });
+      // Removing the last remaining language is refused with only a snackbar, so everything that
+      // should end up selected is clicked before anything is deselected.
+      indexes.filter(wanted).forEach((index) => setLanguageItem(index, true));
+      indexes
+        .filter((index) => !wanted(index))
+        .forEach((index) => setLanguageItem(index, false));
+    });
+
+    assertLanguageItems(renderedValues);
   });
   dismissMenu();
   waitForGlobalLoading();
@@ -138,20 +158,7 @@ export const toggleInMultiselect = (
 
 export const assertMultiselect = (chainable: Chainable, values: string[]) => {
   chainable.find('div').first().click();
-
-  getPopover().within(() => {
-    getPopover()
-      .get('li[data-cy="translations-language-select-item"]')
-      .each(($li) => {
-        const labelText = $li.find('.MuiListItemText-primary').text();
-        const input = cy.wrap($li).find('input');
-        if (values.includes(labelText)) {
-          input.should('be.checked');
-        } else {
-          input.should('not.be.checked');
-        }
-      });
-  });
+  getPopover().within(() => assertLanguageItems(values));
   dismissMenu();
 };
 

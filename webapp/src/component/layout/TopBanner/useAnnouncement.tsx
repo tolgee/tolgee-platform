@@ -212,6 +212,36 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_FIGMA_PLUGIN_NEW_VERSION':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_figma_plugin_new_version"
+                defaultValue="We've released a new version of the <linkFigma>Figma plugin</linkFigma>!"
+                params={{
+                  linkFigma: <BannerLink href={DOCS_LINKS.figmaPlugin} />,
+                }}
+              />
+            }
+          />
+        );
+
+      case 'FEATURE_COMMUNITY_TRANSLATION':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_community_translation"
+                defaultValue="We've released <link>Community Translation</link>!"
+                params={{
+                  link: <BannerLink href={DOCS_LINKS.communityTranslation} />,
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }

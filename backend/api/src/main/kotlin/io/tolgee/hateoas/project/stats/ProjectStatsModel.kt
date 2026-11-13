@@ -7,6 +7,7 @@ open class ProjectStatsModel(
   val keyCount: Long,
   val taskCount: Long,
   val baseWordsCount: Long,
+  val hostedWordsCount: Long,
   val translatedPercentage: Double,
   val reviewedPercentage: Double,
   val membersCount: Long,

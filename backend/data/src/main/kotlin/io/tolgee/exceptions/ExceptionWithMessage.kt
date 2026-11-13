@@ -1,6 +1,7 @@
 package io.tolgee.exceptions
 
 import io.tolgee.constants.Message
+import io.tolgee.constants.MessageInterface
 import java.io.Serializable
 
 abstract class ExceptionWithMessage(
@@ -14,15 +15,15 @@ abstract class ExceptionWithMessage(
   override val code: String
     get() = _code ?: tolgeeMessage?.code ?: throw IllegalStateException("Exception code or message not set")
 
-  constructor(message: Message, params: List<Serializable?>? = null, cause: Throwable? = null) : this(
+  constructor(message: MessageInterface, params: List<Serializable?>? = null, cause: Throwable? = null) : this(
     message.code,
     params,
     cause,
   ) {
-    this.tolgeeMessage = message
+    this.tolgeeMessage = message as? Message
   }
 
-  constructor(message: Message) : this(message.code, null) {
-    this.tolgeeMessage = message
+  constructor(message: MessageInterface) : this(message.code, null) {
+    this.tolgeeMessage = message as? Message
   }
 }

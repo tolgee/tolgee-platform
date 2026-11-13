@@ -22,8 +22,22 @@ object OAuth2Constants {
   /** Project-selection sentinel: not narrowed to any project subset (still bounded by live permissions). */
   const val ALL_PROJECTS = "*"
 
+  /** The HTTP authentication scheme an OAuth access token, and Tolgee's own JWT, arrive under. */
+  const val BEARER_PREFIX = "Bearer "
+
   const val BROWSER_EXTENSION_CLIENT_ID = "tolgee-browser-extension"
   const val CLI_CLIENT_ID = "tolgee-cli"
+
+  /**
+   * Where the published Tolgee Tools extension receives the authorization code: the Chrome Web Store build, then the
+   * Firefox add-on. Both ids are pinned in the extension's manifest, so these never change between releases.
+   */
+  const val OFFICIAL_CHROME_EXTENSION_REDIRECT_URI = "https://hacnbapajkkfohnonhbmegojnddagfnj.chromiumapp.org/"
+  const val OFFICIAL_FIREFOX_EXTENSION_REDIRECT_URI =
+    "https://e262e73e8cbdd8d796b491acfa20a501bfc7b9c0.extensions.allizom.org/"
+
+  val OFFICIAL_BROWSER_EXTENSION_REDIRECT_URIS =
+    listOf(OFFICIAL_CHROME_EXTENSION_REDIRECT_URI, OFFICIAL_FIREFOX_EXTENSION_REDIRECT_URI)
 
   const val AUTHORIZE_PATH = "/oauth2/authorize"
   const val TOKEN_PATH = "/oauth2/token"

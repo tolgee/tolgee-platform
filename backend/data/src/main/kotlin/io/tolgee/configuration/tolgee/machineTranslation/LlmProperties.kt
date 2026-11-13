@@ -171,6 +171,7 @@ class LlmProperties : MachineTranslationServiceProperties {
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,
         maxTokens = maxTokens,
+        serverConfigured = true,
       )
     }
 

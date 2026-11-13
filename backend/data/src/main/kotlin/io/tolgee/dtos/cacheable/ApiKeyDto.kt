@@ -32,6 +32,9 @@ data class ApiKeyDto(
   override val scopes: Set<Scope>,
 ) : Serializable,
   ScopedCredential {
+  override val projectIds: Set<Long>
+    get() = setOf(projectId)
+
   override val singleProjectId: Long
     get() = projectId
 

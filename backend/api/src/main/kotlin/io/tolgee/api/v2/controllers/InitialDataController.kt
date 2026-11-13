@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.EeSubscriptionProvider
+import io.tolgee.api.OnboardingSurveyProvider
 import io.tolgee.component.PreferredOrganizationFacade
 import io.tolgee.hateoas.auth.AuthInfoModelAssembler
 import io.tolgee.hateoas.initialData.InitialDataEeSubscriptionModel
@@ -42,6 +43,7 @@ class InitialDataController(
   private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
   private val projectContributorService: ProjectContributorService,
+  private val onboardingSurveyProvider: OnboardingSurveyProvider?,
 ) : IController {
   @GetMapping(value = [""])
   @Operation(summary = "Get initial data", description = "Returns initial data required by the UI to load")
@@ -64,6 +66,7 @@ class InitialDataController(
       data.announcement = announcementController.getLatest()
       data.eeSubscription = getEeSubscriptionModel()
       data.hasCommunityContributions = projectContributorService.hasCommunityContributions(userAccount.id)
+      data.onboardingSurveyVersion = onboardingSurveyProvider?.resolveVersion(userAccount.id)
     }
 
     return data

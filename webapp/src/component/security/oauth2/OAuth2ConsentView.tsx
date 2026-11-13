@@ -7,19 +7,21 @@ import { CompactView } from 'tg.component/layout/CompactView';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { isRequestedProjectInaccessible } from './consentProjectAccess';
+import { isRequestedProjectInaccessible } from 'tg.component/security/oauth2/consentProjectAccess';
 import {
   authorizeRequestFromSearch,
   consentRequest,
-} from './oauth2ConsentSubmit';
+} from 'tg.component/security/oauth2/oauth2ConsentSubmit';
 import {
   NO_CHOICE,
   ProjectChoice,
   initialProjectChoice,
   isChoiceComplete,
-} from './consentProjectChoice';
-import { ConsentProjectPicker } from './ConsentProjectPicker';
-import { ConsentPermissions } from './ConsentPermissions';
+} from 'tg.component/security/oauth2/consentProjectChoice';
+import { ConsentProjectPicker } from 'tg.component/security/oauth2/ConsentProjectPicker';
+import { ConsentPermissions } from 'tg.component/security/oauth2/ConsentPermissions';
+import { ConsentLocalAppNotice } from 'tg.component/security/oauth2/ConsentLocalAppNotice';
+import { ConsentUnverifiedClient } from 'tg.component/security/oauth2/ConsentUnverifiedClient';
 
 const StyledButtons = styled(Box)`
   display: flex;
@@ -139,20 +141,37 @@ const OAuth2ConsentView: React.FC<React.PropsWithChildren<unknown>> = () => {
     return <FullPageLoading />;
   }
 
+  const unverified = info.verified === false;
+
   return (
     <DashboardPage hideQuickStart>
       <CompactView
         windowTitle={t('oauth2_consent_title', 'Authorize application')}
         title={t('oauth2_consent_heading', 'Allow access')}
+        // An unverified client's name is attacker-chosen, and CompactView renders the subtitle above primaryContent:
+        // putting it here would place it before the warning ConsentUnverifiedClient exists to show first.
         subtitle={
-          <T
-            keyName="oauth2_consent_subtitle"
-            defaultValue="{appName} wants to access a project. Review what it will be able to do."
-            params={{ appName: info.appName }}
-          />
+          unverified ? undefined : (
+            <span data-cy="oauth2-consent-subtitle">
+              <T
+                keyName="oauth2_consent_subtitle"
+                defaultValue="{appName} wants to access a project. Review what it will be able to do."
+                params={{ appName: info.appName }}
+              />
+            </span>
+          )
         }
         primaryContent={
           <Box data-cy="oauth2-consent">
+            {unverified && (
+              <ConsentUnverifiedClient
+                appName={info.appName}
+                clientOrigin={info.clientOrigin}
+              />
+            )}
+            {!unverified && info.redirectsToLocalApp && (
+              <ConsentLocalAppNotice />
+            )}
             {isRequestedProjectInaccessible(info) && (
               <Alert
                 severity="warning"

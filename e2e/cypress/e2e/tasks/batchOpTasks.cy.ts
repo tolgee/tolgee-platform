@@ -9,6 +9,7 @@ import {
 import { HOST } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage } from '../../common/shared';
+import { checkTaskPreview } from '../../common/tasks';
 import {
   getTranslationCell,
   visitTranslations,
@@ -53,6 +54,25 @@ describe('Tasks from batch operations view', () => {
 
     cy.gcy('task-detail-keys').should('contain', 1);
     cy.gcy('task-detail-words').should('contain', 2);
+  });
+
+  it('warns that hand-picked keys already in an open task will be dropped', () => {
+    selectAll();
+    selectOperation('Create task');
+
+    cy.gcy('create-task-field-type').click();
+    cy.gcy('create-task-field-type-item').contains('Review').click();
+    cy.waitForDom();
+    cy.gcy('translations-state-filter-clear').click();
+    waitForGlobalLoading();
+
+    checkTaskPreview({
+      language: 'Czech',
+      keys: 2,
+      alert: true,
+      words: 4,
+      characters: 26,
+    });
   });
 
   it('adds keys to existing task', () => {

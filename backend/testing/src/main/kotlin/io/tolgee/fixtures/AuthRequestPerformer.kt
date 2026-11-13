@@ -9,6 +9,11 @@ interface AuthRequestPerformer : RequestPerformer {
     content: Any?,
   ): ResultActions
 
+  fun performAuthPatch(
+    url: String,
+    content: Any?,
+  ): ResultActions
+
   fun performAuthPost(
     url: String,
     content: Any?,

@@ -100,6 +100,21 @@ class ProjectsControllerPermissionsTest : ProjectAuthControllerTest("/v2/project
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot set permissions with deleted language`() {
+    val testData = PermissionsTestData()
+    val user = testData.addUserWithPermissions(type = ProjectPermissionType.VIEW)
+    val deletedLanguage = testData.addDeletedLanguage()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin.self
+    projectSupplier = { testData.projectBuilder.self }
+
+    performProjectAuthPut("users/${user.id}/set-permissions/TRANSLATE?languages=${deletedLanguage.id}")
+      .andIsBadRequest
+      .andHasErrorMessage(Message.LANGUAGE_NOT_FROM_PROJECT)
+  }
+
+  @Test
   fun `cannot save stateChangeLanguages when translate`() {
     permissionTestUtil
       .performSetPermissions("TRANSLATE") { getLang ->

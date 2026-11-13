@@ -10,6 +10,7 @@ import jakarta.persistence.MapsId
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(name = "s3content_storage_config")
@@ -42,4 +43,7 @@ class S3ContentStorageConfig(
     description = "Specifies an optional subfolder structure within s3 bucket to which content will be stored",
   )
   override var path: String? = ""
+
+  @ColumnDefault("false")
+  override var publicRead: Boolean = false
 }

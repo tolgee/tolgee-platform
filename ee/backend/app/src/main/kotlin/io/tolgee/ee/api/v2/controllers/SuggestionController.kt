@@ -136,7 +136,8 @@ class SuggestionController(
     suggestion: TranslationSuggestion,
     languageId: Long,
   ) {
-    if (authenticationFacade.isAuthorSelfAccess(suggestion.author?.id)) {
+    if (suggestion.author?.id == authenticationFacade.authenticatedUser.id) {
+      securityService.checkProjectPermission(projectId, Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS)
       return
     }
     try {
@@ -160,11 +161,8 @@ class SuggestionController(
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ): TranslationSuggestionModel {
-    securityService.checkLanguageStateChangePermission(
-      projectHolder.project.id,
-      listOf(languageId),
-    )
     val projectId = projectHolder.project.id
+    securityService.checkLanguageStateChangePermission(projectId, listOf(languageId))
     val suggestion = translationSuggestionService.declineSuggestion(projectId, languageId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
@@ -180,15 +178,9 @@ class SuggestionController(
     @PathVariable suggestionId: Long,
     @RequestParam declineOther: Boolean = false,
   ): TranslationSuggestionAcceptResponse {
-    securityService.checkLanguageTranslatePermission(
-      projectHolder.project.id,
-      listOf(languageId),
-    )
-    securityService.checkLanguageStateChangePermission(
-      projectHolder.project.id,
-      listOf(languageId),
-    )
     val projectId = projectHolder.project.id
+    securityService.checkLanguageTranslatePermission(projectId, listOf(languageId))
+    securityService.checkLanguageStateChangePermission(projectId, listOf(languageId))
     val (suggestion, declined) =
       translationSuggestionService.acceptSuggestion(
         projectId,
@@ -211,11 +203,8 @@ class SuggestionController(
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ): TranslationSuggestionModel {
-    securityService.checkLanguageStateChangePermission(
-      projectHolder.project.id,
-      listOf(languageId),
-    )
     val projectId = projectHolder.project.id
+    securityService.checkLanguageStateChangePermission(projectId, listOf(languageId))
     val suggestion = translationSuggestionService.suggestionSetActive(projectId, languageId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }

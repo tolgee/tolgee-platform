@@ -27,6 +27,7 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
 import io.tolgee.security.oauth2.OAuth2AccessTokenResolver
+import io.tolgee.security.oauth2.OAuth2Audience
 import io.tolgee.security.ratelimit.RateLimitPolicy
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimitedException
@@ -232,6 +233,19 @@ class AuthenticationFilterTest {
     req.removeHeader("Authorization")
     req.addHeader("Authorization", TEST_VALID_TOKEN)
     assertThrows<AuthenticationException> { authenticationFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it expects the MCP audience on the MCP endpoint and the API audience everywhere else`() {
+    val mcpReq = MockHttpServletRequest("POST", "/mcp/developer")
+    mcpReq.addHeader("Authorization", "Bearer $TEST_VALID_TOKEN")
+    authenticationFilter.doFilter(mcpReq, MockHttpServletResponse(), MockFilterChain())
+    Mockito.verify(oauth2AccessTokenResolver).tryResolve(TEST_VALID_TOKEN, OAuth2Audience.MCP)
+
+    val apiReq = MockHttpServletRequest("GET", "/v2/projects")
+    apiReq.addHeader("Authorization", "Bearer $TEST_VALID_TOKEN")
+    authenticationFilter.doFilter(apiReq, MockHttpServletResponse(), MockFilterChain())
+    Mockito.verify(oauth2AccessTokenResolver).tryResolve(TEST_VALID_TOKEN, OAuth2Audience.API)
   }
 
   @Test

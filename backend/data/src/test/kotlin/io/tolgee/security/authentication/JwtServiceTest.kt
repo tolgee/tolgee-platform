@@ -16,8 +16,7 @@
 
 package io.tolgee.security.authentication
 
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.Jwts
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -31,7 +30,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import java.util.Base64
 import java.util.Date
+import javax.crypto.Mac
 
 class JwtServiceTest {
   companion object {
@@ -46,7 +47,10 @@ class JwtServiceTest {
     const val SUPPORTER_ACTOR_ID = 4343L
   }
 
-  private val testSigningKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+  private val testSigningKey =
+    Jwts.SIG.HS256
+      .key()
+      .build()
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
@@ -109,6 +113,24 @@ class JwtServiceTest {
 
     assertThat(auth.principal.id).isEqualTo(TEST_USER_ID)
     assertThat(auth.principal.username).isEqualTo(TEST_USER_EMAIL)
+  }
+
+  @Test
+  fun `it accepts tokens with a string audience claim (emitted before the jjwt 0_12 upgrade)`() {
+    val now = currentDateProvider.date
+    val encoder = Base64.getUrlEncoder().withoutPadding()
+    val header = encoder.encodeToString("""{"alg":"HS256"}""".toByteArray())
+    val claimsJson =
+      """{"iat":${now.time / 1000},"aud":"${JwtService.JWT_TOKEN_AUDIENCE}",""" +
+        """"sub":"$TEST_USER_ID","exp":${(now.time + JWT_LIFETIME) / 1000}}"""
+    val payload = encoder.encodeToString(claimsJson.toByteArray())
+    val mac = Mac.getInstance("HmacSHA256")
+    mac.init(testSigningKey)
+    val signature = encoder.encodeToString(mac.doFinal("$header.$payload".toByteArray()))
+
+    val auth = jwtService.validateToken("$header.$payload.$signature")
+
+    assertThat(auth.principal.id).isEqualTo(TEST_USER_ID)
   }
 
   @Test

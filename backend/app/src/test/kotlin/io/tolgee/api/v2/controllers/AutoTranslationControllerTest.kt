@@ -11,6 +11,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -30,6 +31,11 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
     initMachineTranslationProperties(INITIAL_BUCKET_CREDITS)
   }
 
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates using MT`() {
@@ -45,6 +51,17 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
       .isEqualTo("Translated with Google")
     assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.germanLanguage).text)
       .isEqualTo("Translated with Google")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns bad request when out of credits`() {
+    initMachineTranslationProperties(0)
+    saveTestData()
+    performProjectAuthPut(
+      "keys/${testData.thisIsBeautifulKey.id}/auto-translate?useMachineTranslation=true&languages=de",
+      null,
+    ).andIsBadRequest.andHasErrorMessage(Message.OUT_OF_CREDITS)
   }
 
   @ProjectJWTAuthTestMethod
@@ -127,6 +144,58 @@ class AutoTranslationControllerTest : MachineTranslationTest() {
   fun `doesn't work when no service provided`() {
     saveTestData()
     performProjectAuthPut("keys/${testData.thisIsBeautifulKey.id}/auto-translate", null).andIsBadRequest
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `rejects a requested language the user cannot translate`() {
+    val translator = testData.addSpanishOnlyTranslator()
+    saveTestData()
+    userAccount = translator
+    performProjectAuthPut(
+      "keys/${testData.thisIsBeautifulKey.id}/auto-translate?useMachineTranslation=true&languages=de",
+      null,
+    ).andIsForbidden.andHasErrorMessage(Message.LANGUAGE_NOT_PERMITTED)
+    assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.germanLanguage).text)
+      .isEqualTo("Es ist schön.")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `translates only permitted languages when no languages are specified`() {
+    val translator = testData.addSpanishOnlyTranslator()
+    val another = testData.createAnotherThisIsBeautifulKey()
+    saveTestData()
+    userAccount = translator
+    performProjectAuthPut("keys/${another.id}/auto-translate?useMachineTranslation=true", null).andIsOk
+    assertThat(another.getLangTranslation(testData.spanishLanguage).text).isEqualTo("Translated with Google")
+    assertThat(translationService.find(another, testData.germanLanguage).isPresent).isFalse()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `rejects a call without languages when the user cannot translate any`() {
+    val translator = testData.addBaseOnlyTranslator()
+    val another = testData.createAnotherThisIsBeautifulKey()
+    saveTestData()
+    userAccount = translator
+    performProjectAuthPut("keys/${another.id}/auto-translate?useMachineTranslation=true", null)
+      .andIsForbidden
+      .andHasErrorMessage(Message.LANGUAGE_NOT_PERMITTED)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `keeps existing translations when no languages are specified`() {
+    saveTestData()
+    performProjectAuthPut(
+      "keys/${testData.thisIsBeautifulKey.id}/auto-translate?useMachineTranslation=true",
+      null,
+    ).andIsOk
+    assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.germanLanguage).text)
+      .isEqualTo("Es ist schön.")
+    assertThat(testData.thisIsBeautifulKey.getLangTranslation(testData.spanishLanguage).text)
+      .isEqualTo("Translated with Google")
   }
 
   private fun saveTestData() {

@@ -18,10 +18,11 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.component.BackendUrlProvider
 import io.tolgee.component.FrontendUrlProvider
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import io.tolgee.util.nullIfBlank
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
-import java.net.URI
 
 /**
  * The URL that identifies this authorization server.
@@ -37,19 +38,23 @@ import java.net.URI
 class OAuth2IssuerResolver(
   private val backendUrlProvider: BackendUrlProvider,
   private val frontendUrlProvider: FrontendUrlProvider,
-  private val clientRegistry: OAuth2ClientRegistry,
-) {
+) : Logging {
+  /** A warning, not a failure: the hard failure is [PreRegisteredOAuth2Clients.requireIssuerForConfiguredClients]. */
   @PostConstruct
-  fun requireConfiguredIssuer() {
-    if (clientRegistry.isEnabled) issuerUrl
+  fun warnOnUnusableIssuer() {
+    val reason = runCatching { configuredBaseUrl }.exceptionOrNull() ?: return
+    logger.warn("The OAuth 2.1 authorization server is disabled: {}", reason.message)
   }
+
+  val isConfigured: Boolean
+    get() = runCatching { configuredBaseUrl }.getOrNull() != null
 
   val issuerUrl: String
     get() =
       checkNotNull(configuredBaseUrl) {
-        "tolgee.back-end-url (or tolgee.front-end-url) must be set when a tolgee.oauth2 client is configured: the " +
-          "issuer is published in every discovery document and on every authorization response, and it is never " +
-          "derived from the request"
+        "tolgee.back-end-url (or tolgee.front-end-url) must be set for Tolgee to act as an OAuth 2.1 authorization " +
+          "server: the issuer is published in every discovery document and on every authorization response, and it " +
+          "is never derived from the request"
       }
 
   private val configuredBaseUrl: String?
@@ -73,7 +78,7 @@ class OAuth2IssuerResolver(
    */
   private fun requireOrigin(url: String) {
     val parsed =
-      runCatching { URI(url) }.getOrNull()
+      UrlOrigins.parse(url)
         ?: throw IllegalStateException(
           "tolgee.back-end-url (or tolgee.front-end-url) is not a valid URL: $url",
         )

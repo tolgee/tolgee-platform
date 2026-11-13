@@ -11,6 +11,7 @@ data class ContentStorageS3Properties(
   override var endpoint: String? = null,
   override var signingRegion: String? = null,
   override var path: String? = null,
+  override var publicRead: Boolean = false,
 ) : S3Config {
   fun clear() {
     bucketName = null
@@ -19,5 +20,6 @@ data class ContentStorageS3Properties(
     endpoint = null
     signingRegion = null
     path = null
+    publicRead = false
   }
 }

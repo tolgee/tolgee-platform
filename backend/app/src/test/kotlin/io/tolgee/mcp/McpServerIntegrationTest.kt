@@ -116,19 +116,61 @@ class McpServerIntegrationTest : AbstractMcpTest() {
       }}
       """.trimIndent()
 
-    val request =
-      HttpRequest
-        .newBuilder(URI("http://localhost:$port/mcp/developer"))
-        .header("X-API-Key", "tgpat_${data.pat.token}")
-        .header("Content-Type", "application/json")
-        .header("Accept", "application/json, text/event-stream")
-        .POST(HttpRequest.BodyPublishers.ofString(body))
-        .build()
-
-    val response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString())
+    val response = send(mcpRequestBuilder().POST(HttpRequest.BodyPublishers.ofString(body)).build())
 
     assertThat(response.statusCode()).isEqualTo(200)
-    assertThat(response.headers().firstValue("Mcp-Session-Id")).isPresent
+    assertThat(response.headers().firstValue("Mcp-Session-Id")).isEmpty
+  }
+
+  @Test
+  fun `initialized notification is accepted`() {
+    val body = """{"jsonrpc":"2.0","method":"notifications/initialized"}"""
+
+    val response = send(mcpRequestBuilder().POST(HttpRequest.BodyPublishers.ofString(body)).build())
+
+    assertThat(response.statusCode()).isEqualTo(202)
+  }
+
+  @Test
+  fun `tool call works without initialize and with an unknown session id`() {
+    val body =
+      """
+      {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_projects","arguments":{}}}
+      """.trimIndent()
+
+    val response =
+      send(
+        mcpRequestBuilder()
+          .header("Mcp-Session-Id", "session-from-another-replica")
+          .POST(HttpRequest.BodyPublishers.ofString(body))
+          .build(),
+      )
+
+    assertThat(response.statusCode()).isEqualTo(200)
+    assertThat(response.headers().firstValue("Content-Type").get()).startsWith("application/json")
+    val json = objectMapper.readTree(response.body())
+    assertThat(json.isObject).isTrue()
+    assertThat(json["result"]["isError"].asBoolean()).isFalse()
+  }
+
+  @Test
+  fun `GET on the endpoint is not allowed`() {
+    val response = send(mcpRequestBuilder().GET().build())
+
+    assertThat(response.statusCode()).isEqualTo(405)
+  }
+
+  @Test
+  fun `DELETE on the endpoint is not allowed`() {
+    val response =
+      send(
+        mcpRequestBuilder()
+          .header("Mcp-Session-Id", "session-from-before-the-deploy")
+          .DELETE()
+          .build(),
+      )
+
+    assertThat(response.statusCode()).isEqualTo(405)
   }
 
   @Test
@@ -316,4 +358,14 @@ class McpServerIntegrationTest : AbstractMcpTest() {
       cacheManager.getCache(io.tolgee.constants.Caches.RATE_LIMITS)?.clear()
     }
   }
+
+  private fun mcpRequestBuilder(): HttpRequest.Builder =
+    HttpRequest
+      .newBuilder(URI("http://localhost:$port/mcp/developer"))
+      .header("X-API-Key", "tgpat_${data.pat.token}")
+      .header("Content-Type", "application/json")
+      .header("Accept", "application/json, text/event-stream")
+
+  private fun send(request: HttpRequest): HttpResponse<String> =
+    HttpClient.newHttpClient().use { it.send(request, HttpResponse.BodyHandlers.ofString()) }
 }

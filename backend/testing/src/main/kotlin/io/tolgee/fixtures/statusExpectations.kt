@@ -1,6 +1,6 @@
 package io.tolgee.fixtures
 
-import io.tolgee.constants.Message
+import io.tolgee.constants.MessageInterface
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -33,6 +33,9 @@ val ResultActions.andIsCreated: ResultActions
 val ResultActions.andIsBadRequest: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isBadRequest) }
 
+val ResultActions.andIsConflict: ResultActions
+  get() = this.tryPrettyPrinting { this.andExpect(status().isConflict) }
+
 val ResultActions.andIsNotModified: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isNotModified) }
 
@@ -42,7 +45,7 @@ val ResultActions.andIsRateLimited: ResultActions
 val ResultActions.andIsBlocked: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().`is`(444)) }
 
-fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
+fun ResultActions.andHasErrorMessage(message: MessageInterface): ResultActions {
   return this.tryPrettyPrinting {
     this.andAssertThatJson {
       node("code").isEqualTo(message.code)

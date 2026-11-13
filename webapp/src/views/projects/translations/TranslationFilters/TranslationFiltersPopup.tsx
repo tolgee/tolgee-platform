@@ -1,6 +1,7 @@
 import { Box, Menu, MenuItem } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 import { FilterActions, FilterOptions } from './tools';
 import { FiltersType, LanguageModel } from './tools';
@@ -13,11 +14,17 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterDescription } from './SubfilterDescription';
+import { SubfilterPlurals } from './SubfilterPlurals';
 import { SubfilterComments } from './SubfilterComments';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
-import { getQaChecksFiltersLength, SubfilterQaChecks } from 'tg.ee';
+import {
+  getQaChecksFiltersLength,
+  SubfilterQaChecks,
+  SubfilterTasks,
+  getTaskFiltersLength,
+} from 'tg.ee';
 
 type Props = {
   value: FiltersType;
@@ -42,6 +49,13 @@ export const TranslationFiltersPopup = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const { isEnabled } = useEnabledFeatures();
+  const tasksEnabled = isEnabled('TASKS') || isEnabled('ORDER_TRANSLATION');
+  const tasksFilterAvailable =
+    tasksEnabled || Boolean(getTaskFiltersLength(value));
+  const surfaceShowsTaskFilter =
+    !filterOptions?.taskPrefiltered &&
+    (!filterOptions?.keyRelatedOnly || filterOptions?.taskCreation);
   return (
     <Menu
       open={true}
@@ -73,6 +87,7 @@ export const TranslationFiltersPopup = ({
           actions={actions}
           projectId={projectId}
         />
+        <SubfilterPlurals value={value} actions={actions} />
         {!filterOptions?.keyRelatedOnly && (
           <>
             <SubfilterTranslations
@@ -102,12 +117,22 @@ export const TranslationFiltersPopup = ({
             )}
           </>
         )}
+        {tasksFilterAvailable && surfaceShowsTaskFilter && (
+          <SubfilterTasks
+            value={value}
+            actions={actions}
+            selectedLanguages={selectedLanguages}
+            taskCreation={filterOptions?.taskCreation}
+            pinnedTaskType={filterOptions?.pinnedTaskType}
+          />
+        )}
         {project.suggestionsMode !== 'DISABLED' && (
           <SubfilterSuggestions
             value={value}
             actions={actions}
             projectId={projectId}
             selectedLanguages={selectedLanguages}
+            taskCreation={filterOptions?.taskCreation}
           />
         )}
         {filterOptions?.showDeletedBy && (

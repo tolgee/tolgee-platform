@@ -130,6 +130,19 @@ class PublicControllerTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `sets the user as a person property on sign up`() {
+    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "person-props@aaaa.com")
+    performPost("/api/public/sign_up", dto).andIsOk
+
+    val params = assertPostHogEventReported(postHog, "SIGN_UP")
+
+    @Suppress("UNCHECKED_CAST")
+    val set = params["\$set"] as Map<String, Any?>
+    set["email"].assert.isEqualTo("person-props@aaaa.com")
+    set["name"].assert.isEqualTo("Pavel Novak")
+  }
+
+  @Test
   fun `doesn't create organization when invitation provided`() {
     val base = dbPopulator.createBase()
     val project = base.project

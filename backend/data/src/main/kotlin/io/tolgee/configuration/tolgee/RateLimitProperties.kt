@@ -90,4 +90,20 @@ class RateLimitProperties(
     defaultExplanation = "= 1 minute",
   )
   var strikeResetWindowMs: Long = 60_000,
+  @DocProperty(
+    description =
+      "Maximum time, in milliseconds, a request waits for the internal per-bucket lock before it is\n" +
+        "rejected with a `429` response. This prevents requests from queueing on a heavily contended\n" +
+        "rate limit bucket and exhausting the server's worker threads.",
+  )
+  var lockWaitMs: Long = 500,
+  @DocProperty(
+    description =
+      "Maximum number of requests processed concurrently (per node) for a single rate limit bucket.\n" +
+        "Requests above this cap are rejected immediately with a `429` response, without waiting for\n" +
+        "the bucket lock. This protects the server's worker threads when a single client floods the\n" +
+        "API, while leaving room for legitimate bursts (e.g. an app fetching many namespaces in\n" +
+        "parallel on startup). Set to 0 to disable the cap.",
+  )
+  var maxConcurrentPerBucket: Int = 50,
 )

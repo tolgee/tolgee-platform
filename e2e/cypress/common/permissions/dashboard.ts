@@ -15,9 +15,15 @@ export function testDashboard(projectInfo: ProjectInfo) {
   const scopes = projectInfo.project.computedPermission.scopes;
 
   tryClickable('project-dashboard-task-count', scopes.includes('tasks.view'));
-  tryClickable('project-dashboard-text', scopes.includes('keys.view'));
-  tryClickable('project-dashboard-progress', scopes.includes('keys.view'));
-  tryClickable('project-dashboard-members', scopes.includes('members.view'));
+  tryClickable('project-dashboard-key-count', scopes.includes('keys.view'));
+  tryClickable(
+    'project-dashboard-translated-percentage',
+    scopes.includes('keys.view')
+  );
+  tryClickable(
+    'project-dashboard-members-count',
+    scopes.includes('members.view')
+  );
   if (scopes.includes('languages.edit')) {
     tryClickable('project-dashboard-languages-edit', true);
   }

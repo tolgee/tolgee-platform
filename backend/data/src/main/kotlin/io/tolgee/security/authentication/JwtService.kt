@@ -37,14 +37,14 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.security.Key
 import java.util.Date
 import java.util.UUID
+import javax.crypto.SecretKey
 
 @Service
 class JwtService(
   @Qualifier("jwt_signing_key")
-  private val signingKey: Key,
+  private val signingKey: SecretKey,
   private val authenticationProperties: AuthenticationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
@@ -52,9 +52,9 @@ class JwtService(
 ) {
   private val jwtParser: JwtParser =
     Jwts
-      .parserBuilder()
-      .setClock { currentDateProvider.date }
-      .setSigningKey(signingKey)
+      .parser()
+      .clock { currentDateProvider.date }
+      .verifyWith(signingKey)
       .build()
 
   /**
@@ -79,10 +79,12 @@ class JwtService(
       Jwts
         .builder()
         .signWith(signingKey)
-        .setIssuedAt(now)
-        .setAudience(JWT_TOKEN_AUDIENCE)
-        .setSubject(userAccountId.toString())
-        .setExpiration(expiration)
+        .issuedAt(now)
+        .audience()
+        .add(JWT_TOKEN_AUDIENCE)
+        .and()
+        .subject(userAccountId.toString())
+        .expiration(expiration)
 
     if (actingAsUserAccountId != null) {
       builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId.toString())
@@ -171,10 +173,12 @@ class JwtService(
       Jwts
         .builder()
         .signWith(signingKey)
-        .setIssuedAt(now)
-        .setAudience(JWT_TICKET_AUDIENCE)
-        .setSubject(userAccountId.toString())
-        .setExpiration(Date(now.time + expiresAfter))
+        .issuedAt(now)
+        .audience()
+        .add(JWT_TICKET_AUDIENCE)
+        .and()
+        .subject(userAccountId.toString())
+        .expiration(Date(now.time + expiresAfter))
         .claim(JWT_TICKET_TYPE_CLAIM, ticketType.name)
 
     if (data != null) {
@@ -193,27 +197,27 @@ class JwtService(
    */
   fun validateToken(token: String): TolgeeAuthentication {
     val jws = parseJwt(token)
-    if (jws.body.audience != JWT_TOKEN_AUDIENCE) {
+    if (JWT_TOKEN_AUDIENCE !in jws.payload.audience.orEmpty()) {
       // This is not a token - possibly a ticket or something else.
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    val account = validateJwt(jws.body)
+    val account = validateJwt(jws.payload)
 
-    if (account.isTokenInvalidated(jws.body.issuedAt?.toInstant())) {
+    if (account.isTokenInvalidated(jws.payload.issuedAt?.toInstant())) {
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
-    val actor = validateActor(jws.body)
+    val actor = validateActor(jws.payload)
 
     // to avoid mass sign-out on update, we allow tokens without a device id
     // maybe we should consider changing this later on
-    val deviceId = jws.body[JWT_TOKEN_DEVICE_ID_CLAIM] as? String
+    val deviceId = jws.payload[JWT_TOKEN_DEVICE_ID_CLAIM] as? String
 
-    val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
+    val steClaim = jws.payload[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
     val hasSuperPowers = steClaim != null && steClaim > currentDateProvider.date.time
 
-    val roClaim = jws.body[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
+    val roClaim = jws.payload[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
 
     if (roClaim && account.isAdmin()) {
       // we don't allow admin accounts to be impersonated in read-only mode to make our lives easier
@@ -251,13 +255,13 @@ class JwtService(
     expectedType: TicketType,
   ): TicketAuthentication {
     val jws = parseJwt(token)
-    if (jws.body.audience != JWT_TICKET_AUDIENCE) {
+    if (JWT_TICKET_AUDIENCE !in jws.payload.audience.orEmpty()) {
       // This is not a token - possibly a token or something else.
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
     val rawJwsType =
-      jws.body[JWT_TICKET_TYPE_CLAIM] as? String
+      jws.payload[JWT_TICKET_TYPE_CLAIM] as? String
         ?: throw AuthenticationException(Message.INVALID_JWT_TOKEN)
 
     val jwsType = TicketType.valueOf(rawJwsType)
@@ -265,10 +269,10 @@ class JwtService(
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
     }
 
-    val userAccount = validateJwt(jws.body)
+    val userAccount = validateJwt(jws.payload)
 
     @Suppress("UNCHECKED_CAST") // Type safety: safe to do as the JWT comes from a trusted source (ourselves).
-    val data = jws.body.get(JWT_TICKET_DATA_CLAIM, Map::class.java) as? Map<String, String?>
+    val data = jws.payload.get(JWT_TICKET_DATA_CLAIM, Map::class.java) as? Map<String, String?>
 
     return TicketAuthentication(userAccount, data)
   }
@@ -295,7 +299,7 @@ class JwtService(
 
   private fun parseJwt(token: String): Jws<Claims> {
     try {
-      return jwtParser.parseClaimsJws(token)
+      return jwtParser.parseSignedClaims(token)
     } catch (ex: Exception) {
       when (ex) {
         is SignatureException,

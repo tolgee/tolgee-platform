@@ -105,9 +105,7 @@ class ImportDataManager(
   val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
     keyService
       .getAllByBranch(import.project.id, import.branch?.name)
-      .asSequence()
-      .map { (it.namespace?.name to it.name) to it }
-      .toMap(mutableMapOf())
+      .associateByTo(mutableMapOf()) { (it.namespace?.name to it.name) }
   }
 
   private val translationService: TranslationService by lazy {
@@ -116,15 +114,14 @@ class ImportDataManager(
 
   val existingMetas: MutableMap<Pair<String?, String>, KeyMeta> by lazy {
     keyMetaService
-      .getWithFetchedData(this.import.project)
-      .asSequence()
-      .map { (it.key!!.namespace?.name to it.key!!.name) to it }
-      .toMap()
-      .toMutableMap()
+      .getWithFetchedData(import.project, import.branch?.name)
+      .associateByTo(mutableMapOf()) { (it.key!!.namespace?.name to it.key!!.name) }
   }
 
   val existingNamespaces by lazy {
-    namespaceService.getAllInProject(import.project.id).map { it.name to it }.toMap(mutableMapOf())
+    namespaceService
+      .getAllInProject(import.project.id)
+      .associateByTo(mutableMapOf()) { it.name }
   }
 
   fun releaseData() {

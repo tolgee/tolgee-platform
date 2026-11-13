@@ -63,7 +63,7 @@ class KeyMeta(
   var custom: MutableMap<String, Any?>? = null
 
   fun addComment(
-    author: UserAccount? = null,
+    author: UserAccount,
     ft: KeyComment.() -> Unit,
   ) {
     KeyComment(this, author).apply {

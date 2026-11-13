@@ -8,7 +8,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.MvcResult
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.net.URLDecoder
@@ -73,7 +72,7 @@ abstract class AbstractOAuth2ConformanceTest : AbstractControllerTest() {
     mapOf(
       "response_type" to "code",
       "scope" to "translations.view",
-      "code_challenge" to OAuth2FlowDriver.s256Challenge(OAuth2FlowDriver.randomVerifier()),
+      "code_challenge" to OAuth2FlowDriver.randomChallenge(),
       "code_challenge_method" to "S256",
     )
 
@@ -86,7 +85,7 @@ abstract class AbstractOAuth2ConformanceTest : AbstractControllerTest() {
 
   protected fun tokenResult(): MvcResult {
     val pending = driver.startPendingConsent(jwt(), CLIENT_ID, REDIRECT)
-    val code = driver.queryParam(driver.consentRedirect(pending), "code")!!
+    val code = driver.code(pending)
     return driver.exchangeCode(code, CLIENT_ID, REDIRECT, pending.verifier).andReturn()
   }
 

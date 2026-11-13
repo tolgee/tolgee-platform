@@ -44,7 +44,8 @@ type Props = {
   existing?: string[];
   filtered?: string[];
   placeholder?: string;
-  noNew?: boolean;
+  canAddNew?: (value: string) => boolean;
+  newOptionLabel?: (value: string) => React.ReactNode;
 };
 
 export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
@@ -55,7 +56,8 @@ export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
   existing,
   filtered,
   placeholder,
-  noNew,
+  canAddNew,
+  newOptionLabel,
 }) => {
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
@@ -84,8 +86,8 @@ export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
 
   const options = (tags.data?._embedded?.tags?.map(({ name }) => name) || [])
     .concat(existing || [])
-    .filter((value, index, self) => {
-      return self.indexOf(value) === index;
+    .filter((tag, index, self) => {
+      return self.indexOf(tag) === index;
     })
     .map((tag) => ({
       label: tag,
@@ -106,19 +108,19 @@ export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
         }
         PopperComponent={CustomPopper}
         options={options}
-        filterOptions={(options) => {
-          const result = options.filter(
+        filterOptions={(allOptions) => {
+          const result = allOptions.filter(
             (o) =>
               !filtered?.includes(o.value) &&
-              o.value.toLowerCase().startsWith(search.toLowerCase())
+              o.value.toLowerCase().startsWith(value.toLowerCase())
           );
           if (
-            !noNew &&
-            search !== '' &&
-            !options.find((item) => item.value === search)
+            value !== '' &&
+            (canAddNew?.(value) ?? true) &&
+            !allOptions.find((item) => item.value === value)
           ) {
             result.push({
-              value: search,
+              value,
               label: '',
               new: true,
             });
@@ -126,8 +128,8 @@ export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
           return result;
         }}
         inputValue={value}
-        onInputChange={(_, value) => {
-          setValue(value);
+        onInputChange={(_, newInputValue) => {
+          setValue(newInputValue);
         }}
         onChange={(_, newValue) => {
           if (newValue) {
@@ -141,7 +143,8 @@ export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
             <MenuItem {...attrs}>
               <StyledOption data-cy="tag-autocomplete-option">
                 {option.new
-                  ? t('translations_tag_create', { tag: search })
+                  ? newOptionLabel?.(option.value) ??
+                    t('translations_tag_create', { tag: option.value })
                   : option.label}
               </StyledOption>
             </MenuItem>

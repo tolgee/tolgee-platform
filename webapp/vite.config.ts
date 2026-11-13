@@ -76,6 +76,9 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       exclude: ['@tginternal/library'],
+      // Reached only through a dynamic import, so without this the dev server
+      // re-optimizes it on first render and the survey gets a second React.
+      include: ['mui-tel-input'],
     },
     server: {
       // this ensures that the browser opens upon server start

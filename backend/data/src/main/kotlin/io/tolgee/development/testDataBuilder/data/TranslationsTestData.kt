@@ -298,6 +298,22 @@ class TranslationsTestData {
     }
   }
 
+  fun addPluralKeys() {
+    listOf("plural-items", "plural-days").forEach { keyName ->
+      projectBuilder
+        .addKey {
+          name = keyName
+          isPlural = true
+          pluralArgName = "count"
+        }.build {
+          addTranslation {
+            language = englishLanguage
+            text = "{count, plural, one {# thing} other {# things}}"
+          }
+        }
+    }
+  }
+
   fun generateLotOfData(count: Long = 99) {
     root.data.projects[0].apply {
       (1..count).forEach {

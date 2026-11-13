@@ -6,19 +6,14 @@ import { BatchJobProgress } from 'tg.websocket-client/WebsocketClient';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { GlobalError } from '../error/GlobalError';
 import { useApiQuery } from '../service/http/useQueryApi';
+import { BatchJobModel } from 'tg.views/projects/translations/BatchOperations/types';
 import {
-  BatchJobModel,
-  BatchJobStatus,
-} from 'tg.views/projects/translations/BatchOperations/types';
+  applyProgress,
+  BatchJobState,
+  mergeServerJobs,
+} from 'tg.views/projects/translations/BatchOperations/OperationsSummary/utils';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-
-type BatchJobUpdateModel = {
-  totalItems: number;
-  progress: number;
-  status: BatchJobStatus;
-  id: number;
-};
 
 type Props = {
   id: number;
@@ -51,72 +46,23 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
         noGlobalLoading: true,
         staleTime: 0,
         onSuccess(data) {
-          setBatchOperations(
-            (
-              data._embedded?.batchJobs?.map((job) => {
-                // if data about the progress already exist, don't override them
-                // because that can cause out of order issues
-                const existingProgress = batchOperations?.find(
-                  (o) => o.id === job.id
-                );
-                return {
-                  ...job,
-                  status: existingProgress?.status ?? job.status,
-                  totalItems: existingProgress?.totalItems ?? job.totalItems,
-                  progress: existingProgress?.progress ?? job.progress,
-                  errorMessage:
-                    existingProgress?.errorMessage ?? job.errorMessage,
-                };
-              }) || []
-            ).reverse()
+          setBatchOperations((jobs) =>
+            mergeServerJobs(jobs, data._embedded?.batchJobs ?? [])
           );
         },
       },
     });
 
-    const [batchOperations, setBatchOperations] =
-      useState<(Partial<BatchJobModel> & BatchJobUpdateModel)[]>();
+    const [batchOperations, setBatchOperations] = useState<BatchJobState[]>();
 
     const changeHandler = ({ data }: BatchJobProgress) => {
-      const exists = batchOperations?.find((job) => job.id === data.jobId);
-      let shouldRefetch = false;
-      if (!exists) {
-        if (!knownJobs.includes(data.jobId)) {
-          shouldRefetch = true;
-          // only refetch jobs first time we see unknown job
-          setKnownJobs((jobs) => [...jobs, data.jobId]);
-          setBatchOperations((jobs) => [
-            ...(jobs || []),
-            {
-              id: data.jobId,
-              progress: data.processed,
-              totalItems: data.total,
-              status: data.status,
-              errorMessage: data.errorMessage,
-            },
-          ]);
-        }
-      } else {
-        setBatchOperations((jobs) =>
-          jobs?.map((job) => {
-            if (job.id === data.jobId) {
-              if (data.status === 'FAILED' && data.status !== job.status) {
-                // load error message
-                shouldRefetch = true;
-              }
-              return {
-                ...job,
-                totalItems: data.total ?? job.totalItems,
-                progress: data.processed ?? job.progress,
-                status: data.status ?? job.status,
-                errorMessage: data.errorMessage ?? job.errorMessage,
-              };
-            }
-            return job;
-          })
-        );
+      setBatchOperations((jobs) => applyProgress(jobs, data));
+      const isNewJob = !knownJobs.includes(data.jobId);
+      if (isNewJob) {
+        setKnownJobs((ids) => [...ids, data.jobId]);
       }
-      if (shouldRefetch) {
+      // FAILED: load error message
+      if (isNewJob || data.status === 'FAILED') {
         batchJobsLoadable.refetch({ fetching: true });
       }
     };

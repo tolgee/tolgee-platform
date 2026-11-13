@@ -32,6 +32,7 @@ class SlackTestData {
   var automation: Automation
   var key: Key
   var key2: Key
+  lateinit var keyWithAllLanguages: Key
   lateinit var baseTranslationNotExistKey: Key
   lateinit var slackWorkspace: OrganizationSlackWorkspace
   lateinit var slackWorkspace2: OrganizationSlackWorkspace
@@ -45,6 +46,7 @@ class SlackTestData {
   lateinit var englishTranslationOfFrenchBeforeEnglishKey: Translation
 
   lateinit var slackUserConnection: SlackUserConnection
+  lateinit var languageOnlySlackConfig: SlackConfig
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -134,6 +136,15 @@ class SlackTestData {
           .build {
             frenchTranslationOfFrenchBeforeEnglishKey = addTranslation("fr", "Frère").self
             englishTranslationOfFrenchBeforeEnglishKey = addTranslation("en", "Sibling").self
+          }.self
+
+      keyWithAllLanguages =
+        projectBuilder
+          .addKey("keyWithAllLanguages")
+          .build {
+            addTranslation("en", "Dashboard")
+            addTranslation("fr", "Tableau de bord")
+            addTranslation("cs", "Nástěnka")
           }.self
 
       slackConfigBuilder =
@@ -237,6 +248,18 @@ class SlackTestData {
           }
         }.self
     }
+
+  fun addLanguageOnlySlackConfigWithChannelEvents() {
+    languageOnlySlackConfig =
+      projectBuilder
+        .addSlackConfig {
+          channelId = "languageOnlyChannel"
+          project = projectBuilder.self
+          userAccount = userAccountBuilder.self
+          isGlobalSubscription = false
+          events = mutableSetOf(SlackEventType.NEW_KEY)
+        }.self
+  }
 
   fun add10Keys(): List<Key> {
     return (1..10).map {

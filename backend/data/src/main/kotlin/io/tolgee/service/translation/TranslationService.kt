@@ -157,9 +157,10 @@ class TranslationService(
     key: Key,
     targetLanguage: ILanguage,
   ): TranslationMemoryItemView? {
-    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
+    val baseTranslation = findBaseTranslation(key) ?: return null
+    val baseTranslationText = baseTranslation.text ?: return null
     return translationRepository
-      .getTranslationMemoryValue(baseTranslationText, key, targetLanguage.id)
+      .getTranslationMemoryValue(baseTranslationText, key, baseTranslation.language.id, targetLanguage.id)
       .firstOrNull()
   }
 

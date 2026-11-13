@@ -1,37 +1,126 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.security.oauth2.OAuth2Constants
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.oauth2")
 @DocProperty(
-  description = "Settings for Tolgee acting as an OAuth 2.1 authorization server (browser-extension login, MCP).",
+  description =
+    "Settings for Tolgee acting as an OAuth 2.1 authorization server (CLI and browser-extension login, MCP).",
   displayName = "OAuth2 authorization server",
 )
 class OAuth2ServerProperties {
   @DocProperty(
     description =
-      "Exact redirect URIs of the Tolgee browser extension, e.g. `https://<extension-id>.chromiumapp.org/`. " +
-        "The extension OAuth client is only registered when this is set.",
-    defaultValue = "",
+      "Whether the Tolgee Tools browser extension can sign users in against this instance. Off by default: an " +
+        "instance that turns it on lets anyone with the published extension sign in with their own account, " +
+        "which not every self-hosted instance wants.",
+    defaultValue = "false",
+  )
+  var browserExtensionEnabled: Boolean = false
+
+  @DocProperty(
+    description =
+      "Exact redirect URIs of the browser extension, accepted instead of the published extension's own. Only " +
+        "needed for a custom build of the extension, whose id is part of the URI, e.g. " +
+        "`https://<extension-id>.chromiumapp.org/`. An empty list keeps the published extension's URIs.",
+    defaultValue =
+      OAuth2Constants.OFFICIAL_CHROME_EXTENSION_REDIRECT_URI + ", " +
+        OAuth2Constants.OFFICIAL_FIREFOX_EXTENSION_REDIRECT_URI,
   )
   var browserExtensionRedirectUris: List<String> = listOf()
 
   @DocProperty(
     description =
-      "Loopback redirect URIs of the Tolgee CLI (RFC 8252), e.g. `http://127.0.0.1:9876/callback`. Prefer the " +
-        "loopback IP literal over `localhost`, which RFC 8252 section 7.3 marks NOT RECOMMENDED: a client " +
-        "resolving `localhost` may end up listening on interfaces other than the loopback one. The CLI " +
-        "OAuth client is only registered when this is set.\n" +
+      "Whether `tolgee login` can sign users in against this instance. The CLI is registered wherever the " +
+        "authorization server is live, so nothing has to be configured for browser login to work.\n" +
         "\n" +
         ":::info\n" +
-        "A loopback redirect cannot be tied to one local application, so any process on the machine that knows " +
-        "the client id can start an authorization for it. The user still has to approve the consent screen, " +
-        "but leave this unset unless the CLI is actually in use.\n" +
+        "A loopback redirect cannot be tied to one local application, so any process on the machine can start an " +
+        "authorization as the CLI. The user still has to approve the consent screen, and the token can never " +
+        "exceed what they are allowed to do, but an instance that will never see the CLI can turn it off here.\n" +
         ":::\n\n",
-    defaultValue = "",
+    defaultValue = "true",
+    defaultExplanation =
+      "The client is registered only where the issuer resolves: without `tolgee.back-end-url` (or " +
+        "`tolgee.front-end-url`) the authorization server is off entirely and browser login cannot work.",
+  )
+  var cliEnabled: Boolean = true
+
+  @DocProperty(
+    description =
+      "Loopback redirect URIs of the Tolgee CLI (RFC 8252), accepted instead of the `http://127.0.0.1/callback` " +
+        "the CLI uses by default. The port is ignored either way, since a CLI takes whatever port the OS gives " +
+        "it, so this is only needed for a build that listens elsewhere. Prefer the loopback IP literal over " +
+        "`localhost`, which RFC 8252 section 8.3 marks NOT RECOMMENDED: a client resolving `localhost` may end " +
+        "up listening on interfaces other than the loopback one.",
+    defaultValue = "http://127.0.0.1/callback",
   )
   var cliRedirectUris: List<String> = listOf()
+
+  @DocProperty(
+    description =
+      "Whether an unknown client may identify itself with a Client ID Metadata Document (an HTTPS URL as " +
+        "`client_id`). This is what lets an MCP client an operator never registered ask for access, and it is the " +
+        "one path on which an unauthenticated caller makes this server fetch a URL of their choosing — bounded by " +
+        "the address checks, the fetch budget and the rate limit on the authorization endpoint. Turn it off on an " +
+        "instance that should only ever serve clients it registered itself.",
+    defaultValue = "true",
+  )
+  var cimdEnabled: Boolean = true
+
+  @DocProperty(
+    description =
+      "Hosts allowed to present a Client ID Metadata Document (an HTTPS URL as `client_id`) so an unknown MCP " +
+        "client can register itself. Empty (the default) allows any public host; set it to restrict CIMD to a " +
+        "specific list, e.g. `claude.ai`. Loopback and private hosts are always refused regardless.",
+    defaultValue = "",
+  )
+  var cimdAllowedHosts: List<String> = listOf()
+
+  @DocProperty(
+    description =
+      "How long, in minutes, a recorded client withdrawal stays reversible. Taking the metadata document down " +
+        "ends every grant of that client; if the document answers again within this window the mark is lifted, " +
+        "which covers a mis-deploy. After it, the retirement is permanent for those grants, so a publisher who " +
+        "republishes a fixed build at the same `client_id` does not hand back a grant they retired on purpose. " +
+        "Users of that client simply consent again. A mark is also liftable while no read has happened since it " +
+        "was made, whatever this window says: the document is read when a user of the client refreshes, so a client " +
+        "nobody refreshed for a while has not had its chance to recover.",
+  )
+  var cimdWithdrawalGraceMinutes: Long = 60
+
+  @DocProperty(
+    description =
+      "How long, in days, a grant of a client that identifies itself with a metadata document may keep working " +
+        "while that document cannot be read. A short outage at the publisher must not sign every user out, so an " +
+        "unreadable document is tolerated - but not forever, because then anyone able to keep this server from " +
+        "reading it could keep a retired client alive. The time counts from the first failed read after the last " +
+        "successful one, so a client nobody refreshed for a month is not refused over one failed read when its " +
+        "users come back. Lower it on an instance that wants third-party grants checked more strictly.",
+  )
+  var cimdVerificationMaxAgeDays: Long = 7
+
+  @DocProperty(
+    description =
+      "How long, in minutes, before the same client's metadata document is read again. The document is read when a " +
+        "user of the client refreshes their token, at most once per client within this interval. It is set by how " +
+        "quickly a publisher taking their document down should take effect, not by " +
+        "`cimd-verification-max-age-days`, which would be satisfied by reading a document once every few days. The " +
+        "cost of a short interval is outbound traffic to third-party hosts on the token endpoint; the cost of a long " +
+        "one is a retired client staying usable for longer.",
+  )
+  var cimdCheckIntervalMinutes: Long = 15
+
+  @DocProperty(
+    description =
+      "How many different clients identifying themselves with a metadata document one account may hold " +
+        "authorizations for. Each one is a publisher this server fetches from when that account refreshes, so " +
+        "without a cap a single scripted account decides how many third-party hosts this server talks to and how " +
+        "often. Raise it only if real users legitimately connect more third-party apps than this.",
+  )
+  var cimdMaxClientsPerUser: Long = 25
 
   @DocProperty(description = "How long an issued OAuth access token stays valid, in minutes.")
   var accessTokenValidityMinutes: Long = 30
@@ -42,6 +131,34 @@ class OAuth2ServerProperties {
         "this window, so it bounds how long a grant may sit unused — not how long it may live.",
   )
   var refreshTokenValidityDays: Long = 30
+
+  @DocProperty(
+    description =
+      "Grace window, in seconds, during which replaying a refresh token that was rotated away fails the request " +
+        "without revoking the grant. It absorbs innocent collisions (two tabs, a lost response) instead of signing " +
+        "the user out everywhere, and it covers every rotated-away token, not only the latest. A replay after the " +
+        "window is treated as theft.",
+  )
+  var refreshTokenGraceSeconds: Long = 60
+
+  @DocProperty(
+    description =
+      "How many already-rotated refresh tokens are remembered per grant, so that replaying one is recognised as " +
+        "theft and revokes the grant. This is the bound that binds for a *slow* client — a CLI used once a week " +
+        "reaches this many weeks back. For a client rotating faster than this many times within " +
+        "`refresh-token-history-min-days`, that window is what decides instead. Beyond both, a replay is still " +
+        "refused, it just no longer revokes.",
+  )
+  var refreshTokenHistoryGenerations: Int = 50
+
+  @DocProperty(
+    description =
+      "Minimum age, in days, before a rotated refresh token can be dropped from that history. This is the bound " +
+        "that binds for a *fast* client, and the one to reach for if the table is growing. It also keeps the depth " +
+        "above from being something a thief can force: rank depends only on how many rotations followed a row, and " +
+        "a thief holding a stolen token can produce those in minutes — this makes eviction cost wall-clock time.",
+  )
+  var refreshTokenHistoryMinDays: Long = 7
 
   @DocProperty(
     description = "How long an authorization code can be exchanged for tokens after it was issued, in seconds.",

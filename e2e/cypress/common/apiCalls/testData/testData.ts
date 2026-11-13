@@ -69,6 +69,14 @@ export const publicProjectsData = {
 
 export const projectTestData = generateTestDataObject('projects');
 
+export const exportTagFilterTestData =
+  generateTestDataObject('export-tag-filter');
+
+export const exportSettingsTestData = generateTestDataObject('export-settings');
+
+export const projectSwitchingTestData =
+  generateTestDataObject('project-switching');
+
 export const apiKeysTestData = generateTestDataObject('api-keys');
 
 export const patsTestData = generateTestDataObject('pat');
@@ -114,6 +122,11 @@ export const translationsTestData = {
     internalFetch(
       'e2e-data/translations/generate-for-description-filters'
     ).then((r) => r.body as ProjectDTO),
+
+  generateForPluralFilters: () =>
+    internalFetch('e2e-data/translations/generate-for-plural-filters').then(
+      (r) => r.body as ProjectDTO
+    ),
 };
 
 export const translationsDisabled = generateTestDataObject(

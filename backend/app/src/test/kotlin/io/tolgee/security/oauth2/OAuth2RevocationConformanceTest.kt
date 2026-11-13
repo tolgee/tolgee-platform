@@ -155,6 +155,22 @@ class OAuth2RevocationConformanceTest : AbstractOAuth2ConformanceTest() {
   }
 
   @Test
+  fun `revoking a refresh token from two rotations back still ends the grant`() {
+    val issued = json(tokenResult())
+    val oldest = issued.get("refresh_token").asString()
+    val middle = json(driver.refresh(oldest, CLIENT_ID).andReturn()).get("refresh_token").asString()
+    val current = json(driver.refresh(middle, CLIENT_ID).andReturn()).get("refresh_token").asString()
+
+    driver.revoke(oldest, CLIENT_ID).andIsOk
+
+    json(driver.refresh(current, CLIENT_ID).andReturn())
+      .get("error")
+      .asString()
+      .assert
+      .isEqualTo("invalid_grant")
+  }
+
+  @Test
   fun `a revocation naming no registered client is refused rather than silently doing nothing`() {
     val issued = json(tokenResult())
     val refreshToken = issued.get("refresh_token").asString()

@@ -69,9 +69,12 @@ export const Navigation: React.FC<React.PropsWithChildren<Props>> = ({
             index === path.length - 1 ? theme.palette.primaryText : undefined;
           if (React.isValidElement(name)) {
             return (
-              <Box data-cy="navigation-item" sx={{ color }} key={index}>
-                {name}
-              </Box>
+              <LinkWrapper key={index}>
+                <Box data-cy="navigation-item" sx={{ color }}>
+                  {name}
+                </Box>
+                {suffix}
+              </LinkWrapper>
             );
           } else if (url) {
             return (

@@ -23,6 +23,7 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,
       carryOverTotal = data.carryOverTotal,
+      upgradeProrationTotal = data.upgradeProrationTotal,
     )
   }
 

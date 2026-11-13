@@ -15,6 +15,7 @@ import io.tolgee.dtos.request.userAccount.UserAccountPermissionsFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.OnUserCountChanged
 import io.tolgee.events.user.OnUserCreated
+import io.tolgee.events.user.OnUserDeleted
 import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
@@ -185,17 +186,8 @@ class UserAccountService(
   }
 
   @Transactional
-  fun createUser(
-    /**
-     * the user account to be created
-     */
-    userAccount: UserAccount,
-    /**
-     * The answer for the "Where did you hear about us?"
-     */
-    userSource: String? = null,
-  ): UserAccount {
-    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount, userSource))
+  fun createUser(userAccount: UserAccount): UserAccount {
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     userAccountRepository.saveAndFlush(userAccount)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = false, this))
     return userAccount
@@ -267,6 +259,7 @@ class UserAccountService(
     aiPlaygroundResultService.deleteResultsByUser(toDelete.id)
     userAccountRepository.softDeleteUser(toDelete, currentDateProvider.date)
     applicationEventPublisher.publishEvent(OnUserCountChanged(decrease = true, this))
+    applicationEventPublisher.publishEvent(OnUserDeleted(this, toDelete))
   }
 
   @Transactional

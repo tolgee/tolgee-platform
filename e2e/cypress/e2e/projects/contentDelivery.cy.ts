@@ -10,7 +10,12 @@ import { contentDeliveryTestData } from '../../common/apiCalls/testData/testData
 import { login, setContentStorageBypass } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { setFeature } from '../../common/features';
-import { FormatTest, testExportFormats } from '../../common/export';
+import {
+  exportSelectFormat,
+  FormatTest,
+  testExportFormats,
+} from '../../common/export';
+import { E2ExportTagFilters } from '../../compounds/E2ExportTagFilters';
 
 describe('Content delivery', () => {
   let projectId: number;
@@ -215,6 +220,96 @@ describe('Content delivery', () => {
       .contains('Auto');
   });
 
+  it('stores tag filters', () => {
+    const tagFilters = new E2ExportTagFilters();
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('Tagged');
+    tagFilters.addIncludedTag('release');
+    tagFilters.addIncludedTag('feature-*');
+    tagFilters.addExcludedTag('wip');
+    cy.intercept('POST', '/v2/projects/*/content-delivery-configs').as(
+      'create'
+    );
+    saveForm();
+    cy.wait('@create')
+      .its('request.body')
+      .should('deep.include', {
+        filterTagIn: ['release', 'feature-*'],
+        filterTagNotIn: ['wip'],
+      });
+    waitForGlobalLoading();
+
+    openEditDialog('Tagged');
+    tagFilters.getIncludedTagRemoveButtons().should('have.length', 2);
+    tagFilters.removeOnlyExcludedTag();
+    cy.intercept('PUT', '/v2/projects/*/content-delivery-configs/*').as(
+      'update'
+    );
+    saveForm();
+    cy.wait('@update')
+      .its('request.body')
+      .should((body) => {
+        expect(body.filterTagIn).to.deep.equal(['release', 'feature-*']);
+        expect(body).not.to.have.any.keys('filterTagNotIn');
+      });
+    waitForGlobalLoading();
+
+    openEditDialog('Tagged');
+    tagFilters.getIncludedTagRemoveButtons().should('have.length', 2);
+    tagFilters.getExcludedTagRemoveButtons().should('not.exist');
+  });
+
+  it('keeps export params not editable in the form on update', () => {
+    openEditDialog('Hidden params');
+    cy.intercept('PUT', '/v2/projects/*/content-delivery-configs/*').as(
+      'update'
+    );
+    saveForm();
+    cy.wait('@update')
+      .its('request.body')
+      .should((body) => {
+        expect(body.filterKeyPrefix).to.equal('release.');
+        expect(body.filterKeyId).to.have.length(1);
+        expect(body.filterKeyIdNot).to.have.length(1);
+        expect(body.structureDelimiter).to.equal('/');
+        expect(body.fileStructureTemplate).to.equal(
+          '{languageTag}/messages.{extension}'
+        );
+      });
+  });
+
+  it('drops format specific params when format changes', () => {
+    openEditDialog('Hidden params');
+    exportSelectFormat('XLIFF');
+    cy.intercept('PUT', '/v2/projects/*/content-delivery-configs/*').as(
+      'update'
+    );
+    saveForm();
+    cy.wait('@update')
+      .its('request.body')
+      .should((body) => {
+        expect(body.filterKeyPrefix).to.equal('release.');
+        expect(body.structureDelimiter).to.equal('');
+        expect(body).not.to.have.any.keys('fileStructureTemplate');
+      });
+  });
+
+  it('moves legacy single tag filter into included tags', () => {
+    const tagFilters = new E2ExportTagFilters();
+    openEditDialog('Legacy tag');
+    tagFilters.getIncludedTagRemoveButtons().should('have.length', 2);
+    cy.intercept('PUT', '/v2/projects/*/content-delivery-configs/*').as(
+      'update'
+    );
+    saveForm();
+    cy.wait('@update')
+      .its('request.body')
+      .should((body) => {
+        expect(body.filterTagIn).to.have.members(['in-list', 'legacy']);
+        expect(body).not.to.have.any.keys('filterTag');
+      });
+  });
+
   it('deletes content delivery', () => {
     deleteContentDeliveryConfig('Azure');
   });
@@ -230,6 +325,8 @@ describe('Content delivery', () => {
     deleteContentDeliveryConfig('S3');
     deleteContentDeliveryConfig('Custom Slug');
     deleteContentDeliveryConfig('Zip Enabled');
+    deleteContentDeliveryConfig('Hidden params');
+    deleteContentDeliveryConfig('Legacy tag');
 
     cy.contains('Only single content delivery configuration enabled');
     cy.gcy('content-delivery-add-button').should('be.disabled');

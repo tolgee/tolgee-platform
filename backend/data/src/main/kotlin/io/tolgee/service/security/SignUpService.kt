@@ -31,7 +31,7 @@ class SignUpService(
 
     val user = dtoToEntity(dto)
     checkNotManagedByOrganization(user.domain)
-    signUp(user, dto.invitationCode, dto.organizationName, dto.userSource)
+    signUp(user, dto.invitationCode, dto.organizationName)
 
     if (tolgeeProperties.authentication.needsEmailVerification) {
       emailVerificationService.createForUser(user, dto.callbackUrl)
@@ -52,9 +52,8 @@ class SignUpService(
     entity: UserAccount,
     invitationCode: String?,
     organizationName: String?,
-    userSource: String? = null,
   ): UserAccount {
-    return SignUpProcessor(applicationContext, entity, invitationCode, organizationName, userSource).process()
+    return SignUpProcessor(applicationContext, entity, invitationCode, organizationName).process()
   }
 
   fun dtoToEntity(request: SignUpDto): UserAccount {

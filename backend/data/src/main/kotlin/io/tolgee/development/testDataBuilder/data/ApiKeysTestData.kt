@@ -6,6 +6,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import java.util.Date
@@ -64,6 +66,8 @@ class ApiKeysTestData : BaseTestData() {
       addProject {
         organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
         name = "Frantisek's project"
+        suggestionsMode = SuggestionsMode.ENABLED
+        translationProtection = TranslationProtection.PROTECT_REVIEWED
         frantasProject = this
       }.build {
         (0..100).forEach {

@@ -36,7 +36,7 @@ object OAuth2Scopes {
   fun find(scope: String): Scope? = BY_VALUE[scope]
 
   /**
-   * Grants persist [Scope.name], not [Scope.value], for the same reason `ApiKey.scopesEnum` does: `value` is the wire
+   * Grants persist [Scope.name], not [Scope.value], for the same reason [io.tolgee.model.ApiKey.scopesEnum] does: `value` is the wire
    * spelling and is a `var`, so renaming it for API cosmetics would silently narrow every live grant that held it.
    */
   fun findByName(name: String): Scope? = BY_NAME[name]

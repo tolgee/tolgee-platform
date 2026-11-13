@@ -6,11 +6,13 @@ import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.StringIsNotPluralException
 import io.tolgee.formats.normalizePlurals
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationSuggestionView
@@ -60,6 +62,9 @@ class TranslationSuggestionServiceEeImpl(
     keyId: Long,
     dto: CreateTranslationSuggestionRequest,
   ): TranslationSuggestion {
+    if (project.suggestionsMode == SuggestionsMode.DISABLED) {
+      throw DisabledFunctionalityException(Message.SUGGESTIONS_DISABLED)
+    }
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, project.id)
     val language =

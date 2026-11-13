@@ -1,9 +1,15 @@
 import { useTranslate } from '@tolgee/react';
+import { moduleErrorTranslator } from './moduleErrorTranslator';
 
 export function useErrorTranslation() {
   const { t } = useTranslate();
 
   return (code: string, params?: string[]) => {
+    const fromModule = moduleErrorTranslator.translate(t, code, params);
+    if (fromModule !== undefined) {
+      return fromModule;
+    }
+
     switch (code.toLocaleLowerCase()) {
       // from 'ApiHttpService.tsx'
       case 'authentication_cancelled':
@@ -80,12 +86,8 @@ export function useErrorTranslation() {
         return t('unexpected_error_occurred');
       case 'feature_not_enabled':
         return t('feature_not_enabled');
-      case 'license_key_not_found':
-        return t('license_key_not_found');
       case 'plan_translation_limit_exceeded':
         return t('plan_translation_limit_exceeded');
-      case 'organization_already_subscribed':
-        return t('organization_already_subscribed');
       case 'user_has_no_project_access':
         return t('user_has_no_project_access');
       case 'translation_spending_limit_exceeded':
@@ -116,14 +118,6 @@ export function useErrorTranslation() {
         return t('content_storage_test_failed');
       case 'content_storage_is_in_use':
         return t('content_storage_is_in_use');
-      case 'plan_has_subscribers':
-        return t('plan_has_subscribers');
-      case 'plan_has_migrations':
-        return t('plan_has_migrations');
-      case 'plan_migration_not_found':
-        return t('plan_migration_not_found');
-      case 'source_and_target_plan_must_be_different':
-        return t('source_and_target_plan_must_be_different');
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
       case 'unexpected_error_while_publishing_to_content_storage':
@@ -134,12 +128,8 @@ export function useErrorTranslation() {
         return t('unexpected_error_while_executing_webhook');
       case 'resource_not_found':
         return t('resource_not_found');
-      case 'subscription_already_canceled':
-        return t('subscription_already_canceled');
       case 'credit_spending_limit_exceeded':
         return t('credit_spending_limit_exceeded');
-      case 'subscription_not_active':
-        return t('subscription_not_active');
       case 'invalid_plural_form':
         return t('invalid_plural_form');
       case 'slack_not_configured':
@@ -150,8 +140,6 @@ export function useErrorTranslation() {
         return t('verify_email_already_verified');
       case 'email_verification_code_not_valid':
         return t('verify_email_verification_code_not_valid');
-      case 'user_is_subscribed_to_paid_plan':
-        return t('user_is_subscribed_to_paid_plan');
       case 'sso_token_exchange_failed':
         return t('sso_token_exchange_failed');
       case 'sso_user_info_retrieval_failed':
@@ -235,6 +223,11 @@ export function useErrorTranslation() {
         return t('suggestion_must_be_plural');
       case 'duplicate_suggestion':
         return t('duplicate_suggestion');
+      case 'suggestions_disabled':
+        return t(
+          'suggestions_disabled',
+          'Suggestions are disabled for this project'
+        );
       case 'operation_not_permitted_in_read_only_mode':
         return t('operation_not_permitted_in_read_only_mode');
       case 'cannot_delete_branch_with_children':
@@ -335,8 +328,6 @@ export function useErrorTranslation() {
         return t('user_is_not_owner_or_maintainer_of_organization');
       case 'dont_have_direct_permissions':
         return t('dont_have_direct_permissions');
-      case 'organization_not_subscribed':
-        return t('organization_not_subscribed');
 
       // Projects
       case 'project_not_found':
@@ -469,28 +460,12 @@ export function useErrorTranslation() {
         return t('content_delivery_prune_failed');
 
       // Billing & subscriptions
-      case 'plan_not_found':
-        return t('plan_not_found');
-      case 'plan_not_available_any_more':
-        return t('plan_not_available_any_more');
-      case 'subscription_not_found':
-        return t('subscription_not_found');
+      case 'license_key_not_found':
+        return t('license_key_not_found');
       case 'license_key_used_by_another_instance':
         return t('license_key_used_by_another_instance');
       case 'this_instance_is_already_licensed':
         return t('this_instance_is_already_licensed');
-      case 'cannot_subscribe_to_free_plan':
-        return t('cannot_subscribe_to_free_plan');
-      case 'subscription_not_scheduled_for_cancellation':
-        return t('subscription_not_scheduled_for_cancellation');
-      case 'cannot_cancel_trial':
-        return t('cannot_cancel_trial');
-      case 'cannot_update_without_modification':
-        return t('cannot_update_without_modification');
-      case 'current_subscription_is_not_trialing':
-        return t('current_subscription_is_not_trialing');
-      case 'date_has_to_be_in_the_future':
-        return t('date_has_to_be_in_the_future');
       case 'plan_key_limit_exceeded':
         return t('plan_key_limit_exceeded');
       case 'plan_word_limit_exceeded':
@@ -503,30 +478,10 @@ export function useErrorTranslation() {
           'words_spending_limit_exceeded',
           'Word spending limit exceeded.'
         );
-      case 'auto_upgrade_cannot_be_disabled_over_limit':
-        return t(
-          'auto_upgrade_cannot_be_disabled_over_limit',
-          'Auto-upgrade cannot be turned off while your organization is over its word allowance. Reduce your content or upgrade your plan first.'
-        );
-      case 'cannot_downgrade_word_tier':
-        return t(
-          'cannot_downgrade_word_tier',
-          'This plan includes fewer words than your organization currently uses. Reduce your content first, or pick a bigger tier.'
-        );
       case 'organization_currency_already_set':
         return t(
           'organization_currency_already_set',
           'This organization already has a billing currency and it cannot be changed.'
-        );
-      case 'plan_not_priced_in_organization_currency':
-        return t(
-          'plan_not_priced_in_organization_currency',
-          'This organization is billed in a currency this plan has no prices for. Add prices in that currency to the plan.'
-        );
-      case 'plan_is_not_a_downgrade':
-        return t(
-          'plan_is_not_a_downgrade',
-          'Only a smaller plan can be scheduled for the end of the period. Change to this plan right away instead.'
         );
       case 'keys_spending_limit_exceeded':
         return t('keys_spending_limit_exceeded');
@@ -560,14 +515,10 @@ export function useErrorTranslation() {
         return t('task_not_finished');
       case 'task_not_open':
         return t('task_not_open');
-      case 'translation_agency_not_found':
-        return t('translation_agency_not_found');
 
       // LLM / AI
       case 'llm_provider_timeout':
         return t('llm_provider_timeout');
-      case 'no_llm_provider_configured':
-        return t('no_llm_provider_configured');
 
       // Glossary
       case 'glossary_not_found':

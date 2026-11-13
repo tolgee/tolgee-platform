@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
@@ -8,6 +8,8 @@ import {
   QaBadgeProps,
   QaIssueHighlightProps,
   SubfilterQaChecksProps,
+  OnboardingSurveyGateProps,
+  SubfilterTasksProps,
 } from './EeModuleType';
 import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 
@@ -53,6 +55,12 @@ export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;
 export const getQaChecksFiltersName = (
   _value: FiltersInternal
 ): JSX.Element | undefined => undefined;
+export const SubfilterTasks = (_props: SubfilterTasksProps) =>
+  Empty() as JSX.Element;
+export const getTaskFiltersLength = (_value: FiltersInternal) => 0;
+export const getTaskFiltersName = (
+  _value: FiltersInternal
+): JSX.Element | undefined => undefined;
 
 export const routes = {
   Root: Empty,
@@ -84,6 +92,8 @@ export const TrialChip = Empty;
 export const TaskInfoMessage = Empty;
 
 export const CriticalUsageCircle = Empty;
+export const usePlanLimitBanner = Empty;
+export const usePastDueBanner = Empty;
 export const AiPrompt = Empty;
 export const AiContextData = Empty;
 export const AiPromptsList = Empty;
@@ -99,3 +109,7 @@ export const ProjectSettingsTranslationMemory = Empty;
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
     existingItems;
+
+export const OnboardingSurveyGate = ({
+  children,
+}: OnboardingSurveyGateProps): ReactElement | null => <>{children}</>;

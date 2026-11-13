@@ -72,62 +72,71 @@ class KeyMetaService(
 
   @Suppress("UNCHECKED_CAST")
   fun getWithFetchedData(import: Import): List<KeyMeta> {
-    var result: List<KeyMeta> =
-      entityManager
-        .createQuery(
-          """
-            select distinct ikm from KeyMeta ikm
-            join fetch ikm.importKey ik
-            left join fetch ikm.comments ikc
-            join ik.file if
-            where if.importData = :import 
-            """,
-        ).setParameter("import", import)
-        .resultList as List<KeyMeta>
+    // Loads comments into the instances the query below returns; without it they load lazily, one query per meta
+    entityManager
+      .createQuery(
+        """
+          select distinct ikm from KeyMeta ikm
+          join fetch ikm.importKey ik
+          left join fetch ikm.comments ikc
+          join ik.file if
+          where if.importData = :import
+          """,
+      ).setParameter("import", import)
+      .resultList
 
-    result =
-      entityManager
-        .createQuery(
-          """
-            select distinct ikm from KeyMeta ikm
-            join ikm.importKey ik
-            left join fetch ikm.codeReferences ikc
-            join ik.file if
-            where ikm in :metas 
-        """,
-        ).setParameter("metas", result)
-        .resultList as List<KeyMeta>
-
-    return result
+    return entityManager
+      .createQuery(
+        """
+          select distinct ikm from KeyMeta ikm
+          join ikm.importKey ik
+          left join fetch ikm.codeReferences ikc
+          join ik.file if
+          where if.importData = :import
+      """,
+      ).setParameter("import", import)
+      .resultList as List<KeyMeta>
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun getWithFetchedData(project: Project): List<KeyMeta> {
-    var result: List<KeyMeta> =
-      entityManager
-        .createQuery(
-          """
-            select distinct ikm from KeyMeta ikm
-            join fetch ikm.key k
-            left join fetch ikm.comments ikc
-            where k.project = :project 
-            """,
-        ).setParameter("project", project)
-        .resultList as List<KeyMeta>
+  fun getWithFetchedData(
+    project: Project,
+    branch: String?,
+  ): List<KeyMeta> {
+    val branchKeysCondition =
+      """
+        k.project = :project
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
+        and k.deletedAt is null
+      """
 
-    result =
-      entityManager
-        .createQuery(
-          """
-            select distinct ikm from KeyMeta ikm
-            join ikm.key k
-            left join fetch ikm.codeReferences ikc
-            where ikm in :metas 
-        """,
-        ).setParameter("metas", result)
-        .resultList as List<KeyMeta>
+    // Loads comments into the instances the query below returns; without it they load lazily, one query per meta
+    entityManager
+      .createQuery(
+        """
+          select distinct ikm from KeyMeta ikm
+          join fetch ikm.key k
+          left join fetch k.namespace
+          left join k.branch b
+          left join fetch ikm.comments ikc
+          where $branchKeysCondition
+          """,
+      ).setParameter("project", project)
+      .setParameter("branch", branch)
+      .resultList
 
-    return result
+    return entityManager
+      .createQuery(
+        """
+          select distinct ikm from KeyMeta ikm
+          join ikm.key k
+          left join k.branch b
+          left join fetch ikm.codeReferences ikc
+          where $branchKeysCondition
+      """,
+      ).setParameter("project", project)
+      .setParameter("branch", branch)
+      .resultList as List<KeyMeta>
   }
 
   fun getOrCreateForKey(key: Key): KeyMeta {

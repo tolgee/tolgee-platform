@@ -41,6 +41,7 @@ class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/proje
       .andAssertThatJson {
         node("keyCount").isEqualTo(2)
         node("baseWordsCount").isEqualTo(4)
+        node("hostedWordsCount").isEqualTo(8)
         node("languageStats").isArray
         node("languageStats[1].languageTag").isEqualTo("de")
         node("languageStats[1].translatedKeyCount").isEqualTo(1)
@@ -59,6 +60,7 @@ class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/proje
       .andAssertThatJson {
         node("keyCount").isEqualTo(1)
         node("baseWordsCount").isEqualTo(3)
+        node("hostedWordsCount").isEqualTo(4)
         node("languageStats").isArray
         node("languageStats[1].languageTag").isEqualTo("de")
         node("languageStats[1].translatedKeyCount").isEqualTo(1)
