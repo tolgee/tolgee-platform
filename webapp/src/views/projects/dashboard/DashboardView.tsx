@@ -68,7 +68,7 @@ export const DashboardView = () => {
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
 
-  const canViewActivity = satisfiesPermission('activity.view');
+  const canViewActivity = satisfiesPermission('activity-contributions.view');
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'], branch };

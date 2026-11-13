@@ -106,6 +106,20 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
 
   @Query(
     """
+      select count(ar.id) as count, function('to_char', ar.timestamp, 'yyyy-MM-dd') as date
+      from ActivityRevision ar
+      where ar.projectId = :projectId and ar.type in :types
+      group by date
+      order by date
+    """,
+  )
+  fun getProjectDailyActivityOfTypes(
+    projectId: Long,
+    types: Collection<ActivityType>,
+  ): List<Array<Any>>
+
+  @Query(
+    """
     from ActivityRevision ar where ar.id = :revisionId and (ar.projectId = :projectId or :projectId is null) 
   """,
   )

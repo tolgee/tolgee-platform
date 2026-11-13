@@ -40,7 +40,7 @@ class CommunityPermissionTest : ProjectAuthControllerTest("/v2/projects/") {
       node("computedPermission.scopes").isArray.contains(
         "translations.view",
         "screenshots.view",
-        "activity.view",
+        "activity-contributions.view",
         "translations.suggest",
         "translation-comments.add",
       )
@@ -199,7 +199,7 @@ class CommunityPermissionTest : ProjectAuthControllerTest("/v2/projects/") {
       node("computedPermission.scopes").isArray.contains(
         "translations.view",
         "screenshots.view",
-        "activity.view",
+        "activity-contributions.view",
         "translations.suggest",
         "translation-comments.add",
       )

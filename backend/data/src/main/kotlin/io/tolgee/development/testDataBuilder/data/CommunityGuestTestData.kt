@@ -36,6 +36,14 @@ class CommunityGuestTestData : CommunityStatsTestData() {
         userAccount = serverAdmin
       }.self
 
+  val ownerContributionsOnlyApiKey: ApiKey =
+    publicProjectBuilder
+      .addApiKey {
+        key = "owner-contributions-only-api-key"
+        scopesEnum = mutableSetOf(Scope.ACTIVITY_CONTRIBUTIONS_VIEW)
+        userAccount = user
+      }.self
+
   init {
     publicProjectBuilder.addPermission {
       user = memberWithoutActivityScope

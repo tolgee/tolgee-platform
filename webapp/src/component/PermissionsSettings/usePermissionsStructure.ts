@@ -188,6 +188,9 @@ export const usePermissionsStructure = () => {
         value: 'activity.view',
       },
       {
+        value: 'activity-contributions.view',
+      },
+      {
         value: 'languages.edit',
       },
       {

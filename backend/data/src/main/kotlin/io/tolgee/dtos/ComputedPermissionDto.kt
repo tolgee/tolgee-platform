@@ -204,7 +204,7 @@ class ComputedPermissionDto(
               arrayOf(
                 Scope.TRANSLATIONS_VIEW,
                 Scope.SCREENSHOTS_VIEW,
-                Scope.ACTIVITY_VIEW,
+                Scope.ACTIVITY_CONTRIBUTIONS_VIEW,
                 Scope.TRANSLATIONS_SUGGEST,
                 Scope.TRANSLATION_SUGGESTIONS_OWN_ACCESS,
                 Scope.TRANSLATIONS_COMMENTS_ADD,
@@ -222,7 +222,7 @@ class ComputedPermissionDto(
               arrayOf(
                 Scope.TRANSLATIONS_VIEW,
                 Scope.SCREENSHOTS_VIEW,
-                Scope.ACTIVITY_VIEW,
+                Scope.ACTIVITY_CONTRIBUTIONS_VIEW,
               ),
             type = ProjectPermissionType.VIEW,
           ),

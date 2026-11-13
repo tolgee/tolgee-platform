@@ -450,6 +450,7 @@ export interface paths {
     delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/activity": {
+    /** With `activity-contributions.view` alone, which is what a public project gives everyone, only translation work is listed: translating, changing translation states, commenting, suggesting and edits made in the key dialog. `activity.view` lists everything. */
     get: operations["getActivity_1"];
   };
   "/v2/projects/{projectId}/activity/revisions/{revisionId}": {
@@ -1009,6 +1010,7 @@ export interface paths {
     get: operations["getProjectStats"];
   };
   "/v2/projects/{projectId}/stats/daily-activity": {
+    /** With `activity-contributions.view` alone, only the events the project activity lists for that scope are counted. `activity.view` counts everything. */
     get: operations["getProjectDailyActivity"];
   };
   "/v2/projects/{projectId}/stats/qa-issue-counts": {
@@ -1473,6 +1475,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -1562,6 +1565,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -2450,6 +2454,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -3814,6 +3819,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -5442,6 +5448,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -5550,6 +5557,7 @@ export interface components {
         | "screenshots.delete"
         | "screenshots.view"
         | "activity.view"
+        | "activity-contributions.view"
         | "languages.edit"
         | "admin"
         | "project.edit"
@@ -15788,6 +15796,7 @@ export interface operations {
       };
     };
   };
+  /** With `activity-contributions.view` alone, which is what a public project gives everyone, only translation work is listed: translating, changing translation states, commenting, suggesting and edits made in the key dialog. `activity.view` lists everything. */
   getActivity_1: {
     parameters: {
       query: {
@@ -25396,6 +25405,7 @@ export interface operations {
       };
     };
   };
+  /** With `activity-contributions.view` alone, only the events the project activity lists for that scope are counted. `activity.view` counts everything. */
   getProjectDailyActivity: {
     parameters: {
       path: {
@@ -29727,6 +29737,7 @@ export interface operations {
               | "screenshots.delete"
               | "screenshots.view"
               | "activity.view"
+              | "activity-contributions.view"
               | "languages.edit"
               | "admin"
               | "project.edit"

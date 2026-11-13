@@ -53,7 +53,7 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
         "keys.view",
         "translations.view",
         "screenshots.view",
-        "activity.view",
+        "activity-contributions.view",
       )
     }
   }
@@ -164,6 +164,21 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
     assertTranslationWorkOnly { performAuthGet(it) }
     userAccount = testData.memberWithoutActivityScope
     assertTranslationWorkOnly { performAuthGet(it) }
+    val ownerKeyWithNarrowScope =
+      HttpHeaders().apply { add("X-API-Key", "tgpak_" + testData.ownerContributionsOnlyApiKey.encodedKey) }
+    assertTranslationWorkOnly { performGet(it, ownerKeyWithNarrowScope) }
+  }
+
+  @Test
+  fun `the daily activity counts follow the activity log`() {
+    val dailyActivity = "${url(testData.publicProject)}/stats/daily-activity"
+    userAccount = testData.user
+    val beforeKeyCreation = dailyTotal(performAuthGet(dailyActivity))
+    performAuthPost("${url(testData.publicProject)}/keys/create", mapOf("name" to "configured-by-the-owner"))
+      .andIsCreated
+
+    assertThat(dailyTotal(performAuthGet(dailyActivity))).isEqualTo(beforeKeyCreation + 1)
+    assertThat(dailyTotal(performGet(dailyActivity))).isEqualTo(beforeKeyCreation)
   }
 
   @Test
@@ -267,6 +282,11 @@ class CommunityGuestAccessTest : AuthorizedControllerTest() {
       .path("_embedded")
       .path("activities")
       .map { it.path("type").asText() }
+
+  private fun dailyTotal(response: ResultActions): Long =
+    jacksonObjectMapper()
+      .readTree(response.andIsOk.andGetContentAsString)
+      .sumOf { it.asLong() }
 
   private fun url(project: Project) = "/v2/projects/${project.id}"
 

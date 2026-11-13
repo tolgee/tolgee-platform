@@ -26,7 +26,7 @@ import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.contributor.CommunityStatsService
 import io.tolgee.service.project.ProjectFeatureGuard
-import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -53,11 +53,18 @@ class ProjectActivityController(
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val rateLimitService: RateLimitService,
-  private val permissionService: PermissionService,
+  private val securityService: SecurityService,
 ) {
-  @Operation(summary = "Get project activity")
+  @Operation(
+    summary = "Get project activity",
+    description =
+      "With `activity-contributions.view` alone, which is what a public project gives everyone, only translation " +
+        "work is listed: translating, changing translation states, commenting, suggesting and edits made in the " +
+        "key dialog. " +
+        "`activity.view` lists everything.",
+  )
   @GetMapping("")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable,
@@ -77,7 +84,7 @@ class ProjectActivityController(
 
   @Operation(summary = "Get one revision data")
   @GetMapping("/revisions/{revisionId}")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getSingleRevision(
     @PathVariable revisionId: Long,
@@ -97,7 +104,7 @@ class ProjectActivityController(
 
   @Operation(summary = "Get modified entities in revision")
   @GetMapping("/revisions/{revisionId}/modified-entities")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getModifiedEntitiesByRevision(
     @ParameterObject pageable: Pageable,
@@ -125,16 +132,15 @@ class ProjectActivityController(
   }
 
   private fun checkRevisionVisibleToViewer(revisionId: Long) {
-    if (viewerHasOwnActivityAccess()) return
+    if (viewerSeesAllActivity()) return
     val type = activityService.findRevisionType(projectHolder.project.id, revisionId)
     if (type !in CommunityStatsService.CONTRIBUTION_TYPES) throw NotFoundException()
   }
 
   private fun typesVisibleToViewer(): List<ActivityType> {
-    if (viewerHasOwnActivityAccess()) return ActivityType.entries
+    if (viewerSeesAllActivity()) return ActivityType.entries
     return CommunityStatsService.CONTRIBUTION_TYPES
   }
 
-  private fun viewerHasOwnActivityAccess(): Boolean =
-    permissionService.currentCredentialHasScopeWithoutCommunityFloor(projectHolder.project, Scope.ACTIVITY_VIEW)
+  private fun viewerSeesAllActivity(): Boolean = securityService.currentPermittedScopesContain(Scope.ACTIVITY_VIEW)
 }
