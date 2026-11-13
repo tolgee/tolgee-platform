@@ -35,6 +35,13 @@ describe('Scoped search', () => {
     view.getKeyCell('cart_subtitle').should('not.exist');
   });
 
+  it('searches only in translation comments', () => {
+    view.searchFor('comment:copywriter');
+    view.getKeyCell('checkout.title').should('be.visible');
+    view.getKeyCell('cart_subtitle').should('not.exist');
+    view.getKeyCell('my.cart').should('not.exist');
+  });
+
   it('ignores a qualifier while its value is still empty', () => {
     view.searchFor('description:');
     waitForGlobalLoading();
