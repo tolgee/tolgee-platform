@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository
 @Lazy
 interface GlossaryRepository : JpaRepository<Glossary, Long> {
   companion object {
-    const val ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE = ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT
+    const val ASSIGNED_PROJECT_BELOW_MEMBER_ACCESSIBLE = """
+      (r.organizationOwner = g.organizationOwner and ${ProjectRepository.BELOW_MEMBER_ACCESSIBLE_PROJECT})
+    """
 
     const val BELOW_MEMBER_ACCESSIBLE = """
       exists (

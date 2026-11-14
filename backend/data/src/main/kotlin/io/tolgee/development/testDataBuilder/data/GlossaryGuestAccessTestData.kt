@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
@@ -24,6 +25,9 @@ class GlossaryGuestAccessTestData : BaseTestData() {
   lateinit var softDeletedProjectGlossary: Glossary
   lateinit var softDeletedBaseLangProject: Project
   lateinit var softDeletedBaseLangGlossary: Glossary
+  lateinit var otherOrganization: Organization
+  lateinit var otherOrganizationProject: Project
+  lateinit var otherOrganizationProjectGlossary: Glossary
   var storedGuest: UserAccount
   var virtualGuest: UserAccount
   var directPermissionUser: UserAccount
@@ -122,6 +126,24 @@ class GlossaryGuestAccessTestData : BaseTestData() {
         addBaseLanguage().setDeletedAt()
       }
 
+      addOrganization {
+        name = "Other organization"
+      }.build {
+        otherOrganization = self
+        addRole {
+          user = this@GlossaryGuestAccessTestData.user
+          type = OrganizationRoleType.OWNER
+        }
+      }
+
+      addProject(organizationOwner = otherOrganization) {
+        name = "Other organization public project"
+        public = true
+      }.build {
+        otherOrganizationProject = self
+        addBaseLanguage()
+      }
+
       userAccountBuilder.defaultOrganizationBuilder.build {
         publicGlossary =
           addGlossary {
@@ -188,6 +210,14 @@ class GlossaryGuestAccessTestData : BaseTestData() {
             baseLanguageTag = "en"
           }.build {
             assignProject(this@GlossaryGuestAccessTestData.softDeletedBaseLangProject)
+          }.self
+
+        otherOrganizationProjectGlossary =
+          addGlossary {
+            name = "Other organization project glossary"
+            baseLanguageTag = "en"
+          }.build {
+            assignProject(this@GlossaryGuestAccessTestData.otherOrganizationProject)
           }.self
       }
     }
