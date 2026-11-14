@@ -99,6 +99,11 @@ class TranslationMemoryManagementService(
   }
 
   @Transactional
+  fun unassignAllSharedTmsByProject(projectId: Long) {
+    translationMemoryProjectRepository.deleteAll(getSharedTmAssignmentsForProject(projectId))
+  }
+
+  @Transactional
   fun renameProjectTm(
     projectId: Long,
     newName: String,

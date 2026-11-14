@@ -25,6 +25,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
@@ -32,6 +33,8 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.GlossaryCleanupService
+import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
@@ -89,6 +92,14 @@ class ProjectService(
   private val branchService: BranchService,
   private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
+  @set:Autowired
+  @set:Lazy
+  lateinit var glossaryCleanupService: GlossaryCleanupService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var automationService: AutomationService
+
   @set:Autowired
   @set:Lazy
   lateinit var keyService: KeyService
@@ -588,8 +599,34 @@ class ProjectService(
   ) {
     val project = get(projectId)
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
+    if (project.organizationOwner.id != organization.id) {
+      glossaryCleanupService.unassignFromAllProjects(project)
+      translationMemoryManagementService.unassignAllSharedTmsByProject(projectId)
+      translationMemoryManagementService.getProjectTm(projectId)?.organizationOwner = organization
+      deleteSlackConfigsOfOrganizationWorkspaces(projectId, project.organizationOwner.id)
+    }
     project.organizationOwner = organization
     save(project)
+  }
+
+  private fun deleteSlackConfigsOfOrganizationWorkspaces(
+    projectId: Long,
+    organizationId: Long,
+  ) {
+    entityManager
+      .createQuery(
+        """
+        from SlackConfig s
+        where s.project.id = :projectId and s.organizationSlackWorkspace.organization.id = :organizationId
+        """,
+        SlackConfig::class.java,
+      ).setParameter("projectId", projectId)
+      .setParameter("organizationId", organizationId)
+      .resultList
+      .forEach {
+        automationService.deleteForSlackIntegration(it)
+        entityManager.remove(it)
+      }
   }
 
   @Transactional(readOnly = true)

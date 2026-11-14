@@ -143,6 +143,37 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `glossaries assigned only to another organization's project stay hidden from guests`() {
+    userAccount = testData.virtualGuest
+    val base = "/v2/organizations/${testData.organization.id}/glossaries"
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}").andIsNotFound
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}/terms").andIsNotFound
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}/assigned-projects").andIsNotFound
+    performAuthGet("$base-with-stats?sort=name&sort=id").andIsOk.andAssertThatJson {
+      node("_embedded.glossaries").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  fun `transferring a project to another organization unassigns its glossaries`() {
+    projectService.transferToOrganization(testData.publicProject.id, testData.otherOrganization.id)
+
+    userAccount = testData.user
+    performAuthGet(
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.mixedGlossary.id}/assigned-projects",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.projects") {
+        isArray.hasSize(1)
+        node("[0].name").isEqualTo("A members only project")
+      }
+    }
+
+    userAccount = testData.virtualGuest
+    performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.mixedGlossary.id}")
+      .andIsNotFound
+  }
+
+  @Test
   fun `guest single-term reads follow the glossary accessibility`() {
     userAccount = testData.virtualGuest
     val publicTermPath =
@@ -180,7 +211,7 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.glossaries").isArray.hasSize(6)
+        node("_embedded.glossaries").isArray.hasSize(7)
       }
   }
 
