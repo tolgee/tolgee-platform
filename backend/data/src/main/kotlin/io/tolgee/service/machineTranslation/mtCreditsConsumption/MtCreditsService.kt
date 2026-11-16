@@ -1,5 +1,6 @@
 package io.tolgee.service.machineTranslation.mtCreditsConsumption
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.MtCreditBalanceDto
 
 /**
@@ -17,7 +18,11 @@ interface MtCreditsService {
     creditsInCents: Int,
   )
 
-  fun checkCanConsumeCredits(organizationId: Long)
+  fun checkCanConsumeCredits(
+    organizationId: Long,
+    services: Set<MtServiceType>,
+    llmProviders: Set<String>,
+  )
 
   fun getCreditBalances(organizationId: Long): MtCreditBalanceDto
 }

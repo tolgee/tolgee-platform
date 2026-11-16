@@ -14,7 +14,7 @@ class MtEventListener(
   @EventListener(OnBeforeMachineTranslationEvent::class)
   @ExperimentalTime
   fun onBeforeMtEvent(event: OnBeforeMachineTranslationEvent) {
-    mtCreditsService.checkCanConsumeCredits(event.organizationId)
+    mtCreditsService.checkCanConsumeCredits(event.organizationId, event.services, event.llmProviders)
   }
 
   @EventListener(OnAfterMachineTranslationEvent::class)

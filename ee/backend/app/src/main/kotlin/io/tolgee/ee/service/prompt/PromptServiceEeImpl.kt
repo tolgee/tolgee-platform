@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
+import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
@@ -224,7 +225,7 @@ class PromptServiceEeImpl(
     provider: String,
     attempts: List<Int>? = null,
   ): ParsedResult {
-    publishBeforeEvent(organizationId)
+    publishBeforeEvent(organizationId, provider)
     val result = runPromptWithoutChargingCredits(organizationId, params, provider, attempts)
     publishAfterEvent(organizationId, result.promptResult.price)
     return result
@@ -271,9 +272,12 @@ class PromptServiceEeImpl(
     return defaultPromptHelper.getDefaultPrompt()
   }
 
-  private fun publishBeforeEvent(organizationId: Long) {
+  private fun publishBeforeEvent(
+    organizationId: Long,
+    provider: String,
+  ) {
     applicationContext.publishEvent(
-      OnBeforeMachineTranslationEvent(this, organizationId),
+      OnBeforeMachineTranslationEvent(this, organizationId, setOf(MtServiceType.PROMPT), setOf(provider)),
     )
   }
 

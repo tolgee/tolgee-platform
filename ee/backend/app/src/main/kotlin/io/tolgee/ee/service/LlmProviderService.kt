@@ -242,22 +242,7 @@ class LlmProviderService(
     name: String,
     priority: LlmProviderPriority?,
   ): LlmProviderDto {
-    val customProviders =
-      if (adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
-        emptyList()
-      } else {
-        getAll(organizationId)
-      }
-    val serverProviders = getAllServerProviders()
-
-    val providersOfTheName =
-      if (customProviders.find { it.name == name } != null) {
-        customProviders
-      } else {
-        serverProviders
-      }.filter {
-        it.name == name
-      }
+    val providersOfTheName = getProvidersByName(organizationId, name)
 
     val providersWithPriority =
       if (providersOfTheName.find { it.priority == priority } != null) {
@@ -293,6 +278,30 @@ class LlmProviderService(
     return provider
   }
 
+  fun consumesCredits(
+    organizationId: Long,
+    provider: String,
+  ): Boolean {
+    val name =
+      try {
+        llmProviderResolver.resolveProviderName(organizationId, provider)
+      } catch (e: LlmProviderNotFoundException) {
+        return true
+      }
+    return getProvidersByName(organizationId, name).any { it.consumesCredits() }
+  }
+
+  private fun getProvidersByName(
+    organizationId: Long,
+    name: String,
+  ): List<LlmProviderDto> {
+    if (!adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
+      val customProviders = getAll(organizationId).filter { it.name == name }
+      if (customProviders.isNotEmpty()) return customProviders
+    }
+    return getAllServerProviders().filter { it.name == name }
+  }
+
   fun getProviderResponse(
     providerService: AbstractLlmApiService,
     params: LlmParams,
@@ -319,19 +328,27 @@ class LlmProviderService(
     providerConfig: LlmProviderDto,
     usage: PromptResult.Usage?,
   ): Int {
-    val tokenPriceInCreditsInput: Double = (providerConfig.tokenPriceInCreditsInput ?: 0.0)
-    val tokenPriceInCreditsOutput: Double = (providerConfig.tokenPriceInCreditsOutput ?: 0.0)
     val inputTokens: Long = usage?.inputTokens ?: 0L
     val outputTokens: Long = usage?.outputTokens ?: 0L
     val cachedTokens: Long = usage?.cachedTokens ?: 0L
 
-    val inputPrice = (inputTokens - cachedTokens) * tokenPriceInCreditsInput
-    val outputPrice = (outputTokens) * tokenPriceInCreditsOutput
+    val inputPrice = (inputTokens - cachedTokens) * providerConfig.inputTokenPrice
+    val outputPrice = (outputTokens) * providerConfig.outputTokenPrice
 
     val price = inputPrice + outputPrice
 
     return (price * 100).roundToInt()
   }
+
+  private fun LlmProviderDto.consumesCredits(): Boolean {
+    // a TOLGEE provider returns its own price in the response, see callProviderInternal
+    if (type == LlmProviderType.TOLGEE) return true
+    return inputTokenPrice > 0 || outputTokenPrice > 0
+  }
+
+  private val LlmProviderDto.inputTokenPrice: Double get() = tokenPriceInCreditsInput ?: 0.0
+
+  private val LlmProviderDto.outputTokenPrice: Double get() = tokenPriceInCreditsOutput ?: 0.0
 
   fun suspendProvider(
     name: String,
