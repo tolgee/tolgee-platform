@@ -7,6 +7,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchCopyQaIssuesTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueState
@@ -97,7 +98,7 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
   @Test
   fun `rechecks stale translations of the new branch after it is created`() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
-    val qaJobsBefore = qaCheckJobCount()
+    val qaJobsBefore = projectBatchJobs().count { it.type == BatchJobType.QA_CHECK }
 
     branchService.createBranch(
       projectId = testData.project.id,
@@ -106,14 +107,16 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
       author = testData.user,
     )
 
-    waitForNotThrowing(timeout = 10_000, pollTime = 200) {
-      qaCheckJobCount().assert.isGreaterThan(qaJobsBefore)
+    waitForNotThrowing(timeout = 30_000, pollTime = 200) {
+      val jobs = projectBatchJobs()
+      jobs.count { it.type == BatchJobType.QA_CHECK }.assert.isGreaterThan(qaJobsBefore)
+      jobs.all { it.status.completed }.assert.isTrue()
     }
   }
 
-  private fun qaCheckJobCount(): Int =
+  private fun projectBatchJobs(): List<BatchJob> =
     executeInNewTransaction(platformTransactionManager) {
-      batchJobService.getAllByProjectId(testData.project.id).count { it.type == BatchJobType.QA_CHECK }
+      batchJobService.getAllByProjectId(testData.project.id)
     }
 
   private fun findTranslationOnBranch(
