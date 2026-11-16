@@ -3,18 +3,29 @@ import { notificationsPocTestData } from '../../common/apiCalls/testData/testDat
 import { gcy, gcyAdvanced } from '../../common/shared';
 import { HOST } from '../../common/constants';
 
-const chip = (tag: string) =>
+let mobileAppId: number;
+
+const mobileAppRow = () =>
   gcyAdvanced({
+    value: 'notifications-settings-languages-project',
+    'project-id': String(mobileAppId),
+  });
+
+const chip = (tag: string) =>
+  mobileAppRow().findDcyAdvanced({
     value: 'notifications-settings-languages-chip',
     'language-tag': tag,
   });
 
-const state = () => gcy('notifications-settings-languages-state');
+const state = () =>
+  mobileAppRow().findDcy('notifications-settings-languages-state');
 
 describe('Notification languages per project', () => {
   beforeEach(() => {
     notificationsPocTestData.clean();
-    notificationsPocTestData.generateStandard();
+    notificationsPocTestData.generateStandard().then((r) => {
+      mobileAppId = r.body.projects.find((p) => p.name === 'Mobile App')!.id;
+    });
     login('andreas@example.com');
     cy.visit(`${HOST}/account/notifications`);
   });
@@ -24,7 +35,7 @@ describe('Notification languages per project', () => {
   });
 
   it('follows languages picked from recent work and lets the user change them', () => {
-    gcy('notifications-settings-languages-project').should('have.length', 1);
+    gcy('notifications-settings-languages-project').should('have.length', 2);
     state().should('have.attr', 'data-cy-state', 'DEFAULT');
     chip('de').should('have.attr', 'data-cy-followed', 'true');
     chip('fr').should('have.attr', 'data-cy-followed', 'false');
@@ -38,7 +49,7 @@ describe('Notification languages per project', () => {
     chip('fr').click();
     state().should('have.attr', 'data-cy-state', 'MUTED');
 
-    gcy('notifications-settings-languages-reset').click();
+    mobileAppRow().findDcy('notifications-settings-languages-reset').click();
     state().should('have.attr', 'data-cy-state', 'DEFAULT');
     chip('de').should('have.attr', 'data-cy-followed', 'true');
     chip('fr').should('have.attr', 'data-cy-followed', 'false');
