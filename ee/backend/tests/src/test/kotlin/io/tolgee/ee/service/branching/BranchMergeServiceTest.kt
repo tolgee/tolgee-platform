@@ -21,6 +21,7 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
@@ -519,6 +520,45 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run reports no change for an untouched key with description, custom values and screenshot`() {
+    dryRunFeatureBranchMerge().changes.assert.isEmpty()
+  }
+
+  @Test
+  fun `dry-run detects a changed key description`() {
+    changeFeatureStableKey { it.keyMeta!!.description = "Shown on the payment button" }
+    assertOnlyStableKeyUpdated()
+  }
+
+  @Test
+  fun `dry-run detects a changed nested custom value`() {
+    changeFeatureStableKey {
+      it.keyMeta!!.custom =
+        mutableMapOf(
+          "priority" to 2,
+          "ratio" to 0.5,
+          "design" to mapOf("node" to "12:34", "frames" to listOf(1, 3)),
+        )
+    }
+    assertOnlyStableKeyUpdated()
+  }
+
+  @Test
+  fun `dry-run detects a changed max char limit`() {
+    changeFeatureStableKey { it.maxCharLimit = 60 }
+    assertOnlyStableKeyUpdated()
+  }
+
+  @Test
+  fun `dry-run detects a moved screenshot position`() {
+    executeInNewTransaction {
+      getScreenshotReferences(testData.featureStableKey.id).single().positions =
+        mutableListOf(KeyInScreenshotPosition(11, 20, 30, 40))
+    }
+    assertOnlyStableKeyUpdated()
+  }
+
+  @Test
   fun `apply merge - adds translation when source has language that target does not have`() {
     val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
 
@@ -689,6 +729,21 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val managedKey = keyService.get(key.id)
     val translation = translationService.getOrCreate(managedKey, testData.englishLanguage)
     translationService.setTranslationText(translation, value)
+  }
+
+  private fun changeFeatureStableKey(change: (Key) -> Unit) {
+    executeInNewTransaction { change(keyService.get(testData.featureStableKey.id)) }
+  }
+
+  private fun assertOnlyStableKeyUpdated() {
+    val change = dryRunFeatureBranchMerge().changes.single()
+    change.change.assert.isEqualTo(BranchKeyMergeChangeType.UPDATE)
+    change.sourceKey!!
+      .id.assert
+      .isEqualTo(testData.featureStableKey.id)
+    change.targetKey!!
+      .id.assert
+      .isEqualTo(testData.mainStableKey.id)
   }
 
   private fun getTranslation(

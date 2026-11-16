@@ -75,6 +75,11 @@ class UrlSecurityTest {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[64:ff9b:1:a00:0:100::]/internal") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[2002:7f00:1::]/admin") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[2002:a00:1::]/internal") }
+    // Teredo (2001::/32): the client IPv4 sits in the last 32 bits, bitwise inverted (127.0.0.1 -> 80ff:fffe).
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[2001::80ff:fffe]/admin") }
+    assertThrows<BadRequestException> {
+      urlSecurity.validateUrl("http://[2001:0:4136:e378:8000:63bf:5601:5601]/latest/meta-data/")
+    }
     // RFC 2765 IPv4-translated: the ffff sits two bytes earlier than in the mapped form.
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::ffff:0:127.0.0.1]/admin") }
   }
@@ -85,6 +90,8 @@ class UrlSecurityTest {
     assertDoesNotThrow { urlSecurity.validateUrl("http://100.128.0.1/") }
     assertDoesNotThrow { urlSecurity.validateUrl("http://198.20.0.1/") }
     assertDoesNotThrow { urlSecurity.validateUrl("http://[64:ff9b::8.8.8.8]/") }
+    assertDoesNotThrow { urlSecurity.validateUrl("http://[2001::a247:27dd]/") } // Teredo-wrapped 93.184.216.34
+    assertDoesNotThrow { urlSecurity.validateUrl("http://[2001:1::80ff:fffe]/") } // just outside the Teredo /32
   }
 
   @Test

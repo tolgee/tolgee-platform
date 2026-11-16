@@ -182,6 +182,10 @@ dependencies {
         implementation(project(':billing-app'))
     }
 
+    if (gradle.ext.docsScreenshotsAppDirectory.exists()) {
+        implementation(project(':docs-screenshots'))
+    }
+
     /**
      * DATA MODULE
      */

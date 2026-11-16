@@ -24,7 +24,8 @@ class TolgeeApiService(
   private val subscriptionService: EeSubscriptionServiceImpl,
 ) : AbstractLlmApiService(),
   Logging {
-  override fun defaultAttempts(): List<Int> = listOf(30)
+  // Has to outlast the 60s Tolgee Cloud gives its own LLM provider when serving this proxied prompt.
+  override fun defaultAttempts(): List<Int> = listOf(90)
 
   override fun translate(
     params: LlmParams,

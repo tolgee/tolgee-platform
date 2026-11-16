@@ -1,6 +1,8 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.Screenshot
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
@@ -10,6 +12,7 @@ import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Tag
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
 import java.util.Date
@@ -22,6 +25,8 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var featureKeyToUpdate: Key
   lateinit var mainKeyToDelete: Key
   lateinit var featureKeyToDelete: Key
+  lateinit var mainStableKey: Key
+  lateinit var featureStableKey: Key
   lateinit var mainConflictKey: Key
   lateinit var featureConflictKey: Key
   lateinit var conflictsBranchKey: Key
@@ -48,6 +53,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     const val UPDATE_KEY_NAME = "shared-update-key"
     const val DELETE_KEY_NAME = "shared-delete-key"
     const val CONFLICT_KEY_NAME = "shared-conflict-key"
+    const val STABLE_KEY_NAME = "stable-key"
     const val NAMESPACED_KEY_NAME = "namespaced-key"
     const val TEST_NAMESPACE_NAME = "test-namespace"
   }
@@ -109,10 +115,14 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     }
 
     addMatchingKey(
-      name = "stable-key",
+      name = STABLE_KEY_NAME,
       mainText = "Stable text",
       additionalLabels = setOf(label4),
-    )
+      describedBy = addScreenshot { }.self,
+    ) { mainKey, featureKey ->
+      mainStableKey = mainKey
+      featureStableKey = featureKey
+    }
 
     addMatchingKey(
       name = CONFLICT_KEY_NAME,
@@ -247,6 +257,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     featureText: String = mainText,
     extended: Boolean = false,
     additionalLabels: Set<Label> = emptySet(),
+    describedBy: Screenshot? = null,
     callback: (main: Key, feature: Key) -> Unit = { _, _ -> },
   ) {
     val baseLabels =
@@ -269,6 +280,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
           tag2 = addTag("def")
           tag3 = addTag("ghi")
         }
+        describedBy?.let { describe(it) }
       }.self
 
     val featureKey =
@@ -286,9 +298,27 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
           addTag("def")
           addTag("ghi")
         }
+        describedBy?.let { describe(it) }
       }.self
 
     callback(mainKey, featureKey)
+  }
+
+  private fun KeyBuilder.describe(screenshot: Screenshot) {
+    self.maxCharLimit = 120
+    setDescription("Shown on the checkout button")
+    data.meta!!.self.custom =
+      mutableMapOf(
+        "priority" to 2,
+        "ratio" to 0.5,
+        "design" to mapOf("node" to "12:34", "frames" to listOf(1, 2)),
+      )
+    projectBuilder.addScreenshotReference {
+      key = this@describe.self
+      this.screenshot = screenshot
+      positions = mutableListOf(KeyInScreenshotPosition(10, 20, 30, 40))
+      originalText = "Stable text"
+    }
   }
 
   private fun ProjectBuilder.createMergeWithConflicts() {

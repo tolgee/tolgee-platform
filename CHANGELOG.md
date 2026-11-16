@@ -1,3 +1,24 @@
+## [3.242.7](https://github.com/tolgee/tolgee-platform/compare/v3.242.6...v3.242.7) (2026-11-12)
+
+
+### Performance Improvements
+
+* drop indexes that no query can use ([#4046](https://github.com/tolgee/tolgee-platform/issues/4046)) ([a67f725](https://github.com/tolgee/tolgee-platform/commit/a67f725eee307b7e7ed2d63c94566c4a84d34879))
+
+## [3.242.6](https://github.com/tolgee/tolgee-platform/compare/v3.242.5...v3.242.6) (2026-11-11)
+
+
+### Bug Fixes
+
+* self-hosted AI translation of long texts times out too early ([#4045](https://github.com/tolgee/tolgee-platform/issues/4045)) ([d5fd514](https://github.com/tolgee/tolgee-platform/commit/d5fd5149267c70b5aeb54936c48975a75231576b)), closes [#4042](https://github.com/tolgee/tolgee-platform/issues/4042)
+
+## [3.242.5](https://github.com/tolgee/tolgee-platform/compare/v3.242.4...v3.242.5) (2026-11-10)
+
+
+### Performance Improvements
+
+* merge preview loads keys and snapshots as plain rows instead of entities ([#4041](https://github.com/tolgee/tolgee-platform/issues/4041)) ([065b111](https://github.com/tolgee/tolgee-platform/commit/065b1119ed985866bd72ad283e06b56d193efd28))
+
 ## [3.242.4](https://github.com/tolgee/tolgee-platform/compare/v3.242.3...v3.242.4) (2026-11-06)
 
 

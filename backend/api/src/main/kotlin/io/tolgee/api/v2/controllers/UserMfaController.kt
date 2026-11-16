@@ -30,7 +30,6 @@ class UserMfaController(
     summary = "Enable TOTP",
     description = "Enables TOTP-based two-factor authentication. Invalidates all previous sessions upon success.",
   )
-  @BypassEmailVerification
   fun enableMfa(
     @RequestBody @Valid
     dto: UserTotpEnableRequestDto,
@@ -59,7 +58,6 @@ class UserMfaController(
 
   @PutMapping("/recovery")
   @Operation(summary = "Regenerate Codes", description = "Regenerates multi-factor authentication recovery codes")
-  @BypassEmailVerification
   fun regenerateRecoveryCodes(
     @RequestBody @Valid
     dto: UserMfaRecoveryRequestDto,

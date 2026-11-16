@@ -135,10 +135,10 @@ class UrlSecurity(
   }
 
   /**
-   * Whether an IPv6 address carries an *internal* IPv4 address inside it: `::a.b.c.d`, `::ffff:a.b.c.d`, 6to4 and
-   * the NAT64 well-known prefix all reach the embedded IPv4 address, while every `isLoopbackAddress`-style
+   * Whether an IPv6 address carries an *internal* IPv4 address inside it: `::a.b.c.d`, `::ffff:a.b.c.d`, 6to4, Teredo
+   * and the NAT64 well-known prefix all reach the embedded IPv4 address, while every `isLoopbackAddress`-style
    * predicate reads false. A disguised but externally routable address is not refused here.
-   * The JDK already maps `::ffff:a.b.c.d` back to an Inet4Address, so only the other two need naming here.
+   * The JDK already maps `::ffff:a.b.c.d` back to an Inet4Address, so it needs no branch of its own here.
    */
   private fun disguisesInternalIpv4(address: InetAddress): Boolean {
     val bytes = address.address
@@ -147,6 +147,10 @@ class UrlSecurity(
     // 6to4 (2002::/16, RFC 3056) carries the IPv4 straight after the prefix.
     if ((bytes[0].toInt() and 0xFF) == 0x20 && (bytes[1].toInt() and 0xFF) == 0x02) {
       return isInternalIpv4(bytes.copyOfRange(2, 6))
+    }
+    // Teredo (2001::/32, RFC 4380) carries the client IPv4 in the last four bytes with every bit inverted.
+    if (bytes.copyOfRange(0, 4).map { it.toInt() and 0xFF } == listOf(0x20, 0x01, 0x00, 0x00)) {
+      return isInternalIpv4(ByteArray(4) { (bytes[12 + it].toInt() xor 0xFF).toByte() })
     }
     // ::a.b.c.d, ::ffff:a.b.c.d and the RFC 2765 translated form ::ffff:0:a.b.c.d all carry it in the last four
     // bytes. The unspecified address and ::1 are caught by the JDK's own predicates before this runs.
