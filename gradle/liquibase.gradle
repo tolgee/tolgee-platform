@@ -42,6 +42,8 @@ ext {
                             "table:temp_unsuccessful_job_keys," +
                             "table:notification_entity," +
                             "table:notification_mention_mute," +
+                            "table:notification_project_preference," +
+                            "column:activity_revision_ids," +
                             "notification_digest_state_user_fk"
                 }
             }
