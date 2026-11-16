@@ -60,7 +60,8 @@ export type EntityEnum =
   | 'TranslationSuggestion'
   | 'TranslationQaIssue'
   | 'Branch'
-  | 'AiReviewRule';
+  | 'AiReviewRule'
+  | 'Prompt';
 
 export type FieldTypeEnum =
   | 'text'

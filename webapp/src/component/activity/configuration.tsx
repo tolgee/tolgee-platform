@@ -307,6 +307,42 @@ export const actionsConfiguration: Partial<
     },
     entities: { Params: true },
   },
+  AI_PROMPT_CREATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_prompt_create"
+          defaultValue="Created AI prompt"
+          params={params}
+        />
+      );
+    },
+    entities: { Prompt: [] },
+  },
+  AI_PROMPT_UPDATE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_prompt_update"
+          defaultValue="Updated AI prompt"
+          params={params}
+        />
+      );
+    },
+    entities: { Prompt: [] },
+  },
+  AI_PROMPT_DELETE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_ai_prompt_delete"
+          defaultValue="Deleted AI prompt"
+          params={params}
+        />
+      );
+    },
+    entities: { Prompt: [] },
+  },
   AI_REVIEW_RULE_CREATE: {
     label(params) {
       return (

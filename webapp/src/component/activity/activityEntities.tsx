@@ -633,6 +633,21 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         : undefined;
     },
   },
+  Prompt: {
+    label() {
+      return <T keyName="activity_entity_prompt" defaultValue="AI prompt" />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label() {
+          return (
+            <T keyName="activity_entity_prompt.name" defaultValue="Name" />
+          );
+        },
+      },
+    },
+  },
   AiReviewRule: {
     label() {
       return (
