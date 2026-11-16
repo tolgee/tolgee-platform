@@ -1,6 +1,8 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.PropertyModification
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -40,6 +42,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @AfterEach
   fun after() {
     enabledFeaturesProvider.forceEnabled = null
+    testDataService.cleanTestData(testData.root)
   }
 
   @Test
@@ -100,6 +103,81 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     webhookConfigService.find(testData.webhookConfig.self.id).assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `activity of a created webhook stores only the url host`() {
+    performProjectAuthPost("webhook-configs", mapOf("url" to FULL_URL)).andIsOk
+
+    val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_CREATE)
+    activity.modifications["url"].assert.isEqualTo(PropertyModification(null, HOST_OF_FULL_URL))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `activity of a changed webhook url stores only the old and the new host`() {
+    updateSeededWebhook(mapOf("url" to FULL_URL))
+
+    val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_UPDATE)
+    activity.modifications["url"].assert.isEqualTo(PropertyModification(SEEDED_HOST, HOST_OF_FULL_URL))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `activity still records a webhook url change that keeps the host`() {
+    updateSeededWebhook(mapOf("url" to "https://$SEEDED_HOST/another/path"))
+
+    val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_UPDATE)
+    activity.modifications["url"].assert.isEqualTo(PropertyModification(SEEDED_HOST, SEEDED_HOST))
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `activity of an update keeping the webhook url describes the webhook by host only`() {
+    updateSeededWebhook(mapOf("url" to SEEDED_URL, "enabled" to false))
+
+    val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_UPDATE)
+    activity.modifications.keys.assert
+      .containsExactly("enabled")
+    activity.describingData["url"].assert.isEqualTo(SEEDED_HOST)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `activity of a deleted webhook stores only the url host`() {
+    performProjectAuthDelete("webhook-configs/${testData.webhookConfig.self.id}").andIsOk
+
+    val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_DELETE)
+    activity.modifications["url"].assert.isEqualTo(PropertyModification(SEEDED_HOST, null))
+  }
+
+  private fun updateSeededWebhook(body: Map<String, Any>) {
+    performProjectAuthPut("webhook-configs/${testData.webhookConfig.self.id}", body).andIsOk
+  }
+
+  private class StoredActivity(
+    val modifications: Map<String, PropertyModification>,
+    val describingData: Map<String, Any?>,
+  )
+
+  @Suppress("UNCHECKED_CAST")
+  private fun storedWebhookActivity(type: ActivityType): StoredActivity {
+    val row =
+      entityManager
+        .createQuery(
+          """
+          select ame.modifications, ame.describingData from ActivityRevision ar
+          join ar.modifiedEntities ame
+          where ar.type = :type and ar.projectId = :projectId and ame.entityClass = 'WebhookConfig'
+          """,
+        ).setParameter("type", type)
+        .setParameter("projectId", project.id)
+        .singleResult as Array<Any?>
+    return StoredActivity(
+      modifications = row[0] as Map<String, PropertyModification>,
+      describingData = row[1] as Map<String, Any?>,
+    )
   }
 
   @Test
@@ -203,5 +281,12 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("enabled").isEqualTo(false)
       node("url").isEqualTo("https://new-url.com")
     }
+  }
+
+  companion object {
+    private const val SEEDED_HOST = "this-will-hopefully-never-exist.com"
+    private const val SEEDED_URL = "https://$SEEDED_HOST/wh"
+    private const val HOST_OF_FULL_URL = "hooks.example.com"
+    private const val FULL_URL = "https://user@$HOST_OF_FULL_URL/some/path?param=value"
   }
 }

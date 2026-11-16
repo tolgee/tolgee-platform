@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.annotation.ActivityUrlHostOnly
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
@@ -31,6 +32,7 @@ class WebhookConfig(
   @NotBlank
   @ActivityLoggedProp
   @ActivityDescribingProp
+  @ActivityUrlHostOnly
   var url: String = ""
 
   @NotBlank
