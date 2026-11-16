@@ -40,6 +40,14 @@ class ImageConverterTest {
   }
 
   @Test
+  fun `close releases the input of a processor that never decoded`() {
+    val converter = ImageConverter(solidPng(10, 10).inputStream())
+    converter.originalDimension
+    converter.close()
+    assertThrows<Exception> { converter.getImage() }
+  }
+
+  @Test
   fun `rejects an image with one side over the limit even when the pixel count is small`() {
     val converter = ImageConverter(solidPng(100_000, 1).inputStream())
     val exception = assertThrows<BadRequestException> { converter.originalDimension }

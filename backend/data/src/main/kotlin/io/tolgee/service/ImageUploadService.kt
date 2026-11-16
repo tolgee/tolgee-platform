@@ -47,30 +47,31 @@ class ImageUploadService(
       throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
 
-    val imageConverter = ImageConverter(image.inputStream)
-    val dimension = imageConverter.originalDimension
+    return ImageConverter(image.inputStream).use { imageConverter ->
+      val dimension = imageConverter.originalDimension
 
-    val uploadedImageEntity =
-      UploadedImage(generateFilename(), userAccount)
-        .apply {
-          extension = "png"
-          originalWidth = dimension.width
-          originalHeight = dimension.height
-          width = imageConverter.targetDimension.width
-          height = imageConverter.targetDimension.height
-          location = info?.location
-        }
+      val uploadedImageEntity =
+        UploadedImage(generateFilename(), userAccount)
+          .apply {
+            extension = "png"
+            originalWidth = dimension.width
+            originalHeight = dimension.height
+            width = imageConverter.targetDimension.width
+            height = imageConverter.targetDimension.height
+            location = info?.location
+          }
 
-    save(uploadedImageEntity)
-    val processedImage = imageConverter.getImage()
-    val processedMiddleSized = imageConverter.getThumbnail(600)
-    val processedThumbnail = imageConverter.getThumbnail(200)
+      save(uploadedImageEntity)
+      val processedImage = imageConverter.getImage()
+      val processedMiddleSized = imageConverter.getThumbnail(600)
+      val processedThumbnail = imageConverter.getThumbnail(200)
 
-    fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
-    fileStorage.storeFile(uploadedImageEntity.middleSizedFilePath, processedMiddleSized.toByteArray())
-    fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
+      fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+      fileStorage.storeFile(uploadedImageEntity.middleSizedFilePath, processedMiddleSized.toByteArray())
+      fileStorage.storeFile(uploadedImageEntity.thumbnailFilePath, processedThumbnail.toByteArray())
 
-    return uploadedImageEntity
+      uploadedImageEntity
+    }
   }
 
   @Transactional

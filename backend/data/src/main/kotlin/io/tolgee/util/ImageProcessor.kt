@@ -5,6 +5,7 @@ import io.tolgee.exceptions.BadRequestException
 import java.awt.Dimension
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.io.Closeable
 import java.io.InputStream
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
@@ -16,7 +17,7 @@ import kotlin.math.sqrt
 
 abstract class ImageProcessor(
   protected val imageStream: InputStream,
-) {
+) : Closeable {
   private var imageInput: ImageInputStream? = null
   private var imageReader: ImageReader? = null
 
@@ -57,7 +58,7 @@ abstract class ImageProcessor(
 
   private fun <T> closingOnFailure(block: () -> T): T = runCatching(block).onFailure { close() }.getOrThrow()
 
-  private fun close() {
+  override fun close() {
     imageReader?.dispose()
     imageReader = null
     imageInput?.close()
