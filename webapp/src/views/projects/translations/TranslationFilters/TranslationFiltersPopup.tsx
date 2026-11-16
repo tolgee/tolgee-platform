@@ -21,9 +21,12 @@ import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
 import {
   getQaChecksFiltersLength,
+  getAiReviewFiltersLength,
+  SubfilterAiReview,
   SubfilterQaChecks,
   SubfilterTasks,
   getTaskFiltersLength,
+  useAiReviewActive,
 } from 'tg.ee';
 
 type Props = {
@@ -50,6 +53,7 @@ export const TranslationFiltersPopup = ({
   const { t } = useTranslate();
   const project = useProject();
   const { isEnabled } = useEnabledFeatures();
+  const aiReviewActive = useAiReviewActive();
   const tasksEnabled = isEnabled('TASKS') || isEnabled('ORDER_TRANSLATION');
   const tasksFilterAvailable =
     tasksEnabled || Boolean(getTaskFiltersLength(value));
@@ -110,6 +114,13 @@ export const TranslationFiltersPopup = ({
             {(project.useQaChecks ||
               Boolean(getQaChecksFiltersLength(value))) && (
               <SubfilterQaChecks
+                value={value}
+                actions={actions}
+                selectedLanguages={selectedLanguages}
+              />
+            )}
+            {(aiReviewActive || Boolean(getAiReviewFiltersLength(value))) && (
+              <SubfilterAiReview
                 value={value}
                 actions={actions}
                 selectedLanguages={selectedLanguages}

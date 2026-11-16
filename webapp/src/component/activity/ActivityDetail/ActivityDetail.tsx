@@ -119,7 +119,7 @@ export const ActivityDetail = ({ data, diffEnabled, activity }: Props) => {
   return (
     <StyledContainer data-cy="activity-detail">
       <StyledUserWrapper>
-        <ActivityUser item={data} />
+        <ActivityUser item={data} fullActorLabel />
       </StyledUserWrapper>
       {detailLoadable.isLoading ? (
         <BoxLoading />

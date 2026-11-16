@@ -26,6 +26,7 @@ class TranslationsViewQueryBuilder(
   private val qaEnabled: Boolean,
   private val qaDisabledLanguageIds: Set<Long>,
   private val tasksEnabled: Boolean,
+  private val aiReviewFilterData: AiReviewFilterData? = null,
 ) {
   private fun <T> getBaseQuery(
     query: CriteriaQuery<T>,
@@ -41,6 +42,7 @@ class TranslationsViewQueryBuilder(
       qaEnabled = qaEnabled,
       qaDisabledLanguageIds = qaDisabledLanguageIds,
       tasksEnabled = tasksEnabled,
+      aiReviewFilterData = aiReviewFilterData,
       isCountQuery = isCountQuery,
     )
   }

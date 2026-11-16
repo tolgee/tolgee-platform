@@ -26,7 +26,12 @@ export const BatchOperationsSummary = () => {
       title={<OperationsList data={batchOperations} />}
       PopperComponent={StyledPopper}
     >
-      <Box display="flex" gap={1} alignItems="center">
+      <Box
+        display="flex"
+        gap={1}
+        alignItems="center"
+        data-cy="batch-operations-summary"
+      >
         <Box sx={{ mt: 0.75 }}>
           <PlayCircle width={18} height={18} />
         </Box>

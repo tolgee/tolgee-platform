@@ -10,6 +10,8 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.Prompt
+import io.tolgee.model.enums.PromptType
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
@@ -144,12 +146,7 @@ class MtServiceConfigService(
         (
           languageSetting.primaryServiceInfo?.promptId
             ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId
-        )?.let {
-          promptService.findPrompt(
-            project.id,
-            it,
-          )
-        }
+        )?.let { findTranslatePrompt(project.id, it) }
 
       setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)
@@ -310,10 +307,11 @@ class MtServiceConfigService(
     projectEntity: Project,
     promptId: Long,
   ) {
+    val prompt = findTranslatePrompt(projectEntity.id, promptId)
     val data = getProjectSettings(projectEntity)
     data.forEach { entity ->
       if (entity.primaryService == MtServiceType.PROMPT || entity.enabledServices.contains(MtServiceType.PROMPT)) {
-        entity.prompt = promptService.findPrompt(projectEntity.id, promptId)
+        entity.prompt = prompt
         save(entity)
       }
     }
@@ -430,5 +428,14 @@ class MtServiceConfigService(
     MtServiceType.entries.associateWith {
       (it.propertyClass?.let { applicationContext.getBean(it) } to applicationContext.getBean(it.providerClass))
     }
+  }
+
+  private fun findTranslatePrompt(
+    projectId: Long,
+    promptId: Long,
+  ): Prompt {
+    val prompt = promptService.findPrompt(projectId, promptId)
+    if (prompt.type != PromptType.TRANSLATE) throw BadRequestException(Message.REVIEW_PROMPT_CANNOT_TRANSLATE)
+    return prompt
   }
 }

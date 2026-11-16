@@ -39,7 +39,7 @@ class AnthropicApiService :
         thinking = Thinking(type = "disabled"),
         output_config =
           if (params.shouldOutputJson && config.format == "json_schema") {
-            OutputConfig(format = OutputFormat())
+            OutputConfig(format = OutputFormat(schema = params.responseSchema.schema))
           } else {
             null
           },
@@ -145,18 +145,8 @@ class AnthropicApiService :
     )
 
     class OutputFormat(
+      val schema: Map<String, Any>,
       val type: String = "json_schema",
-      val schema: Map<String, Any> =
-        mapOf(
-          "type" to "object",
-          "properties" to
-            mapOf(
-              "output" to mapOf("type" to "string"),
-              "contextDescription" to mapOf("type" to "string"),
-            ),
-          "required" to listOf("output", "contextDescription"),
-          "additionalProperties" to false,
-        ),
     )
 
     class RequestMessage(

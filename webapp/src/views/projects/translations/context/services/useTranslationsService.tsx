@@ -389,39 +389,12 @@ export const useTranslationsService = (props: Props) => {
       },
     ]);
 
-  const changeTranslations = (
-    data: {
-      keyId: number;
-      language: string;
-      value: ValueUpdate<Partial<TranslationModel>> | undefined;
-    }[]
-  ) => {
+  const changeTranslations = (data: TranslationMod[]) => {
     setFixedTranslations((fixedTranslations) => {
-      let result = fixedTranslations;
-      data.forEach((mod) => {
-        result = result?.map((k) => {
-          if (k.keyId === mod.keyId) {
-            const value =
-              typeof mod.value === 'function'
-                ? mod.value(k.translations[mod.language])
-                : mod.value;
-            return {
-              ...k,
-              translations: {
-                ...k.translations,
-                [mod.language]: mod.value
-                  ? {
-                      ...k.translations[mod.language],
-                      ...value,
-                    }
-                  : (undefined as any),
-              },
-            };
-          }
-          return k;
-        });
-      });
-      return result;
+      const modsByKey = groupModsByKey(data);
+      return fixedTranslations?.map((k) =>
+        applyMods(k, modsByKey.get(k.keyId))
+      );
     });
   };
 
@@ -468,4 +441,52 @@ export const useTranslationsService = (props: Props) => {
     removeFilter,
     setFilters,
   };
+};
+
+type TranslationMod = {
+  keyId: number;
+  language: string;
+  value: ValueUpdate<Partial<TranslationModel>> | undefined;
+};
+
+const groupModsByKey = (data: TranslationMod[]) => {
+  const modsByKey = new Map<number, TranslationMod[]>();
+  data.forEach((mod) => {
+    const list = modsByKey.get(mod.keyId);
+    if (list) {
+      list.push(mod);
+    } else {
+      modsByKey.set(mod.keyId, [mod]);
+    }
+  });
+  return modsByKey;
+};
+
+const applyMods = (
+  key: DeletableKeyWithTranslationsModelType,
+  mods: TranslationMod[] | undefined
+) => {
+  if (!mods) {
+    return key;
+  }
+  let result = key;
+  mods.forEach((mod) => {
+    const value =
+      typeof mod.value === 'function'
+        ? mod.value(result.translations[mod.language])
+        : mod.value;
+    result = {
+      ...result,
+      translations: {
+        ...result.translations,
+        [mod.language]: mod.value
+          ? {
+              ...result.translations[mod.language],
+              ...value,
+            }
+          : (undefined as any),
+      },
+    };
+  });
+  return result;
 };

@@ -6,11 +6,13 @@ import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.LlmParams
+import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderResolver
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.ee.service.aiReview.AiReviewRuleService
 import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
@@ -23,6 +25,7 @@ import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
+import io.tolgee.model.enums.PromptType
 import io.tolgee.repository.PromptRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.PromptService
@@ -56,13 +59,15 @@ class PromptServiceEeImpl(
   private val objectMapper: ObjectMapper,
   private val llmProviderResolver: LlmProviderResolver,
   private val entityManager: EntityManager,
+  private val aiReviewRuleService: AiReviewRuleService,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
     pageable: Pageable,
     search: String?,
+    types: Collection<PromptType>,
   ): Page<Prompt> {
-    return promptRepository.getAllPaged(projectId, pageable, search).map { withResolvedProviderName(it) }
+    return promptRepository.getAllPaged(projectId, pageable, search, types).map { withResolvedProviderName(it) }
   }
 
   fun createPrompt(
@@ -76,6 +81,7 @@ class PromptServiceEeImpl(
         project = projectService.get(projectId),
         providerName = dto.providerName,
         basicPromptOptions = dto.basicPromptOptions?.toTypedArray(),
+        type = dto.type,
       )
     promptRepository.save(prompt)
     return withResolvedProviderName(prompt)
@@ -92,6 +98,7 @@ class PromptServiceEeImpl(
         template = prompt.template,
         providerName = prompt.providerName,
         basicPromptOptions = prompt.basicPromptOptions?.toList(),
+        type = prompt.type,
       )
     } else {
       return getDefaultPrompt()
@@ -122,13 +129,27 @@ class PromptServiceEeImpl(
     dto: PromptDto,
   ): Prompt {
     val prompt = findPrompt(projectId, promptId)
+    if (dto.type != prompt.type) throw BadRequestException(Message.PROMPT_TYPE_CANNOT_BE_CHANGED)
+    val outputChanges = changesOutput(prompt, dto)
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
     prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
+    if (outputChanges) prompt.revision += 1
     promptRepository.save(prompt)
+    if (outputChanges && prompt.type == PromptType.REVIEW) {
+      aiReviewRuleService.switchRulesUsingPromptToScoreOnly(projectId, prompt.id)
+    }
     return withResolvedProviderName(prompt)
   }
+
+  private fun changesOutput(
+    prompt: Prompt,
+    dto: PromptDto,
+  ): Boolean =
+    prompt.template != dto.template ||
+      prompt.providerName != dto.providerName ||
+      prompt.basicPromptOptions?.toList() != dto.basicPromptOptions
 
   fun deletePrompt(
     projectId: Long,
@@ -137,6 +158,7 @@ class PromptServiceEeImpl(
     val prompt = this.findPrompt(projectId, promptId)
     val project = projectService.get(projectId)
     mtServiceConfigService.removePrompt(project, prompt.id)
+    if (prompt.type == PromptType.REVIEW) aiReviewRuleService.detachPromptAndSwitchToScoreOnly(projectId, prompt.id)
     promptRepository.delete(prompt)
   }
 
@@ -209,14 +231,32 @@ class PromptServiceEeImpl(
     provider: String,
     attempts: List<Int>? = null,
   ): ParsedResult {
-    val result =
-      try {
-        providerService.callProvider(organizationId, provider, params, attempts)
-      } catch (e: RestClientException) {
-        throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
-      }
-
+    val result = callProvider(organizationId, params, provider, attempts)
     return PromptResultParser(result, objectMapper).parse()
+  }
+
+  fun callProviderAndChargeCredits(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+  ): PromptResult {
+    publishBeforeEvent(organizationId, provider)
+    val result = callProvider(organizationId, params, provider, null)
+    publishAfterEvent(organizationId, result.price)
+    return result
+  }
+
+  private fun callProvider(
+    organizationId: Long,
+    params: LlmParams,
+    provider: String,
+    attempts: List<Int>?,
+  ): PromptResult {
+    try {
+      return providerService.callProvider(organizationId, provider, params, attempts)
+    } catch (e: RestClientException) {
+      throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
+    }
   }
 
   fun runPromptAndChargeCredits(

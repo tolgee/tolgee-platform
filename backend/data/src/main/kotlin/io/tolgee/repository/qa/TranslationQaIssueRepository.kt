@@ -4,6 +4,7 @@ import io.tolgee.dtos.queryResults.qa.LanguageQaIssueCount
 import io.tolgee.dtos.queryResults.qa.QaIssueCountByCheckType
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.qa.TranslationQaIssue
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
@@ -14,6 +15,22 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long> {
+  fun existsByTranslationIdAndState(
+    translationId: Long,
+    state: QaIssueState,
+  ): Boolean
+
+  @Query(
+    """
+    select distinct i.translation.id from TranslationQaIssue i
+    where i.translation.id in :translationIds and i.state = :state
+    """,
+  )
+  fun findTranslationIdsByState(
+    translationIds: Collection<Long>,
+    state: QaIssueState,
+  ): List<Long>
+
   @Query(
     """
     select t.language.id as languageId, count(i) as count

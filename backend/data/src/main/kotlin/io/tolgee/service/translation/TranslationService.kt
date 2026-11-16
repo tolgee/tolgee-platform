@@ -20,7 +20,6 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
-import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -30,7 +29,8 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.security.ProjectHolder
+import io.tolgee.service.aiReview.AiReviewRowAccess
+import io.tolgee.service.aiReview.SourceChangeDecision
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -55,6 +55,8 @@ import java.util.Optional
 @Service
 @Transactional
 class TranslationService(
+  @Lazy
+  private val aiReviewRowAccess: AiReviewRowAccess,
   private val translationRepository: TranslationRepository,
   private val importService: ImportService,
   private val tolgeeProperties: TolgeeProperties,
@@ -64,9 +66,6 @@ class TranslationService(
   private val translationCommentService: TranslationCommentService,
   private val translationQaIssueService: TranslationQaIssueService,
 ) {
-  @Autowired
-  private lateinit var projectHolder: ProjectHolder
-
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
@@ -385,9 +384,10 @@ class TranslationService(
     save(translation)
   }
 
-  fun setOutdated(
+  fun applySourceChange(
     key: Key,
-    excludeTranslationIds: Set<Long> = emptySet(),
+    excludeTranslationIds: Set<Long>,
+    decide: (Translation) -> SourceChangeDecision,
   ) {
     val baseLanguage = key.project.baseLanguage
     key.translations.forEach {
@@ -396,12 +396,14 @@ class TranslationService(
       val isExcluded = excludeTranslationIds.contains(it.id)
 
       if (!isBase && !isEmpty && !isExcluded) {
-        val project = projectHolder.projectOrNull
+        val decision = decide(it)
         it.outdated = true
-        if (project?.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
-          it.state = TranslationState.TRANSLATED
-        }
+        decision.newState?.let { state -> it.state = state }
+        decision.setAuto?.let { auto -> it.auto = auto }
         save(it)
+        if (decision.deleteAiReviewRow) {
+          aiReviewRowAccess.deleteRow(it.id)
+        }
       }
     }
   }

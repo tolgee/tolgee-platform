@@ -10,15 +10,16 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { messageService } from 'tg.service/MessageService';
+import { confirmation } from 'tg.hooks/confirmation';
 
 import { PromptItem } from './PromptLoadMenu';
-import { PromptSaveDialog } from './PromptSaveDialog';
-
-type PromptModel = components['schemas']['PromptModel'];
+import {
+  PromptSaveData,
+  PromptSaveDialog,
+} from 'tg.ee.module/llm/AiPrompt/PromptSaveDialog';
 
 const StyledArrowButton = styled(Button)`
   padding-left: 6px;
@@ -28,7 +29,7 @@ const StyledArrowButton = styled(Button)`
 
 type Props = {
   projectId: number;
-  data: Omit<PromptModel, 'projectId' | 'id' | 'name'>;
+  data: PromptSaveData;
   existingPrompt?: PromptItem;
   disabled?: boolean;
   unsavedChanges?: boolean;
@@ -64,22 +65,43 @@ export const PromptSaveMenu = ({
             loading={updatePrompt.isLoading}
             data-cy="ai-prompt-save-button"
             onClick={() => {
-              updatePrompt.mutate(
-                {
-                  path: { projectId, promptId: existingPrompt.id! },
-                  content: {
-                    'application/json': { ...data, name: existingPrompt.name },
+              const activeRuleCount = existingPrompt.activeRuleCount ?? 0;
+              const doUpdate = () =>
+                updatePrompt.mutate(
+                  {
+                    path: { projectId, promptId: existingPrompt.id! },
+                    content: {
+                      'application/json': {
+                        ...data,
+                        name: existingPrompt.name,
+                      },
+                    },
                   },
-                },
-                {
-                  onSuccess(data) {
-                    messageService.success(
-                      <T keyName="ai_prompt_update_success" />
-                    );
-                    onSuccess(data);
-                  },
-                }
-              );
+                  {
+                    onSuccess(data) {
+                      messageService.success(
+                        <T keyName="ai_prompt_update_success" />
+                      );
+                      onSuccess(data);
+                    },
+                  }
+                );
+              if (activeRuleCount === 0) {
+                doUpdate();
+                return;
+              }
+              confirmation({
+                message: (
+                  <span data-cy="ai-review-prompt-save-warning">
+                    <T
+                      keyName="ai_review_prompt_save_warning"
+                      defaultValue="{count, plural, one {# active rule uses this prompt and will switch to Score only.} other {# active rules use this prompt and will switch to Score only.}}"
+                      params={{ count: activeRuleCount }}
+                    />
+                  </span>
+                ),
+                onConfirm: doUpdate,
+              });
             }}
           >
             {t('ai_prompt_save_label')}

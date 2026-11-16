@@ -5,6 +5,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOpenedPrompt } from './useOpenedPrompt';
 import { useProject } from 'tg.hooks/useProject';
 import { PromptItem } from './PromptLoadMenu';
+import { PromptType } from 'tg.ee.module/llm/AiPrompt/PromptTypeToggle';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
@@ -29,6 +30,9 @@ const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
   'SCREENSHOT',
 ];
 
+const storedBasicOptions = (item: PromptItem) =>
+  item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS;
+
 type Props = {
   language: LanguageModel;
   keyData: DeletableKeyWithTranslationsModelType;
@@ -38,7 +42,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
   const { isEnabled } = useEnabledFeatures();
   const project = useProject();
 
-  const { setOpenPrompt, setAiPlayground } = usePromptUrlState();
+  const { setOpenPrompt, setAiPlayground, openPromptType } =
+    usePromptUrlState();
 
   const [options, setOptions] = useState<BasicPromptOption[]>(
     DEFAULT_BASIC_OPTIONS
@@ -55,6 +60,9 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const [provider, setProvider] = useState<string>('default');
   const [errors, setErrors] = useState<EditorError[]>();
+  const [promptType, setPromptType] = useState<PromptType>(
+    openPromptType ?? 'TRANSLATE'
+  );
 
   const runLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/prompts/run',
@@ -64,6 +72,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const openPromptLoadable = useOpenedPrompt({
     projectId: project.id,
+    type: promptType,
   });
 
   useEffect(() => {
@@ -79,32 +88,51 @@ export const usePromptState = ({ language, keyData }: Props) => {
   });
 
   const unsavedChanges = useMemo(() => {
-    if (openPromptData) {
-      if (openPromptData.providerName !== provider) {
-        return true;
-      }
+    if (!openPromptData) {
+      return undefined;
+    }
+    if (openPromptData.providerName !== provider) {
+      return true;
+    }
+    if ((openPromptData.type ?? 'TRANSLATE') !== promptType) {
+      return true;
+    }
+    const sameOptions = () => {
+      const lastOptions = new Set(storedBasicOptions(openPromptData));
+      const newOptions = new Set(options);
+      return (
+        lastOptions.size === newOptions.size &&
+        [...lastOptions].every((x) => newOptions.has(x))
+      );
+    };
+    if (typeof openPromptData.id === 'number') {
       const type = getPromptType(openPromptData);
       if (type !== tab) {
         return true;
       }
-      if (type === 'advanced' && openPromptData.template !== value) {
-        return true;
+      if (type === 'advanced') {
+        return openPromptData.template !== value;
       }
-      if (type === 'basic') {
-        const lastOptions = new Set(openPromptData.basicPromptOptions);
-        const newOptions = new Set(options);
-        return !(
-          lastOptions.size === newOptions.size &&
-          [...lastOptions].every((x) => newOptions.has(x))
-        );
-      }
-
-      return false;
+      return !sameOptions();
     }
-    return undefined;
-  }, [openPromptData, value, options, provider, tab]);
+    // A draft on the default prompt: any content edit counts, whatever the tab.
+    const defaultTemplate =
+      openPromptData.template || openPromptLoadable.defaultTemplate || '';
+    if (defaultTemplate !== value) {
+      return true;
+    }
+    return !sameOptions();
+  }, [
+    openPromptData,
+    openPromptLoadable.defaultTemplate,
+    value,
+    options,
+    provider,
+    tab,
+    promptType,
+  ]);
 
-  const preventLeave = unsavedChanges === true && tab === 'advanced';
+  const preventLeave = unsavedChanges === true;
 
   usePreventPageLeave(preventLeave);
   function confirmUnsaved(callback: () => void) {
@@ -134,7 +162,8 @@ export const usePromptState = ({ language, keyData }: Props) => {
     setOpenPrompt(item.id);
     setProvider(item.providerName);
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
-    setOptions(item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS);
+    setOptions(storedBasicOptions(item));
+    setPromptType(item.type ?? 'TRANSLATE');
     if (!tab || overrideTab) {
       if (item.id === undefined) {
         setTab('basic');
@@ -190,6 +219,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
             targetLanguageId: language.id,
             provider,
             basicPromptOptions: tab === 'basic' ? options : undefined,
+            type: promptType,
           },
         },
       },
@@ -212,9 +242,14 @@ export const usePromptState = ({ language, keyData }: Props) => {
 
   const usage = runLoadable.data?.usage;
 
+  const typeLocked = typeof openPromptData?.id === 'number';
+
   return {
     usage,
     openPromptData,
+    promptType,
+    setPromptType,
+    typeLocked,
     variables: promptVariables.data,
     providers: providersLoadable.data,
     handleTestPrompt,

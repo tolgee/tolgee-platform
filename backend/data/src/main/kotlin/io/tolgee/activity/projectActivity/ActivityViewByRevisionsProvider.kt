@@ -64,6 +64,7 @@ class ActivityViewByRevisionsProvider(
         authorName = author?.name,
         authorAvatarHash = author?.avatarHash,
         authorDeleted = author?.deletedAt != null,
+        systemActor = revision.systemActor,
         meta = revision.meta,
         modifications = modifiedEntities[revision.id],
         counts = counts[revision.id],

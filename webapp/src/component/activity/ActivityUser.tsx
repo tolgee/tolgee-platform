@@ -1,9 +1,8 @@
 import { Box, styled } from '@mui/material';
 
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { ActorAvatar, ActorName } from 'tg.component/activity/SystemActor';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { ActivityModel } from './types';
-import { UserName } from '../common/UserName';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -34,36 +33,32 @@ const StyledUser = styled(Box)`
 type Props = {
   item: ActivityModel;
   onlyTime?: boolean;
+  fullActorLabel?: boolean;
 };
 
 export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
   item,
   onlyTime,
+  fullActorLabel,
 }) => {
   const date = new Date(item.timestamp);
   const lang = useCurrentLanguage();
 
+  const systemActor = item.systemActor;
+
   return (
     <StyledContainer>
-      {item.author && (
+      {(systemActor || item.author) && (
         <StyledAvatar gridArea="avatar">
-          <AvatarImg
-            size={24}
-            owner={{
-              type: 'USER',
-              id: item.author.id,
-              avatar: item.author.avatar,
-              deleted: item.author.deleted,
-            }}
-          />
+          <ActorAvatar systemActor={systemActor} author={item.author} />
         </StyledAvatar>
       )}
       <StyledUser gridArea="user">
-        {item.author?.deleted ? (
-          <UserName {...item.author} />
-        ) : (
-          item.author?.name
-        )}
+        <ActorName
+          systemActor={systemActor}
+          author={item.author}
+          full={fullActorLabel}
+        />
       </StyledUser>
       <Box gridArea="time">
         <StyledTime>

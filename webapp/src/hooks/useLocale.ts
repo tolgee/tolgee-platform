@@ -60,3 +60,12 @@ export const useNumberFormatter = () => {
   return (number: number, options?: Intl.NumberFormatOptions) =>
     new Intl.NumberFormat(language, options).format(number);
 };
+
+export const useListFormatter = () => {
+  const language = useCurrentLanguage();
+  return (items: string[]) =>
+    new Intl.ListFormat(language, {
+      type: 'conjunction',
+      style: 'narrow',
+    }).format(items);
+};

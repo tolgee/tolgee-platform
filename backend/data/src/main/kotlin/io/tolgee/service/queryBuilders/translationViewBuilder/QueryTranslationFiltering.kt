@@ -57,6 +57,7 @@ class QueryTranslationFiltering(
   }
 
   private val stateFilterBuilder = StateFilterBuilder(queryBase, cb, isCountQuery)
+  private val aiReviewFilterBuilder = AiReviewFilterBuilder(this, queryBase, cb, isCountQuery)
 
   fun applyStateFilters() {
     val byStateMap = filterByStateMap ?: return
@@ -183,6 +184,12 @@ class QueryTranslationFiltering(
     }
   }
 
+  fun applyAiReviewFilters(data: AiReviewFilterData) {
+    val outcomes = params.filterAiReviewStatus?.takeIf { it.isNotEmpty() } ?: return
+    val langIds = languageIdsForTags(params.filterAiReviewInLang) ?: queryBase.languages.map { it.id }
+    queryBase.translationConditions.add(aiReviewFilterBuilder.build(outcomes, langIds, data))
+  }
+
   /**
    * `filterOutdatedLanguage` / `filterNotOutdatedLanguage` — each collapsed to one subquery.
    */
@@ -218,7 +225,7 @@ class QueryTranslationFiltering(
    * - [languageIds]: emitted as `= L` for a single id, `IN (…)` for many.
    * - [extraConditions]: any predicates specific to the filter (state, outdated, check type, …).
    */
-  private fun <E> buildExistsOrIn(
+  internal fun <E> buildExistsOrIn(
     entityClass: Class<E>,
     keyIdInSub: (Root<E>) -> Expression<Long>,
     languageIdInSub: (Root<E>) -> Path<Long>,
@@ -244,7 +251,7 @@ class QueryTranslationFiltering(
    * LIMIT the planner short-circuits after finding enough matches) or a non-correlated
    * `k.id IN (…)` (count query, one scan + hash join across all keys).
    */
-  private fun wrapExistsOrIn(subquery: Subquery<Long>): Predicate =
+  internal fun wrapExistsOrIn(subquery: Subquery<Long>): Predicate =
     if (isCountQuery) queryBase.root.get(Key_.id).`in`(subquery) else cb.exists(subquery)
 
   fun languagePredicate(

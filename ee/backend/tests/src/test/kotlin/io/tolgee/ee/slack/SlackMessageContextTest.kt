@@ -6,6 +6,7 @@ import io.tolgee.api.IProjectActivityAuthorModel
 import io.tolgee.api.IProjectActivityModel
 import io.tolgee.ee.component.slackIntegration.data.SlackRequest
 import io.tolgee.ee.component.slackIntegration.notification.SlackMessageContext
+import io.tolgee.model.enums.SystemActor
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -31,6 +32,7 @@ class SlackMessageContextTest {
       override val timestamp = 0L
       override val type = ActivityType.SET_TRANSLATIONS
       override val author: IProjectActivityAuthorModel? = null
+      override val systemActor: SystemActor? = null
       override val modifiedEntities: Map<String, List<IModifiedEntityModel>>? = null
       override val meta: Map<String, Any?>? = null
       override val counts = mutableMapOf("Translation" to translationCount)

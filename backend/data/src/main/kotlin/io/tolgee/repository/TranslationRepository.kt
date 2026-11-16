@@ -236,6 +236,60 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
+    select distinct t from Translation t
+    join fetch t.key k
+    join fetch k.project
+    join fetch t.language
+    left join fetch k.namespace
+    left join fetch k.branch
+    left join fetch k.keyMeta km
+    left join fetch km.tags
+    where t.id in :translationIds
+    """,
+  )
+  fun findAllForAiReviewRuleEvaluation(translationIds: Collection<Long>): List<Translation>
+
+  @Query(
+    """
+    select t.id from Translation t
+    where t.key.id in :keyIds and t.language.id in :languageIds
+    """,
+  )
+  fun getIdsByKeyIdsAndLanguageIds(
+    keyIds: Collection<Long>,
+    languageIds: Collection<Long>,
+  ): List<Long>
+
+  @Query(
+    """
+    select t.id from Translation t
+    join t.key k
+    left join k.branch b
+    where k.project.id = :projectId
+      and t.language.id in :languageIds
+      and k.deletedAt is null
+      and (b is null or b.deletedAt is null)
+    """,
+  )
+  fun getIdsByProjectAndLanguageIds(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ): List<Long>
+
+  @Query(
+    """
+    select t.id from Translation t
+    join t.key k
+    left join k.branch b
+    where k.project.id = :projectId
+      and k.deletedAt is null
+      and (b is null or b.deletedAt is null)
+    """,
+  )
+  fun getIdsByProject(projectId: Long): List<Long>
+
+  @Query(
+    """
     select new io.tolgee.dtos.queryResults.qa.KeyLanguagePairView(k.id, t.language.id)
     from Translation t
     join t.key k

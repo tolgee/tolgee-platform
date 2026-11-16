@@ -22,10 +22,13 @@ import java.net.URI
  * application's own `JsonMapper` — the LLM services get theirs from the Spring-configured
  * `RestTemplateBuilder`, so a stub on plain defaults would not exercise the same Jackson settings.
  */
-fun stubLlmRestTemplate(responseJson: String): RestTemplate {
+fun stubLlmRestTemplate(
+  responseJson: String,
+  onRequestBody: (String) -> Unit = {},
+): RestTemplate {
   val factory =
     ClientHttpRequestFactory { uri, httpMethod ->
-      StubClientHttpRequest(uri, httpMethod, responseJson)
+      StubClientHttpRequest(uri, httpMethod, responseJson, onRequestBody)
     }
 
   val restTemplate = RestTemplate(factory)
@@ -41,6 +44,7 @@ private class StubClientHttpRequest(
   private val uri: URI,
   private val httpMethod: HttpMethod,
   private val responseJson: String,
+  private val onRequestBody: (String) -> Unit,
 ) : ClientHttpRequest {
   private val outputStream = ByteArrayOutputStream()
   private val headers = HttpHeaders()
@@ -55,7 +59,10 @@ private class StubClientHttpRequest(
 
   override fun getAttributes(): MutableMap<String, Any> = mutableMapOf()
 
-  override fun execute(): ClientHttpResponse = StubClientHttpResponse(responseJson)
+  override fun execute(): ClientHttpResponse {
+    onRequestBody(outputStream.toString(Charsets.UTF_8))
+    return StubClientHttpResponse(responseJson)
+  }
 }
 
 private class StubClientHttpResponse(

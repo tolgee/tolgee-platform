@@ -10,6 +10,10 @@ type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
+export type AiReviewFilterOutcome = NonNullable<
+  FiltersType['filterAiReviewStatus']
+>[number];
+
 export type TaskStatusFilter =
   | 'IN_OPEN_TASK'
   | 'NOT_IN_OPEN_TASK'
@@ -42,6 +46,7 @@ export type FiltersInternal = {
   filterHasComments?: boolean;
   filterQaCheckTypes?: QaCheckType[];
   filterQaChecksStale?: boolean;
+  filterAiReviewOutcomes?: AiReviewFilterOutcome[];
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
@@ -59,16 +64,12 @@ export type FiltersInternal = {
   filterSuggestionLanguage?: true | string;
   filterTaskLanguage?: true | string;
 
-  /*
-   * this one differs from the others above
-   *
-   * Specifies which languages will be considered when filtering by the QA check type:
-   *  - undefined = all languages (default)
-   *  - false = all but base
-   *  - string = one language tag
-   */
-  filterQaCheckTypeLanguage?: false | string;
+  filterQaCheckTypeLanguage?: LanguageScope;
+  filterAiReviewOutcomeLanguage?: LanguageScope;
 };
+
+/** Unlike above: undefined = all languages, false = all but base, string = one language tag. */
+type LanguageScope = false | string;
 
 export type AddParams =
   | ['filterTag', string]
@@ -86,6 +87,7 @@ export type AddParams =
   | ['filterHasComments']
   | ['filterQaCheckTypes', QaCheckType]
   | ['filterQaChecksStale']
+  | ['filterAiReviewOutcomes', AiReviewFilterOutcome]
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
