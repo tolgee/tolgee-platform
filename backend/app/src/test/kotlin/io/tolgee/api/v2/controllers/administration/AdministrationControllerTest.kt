@@ -106,6 +106,15 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `deletes user with pending email verification`() {
+    testData.addPendingEmailVerificationToUser()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.admin
+    performAuthDelete("/v2/administration/users/${testData.user.id}").andIsOk
+    userAccountService.findActive(testData.user.id).assert.isNull()
+  }
+
+  @Test
   fun `generates user jwt token`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin

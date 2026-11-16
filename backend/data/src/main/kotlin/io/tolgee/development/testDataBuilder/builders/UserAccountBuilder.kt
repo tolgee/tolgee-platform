@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.builders
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.AuthProviderChangeRequest
+import io.tolgee.model.EmailVerification
 import io.tolgee.model.Pat
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserPreferences
@@ -22,6 +23,7 @@ class UserAccountBuilder(
     var avatarFile: ClassPathResource? = null
     var userPreferences: UserPreferencesBuilder? = null
     var authProviderChangeRequest: AuthProviderChangeRequestBuilder? = null
+    var emailVerification: EmailVerificationBuilder? = null
     var pats: MutableList<PatBuilder> = mutableListOf()
     var slackUserConnections: MutableList<SlackUserConnectionBuilder> = mutableListOf()
     var notifications: MutableList<NotificationBuilder> = mutableListOf()
@@ -44,6 +46,13 @@ class UserAccountBuilder(
     val builder = AuthProviderChangeRequestBuilder(this)
     ft(builder.self)
     data.authProviderChangeRequest = builder
+    return builder
+  }
+
+  fun setEmailVerification(ft: FT<EmailVerification>): EmailVerificationBuilder {
+    val builder = EmailVerificationBuilder(this)
+    ft(builder.self)
+    data.emailVerification = builder
     return builder
   }
 
