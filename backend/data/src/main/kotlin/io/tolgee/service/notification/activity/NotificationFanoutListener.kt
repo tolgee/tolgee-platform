@@ -1,5 +1,6 @@
 package io.tolgee.service.notification.activity
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.events.OnBatchJobFinalized
@@ -27,6 +28,7 @@ class NotificationFanoutListener(
     if (bypass) return
     val revision = event.activityRevision
     if (revision.batchJobChunkExecution != null) return
+    if (revision.type == ActivityType.CREATE_PROJECT) return
     val projectId = revision.projectId ?: return
     if (revision.modifiedEntities.none { it.entityClass in NOTIFYING_ENTITY_CLASSES }) return
     startFanout(projectId, revision.id)
