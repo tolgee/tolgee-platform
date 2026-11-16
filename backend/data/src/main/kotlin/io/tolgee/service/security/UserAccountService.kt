@@ -229,6 +229,7 @@ class UserAccountService(
     toDelete.emailVerification?.let {
       entityManager.remove(it)
     }
+    toDelete.emailVerification = null
     toDelete.apiKeys?.forEach {
       entityManager.remove(it)
     }

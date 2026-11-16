@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.development.testDataBuilder.builders.AuthProviderChangeRequestBuilder
 import io.tolgee.development.testDataBuilder.builders.BatchJobBuilder
+import io.tolgee.development.testDataBuilder.builders.EmailVerificationBuilder
 import io.tolgee.development.testDataBuilder.builders.GlossaryBuilder
 import io.tolgee.development.testDataBuilder.builders.GlossaryTermBuilder
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
@@ -620,6 +621,7 @@ class TestDataService(
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
     saveAuthProviderChangeRequests(userAccountBuilders.mapNotNull { it.data.authProviderChangeRequest })
+    saveEmailVerifications(userAccountBuilders.mapNotNull { it.data.emailVerification })
     saveUserPats(userAccountBuilders.flatMap { it.data.pats })
     saveUserSlackConnections(userAccountBuilders.flatMap { it.data.slackUserConnections })
     saveUserOAuth2Grants(userAccountBuilders.flatMap { it.data.oauth2Grants })
@@ -627,6 +629,10 @@ class TestDataService(
 
   private fun saveUserOAuth2Grants(data: List<OAuth2GrantBuilder>) {
     oauth2GrantRepository.saveAll(data.map { it.self })
+  }
+
+  private fun saveEmailVerifications(data: List<EmailVerificationBuilder>) {
+    data.forEach { entityManager.persist(it.self) }
   }
 
   private fun saveUserPats(data: List<PatBuilder>) {
