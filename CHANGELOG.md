@@ -1,3 +1,10 @@
+## [3.242.8](https://github.com/tolgee/tolgee-platform/compare/v3.242.7...v3.242.8) (2026-11-16)
+
+
+### Bug Fixes
+
+* own LLM provider keeps working when the organization is out of MT credits ([#4048](https://github.com/tolgee/tolgee-platform/issues/4048)) ([3bb9166](https://github.com/tolgee/tolgee-platform/commit/3bb9166041c731fa6107369038a84764024bc0b9))
+
 ## [3.242.7](https://github.com/tolgee/tolgee-platform/compare/v3.242.6...v3.242.7) (2026-11-12)
 
 
