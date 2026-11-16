@@ -41,6 +41,8 @@ spring:
   datasource:
     maximum-pool-size: 100
 tolgee:
+  notifications:
+    scheduling-enabled: false
   slack:
     token: fakeToken
     signingSecret: fakeSecret

@@ -12,6 +12,7 @@ import { OrganizationBillingRedirect } from './security/OrganizationBillingRedir
 import { PublicOnlyRoute } from './common/PublicOnlyRoute';
 import { PreferredOrganizationRedirect } from './security/PreferredOrganizationRedirect';
 import { RecaptchaProvider } from 'tg.component/common/RecaptchaProvider';
+import { useTestClockAvailable } from 'tg.component/testClock/useTestClockState';
 
 const LoginRouter = React.lazy(() => import('./security/Login/LoginRouter'));
 
@@ -45,8 +46,15 @@ const AcceptAuthProviderChangeView = React.lazy(
 const OAuth2ConsentView = React.lazy(
   () => import('./security/oauth2/OAuth2ConsentView')
 );
+const TestClockView = React.lazy(() =>
+  import('tg.views/testClock/TestClockView').then((m) => ({
+    default: m.TestClockView,
+  }))
+);
 
 export const RootRouter = () => {
+  const testClockAvailable = useTestClockAvailable();
+
   return (
     <Switch>
       <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
@@ -105,6 +113,11 @@ export const RootRouter = () => {
             <PrivateRoute path={LINKS.ADMINISTRATION.template}>
               <AdministrationView />
             </PrivateRoute>
+            {testClockAvailable && (
+              <PrivateRoute exact path={LINKS.TEST_CLOCK.template}>
+                <TestClockView />
+              </PrivateRoute>
+            )}
             <Route>
               <DashboardRouter />
             </Route>

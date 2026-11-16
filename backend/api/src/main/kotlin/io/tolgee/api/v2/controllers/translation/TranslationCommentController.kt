@@ -83,9 +83,9 @@ class TranslationCommentController(
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationCommentModel> {
     val translation = translationService.get(projectHolder.project.id, translationId)
-    return pagedResourcesAssembler.toModel(
+    return translationCommentModelAssembler.toPagedModel(
       translationCommentService.getPaged(translation, pageable),
-      translationCommentModelAssembler,
+      pagedResourcesAssembler,
     )
   }
 

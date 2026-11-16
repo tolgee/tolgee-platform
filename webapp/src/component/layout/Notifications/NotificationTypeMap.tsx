@@ -7,6 +7,19 @@ import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordC
 import { components } from 'tg.service/apiSchema.generated';
 import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
 import React from 'react';
+import { useLocalizationNotificationLabel } from 'tg.component/layout/Notifications/useLocalizationNotificationLabel';
+import { LocalizationItem } from 'tg.component/layout/Notifications/LocalizationItem';
+import { CommentMentionItem } from 'tg.component/layout/Notifications/CommentMentionItem';
+
+const LocalizationTypeItem = (props: NotificationItemProps) => {
+  const getLabel = useLocalizationNotificationLabel();
+  return (
+    <LocalizationItem
+      {...props}
+      label={getLabel(props.notification.type) ?? ''}
+    />
+  );
+};
 
 type NotificationsComponentMap = Record<
   components['schemas']['NotificationModel']['type'],
@@ -20,4 +33,10 @@ export const notificationComponents: NotificationsComponentMap = {
   MFA_ENABLED: MfaEnabledItem,
   MFA_DISABLED: MfaDisabledItem,
   PASSWORD_CHANGED: PasswordChangedItem,
+  COMMENT_MENTION: CommentMentionItem,
+  KEYS_ADDED: LocalizationTypeItem,
+  SOURCE_CHANGED: LocalizationTypeItem,
+  STRINGS_TRANSLATED: LocalizationTypeItem,
+  STRINGS_REVIEWED: LocalizationTypeItem,
+  AUTOMATICALLY_TRANSLATED: LocalizationTypeItem,
 };

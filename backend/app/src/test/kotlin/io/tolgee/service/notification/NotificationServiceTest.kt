@@ -54,6 +54,20 @@ class NotificationServiceTest : AbstractSpringTest() {
     assertEmailNotificationNotExists()
   }
 
+  @Test
+  fun `grouped notification creates in-app row and sends no instant email`() {
+    notificationService.notify(
+      Notification().apply {
+        this.user = base.userAccount
+        this.type = NotificationType.KEYS_ADDED
+      },
+    )
+    notificationTestUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(NotificationType.KEYS_ADDED)
+    }
+    assertEmailNotificationNotExists()
+  }
+
   private fun disableChannel(channel: NotificationChannel) {
     notificationSettingsService.save(
       base.userAccount,

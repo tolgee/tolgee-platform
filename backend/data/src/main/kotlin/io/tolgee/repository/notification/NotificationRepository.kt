@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.sql.Timestamp
+import java.util.Date
 
 @Repository
 @Lazy
@@ -22,6 +23,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      LEFT JOIN FETCH n.originatingUser
      LEFT JOIN FETCH n.linkedTask
      WHERE u.id = :userId
+        AND n.emailOnly = false
         AND u.deletedAt is null
         AND u.disabledAt is null
         AND (
@@ -29,10 +31,10 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
                 OR :#{#filters.filterSeen} = n.seen
             )
         AND (
-                CAST(:cursorCreatedAt AS timestamp) is null
+                CAST(:cursorUpdatedAt AS timestamp) is null
                 OR :cursorId is null
-                OR :cursorCreatedAt > n.createdAt
-                OR :cursorCreatedAt = n.createdAt AND :cursorId > n.id
+                OR :cursorUpdatedAt > n.updatedAt
+                OR :cursorUpdatedAt = n.updatedAt AND :cursorId > n.id
             )
     """,
   )
@@ -40,14 +42,49 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     userId: Long,
     pageable: Pageable,
     filters: NotificationFilters,
-    cursorCreatedAt: Timestamp? = null,
+    cursorUpdatedAt: Timestamp? = null,
     cursorId: Long? = null,
   ): Page<Notification>
 
   @Query(
     """
+    SELECT n
+     FROM Notification n
+     LEFT JOIN FETCH n.originatingUser
+     LEFT JOIN FETCH n.linkedTask
+     WHERE n.id = :id
+        AND n.user.id = :userId
+        AND n.emailOnly = false
+    """,
+  )
+  fun findVisibleToUser(
+    id: Long,
+    userId: Long,
+  ): Notification?
+
+  @Modifying
+  @Query("DELETE FROM Notification n WHERE n.user.id = :userId")
+  fun deleteAllOfUser(userId: Long)
+
+  @Modifying
+  @Query(
+    """
+    DELETE FROM Notification n
+    WHERE n.linkedComment.id = :commentId
+        AND n.type = io.tolgee.model.notifications.NotificationType.COMMENT_MENTION
+        AND n.seen = false
+        AND n.user.id NOT IN :keepUserIds
+    """,
+  )
+  fun deleteUnseenMentionsOfCommentExcept(
+    commentId: Long,
+    keepUserIds: Collection<Long>,
+  )
+
+  @Query(
+    """
     UPDATE Notification n
-    SET n.seen = true
+    SET n.seen = true, n.seenAt = :seenAt
     WHERE n.user.id = :userId
         AND n.id IN :notificationIds 
         AND n.seen = false
@@ -57,5 +94,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
   fun markNotificationsAsSeen(
     notificationIds: List<Long>,
     userId: Long,
+    seenAt: Date,
   ): Int
 }

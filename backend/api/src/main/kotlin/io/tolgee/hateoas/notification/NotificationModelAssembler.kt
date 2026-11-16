@@ -20,6 +20,7 @@ class NotificationModelAssembler(
             id = notification.id,
             type = notification.type,
             createdAt = notification.createdAt,
+            updatedAt = notification.updatedAt,
           )
         }
       enhancers.forEach { enhancer ->

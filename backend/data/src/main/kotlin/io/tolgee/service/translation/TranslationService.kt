@@ -34,6 +34,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.notification.NotificationLinkResolver
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
@@ -63,6 +64,7 @@ class TranslationService(
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
   private val translationQaIssueService: TranslationQaIssueService,
+  private val notificationLinkResolver: NotificationLinkResolver,
 ) {
   @Autowired
   private lateinit var projectHolder: ProjectHolder
@@ -223,6 +225,7 @@ class TranslationService(
     params: GetTranslationsParams,
     languages: Set<LanguageDto>,
   ): Page<KeyWithTranslationsView> {
+    params.notificationKeyIds = notificationLinkResolver.keyIdsFor(projectId, params.filterNotificationId)
     return translationViewDataProvider.getData(
       projectId,
       languages,
@@ -238,6 +241,7 @@ class TranslationService(
     params: TranslationFilters,
     languages: Set<LanguageDto>,
   ): List<Long> {
+    params.notificationKeyIds = notificationLinkResolver.keyIdsFor(projectId, params.filterNotificationId)
     return translationViewDataProvider.getSelectAllKeys(projectId, languages, params)
   }
 

@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.findUserVisibleBatchJobs
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SingleStepImportTestData
 import io.tolgee.fixtures.andHasErrorMessage
@@ -443,7 +444,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   private fun assertAutoTranslationTriggered() {
-    val job = entityManager.createQuery("from BatchJob bj", BatchJob::class.java).singleResult
+    val job = entityManager.findUserVisibleBatchJobs().single()
     job.type.assert.isEqualTo(BatchJobType.AUTO_TRANSLATE)
   }
 

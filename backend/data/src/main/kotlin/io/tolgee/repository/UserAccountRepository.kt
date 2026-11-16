@@ -307,6 +307,30 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
+        select ua.id as id, ua.name as name, ua.username as username, p as directPermission,
+          ua.totpKey as totpKey, orl.type as organizationRole, ua.avatarHash as avatarHash
+        from UserAccount ua
+        left join Project r on r.id = :projectId
+        left join ua.permissions p on p.project.id = :projectId
+        left join ua.organizationRoles orl on orl.organization = r.organizationOwner
+        where r.id = :projectId
+        and (p is not null or orl is not null)
+        and ua.id <> :exceptUserId
+        and (cast(:search as text) is null or lower(ua.name) like lower(concat('%', cast(:search as text), '%')))
+        and ua.deletedAt is null
+        and ua.disabledAt is null
+        order by lower(ua.name), ua.id
+    """,
+  )
+  fun findInProjectByName(
+    projectId: Long,
+    search: String?,
+    exceptUserId: Long,
+    pageable: Pageable,
+  ): Page<UserAccountInProjectView>
+
+  @Query(
+    """
     select ua
     from UserAccount ua
     left join ua.organizationRoles orl

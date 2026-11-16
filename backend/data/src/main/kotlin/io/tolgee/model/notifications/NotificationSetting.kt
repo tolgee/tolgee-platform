@@ -26,6 +26,9 @@ class NotificationSetting : StandardAuditModel() {
   lateinit var group: NotificationTypeGroup
 
   @Enumerated(EnumType.STRING)
+  var type: NotificationType? = null
+
+  @Enumerated(EnumType.STRING)
   lateinit var channel: NotificationChannel
 
   var enabled: Boolean = false

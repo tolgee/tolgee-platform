@@ -65,7 +65,7 @@ export const NotificationItem: React.FC<
   React.PropsWithChildren<NotificationItemProps>
 > = ({ notification, key, destinationUrl, children }) => {
   const timeDistance = useTimeDistance();
-  const createdAt = notification?.createdAt || '';
+  const shownAt = notification?.updatedAt ?? notification?.createdAt ?? '';
   const originatingUser = notification?.originatingUser;
   const project = notification?.project;
   const formatDate = useDateFormatter();
@@ -91,16 +91,16 @@ export const NotificationItem: React.FC<
         )}
       </StyledAvatar>
       <StyledDetail>{children}</StyledDetail>
-      {createdAt && (
+      {shownAt && (
         <StyledTime>
           <StyledRightDetailText variant="body2">
             <Tooltip
-              title={formatDate(new Date(createdAt), {
+              title={formatDate(new Date(shownAt), {
                 dateStyle: 'long',
                 timeStyle: 'short',
               })}
             >
-              <span>{timeDistance(createdAt)}</span>
+              <span>{timeDistance(shownAt)}</span>
             </Tooltip>
           </StyledRightDetailText>
         </StyledTime>

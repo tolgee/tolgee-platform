@@ -2,6 +2,7 @@ package io.tolgee.util
 
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.findUserVisibleBatchJobs
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJob
@@ -74,11 +75,11 @@ class BatchDumper(
     return try {
       fn()
     } finally {
-      this.dump(getSingleJob().id)
+      this.dump(getSingleUserVisibleJob().id)
     }
   }
 
-  fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
+  fun getSingleUserVisibleJob(): BatchJob = entityManager.findUserVisibleBatchJobs().single()
 
   private fun dumpQueuedItems(
     jobId: Long,

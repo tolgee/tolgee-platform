@@ -156,6 +156,7 @@ class ActivityWebsocketListener(
     event: OnBatchJobCompleted,
     errorMessage: Message? = null,
   ) {
+    if (!event.job.type.userVisible) return
     if (event.job.hidden && event.job.status != BatchJobStatus.FAILED) return
     val projectId = event.job.projectId ?: return
 

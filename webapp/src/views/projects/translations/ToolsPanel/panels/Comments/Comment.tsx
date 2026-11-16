@@ -8,6 +8,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { UserName } from 'tg.component/common/UserName';
+import { MentionText } from 'tg.component/mentions/MentionText';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { SmallActionButton } from '../../common/SmallActionButton';
 
@@ -156,7 +157,7 @@ export const Comment: React.FC<React.PropsWithChildren<Props>> = ({
         })}
         data-cy="comment-text"
       >
-        {data.text}
+        <MentionText text={data.text} mentions={data.mentions} />
       </StyledTextPre>
       <StyledTime>
         {date.toLocaleTimeString(lang, {

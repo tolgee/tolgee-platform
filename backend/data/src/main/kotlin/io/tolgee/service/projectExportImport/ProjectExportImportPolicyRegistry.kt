@@ -66,6 +66,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.notifications.Notification
+import io.tolgee.model.notifications.NotificationDigestState
 import io.tolgee.model.notifications.NotificationSetting
 import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
 import io.tolgee.model.oauth2.OAuth2Grant
@@ -192,6 +193,7 @@ object ProjectExportImportPolicyRegistry {
         TranslationMemoryProject::class,
         Notification::class,
         NotificationSetting::class,
+        NotificationDigestState::class,
         UploadedImage::class,
         TranslationAgency::class,
         InstanceId::class,

@@ -41,6 +41,21 @@ class ComputedPermissionDto(
       suggestManageLanguageIds,
     )
 
+  fun filterViewPermitted(languageIds: Collection<Long>) = filterPermitted(languageIds, viewLanguageIds)
+
+  fun filterTranslatePermitted(languageIds: Collection<Long>) = filterPermitted(languageIds, translateLanguageIds)
+
+  fun filterStateChangePermitted(languageIds: Collection<Long>) = filterPermitted(languageIds, stateChangeLanguageIds)
+
+  private fun filterPermitted(
+    languageIds: Collection<Long>,
+    permittedLanguageIds: Collection<Long>?,
+  ): List<Long> {
+    if (scopes.isEmpty()) return emptyList()
+    if (isAllLanguagesPermitted(permittedLanguageIds)) return languageIds.toList()
+    return languageIds.filter { permittedLanguageIds?.contains(it) == true }
+  }
+
   private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
     if (scopes.isEmpty()) {
       return false

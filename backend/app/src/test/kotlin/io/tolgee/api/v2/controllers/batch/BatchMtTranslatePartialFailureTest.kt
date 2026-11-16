@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.batch.findUserVisibleBatchJobs
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
@@ -97,7 +98,7 @@ class BatchMtTranslatePartialFailureTest : ProjectAuthControllerTest("/v2/projec
 
   private fun waitForJobFailed() {
     waitForNotThrowing(pollTime = 500, timeout = 30000) {
-      getSingleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
+      getSingleUserVisibleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
     }
   }
 
@@ -126,7 +127,7 @@ class BatchMtTranslatePartialFailureTest : ProjectAuthControllerTest("/v2/projec
           .createQuery(
             """from BatchJobChunkExecution e where e.batchJob.id = :jobId""",
             BatchJobChunkExecution::class.java,
-          ).setParameter("jobId", getSingleJob().id)
+          ).setParameter("jobId", getSingleUserVisibleJob().id)
           .resultList
 
       val failed = executions.filter { it.status == BatchJobChunkExecutionStatus.FAILED }
@@ -154,10 +155,8 @@ class BatchMtTranslatePartialFailureTest : ProjectAuthControllerTest("/v2/projec
     verify(googleTranslationProvider, times(12)).translate(any())
   }
 
-  private fun getSingleJob(): BatchJob =
+  private fun getSingleUserVisibleJob(): BatchJob =
     executeInNewTransaction {
-      entityManager
-        .createQuery("""from BatchJob""", BatchJob::class.java)
-        .singleResult
+      entityManager.findUserVisibleBatchJobs().single()
     }
 }

@@ -10,6 +10,7 @@ import io.tolgee.model.translation.TranslationComment
 import io.tolgee.repository.translation.TranslationCommentRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -20,6 +21,8 @@ class TranslationCommentService(
   private val translationCommentRepository: TranslationCommentRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
+  @Lazy
+  private val commentMentionService: CommentMentionService,
 ) {
   @Transactional
   fun create(
@@ -34,7 +37,7 @@ class TranslationCommentService(
     ).let {
       it.author = author
       create(it)
-    }
+    }.also { commentMentionService.notifyMentionedUsersOfNewComment(it) }
   }
 
   @Transactional
@@ -83,9 +86,12 @@ class TranslationCommentService(
     dto: TranslationCommentDto,
     entity: TranslationComment,
   ): TranslationComment {
+    val previousText = entity.text
     entity.text = dto.text
     entity.state = dto.state
-    return this.update(entity)
+    return this.update(entity).also {
+      commentMentionService.updateMentionNotificationsOfEditedComment(it, previousText)
+    }
   }
 
   @Transactional
@@ -127,6 +133,11 @@ class TranslationCommentService(
     updatedBy: UserAccount = authenticationFacade.authenticatedUserEntity,
   ): TranslationComment {
     return translationCommentRepository.save(entity)
+  }
+
+  fun findAllWithKeyAndLanguage(ids: Collection<Long>): List<TranslationComment> {
+    if (ids.isEmpty()) return emptyList()
+    return translationCommentRepository.findAllWithKeyAndLanguage(ids)
   }
 
   fun deleteByTranslationIdIn(ids: Collection<Long>) {

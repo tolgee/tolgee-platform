@@ -68,6 +68,7 @@ class QueryGlobalFiltering(
     filterPatterns()
     filterSearch()
     filterRevisionId()
+    filterNotification()
     filterFailedTargets()
     filterTask()
     filterBranch()
@@ -586,6 +587,19 @@ class QueryGlobalFiltering(
         ),
       )
     }
+  }
+
+  private fun filterNotification() {
+    params.filterNotificationId ?: return
+    val keyIds =
+      checkNotNull(params.notificationKeyIds) {
+        "filterNotificationId must be resolved with NotificationLinkResolver before querying translations"
+      }
+    if (keyIds.isEmpty()) {
+      queryBase.whereConditions.add(cb.disjunction())
+      return
+    }
+    queryBase.whereConditions.add(queryBase.root.get(Key_.id).`in`(keyIds))
   }
 
   private fun filterBranch() {

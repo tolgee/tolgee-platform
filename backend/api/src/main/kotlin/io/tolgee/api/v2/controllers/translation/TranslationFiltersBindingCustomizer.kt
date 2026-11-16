@@ -23,6 +23,7 @@ class TranslationFiltersBindingCustomizer {
     if (!bindsTranslationFilters(binder)) {
       return
     }
+    binder.setDisallowedFields(TranslationFilters::notificationKeyIds.name)
     TranslationFilters.VERBATIM_LIST_PARAMS.forEach { param ->
       binder.registerCustomEditor(
         List::class.java,

@@ -1,3 +1,5 @@
+import { gcy } from './shared';
+
 export const notifications = {
   assertUnseenNotificationsCount: function (expectedCount: number) {
     if (expectedCount === 0) {
@@ -36,4 +38,19 @@ function getNotificationsListWrappper() {
   notifications.assertUnseenNotificationsCount(0);
   cy.gcy('notifications-list').should('be.visible');
   return cy.gcy('notifications-list');
+}
+
+export function waitForNotificationItem(item: DataCy.Value, attempt = 0) {
+  cy.get('body').then((body) => {
+    if (body.find(`[data-cy="${item}"]`).length) {
+      return;
+    }
+    if (attempt > 30) {
+      throw new Error(`${item} did not arrive`);
+    }
+    cy.wait(1000);
+    cy.reload();
+    gcy('notifications-button').click();
+    waitForNotificationItem(item, attempt + 1);
+  });
 }

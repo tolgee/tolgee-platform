@@ -7,6 +7,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.notification.NotificationFilters
 import io.tolgee.events.OnNotificationsChangedForUser
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.PagedModelWithNextCursor
 import io.tolgee.hateoas.notification.NotificationEnhancer
 import io.tolgee.hateoas.notification.NotificationModel
@@ -30,6 +31,7 @@ import org.springframework.data.web.SortDefault.SortDefaults
 import org.springframework.transaction.event.TransactionalEventListener
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -50,7 +52,7 @@ class NotificationController(
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-  private val defaultSort: Sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))
+  private val defaultSort: Sort = Sort.by(Sort.Order.desc("updatedAt"), Sort.Order.desc("id"))
 
   @GetMapping
   @Operation(summary = "Gets notifications of the currently logged in user, newest is first.")
@@ -58,7 +60,7 @@ class NotificationController(
   fun getNotifications(
     @ParameterObject
     @SortDefaults(
-      SortDefault(sort = ["createdAt"], direction = Sort.Direction.DESC),
+      SortDefault(sort = ["updatedAt"], direction = Sort.Direction.DESC),
       SortDefault(sort = ["id"], direction = Sort.Direction.DESC),
     )
     pageable: Pageable,
@@ -77,7 +79,7 @@ class NotificationController(
       cursor
         ?.let { CursorUtil.parseCursor(it) }
         ?.apply {
-          if (get("createdAt")?.direction != Sort.Direction.DESC ||
+          if (get("updatedAt")?.direction != Sort.Direction.DESC ||
             get("id")?.direction != Sort.Direction.DESC
           ) {
             throw BadRequestException("Supplied cursor is not valid, custom sorting is not supported.")
@@ -101,6 +103,18 @@ class NotificationController(
         ?.let { CursorUtil.getCursor(it, pageable.sort) }
 
     return PagedModelWithNextCursor(model, nextCursor)
+  }
+
+  @GetMapping("/{notificationId:[0-9]+}")
+  @Operation(summary = "Gets one notification of the currently logged in user.")
+  @AllowApiAccess
+  fun getNotification(
+    @PathVariable notificationId: Long,
+  ): NotificationModel {
+    val notification =
+      notificationService.findVisibleToUser(notificationId, authenticationFacade.authenticatedUser.id)
+        ?: throw NotFoundException()
+    return NotificationModelAssembler(enhancers, PageImpl(listOf(notification))).toModel(notification)
   }
 
   @TransactionalEventListener
