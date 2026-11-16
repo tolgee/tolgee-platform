@@ -1,3 +1,15 @@
+# [3.243.0](https://github.com/tolgee/tolgee-platform/compare/v3.242.8...v3.243.0) (2026-11-16)
+
+
+### Bug Fixes
+
+* delete users with a pending email verification ([#4057](https://github.com/tolgee/tolgee-platform/issues/4057)) ([fabaec0](https://github.com/tolgee/tolgee-platform/commit/fabaec0e55917bb929a8a846b72a065fe6656864))
+
+
+### Features
+
+* add AI review rules ([#4032](https://github.com/tolgee/tolgee-platform/issues/4032)) ([68383a0](https://github.com/tolgee/tolgee-platform/commit/68383a0d93caf2c1ccb09a1d719c00c33912ee2a)), closes [#3955](https://github.com/tolgee/tolgee-platform/issues/3955)
+
 ## [3.242.8](https://github.com/tolgee/tolgee-platform/compare/v3.242.7...v3.242.8) (2026-11-16)
 
 
