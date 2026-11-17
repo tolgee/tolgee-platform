@@ -3,7 +3,7 @@ import {
   getProjectByNameFromTestData,
 } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { gcyAdvanced } from '../../common/shared';
+import { gcy, gcyAdvanced } from '../../common/shared';
 import {
   restoreAiReviewFeature,
   withoutAiReviewFeature,
@@ -67,6 +67,57 @@ describe('AI review filters', () => {
       .getTranslationCell('key_overridden_after_failed_rereview', 'de')
       .should('exist');
     view.getTranslationCell('key_approved', 'de').should('not.exist');
+  });
+
+  it('filters by score', () => {
+    visit();
+    view.openAiReviewFilter();
+    // The score commits through a debounce, so wait for the filtered request
+    // instead of the loading indicator.
+    cy.intercept({
+      pathname: '**/translations',
+      query: {
+        filterAiReviewScoreMode: 'HIGHER_THAN',
+        filterAiReviewScore: '89',
+      },
+    }).as('higherThan89');
+    view.setAiReviewScoreFilter('HIGHER_THAN', 89);
+    cy.wait('@higherThan89');
+    waitForGlobalLoading();
+    view.getTranslationCell('key_approved', 'de').should('exist');
+    view.getTranslationCell('key_score_only_pass', 'de').should('exist');
+    view.getTranslationCell('key_below_threshold', 'de').should('not.exist');
+    view.getTranslationCell('key_score_only_fail', 'de').should('not.exist');
+    view.getTranslationCell('key_failed', 'de').should('not.exist');
+
+    cy.intercept({
+      pathname: '**/translations',
+      query: {
+        filterAiReviewScoreMode: 'LOWER_THAN',
+        filterAiReviewScore: '40',
+      },
+    }).as('lowerThan40');
+    view.setAiReviewScoreFilter('LOWER_THAN', 40);
+    cy.wait('@lowerThan40');
+    waitForGlobalLoading();
+    view.getTranslationCell('key_score_only_fail', 'de').should('exist');
+    view.getTranslationCell('key_below_threshold', 'de').should('not.exist');
+
+    // An edit commits when the menu closes, not through the debounce: the
+    // clock freezes the debounce timer, so only the close-time flush can
+    // send the request.
+    cy.intercept({
+      pathname: '**/translations',
+      query: {
+        filterAiReviewScoreMode: 'LOWER_THAN',
+        filterAiReviewScore: '45',
+      },
+    }).as('lowerThan45');
+    cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+    gcy('ai-review-filter-score-input').clear().type('45{esc}');
+    gcy('ai-review-filter-score-row').should('not.exist');
+    cy.wait('@lowerThan45');
+    cy.clock().invoke('restore');
   });
 
   it('the score-only option matches passing and failing scores alike', () => {

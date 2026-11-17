@@ -108,6 +108,10 @@ declare namespace DataCy {
         "ai-review-empty-state": true;
         "ai-review-enabled-toggle": true;
         "ai-review-filter-item": true;
+        "ai-review-filter-score-input": true;
+        "ai-review-filter-score-mode": true;
+        "ai-review-filter-score-mode-item": true;
+        "ai-review-filter-score-row": true;
         "ai-review-issue": true;
         "ai-review-popover": true;
         "ai-review-popover-failure-reason": true;

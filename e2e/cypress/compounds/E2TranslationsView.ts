@@ -85,6 +85,13 @@ export class E2TranslationsView {
     return this;
   }
 
+  setAiReviewScoreFilter(mode: string, value: number) {
+    gcy('ai-review-filter-score-mode').click();
+    gcyAdvanced({ value: 'ai-review-filter-score-mode-item', mode }).click();
+    gcy('ai-review-filter-score-input').clear().type(String(value));
+    return this;
+  }
+
   openAiReviewRunDialog() {
     selectAll();
     openBatchOperationMenu();
