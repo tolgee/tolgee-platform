@@ -1,9 +1,15 @@
-import { internalFetch, login } from '../../common/apiCalls/common';
+import {
+  deleteUserSql,
+  internalFetch,
+  login,
+} from '../../common/apiCalls/common';
 import { oauth2ConsentTestData } from '../../common/apiCalls/testData/testData';
 import { API_URL, HOST, PASSWORD } from '../../common/constants';
 import { waitForGlobalLoading } from '../../common/loading';
 import { scopeCheckbox } from '../../common/permissionsMenu';
+import { loginWithFakeGithub } from '../../common/login';
 import { gcyAdvanced } from '../../common/shared';
+import { getInput } from '../../common/xPath';
 
 const CLIENT_ID = 'tolgee-browser-extension';
 const REDIRECT_URI = `${API_URL}/internal/e2e-data/oauth2-consent/callback`;
@@ -293,5 +299,60 @@ describe('OAuth2 consent', () => {
     // keys.view and translations.view are required by this client, so they are locked and stay.
     scopeCheckbox('keys.view').find('input').should('be.checked');
     scopeCheckbox('translations.view').find('input').should('be.checked');
+  });
+});
+
+describe('OAuth2 consent from a signed-out session', () => {
+  const GITHUB_USERNAME = 'oauth2-consent-github@doe.com';
+  let username: string;
+
+  const assertConsentReached = () => {
+    cy.gcy('oauth2-consent', { timeout: NAVIGATION_TIMEOUT }).should(
+      'be.visible'
+    );
+    cy.location('pathname').should('eq', '/oauth2/consent');
+  };
+
+  const assertSentToLogin = () => {
+    cy.location('pathname', { timeout: NAVIGATION_TIMEOUT }).should(
+      'eq',
+      '/login'
+    );
+  };
+
+  beforeEach(() => {
+    deleteUserSql(GITHUB_USERNAME);
+    oauth2ConsentTestData.clean({ failOnStatusCode: false });
+    oauth2ConsentTestData
+      .generateStandard()
+      .then((r) => r.body)
+      .then(({ users }) => {
+        username = users[0].username;
+      });
+  });
+
+  afterEach(() => {
+    deleteUserSql(GITHUB_USERNAME);
+    oauth2ConsentTestData.clean({ failOnStatusCode: false });
+  });
+
+  it('returns to the consent screen after signing in with a password', () => {
+    cy.visit(authorizeUrl('translations.view'));
+    assertSentToLogin();
+
+    cy.xpath(getInput('username')).type(username);
+    cy.xpath(getInput('password')).type(PASSWORD);
+    cy.gcy('login-button').click();
+
+    assertConsentReached();
+  });
+
+  it('returns to the consent screen after signing in with a third party', () => {
+    cy.visit(authorizeUrl('translations.view'));
+    assertSentToLogin();
+
+    loginWithFakeGithub(GITHUB_USERNAME);
+
+    assertConsentReached();
   });
 });

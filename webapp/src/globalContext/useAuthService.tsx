@@ -230,6 +230,11 @@ export const useAuthService = (
     setJwtToken(accessToken!);
   }
 
+  function redirectToAfterLoginLink(forUserId: number | undefined) {
+    history.replace(getRedirectUrl(forUserId));
+    securityService.removeAfterLoginLink();
+  }
+
   const state = {
     allowPrivate: Boolean(
       jwtToken || !initialData.state?.serverConfiguration.authentication
@@ -286,9 +291,6 @@ export const useAuthService = (
           },
         },
         {
-          onSuccess: (response) => {
-            history.replace(LINKS.AFTER_LOGIN.build());
-          },
           onError: (error) => {
             if (error.code === 'third_party_switch_initiated') {
               history.replace(LINKS.ACCEPT_AUTH_PROVIDER_CHANGE.build());
@@ -304,6 +306,7 @@ export const useAuthService = (
       );
       setInvitationCode(undefined);
       await handleAfterLogin(response!);
+      redirectToAfterLoginLink(tokenService.getUserId(response!.accessToken));
     },
     loginRedirectSso,
     getSsoAuthLinkByDomain,
@@ -343,9 +346,7 @@ export const useAuthService = (
     },
     handleAfterLogin,
     redirectAfterLogin() {
-      const link = getRedirectUrl(userId);
-      history.replace(link);
-      securityService.removeAfterLoginLink();
+      redirectToAfterLoginLink(userId);
     },
     saveAfterLoginLink(url: string) {
       securityService.saveAfterLoginLink({ url, userId });
