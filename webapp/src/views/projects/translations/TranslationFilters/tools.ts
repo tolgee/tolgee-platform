@@ -14,6 +14,10 @@ export type AiReviewFilterOutcome = NonNullable<
   FiltersType['filterAiReviewStatus']
 >[number];
 
+export type AiReviewScoreFilterMode = NonNullable<
+  FiltersType['filterAiReviewScoreMode']
+>;
+
 export type TaskStatusFilter =
   | 'IN_OPEN_TASK'
   | 'NOT_IN_OPEN_TASK'
@@ -47,6 +51,8 @@ export type FiltersInternal = {
   filterQaCheckTypes?: QaCheckType[];
   filterQaChecksStale?: boolean;
   filterAiReviewOutcomes?: AiReviewFilterOutcome[];
+  filterAiReviewScoreMode?: AiReviewScoreFilterMode;
+  filterAiReviewScore?: number;
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
@@ -70,6 +76,33 @@ export type FiltersInternal = {
 
 /** Unlike above: undefined = all languages, false = all but base, string = one language tag. */
 type LanguageScope = false | string;
+
+export function aiReviewScoreFilterActive(value: FiltersInternal) {
+  return (
+    value.filterAiReviewScoreMode !== undefined &&
+    value.filterAiReviewScore !== undefined
+  );
+}
+
+export function withoutAiReviewScoreFilter(
+  value: FiltersInternal
+): FiltersInternal {
+  return {
+    ...value,
+    filterAiReviewScoreMode: undefined,
+    filterAiReviewScore: undefined,
+  };
+}
+
+export function withoutNotReviewedYet(value: FiltersInternal): FiltersInternal {
+  const outcomes = value.filterAiReviewOutcomes?.filter(
+    (outcome) => outcome !== 'NOT_REVIEWED_YET'
+  );
+  return {
+    ...value,
+    filterAiReviewOutcomes: outcomes?.length ? outcomes : undefined,
+  };
+}
 
 export type AddParams =
   | ['filterTag', string]
