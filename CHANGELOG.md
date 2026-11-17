@@ -1,3 +1,10 @@
+## [3.243.2](https://github.com/tolgee/tolgee-platform/compare/v3.243.1...v3.243.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* return to the page that required login after social and SSO login ([#4040](https://github.com/tolgee/tolgee-platform/issues/4040)) ([bc8f32b](https://github.com/tolgee/tolgee-platform/commit/bc8f32ba42aef6495da0525bdca1734e54a0aa17))
+
 ## [3.243.1](https://github.com/tolgee/tolgee-platform/compare/v3.243.0...v3.243.1) (2026-11-16)
 
 
