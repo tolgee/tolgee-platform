@@ -411,7 +411,8 @@ class TranslationViewDataProvider(
     aiReviewEnabled: Boolean,
     params: TranslationFilters,
   ): AiReviewFilterData? {
-    if (!aiReviewEnabled || params.filterAiReviewStatus.isNullOrEmpty()) return null
+    if (!aiReviewEnabled) return null
+    if (params.filterAiReviewStatus.isNullOrEmpty() && params.aiReviewScoreFilter == null) return null
     return AiReviewFilterData(
       rules = aiReviewRuleRepository.findEnabledWithScope(project.id),
       branchingEnabled = projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, project),

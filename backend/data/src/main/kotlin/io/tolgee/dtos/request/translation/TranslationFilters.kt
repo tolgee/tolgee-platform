@@ -3,7 +3,10 @@ package io.tolgee.dtos.request.translation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.tolgee.model.enums.aiReview.AiReviewFilterOutcome
+import io.tolgee.model.enums.aiReview.AiReviewScoreFilterMode
 import io.tolgee.service.queryBuilders.translationViewBuilder.WildcardLikeUtil
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 
 open class TranslationFilters(
   @field:Parameter(
@@ -272,6 +275,20 @@ A key matches if any of the selected check types is present in any of the select
     description = "Limit the AI review filter to these language tags.",
   )
   var filterAiReviewInLang: List<String>? = null
+
+  @field:Parameter(
+    description =
+      "Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. " +
+        "Applies only together with filterAiReviewScore.",
+  )
+  var filterAiReviewScoreMode: AiReviewScoreFilterMode? = null
+
+  @field:Parameter(
+    description = "The score (0-100) that filterAiReviewScoreMode compares against.",
+  )
+  @field:Min(0)
+  @field:Max(100)
+  var filterAiReviewScore: Int? = null
 
   @field:Parameter(
     description =

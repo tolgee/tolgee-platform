@@ -4,6 +4,7 @@ import io.tolgee.model.Language_
 import io.tolgee.model.aiReview.TranslationAiReview
 import io.tolgee.model.aiReview.TranslationAiReview_
 import io.tolgee.model.enums.aiReview.AiReviewFilterOutcome
+import io.tolgee.model.enums.aiReview.AiReviewScoreFilterMode
 import io.tolgee.model.enums.aiReview.AiReviewStatus
 import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
@@ -35,18 +36,21 @@ internal class AiReviewFilterBuilder(
       )
 
     private val QUEUED_STATUSES = listOf(AiReviewStatus.PENDING, AiReviewStatus.SKIPPED_QA_ISSUES)
+
+    private val SCORED_STATUSES = STATUS_OUTCOMES.values.filter { it != AiReviewStatus.FAILED }
   }
 
   fun build(
     outcomes: List<AiReviewFilterOutcome>,
+    scoreFilter: Pair<AiReviewScoreFilterMode, Int>?,
     langIds: List<Long>,
     data: AiReviewFilterData,
   ): Predicate {
     val nonBaseLangIds = langIds.filter { it != data.baseLanguageId }
     val conditions = mutableListOf<Predicate>()
     if (nonBaseLangIds.isNotEmpty()) {
-      statusOutcomePredicate(outcomes, nonBaseLangIds)?.let { conditions.add(it) }
-      if (AiReviewFilterOutcome.NOT_REVIEWED_YET in outcomes) {
+      currentReviewRowPredicate(outcomes, scoreFilter, nonBaseLangIds)?.let { conditions.add(it) }
+      if (AiReviewFilterOutcome.NOT_REVIEWED_YET in outcomes && scoreFilter == null) {
         notReviewedYetPredicate(nonBaseLangIds, data)?.let { conditions.add(it) }
       }
     }
@@ -55,11 +59,12 @@ internal class AiReviewFilterBuilder(
     return cb.or(*conditions.toTypedArray())
   }
 
-  private fun statusOutcomePredicate(
+  private fun currentReviewRowPredicate(
     outcomes: List<AiReviewFilterOutcome>,
+    scoreFilter: Pair<AiReviewScoreFilterMode, Int>?,
     langIds: List<Long>,
   ): Predicate? {
-    val statuses = outcomes.mapNotNull { STATUS_OUTCOMES[it] }
+    val statuses = statusesFor(outcomes, scoreFilter)
     if (statuses.isEmpty()) return null
     return filtering.buildExistsOrIn(
       entityClass = TranslationAiReview::class.java,
@@ -70,16 +75,41 @@ internal class AiReviewFilterBuilder(
       languageIds = langIds,
       extraConditions = { r ->
         val translation = r.get(TranslationAiReview_.translation)
-        listOf(
-          cb.or(
-            *statuses
-              .map { AiReviewResultApplies.criteria(cb, r.get(TranslationAiReview_.status), translation, it) }
-              .toTypedArray(),
-          ),
-          rowIsForCurrentText(r.get(TranslationAiReview_.textHash), translation.get(Translation_.text)),
-        )
+        val conditions =
+          mutableListOf(
+            cb.or(
+              *statuses
+                .map { AiReviewResultApplies.criteria(cb, r.get(TranslationAiReview_.status), translation, it) }
+                .toTypedArray(),
+            ),
+            rowIsForCurrentText(r.get(TranslationAiReview_.textHash), translation.get(Translation_.text)),
+          )
+        scorePredicate(scoreFilter, r)?.let { conditions.add(it) }
+        conditions
       },
     )
+  }
+
+  private fun statusesFor(
+    outcomes: List<AiReviewFilterOutcome>,
+    scoreFilter: Pair<AiReviewScoreFilterMode, Int>?,
+  ): List<AiReviewStatus> {
+    if (outcomes.isNotEmpty()) return outcomes.mapNotNull { STATUS_OUTCOMES[it] }
+    if (scoreFilter != null) return SCORED_STATUSES
+    return emptyList()
+  }
+
+  private fun scorePredicate(
+    scoreFilter: Pair<AiReviewScoreFilterMode, Int>?,
+    r: Root<TranslationAiReview>,
+  ): Predicate? {
+    val (scoreMode, score) = scoreFilter ?: return null
+    val path = r.get(TranslationAiReview_.score)
+    return when (scoreMode) {
+      AiReviewScoreFilterMode.HIGHER_THAN -> cb.gt(path, score)
+      AiReviewScoreFilterMode.LOWER_THAN -> cb.lt(path, score)
+      AiReviewScoreFilterMode.EQUAL_TO -> cb.equal(path, score)
+    }
   }
 
   private fun notReviewedYetPredicate(
