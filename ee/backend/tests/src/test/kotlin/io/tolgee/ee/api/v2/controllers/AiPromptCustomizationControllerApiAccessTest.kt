@@ -163,6 +163,34 @@ class AiPromptCustomizationControllerApiAccessTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `OAuth access token bound to another project is refused`() {
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.PROJECT_EDIT.value, Scope.LANGUAGES_EDIT.value),
+        projectIds = listOf(testData.otherProjectBuilder.self.id),
+      )
+
+    putProject(bearerHeaders(token), testData.project).andIsForbidden
+    assertProjectDescription(testData.project, "Project description")
+  }
+
+  @Test
+  fun `OAuth access token without project edit scope cannot set project customization`() {
+    val token =
+      tokens.issue(
+        subject = testData.user.id,
+        scopes = listOf(Scope.TRANSLATIONS_VIEW.value),
+        projectIds = null,
+      )
+
+    putProject(bearerHeaders(token), testData.project)
+      .andIsForbidden
+      .andHasErrorMessage(Message.OPERATION_NOT_PERMITTED)
+    assertProjectDescription(testData.project, "Project description")
+  }
+
+  @Test
   fun `language from another project is not found`() {
     putLanguage(patHeaders(testData.ownerPat), testData.project, testData.otherProjectGerman.id)
       .andIsNotFound
