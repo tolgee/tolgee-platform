@@ -226,4 +226,18 @@ open class AiReviewTestData : BaseTestData() {
       }
     return de
   }
+
+  fun addCzechPluralKey(): TranslationBuilder {
+    projectBuilder.addCzech()
+    lateinit var cs: TranslationBuilder
+    projectBuilder
+      .addKey {
+        name = "dogs"
+        isPlural = true
+      }.build {
+        addTranslation("en", "{count, plural, one {# dog} other {# dogs}}")
+        cs = addTranslation("cs", "{count, plural, one {# pes} few {# psi} many {# psa} other {# psů}}")
+      }
+    return cs
+  }
 }

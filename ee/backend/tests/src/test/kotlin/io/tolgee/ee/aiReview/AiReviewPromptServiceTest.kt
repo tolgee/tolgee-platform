@@ -62,11 +62,6 @@ class AiReviewPromptServiceTest : AuthorizedControllerTest() {
     internalProperties.fakeLlmProviders = false
   }
 
-  private fun save() {
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-  }
-
   @Test
   fun `default review prompt ends with reviewJson and uses the default provider`() {
     val prompt = DefaultReviewPromptHelper.get()
@@ -124,6 +119,29 @@ class AiReviewPromptServiceTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `review prompt explains plural forms with example numbers`() {
+    val plural = testData.addPluralKey("cart.items", "{count, plural, one {# Artikel} other {# Artikel mehr}}")
+    save()
+    val rendered = render(plural.self.id)
+    rendered.assert.contains("CLDR rules")
+    rendered.assert.contains("one (e.g.")
+    rendered.assert.contains("other (e.g.")
+    rendered.assert.contains("Do not judge a form against numbers")
+    render(testData.deTranslation.id).assert.doesNotContain("CLDR")
+  }
+
+  @Test
+  fun `plural examples use the target language forms`() {
+    val csTranslation = testData.addCzechPluralKey()
+    save()
+    val rendered = render(csTranslation.self.id)
+    rendered.assert.contains("few (e.g.")
+    rendered.assert.contains("many (e.g.")
+    rendered.assert.contains("exactly: one few many other")
+    rendered.assert.contains("Never report a missing or extra plural form")
+  }
+
+  @Test
   fun `runReview with a saved prompt snapshots its id, name and revision`() {
     save()
     val result =
@@ -157,6 +175,11 @@ class AiReviewPromptServiceTest : AuthorizedControllerTest() {
       node("issues").isArray.isEmpty()
       node("score").isEqualTo(100)
     }
+  }
+
+  private fun save() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
   }
 
   private fun render(

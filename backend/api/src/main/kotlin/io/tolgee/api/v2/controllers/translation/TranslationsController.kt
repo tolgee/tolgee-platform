@@ -245,6 +245,7 @@ When null, resulting file will be a flat key-value object.
   fun getTranslations(
     @ParameterObject
     @ModelAttribute("translationFilters")
+    @Valid
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {

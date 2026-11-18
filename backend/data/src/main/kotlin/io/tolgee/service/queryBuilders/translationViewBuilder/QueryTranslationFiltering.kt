@@ -11,6 +11,7 @@ import io.tolgee.model.TranslationSuggestion_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.aiReview.AiReviewScoreFilterMode
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key_
@@ -185,9 +186,15 @@ class QueryTranslationFiltering(
   }
 
   fun applyAiReviewFilters(data: AiReviewFilterData) {
-    val outcomes = params.filterAiReviewStatus?.takeIf { it.isNotEmpty() } ?: return
-    val langIds = languageIdsForTags(params.filterAiReviewInLang) ?: queryBase.languages.map { it.id }
-    queryBase.translationConditions.add(aiReviewFilterBuilder.build(outcomes, langIds, data))
+    val outcomes = params.filterAiReviewStatus.orEmpty()
+    val scoreFilter = params.aiReviewScoreFilter
+    if (outcomes.isEmpty() && scoreFilter == null) return
+    val langIds = languageIdsForTags(params.filterAiReviewInLang)
+    // Tags that resolve to no view language drop the filter, like the other language filters.
+    if (langIds == null && !params.filterAiReviewInLang.isNullOrEmpty()) return
+    queryBase.translationConditions.add(
+      aiReviewFilterBuilder.build(outcomes, scoreFilter, langIds ?: queryBase.languages.map { it.id }, data),
+    )
   }
 
   /**
@@ -413,3 +420,6 @@ class QueryTranslationFiltering(
     }
   }
 }
+
+internal val TranslationFilters.aiReviewScoreFilter: Pair<AiReviewScoreFilterMode, Int>?
+  get() = filterAiReviewScoreMode?.let { mode -> filterAiReviewScore?.let { score -> mode to score } }
