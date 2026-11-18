@@ -1,6 +1,9 @@
 package io.tolgee.ee.development
 
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.model.Pat
+import io.tolgee.model.enums.Scope
 
 class AiPromptCustomizationTestData : BaseTestData() {
   val czech =
@@ -13,7 +16,39 @@ class AiPromptCustomizationTestData : BaseTestData() {
       it.aiTranslatorPromptDescription = "French description"
     }
 
+  val ownerPat: Pat = userAccountBuilder.addPat { description = "owner" }.self
+
+  private val memberBuilder = root.addUserAccount { username = "member" }
+  val member = memberBuilder.self
+  val memberPat: Pat = memberBuilder.addPat { description = "member" }.self
+
+  private val outsiderBuilder = root.addUserAccount { username = "outsider" }
+  val outsider = outsiderBuilder.self
+  val outsiderPat: Pat = outsiderBuilder.addPat { description = "outsider" }.self
+
+  val otherProjectBuilder: ProjectBuilder =
+    root.addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
+      name = "other_project"
+      aiTranslatorPromptDescription = "Other project description"
+    }
+
+  val otherProjectGerman =
+    otherProjectBuilder.addGerman().self.also {
+      it.aiTranslatorPromptDescription = "Other project German description"
+    }
+
   init {
     this.projectBuilder.self.aiTranslatorPromptDescription = "Project description"
+
+    this.projectBuilder.addPermission {
+      user = member
+      type = null
+      scopes = arrayOf(Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT)
+    }
+
+    otherProjectBuilder.build {
+      val english = addEnglish().self
+      self.baseLanguage = english
+    }
   }
 }
