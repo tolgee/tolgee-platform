@@ -126,6 +126,7 @@ export const useLanguagesContent = ({
       key={lang.tag}
       value={lang.tag}
       data-cy="translations-language-select-item"
+      data-cy-tag={lang.tag}
       onClick={handleLanguageChange(lang.tag)}
       disabled={disabledLanguages?.includes(lang.id)}
     >

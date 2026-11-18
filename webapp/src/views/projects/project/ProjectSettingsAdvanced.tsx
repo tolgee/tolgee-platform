@@ -20,7 +20,10 @@ import { DefaultNamespaceSelect } from 'tg.views/projects/project/components/Def
 import { LinkReadMore } from 'tg.component/LinkReadMore';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useEnabledFeatures, useIsAdmin } from 'tg.globalContext/helpers';
-import { ProjectSettingsTranslationMemory } from 'tg.ee';
+import {
+  ProjectSettingsSourceChange,
+  ProjectSettingsTranslationMemory,
+} from 'tg.ee';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -251,6 +254,8 @@ export const ProjectSettingsAdvanced = () => {
           />
         </>
       )}
+
+      <ProjectSettingsSourceChange />
 
       <ProjectSettingsTranslationMemory />
 

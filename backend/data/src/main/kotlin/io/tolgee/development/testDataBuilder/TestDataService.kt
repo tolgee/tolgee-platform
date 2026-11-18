@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.eventListeners.BypassableActivityListener
 import io.tolgee.development.testDataBuilder.builders.AuthProviderChangeRequestBuilder
 import io.tolgee.development.testDataBuilder.builders.BatchJobBuilder
+import io.tolgee.development.testDataBuilder.builders.EmailVerificationBuilder
 import io.tolgee.development.testDataBuilder.builders.GlossaryBuilder
 import io.tolgee.development.testDataBuilder.builders.GlossaryTermBuilder
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
@@ -19,8 +20,10 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
 import io.tolgee.service.TenantService
+import io.tolgee.service.aiReview.AiReviewTextHash
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
@@ -395,6 +398,7 @@ class TestDataService(
     saveImportSettings(builder)
     saveQaConfigs(builder)
     saveBatchJobs(builder)
+    saveActivityRevisions(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
     savePrompts(builder)
@@ -402,6 +406,23 @@ class TestDataService(
     saveLabels(builder)
     saveTags(builder)
     saveSuggestions(builder)
+    saveAiReviewRules(builder)
+    saveAiReviews(builder)
+  }
+
+  private fun saveAiReviewRules(builder: ProjectBuilder) {
+    builder.data.aiReviewRules.forEach { entityManager.persist(it.self) }
+  }
+
+  private fun saveAiReviews(builder: ProjectBuilder) {
+    builder.data.translations
+      .flatMap { it.data.aiReviews }
+      .forEach {
+        if (it.self.textHash.isEmpty()) {
+          it.self.textHash = AiReviewTextHash.of(it.self.translation)
+        }
+        entityManager.persist(it.self)
+      }
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -620,6 +641,7 @@ class TestDataService(
     saveUserAvatars(userAccountBuilders)
     saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
     saveAuthProviderChangeRequests(userAccountBuilders.mapNotNull { it.data.authProviderChangeRequest })
+    saveEmailVerifications(userAccountBuilders.mapNotNull { it.data.emailVerification })
     saveUserPats(userAccountBuilders.flatMap { it.data.pats })
     saveUserSlackConnections(userAccountBuilders.flatMap { it.data.slackUserConnections })
     saveUserOAuth2Grants(userAccountBuilders.flatMap { it.data.oauth2Grants })
@@ -627,6 +649,10 @@ class TestDataService(
 
   private fun saveUserOAuth2Grants(data: List<OAuth2GrantBuilder>) {
     oauth2GrantRepository.saveAll(data.map { it.self })
+  }
+
+  private fun saveEmailVerifications(data: List<EmailVerificationBuilder>) {
+    data.forEach { entityManager.persist(it.self) }
   }
 
   private fun saveUserPats(data: List<PatBuilder>) {
@@ -676,6 +702,22 @@ class TestDataService(
       }
       entityManager.persist(it.self)
       saveChunkExecutions(it)
+    }
+  }
+
+  private fun saveActivityRevisions(builder: ProjectBuilder) {
+    builder.data.activityRevisions.forEach { revisionBuilder ->
+      val revision = revisionBuilder.self
+      if (revision.projectId == null) revision.projectId = builder.self.id
+      if (revision.organizationId == null) revision.organizationId = builder.self.organizationOwner.id
+      if (revision.authorId == null) revision.authorId = revisionBuilder.authorIdProvider()
+      entityManager.persist(revision)
+      revisionBuilder.modifiedEntities.forEach { ref ->
+        val entity = ActivityModifiedEntity(revision, ref.entityClass, ref.entityIdProvider())
+        entity.revisionType = ref.revisionType
+        ref.modifications.forEach { (name, oldNew) -> entity.modifications.put(name, oldNew.first, oldNew.second) }
+        entityManager.persist(entity)
+      }
     }
   }
 

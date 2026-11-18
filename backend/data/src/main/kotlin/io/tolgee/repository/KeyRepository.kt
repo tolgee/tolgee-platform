@@ -33,21 +33,6 @@ interface KeyRepository : JpaRepository<Key, Long> {
   ): Long
 
   @Query(
-    value = """
-      select count(k.id) from key k
-      where k.project_id = :projectId
-      and (k.branch_id = :branchId or (:includeOrphanDefault = true and k.branch_id is null))
-      and k.deleted_at is null
-    """,
-    nativeQuery = true,
-  )
-  fun countByProjectAndBranchIncludingOrphan(
-    projectId: Long,
-    branchId: Long,
-    includeOrphanDefault: Boolean,
-  ): Long
-
-  @Query(
     """
     select k.id from Key k
     where k.project.id = :projectId and k.branch.id = :branchId

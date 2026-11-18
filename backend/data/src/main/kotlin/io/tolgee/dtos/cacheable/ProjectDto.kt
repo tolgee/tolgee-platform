@@ -2,6 +2,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.api.ISimpleProject
 import io.tolgee.model.Project
+import io.tolgee.model.enums.SourceChangeAction
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import java.io.Serializable
@@ -18,9 +19,13 @@ data class ProjectDto(
   var useNamespaces: Boolean,
   var useBranching: Boolean,
   var useQaChecks: Boolean,
+  var useAiReview: Boolean,
   var public: Boolean,
   var suggestionsMode: SuggestionsMode,
   var translationProtection: TranslationProtection,
+  var aiApprovedSourceChangeAction: SourceChangeAction = SourceChangeAction.RETRANSLATE,
+  var humanEditedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED,
+  var humanReviewedSourceChangeAction: SourceChangeAction = SourceChangeAction.MARK_OUTDATED,
 ) : Serializable,
   ISimpleProject {
   companion object {
@@ -37,9 +42,13 @@ data class ProjectDto(
         useNamespaces = entity.useNamespaces,
         useBranching = entity.useBranching,
         useQaChecks = entity.useQaChecks,
+        useAiReview = entity.useAiReview,
         public = entity.public,
         suggestionsMode = entity.suggestionsMode,
         translationProtection = entity.translationProtection,
+        aiApprovedSourceChangeAction = entity.aiApprovedSourceChangeAction,
+        humanEditedSourceChangeAction = entity.humanEditedSourceChangeAction,
+        humanReviewedSourceChangeAction = entity.humanReviewedSourceChangeAction,
       )
   }
 }

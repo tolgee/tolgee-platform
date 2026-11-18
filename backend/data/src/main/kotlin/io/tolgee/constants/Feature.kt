@@ -26,6 +26,7 @@ enum class Feature {
   BRANCHING,
   QA_CHECKS,
   TRANSLATION_MEMORY,
+  AI_REVIEW,
   ;
 
   companion object {

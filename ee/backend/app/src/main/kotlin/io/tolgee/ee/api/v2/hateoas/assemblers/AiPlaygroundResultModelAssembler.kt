@@ -18,6 +18,8 @@ class AiPlaygroundResultModelAssembler :
       languageId = entity.language!!.id,
       translation = entity.translation,
       contextDescription = entity.contextDescription,
+      score = entity.score,
+      issues = entity.issues,
     )
   }
 }

@@ -21,6 +21,7 @@ interface Caches {
     const val SSO_TENANTS = "ssoTenants"
     const val LLM_PROVIDERS = "llmProviders"
     const val LANGUAGE_TOOL_RESULTS = "languageToolResults"
+    const val AI_REVIEW_RULES = "aiReviewRules"
 
     const val EE_LAST_REPORTED_USAGE = "eeLastReportedUsage"
   }

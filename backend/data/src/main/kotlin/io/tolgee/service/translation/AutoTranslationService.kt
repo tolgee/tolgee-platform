@@ -1,5 +1,6 @@
 package io.tolgee.service.translation
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
@@ -74,7 +75,7 @@ class AutoTranslationService(
       AutoTranslationRequest().apply {
         target =
           languageIds.flatMap { languageId ->
-            if (configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
+            if (configs[languageId]?.let { translatesLanguage(it) } == false) {
               return@flatMap emptyList()
             }
             keyIds.map { keyId ->
@@ -387,6 +388,17 @@ class AutoTranslationService(
   fun getConfigs(project: Project) =
     addDefaultConfig(project, autoTranslationConfigRepository.findAllByProject(project))
 
+  fun startsForActivity(
+    activityType: ActivityType?,
+    configs: Collection<AutoTranslationConfig>,
+  ): Boolean {
+    if (configs.none { translatesLanguage(it) }) return false
+    if (activityType in LOW_VOLUME_ACTIVITIES) return true
+    return activityType in IMPORT_ACTIVITIES && configs.any { it.enableForImport }
+  }
+
+  fun translatesLanguage(config: AutoTranslationConfig): Boolean = config.usingTm || config.usingPrimaryMtService
+
   private fun addDefaultConfig(
     project: Project,
     list: List<AutoTranslationConfig>?,
@@ -475,5 +487,12 @@ class AutoTranslationService(
     autoTranslationConfigRepository.deleteAll(toDelete)
     autoTranslationConfigRepository.saveAll(result)
     return addDefaultConfig(projectEntity, result)
+  }
+
+  companion object {
+    val IMPORT_ACTIVITIES = listOf(ActivityType.IMPORT)
+
+    val LOW_VOLUME_ACTIVITIES =
+      listOf(ActivityType.SET_TRANSLATIONS, ActivityType.CREATE_KEY, ActivityType.COMPLEX_EDIT)
   }
 }

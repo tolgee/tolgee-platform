@@ -1,6 +1,10 @@
 export const DOCS_ROOT = 'https://docs.tolgee.io';
 
 export const DOCS_LINKS = {
+  // TODO: switch back to `${DOCS_ROOT}/platform/translation_process/ai_review`
+  // once tolgee/documentation#1168 is merged.
+  aiReview:
+    'https://deploy-preview-1168--tolgee-docs.netlify.app/platform/translation_process/ai_review',
   communityTranslation: `${DOCS_ROOT}/platform/translation_process/community-translation`,
   figmaPlugin: `${DOCS_ROOT}/platform/integrations/figma_plugin/about`,
   importOverridingDescriptions: `${DOCS_ROOT}/platform/projects_and_organizations/import#overriding-key-descriptions`,

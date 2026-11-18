@@ -3,7 +3,11 @@ package io.tolgee.ee.service.branching
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchCopyQaIssuesTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueState
@@ -35,6 +39,9 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
   @Autowired
   lateinit var batchJobService: BatchJobService
 
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   private lateinit var testData: BranchCopyQaIssuesTestData
 
   @BeforeEach
@@ -46,6 +53,7 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
   @AfterEach
   fun cleanup() {
     testDataService.cleanTestData(testData.root)
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
@@ -86,6 +94,30 @@ class BranchCopyQaIssuesTest : AbstractSpringTest() {
       sourceIssues.assert.hasSize(2)
     }
   }
+
+  @Test
+  fun `rechecks stale translations of the new branch after it is created`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
+    val qaJobsBefore = projectBatchJobs().count { it.type == BatchJobType.QA_CHECK }
+
+    branchService.createBranch(
+      projectId = testData.project.id,
+      name = "feature-y",
+      originBranchId = testData.defaultBranch.id,
+      author = testData.user,
+    )
+
+    waitForNotThrowing(timeout = 30_000, pollTime = 200) {
+      val jobs = projectBatchJobs()
+      jobs.count { it.type == BatchJobType.QA_CHECK }.assert.isGreaterThan(qaJobsBefore)
+      jobs.all { it.status.completed }.assert.isTrue()
+    }
+  }
+
+  private fun projectBatchJobs(): List<BatchJob> =
+    executeInNewTransaction(platformTransactionManager) {
+      batchJobService.getAllByProjectId(testData.project.id)
+    }
 
   private fun findTranslationOnBranch(
     branch: Branch,

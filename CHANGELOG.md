@@ -1,3 +1,36 @@
+## [3.243.2](https://github.com/tolgee/tolgee-platform/compare/v3.243.1...v3.243.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* return to the page that required login after social and SSO login ([#4040](https://github.com/tolgee/tolgee-platform/issues/4040)) ([bc8f32b](https://github.com/tolgee/tolgee-platform/commit/bc8f32ba42aef6495da0525bdca1734e54a0aa17))
+
+## [3.243.1](https://github.com/tolgee/tolgee-platform/compare/v3.243.0...v3.243.1) (2026-11-16)
+
+
+### Performance Improvements
+
+* faster branch creation ([#4047](https://github.com/tolgee/tolgee-platform/issues/4047)) ([d4fe402](https://github.com/tolgee/tolgee-platform/commit/d4fe402ad255302ce0713a24d72b711368171527)), closes [#4046](https://github.com/tolgee/tolgee-platform/issues/4046) [#4046](https://github.com/tolgee/tolgee-platform/issues/4046)
+
+# [3.243.0](https://github.com/tolgee/tolgee-platform/compare/v3.242.8...v3.243.0) (2026-11-16)
+
+
+### Bug Fixes
+
+* delete users with a pending email verification ([#4057](https://github.com/tolgee/tolgee-platform/issues/4057)) ([fabaec0](https://github.com/tolgee/tolgee-platform/commit/fabaec0e55917bb929a8a846b72a065fe6656864))
+
+
+### Features
+
+* add AI review rules ([#4032](https://github.com/tolgee/tolgee-platform/issues/4032)) ([68383a0](https://github.com/tolgee/tolgee-platform/commit/68383a0d93caf2c1ccb09a1d719c00c33912ee2a)), closes [#3955](https://github.com/tolgee/tolgee-platform/issues/3955)
+
+## [3.242.8](https://github.com/tolgee/tolgee-platform/compare/v3.242.7...v3.242.8) (2026-11-16)
+
+
+### Bug Fixes
+
+* own LLM provider keeps working when the organization is out of MT credits ([#4048](https://github.com/tolgee/tolgee-platform/issues/4048)) ([3bb9166](https://github.com/tolgee/tolgee-platform/commit/3bb9166041c731fa6107369038a84764024bc0b9))
+
 ## [3.242.7](https://github.com/tolgee/tolgee-platform/compare/v3.242.6...v3.242.7) (2026-11-12)
 
 

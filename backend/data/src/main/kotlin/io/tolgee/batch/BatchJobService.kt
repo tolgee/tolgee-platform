@@ -405,9 +405,14 @@ class BatchJobService(
     return batchJobRepository.findAllByProjectId(projectId)
   }
 
+  /**
+   * [excludedJobId] matters for listeners of a job's own finalize event: the finishing job's
+   * status may not be committed yet, so it would count as active.
+   */
   fun hasActiveJobForProject(
     projectId: Long,
     type: BatchJobType,
+    excludedJobId: Long? = null,
   ): Boolean {
     return entityManager
       .createQuery(
@@ -416,11 +421,13 @@ class BatchJobService(
         where j.project.id = :projectId
           and j.type = :type
           and j.status not in :completedStatuses
+          and j.id <> :excludedJobId
         """.trimIndent(),
         Boolean::class.javaObjectType,
       ).setParameter("projectId", projectId)
       .setParameter("type", type)
       .setParameter("completedStatuses", BatchJobStatus.entries.filter { it.completed })
+      .setParameter("excludedJobId", excludedJobId ?: -1L)
       .singleResult
   }
 

@@ -3,7 +3,12 @@ import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
 import { useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
-import { TaskInfoMessage } from 'tg.ee';
+import {
+  AiReviewCellButton,
+  getAiReviewCellVisibility,
+  TaskInfoMessage,
+  useAiReviewFeatureEnabled,
+} from 'tg.ee';
 import { ControlsEditorMain } from '../cell/editorMainActions/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { useTranslationsSelector } from '../context/TranslationsContext';
@@ -138,6 +143,11 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
     enabled: editEnabled,
   });
 
+  const aiReviewFeature = useAiReviewFeatureEnabled();
+  const displayAiReview =
+    aiReviewFeature &&
+    getAiReviewCellVisibility(translation?.aiReview) !== 'none';
+
   const handleModeToggle = () => {
     setMode((mode) => (mode === 'syntax' ? 'placeholders' : 'syntax'));
   };
@@ -190,7 +200,15 @@ export const TranslationWrite: React.FC<React.PropsWithChildren<Props>> = ({
         onModeToggle={editEnabled ? handleModeToggle : undefined}
         tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
         onTaskStateChange={setAssignedTaskState}
-      />
+      >
+        {displayAiReview && (
+          <AiReviewCellButton
+            aiReview={translation!.aiReview!}
+            translationId={translation!.id!}
+            state={state}
+          />
+        )}
+      </ControlsEditorSmall>
       <Box onMouseDown={(e) => e.preventDefault()} className="editor">
         {editEnabled ? (
           <TranslationEditor

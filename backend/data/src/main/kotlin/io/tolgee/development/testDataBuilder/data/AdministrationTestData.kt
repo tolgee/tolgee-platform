@@ -9,6 +9,7 @@ class AdministrationTestData {
   lateinit var supporter: UserAccount
   lateinit var user: UserAccount
   var adminBuilder: UserAccountBuilder
+  var userBuilder: UserAccountBuilder
 
   val root =
     TestDataBuilder().apply {
@@ -27,13 +28,18 @@ class AdministrationTestData {
         supporter = this
       }
 
-      addUserAccount {
-        username = "user@user.com"
-        name = "John User"
-        role = UserAccount.Role.USER
-        user = this
-      }
+      userBuilder =
+        addUserAccount {
+          username = "user@user.com"
+          name = "John User"
+          role = UserAccount.Role.USER
+          user = this
+        }
     }
+
+  fun addPendingEmailVerificationToUser() {
+    userBuilder.setEmailVerification {}
+  }
 
   fun makeUserInitial() {
     user.isInitialUser = true
