@@ -22,6 +22,11 @@ fi
 if [ "$ARCH" = "aarch64" ]; then
     JAVA_OPTS_ARRAY+=("-XX:UseSVE=0")
 fi
+# CVE-2026-114938: the AVX-512 Base64 decode intrinsic in OpenJDK < 25.0.5.1 has a heap overflow
+# reachable before authentication (JWT, Basic auth). Keep this until the image ships a fixed JRE.
+if [ "$ARCH" = "x86_64" ]; then
+    JAVA_OPTS_ARRAY+=("-XX:+UnlockDiagnosticVMOptions" "-XX:-UseBASE64Intrinsics")
+fi
 
 # OpenTelemetry agent (enabled via OTEL_JAVAAGENT_ENABLED=true)
 if [ "$OTEL_JAVAAGENT_ENABLED" = "true" ]; then
