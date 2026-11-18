@@ -8,6 +8,7 @@ import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -73,16 +74,14 @@ class ReviewPromptControllerTest : AuthorizedControllerTest() {
   fun `denies review prompt creation without the AI review feature`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthPost("$projectUrl/prompts", mapOf("name" to "R", "providerName" to "default", "type" to "REVIEW"))
-      .andIsBadRequest
-      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+      .andIsNotFound
   }
 
   @Test
   fun `denies review prompt deletion without the AI review feature`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthDelete("$projectUrl/prompts/${testData.reviewPrompt.id}")
-      .andIsBadRequest
-      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+      .andIsNotFound
   }
 
   @Test
@@ -125,8 +124,7 @@ class ReviewPromptControllerTest : AuthorizedControllerTest() {
   fun `denies reading a review prompt without the AI review feature`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthGet("$projectUrl/prompts/${testData.reviewPrompt.id}")
-      .andIsBadRequest
-      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+      .andIsNotFound
   }
 
   @Test

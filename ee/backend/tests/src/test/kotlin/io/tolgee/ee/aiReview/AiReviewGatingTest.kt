@@ -11,6 +11,7 @@ import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
@@ -78,7 +79,7 @@ class AiReviewGatingTest : AbstractAiReviewTest() {
   }
 
   @Test
-  fun `every AI review endpoint returns FEATURE_NOT_ENABLED without the feature`() {
+  fun `every AI review endpoint returns not found without the feature`() {
     testData.addReview(testData.deTranslationBuilder, AiReviewStatus.APPROVED, 90)
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
@@ -102,7 +103,7 @@ class AiReviewGatingTest : AbstractAiReviewTest() {
       { performAuthPost("$projectUrl/ai-review/run", runBody) },
     ).forEachIndexed { index, request ->
       try {
-        request().andIsBadRequest.andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+        request().andIsNotFound
       } catch (e: Throwable) {
         throw AssertionError("Endpoint #$index is not gated: ${e.message}", e)
       }

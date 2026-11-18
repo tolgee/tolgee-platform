@@ -10,6 +10,7 @@ import io.tolgee.ee.component.aiReview.AiReviewActivityListener
 import io.tolgee.ee.development.AiReviewTestData
 import io.tolgee.ee.service.aiReview.AiReviewRunService
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
@@ -728,7 +729,7 @@ class AiReviewRunTest : AbstractAiReviewTest() {
       executeInNewTransaction(platformTransactionManager) {
         aiReviewRunService.preview(testData.project.id, runRequest())
       }
-    }.isInstanceOf(BadRequestException::class.java)
+    }.isInstanceOf(NotFoundException::class.java)
     assertThatThrownBy {
       executeInNewTransaction(platformTransactionManager) {
         aiReviewRunService.start(
@@ -737,7 +738,7 @@ class AiReviewRunTest : AbstractAiReviewTest() {
           testData.user.id,
         )
       }
-    }.isInstanceOf(BadRequestException::class.java)
+    }.isInstanceOf(NotFoundException::class.java)
   }
 
   private fun runRequest() =

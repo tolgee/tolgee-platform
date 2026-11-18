@@ -10,6 +10,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Project
 import io.tolgee.model.aiReview.TranslationAiReview
@@ -205,8 +206,7 @@ class AiReviewProjectSwitchTest : AbstractAiReviewTest() {
     enabledFeaturesProvider.forceEnabled = emptySet()
 
     performAuthPut("$projectUrl/ai-review-rules/enabled", mapOf("enabled" to false))
-      .andIsBadRequest
-      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+      .andIsNotFound
   }
 
   @Test
