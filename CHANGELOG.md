@@ -1,3 +1,10 @@
+## [3.245.1](https://github.com/tolgee/tolgee-platform/compare/v3.245.0...v3.245.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* disable the vulnerable Base64 intrinsic in the Docker image (CVE-2026-114938) ([#4063](https://github.com/tolgee/tolgee-platform/issues/4063)) ([4b66187](https://github.com/tolgee/tolgee-platform/commit/4b661874a5ad12bc40549071ce414a19912c3f36))
+
 # [3.245.0](https://github.com/tolgee/tolgee-platform/compare/v3.244.0...v3.245.0) (2026-11-18)
 
 
