@@ -57,6 +57,11 @@ describe('Community tab on the Members page', () => {
       membersView
         .getContributor('Cody Contributor')
         .should('contain', 'contributor2@contributors.com');
+      membersView
+        .getContributor('Cora Contributor')
+        .findDcy('project-contributor-item-profile-link')
+        .should('have.attr', 'href')
+        .and('match', /^\/users\/\d+$/);
 
       membersView.openTeamTab();
       membersView.getMembers().should('be.visible');

@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.posthog.server.PostHog
 import io.tolgee.development.testDataBuilder.data.PublicProjectsControllerTestData
+import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.UserAccount
@@ -14,6 +15,7 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -22,6 +24,9 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var postHog: PostHog
+
+  @Autowired
+  private lateinit var emailTestUtil: EmailTestUtil
 
   @BeforeEach
   fun setup() {
@@ -82,6 +87,27 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `it accepts a report from an account whose email is not verified yet`() {
+    val oldNeedsVerification = tolgeeProperties.authentication.needsEmailVerification
+    tolgeeProperties.authentication.needsEmailVerification = true
+    emailTestUtil.initMocks()
+    val code =
+      executeInNewTransaction {
+        emailVerificationService.createForUser(userAccountService.get(testData.nonMember.id))!!.code!!
+      }
+    try {
+      reportAs(
+        testData.nonMember,
+        mapOf("eventName" to "UNVERIFIED_EVENT", "projectId" to testData.publicProject.id),
+      )
+      assertPostHogEventReported(postHog, "UNVERIFIED_EVENT")
+    } finally {
+      executeInNewTransaction { emailVerificationService.verify(testData.nonMember.id, code) }
+      tolgeeProperties.authentication.needsEmailVerification = oldNeedsVerification
+    }
+  }
+
+  @Test
   fun `it does not log an error for non-member claim on organization without public projects`() {
     val logged =
       capturingControllerLog {
@@ -112,6 +138,21 @@ class BusinessEventControllerTest : AuthorizedControllerTest() {
 
     logged.filter { it.level == Level.ERROR }.assert.isEmpty()
   }
+
+  @Test
+  fun `it drops a guest's project-scoped event instead of attributing it to the organization owner`() {
+    performPost(
+      "/v2/public/business-events/report",
+      mapOf("eventName" to "GUEST_PROJECT_EVENT", "projectId" to testData.publicProject.id),
+    ).andIsOk
+
+    reportAs(testData.nonMember, mapOf("eventName" to "AFTER_GUEST_EVENT"))
+    assertPostHogEventReported(postHog, "AFTER_GUEST_EVENT")
+    postHogCaptured("GUEST_PROJECT_EVENT").assert.isFalse()
+  }
+
+  private fun postHogCaptured(eventName: String): Boolean =
+    Mockito.mockingDetails(postHog).invocations.any { it.method.name == "capture" && it.arguments[1] == eventName }
 
   private fun reportAs(
     user: UserAccount,

@@ -62,7 +62,8 @@ export const PublicProjectListView = () => {
           emptyPlaceholder={
             <EmptyListMessage loading={loadable.isFetching}>
               <T
-                keyName="public_projects_empty"
+                keyName="community_projects_empty"
+                defaultValue="No community projects yet"
               />
             </EmptyListMessage>
           }

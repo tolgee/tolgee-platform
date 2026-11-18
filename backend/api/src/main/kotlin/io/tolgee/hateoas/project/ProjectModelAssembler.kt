@@ -65,6 +65,12 @@ class ProjectModelAssembler(
       icuPlaceholders = view.icuPlaceholders,
       suggestionsMode = view.suggestionsMode,
       translationProtection = view.translationProtection,
+      communityDescription = view.communityDescription,
+      communityGuidelines = view.communityGuidelines,
+      communityShared = view.communityShared,
+      communityInContext = view.communityInContext,
+      communityAppUrl = view.communityAppUrl,
+      createdAt = view.createdAt,
     )
   }
 
@@ -76,6 +82,7 @@ class ProjectModelAssembler(
       authenticationFacade.authenticatedUserOrNull?.role,
       asScopedCredential = authenticationFacade.isScopedCredential,
       isProjectPublic = view.public,
+      isGuest = authenticationFacade.isGuest,
     )
   }
 }

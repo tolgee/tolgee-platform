@@ -124,6 +124,11 @@ export class LINKS {
 
   static USER_SETTINGS = Link.ofRoot('account');
 
+  static USER_COMMUNITY_PROFILE = Link.ofParent(
+    Link.ofRoot('users'),
+    p(PARAMS.USER_ID)
+  );
+
   static USER_ACCOUNT_NOTIFICATIONS = Link.ofParent(
     LINKS.USER_SETTINGS,
     'notifications'
@@ -368,6 +373,13 @@ export class LINKS {
   static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');
 
   static PROJECT_DASHBOARD = LINKS.PROJECT;
+
+  static PROJECT_COMMUNITY = Link.ofParent(LINKS.PROJECT, 'community');
+
+  static PROJECT_COMMUNITY_CONTRIBUTORS = Link.ofParent(
+    LINKS.PROJECT_COMMUNITY,
+    'contributors'
+  );
 
   static PROJECT_AI = Link.ofParent(LINKS.PROJECT, 'ai');
 

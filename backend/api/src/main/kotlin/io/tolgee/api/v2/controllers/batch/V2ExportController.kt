@@ -88,6 +88,7 @@ class V2ExportController(
     @ParameterObject params: ExportParams,
     request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
+    authenticationFacade.requireNotGuest()
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.filterBranch)
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       rateLimitService.checkPerUserRateLimit(

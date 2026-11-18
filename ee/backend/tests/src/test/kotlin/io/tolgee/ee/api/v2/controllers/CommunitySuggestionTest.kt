@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
@@ -11,22 +12,31 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.postHogEventsCapturedSoFar
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.springframework.beans.factory.annotation.Autowired
 
 class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: SuggestionsTestData
 
+  @Autowired
+  private lateinit var postHog: PostHog
+
   @BeforeEach
   fun setup() {
-    testData = SuggestionsTestData(SuggestionsMode.ENABLED)
+    Mockito.reset(postHog)
+    testData = SuggestionsTestData(SuggestionsMode.ENABLED, public = true)
     projectSupplier = { testData.relatedProject.self }
     testDataService.saveTestData(testData.root)
-    projectService.setPublic(testData.relatedProject.self.id, true)
   }
 
   @AfterEach
@@ -232,4 +242,36 @@ class CommunitySuggestionTest : ProjectAuthControllerTest("/v2/projects/") {
       node("computedPermission.origin").isEqualTo("COMMUNITY")
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `reports every non-member suggestion, but only the author's first as COMMUNITY_FIRST_SUGGESTION`() {
+    userAccount = testData.communityUser.self
+    val path = "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion"
+    performProjectAuthPost(path, CreateTranslationSuggestionRequest(translation = "First")).andIsOk
+    assertPostHogEventReported(postHog, "COMMUNITY_SUGGESTION_NON_MEMBER")
+    assertPostHogEventReported(postHog, "COMMUNITY_FIRST_SUGGESTION")
+
+    performProjectAuthPost(path, CreateTranslationSuggestionRequest(translation = "Second")).andIsOk
+    waitForNotThrowing { reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(2) }
+    reportedCount("COMMUNITY_FIRST_SUGGESTION").assert.isEqualTo(1)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `a member's first suggestion on a public project reports no community event`() {
+    val path = "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion"
+    userAccount = testData.projectEditor.self
+    performProjectAuthPost(path, CreateTranslationSuggestionRequest(translation = "Member suggestion")).andIsOk
+    userAccount = testData.communityUser.self
+    performProjectAuthPost(path, CreateTranslationSuggestionRequest(translation = "Community suggestion")).andIsOk
+    waitForNotThrowing {
+      reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(1)
+      reportedCount("COMMUNITY_FIRST_SUGGESTION").assert.isEqualTo(1)
+    }
+    reportedCount("COMMUNITY_SUGGESTION_NON_MEMBER").assert.isEqualTo(1)
+    reportedCount("COMMUNITY_FIRST_SUGGESTION").assert.isEqualTo(1)
+  }
+
+  private fun reportedCount(eventName: String) = postHogEventsCapturedSoFar(postHog, eventName)
 }

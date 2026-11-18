@@ -1,10 +1,15 @@
 import React from 'react';
 import { ProfileAvatar } from 'tg.component/common/avatar/ProfileAvatar';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 
-export const UserProfileAvatar = () => {
+type Props = {
+  size?: number;
+};
+
+export const UserProfileAvatar = ({ size }: Props) => {
   const { refetchInitialData } = useGlobalActions();
   const uploadLoadable = useApiMutation({
     url: '/v2/user/avatar',
@@ -50,6 +55,9 @@ export const UserProfileAvatar = () => {
         })
       }
       onRemove={() => removeLoadable.mutateAsync({})}
+      preview={
+        size ? (owner) => <AvatarImg owner={owner} size={size} /> : undefined
+      }
     />
   );
 };

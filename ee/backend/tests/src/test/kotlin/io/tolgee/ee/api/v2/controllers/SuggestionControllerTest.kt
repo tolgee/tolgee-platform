@@ -80,6 +80,23 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `counts the suggestions of a key that has no translation in the language yet`() {
+    testData = SuggestionsTestData(SuggestionsMode.ENABLED)
+    val untranslated = testData.addUntranslatedKeyWithCzechSuggestions()
+    projectSupplier = { testData.relatedProject.self }
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.projectReviewer.self
+    performProjectAuthGet("/translations?filterKeyId=${untranslated.self.id}").andIsOk.andAssertThatJson {
+      node("_embedded.keys[0].translations.cs") {
+        node("id").isNull()
+        node("totalSuggestionCount").isNumber.isEqualTo(BigDecimal(2))
+        node("activeSuggestionCount").isNumber.isEqualTo(BigDecimal(1))
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns list of suggestions`() {
     initTestData()
     performProjectAuthGet("languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion")

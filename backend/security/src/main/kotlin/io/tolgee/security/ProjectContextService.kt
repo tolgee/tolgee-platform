@@ -54,7 +54,7 @@ class ProjectContextService(
     useDefaultPermissions: Boolean,
     isWriteOperation: Boolean,
   ) {
-    val userId = authenticationFacade.authenticatedUser.id
+    val userId = authenticationFacade.authenticatedUserOrGuest.id
     var bypassed = false
 
     // Before the scope gate: a credential pointed at a project it does not cover is told so, rather than being told
@@ -74,11 +74,11 @@ class ProjectContextService(
 
           if (!canBypassForReadOnly()) {
             // Security consideration: if the user cannot see the project, pretend it does not exist.
-            throw ProjectNotFoundException(project.id)
+            denyOrAskGuestToSignIn(ProjectNotFoundException(project.id))
           }
 
           // Admin access for read-only operations is allowed, but it's not enough for the current operation.
-          throw PermissionException()
+          denyOrAskGuestToSignIn(PermissionException())
         }
 
         bypassed = true
@@ -94,9 +94,11 @@ class ProjectContextService(
               userId,
             )
 
-            throw PermissionException(
-              Message.OPERATION_NOT_PERMITTED,
-              missing.map { it.value },
+            denyOrAskGuestToSignIn(
+              PermissionException(
+                Message.OPERATION_NOT_PERMITTED,
+                missing.map { it.value },
+              ),
             )
           }
 
@@ -140,7 +142,7 @@ class ProjectContextService(
   }
 
   private val canUseAdminPermissions
-    get() = !authenticationFacade.isScopedCredential
+    get() = !authenticationFacade.isGuest && !authenticationFacade.isScopedCredential
 
   private fun canBypass(isWriteOperation: Boolean): Boolean {
     if (!canUseAdminPermissions) return false
@@ -150,5 +152,10 @@ class ProjectContextService(
 
   private fun canBypassForReadOnly(): Boolean {
     return canUseAdminPermissions && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
+  }
+
+  private fun denyOrAskGuestToSignIn(exception: Exception): Nothing {
+    authenticationFacade.requireNotGuest()
+    throw exception
   }
 }

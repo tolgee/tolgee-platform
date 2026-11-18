@@ -1,0 +1,81 @@
+package io.tolgee.api.v2.controllers
+
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.community.CommunityActivityItem
+import io.tolgee.dtos.request.community.PeriodParams
+import io.tolgee.dtos.request.community.RangeParams
+import io.tolgee.hateoas.community.CommunityActivityModel
+import io.tolgee.hateoas.community.CommunityActivityModelAssembler
+import io.tolgee.hateoas.community.CommunityProfileModel
+import io.tolgee.hateoas.community.CommunityProfileModelAssembler
+import io.tolgee.security.authentication.AllowGuestAccess
+import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.service.contributor.CommunityStatsService
+import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.PagedModel
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@CrossOrigin(origins = ["*"])
+@RequestMapping(value = ["/v2/users/{userId:[0-9]+}"])
+@Tag(
+  name = "Community profile",
+  description = "A user's contributions to public projects, readable with or without an account",
+)
+class CommunityProfileController(
+  private val communityStatsService: CommunityStatsService,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<CommunityActivityItem>,
+  private val communityActivityModelAssembler: CommunityActivityModelAssembler,
+  private val rateLimitService: RateLimitService,
+  private val communityProfileModelAssembler: CommunityProfileModelAssembler,
+) {
+  @GetMapping("/community-profile")
+  @AllowGuestAccess
+  @Operation(
+    summary = "Get community profile",
+    description =
+      "The user's contribution counts, languages and the public projects they contributed to, over their " +
+        "whole history, plus one bucket of counts per day or week of the range. By default, the range is the " +
+        "365 days ending with `to` (today, unless given), with one bucket per day. " +
+        RangeParams.RANGE_LIMITS + " " +
+        "Only contributions to public projects count. An unknown, deleted or disabled user returns 404 " +
+        "`user_not_found`. A profile set to private, or one left on the default visibility by a user without " +
+        "contributions to public projects, returns 404 `community_profile_private`; users always see their own " +
+        "profile. The counts are approximate: they come from the activity " +
+        "log and never go down, so a suggestion made on one day and accepted or declined on a later day counts " +
+        "on both. `active` is exact: the number of the user's suggestions that are pending right now, in total " +
+        "and per project.",
+  )
+  fun getProfile(
+    @PathVariable userId: Long,
+    @ParameterObject period: PeriodParams,
+  ): CommunityProfileModel {
+    rateLimitService.checkActivityRateLimit("community-profile")
+    return communityProfileModelAssembler.toModel(communityStatsService.getProfile(userId, period))
+  }
+
+  @GetMapping("/community-activity")
+  @AllowGuestAccess
+  @Operation(
+    summary = "Get community activity feed",
+    description =
+      "The user's translation work in public projects, newest first; the sort parameter is ignored. Each entry " +
+        "has the shape of an entry in the project activity log, with the project added and the author left out. " +
+        "Returns 404 whenever the community profile does.",
+  )
+  fun getActivityFeed(
+    @PathVariable userId: Long,
+    @ParameterObject pageable: Pageable,
+  ): PagedModel<CommunityActivityModel> {
+    rateLimitService.checkActivityRateLimit("activity")
+    val page = communityStatsService.getActivityFeed(userId, pageable)
+    return pagedResourcesAssembler.toModel(page, communityActivityModelAssembler)
+  }
+}

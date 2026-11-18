@@ -66,7 +66,11 @@ class RequestContextService(
   }
 
   private fun getTargetProjectImplicit(): ProjectDto? {
-    val projectId = authenticationFacade.implicitProjectId ?: throw ProjectNotSelectedException()
+    val projectId =
+      authenticationFacade.implicitProjectId ?: run {
+        authenticationFacade.requireNotGuest()
+        throw ProjectNotSelectedException()
+      }
     return projectService.findDto(projectId)
   }
 

@@ -8,11 +8,24 @@ export const useConfig = () =>
 
 export const useUser = () => useGlobalContext((c) => c.initialData.userInfo);
 
+export const useIsGuest = () => useGlobalContext((c) => !c.auth.allowPrivate);
+
+export const useRegistrationAllowed = () =>
+  useGlobalContext(
+    (c) =>
+      (c.initialData.serverConfiguration.allowRegistrations ||
+        c.auth.allowRegistration) &&
+      c.initialData.serverConfiguration.nativeEnabled
+  );
+
 export const useIsEmailVerified = () =>
   useGlobalContext((c) => c.isEmailVerified);
 
 export const useHasCommunityContributions = () =>
   useGlobalContext((c) => c.initialData.hasCommunityContributions);
+
+export const useHasPublicContribution = () =>
+  useGlobalContext((c) => c.initialData.hasPublicContribution);
 
 export const useEmailAwaitingVerification = () =>
   useGlobalContext((c) => c.initialData.userInfo?.emailAwaitingVerification);

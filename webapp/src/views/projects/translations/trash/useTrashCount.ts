@@ -1,6 +1,8 @@
+import { useIsGuest } from 'tg.globalContext/helpers';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const useTrashCount = (projectId: number, branchName?: string) => {
+  const isGuest = useIsGuest();
   const loadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/trash',
     method: 'get',
@@ -10,6 +12,7 @@ export const useTrashCount = (projectId: number, branchName?: string) => {
       branch: branchName,
     },
     options: {
+      enabled: !isGuest,
       staleTime: 30000,
     },
   });

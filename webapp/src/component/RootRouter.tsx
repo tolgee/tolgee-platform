@@ -27,6 +27,10 @@ const PublicProjectListView = React.lazy(
   () => import('tg.views/projects/public/PublicProjectListView')
 );
 
+const CommunityProfileView = React.lazy(
+  () => import('tg.views/community/profile/CommunityProfileView')
+);
+
 const PasswordResetSetView = React.lazy(
   () => import('./security/ResetPasswordSetView')
 );
@@ -98,6 +102,9 @@ export const RootRouter = () => {
             </PrivateRoute>
             <Route exact path={LINKS.PUBLIC_PROJECTS.template}>
               <PublicProjectListView />
+            </Route>
+            <Route exact path={LINKS.USER_COMMUNITY_PROFILE.template}>
+              <CommunityProfileView />
             </Route>
             <PrivateRoute path={LINKS.USER_SETTINGS.template}>
               <UserSettingsRouter />

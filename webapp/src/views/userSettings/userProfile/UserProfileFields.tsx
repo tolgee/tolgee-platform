@@ -2,6 +2,7 @@ import { useFormikContext } from 'formik';
 import { Box, Grid, Typography } from '@mui/material';
 import { UserProfileAvatar } from 'tg.views/userSettings/userProfile/UserProfileAvatar';
 import { TextField } from 'tg.component/common/form/fields/TextField';
+import { ProfileVisibilityField } from 'tg.views/userSettings/userProfile/ProfileVisibilityField';
 import { T, useTranslate } from '@tolgee/react';
 import { useConfig, useUser } from 'tg.globalContext/helpers';
 import { FunctionComponent } from 'react';
@@ -36,6 +37,7 @@ export const UserProfileFields: FunctionComponent<
             helperText={isManaged ? t('managed-account-field-hint') : undefined}
             label={<T keyName="User settings - E-mail" />}
           />
+          <ProfileVisibilityField />
           {user?.emailAwaitingVerification && (
             <Box>
               <Typography variant="body1">

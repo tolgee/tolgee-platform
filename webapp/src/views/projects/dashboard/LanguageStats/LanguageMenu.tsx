@@ -8,6 +8,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useIsGuest } from 'tg.globalContext/helpers';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -21,6 +22,7 @@ export const LanguageMenu: React.FC<React.PropsWithChildren<Props>> = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
   const history = useHistory();
   const project = useProject();
+  const isGuest = useIsGuest();
   const { satisfiesPermission, satisfiesLanguageAccess } =
     useProjectPermissions();
 
@@ -52,15 +54,13 @@ export const LanguageMenu: React.FC<React.PropsWithChildren<Props>> = ({
     );
   };
 
-  const canViewLanguage = satisfiesLanguageAccess(
-    'translations.view',
-    language.id
-  );
+  const canExportLanguage =
+    !isGuest && satisfiesLanguageAccess('translations.view', language.id);
   const canEditLanguages = satisfiesPermission('languages.edit');
 
   return (
     <>
-      {(canViewLanguage || canEditLanguages) && (
+      {(canExportLanguage || canEditLanguages) && (
         <IconButton
           onClick={handleOpen}
           data-cy="project-dashboard-language-menu"
@@ -77,7 +77,7 @@ export const LanguageMenu: React.FC<React.PropsWithChildren<Props>> = ({
             <T keyName="language_settings_title" />
           </MenuItem>
         )}
-        {canViewLanguage && (
+        {canExportLanguage && (
           <MenuItem
             onClick={closeWith(redirectToExport)}
             data-cy="project-dashboard-language-menu-export"

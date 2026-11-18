@@ -212,6 +212,10 @@ class ProjectHardDeletingService(
         .createQuery("DELETE FROM ProjectContributor pc WHERE pc.projectId = :projectId")
         .setParameter("projectId", projectId)
         .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM CommunityContributionDay c WHERE c.projectId = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
 
       // Use bulk delete to bypass Hibernate's orphan removal checking
       // which can cause TransientObjectException with Hibernate 6.6's stricter validation

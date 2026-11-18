@@ -87,6 +87,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
     aiPlaygroundEnabled,
     aiPlaygroundData,
     cellClickable,
+    controlsEnabled,
     addLabel,
     removeLabel,
   } = tools;
@@ -183,7 +184,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           aiReview={translation?.aiReview}
           translationId={translation?.id}
           stateChangeEnabled={canChangeState}
-          editEnabled={cellClickable}
+          editEnabled={controlsEnabled}
           state={state}
           onStateChange={handleStateChange}
           active={active}

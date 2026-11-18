@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
 import io.tolgee.component.ThirdPartyAuthTypeConverter
+import io.tolgee.model.enums.ProfileVisibility
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.enums.UserDisabledBy
 import io.tolgee.model.slackIntegration.SlackConfig
@@ -142,6 +143,11 @@ data class UserAccount(
    */
   @ColumnDefault("false")
   var isDemo: Boolean = false
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "profile_visibility", nullable = false)
+  @ColumnDefault("'DEFAULT'")
+  var profileVisibility: ProfileVisibility = ProfileVisibility.DEFAULT
 
   @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY, orphanRemoval = true)
   var slackUserConnection: MutableList<SlackUserConnection> = mutableListOf()

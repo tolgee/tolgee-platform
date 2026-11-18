@@ -39,7 +39,7 @@ class BatchJobContributionTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `records the job author as a contributor of the project the job ran on`() {
+  fun `a batch job does not make its author a contributor of the project`() {
     val projectId = testData.projectBuilder.self.id
     val authorId = testData.user.id
 
@@ -54,11 +54,13 @@ class BatchJobContributionTest : AbstractSpringTest() {
 
     waitForNotThrowing(pollTime = 200, timeout = 60_000) {
       jdbcTemplate
-        .queryForList(
-          "select 1 from project_contributor" +
-            " where project_id = $projectId and user_id = $authorId",
-        ).assert
-        .hasSize(1)
+        .queryForList("select 1 from activity_revision where project_id = $projectId and type = 'KEY_SOFT_DELETE'")
+        .assert
+        .isNotEmpty
     }
+    jdbcTemplate
+      .queryForList("select 1 from project_contributor where project_id = $projectId and user_id = $authorId")
+      .assert
+      .isEmpty()
   }
 }

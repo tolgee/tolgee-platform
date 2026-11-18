@@ -177,7 +177,10 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
       isPublicVariant={isPublicVariant}
       onClick={() =>
         history.push(
-          LINKS.PROJECT_DASHBOARD.build({
+          (isPublicVariant
+            ? LINKS.PROJECT_COMMUNITY
+            : LINKS.PROJECT_DASHBOARD
+          ).build({
             [PARAMS.PROJECT_ID]: p.id,
           })
         )
@@ -200,7 +203,7 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
           <StyledPublicLine>
             <StyledPublicChip
               size="small"
-              label={t('project_list_public_badge')}
+              label={t('community_project_list_badge', 'community')}
               data-cy="project-list-public-badge"
             />
             {p.organizationOwner?.name && (

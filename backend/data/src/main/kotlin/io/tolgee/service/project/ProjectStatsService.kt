@@ -1,5 +1,6 @@
 package io.tolgee.service.project
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Project
@@ -29,14 +30,16 @@ class ProjectStatsService(
     return ProjectStatsProvider(entityManager, projectId, branchId).getResult()
   }
 
-  fun getProjectDailyActivity(projectId: Long): Map<LocalDate, Long> {
-    return activityRevisionRepository
-      .getProjectDailyActivity(projectId)
-      .map {
-        val date = LocalDate.parse(it[1] as String)
-        LocalDate.from(date) to it[0] as Long
-      }.toMap()
-  }
+  fun getProjectDailyActivity(projectId: Long): Map<LocalDate, Long> =
+    activityRevisionRepository.getProjectDailyActivity(projectId).toDailyCounts()
+
+  fun getProjectDailyActivityOfTypes(
+    projectId: Long,
+    types: Collection<ActivityType>,
+  ): Map<LocalDate, Long> = activityRevisionRepository.getProjectDailyActivityOfTypes(projectId, types).toDailyCounts()
+
+  private fun List<Array<Any>>.toDailyCounts(): Map<LocalDate, Long> =
+    associate { LocalDate.parse(it[1] as String) to it[0] as Long }
 
   fun getProjectsTotals(projectIds: Iterable<Long>): Map<Long, ProjectTotals> {
     val cb = entityManager.criteriaBuilder

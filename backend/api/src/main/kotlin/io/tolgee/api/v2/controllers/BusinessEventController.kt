@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.BusinessEventReportRequest
 import io.tolgee.dtos.request.IdentifyRequest
 import io.tolgee.exceptions.ExpectedException
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
@@ -27,6 +28,7 @@ class BusinessEventController(
   private val businessEventPublisher: BusinessEventPublisher,
   private val securityService: SecurityService,
   private val organizationRoleService: OrganizationRoleService,
+  private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
   @PostMapping("/report")
   @Operation(summary = "Reports business event")
@@ -34,6 +36,8 @@ class BusinessEventController(
     @RequestBody eventData: BusinessEventReportRequest,
   ) {
     try {
+      // a project event without an account to attribute it to would be charged to the organization owner
+      if (eventData.projectId != null && authenticationFacade.isGuest) return
       eventData.projectId?.let { securityService.checkAnyProjectPermission(it) }
       eventData.organizationId?.let { organizationRoleService.checkUserCanViewOrPublic(it) }
       businessEventPublisher.publish(eventData)

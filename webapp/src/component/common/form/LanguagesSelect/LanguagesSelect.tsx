@@ -44,6 +44,7 @@ export type Props = {
   enableEmpty?: boolean;
   placeholder?: string;
   placement?: 'top';
+  allSelectedLabel?: string;
   className?: string;
 };
 
@@ -95,11 +96,17 @@ export const LanguagesSelect: FunctionComponent<
         id={`languages-select-${props.context}`}
         multiple
         value={props.value}
-        renderValue={(selected) => (
-          <StyledTypography color="textPrimary" variant="body1">
-            {(selected as string[]).join(', ')}
-          </StyledTypography>
-        )}
+        renderValue={(selected) => {
+          const tags = selected as string[];
+          return (
+            <StyledTypography color="textPrimary" variant="body1">
+              {props.allSelectedLabel &&
+              props.languages.every((l) => tags.includes(l.tag))
+                ? props.allSelectedLabel
+                : tags.join(', ')}
+            </StyledTypography>
+          );
+        }}
         MenuProps={menuProps}
         margin="dense"
       >

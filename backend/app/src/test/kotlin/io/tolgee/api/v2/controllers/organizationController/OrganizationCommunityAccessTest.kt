@@ -6,6 +6,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -58,10 +59,10 @@ class OrganizationCommunityAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `anonymous cannot see any organization`() {
-    performGet("/v2/organizations/${testData.otherOrg.id}").andIsForbidden
-    performGet("/v2/organizations/${testData.otherOrg.slug}").andIsForbidden
-    performGet("/v2/organizations/${testData.noPublicOrg.id}").andIsForbidden
+  fun `anonymous is told to sign in on any organization`() {
+    performGet("/v2/organizations/${testData.otherOrg.id}").andIsUnauthorized
+    performGet("/v2/organizations/${testData.otherOrg.slug}").andIsUnauthorized
+    performGet("/v2/organizations/${testData.noPublicOrg.id}").andIsUnauthorized
   }
 
   @Test

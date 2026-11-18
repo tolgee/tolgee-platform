@@ -25,5 +25,11 @@ class ProjectWithStatsView(
     view.icuPlaceholders,
     view.suggestionsMode,
     view.translationProtection,
+    view.communityDescription,
+    view.communityGuidelines,
+    view.communityShared,
+    view.communityInContext,
+    view.communityAppUrl,
+    view.createdAt,
     view.permittedLanguageIds,
   )

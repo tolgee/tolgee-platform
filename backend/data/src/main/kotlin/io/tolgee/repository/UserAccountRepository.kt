@@ -200,7 +200,8 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     ua.thirdPartyAuthType,
     ua.role,
     ua.isInitialUser,
-    ua.totpKey
+    ua.totpKey,
+    ua.profileVisibility
   ) from UserAccount ua
   left join ua.emailVerification ev
   where ua.id = :userAccountId and ua.deletedAt is null and ua.disabledAt is null

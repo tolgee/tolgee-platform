@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { T } from '@tolgee/react';
-import { Button, styled } from '@mui/material';
+import { Button, Link, styled } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -69,11 +71,8 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const contributorName = contributor.name || `#${contributor.id}`;
-  const contributorLabel = contributor.username
-    ? `${contributorName} (${contributor.username})`
-    : contributorName;
 
-  const formatContribution = (value: string) =>
+  const formatContribution = (value: number) =>
     formatDate(new Date(value), { dateStyle: 'medium' });
   const firstContribution = formatContribution(contributor.firstContributionAt);
   const lastContribution = formatContribution(contributor.lastContributionAt);
@@ -93,7 +92,20 @@ export const ContributorItem: React.FC<React.PropsWithChildren<Props>> = ({
           }}
           size={24}
         />
-        <StyledItemText>{contributorLabel}</StyledItemText>
+        <StyledItemText>
+          <Link
+            component={RouterLink}
+            to={LINKS.USER_COMMUNITY_PROFILE.build({
+              [PARAMS.USER_ID]: contributor.id,
+            })}
+            color="inherit"
+            underline="hover"
+            data-cy="project-contributor-item-profile-link"
+          >
+            {contributorName}
+          </Link>
+          {contributor.username && ` (${contributor.username})`}
+        </StyledItemText>
       </StyledItemUser>
       <StyledItemDates>
         <span data-cy="project-contributor-item-first-contribution">

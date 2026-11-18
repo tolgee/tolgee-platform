@@ -7,6 +7,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
 import { getVisibleCharCount } from './cell/getVisibleCharCount';
 import { confirmation } from 'tg.hooks/confirmation';
+import { useGuestLoginPrompt } from 'tg.component/security/useGuestLoginPrompt';
+import { useIsGuest } from 'tg.globalContext/helpers';
 
 import {
   useTranslationsActions,
@@ -60,6 +62,8 @@ export const useTranslationCell = ({
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
   const canEditProtectedBranch = useBranchEditAccess();
+  const isGuest = useIsGuest();
+  const askGuestToLogIn = useGuestLoginPrompt();
 
   const keyId = keyData.keyId;
   const langTag = language.tag;
@@ -87,6 +91,10 @@ export const useTranslationCell = ({
   }, [cellRef.current, keyId, langTag]);
 
   const handleOpen = (mode?: EditMode, activeVariant?: string) => {
+    if (isGuest) {
+      askGuestToLogIn();
+      return;
+    }
     setEdit({
       keyId,
       language: langTag,
@@ -251,7 +259,8 @@ export const useTranslationCell = ({
     (c) => c.aiPlaygroundEnabled
   );
 
-  const cellClickable = (editEnabled && !isEditing) || aiPlaygroundEnabled;
+  const controlsEnabled = (editEnabled && !isEditing) || aiPlaygroundEnabled;
+  const cellClickable = isGuest || controlsEnabled;
 
   const isOverCharLimit = useMemo(() => {
     const limit = keyData.keyMaxCharLimit;
@@ -306,6 +315,7 @@ export const useTranslationCell = ({
     aiPlaygroundData,
     aiPlaygroundEnabled,
     cellClickable,
+    controlsEnabled,
     addLabel,
     removeLabel,
     prefilteredTask,

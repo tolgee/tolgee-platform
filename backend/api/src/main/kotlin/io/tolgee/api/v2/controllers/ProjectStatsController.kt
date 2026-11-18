@@ -18,6 +18,7 @@ import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
+import io.tolgee.service.contributor.CommunityStatsService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -110,12 +111,21 @@ class ProjectStatsController(
       .getOpenIssueCountsByCheckType(projectHolder.project.id, languageId, branch?.id)
   }
 
-  @Operation(summary = "Get project daily amount of events")
+  @Operation(
+    summary = "Get project daily amount of events",
+    description =
+      "With `activity-contributions.view` alone, only the events the project activity lists for that scope " +
+        "are counted. `activity.view` counts everything.",
+  )
   @GetMapping("/daily-activity")
-  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @RequiresProjectPermissions([Scope.ACTIVITY_CONTRIBUTIONS_VIEW])
   @AllowApiAccess
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
-    return projectStatsService.getProjectDailyActivity(projectHolder.project.id)
+    val projectId = projectHolder.project.id
+    if (securityService.currentPermittedScopesContain(Scope.ACTIVITY_VIEW)) {
+      return projectStatsService.getProjectDailyActivity(projectId)
+    }
+    return projectStatsService.getProjectDailyActivityOfTypes(projectId, CommunityStatsService.CONTRIBUTION_TYPES)
   }
 
   private fun visibleMembersCount(memberCount: Long): Long {

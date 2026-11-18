@@ -68,6 +68,8 @@ export const publicProjectsData = {
   generateFew: () => internalFetch('e2e-data/public-projects/generate-few'),
 };
 
+export const communityStatsData = generateTestDataObject('community-stats');
+
 export const projectTestData = generateTestDataObject('projects');
 
 export const exportTagFilterTestData =

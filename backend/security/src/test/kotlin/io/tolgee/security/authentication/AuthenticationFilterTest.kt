@@ -410,6 +410,57 @@ class AuthenticationFilterTest {
   }
 
   @Test
+  fun `every credential-less request carries the guest principal`() {
+    listOf(
+      "GET" to "/v2/projects/42",
+      "POST" to "/v2/projects/42/translations/suggestions",
+      "GET" to "/v2/projects",
+      "GET" to "/v2/user",
+      "GET" to "/v2/public/initial-data",
+    ).forEach { (method, path) ->
+      SecurityContextHolder.clearContext()
+      val req = MockHttpServletRequest(method, path)
+
+      assertDoesNotThrow { authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain()) }
+
+      val auth = SecurityContextHolder.getContext().authentication as TolgeeAuthentication
+      assertThat(auth.isGuest).describedAs("$method $path").isTrue()
+      assertThat(auth.isAuthenticated).isTrue()
+      assertThat(auth.authorities).isEmpty()
+      assertThat(auth.principal.id).isEqualTo(TolgeeAuthentication.GUEST_USER_ID)
+      assertThat(auth.principal.role).isNull()
+    }
+  }
+
+  @Test
+  fun `the facade reports the guest principal as unauthenticated`() {
+    SecurityContextHolder.clearContext()
+    authenticationFilter.doFilter(
+      MockHttpServletRequest("GET", "/v2/user"),
+      MockHttpServletResponse(),
+      MockFilterChain(),
+    )
+
+    assertThat(authenticationFacade.isGuest).isTrue()
+    assertThat(authenticationFacade.isAuthenticated).isFalse()
+    assertThat(authenticationFacade.authenticatedUserOrNull).isNull()
+    assertThat(authenticationFacade.authenticatedUserOrGuest.id).isEqualTo(TolgeeAuthentication.GUEST_USER_ID)
+    assertThat(authenticationFacade.isAuthorSelfAccess(TolgeeAuthentication.GUEST_USER_ID)).isFalse()
+    assertThrows<AuthenticationException> { authenticationFacade.authenticatedUser }
+  }
+
+  @Test
+  fun `an invalid credential fails the request instead of falling back to the guest`() {
+    val req = MockHttpServletRequest("GET", "/v2/projects/42")
+    req.addHeader("Authorization", "Bearer $TEST_INVALID_TOKEN")
+
+    assertThrows<AuthenticationException> {
+      authenticationFilter.doFilter(req, MockHttpServletResponse(), MockFilterChain())
+    }
+    assertThat(SecurityContextHolder.getContext().authentication).isNull()
+  }
+
+  @Test
   fun `it does not filter when request is OPTIONS`() {
     val req = MockHttpServletRequest()
     val res = MockHttpServletResponse()

@@ -87,6 +87,7 @@ export const UserProfileView: FunctionComponent<
               name: user.name,
               email: user.username,
               currentPassword: '',
+              profileVisibility: user.profileVisibility,
             } as UserUpdateDTO
           }
           validationSchema={Validation.USER_SETTINGS(

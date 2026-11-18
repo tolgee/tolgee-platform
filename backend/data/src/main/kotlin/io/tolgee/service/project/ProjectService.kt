@@ -3,10 +3,13 @@ package io.tolgee.service.project
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.BatchJobService
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.dtos.request.project.CommunityPageRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -21,6 +24,7 @@ import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
@@ -44,6 +48,8 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translationMemory.TranslationMemoryManagementService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
+import io.tolgee.util.nullIfBlank
+import io.tolgee.util.withoutSort
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -57,10 +63,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.io.Serializable
-
-// fed into BASE_VIEW_QUERY's per-user permission/role joins; must never equal a real UserAccount id,
-// or an anonymous caller would inherit that account's permissions
-private const val NO_USER_ID = -1L
 
 @Transactional
 @Service
@@ -85,6 +87,7 @@ class ProjectService(
   private val batchJobService: BatchJobService,
   @Lazy
   private val branchService: BranchService,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -158,9 +161,10 @@ class ProjectService(
 
   @Transactional(readOnly = true)
   fun getView(id: Long): ProjectWithLanguagesView {
-    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.authenticatedUser.id)
+    val userId = authenticationFacade.authenticatedUserOrGuest.id
+    val perms = permissionService.getProjectPermissionData(id, userId)
     val withoutPermittedLanguages =
-      projectRepository.findViewById(authenticationFacade.authenticatedUser.id, id)
+      projectRepository.findViewById(userId, id)
         ?: throw ProjectNotFoundException(id)
     return ProjectWithLanguagesView.fromProjectView(
       withoutPermittedLanguages,
@@ -251,7 +255,32 @@ class ProjectService(
     public: Boolean,
   ): Project {
     val project = get(id)
+    if (project.public != public) {
+      if (public) project.suggestionsMode = SuggestionsMode.ENABLED
+      businessEventPublisher.publish(
+        OnBusinessEventToCaptureEvent(
+          eventName = "PROJECT_PUBLIC_SETTINGS_CHANGE",
+          projectId = id,
+          data = mapOf("public" to public),
+        ),
+      )
+    }
     project.public = public
+    return projectRepository.save(project)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
+  fun setCommunityPage(
+    id: Long,
+    dto: CommunityPageRequest,
+  ): Project {
+    val project = get(id)
+    project.communityDescription = dto.communityDescription.nullIfBlank
+    project.communityGuidelines = dto.communityGuidelines.nullIfBlank
+    project.communityShared = dto.communityShared
+    project.communityInContext = dto.communityInContext
+    project.communityAppUrl = dto.communityAppUrl?.trim().nullIfBlank
     return projectRepository.save(project)
   }
 
@@ -314,6 +343,7 @@ class ProjectService(
               userAccount.role ?: UserAccount.Role.USER,
               isProjectPublic = project.public,
               asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccount.id),
+              isGuest = false,
             ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
@@ -499,8 +529,8 @@ class ProjectService(
     search: String?,
     filterContributed: Boolean = false,
   ): Page<ProjectWithLanguagesView> {
-    val userAccountId = authenticationFacade.authenticatedUserOrNull?.id ?: NO_USER_ID
-    val projects = findPublicProjectViews(userAccountId, pageable, search, filterContributed)
+    val userAccountId = authenticationFacade.authenticatedUserOrGuest.id
+    val projects = findPublicProjectViews(userAccountId, pageable.withoutSort, search, filterContributed)
     return projects.map { ProjectWithLanguagesView.fromProjectView(it, null) }
   }
 

@@ -24,6 +24,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.USER,
         isProjectPublic = true,
         asScopedCredential = false,
+        isGuest = false,
       )
     assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.COMMUNITY)
     assertThat(computed.expandedScopes)
@@ -40,6 +41,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.USER,
         isProjectPublic = false,
         asScopedCredential = false,
+        isGuest = false,
       )
     assertThat(computed.expandedScopes)
       .doesNotContain(Scope.TRANSLATIONS_SUGGEST, Scope.TRANSLATIONS_COMMENTS_ADD)
@@ -55,6 +57,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.SUPPORTER,
         isProjectPublic = true,
         asScopedCredential = false,
+        isGuest = false,
       )
     assertThat(computed.expandedScopes).contains(
       Scope.TRANSLATIONS_SUGGEST,
@@ -74,6 +77,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.ADMIN,
         isProjectPublic = true,
         asScopedCredential = false,
+        isGuest = false,
       )
     assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.SERVER_ADMIN)
     assertThat(computed.expandedScopes).contains(Scope.ADMIN)
@@ -110,6 +114,7 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.USER,
         isProjectPublic = true,
         asScopedCredential = false,
+        isGuest = false,
       )
     assertThat(computed.viewLanguageIds).isNull()
     assertThat(computed.suggestLanguageIds).isNull()
@@ -126,24 +131,10 @@ class CommunityPermissionComputationTest : AbstractSpringTest() {
         userRole = UserAccount.Role.ADMIN,
         isProjectPublic = true,
         asScopedCredential = true,
+        isGuest = false,
       )
     assertThat(computed.origin).isEqualTo(ComputedPermissionOrigin.COMMUNITY)
     assertThat(computed.expandedScopes).isNotEmpty()
     assertThat(computed.expandedScopes).doesNotContain(Scope.ADMIN)
-  }
-
-  @Test
-  fun `public project grants nothing without an authenticated user`() {
-    val computed =
-      permissionService.computeProjectPermission(
-        organizationRole = null,
-        organizationBasePermission = ComputedPermissionDto.NONE,
-        directPermission = null,
-        userRole = null,
-        isProjectPublic = true,
-        asScopedCredential = false,
-      )
-    assertThat(computed.expandedScopes).isEmpty()
-    assertThat(computed.origin).isNotEqualTo(ComputedPermissionOrigin.COMMUNITY)
   }
 }

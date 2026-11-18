@@ -25,6 +25,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.CachedPermissionService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
@@ -118,14 +119,7 @@ class PermissionService(
         ?: throw IllegalStateException("Organization has no base permission")
 
     val computed =
-      computeProjectPermission(
-        organizationRole = organizationRole,
-        organizationBasePermission = organizationBasePermission,
-        directPermission = projectPermission,
-        userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found"),
-        isProjectPublic = project.public,
-        asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountId),
-      )
+      computedPermissionOf(project, userAccountId, organizationRole, organizationBasePermission, projectPermission)
 
     return ProjectPermissionData(
       organizationRole = organizationRole,
@@ -134,6 +128,33 @@ class PermissionService(
       directPermissions = projectPermission,
       suggestionsMode = project.suggestionsMode,
     )
+  }
+
+  private fun computedPermissionOf(
+    project: ProjectDto,
+    userAccountId: Long,
+    organizationRole: OrganizationRoleType?,
+    organizationBasePermission: IPermission,
+    directPermission: IPermission?,
+  ): ComputedPermissionDto {
+    val isGuest = userAccountId == TolgeeAuthentication.GUEST_USER_ID
+    return computeProjectPermission(
+      organizationRole = organizationRole,
+      organizationBasePermission = organizationBasePermission,
+      directPermission = directPermission,
+      userRole = userRoleOf(userAccountId, isGuest),
+      isProjectPublic = project.public,
+      asScopedCredential = authenticationFacade.isScopedCredentialFor(userAccountId),
+      isGuest = isGuest,
+    )
+  }
+
+  private fun userRoleOf(
+    userAccountId: Long,
+    isGuest: Boolean,
+  ): UserAccount.Role? {
+    if (isGuest) return null
+    return userAccountService.findDto(userAccountId)?.role ?: throw IllegalStateException("User not found")
   }
 
   @Transactional(readOnly = true)
@@ -239,6 +260,7 @@ class PermissionService(
     userRole: UserAccount.Role? = null,
     isProjectPublic: Boolean = false,
     asScopedCredential: Boolean,
+    isGuest: Boolean,
   ): ComputedPermissionDto {
     val computed =
       when {
@@ -253,17 +275,18 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    val withFloor = computed.communityFloorIfPublic(userRole, isProjectPublic)
+    val withFloor = computed.communityFloorIfPublic(isProjectPublic, isGuest)
     if (asScopedCredential) return withFloor
     return withFloor.getAdminOrSupporterPermissions(userRole)
   }
 
   private fun ComputedPermissionDto.communityFloorIfPublic(
-    userRole: UserAccount.Role?,
     isProjectPublic: Boolean,
+    isGuest: Boolean,
   ): ComputedPermissionDto {
-    if (isProjectPublic && userRole != null) return withCommunityFloor()
-    return this
+    if (!isProjectPublic) return this
+    if (isGuest) return ComputedPermissionDto.GUEST
+    return withCommunityFloor()
   }
 
   fun createForInvitation(

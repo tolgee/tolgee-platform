@@ -352,6 +352,7 @@ enum class Message : MessageInterface {
   AI_REVIEW_DISABLED,
   PROMPT_TYPE_CANNOT_BE_CHANGED,
   REVIEW_PROMPT_CANNOT_TRANSLATE,
+  COMMUNITY_PROFILE_PRIVATE,
   ;
 
   override val code: String

@@ -1,7 +1,7 @@
 package io.tolgee.fixtures
 
-import io.tolgee.testing.assert
 import org.mockito.Mockito
+import org.mockito.invocation.Invocation
 
 /**
  * Asserts that a specified PostHog event was reported, verifying its structure and data if a check function is provided.
@@ -17,14 +17,25 @@ fun assertPostHogEventReported(
   checkFn: ((Map<*, *>) -> Unit)? = null,
 ): Map<*, *> {
   return waitForNotThrowing(timeout = 10000) {
-    val mockingDetails = Mockito.mockingDetails(postHogMock)
-    val invocations = mockingDetails.invocations
-    val captureInvocation =
-      invocations.last {
-        it.method.name == "capture" && it.arguments[1] == eventName
-      }
-    captureInvocation.assert.isNotNull()
-    checkFn?.invoke(captureInvocation!!.arguments[2] as Map<*, *>)
-    captureInvocation!!.arguments[2] as Map<*, *>
+    val data = postHogCaptures(postHogMock, eventName).last().arguments[2] as Map<*, *>
+    checkFn?.invoke(data)
+    data
   }
 }
+
+/**
+ * Captures reach the mock on the async reporter, so this is a snapshot: only meaningful after
+ * [assertPostHogEventReported] (or another wait) has seen the latest event you expect.
+ */
+fun postHogEventsCapturedSoFar(
+  postHogMock: Any,
+  eventName: String,
+): Int = postHogCaptures(postHogMock, eventName).size
+
+private fun postHogCaptures(
+  postHogMock: Any,
+  eventName: String,
+): List<Invocation> =
+  Mockito.mockingDetails(postHogMock).invocations.filter {
+    it.method.name == "capture" && it.arguments[1] == eventName
+  }

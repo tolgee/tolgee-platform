@@ -1,4 +1,4 @@
-import { Box, styled, Switch } from '@mui/material';
+import { Box, styled, Switch, Tooltip } from '@mui/material';
 import React from 'react';
 
 const StyledContainer = styled('div')`
@@ -24,6 +24,7 @@ type Props = {
   onSwitch: () => void;
   checked: boolean;
   disabled: boolean;
+  disabledTooltip?: React.ReactNode;
   'data-cy'?: string;
 };
 
@@ -33,6 +34,7 @@ export const SwitchWithDescription = ({
   onSwitch,
   checked,
   disabled,
+  disabledTooltip,
   'data-cy': dataCy,
 }: Props) => {
   return (
@@ -41,13 +43,15 @@ export const SwitchWithDescription = ({
       <StyledDescription gridArea="description">
         {description}
       </StyledDescription>
-      <Box gridArea="switch">
-        <Switch
-          checked={checked}
-          onChange={disabled ? undefined : onSwitch}
-          data-cy={dataCy}
-        />
-      </Box>
+      <Tooltip title={disabled ? disabledTooltip : undefined}>
+        <Box gridArea="switch">
+          <Switch
+            checked={checked}
+            onChange={disabled ? undefined : onSwitch}
+            data-cy={dataCy}
+          />
+        </Box>
+      </Tooltip>
     </StyledContainer>
   );
 };

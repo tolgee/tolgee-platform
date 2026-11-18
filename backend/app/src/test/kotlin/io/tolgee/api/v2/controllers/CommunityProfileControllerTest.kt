@@ -1,0 +1,284 @@
+package io.tolgee.api.v2.controllers
+
+import io.tolgee.development.testDataBuilder.data.CommunityStatsTestData
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProfileVisibility
+import io.tolgee.testing.AuthorizedControllerTest
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.util.Date
+
+class CommunityProfileControllerTest : AuthorizedControllerTest() {
+  private lateinit var testData: CommunityStatsTestData
+
+  @Autowired
+  private lateinit var jdbcTemplate: JdbcTemplate
+
+  private val wednesday = LocalDate.of(2026, 3, 4)
+  private val beyondHeatmap = wednesday.minusDays(400)
+
+  @BeforeEach
+  fun setup() {
+    currentDateProvider.forcedDate = Date.from(wednesday.atTime(12, 0).toInstant(ZoneOffset.UTC))
+    testData = CommunityStatsTestData()
+    testDataService.saveTestData(testData.root)
+    executeInNewTransaction { testData.replayActivity(entityManager) }
+    executeInNewTransaction {
+      testData.moveCounterDays(entityManager, testData.alice, testData.german, beyondHeatmap)
+    }
+    userAccount = testData.bob
+  }
+
+  @AfterEach
+  fun cleanup() {
+    currentDateProvider.forcedDate = null
+    testDataService.cleanTestData(testData.root)
+  }
+
+  @Test
+  fun `profile counts only public projects, pending included, heatmap limited to a year`() {
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isEqualTo(testData.alice.id)
+        node("name").isEqualTo("Alice Adams")
+        node("username").isAbsent()
+        node("contributions").isEqualTo(5)
+        node("suggested").isEqualTo(4)
+        node("accepted").isEqualTo(2)
+        node("declined").isEqualTo(1)
+        node("active").isEqualTo(1)
+        node("languages") {
+          isArray.hasSize(2)
+          node("[0].tag").isEqualTo("cs")
+          node("[0].name").isEqualTo("Czech")
+          node("[0].contributions").isEqualTo(4)
+          node("[0].suggested").isEqualTo(3)
+          node("[0].accepted").isEqualTo(2)
+          node("[1].tag").isEqualTo("de")
+          node("[1].declined").isEqualTo(1)
+        }
+        node("projects") {
+          isArray.hasSize(1)
+          node("[0].id").isEqualTo(testData.publicProject.id)
+          node("[0].name").isEqualTo(CommunityStatsTestData.PUBLIC_PROJECT_NAME)
+          node("[0].contributions").isEqualTo(5)
+          node("[0].suggested").isEqualTo(4)
+          node("[0].active").isEqualTo(1)
+          node("[0].firstContributionAt").isEqualTo(1772625600000)
+          node("[0].lastContributionAt").isEqualTo(1772625600000)
+        }
+        node("buckets") {
+          isArray.hasSize(365)
+          node("[0].start").isEqualTo("2025-03-05")
+          node("[0].contributions").isEqualTo(0)
+          node("[364].start").isEqualTo("2026-03-04")
+          node("[364].contributions").isEqualTo(4)
+          node("[364].suggested").isEqualTo(3)
+          node("[364].accepted").isEqualTo(2)
+          node("[364].declined").isEqualTo(0)
+        }
+      }
+  }
+
+  @Test
+  fun `profile buckets take the range and granularity and keep days outside the range out, totals stay all-time`() {
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile?from=2026-03-04&to=2026-03-04&granularity=WEEK")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(5)
+        node("buckets") {
+          isArray.hasSize(1)
+          node("[0].start").isEqualTo("2026-03-02")
+          node("[0].contributions").isEqualTo(4)
+        }
+      }
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile?from=2026-03-02&to=2026-03-03&granularity=WEEK")
+      .andIsOk
+      .andAssertThatJson {
+        node("buckets") {
+          isArray.hasSize(1)
+          node("[0].start").isEqualTo("2026-03-02")
+          node("[0].contributions").isEqualTo(0)
+        }
+      }
+  }
+
+  @Test
+  fun `a soft-deleted language drops out of the profile`() {
+    executeInNewTransaction { testData.softDeleteGerman(entityManager) }
+    jdbcTemplate.update(
+      "update translation_suggestion set state = 'ACTIVE' where language_id = ?",
+      testData.german.id,
+    )
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson {
+        node("contributions").isEqualTo(4)
+        node("suggested").isEqualTo(3)
+        node("declined").isEqualTo(0)
+        node("active").isEqualTo(1)
+        node("languages").isArray.hasSize(1)
+      }
+  }
+
+  @Test
+  fun `unknown and disabled users are 404 user_not_found`() {
+    performAuthGet("/v2/users/999999999/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+    performAuthGet("/v2/users/${testData.dave.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+  }
+
+  @Test
+  fun `default visibility hides a user without public contributions as private`() {
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `private visibility hides a populated profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+
+  @Test
+  fun `private visibility still lists the user among project contributors, with profilePublic false`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    performAuthGet("/v2/projects/${testData.publicProject.id}/community/contributors")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          isArray.hasSize(3)
+          node("[0].id").isEqualTo(testData.user.id)
+          node("[0].profilePublic").isEqualTo(true)
+          node("[1].id").isEqualTo(testData.alice.id)
+          node("[1].name").isEqualTo("Alice Adams")
+          node("[1].profilePublic").isEqualTo(false)
+        }
+      }
+  }
+
+  @Test
+  fun `public visibility lists a user without public contributions with profilePublic true`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    userAccount = testData.user
+    performAuthGet("/v2/projects/${testData.privateProject.id}/community/contributors?sort=suggested,desc")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.contributors") {
+          node("[1].id").isEqualTo(testData.carol.id)
+          node("[1].profilePublic").isEqualTo(true)
+        }
+      }
+  }
+
+  @Test
+  fun `public visibility shows an empty profile`() {
+    setVisibility(testData.carol, ProfileVisibility.PUBLIC)
+
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson {
+        node("name").isEqualTo("Carol Clark")
+        node("suggested").isEqualTo(0)
+        node("languages").isArray.isEmpty()
+        node("projects").isArray.isEmpty()
+        node("active").isEqualTo(0)
+        node("buckets").isArray.hasSize(365)
+        node("buckets[364].contributions").isEqualTo(0)
+      }
+  }
+
+  @Test
+  fun `users always see their own profile`() {
+    setVisibility(testData.alice, ProfileVisibility.PRIVATE)
+
+    userAccount = testData.carol
+    performAuthGet("/v2/users/${testData.carol.id}/community-profile").andIsOk
+    userAccount = testData.alice
+    performAuthGet("/v2/users/${testData.alice.id}/community-profile")
+      .andIsOk
+      .andAssertThatJson { node("suggested").isEqualTo(4) }
+  }
+
+  private fun setVisibility(
+    user: UserAccount,
+    visibility: ProfileVisibility,
+  ) {
+    executeInNewTransaction { testData.setProfileVisibility(entityManager, user, visibility) }
+  }
+
+  @Test
+  fun `the feed lists public translation activity newest first with project, key and language, no author`() {
+    jdbcTemplate.update(
+      "insert into activity_revision (id, project_id, author_id, type, \"timestamp\") " +
+        "values (nextval('activity_sequence'), ?, ?, 'CREATE_KEY', now())",
+      testData.publicProject.id,
+      testData.alice.id,
+    )
+    performAuthGet("/v2/users/${testData.alice.id}/community-activity")
+      .andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(5)
+        node("_embedded.activities") {
+          isArray.hasSize(5)
+          node("[0].type").isEqualTo("TRANSLATION_COMMENT_ADD")
+          node("[0].timestamp").isEqualTo(currentDateProvider.date.time)
+          node("[0].project.id").isEqualTo(testData.publicProject.id)
+          node("[0].project.name").isEqualTo(CommunityStatsTestData.PUBLIC_PROJECT_NAME)
+          node("[0].author").isAbsent()
+          node("[0].modifiedEntities.TranslationComment[0].modifications.text.new").isEqualTo("Looks right")
+          node("[0].modifiedEntities.TranslationComment[0].relations.translation.relations.key.data.name")
+            .isEqualTo("key-1")
+          node("[0].modifiedEntities.TranslationComment[0].relations.translation.relations.language.data.tag")
+            .isEqualTo("cs")
+          node("[1].type").isEqualTo("CREATE_SUGGESTION")
+          node("[1].modifiedEntities.TranslationSuggestion[0].relations.key.data.name").isEqualTo("key-1")
+          node("[1].modifiedEntities.TranslationSuggestion[0].relations.language.data.tag").isEqualTo("de")
+          node("[4].type").isEqualTo("CREATE_SUGGESTION")
+        }
+      }
+    performAuthGet("/v2/users/${testData.alice.id}/community-activity?size=2&page=1")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.activities").isArray.hasSize(2)
+        node("page.totalElements").isEqualTo(5)
+      }
+  }
+
+  @Test
+  fun `the feed page size is capped at 100`() {
+    performAuthGet("/v2/users/${testData.alice.id}/community-activity?size=2000")
+      .andIsOk
+      .andAssertThatJson { node("page.size").isEqualTo(100) }
+  }
+
+  @Test
+  fun `the feed is hidden exactly where the profile is`() {
+    performAuthGet("/v2/users/999999999/community-activity").andIsNotFound
+    performAuthGet("/v2/users/${testData.dave.id}/community-activity")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("user_not_found") }
+    performAuthGet("/v2/users/${testData.carol.id}/community-activity")
+      .andIsNotFound
+      .andAssertThatJson { node("code").isEqualTo("community_profile_private") }
+  }
+}

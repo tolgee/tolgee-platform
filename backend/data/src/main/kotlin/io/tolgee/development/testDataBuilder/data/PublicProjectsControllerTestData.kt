@@ -8,6 +8,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import java.util.Date
 
 class PublicProjectsControllerTestData : BaseTestData() {
   val privateProject: Project get() = project
@@ -66,14 +67,6 @@ class PublicProjectsControllerTestData : BaseTestData() {
           username = "direct_perm_user"
           name = "Direct Perm User"
         }.self
-
-      addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
-        name = "Public project"
-        public = true
-      }.build {
-        publicProject = self
-        addBaseLanguage()
-      }
 
       otherOrgMember =
         addUserAccount {
@@ -139,10 +132,39 @@ class PublicProjectsControllerTestData : BaseTestData() {
       }.build {
         otherOrgPublicProject = self
         addBaseLanguage()
+        addKey {
+          name = "deleted-key-1"
+          deletedAt = Date()
+        }
+        addKey {
+          name = "deleted-key-2"
+          deletedAt = Date()
+        }
+        val featureBranch =
+          addBranch {
+            name = "feature"
+            project = self
+          }.self
+        (1..3).forEach { i ->
+          addKey {
+            name = "branch-key-$i"
+            branch = featureBranch
+          }
+        }
         addPermission {
           user = this@PublicProjectsControllerTestData.directPermissionUser
           type = ProjectPermissionType.TRANSLATE
         }
+      }
+
+      addProject(organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self) {
+        name = "Public project"
+        public = true
+      }.build {
+        publicProject = self
+        addBaseLanguage()
+        addKey { name = "key-1" }
+        addKey { name = "key-2" }
       }
 
       addProject(organizationOwner = otherOrg) {

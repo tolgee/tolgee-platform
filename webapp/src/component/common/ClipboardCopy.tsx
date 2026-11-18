@@ -8,9 +8,15 @@ type Props = {
   tooltip?: string | ReactElement;
   value: () => string;
   successMessage?: string | ReactElement;
+  icon?: ReactElement;
 };
 
-export const ClipboardCopy = ({ tooltip, value, successMessage }: Props) => {
+export const ClipboardCopy = ({
+  tooltip,
+  value,
+  successMessage,
+  icon,
+}: Props) => {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const handleClick = () => {
@@ -45,7 +51,7 @@ export const ClipboardCopy = ({ tooltip, value, successMessage }: Props) => {
         {copied ? (
           <Check height={20} width={20} />
         ) : (
-          <Copy06 height={20} width={20} />
+          icon ?? <Copy06 height={20} width={20} />
         )}
       </IconButton>
     </Tooltip>

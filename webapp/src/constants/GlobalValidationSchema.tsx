@@ -17,6 +17,7 @@ type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
 
 export const PROJECT_DESCRIPTION_MAX_LENGTH = 2000;
+export const COMMUNITY_TEXT_MAX_LENGTH = 10000;
 
 Yup.setLocale({
   // use constant translation keys for messages without values
