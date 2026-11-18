@@ -184,6 +184,18 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `an unresolved language tag drops the filter like the other language filters`() {
+    save()
+    val all = keysFor("search=")
+    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewInLang=xx")
+      .assert
+      .containsExactlyInAnyOrderElementsOf(all)
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0&filterAiReviewInLang=xx")
+      .assert
+      .containsExactlyInAnyOrderElementsOf(all)
+  }
+
+  @Test
   fun `an out-of-range score is rejected`() {
     save()
     fetch("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=101").andIsBadRequest

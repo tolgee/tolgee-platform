@@ -189,8 +189,12 @@ class QueryTranslationFiltering(
     val outcomes = params.filterAiReviewStatus.orEmpty()
     val scoreFilter = params.aiReviewScoreFilter
     if (outcomes.isEmpty() && scoreFilter == null) return
-    val langIds = languageIdsForTags(params.filterAiReviewInLang) ?: queryBase.languages.map { it.id }
-    queryBase.translationConditions.add(aiReviewFilterBuilder.build(outcomes, scoreFilter, langIds, data))
+    val langIds = languageIdsForTags(params.filterAiReviewInLang)
+    // Tags that resolve to no view language drop the filter, like the other language filters.
+    if (langIds == null && !params.filterAiReviewInLang.isNullOrEmpty()) return
+    queryBase.translationConditions.add(
+      aiReviewFilterBuilder.build(outcomes, scoreFilter, langIds ?: queryBase.languages.map { it.id }, data),
+    )
   }
 
   /**
