@@ -22,6 +22,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.util.concurrent.CompletableFuture
 
 @SpringBootTest(
   properties = [
@@ -77,19 +78,16 @@ class LanguageCachingTest : AbstractSpringTest() {
 
   @Test
   fun `a language created while another transaction reads the list is found by id`() {
-    lateinit var created: Language
-    executeInNewTransaction {
-      languageService.getProjectLanguages(testData.project.id)
-      val writer =
-        Thread {
-          created =
+    val created =
+      executeInNewTransaction {
+        languageService.getProjectLanguages(testData.project.id)
+        CompletableFuture
+          .supplyAsync {
             executeInNewTransaction {
               languageService.createLanguage(getLanguageDto(), project = testData.project)
             }
-        }
-      writer.start()
-      writer.join()
-    }
+          }.join()
+      }
 
     languageService
       .get(created.id, testData.project.id)
