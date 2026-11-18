@@ -1,3 +1,10 @@
+# [3.245.0](https://github.com/tolgee/tolgee-platform/compare/v3.244.0...v3.245.0) (2026-11-18)
+
+
+### Features
+
+* filter translations by AI review score ([#4060](https://github.com/tolgee/tolgee-platform/issues/4060)) ([9651419](https://github.com/tolgee/tolgee-platform/commit/9651419b90ececed80b1cb513cc2f3196a8f015e))
+
 # [3.244.0](https://github.com/tolgee/tolgee-platform/compare/v3.243.2...v3.244.0) (2026-11-18)
 
 
