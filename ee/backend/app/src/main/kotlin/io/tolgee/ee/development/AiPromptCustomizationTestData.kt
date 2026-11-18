@@ -23,7 +23,6 @@ class AiPromptCustomizationTestData : BaseTestData() {
   val memberPat: Pat = memberBuilder.addPat { description = "member" }.self
 
   private val outsiderBuilder = root.addUserAccount { username = "outsider" }
-  val outsider = outsiderBuilder.self
   val outsiderPat: Pat = outsiderBuilder.addPat { description = "outsider" }.self
 
   val otherProjectBuilder: ProjectBuilder =
