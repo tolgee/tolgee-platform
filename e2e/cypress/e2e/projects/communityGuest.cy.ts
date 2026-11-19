@@ -1,5 +1,5 @@
 import { HOST } from '../../common/constants';
-import { gcy, gcyAdvanced, visitProjectSettings } from '../../common/shared';
+import { gcy, visitProjectSettings } from '../../common/shared';
 import { visitExport } from '../../common/export';
 import { loginViaForm } from '../../common/login';
 import { communityStatsData } from '../../common/apiCalls/testData/testData';
@@ -9,6 +9,9 @@ import {
 } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { visitTranslations } from '../../common/translations';
+import { E2CommunityPage } from '../../compounds/E2CommunityPage';
+
+const communityPage = new E2CommunityPage();
 
 describe('Community project browsed without an account', () => {
   let publicProjectId: number;
@@ -157,10 +160,7 @@ describe('Community project browsed without an account', () => {
   it('shows a top contributor card to a guest on hover', () => {
     cy.visit(`${HOST}/projects/${publicProjectId}/community`);
     waitForGlobalLoading();
-    gcyAdvanced({
-      value: 'community-top-contributor',
-      'user-id': String(aliceId),
-    }).trigger('mouseover');
+    communityPage.hoverTopContributor(aliceId);
     gcy('contributor-popover-card').should('be.visible');
     gcy('community-contributor-card-contributions').should('be.visible');
     const aliceLanguagesInSeed = 3;

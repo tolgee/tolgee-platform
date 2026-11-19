@@ -1,11 +1,13 @@
 import { HOST } from '../../common/constants';
 import { login } from '../../common/apiCalls/common';
 import { communityStatsData } from '../../common/apiCalls/testData/testData';
-import { gcy, gcyAdvanced } from '../../common/shared';
+import { gcy } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2CommunityPageSettings } from '../../compounds/projectSettings/E2CommunityPageSettings';
+import { E2CommunityPage } from '../../compounds/E2CommunityPage';
 
 const settings = new E2CommunityPageSettings();
+const communityPage = new E2CommunityPage();
 
 const OWNER = 'communityStatsOwner';
 const PROJECT_NAME = 'Community Stats Demo';
@@ -54,10 +56,7 @@ describe('Community project page', () => {
 
   it('shows the contributor card when hovering a top contributor', () => {
     visitPage();
-    gcyAdvanced({
-      value: 'community-top-contributor',
-      'user-id': String(aliceId),
-    }).trigger('mouseover');
+    communityPage.hoverTopContributor(aliceId);
     gcy('contributor-popover-card').should('be.visible');
     const aliceContributionsInSeed = 17;
     gcy('community-contributor-card-contributions')
