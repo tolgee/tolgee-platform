@@ -10,13 +10,12 @@ import {
 } from '@untitled-ui/icons-react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LabelHint } from 'tg.component/common/LabelHint';
-import { UserName } from 'tg.component/common/UserName';
 import { useDateFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 
 import { ExpandableMarkdown } from 'tg.views/projects/community/ExpandableMarkdown';
 import { CommunityTopContributors } from 'tg.views/projects/community/useCommunityTopContributors';
+import { CommunityTopContributor } from 'tg.views/projects/community/CommunityTopContributor';
 import { isValidHttpUrl } from 'tg.fixtures/isValidUrl';
 
 const IN_APP_DOCS_URL = 'https://docs.tolgee.io/translate-with-tolgee';
@@ -269,24 +268,7 @@ export const CommunitySidebar = ({
         {top && top.contributors.length ? (
           <>
             {top.contributors.map((c) => (
-              <Box
-                key={c.id}
-                display="flex"
-                alignItems="center"
-                gap={1}
-                data-cy="community-top-contributor"
-              >
-                <AvatarImg
-                  owner={{
-                    name: c.name,
-                    avatar: c.avatar,
-                    type: 'USER',
-                    id: c.id,
-                  }}
-                  size={24}
-                />
-                <UserName name={c.name} />
-              </Box>
+              <CommunityTopContributor key={c.id} contributor={c} />
             ))}
             <MuiLink
               component={Link}

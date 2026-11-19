@@ -7,26 +7,32 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
 import { ContributorCard } from 'tg.component/community/ContributorCard';
-import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
-import { useUserName } from 'tg.component/common/UserName';
+import { SimpleUser, useUserName } from 'tg.component/common/UserName';
 
-type SimpleUserAccountModel = components['schemas']['SimpleUserAccountModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
-  author: SimpleUserAccountModel;
+  contributor: SimpleUser & {
+    id: number;
+    avatar?: components['schemas']['Avatar'];
+  };
+  projectLanguages: LanguageModel[] | undefined;
   onContentChange: () => void;
 };
 
-export const SuggestionAuthorCard = ({ author, onContentChange }: Props) => {
+export const ContributorPopoverCard = ({
+  contributor,
+  projectLanguages,
+  onContentChange,
+}: Props) => {
   const project = useProject();
   const user = useUser();
   const getUserName = useUserName();
-  const isMe = user?.id === author.id;
-  const viewableLanguages = useTranslationsSelector((c) => c.languages);
+  const isMe = user?.id === contributor.id;
   const { data, isLoading, error } = useApiQuery({
     url: '/v2/projects/{projectId}/community/contributors/{userId}',
     method: 'get',
-    path: { projectId: project.id, userId: author.id },
+    path: { projectId: project.id, userId: contributor.id },
     query: {},
     fetchOptions: { disable404Redirect: true, disableErrorNotification: true },
     options: { staleTime: 60_000 },
@@ -34,21 +40,21 @@ export const SuggestionAuthorCard = ({ author, onContentChange }: Props) => {
 
   useLayoutEffect(() => {
     if (!isLoading) onContentChange();
-  }, [isLoading, data, error]);
+  }, [isLoading, data, error, projectLanguages]);
 
   const languages =
     data?.languages
       .filter((l) => l.contributions > 0)
-      .map((l) => viewableLanguages?.find((p) => p.id === l.languageId))
+      .map((l) => projectLanguages?.find((p) => p.id === l.languageId))
       .filter((l) => l !== undefined) ?? [];
 
-  const authorNotShown = error?.code === 'user_not_found';
-  const status = authorNotShown ? (
+  const contributorNotShown = error?.code === 'user_not_found';
+  const status = contributorNotShown ? (
     <Typography
       variant="caption"
       color="text.secondary"
       component="div"
-      data-cy="suggestion-author-card-no-stats"
+      data-cy="contributor-popover-card-no-stats"
     >
       <T
         keyName="community_contributor_card_no_stats"
@@ -58,12 +64,12 @@ export const SuggestionAuthorCard = ({ author, onContentChange }: Props) => {
   ) : undefined;
 
   return (
-    <div data-cy="suggestion-author-card">
+    <div data-cy="contributor-popover-card">
       <ContributorCard
         variant="popover"
-        id={author.id}
-        name={getUserName(author)}
-        avatar={author.avatar}
+        id={contributor.id}
+        name={getUserName(contributor)}
+        avatar={contributor.avatar}
         isMe={isMe}
         languages={languages}
         contributions={data?.contributions}

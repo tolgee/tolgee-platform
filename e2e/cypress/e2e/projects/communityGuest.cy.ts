@@ -9,6 +9,9 @@ import {
 } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { visitTranslations } from '../../common/translations';
+import { E2CommunityPage } from '../../compounds/E2CommunityPage';
+
+const communityPage = new E2CommunityPage();
 
 describe('Community project browsed without an account', () => {
   let publicProjectId: number;
@@ -152,6 +155,15 @@ describe('Community project browsed without an account', () => {
     waitForGlobalLoading();
     gcy('community-contributor-card').should('have.length.at.least', 2);
     gcy('guest-login-button').should('be.visible');
+  });
+
+  it('shows a top contributor card to a guest on hover', () => {
+    cy.visit(`${HOST}/projects/${publicProjectId}/community`);
+    waitForGlobalLoading();
+    communityPage.hoverLastTopContributor();
+    gcy('contributor-popover-card').should('be.visible');
+    gcy('community-contributor-card-contributions').should('be.visible');
+    cy.location('pathname').should('contain', '/community');
   });
 
   it('shows a contributor profile to a guest', () => {
