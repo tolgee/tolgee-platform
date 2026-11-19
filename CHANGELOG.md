@@ -1,3 +1,10 @@
+## [3.245.2](https://github.com/tolgee/tolgee-platform/compare/v3.245.1...v3.245.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* find a newly created language when the cached language list is stale ([#4061](https://github.com/tolgee/tolgee-platform/issues/4061)) ([7a2c1c2](https://github.com/tolgee/tolgee-platform/commit/7a2c1c2f8bb65b37887d887e62234520ea8d42e1))
+
 ## [3.245.1](https://github.com/tolgee/tolgee-platform/compare/v3.245.0...v3.245.1) (2026-11-18)
 
 
