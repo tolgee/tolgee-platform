@@ -1,3 +1,15 @@
+# [3.246.0](https://github.com/tolgee/tolgee-platform/compare/v3.245.2...v3.246.0) (2026-11-19)
+
+
+### Bug Fixes
+
+* check Slack signatures against the raw request body ([#4068](https://github.com/tolgee/tolgee-platform/issues/4068)) ([40bf8a9](https://github.com/tolgee/tolgee-platform/commit/40bf8a90465d0b54d53c173bc888eaf7be893cb4)), closes [#4043](https://github.com/tolgee/tolgee-platform/issues/4043) [#4043](https://github.com/tolgee/tolgee-platform/issues/4043) [#4043](https://github.com/tolgee/tolgee-platform/issues/4043)
+
+
+### Features
+
+* allow API token access to AI prompt customization endpoints ([#4067](https://github.com/tolgee/tolgee-platform/issues/4067)) ([ea16ce3](https://github.com/tolgee/tolgee-platform/commit/ea16ce394449659c57f55f8c85e8c32cdda99756))
+
 ## [3.245.2](https://github.com/tolgee/tolgee-platform/compare/v3.245.1...v3.245.2) (2026-11-19)
 
 
