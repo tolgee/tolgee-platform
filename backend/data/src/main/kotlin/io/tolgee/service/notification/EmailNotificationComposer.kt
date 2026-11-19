@@ -31,6 +31,7 @@ class EmailNotificationComposer(
 
       NotificationType.COMMENT_MENTION,
       NotificationType.KEYS_ADDED,
+      NotificationType.IMPORTED,
       NotificationType.SOURCE_CHANGED,
       NotificationType.STRINGS_TRANSLATED,
       NotificationType.STRINGS_REVIEWED,

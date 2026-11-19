@@ -6399,4 +6399,44 @@
             <dropTable tableName="notification_mention_mute"/>
         </rollback>
     </changeSet>
+    <changeSet author="zuzanaodstrcilova" id="1793700000000-1">
+        <sql>
+            DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+            CREATE UNIQUE INDEX notification_grouped_unseen_idx
+            ON notification (user_id, project_id, type, coalesce(originating_user_id, 0))
+            WHERE seen = false
+              AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                           'AUTOMATICALLY_TRANSLATED');
+        </sql>
+        <rollback>
+            <sql>
+                DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+                CREATE UNIQUE INDEX notification_grouped_unseen_idx ON notification (user_id, project_id, type)
+                WHERE seen = false
+                  AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                               'AUTOMATICALLY_TRANSLATED');
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="zuzanaodstrcilova" id="1793800000000-1">
+        <sql>
+            DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+            CREATE UNIQUE INDEX notification_grouped_unseen_idx
+            ON notification (user_id, project_id, type, coalesce(originating_user_id, 0))
+            WHERE seen = false
+              AND type IN ('KEYS_ADDED', 'IMPORTED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                           'AUTOMATICALLY_TRANSLATED');
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM notification WHERE type = 'IMPORTED';
+                DROP INDEX IF EXISTS notification_grouped_unseen_idx;
+                CREATE UNIQUE INDEX notification_grouped_unseen_idx
+                ON notification (user_id, project_id, type, coalesce(originating_user_id, 0))
+                WHERE seen = false
+                  AND type IN ('KEYS_ADDED', 'SOURCE_CHANGED', 'STRINGS_TRANSLATED', 'STRINGS_REVIEWED',
+                               'AUTOMATICALLY_TRANSLATED');
+            </sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

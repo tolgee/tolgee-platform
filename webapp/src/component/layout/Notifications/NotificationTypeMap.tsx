@@ -7,16 +7,21 @@ import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordC
 import { components } from 'tg.service/apiSchema.generated';
 import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
 import React from 'react';
-import { useLocalizationNotificationLabel } from 'tg.component/layout/Notifications/useLocalizationNotificationLabel';
+import { useTranslate } from '@tolgee/react';
+import { LocalizationActionLabel } from 'tg.component/layout/Notifications/LocalizationActionLabel';
 import { LocalizationItem } from 'tg.component/layout/Notifications/LocalizationItem';
 import { CommentMentionItem } from 'tg.component/layout/Notifications/CommentMentionItem';
 
 const LocalizationTypeItem = (props: NotificationItemProps) => {
-  const getLabel = useLocalizationNotificationLabel();
+  const { t } = useTranslate();
+  const { notification } = props;
+  const name =
+    notification.originatingUser?.name ??
+    t('notifications-unknown-author', 'Someone');
   return (
     <LocalizationItem
       {...props}
-      label={getLabel(props.notification.type) ?? ''}
+      label={<LocalizationActionLabel type={notification.type} name={name} />}
     />
   );
 };
@@ -35,6 +40,7 @@ export const notificationComponents: NotificationsComponentMap = {
   PASSWORD_CHANGED: PasswordChangedItem,
   COMMENT_MENTION: CommentMentionItem,
   KEYS_ADDED: LocalizationTypeItem,
+  IMPORTED: LocalizationTypeItem,
   SOURCE_CHANGED: LocalizationTypeItem,
   STRINGS_TRANSLATED: LocalizationTypeItem,
   STRINGS_REVIEWED: LocalizationTypeItem,

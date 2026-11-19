@@ -136,6 +136,7 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_translation_comment_add" params={params} />;
     },
     entities: { TranslationComment: ['text'] },
+    titleReferences: ['key'],
   },
   TRANSLATION_COMMENT_SET_STATE: {
     label(params) {
@@ -153,6 +154,7 @@ export const actionsConfiguration: Partial<
       );
     },
     entities: { TranslationComment: ['text'] },
+    titleReferences: ['key'],
   },
   IMPORT: {
     label(params) {

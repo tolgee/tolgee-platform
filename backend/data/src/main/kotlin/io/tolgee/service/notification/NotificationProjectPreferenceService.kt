@@ -26,7 +26,8 @@ class FollowedLanguages(
 
 /**
  * The languages a user follows in a project for work notifications. Until the user saves their own choice, they
- * follow a default picked from their recent work, stored with `is_default` and refreshed from time to time.
+ * follow every language their permissions let them translate or review, stored with `is_default` and refreshed
+ * from time to time so permission changes show up.
  */
 @Service
 class NotificationProjectPreferenceService(
@@ -133,51 +134,14 @@ class NotificationProjectPreferenceService(
     nonBaseLanguageIds: List<Long>,
   ): Map<Long, Set<Long>> {
     if (members.isEmpty()) return emptyMap()
-    val recent = recentlyWorkedLanguages(projectId, members.map { it.member.id })
     return members.associate { member ->
       val userId = member.member.id
-      val defaultIds = defaultLanguages(member, nonBaseLanguageIds, recent[userId].orEmpty())
+      val defaultIds =
+        NotificationEligibility.followableLanguageIds(member.permission, nonBaseLanguageIds).toSet()
       upsert(userId, projectId, defaultIds, isDefault = true)
       userId to defaultIds
     }
   }
-
-  private fun defaultLanguages(
-    member: ProjectMemberWithPermission,
-    nonBaseLanguageIds: List<Long>,
-    recentlyWorked: Set<Long>,
-  ): Set<Long> {
-    val followable = NotificationEligibility.followableLanguageIds(member.permission, nonBaseLanguageIds)
-    val worked = followable.filter { it in recentlyWorked }
-    if (worked.isNotEmpty()) return worked.toSet()
-    val editable = NotificationEligibility.editableLanguageIds(member.permission, nonBaseLanguageIds)
-    if (editable.isNotEmpty()) return editable.toSet()
-    return followable.toSet()
-  }
-
-  private fun recentlyWorkedLanguages(
-    projectId: Long,
-    userIds: List<Long>,
-  ): Map<Long, Set<Long>> =
-    jdbcTemplate
-      .query(
-        """
-        select distinct ar.author_id, (ame.describing_relations -> 'language' ->> 'entityId')::bigint
-        from activity_revision ar
-        join activity_modified_entity ame on ame.activity_revision_id = ar.id
-        where ar.project_id = ? and ar.author_id = any(?) and ar."timestamp" >= ? and ar.batch_job_id is null
-          and ame.entity_class = 'Translation'
-          and (ame.modifications -> 'text' is not null or ame.modifications -> 'state' is not null)
-          and ame.describing_relations -> 'language' ->> 'entityId' is not null
-        """,
-        PreparedStatementSetter { ps ->
-          ps.setLong(1, projectId)
-          ps.setArray(2, ps.connection.createArrayOf("bigint", userIds.toTypedArray()))
-          ps.setTimestamp(3, Timestamp(currentDateProvider.date.time - RECENT_WORK.toMillis()))
-        },
-        { rs, _ -> rs.getLong(1) to rs.getLong(2) },
-      ).groupBy({ it.first }, { it.second })
-      .mapValues { it.value.toSet() }
 
   private fun find(
     projectId: Long,
@@ -228,7 +192,6 @@ class NotificationProjectPreferenceService(
   }
 
   companion object {
-    private val RECENT_WORK = Duration.ofDays(90)
     private val DEFAULT_REFRESH = Duration.ofDays(1)
   }
 }

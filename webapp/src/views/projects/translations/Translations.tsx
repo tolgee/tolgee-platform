@@ -1,3 +1,4 @@
+import { useOpenCommentsFromUrl } from 'tg.views/projects/translations/KeySingle/useOpenCommentsFromUrl';
 import { useEffect, useMemo } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Button, styled } from '@mui/material';
@@ -47,6 +48,9 @@ export const Translations = () => {
   const isFetching = useTranslationsSelector((c) => c.isFetching);
   const view = useTranslationsSelector((v) => v.view);
   const translations = useTranslationsSelector((c) => c.translations);
+  useOpenCommentsFromUrl(
+    prefilter?.notification ? translations?.[0]?.keyId : undefined
+  );
   const sidePanelWidth = useTranslationsSelector(
     (c) => c.layout.sidePanelWidth
   );

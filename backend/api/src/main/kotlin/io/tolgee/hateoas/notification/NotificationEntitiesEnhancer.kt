@@ -22,7 +22,7 @@ class NotificationEntitiesEnhancer(
 
     grouped.forEach { (source, target) ->
       if (source.type.countable) target.entityCount = counts[source.id] ?: 0
-      if (source.type.entityKind == NotificationEntityKind.TRANSLATION) {
+      if (source.type.entityKind == NotificationEntityKind.TRANSLATION || source.type == NotificationType.IMPORTED) {
         target.languages =
           languages[source.id].orEmpty().map { NotificationLanguageModel(it.id, it.tag, it.name, it.flagEmoji) }
       }

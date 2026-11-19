@@ -522,14 +522,17 @@ export const getNotificationTranslationsUrl = (
 
 export const getKeyCommentsUrl = (
   projectId: number,
-  keyId: number,
+  notificationId: number,
   languageTag: string
 ) => {
   const params = new URLSearchParams();
-  params.set('id', String(keyId));
+  params.set(
+    QUERY.TRANSLATIONS_PREFILTERS_NOTIFICATION,
+    String(notificationId)
+  );
   params.set('languages', languageTag);
   params.set(QUERY.TRANSLATIONS_OPEN_COMMENTS, languageTag);
-  return `${LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+  return `${LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: projectId,
   })}?${params.toString()}`;
 };

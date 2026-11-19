@@ -29,6 +29,8 @@ const StyledContainer = styled('div')`
   gap: 5px;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: 10px;
+  overflow: hidden;
+  background: ${({ theme }) => theme.palette.background.paper};
 `;
 
 const StyledHeader = styled('div')`
@@ -41,6 +43,11 @@ const StyledScroller = styled('div')`
   overflow-y: auto;
   overflow-x: hidden;
   max-height: 600px;
+  margin: 0 4px 10px 0;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: ${({ theme }) => theme.palette.divider1} transparent;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
 `;
 
 const StyledList = styled('div')`

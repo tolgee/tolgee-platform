@@ -20,7 +20,7 @@ object NotificationEligibility {
     val scopes = permission.expandedScopes
     val followed = languageIds.onlyFollowed(followedLanguageIds)
     return when (type) {
-      NotificationType.KEYS_ADDED, NotificationType.SOURCE_CHANGED ->
+      NotificationType.KEYS_ADDED, NotificationType.IMPORTED, NotificationType.SOURCE_CHANGED ->
         languageIds.takeIf {
           Scope.TRANSLATIONS_EDIT in scopes &&
             permission.filterTranslatePermitted(nonBaseLanguageIds.onlyFollowed(followedLanguageIds)).isNotEmpty()

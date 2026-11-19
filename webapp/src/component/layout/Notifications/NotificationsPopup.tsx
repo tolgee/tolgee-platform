@@ -1,5 +1,7 @@
 import { default as React, useEffect } from 'react';
 import {
+  alpha,
+  Box,
   IconButton,
   List,
   ListItem,
@@ -7,7 +9,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import Menu from '@mui/material/Menu';
+import Popover from '@mui/material/Popover';
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -31,16 +33,31 @@ type PagedModelNotificationModel =
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
-const StyledMenu = styled(Menu)`
+const StyledPopover = styled(Popover)`
   .MuiPaper-root {
     margin-top: 5px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 `;
 
-const StyledHeaderItem = styled(ListItem)`
-  padding-right: 8px;
-  padding-top: 0;
-  padding-bottom: 0;
+const StyledHeaderItem = styled(Box)`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 50px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid
+    ${({ theme }) => alpha(theme.palette.text.primary, 0.06)};
+`;
+
+const StyledScrollArea = styled(Box)`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 const StyledHeader = styled(Typography)`
@@ -133,7 +150,7 @@ export const NotificationsPopup: React.FC<
   const notifications = getNotifications(notificationsLoadable.data);
 
   return (
-    <StyledMenu
+    <StyledPopover
       keepMounted
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
@@ -152,54 +169,57 @@ export const NotificationsPopup: React.FC<
             maxHeight: maxHeight,
             width: 500,
           },
-          onScroll: (event) => {
-            const target = event.target as HTMLDivElement;
-            if (
-              notificationsLoadable?.hasNextPage &&
-              !notificationsLoadable.isFetching &&
-              target.scrollHeight - target.clientHeight - target.scrollTop <
-                FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
-            ) {
-              notificationsLoadable.fetchNextPage();
-            }
-          },
         },
       }}
     >
-      <List id="notifications-list" data-cy="notifications-list">
-        <StyledHeaderItem>
-          <StyledHeader variant="h6">
-            <T keyName="notifications-header" />
-          </StyledHeader>
-          <Tooltip title={t('settings_notifications_button')}>
-            <IconButton
-              component={Link}
-              to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
-              sx={{ float: 'right', marginLeft: 'auto' }}
-              data-cy="notifications-settings-icon"
-            >
-              <Settings01 />
-            </IconButton>
-          </Tooltip>
-        </StyledHeaderItem>
-        {notifications?.map((notification, i) => {
-          const Component = notificationComponents[notification.type];
+      <StyledHeaderItem>
+        <StyledHeader variant="h6">
+          <T keyName="notifications-header" />
+        </StyledHeader>
+        <Tooltip title={t('settings_notifications_button')}>
+          <IconButton
+            component={Link}
+            to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
+            sx={{ float: 'right', marginLeft: 'auto' }}
+            data-cy="notifications-settings-icon"
+          >
+            <Settings01 width={20} height={20} />
+          </IconButton>
+        </Tooltip>
+      </StyledHeaderItem>
+      <StyledScrollArea
+        onScroll={(event) => {
+          const target = event.target as HTMLDivElement;
+          if (
+            notificationsLoadable?.hasNextPage &&
+            !notificationsLoadable.isFetching &&
+            target.scrollHeight - target.clientHeight - target.scrollTop <
+              FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
+          ) {
+            notificationsLoadable.fetchNextPage();
+          }
+        }}
+      >
+        <List id="notifications-list" data-cy="notifications-list">
+          {notifications?.map((notification, i) => {
+            const Component = notificationComponents[notification.type];
 
-          return (
-            Boolean(Component) && (
-              <Component notification={notification} key={notification.id} />
-            )
-          );
-        })}
-        {notifications?.length === 0 && (
-          <ListItem data-cy="notifications-empty-message">
-            <T keyName="notifications-empty" />
-          </ListItem>
-        )}
-        {(notificationsLoadable.isFetching ||
-          notificationsLoadable.hasNextPage) &&
-          [1, 2, 3, 4, 5].map((i) => <NotificationItemSkeleton key={-i} />)}
-      </List>
-    </StyledMenu>
+            return (
+              Boolean(Component) && (
+                <Component notification={notification} key={notification.id} />
+              )
+            );
+          })}
+          {notifications?.length === 0 && (
+            <ListItem data-cy="notifications-empty-message">
+              <T keyName="notifications-empty" />
+            </ListItem>
+          )}
+          {(notificationsLoadable.isFetching ||
+            notificationsLoadable.hasNextPage) &&
+            [1, 2, 3, 4, 5].map((i) => <NotificationItemSkeleton key={-i} />)}
+        </List>
+      </StyledScrollArea>
+    </StyledPopover>
   );
 };

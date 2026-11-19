@@ -27,11 +27,11 @@ export const KeyReference: React.FC<React.PropsWithChildren<Props>> = ({
         queryEncode({
           search: data.keyName,
         })
-      : LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+      : LINKS.PROJECT_TRANSLATIONS.build({
           [PARAMS.PROJECT_ID]: project.id,
         }) +
         queryEncode({
-          id: data.id,
+          search: data.keyName,
           languages: data.languages?.map((l) => l.tag),
         })
     : undefined;

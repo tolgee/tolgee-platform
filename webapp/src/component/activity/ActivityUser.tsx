@@ -4,6 +4,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { ActivityModel } from './types';
 import { UserName } from '../common/UserName';
+import { TruncatedTooltip } from 'tg.component/activity/TruncatedTooltip';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -23,12 +24,6 @@ const StyledAvatar = styled(Box)`
 const StyledTime = styled('div')`
   display: flex;
   font-size: 11px;
-`;
-
-const StyledUser = styled(Box)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 type Props = {
@@ -58,13 +53,13 @@ export const ActivityUser: React.FC<React.PropsWithChildren<Props>> = ({
           />
         </StyledAvatar>
       )}
-      <StyledUser gridArea="user">
+      <TruncatedTooltip gridArea="user" tooltip={item.author?.name}>
         {item.author?.deleted ? (
           <UserName {...item.author} />
         ) : (
           item.author?.name
         )}
-      </StyledUser>
+      </TruncatedTooltip>
       <Box gridArea="time">
         <StyledTime>
           {!onlyTime && date.toLocaleDateString(lang) + ' '}

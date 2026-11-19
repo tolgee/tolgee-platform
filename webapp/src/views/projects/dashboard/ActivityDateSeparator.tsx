@@ -8,8 +8,23 @@ const StyledContainer = styled('div')`
   align-items: center;
   position: sticky;
   top: 0px;
-  background: ${({ theme }) => theme.palette.background.default};
+  padding: 8px 0px 6px 0px;
+  background: ${({ theme }) => theme.palette.background.paper};
   z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+    background: linear-gradient(
+      ${({ theme }) => theme.palette.background.paper},
+      transparent
+    );
+    pointer-events: none;
+  }
 `;
 
 const StyledLine = styled(Box)`

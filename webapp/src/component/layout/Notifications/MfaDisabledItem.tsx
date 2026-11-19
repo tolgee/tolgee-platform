@@ -1,25 +1,24 @@
 import { default as React, FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
-import {
-  NotificationItem,
-  NotificationItemProps,
-} from 'tg.component/layout/Notifications/NotificationItem';
-import { LINKS } from 'tg.constants/links';
-
-type MfaDisabledItemProps = NotificationItemProps;
+import { ShieldOff } from '@untitled-ui/icons-react';
+import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
+import { SecurityItem } from 'tg.component/layout/Notifications/SecurityItem';
+import { NotificationUserName } from 'tg.component/layout/Notifications/NotificationUserName';
 
 export const MfaDisabledItem: FunctionComponent<
-  React.PropsWithChildren<MfaDisabledItemProps>
-> = ({ notification, ...props }) => {
+  React.PropsWithChildren<NotificationItemProps>
+> = (props) => {
   return (
-    <NotificationItem
-      notification={notification}
-      destinationUrl={LINKS.USER_ACCOUNT_SECURITY.build()}
+    <SecurityItem
       {...props}
-    >
-      <b>{notification.originatingUser?.name}</b>
-      {'\u205F'}
-      <T keyName="notifications-mfa-disabled" />
-    </NotificationItem>
+      icon={<ShieldOff />}
+      renderLabel={(name) => (
+        <T
+          keyName="notifications-security-mfa-disabled-by"
+          defaultValue="<b>{name}</b> disabled two-factor sign-in"
+          params={{ name, b: <NotificationUserName name={name} /> }}
+        />
+      )}
+    />
   );
 };
