@@ -1,11 +1,10 @@
-import { gcyAdvanced } from '../common/shared';
+import { gcy } from '../common/shared';
 
 export class E2CommunityPage {
-  hoverTopContributor(userId: number) {
-    gcyAdvanced({
-      value: 'community-top-contributor',
-      'user-id': String(userId),
-    }).trigger('mouseover');
-    return this;
+  hoverLastTopContributor() {
+    return gcy('community-top-contributor')
+      .last()
+      .trigger('mouseover')
+      .invoke('attr', 'data-cy-user-id');
   }
 }

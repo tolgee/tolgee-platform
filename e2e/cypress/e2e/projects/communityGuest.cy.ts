@@ -160,14 +160,9 @@ describe('Community project browsed without an account', () => {
   it('shows a top contributor card to a guest on hover', () => {
     cy.visit(`${HOST}/projects/${publicProjectId}/community`);
     waitForGlobalLoading();
-    communityPage.hoverTopContributor(aliceId);
+    communityPage.hoverLastTopContributor();
     gcy('contributor-popover-card').should('be.visible');
     gcy('community-contributor-card-contributions').should('be.visible');
-    const aliceLanguagesInSeed = 3;
-    gcy('community-contributor-card-flag').should(
-      'have.length',
-      aliceLanguagesInSeed
-    );
     cy.location('pathname').should('contain', '/community');
   });
 

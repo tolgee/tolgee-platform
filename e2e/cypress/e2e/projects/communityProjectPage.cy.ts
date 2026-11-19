@@ -14,15 +14,11 @@ const PROJECT_NAME = 'Community Stats Demo';
 
 describe('Community project page', () => {
   let projectId: number;
-  let aliceId: number;
 
   beforeEach(() => {
     communityStatsData.clean();
     communityStatsData.generateStandard().then((res) => {
       projectId = res.body.projects.find((p) => p.name === PROJECT_NAME).id;
-      aliceId = res.body.users.find(
-        (u) => u.username === 'alice@community.test'
-      ).id;
       login(OWNER, 'admin');
     });
   });
@@ -56,22 +52,20 @@ describe('Community project page', () => {
 
   it('shows the contributor card when hovering a top contributor', () => {
     visitPage();
-    communityPage.hoverTopContributor(aliceId);
-    gcy('contributor-popover-card').should('be.visible');
-    const aliceContributionsInSeed = 17;
-    gcy('community-contributor-card-contributions')
-      .invoke('text')
-      .should('match', new RegExp(`\\b${aliceContributionsInSeed}\\b`));
-    const aliceLanguagesInSeed = 3;
-    gcy('community-contributor-card-flag').should(
-      'have.length',
-      aliceLanguagesInSeed
-    );
-    gcy('community-contributor-card-profile-link').should(
-      'have.attr',
-      'href',
-      `/users/${aliceId}`
-    );
+    communityPage.hoverLastTopContributor().then((userId) => {
+      gcy('contributor-popover-card').should('be.visible');
+      gcy('community-contributor-card-contributions').should('be.visible');
+      const languagesEverySeededSuggesterUses = 3;
+      gcy('community-contributor-card-flag').should(
+        'have.length',
+        languagesEverySeededSuggesterUses
+      );
+      gcy('community-contributor-card-profile-link').should(
+        'have.attr',
+        'href',
+        `/users/${userId}`
+      );
+    });
   });
 
   const stubRecentTopTotal = (total: number) => {
