@@ -124,6 +124,7 @@ class OpenaiApiServiceTest {
       override var format: String? = "json_schema"
       override var deployment: String? = null
       override var reasoningEffort: String? = null
+      override var thinking: String? = null
       override var maxTokens: Long = 1000
       override var tokenPriceInCreditsInput: Double? = null
       override var tokenPriceInCreditsOutput: Double? = null

@@ -137,8 +137,17 @@ class LlmProperties : MachineTranslationServiceProperties {
       `max_tokens` for Anthropic API.`""",
     )
     override var maxTokens: Long = MAX_TOKENS_DEFAULT,
-    @DocProperty(description = "ChatGPT reasoning effort")
+    @DocProperty(
+      description = """Reasoning effort. `reasoning_effort` option for OpenAI API.
+      `output_config.effort` for Anthropic API.""",
+    )
     override var reasoningEffort: String? = null,
+    @DocProperty(
+      description = """Thinking type for Anthropic API (`thinking.type`),
+      e.g. `disabled`, `between_tools` or `adaptive`. Which types a model accepts differs per model.
+      When empty, no `thinking` is sent and the model uses its default.""",
+    )
+    override var thinking: String? = null,
     @DocProperty(description = "Set to `json_schema` if the API supports JSON Schema")
     override var format: String? = null,
     @DocProperty(
@@ -167,6 +176,7 @@ class LlmProperties : MachineTranslationServiceProperties {
         deployment = deployment,
         format = format,
         reasoningEffort = reasoningEffort,
+        thinking = thinking,
         tokenPriceInCreditsInput = tokenPriceInCreditsInput,
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,
@@ -200,8 +210,17 @@ class LlmProperties : MachineTranslationServiceProperties {
       `max_tokens` for Anthropic API.""",
     )
     var maxTokens: Long? = null,
-    @DocProperty(description = "ChatGPT reasoning effort")
+    @DocProperty(
+      description = """Reasoning effort. `reasoning_effort` option for OpenAI API.
+      `output_config.effort` for Anthropic API.""",
+    )
     var reasoningEffort: String? = null,
+    @DocProperty(
+      description = """Thinking type for Anthropic API (`thinking.type`),
+      e.g. `disabled`, `between_tools` or `adaptive`. Which types a model accepts differs per model.
+      When empty, no `thinking` is sent and the model uses its default.""",
+    )
+    var thinking: String? = null,
     @DocProperty(description = "Set to `json_schema` if the API supports JSON Schema")
     var format: String? = null,
     @DocProperty(
@@ -229,6 +248,7 @@ class LlmProperties : MachineTranslationServiceProperties {
         deployment = deployment,
         maxTokens = maxTokens ?: LlmProvider.MAX_TOKENS_DEFAULT,
         reasoningEffort = reasoningEffort,
+        thinking = thinking,
         format = format,
         priority = priority,
         attempts = attempts,
