@@ -7,7 +7,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { Translate01 } from '@untitled-ui/icons-react';
+import { Translate01, Users01 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory } from 'react-router-dom';
 
@@ -21,7 +21,6 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEnabledFeatures, useQaCheckTypes } from 'tg.globalContext/helpers';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
-import { TransparentChip } from 'tg.component/common/chips/TransparentChip';
 import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div', {
@@ -71,7 +70,6 @@ const StyledContainer = styled('div', {
 
 const StyledImage = styled('div')`
   grid-area: image;
-  overflow: hidden;
   margin-right: ${({ theme }) => theme.spacing(2)};
   @container (max-width: 599px) {
     margin-right: 0px;
@@ -127,23 +125,26 @@ const StyledProjectName = styled(Typography)`
   word-break: break-word;
 `;
 
-const StyledPublicLine = styled('div')`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing(0.5)};
-  overflow: hidden;
-  margin-top: ${({ theme }) => theme.spacing(0.25)};
+const StyledLogo = styled('div')`
+  position: relative;
+  width: fit-content;
 `;
 
-const StyledPublicChip = styled(TransparentChip)`
-  flex-shrink: 0;
-  & .MuiChip-label {
-    font-size: 13px;
-  }
+const StyledCommunityBadge = styled('div')`
+  position: absolute;
+  right: ${({ theme }) => theme.spacing(-0.75)};
+  bottom: ${({ theme }) => theme.spacing(-0.75)};
+  display: flex;
+  padding: ${({ theme }) => theme.spacing(0.375)};
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const StyledOrganizationName = styled(Typography)`
   color: ${({ theme }) => theme.palette.text.secondary};
+  margin-top: ${({ theme }) => theme.spacing(0.25)};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -169,6 +170,10 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
   const hasStaleQaChecks = p.stats.qaChecksStaleCount > 0;
   const showQaBadge =
     isEnabled('QA_CHECKS') && (hasQaIssues || hasStaleQaChecks);
+  const communityLabel = t(
+    'project_list_community_badge_tooltip',
+    'Community project'
+  );
 
   const content = (
     <StyledContainer
@@ -187,34 +192,38 @@ const DashboardProjectListItem = ({ variant = 'default', ...p }: Props) => {
       }
     >
       <StyledImage>
-        <AvatarImg
-          owner={{
-            name: p.name,
-            avatar: p.avatar,
-            type: 'PROJECT',
-            id: p.id,
-          }}
-          size={50}
-        />
+        <StyledLogo>
+          <AvatarImg
+            owner={{
+              name: p.name,
+              avatar: p.avatar,
+              type: 'PROJECT',
+              id: p.id,
+            }}
+            size={50}
+          />
+          {p.public && (
+            <Tooltip title={communityLabel}>
+              <StyledCommunityBadge
+                role="img"
+                aria-label={communityLabel}
+                data-cy="project-list-public-badge"
+              >
+                <Users01 width={14} height={14} />
+              </StyledCommunityBadge>
+            </Tooltip>
+          )}
+        </StyledLogo>
       </StyledImage>
       <StyledTitle>
         <StyledProjectName variant="h3">{p.name}</StyledProjectName>
-        {p.public && (
-          <StyledPublicLine>
-            <StyledPublicChip
-              size="small"
-              label={t('community_project_list_badge', 'community')}
-              data-cy="project-list-public-badge"
-            />
-            {p.organizationOwner?.name && (
-              <StyledOrganizationName
-                variant="body2"
-                data-cy="project-list-org-name"
-              >
-                {p.organizationOwner.name}
-              </StyledOrganizationName>
-            )}
-          </StyledPublicLine>
+        {p.public && p.organizationOwner?.name && (
+          <StyledOrganizationName
+            variant="body2"
+            data-cy="project-list-org-name"
+          >
+            {p.organizationOwner.name}
+          </StyledOrganizationName>
         )}
       </StyledTitle>
       <StyledKeyCount>
