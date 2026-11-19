@@ -24,6 +24,7 @@ class SlackRawBodyFilter : OncePerRequestFilter() {
   companion object {
     const val RAW_BODY_ATTRIBUTE = "slackRawBody"
     private const val MAX_BODY_BYTES = 1024 * 1024
+    private const val MAX_PARAMETERS = 100
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean =
@@ -78,10 +79,12 @@ class SlackRawBodyFilter : OncePerRequestFilter() {
       return parseForm(rawBody)
     }
 
-    private fun parseForm(encoded: String?): List<Pair<String, String>> =
-      encoded.orEmpty().split('&').filter { it.isNotEmpty() }.map {
+    private fun parseForm(encoded: String?): List<Pair<String, String>> {
+      require(encoded.orEmpty().count { it == '&' } < MAX_PARAMETERS) { "Too many form parameters" }
+      return encoded.orEmpty().split('&').filter { it.isNotEmpty() }.map {
         URLDecoder.decode(it.substringBefore('='), Charsets.UTF_8) to
           URLDecoder.decode(it.substringAfter('=', ""), Charsets.UTF_8)
       }
+    }
   }
 }
