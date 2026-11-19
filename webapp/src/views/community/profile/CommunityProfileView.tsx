@@ -15,7 +15,7 @@ import { ProfileIdentity } from 'tg.views/community/profile/ProfileIdentity';
 import { ProfileTotals } from 'tg.views/community/profile/ProfileTotals';
 import { ProfileActivityCalendar } from 'tg.views/community/profile/ProfileActivityCalendar';
 import { ProfileRecentActivity } from 'tg.views/community/profile/ProfileRecentActivity';
-import { yearsSince } from 'tg.views/projects/community/contributors/useContributorsFilters';
+import { yearsSince } from 'tg.component/community/yearsSince';
 
 export const CommunityProfileView = () => {
   const match = useRouteMatch();
@@ -127,16 +127,7 @@ export const CommunityProfileView = () => {
           <ProfileActivityCalendar
             buckets={data.buckets}
             year={year}
-            years={yearsSince(
-              new Date(
-                Math.min(
-                  Date.now(),
-                  ...data.projects.map(
-                    (p) => p.firstContributionAt ?? Date.now()
-                  )
-                )
-              )
-            )}
+            years={yearsSince(data.projects.map((p) => p.firstContributionAt))}
             onYearChange={setYear}
           />
           <ProfileRecentActivity userId={userId} />
