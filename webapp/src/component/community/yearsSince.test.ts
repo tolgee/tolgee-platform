@@ -10,10 +10,14 @@ describe('yearsSince', () => {
     ).toEqual([2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019]);
   });
 
-  describe('takes the year of the start in UTC, as the server files days', () => {
+  describe('takes the year of the start in UTC', () => {
     const originalTz = process.env.TZ;
     afterEach(() => {
-      process.env.TZ = originalTz;
+      if (originalTz === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = originalTz;
+      }
     });
 
     it('east of UTC', () => {
