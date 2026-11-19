@@ -46,13 +46,7 @@ export const useContributorsFilters = (
       tags.length === targetLanguages.length ? undefined : tags
     );
 
-  const currentYear = new Date().getFullYear();
-  const firstYear = Math.max(
-    currentYear - 1,
-    projectCreatedAt ? new Date(projectCreatedAt).getFullYear() : currentYear
-  );
-  const years =
-    firstYear === currentYear ? [currentYear] : [currentYear, firstYear];
+  const years = yearsSince(new Date(projectCreatedAt ?? Date.now()));
   const period = parsePeriod(periodParam, years);
   const isDaily = period === 'month' || period === 'quarter';
 
@@ -82,6 +76,15 @@ export const useContributorsFilters = (
     selectedLanguages,
     setLanguageTags,
   };
+};
+
+export const yearsSince = (start: Date, now = new Date()): number[] => {
+  const currentYear = now.getFullYear();
+  const firstYear = Math.min(start.getFullYear(), currentYear);
+  return Array.from(
+    { length: currentYear - firstYear + 1 },
+    (_, i) => currentYear - i
+  );
 };
 
 const periodRange = (period: Period): { from: string; to?: string } => {
