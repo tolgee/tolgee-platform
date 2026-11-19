@@ -117,6 +117,7 @@ describe('Community contributors page', () => {
     cy.location('search').should('match', /languages=(&|$)/);
     gcy('community-contributors-empty').should('be.visible');
     gcy('community-contributor-card').should('not.exist');
+    gcy('community-activity-chart').should('not.exist');
 
     cy.reload();
     waitForGlobalLoading();

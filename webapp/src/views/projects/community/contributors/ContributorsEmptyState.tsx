@@ -1,9 +1,9 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-type Props = { searching: boolean };
+type Props = { searching: boolean; noLanguages: boolean };
 
-export const ContributorsEmptyState = ({ searching }: Props) => {
+export const ContributorsEmptyState = ({ searching, noLanguages }: Props) => {
   const { t } = useTranslate();
   const theme = useTheme();
   return (
@@ -16,7 +16,12 @@ export const ContributorsEmptyState = ({ searching }: Props) => {
       data-cy="community-contributors-empty"
     >
       <Typography sx={{ opacity: 0.8 }}>
-        {searching
+        {noLanguages
+          ? t(
+              'set_at_least_one_language_error',
+              'Select at least one language.'
+            )
+          : searching
           ? t('community_contributors_search_empty', 'No contributors found')
           : t(
               'community_contributors_empty',

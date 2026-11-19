@@ -69,6 +69,10 @@ describe('Options with 5 Translations', () => {
       cy.gcy('translations-language-select-base')
         .find('input')
         .should('not.be.checked');
+      cy.gcy('translations-language-select-all').click();
+      cy.gcy('translations-language-select-all')
+        .find('input')
+        .should('be.checked');
     });
 
     it('will search', () => {

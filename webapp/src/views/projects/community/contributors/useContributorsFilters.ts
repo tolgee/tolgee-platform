@@ -36,11 +36,12 @@ export const useContributorsFilters = (
   const languagesFromUrl = targetLanguages.filter((l) =>
     languagesParam?.includes(l.tag)
   );
-  const noLanguagesSelected = Boolean(languagesParam?.includes(NO_LANGUAGES));
-  const selectedLanguages = noLanguagesSelected
-    ? []
-    : languagesFromUrl.length
+  const noLanguagesSelected =
+    !languagesFromUrl.length && Boolean(languagesParam?.includes(NO_LANGUAGES));
+  const selectedLanguages = languagesFromUrl.length
     ? languagesFromUrl
+    : noLanguagesSelected
+    ? []
     : targetLanguages;
   const languageFilterActive =
     selectedLanguages.length < targetLanguages.length;

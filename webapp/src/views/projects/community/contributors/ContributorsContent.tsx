@@ -88,7 +88,7 @@ export const ContributorsContent = () => {
     query: contributorsQuery,
     options: {
       enabled: !noLanguagesSelected,
-      keepPreviousData: true,
+      keepPreviousData: !noLanguagesSelected,
       getNextPageParam: (lastPage) =>
         lastPage.page && lastPage.page.number! < lastPage.page.totalPages! - 1
           ? {
@@ -104,7 +104,10 @@ export const ContributorsContent = () => {
     method: 'get',
     path: { projectId: project.id },
     query: statsQuery,
-    options: { enabled: !noLanguagesSelected, keepPreviousData: true },
+    options: {
+      enabled: !noLanguagesSelected,
+      keepPreviousData: !noLanguagesSelected,
+    },
   });
 
   const totalContributors = contributors.data?.pages[0]?.page?.totalElements;
@@ -269,7 +272,7 @@ export const ContributorsContent = () => {
             <ArrowUpRight width={16} height={16} />
           </MuiLink>
         </Box>
-        {activity.data && !noLanguagesSelected ? (
+        {activity.data ? (
           <CommunityActivityChart
             buckets={activity.data.buckets}
             granularity={isDaily ? 'day' : 'week'}
@@ -280,7 +283,14 @@ export const ContributorsContent = () => {
         ) : activity.isError ? (
           <QueryErrorAlert code={activity.error?.code} />
         ) : (
-          <EmptyListMessage loading={activity.isLoading} />
+          <EmptyListMessage loading={activity.isLoading}>
+            {noLanguagesSelected && (
+              <T
+                keyName="set_at_least_one_language_error"
+                defaultValue="Select at least one language."
+              />
+            )}
+          </EmptyListMessage>
         )}
       </Box>
 
@@ -296,7 +306,7 @@ export const ContributorsContent = () => {
 
       {contributors.isLoading ? (
         <EmptyListMessage loading={true} />
-      ) : people.length && !noLanguagesSelected ? (
+      ) : people.length ? (
         <Box
           display="grid"
           gridTemplateColumns={{
@@ -338,7 +348,10 @@ export const ContributorsContent = () => {
       ) : contributors.isError ? (
         <QueryErrorAlert code={contributors.error?.code} />
       ) : (
-        <ContributorsEmptyState searching={Boolean(search)} />
+        <ContributorsEmptyState
+          searching={Boolean(search)}
+          noLanguages={noLanguagesSelected}
+        />
       )}
     </Box>
   );

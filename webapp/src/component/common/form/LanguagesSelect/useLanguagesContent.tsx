@@ -72,6 +72,13 @@ export const useLanguagesContent = ({
 }: Props) => {
   const { t } = useTranslate();
 
+  const availableLanguages = languages.filter(
+    (lang) => !disabledLanguages?.includes(lang.id)
+  );
+  const allSelected = availableLanguages.every((lang) =>
+    value.includes(lang.tag)
+  );
+
   const handleLanguageChange = (lang: string) => () => {
     const baseLang = languages.find((l) => l.base)?.tag;
     const result = value.includes(lang)
@@ -85,16 +92,16 @@ export const useLanguagesContent = ({
     onChange(result || []);
   };
 
-  const handleSelectAll = () => {
+  const handleToggleAll = () => {
     if (allSelected && enableEmpty) {
       onChange([]);
       return;
     }
-    const availableLanguages = languages
-      .filter((lang) => !disabledLanguages?.includes(lang.id))
-      .map((lang) => lang.tag);
     const baseLang = languages.find((l) => l.base)?.tag;
-    const result = putBaseLangFirst(availableLanguages, baseLang);
+    const result = putBaseLangFirst(
+      availableLanguages.map((lang) => lang.tag),
+      baseLang
+    );
     onChange(result || []);
   };
 
@@ -105,13 +112,6 @@ export const useLanguagesContent = ({
     }
     onChange([]);
   };
-
-  const availableLanguages = languages.filter(
-    (lang) => !disabledLanguages?.includes(lang.id)
-  );
-  const allSelected = availableLanguages.every((lang) =>
-    value.includes(lang.tag)
-  );
 
   const isBatchOperation = context === 'batch-operations';
   const isTranslations = context === 'translations';
@@ -143,7 +143,7 @@ export const useLanguagesContent = ({
     return [
       <MenuItem
         key="select-all"
-        onClick={handleSelectAll}
+        onClick={handleToggleAll}
         data-cy="translations-language-select-all"
       >
         <Checkbox checked={allSelected} size="small" />
@@ -175,7 +175,7 @@ export const useLanguagesContent = ({
     return [
       <MenuItem
         key="select-all"
-        onClick={handleSelectAll}
+        onClick={handleToggleAll}
         data-cy="translations-language-select-all"
       >
         <Checkbox checked={allSelected} size="small" />
