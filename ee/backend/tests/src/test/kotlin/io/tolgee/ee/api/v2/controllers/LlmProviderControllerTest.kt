@@ -159,6 +159,21 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `adds llm provider with thinking`() {
+    performAuthPost(
+      "/v2/organizations/${testData.organization.self.id}/llm-providers",
+      LlmProviderRequest(
+        name = "anthropic-provider",
+        type = LlmProviderType.ANTHROPIC,
+        apiUrl = "https://api.anthropic.com",
+        thinking = "between_tools",
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("thinking").isEqualTo("between_tools")
+    }
+  }
+
+  @Test
   fun `keeps SSRF protection for provider url when webhook local addresses are allowed`() {
     internalProperties.disableUrlSsrfProtection = false
     webhookProperties.allowLocalAddresses = true
@@ -202,8 +217,10 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
         name = "updated-provider",
         type = LlmProviderType.OPENAI_AZURE,
         apiUrl = "https://updated.example.com",
+        thinking = "adaptive",
       ),
     ).andIsOk.andAssertThatJson {
+      node("thinking").isEqualTo("adaptive")
       node("name").isEqualTo("updated-provider")
       node("type").isEqualTo("OPENAI_AZURE")
       node("apiUrl").isEqualTo("https://updated.example.com")

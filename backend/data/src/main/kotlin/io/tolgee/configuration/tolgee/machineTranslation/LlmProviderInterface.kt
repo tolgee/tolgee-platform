@@ -31,9 +31,20 @@ interface LlmProviderInterface {
   @DocProperty(description = "Provider deployment (azure only)")
   var deployment: String?
 
-  // openai
-  @DocProperty(description = "ChatGPT reasoning effort")
+  // openai, anthropic
+  @DocProperty(
+    description = """Reasoning effort. `reasoning_effort` option for OpenAI API.
+    `output_config.effort` for Anthropic API.""",
+  )
   var reasoningEffort: String?
+
+  // anthropic
+  @DocProperty(
+    description = """Thinking type for Anthropic API (`thinking.type`),
+    e.g. `disabled`, `between_tools` or `adaptive`. Which types a model accepts differs per model.
+    When empty, no `thinking` is sent and the model uses its default.""",
+  )
+  var thinking: String?
 
   var maxTokens: Long
 

@@ -112,6 +112,7 @@ class LlmProviderService(
         keepAlive = dto.keepAlive,
         format = dto.format,
         reasoningEffort = dto.reasoningEffort,
+        thinking = dto.thinking,
         organization = organizationService.get(organizationId),
       )
     llmProviderRepository.save(provider)
@@ -137,6 +138,7 @@ class LlmProviderService(
     provider.keepAlive = dto.keepAlive
     provider.format = dto.format
     provider.reasoningEffort = dto.reasoningEffort
+    provider.thinking = dto.thinking
     llmProviderRepository.save(provider)
     return provider.toDto()
   }

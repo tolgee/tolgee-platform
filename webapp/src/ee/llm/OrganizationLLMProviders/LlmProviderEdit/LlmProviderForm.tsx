@@ -56,40 +56,45 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
           options.label
         );
 
-        if (options.enum) {
-          return (
-            <Select
-              key={name}
-              name={name}
-              label={labelWithHint}
-              displayEmpty={true}
-              data-cy="llm-provider-form-select"
-              data-cy-name={name}
-            >
-              {options.enum.map((i) => (
-                <MenuItem key={i} value={i}>
-                  {i === undefined ? (
-                    <StyledEmpty>
-                      <T keyName="llm_provider_form_select_empty" />
-                    </StyledEmpty>
-                  ) : (
-                    i
-                  )}
-                </MenuItem>
-              ))}
-            </Select>
-          );
-        } else {
-          return (
-            <TextField
-              key={name}
-              name={name}
-              label={labelWithHint}
-              data-cy="llm-provider-form-text-field"
-              data-cy-name={name}
-            />
-          );
+        const field = options.enum ? (
+          <Select
+            key={name}
+            name={name}
+            label={labelWithHint}
+            displayEmpty={true}
+            data-cy="llm-provider-form-select"
+            data-cy-name={name}
+          >
+            {options.enum.map((i) => (
+              <MenuItem key={i} value={i}>
+                {i === undefined ? (
+                  <StyledEmpty>
+                    <T keyName="llm_provider_form_select_empty" />
+                  </StyledEmpty>
+                ) : (
+                  i
+                )}
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          <TextField
+            key={name}
+            name={name}
+            label={labelWithHint}
+            data-cy="llm-provider-form-text-field"
+            data-cy-name={name}
+          />
+        );
+
+        if (!options.newRow) {
+          return field;
         }
+        return (
+          <Box key={name} sx={{ gridColumnStart: 1 }}>
+            {field}
+          </Box>
+        );
       })}
 
       <Box

@@ -22,6 +22,8 @@ import org.springframework.web.client.exchange
 class AnthropicApiService :
   AbstractLlmApiService(),
   Logging {
+  override fun defaultAttempts(): List<Int> = listOf(60, 120)
+
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -31,21 +33,7 @@ class AnthropicApiService :
 
     val messages = getMessages(params)
 
-    val requestBody =
-      RequestBody(
-        messages = messages,
-        model = config.model,
-        max_tokens = config.maxTokens,
-        thinking = Thinking(type = "disabled"),
-        output_config =
-          if (params.shouldOutputJson && config.format == "json_schema") {
-            OutputConfig(format = OutputFormat(schema = params.responseSchema.schema))
-          } else {
-            null
-          },
-      )
-
-    val request = HttpEntity(requestBody, headers)
+    val request = HttpEntity(getRequestBody(params, config, messages), headers)
 
     val response: ResponseEntity<ResponseBody> =
       restTemplate.exchange<ResponseBody>(
@@ -73,6 +61,38 @@ class AnthropicApiService :
           )
         },
     )
+  }
+
+  private fun getRequestBody(
+    params: LlmParams,
+    config: LlmProviderInterface,
+    messages: List<RequestMessage>,
+  ): RequestBody {
+    return RequestBody(
+      messages = messages,
+      model = config.model,
+      max_tokens = config.maxTokens,
+      thinking = config.thinking?.takeIf { it.isNotBlank() }?.let { Thinking(type = it) },
+      output_config = getOutputConfig(params, config),
+    )
+  }
+
+  private fun getOutputConfig(
+    params: LlmParams,
+    config: LlmProviderInterface,
+  ): OutputConfig? {
+    val format = getOutputFormat(params, config)
+    val effort = config.reasoningEffort?.takeIf { it.isNotBlank() }
+    if (format == null && effort == null) return null
+    return OutputConfig(format = format, effort = effort)
+  }
+
+  private fun getOutputFormat(
+    params: LlmParams,
+    config: LlmProviderInterface,
+  ): OutputFormat? {
+    if (!params.shouldOutputJson || config.format != "json_schema") return null
+    return OutputFormat(schema = params.responseSchema.schema)
   }
 
   private fun getHeaders(config: LlmProviderInterface): HttpHeaders {
@@ -131,7 +151,8 @@ class AnthropicApiService :
       val stream: Boolean = false,
       val messages: List<RequestMessage>,
       val model: String?,
-      val thinking: Thinking,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val thinking: Thinking?,
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val output_config: OutputConfig? = null,
     )
@@ -140,8 +161,10 @@ class AnthropicApiService :
       val type: String,
     )
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     class OutputConfig(
-      val format: OutputFormat,
+      val format: OutputFormat? = null,
+      val effort: String? = null,
     )
 
     class OutputFormat(
