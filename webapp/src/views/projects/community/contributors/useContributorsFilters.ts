@@ -36,14 +36,22 @@ export const useContributorsFilters = (
   const languagesFromUrl = targetLanguages.filter((l) =>
     languagesParam?.includes(l.tag)
   );
+  const noLanguagesSelected =
+    !languagesFromUrl.length && Boolean(languagesParam?.includes(NO_LANGUAGES));
   const selectedLanguages = languagesFromUrl.length
     ? languagesFromUrl
+    : noLanguagesSelected
+    ? []
     : targetLanguages;
   const languageFilterActive =
     selectedLanguages.length < targetLanguages.length;
   const setLanguageTags = (tags: string[]) =>
     setLanguagesParam(
-      tags.length === targetLanguages.length ? undefined : tags
+      tags.length === targetLanguages.length
+        ? undefined
+        : tags.length
+        ? tags
+        : [NO_LANGUAGES]
     );
 
   const currentYear = new Date().getFullYear();
@@ -80,6 +88,7 @@ export const useContributorsFilters = (
     setSearchInput,
     search,
     selectedLanguages,
+    noLanguagesSelected,
     setLanguageTags,
   };
 };
@@ -95,6 +104,8 @@ const periodRange = (period: Period): { from: string; to?: string } => {
       : subMonths(today, period === 'quarter' ? 3 : 12);
   return { from: formatISO(from, { representation: 'date' }) };
 };
+
+const NO_LANGUAGES = '';
 
 const SORT_PARAMS: Record<SortValue, string[]> = {
   suggested: ['suggested,desc', 'accepted,desc'],
