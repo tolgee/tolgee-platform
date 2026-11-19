@@ -142,7 +142,11 @@ export const ProfileIdentity = ({ profile, isMe, isPublic }: Props) => {
           minWidth={0}
         >
           <StyledNameRow>
-            <Typography variant={compact ? 'h5' : 'h4'} component="h1">
+            <Typography
+              variant={compact ? 'h5' : 'h4'}
+              component="h1"
+              sx={{ overflowWrap: 'anywhere' }}
+            >
               {profile.name}
             </Typography>
             {isMe && isPublic && (
@@ -172,7 +176,7 @@ export const ProfileIdentity = ({ profile, isMe, isPublic }: Props) => {
             )}
           </StyledNameRow>
           {profile.languages.length > 0 && (
-            <Box display="flex" gap={0.75} alignItems="center">
+            <Box display="flex" flexWrap="wrap" gap={0.75} alignItems="center">
               {profile.languages.map((l) => (
                 <Tooltip key={l.tag} title={l.name}>
                   <span>
