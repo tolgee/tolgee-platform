@@ -12,6 +12,7 @@ import io.tolgee.dtos.request.project.EditProjectRequest
 import io.tolgee.model.Language
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.eq
@@ -21,6 +22,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import java.util.concurrent.CompletableFuture
 
 @SpringBootTest(
   properties = [
@@ -45,6 +47,11 @@ class LanguageCachingTest : AbstractSpringTest() {
     Mockito.reset(languageRepository)
   }
 
+  @AfterEach
+  fun cleanup() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @Test
   fun `it caches languages`() {
     languageService.getProjectLanguages(testData.project.id)
@@ -67,6 +74,30 @@ class LanguageCachingTest : AbstractSpringTest() {
       )
     }
     assertCacheEvicted()
+  }
+
+  @Test
+  fun `a language created while another transaction reads the list is found by id`() {
+    val created =
+      executeInNewTransaction {
+        languageService.getProjectLanguages(testData.project.id)
+        CompletableFuture
+          .supplyAsync {
+            executeInNewTransaction {
+              languageService.createLanguage(getLanguageDto(), project = testData.project)
+            }
+          }.join()
+      }
+
+    languageService
+      .get(created.id, testData.project.id)
+      .tag.assert
+      .isEqualTo("test")
+    languageService
+      .getProjectLanguages(testData.project.id)
+      .map { it.id }
+      .assert
+      .contains(created.id)
   }
 
   private fun getLanguageDto() =
