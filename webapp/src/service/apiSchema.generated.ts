@@ -30750,11 +30750,6 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
   };
   /**
    * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
@@ -30808,11 +30803,6 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
   };
   /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
   onInteractivityEvent: {
@@ -30856,11 +30846,6 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
       };
     };
   };

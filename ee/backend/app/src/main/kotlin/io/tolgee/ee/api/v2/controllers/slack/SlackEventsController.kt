@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
+import io.tolgee.ee.component.slackIntegration.SlackRawBodyFilter
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackRequestValidation
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackSlackCommandBlocksProvider
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -11,7 +12,7 @@ import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -44,7 +45,7 @@ class SlackEventsController(
   fun onInteractivityEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody payload: String,
+    @RequestAttribute(SlackRawBodyFilter.RAW_BODY_ATTRIBUTE) payload: String,
   ) {
     val event: SlackEventDto = validateAndParsePayload(payload, slackSignature, timestamp)
 
@@ -91,7 +92,7 @@ class SlackEventsController(
   fun fetchBotEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody payload: String,
+    @RequestAttribute(SlackRawBodyFilter.RAW_BODY_ATTRIBUTE) payload: String,
   ): Any? {
     val data: Map<String, Any?> = validateAndParsePayload(payload, slackSignature, timestamp)
 
