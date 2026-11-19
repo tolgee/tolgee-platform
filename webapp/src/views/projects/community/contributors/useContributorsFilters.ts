@@ -3,6 +3,7 @@ import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { yearsSince } from 'tg.component/community/yearsSince';
 import { SortValue } from 'tg.views/projects/community/contributors/ContributorsToolbar';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -46,13 +47,7 @@ export const useContributorsFilters = (
       tags.length === targetLanguages.length ? undefined : tags
     );
 
-  const currentYear = new Date().getFullYear();
-  const firstYear = Math.max(
-    currentYear - 1,
-    projectCreatedAt ? new Date(projectCreatedAt).getFullYear() : currentYear
-  );
-  const years =
-    firstYear === currentYear ? [currentYear] : [currentYear, firstYear];
+  const years = yearsSince([projectCreatedAt]);
   const period = parsePeriod(periodParam, years);
   const isDaily = period === 'month' || period === 'quarter';
 

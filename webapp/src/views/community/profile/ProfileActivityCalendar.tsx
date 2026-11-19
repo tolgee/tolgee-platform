@@ -47,19 +47,20 @@ const levelOf = (count: number) =>
 type Props = {
   buckets: Bucket[];
   year: number;
+  years: number[];
   onYearChange: (year: number) => void;
 };
 
 export const ProfileActivityCalendar = ({
   buckets,
   year,
+  years,
   onYearChange,
 }: Props) => {
   const { t } = useTranslate();
   const theme = useTheme();
   const formatDate = useDateFormatter();
   const [mode, setMode] = useState<CommunityChartMode>('suggested');
-  const currentYear = new Date().getFullYear();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [measuredWidth, setMeasuredWidth] = useState<number>();
@@ -244,7 +245,7 @@ export const ProfileActivityCalendar = ({
             onChange={(e) => onYearChange(Number(e.target.value))}
             data-cy="community-profile-calendar-year"
           >
-            {[currentYear, currentYear - 1].map((y) => (
+            {years.map((y) => (
               <MenuItem key={y} value={y}>
                 {y}
               </MenuItem>
