@@ -8,8 +8,11 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -38,17 +41,28 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
   @MockitoBean
   lateinit var slackChannelMessagesOperations: SlackChannelMessagesOperations
 
+  lateinit var testData: SlackTestData
+
   @BeforeAll
   fun setUp() {
     tolgeeProperties.slack.token = "token"
     tolgeeProperties.slack.signingSecret = "fakeSecret"
   }
 
+  @BeforeEach
+  fun saveTestData() {
+    Mockito.reset(slackChannelMessagesOperations)
+    testData = SlackTestData()
+    testDataService.saveTestData(testData.root)
+  }
+
+  @AfterEach
+  fun cleanUp() {
+    testDataService.cleanTestData(testData.root)
+  }
+
   @Test
   fun `forged bot event with redirect marker does not bypass signature validation`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
-
     // A forged, unsigned payload that smuggles the "redirect" marker together with an
     // app_uninstalled event for a known team id. It must not delete the workspace.
     val payload =
@@ -65,9 +79,6 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `properly signed app_uninstalled bot event deletes the workspace`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
-
     val payload = """{"team_id":"slackTeamId","event":{"type":"app_uninstalled"}}"""
     val timestamp = Instant.now().epochSecond.toString()
 
@@ -82,9 +93,6 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `unsigned interactivity payload with redirect marker is rejected and runs no action`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
-
     // A forged, unsigned payload smuggling the "redirect" marker next to a help button for a known team.
     val body = interactivityBody("redirect", "help_btn")
 
@@ -95,9 +103,6 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `signed redirect button payload is accepted and sends nothing`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
-
     val body = interactivityBody("redirect")
     val timestamp = Instant.now().epochSecond.toString()
 
@@ -108,9 +113,6 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `signed help button payload sends the help message`() {
-    val testData = SlackTestData()
-    testDataService.saveTestData(testData.root)
-
     val body = interactivityBody("help_btn")
     val timestamp = Instant.now().epochSecond.toString()
 
@@ -124,7 +126,27 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
     )
   }
 
-  private fun interactivityBody(vararg actionValues: String): String {
+  @Test
+  fun `signed help button payload is accepted when Slack percent-encodes differently than Java`() {
+    val body = interactivityBody("help_btn", messageText = "*Bold*").slackStyleEncoded()
+    val timestamp = Instant.now().epochSecond.toString()
+
+    performSlackPost("/on-event", body, signature = sign(body, timestamp), timestamp = timestamp).andIsOk
+
+    verify(slackChannelMessagesOperations).sendMessage(
+      eq(SlackChannelMessagesOperations.SlackTeamId("slackTeamId")),
+      eq("testChannel"),
+      any(),
+      anyOrNull(),
+    )
+  }
+
+  private fun String.slackStyleEncoded() = replace("*", "%2A")
+
+  private fun interactivityBody(
+    vararg actionValues: String,
+    messageText: String = "",
+  ): String {
     val json =
       objectMapper.writeValueAsString(
         mapOf(
@@ -138,6 +160,7 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
             },
           "trigger_id" to "tr",
           "team" to mapOf("id" to "slackTeamId", "domain" to "d"),
+          "message" to mapOf("text" to messageText),
         ),
       )
     return "payload=" + URLEncoder.encode(json, StandardCharsets.UTF_8)
@@ -153,7 +176,7 @@ class SlackEventsControllerTest : AuthorizedControllerTest() {
       .post("/v2/public/slack$path")
       .header("X-Slack-Signature", signature)
       .header("X-Slack-Request-Timestamp", timestamp)
-      .contentType(MediaType.TEXT_PLAIN)
+      .contentType(if (path == "/on-event") MediaType.APPLICATION_FORM_URLENCODED else MediaType.APPLICATION_JSON)
       .content(body)
       .headers(HttpHeaders.EMPTY),
   )
