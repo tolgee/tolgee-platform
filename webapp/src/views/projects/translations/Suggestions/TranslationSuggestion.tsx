@@ -212,8 +212,8 @@ export const TranslationSuggestion = ({
         title={
           project.public ? (
             <ContributorPopoverCard
-              author={suggestion.author}
-              viewableLanguages={viewableLanguages}
+              contributor={suggestion.author}
+              projectLanguages={viewableLanguages}
               onContentChange={() => popperRef.current?.update()}
             />
           ) : (

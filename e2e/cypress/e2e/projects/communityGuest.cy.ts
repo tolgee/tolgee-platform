@@ -161,9 +161,13 @@ describe('Community project browsed without an account', () => {
       value: 'community-top-contributor',
       'user-id': String(aliceId),
     }).trigger('mouseover');
-    gcy('suggestion-author-card').should('be.visible');
+    gcy('contributor-popover-card').should('be.visible');
     gcy('community-contributor-card-contributions').should('be.visible');
-    gcy('community-contributor-card-flag').should('have.length', 3);
+    const aliceLanguagesInSeed = 3;
+    gcy('community-contributor-card-flag').should(
+      'have.length',
+      aliceLanguagesInSeed
+    );
     cy.location('pathname').should('contain', '/community');
   });
 

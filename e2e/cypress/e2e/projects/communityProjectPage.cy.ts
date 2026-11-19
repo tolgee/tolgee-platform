@@ -58,12 +58,16 @@ describe('Community project page', () => {
       value: 'community-top-contributor',
       'user-id': String(aliceId),
     }).trigger('mouseover');
-    gcy('suggestion-author-card').should('be.visible');
+    gcy('contributor-popover-card').should('be.visible');
     const aliceContributionsInSeed = 17;
     gcy('community-contributor-card-contributions')
       .invoke('text')
       .should('match', new RegExp(`\\b${aliceContributionsInSeed}\\b`));
-    gcy('community-contributor-card-flag').should('have.length', 3);
+    const aliceLanguagesInSeed = 3;
+    gcy('community-contributor-card-flag').should(
+      'have.length',
+      aliceLanguagesInSeed
+    );
     gcy('community-contributor-card-profile-link').should(
       'have.attr',
       'href',

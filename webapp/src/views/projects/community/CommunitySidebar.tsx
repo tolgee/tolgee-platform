@@ -1,11 +1,5 @@
-import { ReactNode, useEffect, useRef, useState } from 'react';
-import {
-  Box,
-  Link as MuiLink,
-  styled,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { ReactNode, useEffect, useState } from 'react';
+import { Box, Link as MuiLink, styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import {
@@ -16,17 +10,13 @@ import {
 } from '@untitled-ui/icons-react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { LabelHint } from 'tg.component/common/LabelHint';
-import { UserName } from 'tg.component/common/UserName';
-import { ContributorPopoverCard } from 'tg.component/community/ContributorPopoverCard';
 import { useDateFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
-import { useProject } from 'tg.hooks/useProject';
 
 import { ExpandableMarkdown } from 'tg.views/projects/community/ExpandableMarkdown';
 import { CommunityTopContributors } from 'tg.views/projects/community/useCommunityTopContributors';
+import { CommunityTopContributor } from 'tg.views/projects/community/CommunityTopContributor';
 import { isValidHttpUrl } from 'tg.fixtures/isValidUrl';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const IN_APP_DOCS_URL = 'https://docs.tolgee.io/translate-with-tolgee';
 
@@ -115,67 +105,6 @@ const Section = ({
         </Box>
       )}
     </Box>
-  );
-};
-
-type TopContributor = CommunityTopContributors['contributors'][number];
-
-const TopContributorCard = ({
-  contributor,
-  onContentChange,
-}: {
-  contributor: TopContributor;
-  onContentChange: () => void;
-}) => {
-  const project = useProject();
-  const languages = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { page: 0, size: 1000, sort: ['tag'] },
-  });
-  return (
-    <ContributorPopoverCard
-      author={contributor}
-      viewableLanguages={languages.data?._embedded?.languages}
-      onContentChange={onContentChange}
-    />
-  );
-};
-
-const TopContributor = ({ contributor }: { contributor: TopContributor }) => {
-  const popperRef = useRef<any>(null);
-  return (
-    <Tooltip
-      PopperProps={{ popperRef }}
-      componentsProps={{ tooltip: { sx: { maxWidth: 'none' } } }}
-      title={
-        <TopContributorCard
-          contributor={contributor}
-          onContentChange={() => popperRef.current?.update()}
-        />
-      }
-    >
-      <Box
-        display="flex"
-        alignItems="center"
-        gap={1}
-        justifySelf="start"
-        data-cy="community-top-contributor"
-        data-cy-user-id={contributor.id}
-      >
-        <AvatarImg
-          owner={{
-            name: contributor.name,
-            avatar: contributor.avatar,
-            type: 'USER',
-            id: contributor.id,
-          }}
-          size={24}
-        />
-        <UserName name={contributor.name} />
-      </Box>
-    </Tooltip>
   );
 };
 
@@ -339,7 +268,7 @@ export const CommunitySidebar = ({
         {top && top.contributors.length ? (
           <>
             {top.contributors.map((c) => (
-              <TopContributor key={c.id} contributor={c} />
+              <CommunityTopContributor key={c.id} contributor={c} />
             ))}
             <MuiLink
               component={Link}

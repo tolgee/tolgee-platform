@@ -374,6 +374,8 @@ declare namespace DataCy {
         "content-delivery-storage-selector-item": true;
         "content-delivery-subtitle": true;
         "content-delivery-zip-export-checkbox": true;
+        "contributor-popover-card": true;
+        "contributor-popover-card-no-stats": true;
         "create-edit-glossary-cancel": true;
         "create-edit-glossary-dialog": true;
         "create-edit-glossary-submit": true;
@@ -1016,8 +1018,6 @@ declare namespace DataCy {
         "submenu-item": true;
         "suggestion-action": true;
         "suggestion-author": true;
-        "suggestion-author-card": true;
-        "suggestion-author-card-no-stats": true;
         "suggestion-author-tooltip": true;
         "suggestions-list": true;
         "suggestions-show-all": true;
