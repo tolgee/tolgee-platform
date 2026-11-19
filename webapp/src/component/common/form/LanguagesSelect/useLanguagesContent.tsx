@@ -86,6 +86,10 @@ export const useLanguagesContent = ({
   };
 
   const handleSelectAll = () => {
+    if (allSelected && enableEmpty) {
+      onChange([]);
+      return;
+    }
     const availableLanguages = languages
       .filter((lang) => !disabledLanguages?.includes(lang.id))
       .map((lang) => lang.tag);

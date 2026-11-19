@@ -109,6 +109,27 @@ describe('Community contributors page', () => {
     gcy('community-contributor-card').should('have.length.at.least', 2);
   });
 
+  it('toggles all languages off and on with the all languages item', () => {
+    visitPage();
+    gcy('translations-language-select-form-control').click();
+    gcy('translations-language-select-all').click();
+    dismissMenu();
+    cy.location('search').should('match', /languages=(&|$)/);
+    gcy('community-contributors-empty').should('be.visible');
+    gcy('community-contributor-card').should('not.exist');
+
+    cy.reload();
+    waitForGlobalLoading();
+    gcy('community-contributors-empty').should('be.visible');
+    gcy('community-contributor-card').should('not.exist');
+
+    gcy('translations-language-select-form-control').click();
+    gcy('translations-language-select-all').click();
+    dismissMenu();
+    cy.location('search').should('not.include', 'languages');
+    gcy('community-contributor-card').should('have.length.at.least', 2);
+  });
+
   it('changes the sort order and keeps it in the url', () => {
     visitPage();
     cy.intercept(/community\/contributors\?.*sort=contributions/).as(

@@ -68,6 +68,7 @@ export const ContributorsContent = () => {
     setSearchInput,
     search,
     selectedLanguages,
+    noLanguagesSelected,
     setLanguageTags,
   } = useContributorsFilters(projectLanguages, project.createdAt);
 
@@ -86,6 +87,7 @@ export const ContributorsContent = () => {
     path: { projectId: project.id },
     query: contributorsQuery,
     options: {
+      enabled: !noLanguagesSelected,
       keepPreviousData: true,
       getNextPageParam: (lastPage) =>
         lastPage.page && lastPage.page.number! < lastPage.page.totalPages! - 1
@@ -102,7 +104,7 @@ export const ContributorsContent = () => {
     method: 'get',
     path: { projectId: project.id },
     query: statsQuery,
-    options: { keepPreviousData: true },
+    options: { enabled: !noLanguagesSelected, keepPreviousData: true },
   });
 
   const totalContributors = contributors.data?.pages[0]?.page?.totalElements;
@@ -135,6 +137,8 @@ export const ContributorsContent = () => {
     value: selectedLanguages.map((l) => l.tag),
     onChange: setLanguageTags,
     context: 'translations',
+    enableEmpty: true,
+    placeholder: t('batch_operations_select_languages_placeholder'),
     allSelectedLabel: t('community_languages_all', 'All languages'),
   };
 
@@ -265,7 +269,7 @@ export const ContributorsContent = () => {
             <ArrowUpRight width={16} height={16} />
           </MuiLink>
         </Box>
-        {activity.data ? (
+        {activity.data && !noLanguagesSelected ? (
           <CommunityActivityChart
             buckets={activity.data.buckets}
             granularity={isDaily ? 'day' : 'week'}
@@ -292,7 +296,7 @@ export const ContributorsContent = () => {
 
       {contributors.isLoading ? (
         <EmptyListMessage loading={true} />
-      ) : people.length ? (
+      ) : people.length && !noLanguagesSelected ? (
         <Box
           display="grid"
           gridTemplateColumns={{
