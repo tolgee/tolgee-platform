@@ -33,7 +33,7 @@ describe('buildSearchRequestParams', () => {
   it('maps qualifiers to pattern params', () => {
     expect(
       buildSearchRequestParams(
-        'key:cart* description:legal namespace:web translation:foo de:Warenkorb',
+        'key:cart* description:legal namespace:web translation:foo de:Warenkorb comment:wording',
         LANGS
       )
     ).toEqual({
@@ -41,6 +41,7 @@ describe('buildSearchRequestParams', () => {
       filterDescriptionPattern: ['legal'],
       filterNamespacePattern: ['web'],
       filterTranslationPattern: ['*,foo', 'de,Warenkorb'],
+      filterCommentPattern: ['wording'],
       search: undefined,
     });
   });
@@ -48,7 +49,7 @@ describe('buildSearchRequestParams', () => {
   it('maps negated qualifiers to negated params', () => {
     expect(
       buildSearchRequestParams(
-        '-key:internal_* -description:legacy -namespace:web -translation:draft -de:Warenkorb',
+        '-key:internal_* -description:legacy -namespace:web -translation:draft -de:Warenkorb -comment:todo',
         LANGS
       )
     ).toEqual({
@@ -56,6 +57,7 @@ describe('buildSearchRequestParams', () => {
       filterNoDescriptionPattern: ['legacy'],
       filterNoNamespacePattern: ['web'],
       filterNoTranslationPattern: ['*,draft', 'de,Warenkorb'],
+      filterNoCommentPattern: ['todo'],
       search: undefined,
     });
   });

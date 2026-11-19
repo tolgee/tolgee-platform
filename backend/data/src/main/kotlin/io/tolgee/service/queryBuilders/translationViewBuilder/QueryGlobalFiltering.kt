@@ -28,6 +28,7 @@ import io.tolgee.model.task.Task_
 import io.tolgee.model.temp.UnsuccessfulJobKey
 import io.tolgee.model.temp.UnsuccessfulJobKey_
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import jakarta.persistence.EntityManager
 import jakarta.persistence.Tuple
@@ -136,6 +137,8 @@ class QueryGlobalFiltering(
     )
     applyTranslationPatterns(params.filterTranslationPattern, negated = false)
     applyTranslationPatterns(params.filterNoTranslationPattern, negated = true)
+    applyCommentPatterns(params.filterCommentPattern, negated = false)
+    applyCommentPatterns(params.filterNoCommentPattern, negated = true)
   }
 
   private fun applyFieldPatterns(
@@ -173,6 +176,20 @@ class QueryGlobalFiltering(
       val predicate =
         queryBase.queryTranslationFiltering.buildTranslationExists(patternLanguageIds(filter.languageTag)) {
           patternLike(it.get(Translation_.text), filter.pattern)
+        }
+      queryBase.whereConditions.add(negateIfNeeded(predicate, negated))
+    }
+  }
+
+  private fun applyCommentPatterns(
+    patterns: List<String>?,
+    negated: Boolean,
+  ) {
+    WildcardLikeUtil.validatePatterns(patterns)
+    patterns?.forEach { pattern ->
+      val predicate =
+        queryBase.queryTranslationFiltering.buildCommentExists(patternLanguageIds(null)) {
+          patternLike(it.get(TranslationComment_.text), pattern)
         }
       queryBase.whereConditions.add(negateIfNeeded(predicate, negated))
     }

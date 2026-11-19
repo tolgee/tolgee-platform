@@ -21177,6 +21177,18 @@ export interface operations {
          * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
+        /**
+         * Selects only keys with a comment on a translation in any of the returned languages
+         * matching the provided pattern. Each pattern can be matched by a different comment.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterCommentPattern?: string[];
+        /**
+         * Selects only keys with no comment on a translation in any of the returned languages
+         * matching the provided pattern. Keys without comments always match.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -21470,6 +21482,18 @@ export interface operations {
          * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
+        /**
+         * Selects only keys with a comment on a translation in any of the returned languages
+         * matching the provided pattern. Each pattern can be matched by a different comment.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterCommentPattern?: string[];
+        /**
+         * Selects only keys with no comment on a translation in any of the returned languages
+         * matching the provided pattern. Keys without comments always match.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -21807,6 +21831,18 @@ export interface operations {
          * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
+        /**
+         * Selects only keys with a comment on a translation in any of the returned languages
+         * matching the provided pattern. Each pattern can be matched by a different comment.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterCommentPattern?: string[];
+        /**
+         * Selects only keys with no comment on a translation in any of the returned languages
+         * matching the provided pattern. Keys without comments always match.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -28015,6 +28051,18 @@ export interface operations {
          * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
+        /**
+         * Selects only keys with a comment on a translation in any of the returned languages
+         * matching the provided pattern. Each pattern can be matched by a different comment.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterCommentPattern?: string[];
+        /**
+         * Selects only keys with no comment on a translation in any of the returned languages
+         * matching the provided pattern. Keys without comments always match.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */
@@ -28520,6 +28568,18 @@ export interface operations {
          * patterns may be provided per parameter; violations fail with 400.
          */
         filterNoTranslationPattern?: string[];
+        /**
+         * Selects only keys with a comment on a translation in any of the returned languages
+         * matching the provided pattern. Each pattern can be matched by a different comment.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterCommentPattern?: string[];
+        /**
+         * Selects only keys with no comment on a translation in any of the returned languages
+         * matching the provided pattern. Keys without comments always match.
+         * Pattern syntax and limits are the same as for `filterKeyPattern`.
+         */
+        filterNoCommentPattern?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
         /** Selects only keys without provided tag */

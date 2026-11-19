@@ -107,13 +107,17 @@ class QueryTranslationFiltering(
   /** `filterHasCommentsInLang` — collapsed, over `TranslationComment`. */
   fun applyHasCommentsFilter() {
     val langIds = languageIdsForTags(params.filterHasCommentsInLang) ?: return
-    queryBase.translationConditions.add(buildCommentExists(langIds, unresolvedOnly = false))
+    queryBase.translationConditions.add(buildCommentExists(langIds))
   }
 
   /** `filterHasUnresolvedCommentsInLang` — collapsed, `state = NEEDS_RESOLUTION`. */
   fun applyHasUnresolvedCommentsFilter() {
     val langIds = languageIdsForTags(params.filterHasUnresolvedCommentsInLang) ?: return
-    queryBase.translationConditions.add(buildCommentExists(langIds, unresolvedOnly = true))
+    queryBase.translationConditions.add(
+      buildCommentExists(langIds) {
+        cb.equal(it.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
+      },
+    )
   }
 
   /** `filterHasSuggestionsInLang` — collapsed, over `TranslationSuggestion`, `state = ACTIVE`. */
@@ -285,9 +289,9 @@ class QueryTranslationFiltering(
       extraConditions = { listOf(extra(it)) },
     )
 
-  private fun buildCommentExists(
+  fun buildCommentExists(
     languageIds: List<Long>,
-    unresolvedOnly: Boolean,
+    extra: (Root<TranslationComment>) -> Predicate = { cb.conjunction() },
   ): Predicate =
     buildExistsOrIn(
       TranslationComment::class.java,
@@ -296,13 +300,7 @@ class QueryTranslationFiltering(
         it.get(TranslationComment_.translation).get(Translation_.language).get(Language_.id)
       },
       languageIds = languageIds,
-      extraConditions = { tc ->
-        if (unresolvedOnly) {
-          listOf(cb.equal(tc.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION))
-        } else {
-          emptyList()
-        }
-      },
+      extraConditions = { listOf(extra(it)) },
     )
 
   private fun buildActiveSuggestionExists(languageIds: List<Long>): Predicate =

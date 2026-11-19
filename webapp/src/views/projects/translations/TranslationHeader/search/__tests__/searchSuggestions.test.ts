@@ -13,6 +13,7 @@ describe('getSuggestions', () => {
       'description:',
       'namespace:',
       'translation:',
+      'comment:',
       'en:',
       'de:',
       'en-US:',

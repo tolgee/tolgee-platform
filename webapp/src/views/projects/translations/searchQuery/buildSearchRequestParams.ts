@@ -25,6 +25,8 @@ export type SearchRequestParams = Pick<
   | 'filterNoNamespacePattern'
   | 'filterTranslationPattern'
   | 'filterNoTranslationPattern'
+  | 'filterCommentPattern'
+  | 'filterNoCommentPattern'
 >;
 
 type PatternParamName = Exclude<keyof SearchRequestParams, 'search'>;
@@ -38,6 +40,10 @@ const PATTERN_PARAMS = {
   namespace: {
     base: 'filterNamespacePattern',
     negated: 'filterNoNamespacePattern',
+  },
+  comment: {
+    base: 'filterCommentPattern',
+    negated: 'filterNoCommentPattern',
   },
 } as const;
 
