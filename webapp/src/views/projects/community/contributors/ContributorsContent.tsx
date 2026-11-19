@@ -141,7 +141,10 @@ export const ContributorsContent = () => {
     onChange: setLanguageTags,
     context: 'translations',
     enableEmpty: true,
-    placeholder: t('batch_operations_select_languages_placeholder'),
+    placeholder: t(
+      'batch_operations_select_languages_placeholder',
+      'Select languages...'
+    ),
     allSelectedLabel: t('community_languages_all', 'All languages'),
   };
 
@@ -349,8 +352,22 @@ export const ContributorsContent = () => {
         <QueryErrorAlert code={contributors.error?.code} />
       ) : (
         <ContributorsEmptyState
-          searching={Boolean(search)}
-          noLanguages={noLanguagesSelected}
+          message={
+            noLanguagesSelected
+              ? t(
+                  'set_at_least_one_language_error',
+                  'Select at least one language.'
+                )
+              : search
+              ? t(
+                  'community_contributors_search_empty',
+                  'No contributors found'
+                )
+              : t(
+                  'community_contributors_empty',
+                  'No contributions in this period'
+                )
+          }
         />
       )}
     </Box>

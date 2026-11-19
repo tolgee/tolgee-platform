@@ -1,10 +1,8 @@
 import { Box, Typography, useTheme } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
 
-type Props = { searching: boolean; noLanguages: boolean };
+type Props = { message: string };
 
-export const ContributorsEmptyState = ({ searching, noLanguages }: Props) => {
-  const { t } = useTranslate();
+export const ContributorsEmptyState = ({ message }: Props) => {
   const theme = useTheme();
   return (
     <Box
@@ -15,19 +13,7 @@ export const ContributorsEmptyState = ({ searching, noLanguages }: Props) => {
       py={6}
       data-cy="community-contributors-empty"
     >
-      <Typography sx={{ opacity: 0.8 }}>
-        {noLanguages
-          ? t(
-              'set_at_least_one_language_error',
-              'Select at least one language.'
-            )
-          : searching
-          ? t('community_contributors_search_empty', 'No contributors found')
-          : t(
-              'community_contributors_empty',
-              'No contributions in this period'
-            )}
-      </Typography>
+      <Typography sx={{ opacity: 0.8 }}>{message}</Typography>
       <img
         src={
           theme.palette.mode === 'dark'
