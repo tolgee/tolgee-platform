@@ -22,7 +22,8 @@ import {
 } from '@untitled-ui/icons-react';
 import { useProject } from 'tg.hooks/useProject';
 import { SuggestionAction } from './SuggestionAction';
-import { SuggestionAuthorCard } from 'tg.views/projects/translations/Suggestions/SuggestionAuthorCard';
+import { ContributorPopoverCard } from 'tg.component/community/ContributorPopoverCard';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 import { useUserName } from 'tg.component/common/UserName';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { useRef, useState } from 'react';
@@ -130,6 +131,7 @@ export const TranslationSuggestion = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
   const popperRef = useRef<any>(null);
+  const viewableLanguages = useTranslationsSelector((c) => c.languages);
 
   const active = suggestion.state === 'ACTIVE';
   const dimSx = { opacity: active ? 1 : 0.5 };
@@ -209,8 +211,9 @@ export const TranslationSuggestion = ({
         componentsProps={{ tooltip: { sx: { maxWidth: 'none' } } }}
         title={
           project.public ? (
-            <SuggestionAuthorCard
+            <ContributorPopoverCard
               author={suggestion.author}
+              viewableLanguages={viewableLanguages}
               onContentChange={() => popperRef.current?.update()}
             />
           ) : (

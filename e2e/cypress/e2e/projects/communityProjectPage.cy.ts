@@ -1,7 +1,7 @@
 import { HOST } from '../../common/constants';
 import { login } from '../../common/apiCalls/common';
 import { communityStatsData } from '../../common/apiCalls/testData/testData';
-import { gcy } from '../../common/shared';
+import { gcy, gcyAdvanced } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2CommunityPageSettings } from '../../compounds/projectSettings/E2CommunityPageSettings';
 
@@ -12,11 +12,15 @@ const PROJECT_NAME = 'Community Stats Demo';
 
 describe('Community project page', () => {
   let projectId: number;
+  let aliceId: number;
 
   beforeEach(() => {
     communityStatsData.clean();
     communityStatsData.generateStandard().then((res) => {
       projectId = res.body.projects.find((p) => p.name === PROJECT_NAME).id;
+      aliceId = res.body.users.find(
+        (u) => u.username === 'alice@community.test'
+      ).id;
       login(OWNER, 'admin');
     });
   });
@@ -46,6 +50,25 @@ describe('Community project page', () => {
           .should('have.attr', 'href')
           .and('include', `/community/contributors?period=${period}`);
       });
+  });
+
+  it('shows the contributor card when hovering a top contributor', () => {
+    visitPage();
+    gcyAdvanced({
+      value: 'community-top-contributor',
+      'user-id': String(aliceId),
+    }).trigger('mouseover');
+    gcy('suggestion-author-card').should('be.visible');
+    const aliceContributionsInSeed = 17;
+    gcy('community-contributor-card-contributions')
+      .invoke('text')
+      .should('match', new RegExp(`\\b${aliceContributionsInSeed}\\b`));
+    gcy('community-contributor-card-flag').should('have.length', 3);
+    gcy('community-contributor-card-profile-link').should(
+      'have.attr',
+      'href',
+      `/users/${aliceId}`
+    );
   });
 
   const stubRecentTopTotal = (total: number) => {

@@ -1,5 +1,5 @@
 import { HOST } from '../../common/constants';
-import { gcy, visitProjectSettings } from '../../common/shared';
+import { gcy, gcyAdvanced, visitProjectSettings } from '../../common/shared';
 import { visitExport } from '../../common/export';
 import { loginViaForm } from '../../common/login';
 import { communityStatsData } from '../../common/apiCalls/testData/testData';
@@ -152,6 +152,19 @@ describe('Community project browsed without an account', () => {
     waitForGlobalLoading();
     gcy('community-contributor-card').should('have.length.at.least', 2);
     gcy('guest-login-button').should('be.visible');
+  });
+
+  it('shows a top contributor card to a guest on hover', () => {
+    cy.visit(`${HOST}/projects/${publicProjectId}/community`);
+    waitForGlobalLoading();
+    gcyAdvanced({
+      value: 'community-top-contributor',
+      'user-id': String(aliceId),
+    }).trigger('mouseover');
+    gcy('suggestion-author-card').should('be.visible');
+    gcy('community-contributor-card-contributions').should('be.visible');
+    gcy('community-contributor-card-flag').should('have.length', 3);
+    cy.location('pathname').should('contain', '/community');
   });
 
   it('shows a contributor profile to a guest', () => {

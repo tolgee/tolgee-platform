@@ -7,22 +7,28 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useUser } from 'tg.globalContext/helpers';
 import { ContributorCard } from 'tg.component/community/ContributorCard';
-import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
-import { useUserName } from 'tg.component/common/UserName';
+import { SimpleUser, useUserName } from 'tg.component/common/UserName';
 
-type SimpleUserAccountModel = components['schemas']['SimpleUserAccountModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
-  author: SimpleUserAccountModel;
+  author: SimpleUser & {
+    id: number;
+    avatar?: components['schemas']['Avatar'];
+  };
+  viewableLanguages: LanguageModel[] | undefined;
   onContentChange: () => void;
 };
 
-export const SuggestionAuthorCard = ({ author, onContentChange }: Props) => {
+export const ContributorPopoverCard = ({
+  author,
+  viewableLanguages,
+  onContentChange,
+}: Props) => {
   const project = useProject();
   const user = useUser();
   const getUserName = useUserName();
   const isMe = user?.id === author.id;
-  const viewableLanguages = useTranslationsSelector((c) => c.languages);
   const { data, isLoading, error } = useApiQuery({
     url: '/v2/projects/{projectId}/community/contributors/{userId}',
     method: 'get',
