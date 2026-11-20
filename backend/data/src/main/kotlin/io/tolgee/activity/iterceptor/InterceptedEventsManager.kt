@@ -5,6 +5,7 @@ import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.annotation.ActivityUrlHostOnly
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.activity.data.ModifiedCollectionKey
@@ -22,6 +23,7 @@ import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.branching.EntityWithBranch
 import io.tolgee.model.key.Key
 import io.tolgee.util.extractEntityId
+import io.tolgee.util.urlHostOnly
 import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
@@ -340,7 +342,8 @@ class InterceptedEventsManager(
         val old = previousState?.get(idx)
         val new = currentState?.get(idx)
         val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
-        propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
+        val changes = provider.getChanges(old, new) ?: return@mapIndexedNotNull null
+        propertyName to withUrlReducedToHost(entity, propertyName, changes)
       }.toMap()
   }
 
@@ -371,17 +374,41 @@ class InterceptedEventsManager(
 
   private fun getEntityIgnoredMembers(entity: Any): Set<String> {
     return ignoredMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class
-        .members
-        .filter {
-          it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
-        }.map { it.name }
-        .toSet()
+      namesOfMembersAnnotatedWith(entity, ActivityIgnoredProp::class.java)
     }
+  }
+
+  private fun withUrlReducedToHost(
+    entity: Any,
+    propertyName: String,
+    changes: PropertyModification,
+  ): PropertyModification {
+    if (propertyName in getEntityUrlHostOnlyMembers(entity)) {
+      return PropertyModification(urlHostOnly(changes.old), urlHostOnly(changes.new))
+    }
+    return changes
+  }
+
+  private fun getEntityUrlHostOnlyMembers(entity: Any): Set<String> {
+    return urlHostOnlyMembersCache.computeIfAbsent(entity::class.java) {
+      namesOfMembersAnnotatedWith(entity, ActivityUrlHostOnly::class.java)
+    }
+  }
+
+  private fun namesOfMembersAnnotatedWith(
+    entity: Any,
+    annotation: Class<out Annotation>,
+  ): Set<String> {
+    return entity::class
+      .members
+      .filter { it is KProperty<*> && (it.javaField?.isAnnotationPresent(annotation) ?: false) }
+      .map { it.name }
+      .toSet()
   }
 
   private val annotatedMembersCache: ConcurrentHashMap<Class<*>, Map<String, ActivityLoggedProp>> = ConcurrentHashMap()
   private val ignoredMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
+  private val urlHostOnlyMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
   private val collectionMembersCache: ConcurrentHashMap<Class<*>, List<KCallable<*>>> = ConcurrentHashMap()
   private val providerCache: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, PropChangesProvider>> =
     ConcurrentHashMap()
