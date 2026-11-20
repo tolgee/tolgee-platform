@@ -15,12 +15,6 @@ import java.net.ServerSocket
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-/**
- * The GHSA-hqr8-67r5-xj69 fix validates a project storage endpoint only on create/update/test. A storage saved before
- * that fix (or one whose host re-resolves to an internal address after validation) still reaches the endpoint on every
- * publish. These tests drive the publish path directly and assert the storage client no longer connects to a loopback
- * address unless local addresses are explicitly allowed.
- */
 class ContentStoragePublishSsrfTest : AbstractSpringTest() {
   @Autowired
   private lateinit var contentDeliveryUploader: ContentDeliveryUploader

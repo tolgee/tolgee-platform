@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpServer
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.tolgee.ContentStorageS3Properties
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.util.SsrfSafeDnsResolver
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -56,7 +56,8 @@ class S3FileStorageFactoryTest {
         publicRead = publicRead,
       )
     val internalProperties = InternalProperties()
-    val factory = S3FileStorageFactory(SsrfSafeDnsResolver(UrlSecurity(internalProperties), internalProperties))
-    factory.create(properties).storeFile("en.json", "{}".toByteArray())
+    val factory =
+      S3FileStorageFactory(SsrfSafeRequestFactoryProvider(UrlSecurity(internalProperties), internalProperties))
+    factory.create(properties, allowLocalAddresses = true).storeFile("en.json", "{}".toByteArray())
   }
 }

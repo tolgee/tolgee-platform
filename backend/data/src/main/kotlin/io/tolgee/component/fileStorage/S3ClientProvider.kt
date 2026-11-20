@@ -1,9 +1,9 @@
 package io.tolgee.component.fileStorage
 
 import io.tolgee.model.contentDelivery.S3Config
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import org.apache.hc.client5.http.DnsResolver
 import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider
-import org.apache.hc.client5.http.routing.HttpRoutePlanner
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
@@ -16,19 +16,17 @@ import software.amazon.awssdk.services.s3.LegacyMd5Plugin
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.S3ClientBuilder
 import software.amazon.awssdk.services.s3.S3Configuration
+import java.io.IOException
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.SocketAddress
 import java.net.URI
 
 class S3ClientProvider internal constructor(
   private val s3config: S3Config,
-  // When set, pins the client's DNS so it connects only to pre-validated addresses. Null keeps the SDK default
-  // resolver. Kept internal so the Apache HttpClient 5 types stay inside this module; callers outside use the
-  // single-argument constructor and the S3FileStorageFactory overloads to opt into pinning.
   private val dnsResolver: DnsResolver?,
-  // When set, routes through the operator's egress proxy (if any) while refusing a direct connection to the proxy
-  // host, so the dnsResolver's proxy-hop exemption cannot be abused. Pairs with dnsResolver on the pinned path.
-  private val routePlanner: HttpRoutePlanner?,
 ) {
-  constructor(s3config: S3Config) : this(s3config, null, null)
+  constructor(s3config: S3Config) : this(s3config, null)
 
   fun provide(): S3Client {
     val credentialsProvider = getCredentialsProvider()
@@ -37,28 +35,7 @@ class S3ClientProvider internal constructor(
       S3Client.builder().credentialsProvider(credentialsProvider).serviceConfiguration(
         S3Configuration.builder().pathStyleAccessEnabled(true).build(),
       )
-    if (dnsResolver != null || routePlanner != null) {
-      val httpClientBuilder = Apache5HttpClient.builder()
-      dnsResolver?.let { httpClientBuilder.dnsResolver(it) }
-      routePlanner?.let {
-        // Make the route planner the single proxy authority: it reads the JVM proxy properties itself and refuses a
-        // direct connection to the proxy host. The SDK rejects httpRoutePlanner together with an enabled
-        // proxyConfiguration, and its default proxyConfiguration is enabled whenever http(s).proxyHost is set, so turn
-        // the SDK's own proxy resolution off here. Restore proxy authentication (http.proxyUser/http.proxyPassword)
-        // that the disabled proxyConfiguration would otherwise have supplied, via the same system-default credentials
-        // provider SsrfSafeRequestFactoryProvider gets from useSystemProperties(). Mirrors SsrfSafeRequestFactoryProvider.
-        httpClientBuilder
-          .httpRoutePlanner(it)
-          .proxyConfiguration(
-            ProxyConfiguration
-              .builder()
-              .useSystemPropertyValues(false)
-              .useEnvironmentVariableValues(false)
-              .build(),
-          ).credentialsProvider(SystemDefaultCredentialsProvider())
-      }
-      builder.httpClientBuilder(httpClientBuilder)
-    }
+    dnsResolver?.let { builder.httpClientBuilder(pinnedHttpClient(it)) }
     if (!s3config.endpoint.isNullOrEmpty()) {
       builder.configureForCustomEndpoint()
     }
@@ -67,6 +44,21 @@ class S3ClientProvider internal constructor(
     }
     return builder.build()
   }
+
+  // The SDK refuses httpRoutePlanner while its own proxyConfiguration is enabled, which it is by default whenever
+  // http(s).proxyHost is set. Disabling it also drops proxy credentials, hence the system-default credentials provider.
+  private fun pinnedHttpClient(dnsResolver: DnsResolver): Apache5HttpClient.Builder =
+    Apache5HttpClient
+      .builder()
+      .dnsResolver(dnsResolver)
+      .httpRoutePlanner(SsrfSafeRequestFactoryProvider.proxyHopOnlyRoutePlanner(HttpProxyForHttpsSelector))
+      .proxyConfiguration(
+        ProxyConfiguration
+          .builder()
+          .useSystemPropertyValues(false)
+          .useEnvironmentVariableValues(false)
+          .build(),
+      ).credentialsProvider(SystemDefaultCredentialsProvider())
 
   private fun getCredentialsProvider(): AwsCredentialsProvider? =
     when (
@@ -100,4 +92,28 @@ class S3ClientProvider internal constructor(
       endpointOverride(URI.create("""https://${s3config.endpoint}"""))
     }
   }
+}
+
+/**
+ * Matches the SDK's own proxy selection, which sends https targets through a lone `http.proxyHost`; the JDK default
+ * selector only uses `https.proxyHost` for them.
+ */
+private object HttpProxyForHttpsSelector : ProxySelector() {
+  override fun select(uri: URI): MutableList<Proxy> {
+    val default = getDefault()
+    val selected = default.select(uri)
+    if (!"https".equals(uri.scheme, ignoreCase = true) || selected.any { it.type() != Proxy.Type.DIRECT }) {
+      return selected
+    }
+    val asHttp =
+      runCatching { URI("http", uri.userInfo, uri.host, uri.port, uri.path, uri.query, uri.fragment) }
+        .getOrNull() ?: return selected
+    return default.select(asHttp)
+  }
+
+  override fun connectFailed(
+    uri: URI,
+    sa: SocketAddress,
+    e: IOException,
+  ) = getDefault().connectFailed(uri, sa, e)
 }

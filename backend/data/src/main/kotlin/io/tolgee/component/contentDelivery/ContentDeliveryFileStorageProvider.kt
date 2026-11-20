@@ -20,20 +20,15 @@ class ContentDeliveryFileStorageProvider(
     return bypassForTesting() ?: defaultStorage
   }
 
-  /**
-   * @param allowLocalAddresses whether the storage endpoint may resolve to a local/internal address. Pass the value
-   * explicitly from the caller: project-level storages honour tolgee.content-delivery.storage.allow-local-addresses,
-   * while the operator's own server-level default storage passes true (it may legitimately point at MinIO on localhost
-   * or another internal host).
-   */
-  fun getStorage(
+  fun getStorage(config: StorageConfig): FileStorage =
+    createStorage(config, tolgeeProperties.contentDelivery.storage.allowLocalAddresses)
+
+  private fun createStorage(
     config: StorageConfig,
     allowLocalAddresses: Boolean,
   ): FileStorage {
     return bypassForTesting() ?: when (config) {
       is AzureBlobConfig -> {
-        // Azure SDK DNS pinning is handled in a separate change; see ContentStorageService.validateEndpoint for the
-        // save-time Azure guard that is already in place.
         azureFileStorageFactory.create(config)
       }
 
@@ -49,7 +44,7 @@ class ContentDeliveryFileStorageProvider(
 
   val defaultStorage by lazy {
     val props = getDefaultStorageProperties()
-    getStorage(props, allowLocalAddresses = true)
+    createStorage(props, allowLocalAddresses = true)
   }
 
   fun getDefaultStorageProperties(): StorageConfig {

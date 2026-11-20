@@ -115,11 +115,7 @@ class ContentStorageService(
     }
     try {
       validateEndpoint(config)
-      val storage =
-        contentDeliveryFileStorageProvider.getStorage(
-          config,
-          allowLocalAddresses = tolgeeProperties.contentDelivery.storage.allowLocalAddresses,
-        )
+      val storage = contentDeliveryFileStorageProvider.getStorage(config)
       storage.test()
     } catch (e: Exception) {
       if (e is ExceptionWithMessage) {

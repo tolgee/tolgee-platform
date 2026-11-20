@@ -11,7 +11,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.InvalidConnectionStringException
 import io.tolgee.testing.assert
 import io.tolgee.util.InMemoryFileStorage
-import io.tolgee.util.SsrfSafeDnsResolver
+import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -101,7 +101,7 @@ class FileStorageConfigurationTest {
   private fun fileStorage() =
     FileStorageConfiguration(
       properties,
-      S3FileStorageFactory(SsrfSafeDnsResolver(UrlSecurity(InternalProperties()), InternalProperties())),
+      S3FileStorageFactory(SsrfSafeRequestFactoryProvider(UrlSecurity(InternalProperties()), InternalProperties())),
       AzureFileStorageFactory(),
     ).fileStorage()
 

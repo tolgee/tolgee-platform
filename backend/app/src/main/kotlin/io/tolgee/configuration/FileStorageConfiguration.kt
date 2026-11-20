@@ -34,7 +34,7 @@ class FileStorageConfiguration(
       return createAzureFileStorage()
     }
     if (s3Config.enabled) {
-      return s3FileStorageFactory.create(s3Config)
+      return s3FileStorageFactory.create(s3Config, allowLocalAddresses = true)
     }
     return LocalFileStorage(tolgeeProperties = properties)
   }
