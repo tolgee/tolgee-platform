@@ -161,7 +161,10 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     val mockedFileStorage = mock<S3FileStorage>()
     doAnswer {
       mockedFileStorage
-    }.whenever(s3FileStorageFactory).create(any(), any())
+    }.whenever(s3FileStorageFactory).create(any())
+    doAnswer {
+      mockedFileStorage
+    }.whenever(s3FileStorageFactory).createSsrfSafe(any(), any())
     return mockedFileStorage
   }
 

@@ -22,12 +22,10 @@ import java.net.ProxySelector
 import java.net.SocketAddress
 import java.net.URI
 
-class S3ClientProvider internal constructor(
+class S3ClientProvider(
   private val s3config: S3Config,
-  private val dnsResolver: DnsResolver?,
+  private val dnsResolver: DnsResolver? = null,
 ) {
-  constructor(s3config: S3Config) : this(s3config, null)
-
   fun provide(): S3Client {
     val credentialsProvider = getCredentialsProvider()
 
@@ -94,10 +92,6 @@ class S3ClientProvider internal constructor(
   }
 }
 
-/**
- * Matches the SDK's own proxy selection, which sends https targets through a lone `http.proxyHost`; the JDK default
- * selector only uses `https.proxyHost` for them.
- */
 private object HttpProxyForHttpsSelector : ProxySelector() {
   override fun select(uri: URI): MutableList<Proxy> {
     val default = getDefault()

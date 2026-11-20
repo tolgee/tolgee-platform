@@ -20,20 +20,17 @@ class ContentDeliveryFileStorageProvider(
     return bypassForTesting() ?: defaultStorage
   }
 
-  fun getStorage(config: StorageConfig): FileStorage =
-    createStorage(config, tolgeeProperties.contentDelivery.storage.allowLocalAddresses)
-
-  private fun createStorage(
-    config: StorageConfig,
-    allowLocalAddresses: Boolean,
-  ): FileStorage {
+  fun getStorage(config: StorageConfig): FileStorage {
     return bypassForTesting() ?: when (config) {
       is AzureBlobConfig -> {
         azureFileStorageFactory.create(config)
       }
 
       is S3Config -> {
-        s3FileStorageFactory.create(config, allowLocalAddresses)
+        s3FileStorageFactory.createSsrfSafe(
+          config,
+          allowLocalAddresses = tolgeeProperties.contentDelivery.storage.allowLocalAddresses,
+        )
       }
 
       else -> {
@@ -42,9 +39,11 @@ class ContentDeliveryFileStorageProvider(
     }
   }
 
-  val defaultStorage by lazy {
-    val props = getDefaultStorageProperties()
-    createStorage(props, allowLocalAddresses = true)
+  val defaultStorage: FileStorage by lazy {
+    when (val props = getDefaultStorageProperties()) {
+      is S3Config -> s3FileStorageFactory.create(props)
+      else -> getStorage(props)
+    }
   }
 
   fun getDefaultStorageProperties(): StorageConfig {

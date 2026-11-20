@@ -102,7 +102,7 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @Test
   fun `stores files to path by config`() {
-    val storage = s3FileStorageFactory.create(defaultProperties.copy(path = "content/path"), allowLocalAddresses = true)
+    val storage = s3FileStorageFactory.create(defaultProperties.copy(path = "content/path"))
     storage.storeFile(
       testFilePath,
       testFileContent.toByteArray(charset("UTF-8")),
@@ -113,6 +113,6 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
   }
 
   fun createFileStorage(): S3FileStorage {
-    return s3FileStorageFactory.create(defaultProperties, allowLocalAddresses = true)
+    return s3FileStorageFactory.create(defaultProperties)
   }
 }

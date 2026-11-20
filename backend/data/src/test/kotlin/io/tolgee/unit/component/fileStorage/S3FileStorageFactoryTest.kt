@@ -58,6 +58,6 @@ class S3FileStorageFactoryTest {
     val internalProperties = InternalProperties()
     val factory =
       S3FileStorageFactory(SsrfSafeRequestFactoryProvider(UrlSecurity(internalProperties), internalProperties))
-    factory.create(properties, allowLocalAddresses = true).storeFile("en.json", "{}".toByteArray())
+    factory.create(properties).storeFile("en.json", "{}".toByteArray())
   }
 }

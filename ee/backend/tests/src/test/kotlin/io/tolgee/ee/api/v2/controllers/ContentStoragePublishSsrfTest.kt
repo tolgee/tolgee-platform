@@ -2,8 +2,7 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
-import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.model.contentDelivery.S3ContentStorageConfig
+import io.tolgee.development.testDataBuilder.data.ContentStoragePublishTestData
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -12,14 +11,15 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.net.InetAddress
 import java.net.ServerSocket
-import java.util.concurrent.CountDownLatch
+import java.util.Base64
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 class ContentStoragePublishSsrfTest : AbstractSpringTest() {
   @Autowired
   private lateinit var contentDeliveryUploader: ContentDeliveryUploader
 
-  private lateinit var testData: PublishSsrfTestData
+  private lateinit var testData: ContentStoragePublishTestData
 
   @BeforeEach
   fun setup() {
@@ -38,126 +38,139 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
 
   @Test
   fun `does not connect to a loopback storage endpoint on publish`() {
-    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { socket ->
-      val connected = CountDownLatch(1)
-      acceptOnce(socket) { connected.countDown() }
-      val configId = saveConfigWithEndpoint("http://127.0.0.1:${socket.localPort}")
+    val connected =
+      connectionArrives(timeoutSeconds = 1) { port ->
+        val configId = saveConfigWithEndpoint("http://127.0.0.1:$port")
+        assertThrows<Exception> { contentDeliveryUploader.upload(configId) }
+      }
 
-      assertThrows<Exception> { contentDeliveryUploader.upload(configId) }
-
-      connected.await(1, TimeUnit.SECONDS).assert.isFalse()
-    }
+    connected.assert.isFalse()
   }
 
   @Test
   fun `connects to a loopback storage endpoint when local addresses are allowed`() {
     tolgeeProperties.contentDelivery.storage.allowLocalAddresses = true
-    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { socket ->
-      val connected = CountDownLatch(1)
-      acceptOnce(socket) { connected.countDown() }
-      val configId = saveConfigWithEndpoint("http://127.0.0.1:${socket.localPort}")
 
-      // Not a real S3 endpoint, so the upload still fails — but the client was allowed to reach the loopback address.
-      runCatching { contentDeliveryUploader.upload(configId) }
+    val connected =
+      connectionArrives { port ->
+        val configId = saveConfigWithEndpoint("http://127.0.0.1:$port")
+        runCatching { contentDeliveryUploader.upload(configId) }
+      }
 
-      connected.await(10, TimeUnit.SECONDS).assert.isTrue()
-    }
+    connected.assert.isTrue()
   }
 
   @Test
   fun `routes a publish through the operator proxy instead of refusing the private proxy host`() {
-    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { proxy ->
-      val reachedProxy = CountDownLatch(1)
-      acceptOnce(proxy) { reachedProxy.countDown() }
-      withProxyProperties("127.0.0.1", proxy.localPort) {
-        // With an http proxy configured the client connects to the proxy, so the resolver is handed the private
-        // proxy host for a public endpoint; the proxy hop must be exempted, not blocked.
-        val configId = saveConfigWithEndpoint("http://93.184.216.34/")
-
-        runCatching { contentDeliveryUploader.upload(configId) }
-
-        reachedProxy.await(10, TimeUnit.SECONDS).assert.isTrue()
+    val reachedProxy =
+      connectionArrives { proxyPort ->
+        withSystemProperties("http.proxyHost" to "127.0.0.1", "http.proxyPort" to "$proxyPort") {
+          val configId = saveConfigWithEndpoint("http://93.184.216.34/")
+          runCatching { contentDeliveryUploader.upload(configId) }
+        }
       }
-    }
+
+    reachedProxy.assert.isTrue()
   }
 
   @Test
   fun `routes an https publish through an http-only operator proxy`() {
-    ServerSocket(0, 1, InetAddress.getByName("127.0.0.1")).use { proxy ->
-      val reachedProxy = CountDownLatch(1)
-      acceptOnce(proxy) { reachedProxy.countDown() }
-      // Only http.proxyHost/http.proxyPort are set, yet the endpoint is https: the client must still route through
-      // the proxy (an http proxy tunnels https via CONNECT), as the SDK's own proxy selection would.
-      withProxyProperties("127.0.0.1", proxy.localPort) {
-        val configId = saveConfigWithEndpoint("https://93.184.216.34/")
-
-        runCatching { contentDeliveryUploader.upload(configId) }
-
-        reachedProxy.await(10, TimeUnit.SECONDS).assert.isTrue()
+    val reachedProxy =
+      connectionArrives { proxyPort ->
+        withSystemProperties("http.proxyHost" to "127.0.0.1", "http.proxyPort" to "$proxyPort") {
+          val configId = saveConfigWithEndpoint("https://93.184.216.34/")
+          runCatching { contentDeliveryUploader.upload(configId) }
+        }
       }
+
+    reachedProxy.assert.isTrue()
+  }
+
+  @Test
+  fun `answers the operator proxy's authentication challenge with the JVM proxy credentials`() {
+    ServerSocket(0, 50, LOOPBACK).use { proxy ->
+      val authorization = CompletableFuture<String>()
+      challengeForProxyAuthentication(proxy) { authorization.complete(it) }
+
+      withSystemProperties(
+        "http.proxyHost" to "127.0.0.1",
+        "http.proxyPort" to "${proxy.localPort}",
+        "http.proxyUser" to "proxy-user",
+        "http.proxyPassword" to "proxy-secret",
+      ) {
+        val configId = saveConfigWithEndpoint("http://93.184.216.34/")
+        runCatching { contentDeliveryUploader.upload(configId) }
+      }
+
+      val expected = "Basic " + Base64.getEncoder().encodeToString("proxy-user:proxy-secret".toByteArray())
+      authorization.get(10, TimeUnit.SECONDS).assert.isEqualTo(expected)
     }
   }
 
   private fun saveConfigWithEndpoint(endpoint: String): Long {
-    testData = PublishSsrfTestData(endpoint)
+    testData = ContentStoragePublishTestData(endpoint)
     testDataService.saveTestData(testData.root)
     return testData.contentDeliveryConfig.self.id
   }
 
-  private fun <T> withProxyProperties(
-    host: String,
-    port: Int,
-    block: () -> T,
-  ): T {
-    System.setProperty("http.proxyHost", host)
-    System.setProperty("http.proxyPort", port.toString())
-    return try {
+  private fun withSystemProperties(
+    vararg properties: Pair<String, String>,
+    block: () -> Unit,
+  ) {
+    properties.forEach { (name, value) -> System.setProperty(name, value) }
+    try {
       block()
     } finally {
-      System.clearProperty("http.proxyHost")
-      System.clearProperty("http.proxyPort")
+      properties.forEach { (name, _) -> System.clearProperty(name) }
     }
   }
 
-  /** Accepts a single connection on a daemon thread and signals it; stays quietly blocked if none ever arrives. */
-  private fun acceptOnce(
-    serverSocket: ServerSocket,
-    onConnect: () -> Unit,
+  private fun connectionArrives(
+    timeoutSeconds: Long = 10,
+    block: (port: Int) -> Unit,
+  ): Boolean {
+    ServerSocket(0, 1, LOOPBACK).use { serverSocket ->
+      val connected = CompletableFuture<Unit>()
+      onDaemonThread { serverSocket.accept().use { connected.complete(Unit) } }
+      block(serverSocket.localPort)
+      return runCatching { connected.get(timeoutSeconds, TimeUnit.SECONDS) }.isSuccess
+    }
+  }
+
+  private fun challengeForProxyAuthentication(
+    proxy: ServerSocket,
+    onAuthorization: (String) -> Unit,
   ) {
-    Thread {
-      try {
-        serverSocket.accept().use { onConnect() }
-      } catch (_: Exception) {
-        // The socket was closed while nothing had connected.
-      }
-    }.apply { isDaemon = true }.start()
-  }
-}
-
-private class PublishSsrfTestData(
-  s3Endpoint: String,
-) : BaseTestData() {
-  val s3ContentStorage =
-    projectBuilder.addContentStorage {
-      name = "Pre-existing S3"
-      this.s3ContentStorageConfig =
-        S3ContentStorageConfig(this).apply {
-          bucketName = "bucket"
-          accessKey = "accessKey"
-          secretKey = "secretKey"
-          endpoint = s3Endpoint
-          signingRegion = "eu-central-1"
+    onDaemonThread {
+      while (true) {
+        proxy.accept().use { connection ->
+          val headers =
+            connection
+              .getInputStream()
+              .bufferedReader()
+              .lineSequence()
+              .takeWhile { it.isNotEmpty() }
+              .toList()
+          headers
+            .firstOrNull { it.startsWith("Proxy-Authorization:", ignoreCase = true) }
+            ?.let { onAuthorization(it.substringAfter(":").trim()) }
+          connection.getOutputStream().write(PROXY_AUTH_CHALLENGE.toByteArray())
         }
+      }
     }
+  }
 
-  val contentDeliveryConfig =
-    projectBuilder.addContentDeliveryConfig {
-      contentStorage = s3ContentStorage.self
-      name = "Publishes to a pre-existing storage"
-    }
+  private fun onDaemonThread(block: () -> Unit) {
+    Thread { runCatching(block) }.apply { isDaemon = true }.start()
+  }
 
-  val key =
-    projectBuilder.addKey("key") {
-      addTranslation("en", "Hello")
-    }
+  companion object {
+    private val LOOPBACK = InetAddress.getByName("127.0.0.1")
+
+    private const val PROXY_AUTH_CHALLENGE =
+      "HTTP/1.1 407 Proxy Authentication Required\r\n" +
+        "Proxy-Authenticate: Basic realm=\"proxy\"\r\n" +
+        "Content-Length: 0\r\n" +
+        "Connection: close\r\n\r\n"
+  }
 }
