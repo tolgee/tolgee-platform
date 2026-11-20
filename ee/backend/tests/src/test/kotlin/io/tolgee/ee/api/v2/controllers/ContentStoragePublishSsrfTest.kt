@@ -131,7 +131,11 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
   ): Boolean {
     ServerSocket(0, 1, LOOPBACK).use { serverSocket ->
       val connected = CompletableFuture<Unit>()
-      onDaemonThread { serverSocket.accept().use { connected.complete(Unit) } }
+      onDaemonThread {
+        while (true) {
+          serverSocket.accept().use { connected.complete(Unit) }
+        }
+      }
       block(serverSocket.localPort)
       return runCatching { connected.get(timeoutSeconds, TimeUnit.SECONDS) }.isSuccess
     }

@@ -42,7 +42,8 @@ class ContentDeliveryFileStorageProvider(
   val defaultStorage: FileStorage by lazy {
     when (val props = getDefaultStorageProperties()) {
       is S3Config -> s3FileStorageFactory.create(props)
-      else -> getStorage(props)
+      is AzureBlobConfig -> azureFileStorageFactory.create(props)
+      else -> throw Exception("Unknown storage config")
     }
   }
 

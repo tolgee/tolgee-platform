@@ -6,18 +6,16 @@ import io.tolgee.component.fileStorage.LocalFileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.FileStorageConfiguration
-import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.InvalidConnectionStringException
 import io.tolgee.testing.assert
 import io.tolgee.util.InMemoryFileStorage
-import io.tolgee.util.SsrfSafeRequestFactoryProvider
-import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.NullSource
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.mock
 
 class FileStorageConfigurationTest {
   companion object {
@@ -101,7 +99,7 @@ class FileStorageConfigurationTest {
   private fun fileStorage() =
     FileStorageConfiguration(
       properties,
-      S3FileStorageFactory(SsrfSafeRequestFactoryProvider(UrlSecurity(InternalProperties()), InternalProperties())),
+      S3FileStorageFactory(mock()),
       AzureFileStorageFactory(),
     ).fileStorage()
 

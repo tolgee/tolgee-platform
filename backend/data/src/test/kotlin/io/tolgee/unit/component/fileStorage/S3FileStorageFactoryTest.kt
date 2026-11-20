@@ -3,13 +3,11 @@ package io.tolgee.unit.component.fileStorage
 import com.sun.net.httpserver.HttpServer
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.configuration.tolgee.ContentStorageS3Properties
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.util.SsrfSafeRequestFactoryProvider
-import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
 import java.net.InetSocketAddress
 
 class S3FileStorageFactoryTest {
@@ -55,9 +53,6 @@ class S3FileStorageFactoryTest {
         signingRegion = "us-east-1",
         publicRead = publicRead,
       )
-    val internalProperties = InternalProperties()
-    val factory =
-      S3FileStorageFactory(SsrfSafeRequestFactoryProvider(UrlSecurity(internalProperties), internalProperties))
-    factory.create(properties).storeFile("en.json", "{}".toByteArray())
+    S3FileStorageFactory(mock()).create(properties).storeFile("en.json", "{}".toByteArray())
   }
 }
