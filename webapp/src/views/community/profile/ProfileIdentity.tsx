@@ -12,10 +12,10 @@ import {
 import { useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { Calendar, Edit02, Link01 } from '@untitled-ui/icons-react';
-import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { LanguageFlagList } from 'tg.component/community/LanguageFlagList';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { ClipboardCopy } from 'tg.component/common/ClipboardCopy';
 import { UserProfileAvatar } from 'tg.views/userSettings/userProfile/UserProfileAvatar';
@@ -176,18 +176,15 @@ export const ProfileIdentity = ({ profile, isMe, isPublic }: Props) => {
             )}
           </StyledNameRow>
           {profile.languages.length > 0 && (
-            <Box display="flex" flexWrap="wrap" gap={0.75} alignItems="center">
-              {profile.languages.map((l) => (
-                <Tooltip key={l.tag} title={l.name}>
-                  <span>
-                    <FlagImage
-                      flagEmoji={languageInfo[l.tag]?.flags?.[0] ?? ''}
-                      height={20}
-                    />
-                  </span>
-                </Tooltip>
-              ))}
-            </Box>
+            <LanguageFlagList
+              languages={profile.languages.map((l) => ({
+                ...l,
+                flagEmoji: languageInfo[l.tag]?.flags?.[0],
+              }))}
+              flagHeight={20}
+              pillWidth={44}
+              gap={0.75}
+            />
           )}
           {firstContribution !== undefined && (
             <Typography

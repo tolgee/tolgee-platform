@@ -271,7 +271,6 @@ declare namespace DataCy {
         "community-contributor-card-accepted": true;
         "community-contributor-card-activity": true;
         "community-contributor-card-contributions": true;
-        "community-contributor-card-flag": true;
         "community-contributor-card-last-active": true;
         "community-contributor-card-last-active-date": true;
         "community-contributor-card-outcomes": true;
@@ -303,6 +302,8 @@ declare namespace DataCy {
         "community-in-context-info": true;
         "community-in-context-switch": true;
         "community-language-base": true;
+        "community-language-flag": true;
+        "community-language-flag-more": true;
         "community-language-not-started": true;
         "community-language-row": true;
         "community-language-translations-button": true;

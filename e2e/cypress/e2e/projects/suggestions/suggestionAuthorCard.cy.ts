@@ -70,7 +70,7 @@ describe('Suggestion author card', () => {
     gcy('community-contributor-card-contributions')
       .invoke('text')
       .should('match', new RegExp(`\\b${aliceContributionsInSeed}\\b`));
-    gcy('community-contributor-card-flag').should('have.length', 3);
+    gcy('community-language-flag').should('have.length', 3);
     gcy('community-contributor-card-last-active')
       .should('be.visible')
       .trigger('mouseover');
