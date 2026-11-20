@@ -65,7 +65,7 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
     val reachedProxy =
       connectionArrives { proxyPort ->
         withSystemProperties("http.proxyHost" to "127.0.0.1", "http.proxyPort" to "$proxyPort") {
-          val configId = saveConfigWithEndpoint("http://93.184.216.34/")
+          val configId = saveConfigWithEndpoint("http://$PUBLIC_ADDRESS/")
           runCatching { contentDeliveryUploader.upload(configId) }
         }
       }
@@ -78,7 +78,7 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
     val reachedProxy =
       connectionArrives { proxyPort ->
         withSystemProperties("http.proxyHost" to "127.0.0.1", "http.proxyPort" to "$proxyPort") {
-          val configId = saveConfigWithEndpoint("https://93.184.216.34/")
+          val configId = saveConfigWithEndpoint("https://$PUBLIC_ADDRESS/")
           runCatching { contentDeliveryUploader.upload(configId) }
         }
       }
@@ -98,7 +98,7 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
         "http.proxyUser" to "proxy-user",
         "http.proxyPassword" to "proxy-secret",
       ) {
-        val configId = saveConfigWithEndpoint("http://93.184.216.34/")
+        val configId = saveConfigWithEndpoint("http://$PUBLIC_ADDRESS/")
         runCatching { contentDeliveryUploader.upload(configId) }
       }
 
@@ -117,11 +117,16 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
     vararg properties: Pair<String, String>,
     block: () -> Unit,
   ) {
-    properties.forEach { (name, value) -> System.setProperty(name, value) }
+    val previous = properties.associate { (name, value) -> name to System.setProperty(name, value) }
     try {
       block()
     } finally {
-      properties.forEach { (name, _) -> System.clearProperty(name) }
+      previous.forEach { (name, value) ->
+        when (value) {
+          null -> System.clearProperty(name)
+          else -> System.setProperty(name, value)
+        }
+      }
     }
   }
 
@@ -170,6 +175,7 @@ class ContentStoragePublishSsrfTest : AbstractSpringTest() {
 
   companion object {
     private val LOOPBACK = InetAddress.getByName("127.0.0.1")
+    private const val PUBLIC_ADDRESS = "93.184.216.34"
 
     private const val PROXY_AUTH_CHALLENGE =
       "HTTP/1.1 407 Proxy Authentication Required\r\n" +

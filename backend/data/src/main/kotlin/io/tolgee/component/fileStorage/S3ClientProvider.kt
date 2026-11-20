@@ -44,7 +44,8 @@ class S3ClientProvider(
   }
 
   // The SDK refuses httpRoutePlanner while its own proxyConfiguration is enabled, which it is by default whenever
-  // http(s).proxyHost is set. Disabling it also drops proxy credentials, hence the system-default credentials provider.
+  // http.proxyHost and http.proxyPort are set. Disabling it also drops proxy credentials, hence the system-default
+  // credentials provider.
   private fun pinnedHttpClient(dnsResolver: DnsResolver): Apache5HttpClient.Builder =
     Apache5HttpClient
       .builder()
