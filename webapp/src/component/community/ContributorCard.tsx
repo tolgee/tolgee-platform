@@ -14,8 +14,7 @@ import { Link } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { StyledCircledPill } from 'tg.component/languages/CircledLanguageIconList';
-import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
+import { LanguageFlagList } from 'tg.component/community/LanguageFlagList';
 import { UserName } from 'tg.component/common/UserName';
 import { Calendar, InfoCircle } from '@untitled-ui/icons-react';
 import { StatesBarContainer } from 'tg.views/projects/TranslationStatesBar';
@@ -27,7 +26,6 @@ import { useDateFormatter } from 'tg.hooks/useLocale';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const MAX_FLAGS = 5;
 const BAR_HEIGHT = 8;
 const TOOLTIP_DELAY = 300;
 const delayedTooltip = {
@@ -119,8 +117,6 @@ export const ContributorCard = ({
   const profileUrl = LINKS.USER_COMMUNITY_PROFILE.build({
     [PARAMS.USER_ID]: props.id,
   });
-  const shownLanguages = languages.slice(0, MAX_FLAGS);
-  const hiddenLanguages = languages.slice(MAX_FLAGS);
   const hasStats = props.suggested !== undefined;
   const suggested = props.suggested ?? 0;
   const accepted = props.accepted ?? 0;
@@ -269,31 +265,13 @@ export const ContributorCard = ({
       )}
       <Box gridColumn={2} minWidth={0}>
         {props.status ?? (
-          <Box display="flex" alignItems="center" gap={0.5} height={16}>
-            {shownLanguages.map((l) => (
-              <Tooltip key={l.id} title={l.name} {...delayedTooltip}>
-                <Box display="flex" data-cy="community-contributor-card-flag">
-                  <FlagImage flagEmoji={l.flagEmoji || ''} height={16} />
-                </Box>
-              </Tooltip>
-            ))}
-            {hiddenLanguages.length > 0 && (
-              <Tooltip
-                title={hiddenLanguages.map((l) => l.name).join(', ')}
-                {...delayedTooltip}
-              >
-                <div>
-                  <StyledCircledPill
-                    height={16}
-                    width={36}
-                    wrapperProps={{ className: 'wrapped' }}
-                  >
-                    +{hiddenLanguages.length}
-                  </StyledCircledPill>
-                </div>
-              </Tooltip>
-            )}
-          </Box>
+          <LanguageFlagList
+            languages={languages}
+            flagHeight={16}
+            pillWidth={36}
+            gap={0.5}
+            tooltipProps={delayedTooltip}
+          />
         )}
       </Box>
     </Box>
