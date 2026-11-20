@@ -1,7 +1,7 @@
 import { HOST } from '../../common/constants';
 import { login } from '../../common/apiCalls/common';
 import { communityStatsData } from '../../common/apiCalls/testData/testData';
-import { gcy } from '../../common/shared';
+import { assertTooltip, gcy } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 
 const ALICE = 'alice@community.test';
@@ -98,6 +98,28 @@ describe('Community profile', () => {
       .and('match', /^\/projects\/\d+\/community$/);
     gcy('community-profile-activity-item').should('have.length.at.least', 1);
     gcy('community-profile-avatar-edit').should('not.exist');
+    gcy('community-language-flag').should('have.length.at.least', 1);
+    gcy('community-language-flag-more').should('not.exist');
+  });
+
+  it('shows the first five languages and the rest as +N', () => {
+    login(BOB, 'admin');
+    const tags = ['cs', 'de', 'fr', 'es', 'it', 'pl', 'nl'];
+    cy.intercept('GET', '**/community-profile*', (req) =>
+      req.continue((res) => {
+        res.body.languages = tags.map((tag) => ({
+          ...res.body.languages[0],
+          tag,
+          name: `Language ${tag}`,
+        }));
+      })
+    );
+    visitProfile(aliceId);
+    gcy('community-language-flag').should('have.length', 5);
+    gcy('community-language-flag-more')
+      .should('contain', '+2')
+      .trigger('mouseover');
+    assertTooltip('Language pl, Language nl');
   });
 
   it('lets the owner edit their own profile', () => {
