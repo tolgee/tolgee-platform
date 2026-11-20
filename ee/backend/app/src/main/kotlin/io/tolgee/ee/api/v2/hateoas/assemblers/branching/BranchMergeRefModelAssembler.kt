@@ -10,6 +10,7 @@ class BranchMergeRefModelAssembler : RepresentationModelAssembler<BranchMerge, B
   override fun toModel(entity: BranchMerge): BranchMergeRefModel {
     return BranchMergeRefModel(
       id = entity.id,
+      sourceBranchName = entity.sourceBranch.name,
       targetBranchName = entity.targetBranch.name,
       mergedAt = entity.mergedAt?.time,
     )

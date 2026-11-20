@@ -1,9 +1,11 @@
 package io.tolgee.ee.service.branching.merging
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Message
 import io.tolgee.ee.data.branching.AppliedChange
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
 import io.tolgee.ee.service.branching.BranchSnapshotService
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -39,10 +41,11 @@ class BranchMergeExecutor(
     val snapshotKeys by lazy { branchSnapshotService.getSnapshotKeys(merge.childBranch.id) }
     val byTargetKeyId by lazy { snapshotKeys.associateBy { merge.targetKeyIdOf(it) } }
     val bySourceKeyId by lazy { snapshotKeys.associateBy { merge.sourceKeyIdOf(it) } }
-    val applied =
-      applyChanges(merge) { change ->
-        change.targetKey?.id?.let { byTargetKeyId[it] } ?: change.sourceKey?.id?.let { bySourceKeyId[it] }
-      }
+    val snapshotKeyOf = { change: BranchMergeChange ->
+      change.targetKey?.id?.let { byTargetKeyId[it] } ?: change.sourceKey?.id?.let { bySourceKeyId[it] }
+    }
+    checkKeyNamesDoNotCollide(merge, snapshotKeyOf)
+    val applied = applyChanges(merge, snapshotKeyOf)
     entityManager.flush()
     branchSnapshotService.advanceSnapshot(merge, applied)
     return finalizeMerge(merge)
@@ -68,6 +71,7 @@ class BranchMergeExecutor(
     merge: BranchMerge,
     snapshotKeyOf: (BranchMergeChange) -> KeySnapshot?,
   ): AppliedChange? {
+    if (change.excluded) return null
     return when (change.change) {
       BranchKeyMergeChangeType.ADD -> applyAddition(change, merge.targetBranch)
       BranchKeyMergeChangeType.UPDATE -> applyUpdate(change, snapshotKeyOf(change))
@@ -75,6 +79,60 @@ class BranchMergeExecutor(
       BranchKeyMergeChangeType.CONFLICT -> applyConflict(change, snapshotKeyOf(change))
     }
   }
+
+  private fun checkKeyNamesDoNotCollide(
+    merge: BranchMerge,
+    snapshotKeyOf: (BranchMergeChange) -> KeySnapshot?,
+  ) {
+    val wanted = mutableSetOf<Pair<String, String?>>()
+    val freed = mutableSetOf<Pair<String, String?>>()
+    merge.changes
+      .filter { !it.excluded && it.resolution == BranchKeyMergeResolutionType.SOURCE }
+      .forEach { change ->
+        val sourceKey = change.sourceKey
+        val targetKey = change.targetKey
+        when {
+          change.change == BranchKeyMergeChangeType.DELETE -> targetKey?.let { freed.add(it.nameAndNamespace()) }
+          targetKey == null -> sourceKey?.let { wanted.add(it.nameAndNamespace()) }
+          sourceKey == null -> {}
+          else -> {
+            val applied =
+              appliedNameAndNamespace(sourceKey, targetKey, snapshotKeyOf(change), BranchKeyMergeResolutionType.SOURCE)
+            if (applied != targetKey.nameAndNamespace()) {
+              wanted.add(applied)
+              freed.add(targetKey.nameAndNamespace())
+            }
+          }
+        }
+      }
+    if (wanted.isEmpty()) return
+    val targetBranch = merge.targetBranch
+    val live =
+      wanted
+        .map { it.first }
+        .chunked(KEY_NAME_LOOKUP_CHUNK_SIZE)
+        .flatMap { keyRepository.findActiveByProjectIdAndNames(targetBranch.project.id, it) }
+        .filter { it.branch?.id == targetBranch.id || (it.branch == null && targetBranch.isDefault) }
+        .map { it.nameAndNamespace() }
+        .toSet()
+    if (wanted.any { it in live && it !in freed }) {
+      throw BadRequestException(Message.BRANCH_MERGE_KEY_NAME_COLLISION)
+    }
+  }
+
+  private fun appliedNameAndNamespace(
+    sourceKey: Key,
+    targetKey: Key,
+    snapshotKey: KeySnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ): Pair<String, String?> {
+    val name = chooseThreeWay(sourceKey.name, targetKey.name, snapshotKey?.name, resolution) ?: targetKey.name
+    val namespace =
+      chooseThreeWay(sourceKey.namespace?.name, targetKey.namespace?.name, snapshotKey?.namespace, resolution)
+    return name to namespace
+  }
+
+  private fun Key.nameAndNamespace() = name to namespace?.name
 
   private fun finalizeMerge(merge: BranchMerge): BranchMerge {
     merge.markMerged(currentDateProvider.date)
@@ -120,9 +178,7 @@ class BranchMergeExecutor(
       return AppliedChange(sourceKey, targetKey)
     }
     targetKey.merge(sourceKey, snapshotKey, resolution)
-    val name = chooseThreeWay(sourceKey.name, targetKey.name, snapshotKey?.name, resolution) ?: targetKey.name
-    val namespace =
-      chooseThreeWay(sourceKey.namespace?.name, targetKey.namespace?.name, snapshotKey?.namespace, resolution)
+    val (name, namespace) = appliedNameAndNamespace(sourceKey, targetKey, snapshotKey, resolution)
     val targetBranch = change.branchMerge.targetBranch
     keyService.edit(targetKey, name, namespace, targetBranch.name.takeUnless { targetBranch.isDefault })
     persistAfterMerge(targetKey)
@@ -202,5 +258,9 @@ class BranchMergeExecutor(
         translationService.save(it)
       }
     }
+  }
+
+  companion object {
+    private const val KEY_NAME_LOOKUP_CHUNK_SIZE = 10_000
   }
 }

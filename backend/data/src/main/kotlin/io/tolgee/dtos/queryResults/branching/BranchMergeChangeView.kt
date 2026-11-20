@@ -10,6 +10,7 @@ data class BranchMergeChangeView(
   val resolutionType: BranchKeyMergeResolutionType?,
   val sourceBranchKeyId: Long?,
   val targetBranchKeyId: Long?,
+  val excluded: Boolean,
 ) {
   var sourceBranchKey: Key? = null
   var targetBranchKey: Key? = null

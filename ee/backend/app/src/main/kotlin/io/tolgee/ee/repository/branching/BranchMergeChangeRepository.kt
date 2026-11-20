@@ -18,7 +18,8 @@ interface BranchMergeChangeRepository : BranchMergeChangeRepositoryOss {
         bmc.id,
         bmc.sourceKey.id,
         bmc.targetKey.id,
-        bmc.resolution
+        bmc.resolution,
+        bmc.excluded
       )
     from BranchMergeChange bmc
     join bmc.branchMerge bm
@@ -42,7 +43,8 @@ interface BranchMergeChangeRepository : BranchMergeChangeRepositoryOss {
         bmc.change,
         bmc.resolution,
         bmc.sourceKey.id,
-        bmc.targetKey.id
+        bmc.targetKey.id,
+        bmc.excluded
       )
     from BranchMergeChange bmc
     join bmc.branchMerge bm
@@ -90,6 +92,23 @@ interface BranchMergeChangeRepository : BranchMergeChangeRepositoryOss {
     resolution: BranchKeyMergeResolutionType,
   ): Int
 
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+    """
+    update BranchMergeChange bmc
+      set bmc.excluded = :excluded
+    where bmc.branchMerge.id = :mergeId
+      and (:changeIds is null or bmc.id in :changeIds)
+      and (:type is null or bmc.change = :type)
+    """,
+  )
+  fun setExcluded(
+    mergeId: Long,
+    changeIds: Collection<Long>?,
+    type: BranchKeyMergeChangeType?,
+    excluded: Boolean,
+  ): Int
+
   @Query(
     """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeChangeView(
@@ -97,7 +116,8 @@ interface BranchMergeChangeRepository : BranchMergeChangeRepositoryOss {
         bmc.change,
         bmc.resolution,
         bmc.sourceKey.id,
-        bmc.targetKey.id
+        bmc.targetKey.id,
+        bmc.excluded
       )
     from BranchMergeChange bmc
     join bmc.branchMerge bm

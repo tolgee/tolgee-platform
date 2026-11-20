@@ -8,6 +8,7 @@ data class BranchMergeConflictView(
   val sourceBranchKeyId: Long,
   val targetBranchKeyId: Long,
   val resolutionType: BranchKeyMergeResolutionType?,
+  val excluded: Boolean,
 ) {
   lateinit var sourceBranchKey: Key
   lateinit var targetBranchKey: Key
