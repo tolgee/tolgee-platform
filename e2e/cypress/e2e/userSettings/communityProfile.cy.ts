@@ -98,7 +98,7 @@ describe('Community profile', () => {
       .and('match', /^\/projects\/\d+\/community$/);
     gcy('community-profile-activity-item').should('have.length.at.least', 1);
     gcy('community-profile-avatar-edit').should('not.exist');
-    gcy('community-language-flag').should('have.length.at.least', 1);
+    gcy('community-contributor-card-flag').should('have.length.at.least', 1);
     gcy('community-language-flag-more').should('not.exist');
   });
 
@@ -115,7 +115,7 @@ describe('Community profile', () => {
       })
     );
     visitProfile(aliceId);
-    gcy('community-language-flag').should('have.length', 5);
+    gcy('community-contributor-card-flag').should('have.length', 5);
     gcy('community-language-flag-more')
       .should('contain', '+2')
       .trigger('mouseover');

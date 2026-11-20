@@ -37,7 +37,7 @@ export const LanguageFlagList = ({
           <Box
             component="span"
             display={flagsOnTextBaseline ? 'block' : 'flex'}
-            data-cy="community-language-flag"
+            data-cy="community-contributor-card-flag"
           >
             <FlagImage flagEmoji={l.flagEmoji || ''} height={flagHeight} />
           </Box>
