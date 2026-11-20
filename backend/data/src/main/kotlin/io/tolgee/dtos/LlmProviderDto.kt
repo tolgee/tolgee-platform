@@ -20,6 +20,7 @@ data class LlmProviderDto(
   override var tokenPriceInCreditsOutput: Double?,
   override var attempts: List<Int>?,
   override var maxTokens: Long,
+  override var thinking: String? = null,
   /** True only for providers from server config; allows private addresses. */
   val serverConfigured: Boolean = false,
 ) : LlmProviderInterface {

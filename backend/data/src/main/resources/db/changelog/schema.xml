@@ -6540,4 +6540,21 @@
         <modifyDataType columnName="community_description" newDataType="varchar(10000)" tableName="project"/>
         <modifyDataType columnName="community_guidelines" newDataType="varchar(10000)" tableName="project"/>
     </changeSet>
+    <changeSet author="dkrizan" id="1795088372000-1">
+        <addColumn tableName="llm_provider">
+            <column name="thinking" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dkrizan" id="1795088372000-2">
+        <update tableName="llm_provider">
+            <column name="thinking" value="disabled"/>
+            <where>type = 'ANTHROPIC'</where>
+        </update>
+        <rollback>
+            <update tableName="llm_provider">
+                <column name="thinking" valueComputed="NULL"/>
+                <where>type = 'ANTHROPIC'</where>
+            </update>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

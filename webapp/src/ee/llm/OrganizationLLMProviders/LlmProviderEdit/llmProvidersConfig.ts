@@ -34,11 +34,31 @@ export const llmProvidersDefaults = (
 });
 
 export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
-  const reasoningEffort: Partial<ProviderOptions> = {
+  const openaiReasoningEffort: Partial<ProviderOptions> = {
     label: t('llm_provider_form_openai_reasoning_effort'),
     hint: t('llm_provider_form_openai_reasoning_effort_hint'),
     optional: true,
     enum: [undefined, 'minimal', 'low', 'medium', 'high'],
+    defaultValue: undefined,
+  };
+  const anthropicReasoningEffort: Partial<ProviderOptions> = {
+    label: t('llm_provider_form_openai_reasoning_effort', 'Reasoning effort'),
+    hint: t(
+      'llm_provider_form_anthropic_reasoning_effort_hint',
+      "How much the model thinks before it answers. Keep empty to use the model's default."
+    ),
+    optional: true,
+    enum: [undefined, 'low', 'medium', 'high', 'xhigh', 'max'],
+    defaultValue: undefined,
+  };
+  const anthropicThinking: Partial<ProviderOptions> = {
+    label: t('llm_provider_form_anthropic_thinking', 'Thinking'),
+    hint: t(
+      'llm_provider_form_anthropic_thinking_hint',
+      "Thinking type sent to the model. Each model accepts different types, see Anthropic's docs. Keep empty to use the model's default."
+    ),
+    optional: true,
+    enum: [undefined, 'disabled', 'between_tools', 'adaptive'],
     defaultValue: undefined,
   };
   return {
@@ -59,7 +79,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         enum: [undefined, 'json_schema'],
         defaultValue: 'json_schema',
       },
-      reasoningEffort,
+      reasoningEffort: openaiReasoningEffort,
     },
     OPENAI_AZURE: {
       name: {},
@@ -74,7 +94,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         enum: [undefined, 'json_schema'],
         defaultValue: 'json_schema',
       },
-      reasoningEffort,
+      reasoningEffort: openaiReasoningEffort,
     },
     ANTHROPIC: {
       name: {},
@@ -85,6 +105,8 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       model: {
         hint: t('llm_provider_form_anthropic_model_hint'),
       },
+      thinking: anthropicThinking,
+      reasoningEffort: anthropicReasoningEffort,
     },
     GOOGLE_AI: {
       name: {},

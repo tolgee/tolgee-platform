@@ -46,7 +46,7 @@ class AnthropicApiServiceTest {
 
     service.translate(params, config, restTemplate)
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     assertThat(bodyMap).containsKey("output_config")
     @Suppress("UNCHECKED_CAST")
@@ -74,7 +74,7 @@ class AnthropicApiServiceTest {
 
     service.translate(params, createConfig(format = "json_schema"), createCapturingRestTemplate())
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     @Suppress("UNCHECKED_CAST")
     val format = (bodyMap["output_config"] as Map<String, Any>)["format"] as Map<String, Any>
@@ -89,7 +89,7 @@ class AnthropicApiServiceTest {
 
     service.translate(params, config, restTemplate)
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     assertThat(bodyMap).doesNotContainKey("output_config")
   }
@@ -102,7 +102,7 @@ class AnthropicApiServiceTest {
 
     service.translate(params, config, restTemplate)
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     assertThat(bodyMap).doesNotContainKey("temperature")
     assertThat(bodyMap).doesNotContainKey("top_p")
@@ -117,7 +117,7 @@ class AnthropicApiServiceTest {
 
     service.translate(params, config, restTemplate)
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     assertThat(bodyMap["max_tokens"]).isEqualTo(1000)
   }
@@ -133,18 +133,61 @@ class AnthropicApiServiceTest {
   }
 
   @Test
-  fun `always sends thinking type=disabled to avoid billed adaptive thinking`() {
-    val config = createConfig(format = "json_schema")
-    val params = createParams(shouldOutputJson = true)
-    val restTemplate = createCapturingRestTemplate()
+  fun `sends the configured thinking type`() {
+    val config = createConfig(thinking = "between_tools")
 
-    service.translate(params, config, restTemplate)
+    service.translate(createParams(shouldOutputJson = true), config, createCapturingRestTemplate())
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
-    @Suppress("UNCHECKED_CAST")
-    val thinking = bodyMap["thinking"] as Map<String, Any>
-    assertThat(thinking["type"]).isEqualTo("disabled")
+    assertThat(bodyMap["thinking"]).isEqualTo(mapOf("type" to "between_tools"))
+  }
+
+  @Test
+  fun `omits thinking when not configured`() {
+    val config = createConfig()
+
+    service.translate(createParams(shouldOutputJson = true), config, createCapturingRestTemplate())
+
+    val bodyMap = requestBody()
+
+    assertThat(bodyMap).doesNotContainKey("thinking")
+  }
+
+  @Test
+  fun `treats blank thinking and reasoning effort as not configured`() {
+    val config = createConfig(thinking = " ", reasoningEffort = " ")
+
+    service.translate(createParams(shouldOutputJson = false), config, createCapturingRestTemplate())
+
+    val bodyMap = requestBody()
+
+    assertThat(bodyMap).doesNotContainKey("thinking")
+    assertThat(bodyMap).doesNotContainKey("output_config")
+  }
+
+  @Test
+  fun `sends reasoning effort`() {
+    val config = createConfig(reasoningEffort = "low")
+
+    service.translate(createParams(shouldOutputJson = false), config, createCapturingRestTemplate())
+
+    val bodyMap = requestBody()
+
+    assertThat(bodyMap["output_config"]).isEqualTo(mapOf("effort" to "low"))
+  }
+
+  @Test
+  fun `sends reasoning effort together with the json schema format`() {
+    val config = createConfig(format = "json_schema", reasoningEffort = "high")
+
+    service.translate(createParams(shouldOutputJson = true), config, createCapturingRestTemplate())
+
+    val bodyMap = requestBody()
+
+    val outputConfig = bodyMap["output_config"] as Map<*, *>
+    assertThat(outputConfig["effort"]).isEqualTo("high")
+    assertThat(outputConfig["format"]).isNotNull()
   }
 
   @Test
@@ -188,12 +231,18 @@ class AnthropicApiServiceTest {
 
     service.translate(params, config, restTemplate)
 
-    val bodyMap = objectMapper.readValue<Map<String, Any>>(capturedRequestBody!!)
+    val bodyMap = requestBody()
 
     assertThat(bodyMap).doesNotContainKey("output_config")
   }
 
-  private fun createConfig(format: String? = null): LlmProviderInterface {
+  private fun requestBody(): Map<String, Any> = objectMapper.readValue(capturedRequestBody!!)
+
+  private fun createConfig(
+    format: String? = null,
+    reasoningEffort: String? = null,
+    thinking: String? = null,
+  ): LlmProviderInterface {
     return object : LlmProviderInterface {
       override var name = "test-anthropic"
       override var type = LlmProviderType.ANTHROPIC
@@ -203,7 +252,8 @@ class AnthropicApiServiceTest {
       override var model: String? = "claude-sonnet-4-5-20250929"
       override var format: String? = format
       override var deployment: String? = null
-      override var reasoningEffort: String? = null
+      override var reasoningEffort: String? = reasoningEffort
+      override var thinking: String? = thinking
       override var maxTokens: Long = 1000
       override var tokenPriceInCreditsInput: Double? = null
       override var tokenPriceInCreditsOutput: Double? = null
