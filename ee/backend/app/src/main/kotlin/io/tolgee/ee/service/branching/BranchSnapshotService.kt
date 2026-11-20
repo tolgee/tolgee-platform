@@ -1,11 +1,17 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.ee.data.branching.AppliedChange
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
 import io.tolgee.model.branching.snapshot.KeySnapshot
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.key.Key
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.util.LinkedHashMap
 
 @Service
 class BranchSnapshotService(
@@ -145,77 +151,93 @@ class BranchSnapshotService(
   }
 
   @Transactional
-  fun rebuildSnapshotFromSource(
-    projectId: Long,
-    sourceBranch: Branch,
-    targetBranch: Branch,
+  fun advanceSnapshot(
+    merge: BranchMerge,
+    applied: List<AppliedChange>,
   ) {
-    deleteSnapshots(sourceBranch.id)
-    insertKeySnapshotsForRebuild(projectId, sourceBranch, targetBranch)
-    insertTranslationSnapshots(sourceBranch.id)
-    insertKeyMetaSnapshots(sourceBranch.id)
+    if (applied.isEmpty()) {
+      return
+    }
+    val child = merge.childBranch
+    val ids = applied.map { originAndChild(merge, it.sourceKey?.id, it.targetKey.id) }
+    val originIds = ids.mapNotNull { it.first }
+    val childIds = ids.mapNotNull { it.second }
+    val stale =
+      (
+        keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(child.id, originIds) +
+          keySnapshotRepository.findAllByBranchIdAndBranchKeyIdIn(child.id, childIds)
+      ).toSet()
+    keySnapshotRepository.deleteAll(stale)
+    keySnapshotRepository.flush()
+    val fresh =
+      applied.mapNotNull { change ->
+        val source = change.sourceKey ?: return@mapNotNull null
+        val (originId, childId) = originAndChild(merge, source.id, change.targetKey.id)
+        snapshotOf(source, originId, childId, child)
+      }
+    keySnapshotRepository.saveAll(fresh)
   }
 
-  private fun insertKeySnapshotsForRebuild(
-    projectId: Long,
-    sourceBranch: Branch,
-    targetBranch: Branch,
-  ) {
-    val sql =
-      """
-      INSERT INTO branch_key_snapshot (
-        id, name, namespace, is_plural, plural_arg_name, max_char_limit,
-        original_key_id, branch_key_id, branch_id, project_id,
-        screenshot_references, created_at, updated_at
-      )
-      SELECT
-        nextval('hibernate_sequence'),
-        sk.name,
-        ns.name,
-        sk.is_plural,
-        sk.plural_arg_name,
-        sk.max_char_limit,
-        tk.id,
-        sk.id,
-        :sourceBranchId,
-        :projectId,
-        (SELECT coalesce(jsonb_agg(jsonb_build_object(
-            'screenshotId', ksr.screenshot_id,
-            'positions', ksr.positions,
-            'originalText', ksr.original_text
-        )), '[]'::jsonb)
-        FROM key_screenshot_reference ksr WHERE ksr.key_id = sk.id),
-        now(), now()
-      FROM key sk
-      LEFT JOIN namespace ns ON ns.id = sk.namespace_id
-      JOIN key tk ON tk.project_id = :projectId
-                 AND ${getBranchFilter("tk", targetBranch.isDefault, "targetBranchId")}
-                 AND tk.name = sk.name
-                 AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
-                 AND tk.deleted_at IS NULL
-      WHERE sk.project_id = :projectId
-        AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
-        AND sk.deleted_at IS NULL
-      """.trimIndent()
+  private fun <T> originAndChild(
+    merge: BranchMerge,
+    sourceSide: T,
+    targetSide: T,
+  ): Pair<T, T> {
+    if (merge.isUpdate) return sourceSide to targetSide
+    return targetSide to sourceSide
+  }
 
-    entityManager
-      .createNativeQuery(sql)
-      .setParameter("projectId", projectId)
-      .setParameter("sourceBranchId", sourceBranch.id)
-      .setParameter("targetBranchId", targetBranch.id)
-      .executeUpdate()
+  private fun snapshotOf(
+    source: Key,
+    originalKeyId: Long,
+    branchKeyId: Long,
+    child: Branch,
+  ): KeySnapshot {
+    val snapshot =
+      KeySnapshot(
+        name = source.name,
+        namespace = source.namespace?.name,
+        isPlural = source.isPlural,
+        pluralArgName = source.pluralArgName,
+        maxCharLimit = source.maxCharLimit,
+        originalKeyId = originalKeyId,
+        branchKeyId = branchKeyId,
+      )
+    snapshot.project = child.project
+    snapshot.branch = child
+    snapshot.translations =
+      source.translations
+        .map { translation ->
+          TranslationSnapshot(translation.language.tag, translation.text ?: "", translation.state).also {
+            it.labels = translation.labels.map { label -> label.name }.toMutableSet()
+            it.keySnapshot = snapshot
+          }
+        }.toMutableList()
+    snapshot.keyMetaSnapshot =
+      source.keyMeta?.let { meta ->
+        KeyMetaSnapshot(
+          meta.description,
+          meta.custom?.let { LinkedHashMap(it) },
+          meta.tags.map { it.name }.toMutableSet(),
+        ).also { it.keySnapshot = snapshot }
+      }
+    snapshot.screenshotReferences = source.toScreenshotViews().toMutableSet()
+    return snapshot
   }
 
   fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
 
-  fun getSnapshotKeysByOriginalKeyIdIn(
-    branchId: Long,
-    originalKeyIds: Collection<Long>,
+  fun getSnapshotKeysForTargetKeys(
+    merge: BranchMerge,
+    targetKeyIds: Collection<Long>,
   ): List<KeySnapshot> {
-    if (originalKeyIds.isEmpty()) {
+    if (targetKeyIds.isEmpty()) {
       return emptyList()
     }
-    return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(branchId, originalKeyIds)
+    if (merge.isUpdate) {
+      return keySnapshotRepository.findAllByBranchIdAndBranchKeyIdIn(merge.childBranch.id, targetKeyIds)
+    }
+    return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(merge.childBranch.id, targetKeyIds)
   }
 
   fun deleteSnapshots(branchId: Long) {

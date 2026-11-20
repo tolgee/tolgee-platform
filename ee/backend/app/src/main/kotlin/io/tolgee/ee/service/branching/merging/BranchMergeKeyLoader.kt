@@ -45,7 +45,7 @@ class BranchMergeKeyLoader(
     entityManager.flush()
     return entityManager.unwrap(Session::class.java).doReturningWork { connection ->
       Loaded(
-        snapshots = loadSnapshots(connection, merge.sourceBranch.id),
+        snapshots = loadSnapshots(connection, merge.childBranch.id),
         sourceKeys = loadKeys(connection, merge.sourceBranch),
         targetKeys = loadKeys(connection, merge.targetBranch),
       )

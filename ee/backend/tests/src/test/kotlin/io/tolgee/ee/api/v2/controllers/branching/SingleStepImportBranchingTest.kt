@@ -5,10 +5,14 @@ import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.dataImport.SingleStepImportBranchTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.Scope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.performSingleStepImport
@@ -185,6 +189,33 @@ class SingleStepImportBranchingTest : ProjectAuthControllerTest("/v2/projects/")
       listOf(Pair("en.json", simpleJson)),
       params = mapOf("branch" to "non-existent"),
     ).andIsNotFound
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE])
+  fun `fails importing into protected branch without protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImportWithApiKey(testData.defaultBranch.name).andIsForbidden
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATIONS_VIEW, Scope.TRANSLATIONS_EDIT, Scope.KEYS_CREATE, Scope.BRANCH_PROTECTED_MODIFY],
+  )
+  fun `imports into protected branch with protected-modify scope`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performImportWithApiKey(testData.defaultBranch.name).andIsOk
+  }
+
+  private fun performImportWithApiKey(branch: String): ResultActions {
+    val apiKey = (projectAuthRequestPerformer as ProjectApiKeyAuthRequestPerformer).apiKey.key!!
+    return performSingleStepImport(
+      mvc,
+      testData.project.id,
+      listOf(Pair("en.json", simpleJson)),
+      mapOf("branch" to branch),
+      apiKey = apiKey,
+    )
   }
 
   private fun performImport(
