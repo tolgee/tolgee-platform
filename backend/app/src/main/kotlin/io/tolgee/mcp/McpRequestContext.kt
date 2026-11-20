@@ -11,13 +11,16 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.AuthenticationInterceptor
+import io.tolgee.security.authentication.EmailValidationInterceptor
 import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -30,6 +33,8 @@ class McpRequestContext(
   private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val rateLimitService: RateLimitService,
   private val projectContextService: ProjectContextService,
+  @Lazy
+  private val emailVerificationService: EmailVerificationService,
 ) {
   fun <T> executeAs(
     spec: ToolEndpointSpec,
@@ -40,6 +45,8 @@ class McpRequestContext(
     // so unauthenticated tool calls reach this point and must be rejected here.
     requireAuthenticated()
     // Order mirrors the HTTP interceptor chain:
+    // 0. EmailValidationInterceptor (HIGHEST_PRECEDENCE)
+    checkEmailVerified()
     // 1. RateLimitInterceptor
     applyRateLimit(spec)
     // 2. AuthenticationInterceptor (token type check)
@@ -63,6 +70,12 @@ class McpRequestContext(
     setupActivity(spec)
     emitPostHogEvent(spec)
     return block()
+  }
+
+  /** Mirrors [EmailValidationInterceptor.preHandle] */
+  private fun checkEmailVerified() {
+    if (emailVerificationService.isVerified(authenticationFacade.authenticatedUser)) return
+    throw PermissionException(Message.EMAIL_NOT_VERIFIED)
   }
 
   private fun requireAuthenticated() {

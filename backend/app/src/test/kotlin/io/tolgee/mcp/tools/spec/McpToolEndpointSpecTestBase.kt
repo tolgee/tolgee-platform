@@ -15,8 +15,10 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.BeforeEach
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -28,6 +30,7 @@ abstract class McpToolEndpointSpecTestBase {
   protected lateinit var organizationFeatureGuard: OrganizationFeatureGuard
   protected lateinit var rateLimitService: RateLimitService
   protected lateinit var projectContextService: ProjectContextService
+  protected lateinit var emailVerificationService: EmailVerificationService
 
   protected lateinit var sut: McpRequestContext
 
@@ -45,7 +48,11 @@ abstract class McpToolEndpointSpecTestBase {
     projectContextService = mock()
 
     whenever(activityHolder.businessEventData).thenReturn(businessEventData)
-    whenever(authenticationFacade.authenticatedUserOrNull).thenReturn(mock<UserAccountDto>())
+    val user = mock<UserAccountDto>()
+    whenever(authenticationFacade.authenticatedUserOrNull).thenReturn(user)
+    whenever(authenticationFacade.authenticatedUser).thenReturn(user)
+    emailVerificationService = mock()
+    whenever(emailVerificationService.isVerified(any<UserAccountDto>())).thenReturn(true)
     // No implicit project by default (a mock's numeric getter would otherwise answer 0, not null); the PAK case overrides.
     whenever(authenticationFacade.implicitProjectId).thenReturn(null)
 
@@ -58,6 +65,7 @@ abstract class McpToolEndpointSpecTestBase {
         organizationFeatureGuard,
         rateLimitService,
         projectContextService,
+        emailVerificationService,
       )
   }
 
