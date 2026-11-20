@@ -71,6 +71,29 @@ class V2ExportControllerTagAndNamespaceFilterTest : ProjectAuthControllerTest("/
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `exports the same keys when filter lists are empty as when they are missing`() {
+    val withoutFilters = performExportPost(mapOf("format" to "JSON", "zip" to true))
+
+    val withEmptyFilters =
+      performExportPost(
+        mapOf(
+          "format" to "JSON",
+          "zip" to true,
+          "languages" to emptyList<String>(),
+          "filterKeyId" to emptyList<Long>(),
+          "filterKeyIdNot" to emptyList<Long>(),
+          "filterTagIn" to emptyList<String>(),
+          "filterTagNotIn" to emptyList<String>(),
+          "filterState" to emptyList<String>(),
+          "filterNamespace" to emptyList<String>(),
+        ),
+      )
+
+    withEmptyFilters.assert.isEqualTo(withoutFilters)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns no exported result when wildcard tag matches nothing`() {
     performProjectAuthPost(
       "export",

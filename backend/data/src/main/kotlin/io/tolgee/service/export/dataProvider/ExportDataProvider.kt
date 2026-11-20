@@ -1,6 +1,7 @@
 package io.tolgee.service.export.dataProvider
 
 import io.tolgee.dtos.IExportParams
+import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
@@ -119,13 +120,13 @@ class ExportDataProvider(
   }
 
   private fun filterKeyId() {
-    if (exportParams.filterKeyId != null) {
+    if (!exportParams.filterKeyId.isNullOrEmpty()) {
       whereConditions.add(key.get(Key_.id).`in`(exportParams.filterKeyId))
     }
   }
 
   private fun filterKeyIdNot() {
-    if (exportParams.filterKeyIdNot != null) {
+    if (!exportParams.filterKeyIdNot.isNullOrEmpty()) {
       whereConditions.add(cb.not(key.get(Key_.id).`in`(exportParams.filterKeyIdNot)))
     }
   }
@@ -137,8 +138,9 @@ class ExportDataProvider(
   }
 
   private fun filterState() {
-    if (exportParams.filterState != null) {
-      var condition = translationJoin.get(Translation_.state).`in`(exportParams.filterState)
+    val filterState = exportParams.filterState?.ifEmpty { ExportParams.DEFAULT_FILTER_STATE }
+    if (filterState != null) {
+      var condition = translationJoin.get(Translation_.state).`in`(filterState)
 
       if (exportParams.shouldContainUntranslated) {
         condition = cb.or(condition, cb.isNull(translationJoin))
@@ -241,18 +243,20 @@ class ExportDataProvider(
 
   private val shouldApplyTagFilters
     get() =
-      exportParams.filterTagIn != null || exportParams.filterTagNotIn != null || exportParams.filterTag != null
+      !exportParams.filterTagIn.isNullOrEmpty() ||
+        !exportParams.filterTagNotIn.isNullOrEmpty() ||
+        exportParams.filterTag != null
 
   private val tagFilteredKeyIds by lazy {
     taggedKeyIdsProvider.getFilteredKeys(
       projectId,
       getJoinedTagInFilter(),
-      exportParams.filterTagNotIn,
+      exportParams.filterTagNotIn?.ifEmpty { null },
     )
   }
 
   private fun getJoinedTagInFilter(): MutableList<String>? {
-    if (exportParams.filterTagIn == null && exportParams.filterTag == null) {
+    if (exportParams.filterTagIn.isNullOrEmpty() && exportParams.filterTag == null) {
       return null
     }
 
