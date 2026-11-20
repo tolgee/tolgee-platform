@@ -4,15 +4,15 @@ import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { StyledCircledPill } from 'tg.component/languages/CircledLanguageIconList';
 
 const MAX_FLAGS = 5;
-// -2px cancels CircledPill's 2px padding so the pill's top meets the inline flags' top
-const inlinePillAlignment = { alignSelf: 'flex-start', mt: '-2px' };
+// -2px cancels CircledPill's 2px padding so the pill's top meets the flags' top
+const textLinePillAlignment = { alignSelf: 'flex-start', mt: '-2px' };
 
 type Props = {
   languages: { tag: string; name: string; flagEmoji?: string }[];
   flagHeight: number;
   pillWidth: number;
   gap: number;
-  inlineFlags?: boolean;
+  matchTextLineHeight?: boolean;
   tooltipProps?: Partial<TooltipProps>;
 };
 
@@ -21,7 +21,7 @@ export const LanguageFlagList = ({
   flagHeight,
   pillWidth,
   gap,
-  inlineFlags,
+  matchTextLineHeight,
   tooltipProps,
 }: Props) => {
   const shownLanguages = languages.slice(0, MAX_FLAGS);
@@ -33,7 +33,7 @@ export const LanguageFlagList = ({
         <Tooltip key={l.tag} title={l.name} {...tooltipProps}>
           <Box
             component="span"
-            display={inlineFlags ? undefined : 'flex'}
+            display={matchTextLineHeight ? undefined : 'flex'}
             data-cy="community-language-flag"
           >
             <FlagImage flagEmoji={l.flagEmoji || ''} height={flagHeight} />
@@ -47,7 +47,7 @@ export const LanguageFlagList = ({
         >
           <Box
             data-cy="community-language-flag-more"
-            sx={inlineFlags ? inlinePillAlignment : undefined}
+            sx={matchTextLineHeight ? textLinePillAlignment : undefined}
           >
             <StyledCircledPill
               height={flagHeight}

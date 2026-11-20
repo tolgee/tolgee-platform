@@ -184,7 +184,7 @@ export const ProfileIdentity = ({ profile, isMe, isPublic }: Props) => {
               flagHeight={20}
               pillWidth={44}
               gap={0.75}
-              inlineFlags
+              matchTextLineHeight
             />
           )}
           {firstContribution !== undefined && (
