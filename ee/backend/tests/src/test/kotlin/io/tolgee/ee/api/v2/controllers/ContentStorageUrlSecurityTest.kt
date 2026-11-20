@@ -44,7 +44,7 @@ class ContentStorageUrlSecurityTest : ProjectAuthControllerTest("/v2/projects/")
     internalProperties.disableUrlSsrfProtection = false
     tolgeeProperties.contentDelivery.storage.allowLocalAddresses = false
     Mockito.reset(contentDeliveryFileStorageProvider)
-    doAnswer { mock<S3FileStorage>() }.whenever(contentDeliveryFileStorageProvider).getStorage(any())
+    doAnswer { mock<S3FileStorage>() }.whenever(contentDeliveryFileStorageProvider).getStorage(any(), any())
   }
 
   @AfterEach

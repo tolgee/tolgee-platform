@@ -341,7 +341,7 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
     val mockedFileStorage = mock<S3FileStorage>()
     doAnswer {
       mockedFileStorage
-    }.whenever(s3FileStorageFactory).create(any())
+    }.whenever(s3FileStorageFactory).create(any(), any())
     return mockedFileStorage
   }
 
