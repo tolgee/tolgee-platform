@@ -270,7 +270,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
   ): Set<LanguageDto> {
-    if (languages == null) {
+    if (languages.isNullOrEmpty()) {
       return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
     } else {
       securityService.checkLanguageViewPermissionByTag(projectId, languages)

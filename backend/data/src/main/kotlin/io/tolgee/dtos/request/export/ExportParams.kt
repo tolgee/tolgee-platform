@@ -62,11 +62,7 @@ data class ExportParams(
   @field:Parameter(
     description = FILTER_STATE_DESCRIPTION,
   )
-  override var filterState: List<TranslationState>? =
-    listOf(
-      TranslationState.TRANSLATED,
-      TranslationState.REVIEWED,
-    ),
+  override var filterState: List<TranslationState>? = DEFAULT_FILTER_STATE,
   @field:Parameter(
     description = FILTER_NAMESPACE_DESCRIPTION,
   )
@@ -98,4 +94,8 @@ data class ExportParams(
     description = ExportParamsDocs.FILTER_BRANCH_DESCRIPTION,
   )
   override var filterBranch: String? = null,
-) : IExportParams
+) : IExportParams {
+  companion object {
+    val DEFAULT_FILTER_STATE = listOf(TranslationState.TRANSLATED, TranslationState.REVIEWED)
+  }
+}
