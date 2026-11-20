@@ -1,6 +1,7 @@
 package io.tolgee.dtos.queryResults.branching
 
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeFilters
 import java.util.Date
 
@@ -16,6 +17,13 @@ data class BranchMergeView(
   val keyUnresolvedConflictsCount: Long,
   val keyResolvedConflictsCount: Long,
   val keyExcludedCount: Long,
+  val keyExcludedAdditionsCount: Long,
+  val keyExcludedDeletionsCount: Long,
+  val keyExcludedModificationsCount: Long,
+  val keyExcludedConflictsCount: Long,
   val uncompletedTasksCount: Long,
   val filters: BranchMergeFilters,
-)
+) {
+  val isUpdate: Boolean
+    get() = BranchMerge.isUpdate(sourceBranch, targetBranch)
+}

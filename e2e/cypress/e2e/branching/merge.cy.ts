@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { branchMergeTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import { HOST } from '../../common/constants';
+import { gcy } from '../../common/shared';
 import { E2BranchesSection } from '../../compounds/branching/E2BranchesSection';
 import { E2BranchTranslationsView } from '../../compounds/branching/E2BranchTranslationsView';
 import { E2MergeSection } from '../../compounds/branching/E2MergeSection';
@@ -224,5 +225,95 @@ describe('Branch merging', () => {
     // 5. Navigate to branches list and verify source branch is deleted
     branchesSection.visit(projectId);
     branchesSection.assertBranchNotExists('feature');
+  });
+
+  it('excluded changes are not merged and are offered again', () => {
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.editTranslation(
+      'shared-update-key',
+      'en',
+      'Included change'
+    );
+    translationsView.deleteKey('shared-delete-key');
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ modifications: 1, deletions: 1 });
+    mergeSection.assertIncludedCount(2, 2);
+
+    mergeSection.selectTab('DELETE');
+    mergeSection.setAllIncluded(false);
+    mergeSection.assertIncludedCount(1, 2);
+    mergeSection.assertStats({ deletions: 0 });
+    mergeSection.selectTab('UPDATE');
+    mergeSection.selectTab('DELETE');
+    gcy('merge-tab-delete').should('be.visible');
+
+    mergeSection.setChangeIncluded('shared-delete-key', true);
+    mergeSection.assertIncludedCount(2, 2);
+    mergeSection.assertStats({ deletions: 1 });
+    mergeSection.setChangeIncluded('shared-delete-key', false);
+    mergeSection.assertIncludedCount(1, 2);
+
+    mergeSection.setDeleteBranchAfterMerge(false);
+    mergeSection.applyMerge();
+
+    translationsView.visitWithBranch(projectId, 'main');
+    waitForGlobalLoading();
+    translationsView.assertTranslationValue(
+      'shared-update-key',
+      'en',
+      'Included change'
+    );
+    translationsView.assertKeyExists('shared-delete-key');
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ deletions: 1 });
+  });
+
+  it('reviewed-only filter holds back keys with unreviewed translations', () => {
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.editTranslation(
+      'shared-update-key',
+      'en',
+      'Not reviewed yet'
+    );
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ modifications: 1 });
+
+    mergeSection.setReviewedOnly(true);
+    mergeSection.assertStats({ modifications: 0 });
+    mergeSection.assertApplyButtonDisabled();
+
+    mergeSection.setReviewedOnly(false);
+    mergeSection.assertStats({ modifications: 1 });
+    mergeSection.assertApplyButtonEnabled();
+  });
+
+  it('existing-keys-only filter holds back new keys', () => {
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.createKey({
+      key: 'brand-new-key-from-feature',
+      translation: 'New translation value',
+    });
+    waitForGlobalLoading();
+
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+    mergeSection.assertStats({ additions: 1 });
+
+    mergeSection.setExistingKeysOnly(true);
+    mergeSection.assertStats({ additions: 0 });
+    mergeSection.assertApplyButtonDisabled();
+
+    mergeSection.setExistingKeysOnly(false);
+    mergeSection.assertStats({ additions: 1 });
+    mergeSection.assertApplyButtonEnabled();
   });
 });

@@ -14,6 +14,7 @@ export const useMergeData = (
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/preview',
     method: 'get',
     path: { projectId, mergeId },
+    options: { keepPreviousData: true },
   });
 
   const changesLoadable = useApiInfiniteQuery({
@@ -54,6 +55,11 @@ export const useMergeData = (
     method: 'put',
   });
 
+  const excludeMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/exclude',
+    method: 'put',
+  });
+
   const applyMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/apply',
     method: 'post',
@@ -62,6 +68,11 @@ export const useMergeData = (
   const deleteMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}',
     method: 'delete',
+  });
+
+  const createPreviewMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/preview',
+    method: 'post',
   });
 
   const refreshPreviewMutation = useApiMutation({
@@ -81,8 +92,10 @@ export const useMergeData = (
     changes,
     resolveMutation,
     resolveAllMutation,
+    excludeMutation,
     applyMutation,
     deleteMutation,
     refreshPreviewMutation,
+    createPreviewMutation,
   };
 };

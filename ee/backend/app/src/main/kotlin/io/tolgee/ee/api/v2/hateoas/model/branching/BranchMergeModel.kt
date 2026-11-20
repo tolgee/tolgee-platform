@@ -18,6 +18,8 @@ open class BranchMergeModel(
   val targetBranchId: Long,
   @Schema(description = "Target branch name")
   val targetBranchName: String,
+  @Schema(description = "The target branch is the source's child, so this session updates it from its origin")
+  val isUpdate: Boolean,
   @Schema(description = "Is merge outdated. If true, it means, that either source or target branch data were changed")
   val outdated: Boolean,
   @Schema(description = "Key additions count")
@@ -32,6 +34,14 @@ open class BranchMergeModel(
   val keyResolvedConflictsCount: Int,
   @Schema(description = "Count of changes excluded from the merge")
   val keyExcludedCount: Int,
+  @Schema(description = "Excluded key additions count")
+  val keyExcludedAdditionsCount: Int,
+  @Schema(description = "Excluded key deletions count")
+  val keyExcludedDeletionsCount: Int,
+  @Schema(description = "Excluded key updates count")
+  val keyExcludedModificationsCount: Int,
+  @Schema(description = "Excluded key conflicts count, resolved or not")
+  val keyExcludedConflictsCount: Int,
   @Schema(description = "Uncompleted tasks count on source branch")
   val uncompletedTasksCount: Int,
   @Schema(description = "Filters this merge session was created with")

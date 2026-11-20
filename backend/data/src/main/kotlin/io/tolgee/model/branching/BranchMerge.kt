@@ -70,7 +70,7 @@ class BranchMerge :
     get() = changes.any { it.excluded } || filters != BranchMergeFilters()
 
   val isUpdate: Boolean
-    get() = targetBranch.originBranch?.id == sourceBranch.id
+    get() = isUpdate(sourceBranch, targetBranch)
 
   val childBranch: Branch
     get() {
@@ -100,5 +100,12 @@ class BranchMerge :
   fun markMerged(at: Date) {
     changes.clear()
     mergedAt = at
+  }
+
+  companion object {
+    fun isUpdate(
+      sourceBranch: Branch,
+      targetBranch: Branch,
+    ): Boolean = targetBranch.originBranch?.id == sourceBranch.id
   }
 }
