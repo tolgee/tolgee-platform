@@ -227,6 +227,16 @@ export const NotificationsView: React.FC<
       'AUTOMATICALLY_TRANSLATED',
       'SOURCE_CHANGED',
     ]),
+    {
+      key: MY_TRANSLATIONS,
+      group: 'LOCALIZATION',
+      channels: myTranslations,
+      label: t('settings_notifications_my_translations', 'My translations'),
+      description: t(
+        'settings_notifications_my_translations_description',
+        'Someone reviewed or changed a translation you wrote'
+      ),
+    },
     // shortcut: shown without the isEnabled('TASKS') EE check so the prototype has it, restore before shipping
     {
       key: 'TASKS',
@@ -242,16 +252,6 @@ export const NotificationsView: React.FC<
     },
   ];
   const teamItems: Item[] = [
-    {
-      key: MY_TRANSLATIONS,
-      group: 'LOCALIZATION',
-      channels: myTranslations,
-      label: t('settings_notifications_my_translations', 'My translations'),
-      description: t(
-        'settings_notifications_my_translations_description',
-        'Someone reviewed or changed a translation you wrote'
-      ),
-    },
     ...localizationItems(['STRINGS_TRANSLATED', 'STRINGS_REVIEWED']),
   ];
   const allItems = [...workItems, ...teamItems];

@@ -1,24 +1,22 @@
 import React, { useEffect, useMemo } from 'react';
-import {
-  styled,
-  Typography,
-  FormControlLabel,
-  Switch,
-  Box,
-} from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { styled, Typography, Box, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
+import { T } from '@tolgee/react';
 import { UseInfiniteQueryResult } from 'react-query';
 import { useInView } from 'react-intersection-observer';
 
-import { ActivityCompact } from 'tg.component/activity/ActivityCompact/ActivityCompact';
 import { components } from 'tg.service/apiSchema.generated';
 import { ActivityDateSeparator } from 'tg.views/projects/dashboard/ActivityDateSeparator';
 import { useState } from 'react';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/ActivityDetailDialog';
-import { ActivityModel } from 'tg.component/activity/types';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { ActivityRevisionRow } from 'tg.views/projects/activityStream/ActivityRevisionRow';
+import { ActivityRevisionDialog } from 'tg.views/projects/activityStream/ActivityRevisionDialog';
+import { ActivityShowPastTimesContext } from 'tg.views/projects/activityStream/ActivityRowShell';
+import { ActivityMiniFilter } from 'tg.views/projects/activityStream/ActivityMiniFilter';
+import { ActivityFilter } from 'tg.views/projects/activityStream/activityStreamQuery';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
 type PagedModelProjectActivityModel =
@@ -65,14 +63,18 @@ const StyledLoadingWrapper = styled(Box)`
 
 type Props = {
   activityLoadable: UseInfiniteQueryResult<PagedModelProjectActivityModel>;
+  filter: ActivityFilter;
+  onFilterChange: (value: ActivityFilter) => void;
 };
 
 export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
   activityLoadable,
+  filter,
+  onFilterChange,
 }) => {
   const { ref, inView } = useInView({ rootMargin: '100px' });
-  const [detailData, setDetailData] = useState<ActivityModel>();
-  const [detailId, setDetailId] = useUrlSearchState('activity');
+  const project = useProject();
+  const [openedRevision, setOpenedRevision] = useState<ProjectActivityModel>();
 
   const data = useMemo(() => {
     const result: ProjectActivityModel[] = [];
@@ -83,13 +85,6 @@ export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
     );
     return result;
   }, [activityLoadable.data]);
-
-  const { t } = useTranslate();
-  const [diffEnabled, setDiffEnabled] = useState(true);
-
-  const toggleDiff = () => {
-    setDiffEnabled(!diffEnabled);
-  };
 
   const counter = useDateCounter();
 
@@ -105,52 +100,53 @@ export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
         <Typography variant="h4">
           <T keyName="dashboard_activity_title" />
         </Typography>
-        <FormControlLabel
-          control={
-            <Switch size="small" checked={diffEnabled} onChange={toggleDiff} />
-          }
-          label={t('dashboard_activity_differences')}
-          labelPlacement="start"
-        />
+        <Box display="flex" alignItems="center" gap={2}>
+          <Button
+            size="small"
+            component={Link}
+            to={LINKS.PROJECT_ACTIVITY.build({
+              [PARAMS.PROJECT_ID]: project.id,
+            })}
+            data-cy="dashboard-activity-stream-link"
+          >
+            <T
+              keyName="dashboard_activity_stream_link"
+              defaultValue="Activity stream"
+            />
+          </Button>
+          <ActivityMiniFilter value={filter} onChange={onFilterChange} />
+        </Box>
       </StyledHeader>
-      <StyledScroller>
-        <StyledList>
-          {data?.map((item) => {
-            const date = new Date(item.timestamp);
-            return (
-              <React.Fragment key={item.revisionId}>
-                {counter.isNewDate(date) && (
-                  <ActivityDateSeparator date={date} />
-                )}
-                <ActivityCompact
-                  data={item}
-                  diffEnabled={diffEnabled}
-                  onDetailOpen={(detailData) => {
-                    setDetailData(detailData);
-                    setDetailId(String(detailData.revisionId));
-                  }}
-                />
-              </React.Fragment>
-            );
-          })}
-          {activityLoadable.hasNextPage && (
-            <StyledLoadingWrapper ref={ref}>
-              <BoxLoading />
-            </StyledLoadingWrapper>
-          )}
-        </StyledList>
-      </StyledScroller>
-      {detailId && (
-        <ActivityDetailDialog
-          data={detailData}
-          detailId={Number(detailId)}
-          initialDiffEnabled={diffEnabled}
-          open={Boolean(detailId)}
-          onClose={() => {
-            setDetailData(undefined);
-            setDetailId(undefined);
-          }}
-          maxWidth="lg"
+      <ActivityShowPastTimesContext.Provider value={true}>
+        <StyledScroller>
+          <StyledList>
+            {data?.map((item) => {
+              const date = new Date(item.timestamp);
+              return (
+                <React.Fragment key={item.revisionId}>
+                  {counter.isNewDate(date) && (
+                    <ActivityDateSeparator date={date} />
+                  )}
+                  <ActivityRevisionRow
+                    data={item}
+                    diffEnabled={false}
+                    onOpen={() => setOpenedRevision(item)}
+                  />
+                </React.Fragment>
+              );
+            })}
+            {activityLoadable.hasNextPage && (
+              <StyledLoadingWrapper ref={ref}>
+                <BoxLoading />
+              </StyledLoadingWrapper>
+            )}
+          </StyledList>
+        </StyledScroller>
+      </ActivityShowPastTimesContext.Provider>
+      {openedRevision && (
+        <ActivityRevisionDialog
+          data={openedRevision}
+          onClose={() => setOpenedRevision(undefined)}
         />
       )}
     </StyledContainer>

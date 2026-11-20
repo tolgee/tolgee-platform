@@ -348,6 +348,8 @@ export class LINKS {
 
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
 
+  static PROJECT_ACTIVITY = Link.ofParent(LINKS.PROJECT, 'activity');
+
   static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
 
   static PROJECT_BRANCHES_MERGES = Link.ofParent(
