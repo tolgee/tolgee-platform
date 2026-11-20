@@ -9,6 +9,7 @@ import io.tolgee.ee.repository.AiPlaygroundResultRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.LlmProviderType
@@ -106,12 +107,11 @@ class ReviewPlaygroundPreviewTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `a review preview without the feature returns 400`() {
+  fun `a review preview without the feature returns not found`() {
     save()
     enabledFeaturesProvider.forceEnabled = emptySet()
     startPreview(keyIds = listOf(testData.key.id), languageIds = listOf(testData.german.id))
-      .andIsBadRequest
-      .andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+      .andIsNotFound
   }
 
   private fun startPreview(
