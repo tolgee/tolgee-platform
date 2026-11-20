@@ -114,6 +114,12 @@ class SecurityService(
     return ""
   }
 
+  fun shouldExposeOrganizationMemberDetails(organizationId: Long): Boolean {
+    val user = authenticationFacade.authenticatedUser
+    if (user.isSupporterOrAdmin()) return true
+    return organizationRoleService.isUserOwner(user.id, organizationId)
+  }
+
   fun shouldExposeMemberInfo(): Boolean {
     // Off-request threads (e.g. @Async activity-websocket broadcasts) have no request scope, where
     // reading projectHolder.projectOrNull throws; there is also no caller whose scope could gate this.

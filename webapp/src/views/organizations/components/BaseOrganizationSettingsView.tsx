@@ -59,13 +59,21 @@ export const BaseOrganizationSettingsView: React.FC<
     },
   ];
 
-  if (canManageOrganization) {
+  const canViewOrganizationInternals =
+    isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) ||
+    isAdminOrSupporter;
+
+  if (canViewOrganizationInternals) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_members'),
+      'data-cy': 'members',
     });
+  }
+
+  if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
@@ -83,10 +91,7 @@ export const BaseOrganizationSettingsView: React.FC<
   });
 
   // hide the link; below-MEMBER users would hit a 403 on the TM endpoints
-  if (
-    isAtLeastMemberOrgRole(preferredOrganization?.currentUserRole) ||
-    isAdminOrSupporter
-  ) {
+  if (canViewOrganizationInternals) {
     menuItems.push({
       link: LINKS.ORGANIZATION_TRANSLATION_MEMORIES.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
