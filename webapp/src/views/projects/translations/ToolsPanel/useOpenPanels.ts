@@ -6,18 +6,21 @@ const OPEN_PANELS_KEY = '__tolgee_openPanels';
 export const useOpenPanels = () => {
   const mode = useTranslationsSelector((c) => c?.cursor?.mode);
   const [openPanels, _setOpenPanels] = useState<string[]>(() => {
-    let result;
+    let result: string[] = [
+      'machine_translation',
+      'translation_memory',
+      'source_context',
+    ];
     try {
-      result = JSON.parse(localStorage.getItem(OPEN_PANELS_KEY) ?? '');
-    } catch (e) {
-      // pass
-    }
-    if (!Array.isArray(result)) {
-      result = ['machine_translation', 'translation_memory', 'source_context'];
-    }
-
-    if (localStorage.getItem('__tolgee_context_panel_seen') === null) {
-      result = [...new Set([...result, 'source_context'])];
+      const saved = JSON.parse(localStorage.getItem(OPEN_PANELS_KEY) ?? 'null');
+      if (Array.isArray(saved)) {
+        result =
+          localStorage.getItem('__tolgee_context_panel_seen') === null
+            ? [...new Set<string>([...saved, 'source_context'])]
+            : saved;
+      }
+    } catch {
+      // Use the defaults when preferences cannot be read.
     }
     if (mode === 'comments' && !result.includes('comments')) {
       result.push('comments');
@@ -30,9 +33,13 @@ export const useOpenPanels = () => {
   });
 
   function setOpenPanels(value: string[]) {
-    localStorage.setItem('__tolgee_context_panel_seen', '1');
     _setOpenPanels(value);
-    localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify(value));
+    try {
+      localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify(value));
+      localStorage.setItem('__tolgee_context_panel_seen', '1');
+    } catch {
+      // Keep the selection for this session when storage is unavailable.
+    }
   }
 
   function togglePanelOpen(id: string) {

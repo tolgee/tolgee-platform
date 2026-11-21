@@ -6546,10 +6546,12 @@
             <column name="list_id" type="BIGINT"/>
             <column name="source_document" type="VARCHAR(2000)"/>
         </addColumn>
-        <createIndex tableName="key" indexName="idx_key_source_order">
-            <column name="project_id"/><column name="branch_id"/><column name="namespace_id"/>
-            <column name="source_document"/><column name="list_id"/><column name="id"/>
-        </createIndex>
+    </changeSet>
+    <changeSet author="hexaloc" id="source-document-order-index-1" runInTransaction="false">
+        <sql>
+            CREATE INDEX CONCURRENTLY idx_key_source_order
+                ON key (project_id, branch_id, namespace_id, source_document, list_id, id)
+        </sql>
     </changeSet>
     <changeSet author="hexaloc" id="source-document-order-snapshot-1">
         <addColumn tableName="branch_key_snapshot">
