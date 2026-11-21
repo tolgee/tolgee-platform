@@ -152,11 +152,13 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         any(),
         any(),
         anyOrNull(),
+        any(),
       ),
     ).thenReturn("Translated with DeepL")
 
     whenever(
       azureCognitiveApiService.translate(
+        any(),
         any(),
         any(),
         any(),
