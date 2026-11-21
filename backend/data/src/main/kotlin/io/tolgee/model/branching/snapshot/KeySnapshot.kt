@@ -37,6 +37,9 @@ class KeySnapshot(
   var isPlural: Boolean = false,
   var pluralArgName: String? = null,
   var maxCharLimit: Int? = null,
+  var listId: Long? = null,
+  @Column(length = 2000)
+  var sourceDocument: String? = null,
   /**
    * Reference to the original key from which this snapshot was created.
    * Used to match BASE → FEATURE → MAIN.

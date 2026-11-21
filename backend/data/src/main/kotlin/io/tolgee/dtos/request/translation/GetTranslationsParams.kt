@@ -8,6 +8,10 @@ class GetTranslationsParams(
   filterState: List<String>? = null,
   @field:Parameter(description = "Cursor to get next data")
   val cursor: String? = null,
+  var contextKeyId: Long? = null,
+  @field:jakarta.validation.constraints.Min(0)
+  @field:jakarta.validation.constraints.Max(10)
+  var contextRadius: Int = 2,
   @field:Parameter(description = "Include detailed QA issues for inline highlighting")
   var includeQaIssues: Boolean? = false,
 ) : TranslationFilters(filterState)

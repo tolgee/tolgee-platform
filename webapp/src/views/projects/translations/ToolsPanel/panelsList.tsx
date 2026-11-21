@@ -1,3 +1,4 @@
+import { SourceContext } from './panels/SourceContext';
 import { Mt, TranslationMemory as Tm } from 'tg.component/CustomIcons';
 import { MachineTranslation } from './panels/MachineTranslation/MachineTranslation';
 import { T } from '@tolgee/react';
@@ -5,6 +6,7 @@ import { TranslationMemory } from './panels/TranslationMemory/TranslationMemory'
 import { Comments, commentsCount } from './panels/Comments/Comments';
 import { History } from './panels/History/History';
 import {
+  BookOpen01,
   ClockRewind,
   Keyboard02,
   MessageTextSquare02,
@@ -41,6 +43,14 @@ const BASE_PANELS = [
     name: <T keyName="translation_tools_translation_memory" />,
     component: TranslationMemory,
     displayPanel: ({ language, editEnabled }) => !language.base && editEnabled,
+  },
+  {
+    id: 'source_context',
+    icon: <BookOpen01 />,
+    name: <T keyName="source_context_title" defaultValue="Context" />,
+    component: SourceContext,
+    hideCount: true,
+    displayPanel: ({ keyData, editEnabled }) => editEnabled && keyData.listId != null,
   },
   {
     id: 'comments',

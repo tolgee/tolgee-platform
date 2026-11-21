@@ -65,7 +65,7 @@ class BranchMergeKeyLoader(
 
     connection.forEachRow(
       """
-      select k.id, k.name, k.branch_id, k.is_plural, k.plural_arg_name, k.max_char_limit,
+      select k.id, k.name, k.branch_id, k.is_plural, k.plural_arg_name, k.max_char_limit, k.list_id, k.source_document,
         ns.id as namespace_id, ns.name as namespace_name,
         km.id as meta_id, km.description, km.custom::text as custom
       from key k
@@ -87,6 +87,8 @@ class BranchMergeKeyLoader(
         }
       key.isPlural = row.getBoolean("is_plural")
       key.pluralArgName = row.getString("plural_arg_name")
+      key.listId = row.getObject("list_id") as Long?
+      key.sourceDocument = row.getString("source_document")
       key.maxCharLimit = row.getObject("max_char_limit") as Int?
       key.keyMeta =
         row.getLongOrNull("meta_id")?.let { metaId ->
@@ -200,7 +202,7 @@ class BranchMergeKeyLoader(
 
     connection.forEachRow(
       """
-      select s.id, s.name, s.namespace, s.is_plural, s.plural_arg_name, s.max_char_limit,
+      select s.id, s.name, s.namespace, s.is_plural, s.plural_arg_name, s.max_char_limit, s.list_id, s.source_document,
         s.original_key_id, s.branch_key_id, s.screenshot_references::text as screenshot_references,
         m.id as meta_id, m.description, m.custom::text as custom, m.tags::text as tags
       from branch_key_snapshot s
@@ -215,6 +217,8 @@ class BranchMergeKeyLoader(
           namespace = row.getString("namespace"),
           isPlural = row.getBoolean("is_plural"),
           pluralArgName = row.getString("plural_arg_name"),
+          listId = row.getObject("list_id") as Long?,
+          sourceDocument = row.getString("source_document"),
           maxCharLimit = row.getObject("max_char_limit") as Int?,
           originalKeyId = row.getLong("original_key_id"),
           branchKeyId = row.getLong("branch_key_id"),

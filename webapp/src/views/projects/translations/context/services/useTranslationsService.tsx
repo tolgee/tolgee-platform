@@ -181,7 +181,10 @@ export const useTranslationsService = (props: Props) => {
         : filtersQuery.filterTaskInLang,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
     branch: props.branchName,
-    sort: ['keyNamespace', order, 'keyId'],
+    sort:
+      order === 'listId'
+        ? ['sourceOrderGroup', 'sourceDocument', 'listId', 'keyName', 'keyId']
+        : ['keyNamespace', order, 'keyId'],
     includeQaIssues: qaChecksEnabled,
   };
 

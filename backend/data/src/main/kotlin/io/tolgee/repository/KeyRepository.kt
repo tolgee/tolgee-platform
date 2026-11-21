@@ -18,6 +18,38 @@ import java.util.Optional
 @Repository
 @Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
+  @Query(
+    value = """
+      with anchor as (
+        select k.*, b.id as default_branch from key k
+        left join branch b on b.project_id = k.project_id and b.is_default
+        where k.id = :keyId and k.project_id = :projectId
+          and k.deleted_at is null and source_document is not null and list_id is not null
+      )
+      select id from anchor
+      union all
+      (select k.id from key k join anchor a on k.project_id = a.project_id
+         and coalesce(k.branch_id, a.default_branch) is not distinct from coalesce(a.branch_id, a.default_branch)
+         and k.namespace_id is not distinct from a.namespace_id
+         and k.source_document = a.source_document
+       where k.deleted_at is null and (k.list_id, k.id) < (a.list_id, a.id)
+       order by k.list_id desc, k.id desc limit :radius)
+      union all
+      (select k.id from key k join anchor a on k.project_id = a.project_id
+         and coalesce(k.branch_id, a.default_branch) is not distinct from coalesce(a.branch_id, a.default_branch)
+         and k.namespace_id is not distinct from a.namespace_id
+         and k.source_document = a.source_document
+       where k.deleted_at is null and (k.list_id, k.id) > (a.list_id, a.id)
+       order by k.list_id, k.id limit :radius)
+    """,
+    nativeQuery = true,
+  )
+  fun contextIds(
+    projectId: Long,
+    keyId: Long,
+    radius: Int,
+  ): List<Long>
+
   fun countByProjectId(projectId: Long): Long
 
   @Query(

@@ -6540,4 +6540,37 @@
         <modifyDataType columnName="community_description" newDataType="varchar(10000)" tableName="project"/>
         <modifyDataType columnName="community_guidelines" newDataType="varchar(10000)" tableName="project"/>
     </changeSet>
+    <changeSet author="hexaloc" id="source-document-order-1">
+        <addColumn tableName="import_key"><column name="list_id" type="BIGINT"/></addColumn>
+        <addColumn tableName="key">
+            <column name="list_id" type="BIGINT"/>
+            <column name="source_document" type="VARCHAR(2000)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="hexaloc" id="source-document-order-index-1" runInTransaction="false">
+        <sql dbms="postgresql" splitStatements="false"><![CDATA[
+            DO $$
+            BEGIN
+              SET LOCAL lock_timeout = '5s';
+              IF EXISTS (
+                SELECT 1 FROM pg_index
+                WHERE indexrelid = to_regclass('idx_key_source_order')
+                  AND indrelid = 'key'::regclass
+                  AND NOT indisvalid
+              ) THEN
+                DROP INDEX idx_key_source_order;
+              END IF;
+            END $$;
+        ]]></sql>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_key_source_order
+                ON key (project_id, branch_id, namespace_id, source_document, list_id, id)
+        </sql>
+    </changeSet>
+    <changeSet author="hexaloc" id="source-document-order-snapshot-1">
+        <addColumn tableName="branch_key_snapshot">
+            <column name="list_id" type="BIGINT"/>
+            <column name="source_document" type="VARCHAR(2000)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
