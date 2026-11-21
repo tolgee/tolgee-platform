@@ -579,6 +579,21 @@ class TranslationsTestData {
     }
   }
 
+  fun addMtAutoTranslatedKeyWithManualGerman() {
+    projectBuilder.addKey { name = "mt en, manual de" }.build {
+      addTranslation {
+        language = englishLanguage
+        text = "Machine translated"
+        auto = true
+        mtProvider = MtServiceType.GOOGLE
+      }
+      addTranslation {
+        language = germanLanguage
+        text = "Manual"
+      }
+    }
+  }
+
   fun addCommentStatesData() {
     projectBuilder.run {
       addKey {

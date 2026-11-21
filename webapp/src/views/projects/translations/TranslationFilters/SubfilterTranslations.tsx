@@ -1,16 +1,32 @@
-import { useRef, useState } from 'react';
-import { useTranslate } from '@tolgee/react';
+import { ReactNode, useRef, useState } from 'react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem } from '@mui/material';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
 import { useStateTranslation } from 'tg.translationTools/useStateTranslation';
 import { CompactListSubheader } from 'tg.component/ListComponents';
+import { Mt, TranslationMemory } from 'tg.component/CustomIcons';
+import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
+import {
+  AutoTranslatedBy,
+  FiltersInternal,
+  FilterActions,
+  TranslationStateType,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
+import {
+  StateIndicator,
+  StyledIcon,
+} from 'tg.views/projects/translations/TranslationFilters/StateIndicator';
+import {
+  AUTO_TRANSLATED_SOURCES,
+  selectedAutoTranslatedSources,
+  toggleAutoTranslated,
+  toggleAutoTranslatedBy,
+} from 'tg.views/projects/translations/TranslationFilters/useTranslationFilters';
 
-import { FiltersInternal, FilterActions, TranslationStateType } from './tools';
 import { FilterItem } from './FilterItem';
 import { LanguageModel } from './tools';
-import { StateIndicator } from './StateIndicator';
 
 type Props = {
   projectId: number;
@@ -40,6 +56,7 @@ export const SubfilterTranslations = ({
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
   );
+  const autoSources = selectedAutoTranslatedSources(value);
 
   function toggleFilterLanguage(
     newValue: FiltersInternal['filterTranslationLanguage']
@@ -87,17 +104,52 @@ export const SubfilterTranslations = ({
         >
           <Box display="grid">
             {states.map((state) => {
-              return (
+              if (state !== 'AUTO_TRANSLATED') {
+                return (
+                  <FilterItem
+                    key={state}
+                    label={translateState(state)}
+                    selected={Boolean(
+                      value.filterTranslationState?.includes(state)
+                    )}
+                    onClick={() => toggleFilterState(state)}
+                    indicator={<StateIndicator state={state} />}
+                  />
+                );
+              }
+              return [
                 <FilterItem
                   key={state}
                   label={translateState(state)}
-                  selected={Boolean(
-                    value.filterTranslationState?.includes(state)
-                  )}
-                  onClick={() => toggleFilterState(state)}
+                  selected={
+                    autoSources.length === AUTO_TRANSLATED_SOURCES.length
+                  }
+                  indeterminate={
+                    autoSources.length > 0 &&
+                    autoSources.length < AUTO_TRANSLATED_SOURCES.length
+                  }
+                  onClick={() =>
+                    actions.setFilters(toggleAutoTranslated(value))
+                  }
                   indicator={<StateIndicator state={state} />}
-                />
-              );
+                />,
+                ...AUTO_TRANSLATED_SOURCES.map((source) => (
+                  <FilterItem
+                    key={source}
+                    data-cy="translations-filter-auto-translated-by"
+                    data-cy-source={source}
+                    label={<AutoTranslatedByLabel source={source} />}
+                    selected={autoSources.includes(source)}
+                    onClick={() =>
+                      actions.setFilters(toggleAutoTranslatedBy(value, source))
+                    }
+                    indicator={
+                      <StyledIcon>{AUTO_TRANSLATED_BY_ICON[source]}</StyledIcon>
+                    }
+                    indented
+                  />
+                )),
+              ];
             })}
             <CompactListSubheader>
               <Box display="flex" justifyContent="space-between">
@@ -156,13 +208,58 @@ export function getTranslationFiltersLength(value: FiltersInternal) {
   return value.filterTranslationState?.length ?? 0;
 }
 
-const TranslatedState = (props: { state: TranslationStateType }) => {
+const AUTO_TRANSLATED_BY_ICON: Record<AutoTranslatedBy, ReactNode> = {
+  TRANSLATION_MEMORY: <TranslationMemory />,
+  MACHINE_TRANSLATION: <Mt />,
+};
+
+const AutoTranslatedByLabel = ({ source }: { source: AutoTranslatedBy }) => {
+  const { t } = useTranslate();
+  switch (source) {
+    case 'TRANSLATION_MEMORY':
+      return (
+        <>
+          {t('translation_state_auto_translated_by_tm', 'Translation memory')}
+        </>
+      );
+    case 'MACHINE_TRANSLATION':
+      return (
+        <>
+          {t('translation_state_auto_translated_by_mt', 'Machine translation')}
+        </>
+      );
+    default:
+      return exhaustiveMatchingGuard(source);
+  }
+};
+
+const TranslatedState = (props: {
+  state: TranslationStateType;
+  autoTranslatedBy: FiltersInternal['filterAutoTranslatedBy'];
+}) => {
   const translateState = useStateTranslation();
+  if (props.state === 'AUTO_TRANSLATED' && props.autoTranslatedBy) {
+    return (
+      <T
+        keyName="translation_filters_auto_translated_by"
+        defaultValue="{state}: {source}"
+        params={{
+          state: translateState(props.state),
+          source: <AutoTranslatedByLabel source={props.autoTranslatedBy} />,
+        }}
+      />
+    );
+  }
   return <>{translateState(props.state)}</>;
 };
 
 export function getTranslationFiltersName(value: FiltersInternal) {
   if (value.filterTranslationState?.length) {
-    return <TranslatedState state={value.filterTranslationState[0]} />;
+    return (
+      <TranslatedState
+        state={value.filterTranslationState[0]}
+        autoTranslatedBy={value.filterAutoTranslatedBy}
+      />
+    );
   }
 }
