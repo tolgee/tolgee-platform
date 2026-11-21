@@ -13,9 +13,12 @@ export const useOpenPanels = () => {
       // pass
     }
     if (!Array.isArray(result)) {
-      result = ['machine_translation', 'translation_memory'];
+      result = ['machine_translation', 'translation_memory', 'source_context'];
     }
 
+    if (localStorage.getItem('__tolgee_context_panel_seen') === null) {
+      result = [...new Set([...result, 'source_context'])];
+    }
     if (mode === 'comments' && !result.includes('comments')) {
       result.push('comments');
     }
@@ -27,6 +30,7 @@ export const useOpenPanels = () => {
   });
 
   function setOpenPanels(value: string[]) {
+    localStorage.setItem('__tolgee_context_panel_seen', '1');
     _setOpenPanels(value);
     localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify(value));
   }

@@ -85,6 +85,9 @@ class CursorPredicateProvider(
    */
   @Suppress("UNCHECKED_CAST")
   private fun resolveExpression(property: String): Pair<Expression<Comparable<Any>>, Class<*>> {
+    if (property == "sourceOrderGroup" && queryBase != null) {
+      return (queryBase.sourceOrderGroup as Expression<Comparable<Any>>) to Long::class.javaObjectType
+    }
     selection[property]?.let { selected ->
       return (selected as Expression<Comparable<Any>>) to selected.javaType
     }

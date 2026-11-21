@@ -77,6 +77,8 @@ class QueryBase<T>(
    */
   val translationConditions: MutableSet<Predicate> = HashSet()
   val root: Root<Key> = query.from(Key::class.java)
+  val sourceOrderGroup by lazy { cb.selectCase<Long>().`when`(cb.isNull(root.get(Key_.listId)), 1L).otherwise(0L) }
+
   val keyNameExpression: Path<String> = root.get(Key_.name)
   val keyCreatedAtExpression: Path<Date> = root.get(Key_.createdAt)
   val keyIsPluralExpression: Path<Boolean> = root.get(Key_.isPlural)
@@ -121,6 +123,8 @@ class QueryBase<T>(
     addDescription()
     addScreenshotCounts()
     addContextCounts()
+    querySelection["sourceDocument"] = root.get(Key_.sourceDocument)
+    querySelection["listId"] = root.get(Key_.listId)
     if (params.trashed) {
       addDeletedAtSelection()
       addDeletedBySelection()

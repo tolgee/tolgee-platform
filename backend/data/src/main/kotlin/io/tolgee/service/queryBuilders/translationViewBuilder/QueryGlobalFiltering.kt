@@ -592,7 +592,9 @@ class QueryGlobalFiltering(
     val branchJoin =
       queryBase.branchJoin
         ?: queryBase.root.join(Key_.branch, JoinType.LEFT).also { queryBase.branchJoin = it }
-    if (params.filterKeyId?.isNotEmpty() == true) {
+    if (params.filterKeyId?.isNotEmpty() == true &&
+      (params as? io.tolgee.dtos.request.translation.GetTranslationsParams)?.contextKeyId == null
+    ) {
       return
     }
     if (params.branch.isNullOrEmpty()) {

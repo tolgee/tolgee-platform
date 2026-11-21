@@ -423,11 +423,48 @@ class StoredDataImporter(
   }
 
   private fun addAllKeys() {
+    val sourceFiles =
+      importDataManager.storedLanguages
+        .filter {
+          !it.ignored && it.existingLanguage != null && it.existingLanguage?.id == import.project.baseLanguage?.id
+        }.map { it.file }
+        .distinct()
+    val canRecordOrder =
+      sourceFiles.isNotEmpty() &&
+        securityService.currentPermittedScopesContain(Scope.TRANSLATIONS_EDIT) &&
+        securityService
+          .filterTranslatePermissionByLanguageId(
+            import.project.id,
+            listOf(import.project.baseLanguage!!.id),
+          ).isNotEmpty()
+    val sourcePositions = mutableMapOf<Pair<String?, String>, Pair<String, Long>>()
+    if (canRecordOrder) {
+      val sources = sourceFiles.associateBy { it.namespace to it.name }
+      // A key shared by multiple uploaded source files has one canonical position.
+      for (file in sourceFiles.sortedBy { it.name }) {
+        val document = file.name ?: continue
+        importDataManager.storedKeys[file]?.values?.forEach { entry ->
+          entry.listId?.let { sourcePositions.putIfAbsent(file.namespace to entry.name, document to it) }
+        }
+      }
+      for ((name, key) in importDataManager.existingKeys) {
+        val file = sources[name.first to key.sourceDocument] ?: continue
+        if (importDataManager.storedKeys[file]?.containsKey(name.second) == false) {
+          key.listId = null
+          key.sourceDocument = null
+          keysToSavePut(name.first, name.second, key)
+        }
+      }
+    }
     importDataManager.storedKeysValuesSequence().forEach { importKey ->
       if (!importKey.shouldBeImported) {
         return@forEach
       }
-      addKeyToSave(importKey.file.namespace, importKey.name)
+      val key = addKeyToSave(importKey.file.namespace, importKey.name)
+      sourcePositions[importKey.file.namespace to importKey.name]?.let { (document, position) ->
+        key.listId = position
+        key.sourceDocument = document
+      }
     }
   }
 

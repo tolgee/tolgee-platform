@@ -4,6 +4,7 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.SingleStepImportTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -107,6 +108,56 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     executeInNewTransaction {
       getGermanTestTranslation().state.assert.isEqualTo(TranslationState.TRANSLATED)
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `source order survives target import and tracks insertions independently of key ids`() {
+    saveAndPrepare()
+
+    fun upload(
+      file: String,
+      json: String,
+    ) {
+      val resource =
+        org.springframework.core.io
+          .ByteArrayResource(json.toByteArray())
+      performImport(testData.project.id, listOf(file to resource), mapOf("forceMode" to "OVERRIDE")).andIsOk
+    }
+    val source =
+      org.springframework.core.io
+        .ByteArrayResource("""{"z":"Z","a":"A"}""".toByteArray())
+    io.tolgee.util
+      .performImport(mvc, testData.project.id, listOf("en.json" to source))
+      .andIsOk
+    performAuthPut("/v2/projects/${testData.project.id}/import/apply?forceMode=OVERRIDE", null).andIsOk
+    val id = keyService.find(testData.project.id, "a", null)!!.id
+    upload("de.json", """{"a":"AA","z":"ZZ","legacy-b":"B","legacy-a":"A"}""")
+    keyService
+      .find(testData.project.id, "a", null)!!
+      .listId.assert
+      .isEqualTo(2L)
+    upload("en.json", """{"z":"Z","m":"M","a":"A"}""")
+    keyService
+      .find(testData.project.id, "a", null)!!
+      .id.assert
+      .isEqualTo(id)
+    performProjectAuthGet("/translations?sort=sourceOrderGroup&sort=sourceDocument&sort=listId&sort=keyName&sort=keyId")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("z")
+        node("_embedded.keys[1].keyName").isEqualTo("m")
+        node("_embedded.keys[2].keyName").isEqualTo("a")
+        node("_embedded.keys[3].keyName").isEqualTo("legacy-a")
+        node("_embedded.keys[4].keyName").isEqualTo("legacy-b")
+      }
+    performProjectAuthGet("/translations?contextKeyId=$id&contextRadius=1&sort=listId")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys").isArray.hasSize(2)
+        node("_embedded.keys[0].keyName").isEqualTo("m")
+        node("_embedded.keys[1].listId").isEqualTo(3)
+      }
   }
 
   private fun getGermanTestTranslation() = getTestKeyTranslations().single { it.language.tag == "de" }

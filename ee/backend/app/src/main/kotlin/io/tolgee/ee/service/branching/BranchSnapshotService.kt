@@ -46,7 +46,7 @@ class BranchSnapshotService(
     val sql =
       """
       INSERT INTO branch_key_snapshot (
-        id, name, namespace, is_plural, plural_arg_name, max_char_limit,
+        id, name, namespace, is_plural, plural_arg_name, max_char_limit, list_id, source_document,
         original_key_id, branch_key_id, branch_id, project_id,
         screenshot_references, created_at, updated_at
       )
@@ -56,7 +56,7 @@ class BranchSnapshotService(
         ns.name,
         tk.is_plural,
         tk.plural_arg_name,
-        tk.max_char_limit,
+        tk.max_char_limit, tk.list_id, tk.source_document,
         sk.id,
         tk.id,
         :targetBranchId,
@@ -164,7 +164,7 @@ class BranchSnapshotService(
     val sql =
       """
       INSERT INTO branch_key_snapshot (
-        id, name, namespace, is_plural, plural_arg_name, max_char_limit,
+        id, name, namespace, is_plural, plural_arg_name, max_char_limit, list_id, source_document,
         original_key_id, branch_key_id, branch_id, project_id,
         screenshot_references, created_at, updated_at
       )
@@ -174,7 +174,7 @@ class BranchSnapshotService(
         ns.name,
         sk.is_plural,
         sk.plural_arg_name,
-        sk.max_char_limit,
+        sk.max_char_limit, sk.list_id, sk.source_document,
         tk.id,
         sk.id,
         :sourceBranchId,

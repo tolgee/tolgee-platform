@@ -199,9 +199,9 @@ class BranchCopyServiceSql(
     targetBranch: Branch,
   ) {
     val sql = """
-      INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, max_char_limit, created_at, updated_at)
+      INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, max_char_limit, list_id, source_document, created_at, updated_at)
       SELECT m.target_key_id, k.name, :projectId, k.namespace_id, :targetBranchId,
-             k.is_plural, k.plural_arg_name, k.max_char_limit,
+             k.is_plural, k.plural_arg_name, k.max_char_limit, k.list_id, k.source_document,
              :targetBranchCreatedAt, :targetBranchCreatedAt
       FROM temp_key_mapping m
       JOIN key k ON k.id = m.source_key_id
