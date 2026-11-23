@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 class BigMetaController(
   private val bigMetaService: BigMetaService,
+  private val bigMetaFacade: BigMetaFacade,
   private val projectHolder: ProjectHolder,
   private val keyWithBaseTranslationModelAssembler: KeyWithBaseTranslationModelAssembler,
 ) : Logging {
@@ -44,7 +45,7 @@ class BigMetaController(
     @RequestBody @Valid
     data: BigMetaDto,
   ) {
-    bigMetaService.store(data, projectHolder.projectEntity)
+    bigMetaFacade.store(data)
   }
 
   @GetMapping("/keys/{id}/big-meta")

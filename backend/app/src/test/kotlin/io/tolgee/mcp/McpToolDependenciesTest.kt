@@ -27,7 +27,6 @@ class McpToolDependenciesTest : AbstractSpringTest() {
   private val notMigratedYet =
     setOf(
       "BatchJobMcpTools",
-      "BigMetaMcpTools",
       "BranchMcpTools",
       "SuggestionMcpTools",
     )
