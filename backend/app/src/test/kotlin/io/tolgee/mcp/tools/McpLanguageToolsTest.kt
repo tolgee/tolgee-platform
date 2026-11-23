@@ -33,6 +33,26 @@ class McpLanguageToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `create_language refuses a duplicate tag`() {
+    assertToolFails(
+      client,
+      "create_language",
+      mapOf("projectId" to data.projectId, "name" to "English 2", "tag" to "en"),
+      expectedError = "ValidationException",
+    )
+  }
+
+  @Test
+  fun `create_language refuses a tag with a comma`() {
+    assertToolFails(
+      client,
+      "create_language",
+      mapOf("projectId" to data.projectId, "name" to "Multi", "tag" to "en,de"),
+      expectedError = "can not contain coma",
+    )
+  }
+
+  @Test
   fun `create_language adds a new language`() {
     val json =
       callToolAndGetJson(
