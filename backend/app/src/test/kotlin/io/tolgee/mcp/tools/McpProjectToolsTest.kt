@@ -2,8 +2,10 @@ package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
+import io.tolgee.development.testDataBuilder.data.McpOrgMaintainerTestData
 import io.tolgee.development.testDataBuilder.data.ProjectStatsBranchingTestData
 import io.tolgee.model.Pat
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -13,6 +15,7 @@ class McpProjectToolsTest : AbstractMcpTest() {
   lateinit var data: McpPatTestData
   lateinit var client: McpSyncClient
   var branchedData: ProjectStatsBranchingTestData? = null
+  var maintainerData: McpOrgMaintainerTestData? = null
 
   @BeforeEach
   fun setup() {
@@ -57,6 +60,42 @@ class McpProjectToolsTest : AbstractMcpTest() {
       )
     assertThat(json["id"]).isNotNull()
     assertThat(json["name"].asString()).isEqualTo("New MCP Project")
+  }
+
+  @Test
+  fun `create_project refuses a language tag with a comma`() {
+    assertToolFails(
+      client,
+      "create_project",
+      mapOf(
+        "name" to "Bad Project",
+        "organizationId" to data.organizationId,
+        "languages" to listOf(mapOf("name" to "English", "tag" to "en,de")),
+      ),
+      expectedError = "can not contain coma",
+    )
+  }
+
+  @Test
+  fun `create_project grants full access when the user is an organization maintainer`() {
+    val maintainerData = McpOrgMaintainerTestData()
+    this.maintainerData = maintainerData
+    testDataService.saveTestData(maintainerData.root)
+    val maintainerClient = createMcpClientWithPat(maintainerData.pat.token!!)
+
+    val json =
+      callToolAndGetJson(
+        maintainerClient,
+        "create_project",
+        mapOf(
+          "name" to "Maintainer Project",
+          "organizationId" to maintainerData.otherOrganization.id,
+          "languages" to listOf(mapOf("name" to "English", "tag" to "en")),
+        ),
+      )
+
+    val permission = permissionService.getUserProjectPermission(json["id"].asLong(), maintainerData.user.id)
+    assertThat(permission?.type).isEqualTo(ProjectPermissionType.MANAGE)
   }
 
   @Test
@@ -109,7 +148,8 @@ class McpProjectToolsTest : AbstractMcpTest() {
   }
 
   @AfterEach
-  fun cleanupBranchedData() {
+  fun cleanupExtraTestData() {
     branchedData?.let { testDataService.cleanTestData(it.root) }
+    maintainerData?.let { testDataService.cleanTestData(it.root) }
   }
 }

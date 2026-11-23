@@ -1,18 +1,14 @@
 package io.tolgee.mcp.tools
 
 import io.tolgee.api.v2.controllers.ProjectStatsController
+import io.tolgee.api.v2.controllers.ProjectStatsFacade
 import io.tolgee.api.v2.controllers.project.ProjectsController
+import io.tolgee.api.v2.controllers.project.ProjectsFacade
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.language.LanguageService
-import io.tolgee.service.organization.OrganizationRoleService
-import io.tolgee.service.project.LanguageStatsService
-import io.tolgee.service.project.ProjectCreationService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
@@ -22,12 +18,8 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class ProjectMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val projectService: ProjectService,
-  private val projectCreationService: ProjectCreationService,
-  private val languageStatsService: LanguageStatsService,
-  private val languageService: LanguageService,
-  private val organizationRoleService: OrganizationRoleService,
-  private val projectHolder: ProjectHolder,
+  private val projectsFacade: ProjectsFacade,
+  private val projectStatsFacade: ProjectStatsFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -53,7 +45,7 @@ class ProjectMcpTools(
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
         val pageNum = request.arguments?.getInt("page") ?: 0
-        val projects = projectService.findPermittedInOrganizationPaged(PageRequest.of(pageNum, 100), search)
+        val projects = projectsFacade.findPermitted(PageRequest.of(pageNum, 100), search)
         val result =
           pagedResponse(projects) { p ->
             mapOf(
@@ -80,7 +72,7 @@ class ProjectMcpTools(
         objectArray("languages", "Initial languages for the project", required = true) {
           string("name", "Language name (e.g. 'English')", required = true)
           string("tag", "Language tag (e.g. 'en')", required = true)
-          string("originalName", "Original name of the language")
+          string("originalName", "Original name of the language. Defaults to the value of 'name'.")
           string("flagEmoji", "Flag emoji for the language")
         }
         string("baseLanguageTag", "Tag of the base language (default: first language)")
@@ -94,7 +86,7 @@ class ProjectMcpTools(
             LanguageRequest(
               name = lang.requireString("name"),
               tag = lang.requireString("tag"),
-              originalName = lang.getString("originalName"),
+              originalName = lang.getString("originalName") ?: lang.requireString("name"),
               flagEmoji = lang.getString("flagEmoji"),
             )
           }
@@ -108,8 +100,7 @@ class ProjectMcpTools(
           )
 
         executeInNewTransaction(transactionManager) {
-          organizationRoleService.checkUserCanCreateProject(dto.organizationId)
-          val project = projectCreationService.createProject(dto)
+          val project = projectsFacade.createProject(dto)
           val result =
             mapOf(
               "id" to project.id,
@@ -134,14 +125,8 @@ class ProjectMcpTools(
       spec = getLanguageStatsSpec,
     ) { request ->
       mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {
-        val languages = languageService.findAll(projectHolder.project.id)
-        val languageIds = languages.map { it.id }.toSet()
-        val stats = languageStatsService.getLanguageStats(projectHolder.project.id, languageIds)
-        val languageById = languages.associateBy { it.id }
-
         val result =
-          stats.map { stat ->
-            val lang = languageById[stat.languageId]
+          projectStatsFacade.getLanguageStats().map { (lang, stat) ->
             mapOf(
               "languageTag" to lang?.tag,
               "languageName" to lang?.name,
