@@ -29,7 +29,6 @@ class McpToolDependenciesTest : AbstractSpringTest() {
       "BatchJobMcpTools",
       "BigMetaMcpTools",
       "BranchMcpTools",
-      "KeyMcpTools",
       "LanguageMcpTools",
       "NamespaceMcpTools",
       "ProjectMcpTools",
