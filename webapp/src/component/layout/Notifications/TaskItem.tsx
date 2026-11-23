@@ -7,13 +7,24 @@ import {
 import { getTaskUrl } from 'tg.constants/links';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { useTranslate } from '@tolgee/react';
+import { NotificationUserName } from 'tg.component/layout/Notifications/NotificationUserName';
 
-const StyledLinkedDetailItem = styled(Box)`
-  margin-right: 10px;
-  display: inline;
+const StyledDetail = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 `;
 
-const StyledLinkedDetailNumber = styled(StyledLinkedDetailItem)`
+const StyledTaskName = styled(Box)`
+  color: ${({ theme }) => theme.palette.primary.main};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const StyledTaskNumber = styled(Box)`
+  flex-shrink: 0;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -23,10 +34,8 @@ export const TaskItem: FunctionComponent<
   React.PropsWithChildren<TaskItemProps>
 > = ({ notification, children, ...props }) => {
   const { t } = useTranslate();
-  const destinationUrl = getTaskUrl(
-    notification.project!.id,
-    notification.linkedTask!.number
-  );
+  const task = notification.linkedTask!;
+  const destinationUrl = getTaskUrl(notification.project!.id, task.number);
   return (
     <NotificationItem
       notification={notification}
@@ -34,25 +43,21 @@ export const TaskItem: FunctionComponent<
       {...props}
     >
       <Box>
-        <b>{notification.originatingUser?.name}</b>
-        {'\u205F'}
+        <NotificationUserName name={notification.originatingUser?.name ?? ''} />
+        {' '}
         {children}
       </Box>
-      <Box>
-        <StyledLinkedDetailItem>
+      <StyledDetail>
+        <StyledTaskName>{task.name || t('task_default_name')}</StyledTaskName>
+        <StyledTaskNumber>#{task.number}</StyledTaskNumber>
+        {task.language.flagEmoji && (
           <FlagImage
-            flagEmoji={notification.linkedTask!.language.flagEmoji!}
-            height={20}
-            style={{ marginBottom: -5 }}
+            flagEmoji={task.language.flagEmoji}
+            height={16}
+            style={{ flexShrink: 0 }}
           />
-        </StyledLinkedDetailItem>
-        <StyledLinkedDetailItem>
-          {notification.linkedTask?.name || t('task_default_name')}
-        </StyledLinkedDetailItem>
-        <StyledLinkedDetailNumber>
-          #{notification.linkedTask?.number}
-        </StyledLinkedDetailNumber>
-      </Box>
+        )}
+      </StyledDetail>
     </NotificationItem>
   );
 };

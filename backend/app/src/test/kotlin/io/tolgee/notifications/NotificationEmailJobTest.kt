@@ -223,13 +223,9 @@ class NotificationEmailJobTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `mention email is sent 5 minutes after the mention`() {
+  fun `mention email is sent right away`() {
     mention()
     mentionRows().assert.hasSize(1)
-    advanceMinutes(4)
-    job.sendDueEmails()
-    emailTestUtil.verifyTimesEmailSent(0)
-    advanceMinutes(2)
     job.sendDueEmails()
     emailTestUtil.verifyTimesEmailSent(1)
     emailTestUtil.singleEmailContent.assert
@@ -274,7 +270,7 @@ class NotificationEmailJobTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `seen notifications are not emailed`() {
+  fun `seen work is not emailed but a seen mention is`() {
     val work = recordWorkChange()
     mention()
     notificationService.markNotificationsAsSeen(
@@ -283,7 +279,10 @@ class NotificationEmailJobTest : AbstractSpringTest() {
     )
     advanceMinutes(61)
     job.sendDueEmails()
-    emailTestUtil.verifyTimesEmailSent(0)
+    emailTestUtil.verifyTimesEmailSent(1)
+    emailTestUtil.singleEmailContent.assert
+      .contains("mentioned you")
+      .doesNotContain("new key")
   }
 
   @Test

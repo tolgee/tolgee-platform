@@ -30,6 +30,7 @@ class ActivityViewByRevisionsProvider(
    * this parameter specifies what's the maximum per-entity modification to be included in the list.
    */
   private val onlyCountInListAbove: Int = 0,
+  private val allBranches: Boolean = false,
 ) {
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)
@@ -158,7 +159,9 @@ class ActivityViewByRevisionsProvider(
     val whereConditions = mutableListOf<Predicate>()
     whereConditions.add(filter)
     whereConditions.add(revision.get(ActivityRevision_.id).`in`(revisionIds))
-    whereConditions.add(getBranchPredicate(cb, query, root, revision))
+    if (!allBranches) {
+      whereConditions.add(getBranchPredicate(cb, query, root, revision))
+    }
     ActivityType.entries.forEach {
       it.restrictEntitiesInList?.let { restrictEntitiesInList ->
         val restrictedEntityNames = restrictEntitiesInList.map { it.simpleName }
@@ -225,7 +228,7 @@ class ActivityViewByRevisionsProvider(
 
     val filter =
       cb.or(
-        cb.and(*expandFilters.toTypedArray()),
+        cb.or(*expandFilters.toTypedArray()),
         allActivityTypeFilter,
       )
 

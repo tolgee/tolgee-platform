@@ -1,5 +1,5 @@
-import { FunctionComponent } from 'react';
-import { Box, styled } from '@mui/material';
+import { FunctionComponent, ReactNode } from 'react';
+import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import {
@@ -7,29 +7,38 @@ import {
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
 import { getNotificationTranslationsUrl } from 'tg.constants/links';
-import { KeysAddedText } from 'tg.component/layout/Notifications/KeysAddedText';
+import { LocalizationCountLabel } from 'tg.component/layout/Notifications/LocalizationActionLabel';
 
-const ENTITY_CAP = 100;
-
-const StyledFlag = styled(Box)`
-  display: inline;
-  margin-right: 4px;
+const StyledDetail = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 `;
 
 const StyledCount = styled(Box)`
-  display: inline;
-  margin-left: 6px;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
-const StyledBranches = styled(Box)`
-  display: inline;
-  margin-left: 8px;
+const StyledFlags = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const MAX_FLAGS = 4;
+
+const StyledMoreLanguages = styled(Box)`
   font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-type Props = NotificationItemProps & { label: string };
+const StyledBranches = styled(Box)`
+  font-size: 12px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+type Props = NotificationItemProps & { label: ReactNode };
 
 export const LocalizationItem: FunctionComponent<Props> = ({
   notification,
@@ -38,13 +47,14 @@ export const LocalizationItem: FunctionComponent<Props> = ({
 }) => {
   const { t } = useTranslate();
   const projectId = notification.project!.id;
+  const languages = notification.languages ?? [];
+  const shownLanguages = languages.slice(0, MAX_FLAGS);
+  const hiddenLanguages = languages.slice(MAX_FLAGS);
   const destinationUrl = getNotificationTranslationsUrl(
     projectId,
     notification.id,
     notification.languages?.map((l) => l.tag)
   );
-  const count = notification.entityCount;
-  const isKeysAdded = notification.type === 'KEYS_ADDED';
 
   return (
     <NotificationItem
@@ -53,34 +63,43 @@ export const LocalizationItem: FunctionComponent<Props> = ({
       {...props}
     >
       <Box data-cy="notifications-localization-item">
-        {isKeysAdded ? (
-          <KeysAddedText notification={notification} entityCap={ENTITY_CAP} />
-        ) : (
-          <Box>
-            <b>{label}</b>
-          </Box>
-        )}
-        <Box>
-          {notification.languages?.map((language) => (
-            <StyledFlag
-              key={language.id}
-              data-cy="notifications-localization-flag"
-              data-cy-tag={language.tag}
-            >
-              <FlagImage
-                flagEmoji={language.flagEmoji ?? ''}
-                height={16}
-                style={{ marginBottom: -3 }}
-              />
-            </StyledFlag>
-          ))}
-          {!isKeysAdded && count !== undefined && count !== null && (
+        <Box data-cy="notifications-localization-label">{label}</Box>
+        <StyledDetail>
+          {notification.entityCount != null && (
             <StyledCount data-cy="notifications-localization-count">
-              {count >= ENTITY_CAP
-                ? t('notifications-count-capped', '100+')
-                : count}
+              <LocalizationCountLabel
+                type={notification.type}
+                count={notification.entityCount}
+              />
             </StyledCount>
           )}
+          <StyledFlags>
+            {shownLanguages.map((language) => (
+              <Box
+                key={language.id}
+                data-cy="notifications-localization-flag"
+                data-cy-tag={language.tag}
+              >
+                <FlagImage
+                  flagEmoji={language.flagEmoji ?? ''}
+                  height={16}
+                  style={{ marginBottom: -3 }}
+                />
+              </Box>
+            ))}
+            {hiddenLanguages.length > 0 && (
+              <Tooltip
+                title={languages.map((l) => l.name).join(', ')}
+                placement="bottom-start"
+              >
+                <StyledMoreLanguages data-cy="notifications-localization-more-languages">
+                  {t('notifications-more-languages', '+{count}', {
+                    count: hiddenLanguages.length,
+                  })}
+                </StyledMoreLanguages>
+              </Tooltip>
+            )}
+          </StyledFlags>
           {Boolean(notification.branches?.length) && (
             <StyledBranches data-cy="notifications-localization-branches">
               {t('notifications-branches', 'branches: {names}', {
@@ -88,7 +107,7 @@ export const LocalizationItem: FunctionComponent<Props> = ({
               })}
             </StyledBranches>
           )}
-        </Box>
+        </StyledDetail>
       </Box>
     </NotificationItem>
   );

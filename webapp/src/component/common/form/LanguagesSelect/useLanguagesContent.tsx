@@ -12,7 +12,10 @@ import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { components } from 'tg.service/apiSchema.generated';
 import { messageService } from 'tg.service/MessageService';
 
-type LanguageModel = components['schemas']['LanguageModel'];
+type LanguageModel = Pick<
+  components['schemas']['LanguageModel'],
+  'id' | 'tag' | 'name'
+> & { base?: boolean };
 
 const LanguageName = ({ name }: { name: string }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -60,6 +63,7 @@ type Props = {
   disabledLanguages: number[] | undefined;
   enableEmpty?: boolean;
   context?: string;
+  selectAllToggle?: boolean;
 };
 
 export const useLanguagesContent = ({
@@ -69,6 +73,7 @@ export const useLanguagesContent = ({
   disabledLanguages,
   enableEmpty,
   context,
+  selectAllToggle,
 }: Props) => {
   const { t } = useTranslate();
 
@@ -133,6 +138,25 @@ export const useLanguagesContent = ({
       <LanguageName name={lang.name} />
     </MenuItem>
   ));
+
+  if (selectAllToggle) {
+    return [
+      <MenuItem
+        key="select-all"
+        onClick={allSelected ? handleSelectNone : handleSelectAll}
+        data-cy="translations-language-select-all"
+      >
+        <Checkbox
+          checked={allSelected}
+          indeterminate={!allSelected && value.length > 0}
+          size="small"
+        />
+        <ListItemText primary={t('languages_permitted_list_select_all')} />
+      </MenuItem>,
+      <Divider key="divider" />,
+      ...languageItems,
+    ];
+  }
 
   if (isTranslations) {
     return [

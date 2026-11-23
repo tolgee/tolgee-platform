@@ -2,6 +2,7 @@ import React from 'react';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
+import { ActivityStreamView } from 'tg.views/projects/activityStream/ActivityStreamView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectContext } from 'tg.hooks/ProjectContext';
 import { HideObserver } from 'tg.component/layout/TopBar/HideObserver';
@@ -71,6 +72,10 @@ export const ProjectRouter = () => {
 
         <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
           <IntegrateView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_ACTIVITY.template}>
+          <ActivityStreamView />
         </Route>
 
         <Route exact path={LINKS.PROJECT_DASHBOARD.template}>

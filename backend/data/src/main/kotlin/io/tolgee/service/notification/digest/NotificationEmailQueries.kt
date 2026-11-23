@@ -65,11 +65,12 @@ class NotificationEmailQueries(
       join user_account ua on ua.id = n.user_id and ua.deleted_at is null and ua.disabled_at is null
       join project p on p.id = n.project_id and p.deleted_at is null
       left join notification_digest_state s on s.user_id = n.user_id
-      where n.seen = false and n.email_pending = true and n.email_due_at <= ?::timestamp
+      where n.email_pending = true and n.email_due_at <= ?::timestamp
         and (
           n.type = any(?)
           or (
-            n.type = any(?)
+            n.seen = false
+            and n.type = any(?)
             and coalesce(s.frequency, 'SOON') <> 'OFF'
             and (
               s.last_digest_sent_at is null
@@ -103,7 +104,7 @@ class NotificationEmailQueries(
       left join namespace ns on ns.id = k.namespace_id
       join language l on l.id = t.language_id
       left join user_account ou on ou.id = n.originating_user_id
-      where n.user_id = ? and n.seen = false and n.email_pending = true and n.email_due_at <= ?::timestamp
+      where n.user_id = ? and n.email_pending = true and n.email_due_at <= ?::timestamp
         and n.type = any(?)
       order by n.id
       """,

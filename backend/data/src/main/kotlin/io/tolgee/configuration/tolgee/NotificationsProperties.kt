@@ -9,8 +9,8 @@ class NotificationsProperties {
   @DocProperty(description = "Max number of linked entities stored per notification")
   var entityCap: Int = 100
 
-  @DocProperty(description = "How long after a mention the mention email is sent, if still unseen, in ms")
-  var mentionEmailDelayMs: Long = 300_000
+  @DocProperty(description = "How long after a mention the mention email is sent, in ms")
+  var mentionEmailDelayMs: Long = 0
 
   @DocProperty(description = "Work notifications are emailed after this long without new changes, in ms")
   var workQuietMs: Long = 900_000

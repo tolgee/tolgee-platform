@@ -12,7 +12,10 @@ export const TaskAssignedItem: FunctionComponent<
 > = ({ notification, ...props }) => {
   return (
     <TaskItem notification={notification} {...props}>
-      <T keyName="notifications-task-assigned" />
+      <T
+        keyName="notifications-task-assigned-short"
+        defaultValue="assigned task"
+      />
     </TaskItem>
   );
 };

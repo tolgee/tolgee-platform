@@ -4,10 +4,12 @@ import { Bell01 } from '@untitled-ui/icons-react';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useLocalizationNotificationLabel } from 'tg.component/layout/Notifications/useLocalizationNotificationLabel';
+import {
+  LocalizationActionLabel,
+  LocalizationCountLabel,
+} from 'tg.component/layout/Notifications/LocalizationActionLabel';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 
-import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 import { PrefilterContainer } from 'tg.views/projects/translations/prefilters/ContainerPrefilter';
 
 const StyledContent = styled(Box)`
@@ -27,8 +29,6 @@ type Props = {
 };
 
 export const PrefilterNotification = ({ notificationId }: Props) => {
-  const total = useTranslationsSelector((c) => c.translationsTotal);
-  const getLabel = useLocalizationNotificationLabel();
   const timeDistance = useTimeDistance();
 
   const notificationLoadable = useApiQuery({
@@ -44,7 +44,6 @@ export const PrefilterNotification = ({ notificationId }: Props) => {
   });
 
   const notification = notificationLoadable.data;
-  const label = notification && getLabel(notification.type);
   const shownAt = notification?.updatedAt ?? notification?.createdAt;
 
   if (notificationLoadable.isError) {
@@ -73,23 +72,28 @@ export const PrefilterNotification = ({ notificationId }: Props) => {
     <PrefilterContainer
       icon={<Bell01 width={20} height={20} />}
       title={
-        notification && total !== undefined ? (
-          <T
-            keyName="notification_filter_indicator_label_count"
-            defaultValue="Showing {count, plural, one {# string} other {# strings}} from your notification"
-            params={{ count: total }}
-          />
-        ) : (
-          <T
-            keyName="notification_filter_indicator_label"
-            defaultValue="Showing strings from your notification"
-          />
-        )
+        <T
+          keyName="notification_filter_indicator_title_plural"
+          defaultValue="Notifications"
+        />
       }
       content={
         notification && (
           <StyledContent data-cy="translations-notification-prefilter-detail">
-            {label && <Box fontWeight={500}>{label}</Box>}
+            <Box>
+              <LocalizationActionLabel
+                type={notification.type}
+                name={notification.originatingUser?.name ?? ''}
+              />
+            </Box>
+            {notification.entityCount != null && (
+              <Box>
+                <LocalizationCountLabel
+                  type={notification.type}
+                  count={notification.entityCount}
+                />
+              </Box>
+            )}
             {notification.languages?.map((language) => (
               <FlagImage
                 key={language.id}

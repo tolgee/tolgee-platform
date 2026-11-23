@@ -8,10 +8,14 @@ import {
 } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 
+import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useLanguagesContent } from 'tg.component/common/form/LanguagesSelect/useLanguagesContent';
 
-type LanguageModel = components['schemas']['LanguageModel'];
+type LanguageModel = Pick<
+  components['schemas']['LanguageModel'],
+  'id' | 'tag' | 'name'
+> & { base?: boolean };
 
 const StyledSelect = styled(Select)`
   display: flex;
@@ -45,11 +49,13 @@ export type Props = {
   placeholder?: string;
   placement?: 'top';
   className?: string;
+  selectAllToggle?: boolean;
 };
 
 export const LanguagesSelect: FunctionComponent<
   React.PropsWithChildren<Props>
 > = (props) => {
+  const { t } = useTranslate();
   const languagesContent = useLanguagesContent({
     onChange: props.onChange,
     languages: props.languages,
@@ -57,6 +63,7 @@ export const LanguagesSelect: FunctionComponent<
     disabledLanguages: props.disabledLanguages,
     enableEmpty: props.enableEmpty,
     context: props.context,
+    selectAllToggle: props.selectAllToggle,
   });
 
   const menuProps: Partial<MenuProps> = {
@@ -97,7 +104,10 @@ export const LanguagesSelect: FunctionComponent<
         value={props.value}
         renderValue={(selected) => (
           <StyledTypography color="textPrimary" variant="body1">
-            {(selected as string[]).join(', ')}
+            {props.selectAllToggle &&
+            (selected as string[]).length === props.languages.length
+              ? t('languages_permitted_list_select_all')
+              : (selected as string[]).join(', ')}
           </StyledTypography>
         )}
         MenuProps={menuProps}

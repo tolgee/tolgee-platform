@@ -348,6 +348,8 @@ export class LINKS {
 
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
 
+  static PROJECT_ACTIVITY = Link.ofParent(LINKS.PROJECT, 'activity');
+
   static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
 
   static PROJECT_BRANCHES_MERGES = Link.ofParent(
@@ -522,14 +524,17 @@ export const getNotificationTranslationsUrl = (
 
 export const getKeyCommentsUrl = (
   projectId: number,
-  keyId: number,
+  notificationId: number,
   languageTag: string
 ) => {
   const params = new URLSearchParams();
-  params.set('id', String(keyId));
+  params.set(
+    QUERY.TRANSLATIONS_PREFILTERS_NOTIFICATION,
+    String(notificationId)
+  );
   params.set('languages', languageTag);
   params.set(QUERY.TRANSLATIONS_OPEN_COMMENTS, languageTag);
-  return `${LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+  return `${LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: projectId,
   })}?${params.toString()}`;
 };

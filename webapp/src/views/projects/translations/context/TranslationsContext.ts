@@ -99,6 +99,22 @@ export const [
     },
   });
 
+  const prefilteredNotificationLoadable = useApiQuery({
+    url: '/v2/notification/{notificationId}',
+    method: 'get',
+    path: { notificationId: props.prefilter?.notification as number },
+    options: {
+      enabled: props.prefilter?.notification !== undefined,
+      retry: false,
+    },
+    fetchOptions: { disableAutoErrorHandle: true },
+  });
+  // shortcut: mention links filter by the comment's key on the client; the backend resolver doesn't map COMMENT_MENTION to keys yet
+  const mentionKeyId =
+    prefilteredNotificationLoadable.data?.type === 'COMMENT_MENTION'
+      ? prefilteredNotificationLoadable.data.linkedComment?.keyId
+      : undefined;
+
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
@@ -125,7 +141,7 @@ export const [
   const translationService = useTranslationsService({
     projectId: props.projectId,
     branchName: props.branchName,
-    keyId: props.keyId,
+    keyId: props.keyId ?? mentionKeyId,
     keyName: props.keyName,
     keyNamespace: props.keyNamespace,
     pageSize: props.pageSize,
@@ -133,7 +149,10 @@ export const [
     // when initial langs are null, fetching is postponed
     initialLangs: initialLangs,
     baseLang: props.baseLang,
-    prefilter: props.prefilter,
+    prefilter:
+      mentionKeyId !== undefined && props.prefilter
+        ? { ...props.prefilter, notification: undefined }
+        : props.prefilter,
     allLanguageTags,
   });
 

@@ -1,5 +1,7 @@
 import { default as React, useEffect } from 'react';
 import {
+  alpha,
+  Box,
   IconButton,
   List,
   ListItem,
@@ -7,7 +9,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import Menu from '@mui/material/Menu';
+import Popover from '@mui/material/Popover';
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -16,6 +18,10 @@ import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { PopoverProps } from '@mui/material/Popover';
+import {
+  readJson,
+  STORAGE_KEYS,
+} from 'tg.views/userSettings/notifications/prototypeStorage';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
@@ -31,21 +37,77 @@ type PagedModelNotificationModel =
 
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
-const StyledMenu = styled(Menu)`
+const StyledPopover = styled(Popover)`
   .MuiPaper-root {
     margin-top: 5px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 `;
 
-const StyledHeaderItem = styled(ListItem)`
-  padding-right: 8px;
-  padding-top: 0;
-  padding-bottom: 0;
+const StyledHeaderItem = styled(Box)`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 50px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid
+    ${({ theme }) => alpha(theme.palette.text.primary, 0.06)};
+`;
+
+const StyledScrollArea = styled(Box)`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 const StyledHeader = styled(Typography)`
   font-size: 16px;
 `;
+
+type NotificationModel = NonNullable<
+  ReturnType<typeof getNotifications>
+>[number];
+
+const LOCALIZATION_TYPES = [
+  'KEYS_ADDED',
+  'IMPORTED',
+  'SOURCE_CHANGED',
+  'STRINGS_TRANSLATED',
+  'STRINGS_REVIEWED',
+  'AUTOMATICALLY_TRANSLATED',
+];
+
+// shortcut: suggestion notifications have no backend yet, the prototype shows
+// two demo items cloned from a real localization notification
+const withSuggestionDemo = (list: NotificationModel[] | undefined) => {
+  if (!list) return list;
+  const source = list.find(
+    (n) => LOCALIZATION_TYPES.includes(n.type) && n.project
+  );
+  if (!source) return list;
+  const enabled = (storageKey: string, fallback: boolean) =>
+    readJson<{ inApp: boolean }>(storageKey, { inApp: fallback }).inApp;
+  const demo = (
+    id: number,
+    type: string,
+    entityCount: number
+  ): NotificationModel => ({
+    ...source,
+    id,
+    type: type as NotificationModel['type'],
+    entityCount,
+    languages: source.languages?.slice(0, 1),
+  });
+  const result = [...list];
+  if (enabled(STORAGE_KEYS.suggestedByOthers, false)) {
+    result.splice(2, 0, demo(-2, 'SUGGESTION_ADDED', 3));
+  }
+  return result;
+};
 
 function getNotifications(
   data: InfiniteData<PagedModelNotificationModel> | undefined
@@ -91,7 +153,9 @@ export const NotificationsPopup: React.FC<
         }
       },
       onSuccess(data) {
-        const markAsSeenIds = getNotifications(data)?.map((it) => it.id);
+        const markAsSeenIds = getNotifications(data)
+          ?.map((it) => it.id)
+          .filter((id) => id > 0);
         if (!markAsSeenIds) return;
 
         markSeenMutation.mutate({
@@ -130,10 +194,12 @@ export const NotificationsPopup: React.FC<
 
   const windowSize = useWindowSize();
   const maxHeight = Math.min(500, windowSize.height - 100);
-  const notifications = getNotifications(notificationsLoadable.data);
+  const notifications = withSuggestionDemo(
+    getNotifications(notificationsLoadable.data)
+  );
 
   return (
-    <StyledMenu
+    <StyledPopover
       keepMounted
       open={Boolean(anchorEl)}
       anchorEl={anchorEl}
@@ -152,54 +218,57 @@ export const NotificationsPopup: React.FC<
             maxHeight: maxHeight,
             width: 500,
           },
-          onScroll: (event) => {
-            const target = event.target as HTMLDivElement;
-            if (
-              notificationsLoadable?.hasNextPage &&
-              !notificationsLoadable.isFetching &&
-              target.scrollHeight - target.clientHeight - target.scrollTop <
-                FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
-            ) {
-              notificationsLoadable.fetchNextPage();
-            }
-          },
         },
       }}
     >
-      <List id="notifications-list" data-cy="notifications-list">
-        <StyledHeaderItem>
-          <StyledHeader variant="h6">
-            <T keyName="notifications-header" />
-          </StyledHeader>
-          <Tooltip title={t('settings_notifications_button')}>
-            <IconButton
-              component={Link}
-              to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
-              sx={{ float: 'right', marginLeft: 'auto' }}
-              data-cy="notifications-settings-icon"
-            >
-              <Settings01 />
-            </IconButton>
-          </Tooltip>
-        </StyledHeaderItem>
-        {notifications?.map((notification, i) => {
-          const Component = notificationComponents[notification.type];
+      <StyledHeaderItem>
+        <StyledHeader variant="h6">
+          <T keyName="notifications-header" />
+        </StyledHeader>
+        <Tooltip title={t('settings_notifications_button')}>
+          <IconButton
+            component={Link}
+            to={LINKS.USER_ACCOUNT_NOTIFICATIONS.build()}
+            sx={{ float: 'right', marginLeft: 'auto' }}
+            data-cy="notifications-settings-icon"
+          >
+            <Settings01 width={20} height={20} />
+          </IconButton>
+        </Tooltip>
+      </StyledHeaderItem>
+      <StyledScrollArea
+        onScroll={(event) => {
+          const target = event.target as HTMLDivElement;
+          if (
+            notificationsLoadable?.hasNextPage &&
+            !notificationsLoadable.isFetching &&
+            target.scrollHeight - target.clientHeight - target.scrollTop <
+              FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
+          ) {
+            notificationsLoadable.fetchNextPage();
+          }
+        }}
+      >
+        <List id="notifications-list" data-cy="notifications-list">
+          {notifications?.map((notification, i) => {
+            const Component = notificationComponents[notification.type];
 
-          return (
-            Boolean(Component) && (
-              <Component notification={notification} key={notification.id} />
-            )
-          );
-        })}
-        {notifications?.length === 0 && (
-          <ListItem data-cy="notifications-empty-message">
-            <T keyName="notifications-empty" />
-          </ListItem>
-        )}
-        {(notificationsLoadable.isFetching ||
-          notificationsLoadable.hasNextPage) &&
-          [1, 2, 3, 4, 5].map((i) => <NotificationItemSkeleton key={-i} />)}
-      </List>
-    </StyledMenu>
+            return (
+              Boolean(Component) && (
+                <Component notification={notification} key={notification.id} />
+              )
+            );
+          })}
+          {notifications?.length === 0 && (
+            <ListItem data-cy="notifications-empty-message">
+              <T keyName="notifications-empty" />
+            </ListItem>
+          )}
+          {(notificationsLoadable.isFetching ||
+            notificationsLoadable.hasNextPage) &&
+            [1, 2, 3, 4, 5].map((i) => <NotificationItemSkeleton key={-i} />)}
+        </List>
+      </StyledScrollArea>
+    </StyledPopover>
   );
 };

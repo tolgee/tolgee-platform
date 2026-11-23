@@ -17,8 +17,8 @@ export const SecondaryBar: FunctionComponent<
     m={reducedSpacing ? 0 : 3}
     mb={0}
     mt={0}
-    pb={2}
-    pt={reducedSpacing ? 0 : 2}
+    pb={reducedSpacing ? 0 : 2}
+    pt={2}
     {...props}
     sx={{ borderBottom: noBorder ? 0 : undefined }}
   >

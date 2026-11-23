@@ -17,7 +17,7 @@ import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 const StyledItem = styled(ListItemButton)`
   display: grid;
   column-gap: 10px;
-  grid-template-columns: 32px 1fr 120px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   grid-template-rows: auto auto;
   grid-template-areas:
     'notification-avatar notification-detail notification-time'
@@ -27,12 +27,13 @@ const StyledItem = styled(ListItemButton)`
 
 const StyledDetail = styled(Box)`
   grid-area: notification-detail;
+  padding-right: 16px;
   font-size: 14px;
   word-break: break-word;
   overflow-wrap: break-word;
 
   b {
-    font-weight: 500;
+    font-weight: 600;
   }
 `;
 
@@ -50,6 +51,10 @@ const StyledTime = styled(Box)`
 const StyledRightDetailText = styled(Typography)`
   font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const StyledProject = styled(StyledTime)`
@@ -59,11 +64,12 @@ const StyledProject = styled(StyledTime)`
 export type NotificationItemProps = {
   notification: components['schemas']['NotificationModel'];
   destinationUrl?: string;
+  icon?: React.ReactNode;
 } & ListItemButtonProps;
 
 export const NotificationItem: React.FC<
   React.PropsWithChildren<NotificationItemProps>
-> = ({ notification, key, destinationUrl, children }) => {
+> = ({ notification, key, destinationUrl, icon, children }) => {
   const timeDistance = useTimeDistance();
   const shownAt = notification?.updatedAt ?? notification?.createdAt ?? '';
   const originatingUser = notification?.originatingUser;
@@ -78,7 +84,8 @@ export const NotificationItem: React.FC<
       data-cy="notifications-list-item"
     >
       <StyledAvatar>
-        {originatingUser && (
+        {icon}
+        {!icon && originatingUser && (
           <AvatarImg
             owner={{
               name: originatingUser.name,
@@ -107,9 +114,11 @@ export const NotificationItem: React.FC<
       )}
       {project && (
         <StyledProject>
-          <StyledRightDetailText variant="body2">
-            {project.name}
-          </StyledRightDetailText>
+          <Tooltip title={project.name}>
+            <StyledRightDetailText variant="body2">
+              {project.name}
+            </StyledRightDetailText>
+          </Tooltip>
         </StyledProject>
       )}
     </StyledItem>
@@ -129,14 +138,14 @@ export const NotificationItemSkeleton: React.FC<
         />
       </StyledAvatar>
       <StyledDetail>
-        <LoadingSkeleton sx={{ height: 14, width: 200 }} animation="wave" />
-        <LoadingSkeleton sx={{ height: 14, width: 120 }} animation="wave" />
+        <LoadingSkeleton sx={{ height: 18, width: 180 }} animation="wave" />
+        <LoadingSkeleton sx={{ height: 18, width: 90 }} animation="wave" />
       </StyledDetail>
       <StyledTime>
-        <LoadingSkeleton sx={{ height: 12, width: 60 }} animation="wave" />
+        <LoadingSkeleton sx={{ height: 16, width: 44 }} animation="wave" />
       </StyledTime>
       <StyledProject>
-        <LoadingSkeleton sx={{ height: 12, width: 80 }} animation="wave" />
+        <LoadingSkeleton sx={{ height: 16, width: 70 }} animation="wave" />
       </StyledProject>
     </StyledItem>
   );

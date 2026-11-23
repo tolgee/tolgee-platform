@@ -23,15 +23,18 @@ class NotificationEntitiesQueryService(
   fun getLanguages(notificationIds: List<Long>): Map<Long, List<NotificationLanguageDto>> =
     query(
       """
+      with ids as (select unnest(?::bigint[]) as id)
       select ne.notification_id, l.id, l.tag, l.name, l.flag_emoji, count(*)
       from notification_entity ne
+      join ids on ids.id = ne.notification_id
       join notification n on n.id = ne.notification_id
-      join translation t on t.id = ne.entity_id
+      join translation t on
+        (n.type = any(?) and t.id = ne.entity_id) or
+        (n.type = '${NotificationType.IMPORTED.name}' and t.key_id = ne.entity_id and coalesce(t.text, '') <> '')
       join language l on l.id = t.language_id
-      where ne.notification_id = any(?)
-        and n.type = any(?)
-      group by ne.notification_id, l.id, l.tag, l.name, l.flag_emoji
-      order by l.tag
+      join project p on p.id = n.project_id
+      group by ne.notification_id, l.id, l.tag, l.name, l.flag_emoji, p.base_language_id
+      order by l.id = p.base_language_id desc, l.tag
       """,
       notificationIds,
       typeNames(NotificationEntityKind.TRANSLATION),

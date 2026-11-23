@@ -12,10 +12,15 @@ import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
+import {
+  ActivityFilter,
+  useActivityFilter,
+  DEFAULT_ACTIVITY_FILTER,
+} from 'tg.views/projects/activityStream/activityStreamQuery';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectDescription } from './ProjectDescription';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ProjectNameAndId } from './ProjectNameAndId';
 import { ProjectSettingsRight } from './ProjectSettingsRight';
 
@@ -70,14 +75,26 @@ export const DashboardView = () => {
   const canViewActivity = satisfiesPermission('activity.view');
 
   const path = { projectId: project.id };
-  const query = { size: 15, sort: ['timestamp,desc'], branch };
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>(
+    DEFAULT_ACTIVITY_FILTER
+  );
+  const activityFilterState = useActivityFilter(
+    activityFilter,
+    setActivityFilter
+  );
+  const query = {
+    size: 15,
+    sort: ['timestamp,desc'],
+    ...activityFilterState.query,
+  };
   const activityLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/activity',
+    url: '/v2/projects/{projectId}/activity/stream',
     method: 'get',
     path,
     query,
     options: {
       enabled: canViewActivity,
+      keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (
           lastPage.page &&
@@ -158,8 +175,16 @@ export const DashboardView = () => {
                 <Box
                   gridArea="activityList"
                   data-cy="project-dashboard-activity-list"
+                  position="relative"
+                  alignSelf="start"
+                  height="clamp(480px, calc(100vh - 160px), 860px)"
                 >
-                  <ActivityList activityLoadable={activityLoadable} />
+                  <ActivityList
+                    activityLoadable={activityLoadable}
+                    filter={activityFilter}
+                    onFilterChange={setActivityFilter}
+                    filterState={activityFilterState}
+                  />
                 </Box>
                 <Box
                   gridArea="activityChart"

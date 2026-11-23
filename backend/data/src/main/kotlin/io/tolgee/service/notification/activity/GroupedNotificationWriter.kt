@@ -61,7 +61,6 @@ class GroupedNotificationWriter(
     now: Timestamp,
   ): Long {
     val props = tolgeeProperties.notifications
-    val newestRevisionId = request.revisionIds.maxOrNull()
     val id = jdbcTemplate.execute(ConnectionCallback { idProvider.next(it) })!!
     return jdbcTemplate.queryForObject(
       """
@@ -73,7 +72,7 @@ class GroupedNotificationWriter(
         ?, ?, ?, ?, ?, ?, ?,
         false, ?, case when ? then ?::timestamp end, case when ? then ?::timestamp end, false, 0
       )
-      on conflict (user_id, project_id, type) where $UNSEEN_GROUPED_PREDICATE
+      on conflict (user_id, project_id, type, coalesce(originating_user_id, 0)) where $UNSEEN_GROUPED_PREDICATE
       do update set
         email_window_started_at = case
             when excluded.email_pending and not n.email_pending then excluded.updated_at
@@ -89,13 +88,7 @@ class GroupedNotificationWriter(
             else n.email_due_at
           end,
         email_pending = n.email_pending or excluded.email_pending,
-        updated_at = excluded.updated_at,
-        originating_user_id = case
-            when ?::bigint is null
-              or ?::bigint >= coalesce((select max(r) from unnest(n.activity_revision_ids) as r), 0)
-              then excluded.originating_user_id
-            else n.originating_user_id
-          end
+        updated_at = excluded.updated_at
       returning id
       """,
       Long::class.java,
@@ -113,8 +106,6 @@ class GroupedNotificationWriter(
       Timestamp(now.time + minOf(props.workQuietMs, props.workMaxWaitMs)),
       props.workQuietMs,
       props.workMaxWaitMs,
-      newestRevisionId,
-      newestRevisionId,
     )!!
   }
 

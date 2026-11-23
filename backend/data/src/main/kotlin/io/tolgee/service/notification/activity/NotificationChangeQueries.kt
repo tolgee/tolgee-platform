@@ -1,5 +1,6 @@
 package io.tolgee.service.notification.activity
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.model.notifications.NotificationType
 import org.springframework.jdbc.core.JdbcTemplate
@@ -24,7 +25,6 @@ class NotificationChangeQueries(
   ): Map<Long?, List<Long>> {
     val matcher = MATCHERS[type] ?: return emptyMap()
     if (!matcher.byLanguage) return keyLevelEntities(revisionId, matcher, cap)
-    if (matcher.oneSamplePerLanguage) return byLanguage(samplePerLanguageSql(matcher), revisionId)
     return byLanguage(cappedPerLanguageSql(matcher), revisionId, cap)
   }
 
@@ -56,15 +56,6 @@ class NotificationChangeQueries(
     jdbcTemplate
       .query(sql, { rs, _ -> rs.getLong(1) to rs.getLong(2) }, *args)
       .groupBy({ it.first }, { it.second })
-
-  private fun samplePerLanguageSql(matcher: Matcher) =
-    """
-    select distinct on (language_id, coalesce(ame.branch_id, 0))
-           $LANGUAGE_ID as language_id, ${matcher.entityId} as entity_id
-    from $FROM
-    where ar.id = ? and ${matcher.condition}
-    order by language_id, coalesce(ame.branch_id, 0), ame.entity_id
-    """
 
   private fun cappedPerLanguageSql(matcher: Matcher) =
     """
@@ -117,9 +108,14 @@ class NotificationChangeQueries(
     val keyId: String,
     val byLanguage: Boolean,
     val sources: Set<BatchJobType?> = DIRECT_AND_BULK_EDITS,
-    val oneSamplePerLanguage: Boolean = false,
+    val importsOnly: Boolean = false,
   ) {
-    val condition = "($condition) and ${sourceCondition()}"
+    val condition = "($condition) and ${sourceCondition()} and ${importCondition()}"
+
+    private fun importCondition(): String {
+      if (importsOnly) return "ar.type = '${ActivityType.IMPORT.name}'"
+      return "ar.type is distinct from '${ActivityType.IMPORT.name}'"
+    }
 
     private fun sourceCondition(): String {
       val jobTypes = sources.filterNotNull()
@@ -142,6 +138,8 @@ class NotificationChangeQueries(
     private const val LANGUAGE_ID = "(ame.describing_relations -> 'language' ->> 'entityId')::bigint"
     private const val KEY_OF_TRANSLATION = "(ame.describing_relations -> 'key' ->> 'entityId')::bigint"
     private const val IS_TRANSLATION = "ame.entity_class = 'Translation'"
+    private const val KEY_OF_CHANGE =
+      "case when ame.entity_class = 'Key' then ame.entity_id else $KEY_OF_TRANSLATION end"
 
     /** `null` stands for a change made directly, outside of any batch job. Must be declared before [MATCHERS]. */
     private val DIRECT_AND_BULK_EDITS: Set<BatchJobType?> =
@@ -160,6 +158,16 @@ class NotificationChangeQueries(
             entityId = "ame.entity_id",
             keyId = "ame.entity_id",
             byLanguage = false,
+          ),
+        NotificationType.IMPORTED to
+          Matcher(
+            condition =
+              "(ame.entity_class = 'Key' and ame.revision_type = 0) or " +
+                "($IS_TRANSLATION and ame.modifications -> 'text' is not null)",
+            entityId = KEY_OF_CHANGE,
+            keyId = KEY_OF_CHANGE,
+            byLanguage = false,
+            importsOnly = true,
           ),
         NotificationType.SOURCE_CHANGED to
           Matcher(
@@ -196,7 +204,6 @@ class NotificationChangeQueries(
             byLanguage = true,
             sources =
               setOf(BatchJobType.MACHINE_TRANSLATE, BatchJobType.AUTO_TRANSLATE, BatchJobType.PRE_TRANSLATE_BT_TM),
-            oneSamplePerLanguage = true,
           ),
       )
   }

@@ -1,17 +1,12 @@
 import React from 'react';
-import { Box, styled } from '@mui/material';
+import { styled } from '@mui/material';
+import { TruncatedTooltip } from 'tg.component/activity/TruncatedTooltip';
 
 import { formatDiff } from '../formatTools';
 import { Field } from '../types';
 
 const StyledFields = styled('div')`
   display: grid;
-`;
-
-const StyledField = styled(Box)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 type Props = {
@@ -26,15 +21,16 @@ export const ActivityFields: React.FC<React.PropsWithChildren<Props>> = ({
   return (
     <StyledFields>
       {fields.map((field, i) => {
+        const content = formatDiff({
+          value: field.value,
+          options: field.options,
+          diffEnabled,
+          languageTag: field.languageTag,
+        });
         return (
-          <StyledField key={i}>
-            {formatDiff({
-              value: field.value,
-              options: field.options,
-              diffEnabled,
-              languageTag: field.languageTag,
-            })}
-          </StyledField>
+          <TruncatedTooltip key={i} tooltip={content}>
+            {content}
+          </TruncatedTooltip>
         );
       })}
     </StyledFields>

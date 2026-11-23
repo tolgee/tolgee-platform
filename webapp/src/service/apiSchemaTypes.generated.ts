@@ -5,6 +5,7 @@
 import type { components } from './apiSchema.generated';
 
 export type AcceptAuthProviderChangeRequest = components['schemas']['AcceptAuthProviderChangeRequest'];
+export type ActivityStreamBoundsModel = components['schemas']['ActivityStreamBoundsModel'];
 export type AiPlaygroundResultModel = components['schemas']['AiPlaygroundResultModel'];
 export type AiPlaygroundResultRequest = components['schemas']['AiPlaygroundResultRequest'];
 export type AnnouncementDto = components['schemas']['AnnouncementDto'];

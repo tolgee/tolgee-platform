@@ -26,6 +26,7 @@ enum class NotificationType(
   PASSWORD_CHANGED(ACCOUNT_SECURITY),
   COMMENT_MENTION(COMMENTS, emailTiming = MENTION_DELAYED),
   KEYS_ADDED(LOCALIZATION, grouped = true, countable = true, emailTiming = WORK_GROUPED, entityKind = KEY),
+  IMPORTED(LOCALIZATION, grouped = true, countable = true, emailTiming = WORK_GROUPED, entityKind = KEY),
   SOURCE_CHANGED(
     LOCALIZATION,
     grouped = true,
@@ -50,7 +51,13 @@ enum class NotificationType(
     emailTiming = WORK_GROUPED,
     entityKind = TRANSLATION,
   ),
-  AUTOMATICALLY_TRANSLATED(LOCALIZATION, grouped = true, emailTiming = WORK_GROUPED, entityKind = TRANSLATION),
+  AUTOMATICALLY_TRANSLATED(
+    LOCALIZATION,
+    grouped = true,
+    countable = true,
+    emailTiming = WORK_GROUPED,
+    entityKind = TRANSLATION,
+  ),
   ;
 
   companion object {

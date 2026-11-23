@@ -8,8 +8,23 @@ const StyledContainer = styled('div')`
   align-items: center;
   position: sticky;
   top: 0px;
-  background: ${({ theme }) => theme.palette.background.default};
+  padding: 8px 0px 6px 0px;
+  background: ${({ theme }) => theme.palette.background.paper};
   z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+    background: linear-gradient(
+      ${({ theme }) => theme.palette.background.paper},
+      transparent
+    );
+    pointer-events: none;
+  }
 `;
 
 const StyledLine = styled(Box)`
@@ -27,21 +42,33 @@ const StyledDate = styled('div')`
 
 type Props = {
   date: Date;
+  stickyTop?: number;
+  background?: 'paper' | 'default';
 };
 
 export const ActivityDateSeparator: React.FC<
   React.PropsWithChildren<Props>
-> = ({ date }) => {
+> = ({ date, stickyTop = 0, background = 'paper' }) => {
   const lang = useCurrentLanguage();
   const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
   const { t } = useTranslate();
 
   return (
-    <StyledContainer>
-      <StyledLine maxWidth={10} />
+    <StyledContainer
+      sx={(theme) => ({
+        top: stickyTop,
+        transition: 'top 0.2s',
+        background: theme.palette.background[background],
+        '&::after': {
+          background: `linear-gradient(${theme.palette.background[background]}, transparent)`,
+        },
+      })}
+    >
+      <StyledLine maxWidth={16} />
       <StyledDate>
-        {isToday && `${t('activity_date_today')} `}
-        {date.toLocaleDateString(lang)}
+        {isToday
+          ? t('activity_date_today', 'Today')
+          : date.toLocaleDateString(lang)}
       </StyledDate>
       <StyledLine />
     </StyledContainer>
