@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.v2.controllers.branching.BranchesFacade
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
@@ -33,7 +34,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
@@ -77,8 +77,8 @@ class BranchController(
   private val branchMergeChangeModelAssembler: BranchMergeChangeModelAssembler,
   private val pagedBranchMergeChangeResourceAssembler: PagedResourcesAssembler<BranchMergeChangeView>,
   private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
-  private val authenticationFacade: AuthenticationFacade,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val branchesFacade: BranchesFacade,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create branch")
@@ -89,15 +89,8 @@ class BranchController(
   fun create(
     @RequestBody @Valid branch: CreateBranchModel,
   ): BranchModel {
-    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-    val branch =
-      branchService.createBranch(
-        projectHolder.project.id,
-        branch.name,
-        branch.originBranchId,
-        authenticationFacade.authenticatedUserEntity,
-      )
-    return branchModelAssembler.toModel(branch)
+    val created = branchesFacade.createBranch(branch.name, branch.originBranchId)
+    return branchModelAssembler.toModel(created)
   }
 
   @GetMapping(value = [""])
@@ -111,8 +104,7 @@ class BranchController(
     @RequestParam("search", required = false)
     search: String?,
   ): PagedModel<BranchModel> {
-    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-    val branches = branchService.getBranches(projectHolder.project.id, pageable, search)
+    val branches = branchesFacade.getBranches(pageable, search)
     return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
   }
 
@@ -140,8 +132,7 @@ class BranchController(
   fun delete(
     @PathVariable branchId: Long,
   ) {
-    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-    branchService.deleteBranch(projectHolder.project.id, branchId)
+    branchesFacade.deleteBranch(branchId)
   }
 
   @PostMapping(value = ["/{branchId}"])
