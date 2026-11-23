@@ -31,7 +31,6 @@ class McpToolDependenciesTest : AbstractSpringTest() {
       "BranchMcpTools",
       "NamespaceMcpTools",
       "SuggestionMcpTools",
-      "TagMcpTools",
     )
 
   @Test

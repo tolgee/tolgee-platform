@@ -19,6 +19,29 @@ class McpTagToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `tag_keys refuses a blank tag name`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "taggable.key")),
+      ),
+    )
+
+    assertToolFails(
+      client,
+      "tag_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keyNames" to listOf("taggable.key"),
+        "tags" to listOf(" "),
+      ),
+      expectedError = "must not be blank",
+    )
+  }
+
+  @Test
   fun `list_tags auto-resolves projectId from PAK`() {
     callTool(
       client,
