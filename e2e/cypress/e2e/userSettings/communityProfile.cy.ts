@@ -68,12 +68,14 @@ const commentEdit = {
 describe('Community profile', () => {
   let aliceId: number;
   let carolId: number;
+  let demoProjectId: number;
 
   beforeEach(() => {
     communityStatsData.clean();
     communityStatsData.generateStandard().then((res) => {
       aliceId = res.body.users.find((u) => u.username === ALICE).id;
       carolId = res.body.users.find((u) => u.username === CAROL).id;
+      demoProjectId = res.body.projects.find((p) => p.name === project.name).id;
     });
   });
 
@@ -124,6 +126,20 @@ describe('Community profile', () => {
     gcy('community-profile-activity-text')
       .last()
       .should('contain', 'edited comment');
+  });
+
+  it('keeps browser back and forward working', () => {
+    login(BOB, 'admin');
+    cy.visit(`${HOST}/projects/${demoProjectId}/community/contributors`);
+    waitForGlobalLoading();
+    gcy('community-contributor-card').first().click();
+    gcy('community-profile-identity').should('be.visible');
+    cy.go('back');
+    cy.location('pathname').should('match', /\/community\/contributors$/);
+    gcy('community-contributors-page').should('be.visible');
+    gcy('community-profile-page').should('not.exist');
+    cy.go('forward');
+    gcy('community-profile-identity').should('be.visible');
   });
 
   it('shows an unavailable state for an unknown user', () => {
