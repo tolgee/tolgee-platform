@@ -1,7 +1,7 @@
-import { FunctionComponent, ReactNode, createContext, useContext } from 'react';
-import { Box, ButtonBase, styled } from '@mui/material';
+import { FunctionComponent, ReactNode, createContext } from 'react';
+import { Box, ButtonBase, styled, Tooltip } from '@mui/material';
+import { ChevronDown, ChevronRight, ChevronUp } from '@untitled-ui/icons-react';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -10,19 +10,24 @@ type Author = components['schemas']['ProjectActivityAuthorModel'];
 const StyledRow = styled(ButtonBase)`
   grid-column: 1 / span 3;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
   grid-template-areas:
-    'avatar title time'
-    'avatar detail .';
+    'avatar title time chevron'
+    'avatar detail . .';
   align-items: start;
   column-gap: 10px;
   margin: 0px 4px;
-  padding: 8px 12px;
+  padding: 8px 6px 8px 10px;
   border-radius: 8px;
   text-align: left;
+  font-family: inherit;
   font-size: 14px;
   line-height: 1.3;
   transition: background 0.1s ease-out;
+
+  &.single {
+    align-items: center;
+  }
 
   &.static {
     cursor: default;
@@ -33,12 +38,22 @@ const StyledRow = styled(ButtonBase)`
     transition: background 0.3s ease-in;
   }
 
+  & .hover-only {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover .hover-only,
+  &:focus-visible .hover-only {
+    opacity: 1;
+  }
+
   &.expanded {
     background: ${({ theme }) => theme.palette.cell.selected};
   }
 
   b {
-    font-weight: 500;
+    font-weight: 600;
   }
 `;
 
@@ -47,7 +62,7 @@ const StyledTitle = styled(Box)`
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 4px 6px;
+  gap: 2px 4px;
   min-width: 0;
 
   & > [data-cy='activity-group-flags'],
@@ -66,10 +81,20 @@ const StyledDetail = styled(Box)`
 
 const StyledTime = styled(Box)`
   grid-area: time;
+  align-self: center;
   font-size: 12px;
   white-space: nowrap;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
+
+const chevronSx = {
+  gridArea: 'chevron',
+  alignSelf: 'center',
+  ml: 1,
+  width: 18,
+  height: 18,
+  color: 'text.secondary',
+} as const;
 
 export const ActivityShowPastTimesContext = createContext(false);
 
@@ -81,6 +106,7 @@ type Props = {
   detail?: ReactNode;
   onClick?: () => void;
   chevron?: 'right' | 'down' | 'up';
+  singleLine?: boolean;
   'data-cy': string;
   'data-cy-type'?: string;
 };
@@ -93,22 +119,19 @@ export const ActivityRowShell: FunctionComponent<Props> = ({
   detail,
   onClick,
   chevron = 'right',
+  singleLine,
   ...dataProps
 }) => {
-  const timeDistance = useTimeDistance();
-  const showPastTimes = useContext(ActivityShowPastTimesContext);
-  const showTime =
-    showPastTimes ||
-    new Date(timestamp).toDateString() === new Date().toDateString();
   const formatDate = useDateFormatter();
 
   return (
     <StyledRow
       onClick={onClick}
       disableRipple={!onClick}
-      className={
-        !onClick ? 'static' : chevron === 'up' ? 'expanded' : undefined
-      }
+      className={[
+        !onClick ? 'static' : chevron === 'up' ? 'expanded' : '',
+        singleLine ? 'single' : '',
+      ].join(' ')}
       {...dataProps}
     >
       <Box gridArea="avatar" display="flex">
@@ -127,17 +150,28 @@ export const ActivityRowShell: FunctionComponent<Props> = ({
       </Box>
       <StyledTitle>{title}</StyledTitle>
       {detail && <StyledDetail>{detail}</StyledDetail>}
-      {showTime ? (
-        <StyledTime
-          title={formatDate(timestamp, {
-            dateStyle: 'long',
-            timeStyle: 'short',
-          })}
-        >
-          {timeDistance(timestamp)}
-        </StyledTime>
-      ) : (
-        <StyledTime />
+      <Tooltip
+        title={formatDate(timestamp, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        })}
+        placement="top"
+        disableInteractive
+      >
+        <StyledTime>{formatDate(timestamp, { timeStyle: 'short' })}</StyledTime>
+      </Tooltip>
+      {onClick && (
+        <Box
+          component={
+            chevron === 'up'
+              ? ChevronUp
+              : chevron === 'down'
+              ? ChevronDown
+              : ChevronRight
+          }
+          className={chevron === 'right' ? 'hover-only' : undefined}
+          sx={chevronSx}
+        />
       )}
     </StyledRow>
   );

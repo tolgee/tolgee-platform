@@ -18,6 +18,10 @@ import { T, useTranslate } from '@tolgee/react';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUser } from 'tg.globalContext/helpers';
 import { PopoverProps } from '@mui/material/Popover';
+import {
+  readJson,
+  STORAGE_KEYS,
+} from 'tg.views/userSettings/notifications/prototypeStorage';
 import { notificationComponents } from 'tg.component/layout/Notifications/NotificationTypeMap';
 import { NotificationsChanged } from 'tg.websocket-client/WebsocketClient';
 import { components } from 'tg.service/apiSchema.generated';
@@ -64,6 +68,47 @@ const StyledHeader = styled(Typography)`
   font-size: 16px;
 `;
 
+type NotificationModel = NonNullable<
+  ReturnType<typeof getNotifications>
+>[number];
+
+const LOCALIZATION_TYPES = [
+  'KEYS_ADDED',
+  'IMPORTED',
+  'SOURCE_CHANGED',
+  'STRINGS_TRANSLATED',
+  'STRINGS_REVIEWED',
+  'AUTOMATICALLY_TRANSLATED',
+];
+
+// shortcut: suggestion notifications have no backend yet, the prototype shows
+// two demo items cloned from a real localization notification
+const withSuggestionDemo = (list: NotificationModel[] | undefined) => {
+  if (!list) return list;
+  const source = list.find(
+    (n) => LOCALIZATION_TYPES.includes(n.type) && n.project
+  );
+  if (!source) return list;
+  const enabled = (storageKey: string, fallback: boolean) =>
+    readJson<{ inApp: boolean }>(storageKey, { inApp: fallback }).inApp;
+  const demo = (
+    id: number,
+    type: string,
+    entityCount: number
+  ): NotificationModel => ({
+    ...source,
+    id,
+    type: type as NotificationModel['type'],
+    entityCount,
+    languages: source.languages?.slice(0, 1),
+  });
+  const result = [...list];
+  if (enabled(STORAGE_KEYS.suggestedByOthers, false)) {
+    result.splice(2, 0, demo(-2, 'SUGGESTION_ADDED', 3));
+  }
+  return result;
+};
+
 function getNotifications(
   data: InfiniteData<PagedModelNotificationModel> | undefined
 ) {
@@ -108,7 +153,9 @@ export const NotificationsPopup: React.FC<
         }
       },
       onSuccess(data) {
-        const markAsSeenIds = getNotifications(data)?.map((it) => it.id);
+        const markAsSeenIds = getNotifications(data)
+          ?.map((it) => it.id)
+          .filter((id) => id > 0);
         if (!markAsSeenIds) return;
 
         markSeenMutation.mutate({
@@ -147,7 +194,9 @@ export const NotificationsPopup: React.FC<
 
   const windowSize = useWindowSize();
   const maxHeight = Math.min(500, windowSize.height - 100);
-  const notifications = getNotifications(notificationsLoadable.data);
+  const notifications = withSuggestionDemo(
+    getNotifications(notificationsLoadable.data)
+  );
 
   return (
     <StyledPopover

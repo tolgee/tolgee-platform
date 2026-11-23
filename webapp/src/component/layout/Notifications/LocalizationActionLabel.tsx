@@ -15,7 +15,23 @@ export const LocalizationActionLabel: FunctionComponent<ActionProps> = ({
   name,
 }) => {
   const params = { name, b: <NotificationUserName name={name} /> };
-  switch (type) {
+  switch (type as string) {
+    case 'SUGGESTION_RESOLVED':
+      return (
+        <T
+          keyName="notifications-action-suggestions-resolved"
+          defaultValue="<b>{name}</b> accepted your suggestions"
+          params={params}
+        />
+      );
+    case 'SUGGESTION_ADDED':
+      return (
+        <T
+          keyName="notifications-action-suggestions-added"
+          defaultValue="<b>{name}</b> suggested translations"
+          params={params}
+        />
+      );
     case 'KEYS_ADDED':
       return (
         <T
@@ -60,7 +76,7 @@ export const LocalizationActionLabel: FunctionComponent<ActionProps> = ({
       return (
         <T
           keyName="notifications-action-auto-translated"
-          defaultValue="<b>{name}</b> auto-translated"
+          defaultValue="<b>{name}</b> machine-translated"
           params={params}
         />
       );

@@ -42,21 +42,33 @@ const StyledDate = styled('div')`
 
 type Props = {
   date: Date;
+  stickyTop?: number;
+  background?: 'paper' | 'default';
 };
 
 export const ActivityDateSeparator: React.FC<
   React.PropsWithChildren<Props>
-> = ({ date }) => {
+> = ({ date, stickyTop = 0, background = 'paper' }) => {
   const lang = useCurrentLanguage();
   const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
   const { t } = useTranslate();
 
   return (
-    <StyledContainer>
-      <StyledLine maxWidth={10} />
+    <StyledContainer
+      sx={(theme) => ({
+        top: stickyTop,
+        transition: 'top 0.2s',
+        background: theme.palette.background[background],
+        '&::after': {
+          background: `linear-gradient(${theme.palette.background[background]}, transparent)`,
+        },
+      })}
+    >
+      <StyledLine maxWidth={16} />
       <StyledDate>
-        {isToday && `${t('activity_date_today')} `}
-        {date.toLocaleDateString(lang)}
+        {isToday
+          ? t('activity_date_today', 'Today')
+          : date.toLocaleDateString(lang)}
       </StyledDate>
       <StyledLine />
     </StyledContainer>

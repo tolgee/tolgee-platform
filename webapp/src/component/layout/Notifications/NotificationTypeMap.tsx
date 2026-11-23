@@ -31,7 +31,7 @@ type NotificationsComponentMap = Record<
   React.FC<React.PropsWithChildren<NotificationItemProps>>
 >;
 
-export const notificationComponents: NotificationsComponentMap = {
+export const notificationComponents = {
   TASK_ASSIGNED: TaskAssignedItem,
   TASK_FINISHED: TaskFinishedItem,
   TASK_CANCELED: TaskCanceledItem,
@@ -45,4 +45,9 @@ export const notificationComponents: NotificationsComponentMap = {
   STRINGS_TRANSLATED: LocalizationTypeItem,
   STRINGS_REVIEWED: LocalizationTypeItem,
   AUTOMATICALLY_TRANSLATED: LocalizationTypeItem,
-};
+  // shortcut: prototype-only types without backend support
+  ...({
+    SUGGESTION_RESOLVED: LocalizationTypeItem,
+    SUGGESTION_ADDED: LocalizationTypeItem,
+  } as Partial<NotificationsComponentMap>),
+} as NotificationsComponentMap;

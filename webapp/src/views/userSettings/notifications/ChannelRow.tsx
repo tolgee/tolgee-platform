@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Box, Switch, Tooltip, Typography } from '@mui/material';
+import { InfoCircle } from '@untitled-ui/icons-react';
 
 export type Channel = 'inApp' | 'email';
 
@@ -8,8 +9,11 @@ export type ChannelState = { checked: boolean };
 type Props = {
   label: ReactNode;
   description?: ReactNode;
-  inApp: ChannelState;
-  email: ChannelState;
+  hint?: string;
+  inApp?: ChannelState;
+  email?: ChannelState;
+  single?: ChannelState;
+  emailNote?: ReactNode;
   emailDisabledReason?: string;
   onChange: (channel: Channel, enabled: boolean) => void;
   dataCyType: string;
@@ -18,8 +22,11 @@ type Props = {
 export const ChannelRow = ({
   label,
   description,
+  hint,
   inApp,
   email,
+  single,
+  emailNote,
   emailDisabledReason,
   onChange,
   dataCyType,
@@ -45,15 +52,42 @@ export const ChannelRow = ({
   return (
     <>
       <Box alignSelf="center">
-        <Typography variant="body1">{label}</Typography>
+        <Box display="flex" alignItems="center" gap={0.75}>
+          <Typography variant="body1">{label}</Typography>
+          {hint && (
+            <Tooltip title={hint} disableInteractive>
+              <Box display="flex" color="text.secondary">
+                <InfoCircle width={16} height={16} />
+              </Box>
+            </Tooltip>
+          )}
+        </Box>
         {description && (
           <Typography variant="body2" color="text.secondary">
             {description}
           </Typography>
         )}
       </Box>
-      {cell('inApp', inApp)}
-      {cell('email', email, emailDisabledReason)}
+      {single ? (
+        <>
+          {cell('inApp', single)}
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            fontSize={13}
+            color="text.secondary"
+            whiteSpace="nowrap"
+          >
+            {emailNote}
+          </Box>
+        </>
+      ) : (
+        <>
+          {inApp && cell('inApp', inApp)}
+          {email && cell('email', email, emailDisabledReason)}
+        </>
+      )}
     </>
   );
 };

@@ -6,7 +6,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   IconButton,
   styled,
   Switch,
@@ -29,6 +28,10 @@ import {
 } from 'tg.component/languages/tableStyles';
 import { ChannelRow } from 'tg.views/userSettings/notifications/ChannelRow';
 import {
+  StyledColumnHeader,
+  StyledSectionTitle,
+} from 'tg.views/userSettings/notifications/notificationsTableStyles';
+import {
   projectOverridesKey,
   readJson,
   STORAGE_KEYS,
@@ -41,9 +44,18 @@ type ProjectLanguages =
 type Language = components['schemas']['NotificationLanguageModel'];
 type Channels = { inApp: boolean; email: boolean };
 
-const TEAM_TYPES = ['STRINGS_TRANSLATED', 'STRINGS_REVIEWED'];
+const TEAM_TYPES = [
+  'STRINGS_TRANSLATED',
+  'STRINGS_REVIEWED',
+  'SUGGESTED_BY_OTHERS',
+  'COMMENTED_BY_OTHERS',
+];
 
-type ProjectPref = { custom?: boolean; muted?: boolean };
+type ProjectPref = {
+  custom?: boolean;
+  muted?: boolean;
+  mentionsMutedBefore?: boolean;
+};
 type Overrides = Record<string, Partial<Channels>>;
 
 const readOverrides = (projectId: number): Overrides =>
@@ -62,7 +74,11 @@ const writePref = (projectId: number, pref: ProjectPref) => {
   const all = readPrefs();
   delete all[projectId];
   if (pref.custom || pref.muted) {
-    all[projectId] = pref;
+    all[projectId] = {
+      custom: pref.custom,
+      muted: pref.muted,
+      mentionsMutedBefore: pref.muted ? pref.mentionsMutedBefore : undefined,
+    };
   }
   writeJson(
     STORAGE_KEYS.projectLanguages,
@@ -101,29 +117,22 @@ const StyledSummary = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
+const StyledInheritedBanner = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: ${({ theme }) => theme.palette.tokens.secondary._states.selected};
+  color: ${({ theme }) => theme.palette.text.primary};
+  font-size: 14px;
+  padding: ${({ theme }) => theme.spacing(0.5, 3)};
+`;
+
 const StyledDialogGrid = styled(Box)`
   display: grid;
-  grid-template-columns: 1fr 80px 110px;
+  grid-template-columns: 1fr 72px 72px;
   row-gap: 12px;
+  padding-right: 16px;
   align-items: center;
-`;
-
-const StyledSectionTitle = styled(Box)`
-  font-size: 15px;
-  font-weight: 500;
-  text-transform: uppercase;
-  padding-top: ${({ theme }) => theme.spacing(2)};
-`;
-
-const StyledColumnHeader = styled(Box)`
-  justify-self: end;
-  width: 34px;
-  display: flex;
-  justify-content: center;
-  white-space: nowrap;
-  font-size: 13px;
-  padding-top: ${({ theme }) => theme.spacing(2)};
-  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const Flags = ({ languages }: { languages: Language[] }) => {
@@ -143,61 +152,125 @@ const Flags = ({ languages }: { languages: Language[] }) => {
   );
 };
 
+const channelCounts = (channels: Channels[]) => ({
+  inApp: channels.filter((c) => c.inApp).length,
+  email: channels.filter((c) => c.email).length,
+});
+
 type TypeRow = {
   type: string;
   label: string;
+  description?: string;
   channels: Channels;
 };
 
 const useTypeRows = (settings: Settings): TypeRow[] => {
   const { t } = useTranslate();
-  const labels: Record<string, string> = {
-    KEYS_ADDED: t('settings_notifications_type_keys_added', 'New keys'),
-    IMPORTED: t('settings_notifications_type_imported', 'Imports'),
-    AUTOMATICALLY_TRANSLATED: t(
-      'settings_notifications_type_auto_translated',
-      'Auto-translated'
-    ),
-    SOURCE_CHANGED: t(
-      'settings_notifications_type_source_changed',
-      'Source text changed'
-    ),
-    STRINGS_TRANSLATED: t(
-      'settings_notifications_type_strings_translated',
-      'Translated by others'
-    ),
-    STRINGS_REVIEWED: t(
-      'settings_notifications_type_strings_reviewed',
-      'Reviewed by others'
-    ),
+  const copy: Record<string, { label: string; description: string }> = {
+    KEYS_ADDED: {
+      label: t('settings_notifications_type_keys_added', 'New keys'),
+      description: t(
+        'settings_notifications_type_keys_added_description',
+        'Waiting for translation, including imports'
+      ),
+    },
+    AUTOMATICALLY_TRANSLATED: {
+      label: t(
+        'settings_notifications_type_auto_translated',
+        'Machine translated'
+      ),
+      description: t(
+        'settings_notifications_type_auto_translated_description',
+        'Auto or bulk translated (AI, TM or other providers)'
+      ),
+    },
+    SOURCE_CHANGED: {
+      label: t(
+        'settings_notifications_type_source_changed',
+        'Source text changed'
+      ),
+      description: t(
+        'settings_notifications_type_source_changed_description',
+        'Base language texts edited, translations may need an update'
+      ),
+    },
+    STRINGS_TRANSLATED: {
+      label: t(
+        'settings_notifications_type_strings_translated',
+        'Translated by others'
+      ),
+      description: t(
+        'settings_notifications_type_strings_translated_description',
+        'Someone else translated keys'
+      ),
+    },
+    STRINGS_REVIEWED: {
+      label: t(
+        'settings_notifications_type_strings_reviewed',
+        'Reviewed by others'
+      ),
+      description: t(
+        'settings_notifications_type_strings_reviewed_description',
+        'Someone else reviewed translations'
+      ),
+    },
   };
-  const order = Object.keys(labels);
+  const order = Object.keys(copy);
   const rows: TypeRow[] = settings.localization
-    .filter((s) => labels[s.type])
+    .filter((s) => copy[s.type])
     .sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
-    .map((s) => ({ type: s.type, label: labels[s.type], channels: s }));
+    .map((s) => ({ type: s.type, ...copy[s.type], channels: s }));
   // shortcut: no isEnabled('TASKS') EE check in the prototype, restore before shipping
   return [
     ...rows,
     {
       type: 'TASKS',
       label: t('settings_notifications_tasks_description'),
+      description: t('settings_notifications_tasks_subdescription'),
       channels: settings.tasks,
     },
   ];
 };
 
-const countChannels = (rows: TypeRow[], overrides: Overrides = {}) =>
-  rows.reduce(
-    (acc, row) => {
-      const effective = { ...row.channels, ...overrides[row.type] };
-      return {
-        inApp: acc.inApp + (effective.inApp ? 1 : 0),
-        email: acc.email + (effective.email ? 1 : 0),
-      };
-    },
-    { inApp: 0, email: 0 }
-  );
+const useSuggestedRow = (): TypeRow => {
+  const { t } = useTranslate();
+  // shortcut: no backend type yet, the global value lives in this browser
+  return {
+    type: 'SUGGESTED_BY_OTHERS',
+    label: t(
+      'settings_notifications_suggested_by_others',
+      'Suggested by others'
+    ),
+    description: t(
+      'settings_notifications_suggested_by_others_description',
+      'Someone else suggested translations'
+    ),
+    channels: readJson<Channels>(STORAGE_KEYS.suggestedByOthers, {
+      inApp: false,
+      email: false,
+    }),
+  };
+};
+
+const useCommentedRow = (): TypeRow => {
+  const { t } = useTranslate();
+  // shortcut: no backend type yet, the global value lives in this browser
+  return {
+    type: 'COMMENTED_BY_OTHERS',
+    label: t(
+      'settings_notifications_commented_by_others',
+      'Commented by others'
+    ),
+    description: t(
+      'settings_notifications_commented_by_others_description',
+      'Someone else commented on translations'
+    ),
+    channels: readJson<Channels>(STORAGE_KEYS.commentedByOthers, {
+      inApp: false,
+      email: false,
+    }),
+  };
+};
 
 type ProjectDialogProps = {
   project: ProjectLanguages;
@@ -226,7 +299,6 @@ const ProjectDialog = ({
   const [tags, setTags] = useState<string[]>(
     followedLanguages(project).map((l) => l.tag)
   );
-  const [muted, setMuted] = useState(Boolean(pref.muted));
   const [mentions, setMentions] = useState(!mentionsMuted || !!pref.muted);
   const [overrides, setOverrides] = useState<Overrides>(initialOverrides);
 
@@ -239,11 +311,17 @@ const ProjectDialog = ({
     method: 'put',
   });
 
+  const globalIds =
+    globalIdsFor(project, globalTags) ??
+    project.availableLanguages.map((l) => l.id);
+  const selectedIds = project.availableLanguages
+    .filter((l) => tags.includes(l.tag))
+    .map((l) => l.id);
   const isCustom =
-    !!pref.custom ||
     !!pref.muted ||
-    mentionsMuted ||
-    Object.keys(initialOverrides).length > 0;
+    !sameIds(selectedIds, globalIds) ||
+    !mentions ||
+    Object.keys(overrides).length > 0;
 
   const mentionRow: TypeRow = {
     type: 'COMMENTS',
@@ -309,6 +387,31 @@ const ProjectDialog = ({
 
   const busy = languagesMutation.isLoading || mentionsMutation.isLoading;
 
+  const renderHeader = (
+    title: React.ReactNode,
+    email: 'instant' | 'summary'
+  ) => (
+    <>
+      <StyledSectionTitle sx={title ? { pt: 2 } : undefined}>
+        {title}
+      </StyledSectionTitle>
+      <StyledColumnHeader pt={2}>
+        {t('settings_notifications_channel_in_app')}
+      </StyledColumnHeader>
+      <StyledColumnHeader>
+        {email === 'summary' ? (
+          <T
+            keyName="settings_notifications_channel_summary_email"
+            defaultValue="Summary<br></br>email"
+            params={{ br: <br /> }}
+          />
+        ) : (
+          t('settings_notifications_channel_email')
+        )}
+      </StyledColumnHeader>
+    </>
+  );
+
   const renderTypeRow = (row: TypeRow) => {
     const value = effective(row);
     return (
@@ -325,99 +428,54 @@ const ProjectDialog = ({
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      {!isCustom && (
+        <StyledInheritedBanner data-cy="notifications-project-dialog-inherited-banner">
+          {t(
+            'settings_notifications_project_dialog_inherited_banner',
+            'Settings inherited from Global settings'
+          )}
+        </StyledInheritedBanner>
+      )}
+      <DialogTitle
+        sx={{ display: 'flex', alignItems: 'center', gap: 2, pr: 5, pb: 0.5 }}
+      >
         <Box flex={1}>
-          {project.projectName}
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            data-cy="notifications-project-dialog-inherited-banner"
-          >
-            {isCustom
-              ? t(
-                  'settings_notifications_project_dialog_custom',
-                  'Custom settings'
-                )
-              : t(
-                  'settings_notifications_project_dialog_inherited',
-                  'Uses your global settings'
-                )}
-          </Typography>
+          <div>
+            {t(
+              'settings_notifications_project_dialog_title',
+              'Project notifications'
+            )}
+          </div>
+          <Box sx={{ fontSize: 14, fontWeight: 'normal' }}>
+            {project.projectName}
+          </Box>
         </Box>
-        <FormControlLabel
-          labelPlacement="start"
-          sx={{ mr: '-12px' }}
-          control={
-            <Switch
-              checked={muted}
-              onChange={(e) => setMuted(e.target.checked)}
-              data-cy="notifications-project-dialog-mute"
+        <Box sx={{ width: 240, fontSize: 16, fontWeight: 'normal' }}>
+          <Box
+            sx={{
+              '& .MuiFormControl-root, & .MuiInputBase-root': {
+                width: '100%',
+              },
+            }}
+          >
+            <LanguagesSelect
+              enableEmpty
+              placeholder={t(
+                'settings_notifications_languages_none',
+                'No languages'
+              )}
+              languages={project.availableLanguages}
+              selectAllToggle
+              value={tags}
+              onChange={setTags}
+              context="notifications-project-languages-picker"
             />
-          }
-          label={
-            <Typography variant="body1">
-              {t('settings_notifications_project_mute', 'Mute this project')}
-            </Typography>
-          }
-        />
+          </Box>
+        </Box>
       </DialogTitle>
       <DialogContent>
-        <StyledDialogGrid
-          sx={{
-            opacity: muted ? 0.4 : 1,
-            pointerEvents: muted ? 'none' : undefined,
-          }}
-        >
-          <StyledSectionTitle gridColumn="1 / -1">
-            {t('settings_notifications_languages_title', 'Languages')}
-          </StyledSectionTitle>
-          <Box
-            gridColumn="1 / -1"
-            display="flex"
-            flexWrap="wrap"
-            alignItems="center"
-            columnGap={4}
-            rowGap={1}
-          >
-            <Box flex="1 1 200px">
-              <Typography variant="body1">
-                {t(
-                  'settings_notifications_project_languages_label',
-                  'Notify me about'
-                )}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {t(
-                  'settings_notifications_languages_scope_hint',
-                  'Mentions and tasks assigned to you arrive in any language.'
-                )}
-              </Typography>
-            </Box>
-            <Box flex="0 0 auto" ml="auto">
-              <LanguagesSelect
-                enableEmpty
-                placeholder={t(
-                  'settings_notifications_languages_none',
-                  'No languages'
-                )}
-                languages={project.availableLanguages}
-                selectAllToggle
-                value={tags}
-                onChange={setTags}
-                context="notifications-project-languages-picker"
-              />
-            </Box>
-          </Box>
-
-          <StyledSectionTitle>
-            {t('settings_notifications_group_my_work', 'My work')}
-          </StyledSectionTitle>
-          <StyledColumnHeader>
-            {t('settings_notifications_channel_in_app')}
-          </StyledColumnHeader>
-          <StyledColumnHeader>
-            {t('settings_notifications_channel_email')}
-          </StyledColumnHeader>
+        <StyledDialogGrid>
+          {renderHeader(null, 'instant')}
           <ChannelRow
             label={t('settings_notifications_mentions_description', 'Mentions')}
             inApp={{ checked: mentions }}
@@ -429,13 +487,22 @@ const ProjectDialog = ({
             }
             dataCyType="COMMENTS"
           />
+          {typeRows.filter((row) => row.type === 'TASKS').map(renderTypeRow)}
+
+          {renderHeader(
+            t('settings_notifications_group_my_work', 'Work for you'),
+            'summary'
+          )}
           {typeRows
-            .filter((row) => !TEAM_TYPES.includes(row.type))
+            .filter(
+              (row) => !TEAM_TYPES.includes(row.type) && row.type !== 'TASKS'
+            )
             .map(renderTypeRow)}
 
-          <StyledSectionTitle gridColumn="1 / -1">
-            {t('settings_notifications_group_team_activity', 'Team activity')}
-          </StyledSectionTitle>
+          {renderHeader(
+            t('settings_notifications_group_team_activity', 'Team activity'),
+            'summary'
+          )}
           {typeRows
             .filter((row) => TEAM_TYPES.includes(row.type))
             .map(renderTypeRow)}
@@ -445,7 +512,8 @@ const ProjectDialog = ({
         <DialogActions>
           {isCustom && (
             <Button
-              sx={{ color: 'text.primary' }}
+              variant="outlined"
+              color="secondary"
               disabled={busy}
               onClick={() =>
                 save({
@@ -459,7 +527,7 @@ const ProjectDialog = ({
             >
               {t(
                 'settings_notifications_project_dialog_reset',
-                'Reset to global'
+                'Reset to Global'
               )}
             </Button>
           )}
@@ -475,7 +543,7 @@ const ProjectDialog = ({
             onClick={() =>
               save({
                 tags,
-                muted,
+                muted: false,
                 mentionsOn: mentions,
                 overrides,
               })
@@ -515,28 +583,57 @@ const ProjectRow = ({
   const [pref, setPref] = useState<ProjectPref>(
     () => readPrefs()[project.projectId] ?? {}
   );
-  const hasOverrides = Object.keys(overrides).length > 0;
-  const counts = countChannels(typeRows, overrides);
+  const mentionsMutation = useApiMutation({
+    url: '/v2/notification-settings/mentions/{projectId}',
+    method: 'put',
+  });
+
+  // shortcut: only mentions mute on the backend, the rest of the project mute lives in this browser
+  const toggleMute = async () => {
+    const muted = !pref.muted;
+    const mentionsOff = muted ? true : !!pref.mentionsMutedBefore;
+    if (mentionsOff !== mentionsMuted) {
+      await mentionsMutation.mutateAsync({
+        path: { projectId: project.projectId },
+        content: { 'application/json': { muted: mentionsOff } },
+      });
+    }
+    const next = {
+      ...pref,
+      muted: muted || undefined,
+      mentionsMutedBefore: muted ? mentionsMuted : undefined,
+    };
+    writePref(project.projectId, next);
+    setPref(next);
+    afterChange();
+  };
 
   const summary = () => {
     if (pref.muted) {
       return t('settings_notifications_project_muted', 'Muted');
     }
-    const parts = [
-      pref.custom &&
-        t('settings_notifications_project_custom', 'Custom languages'),
-      hasOverrides &&
-        t(
-          'settings_notifications_project_counts',
-          'In-App: {inApp} · Email: {email}',
-          counts
-        ),
-      mentionsMuted &&
-        t('settings_notifications_project_mentions_off', 'Mentions off'),
-    ].filter(Boolean);
-    return parts.length
-      ? parts.join(' · ')
-      : t('settings_notifications_project_same_as_global', 'Same as global');
+    if (
+      !pref.custom &&
+      !pref.muted &&
+      !mentionsMuted &&
+      Object.keys(overrides).length === 0
+    ) {
+      return t('settings_notifications_project_global', 'Global settings');
+    }
+    const channels = pref.muted
+      ? []
+      : [
+          ...typeRows.map((row) => ({
+            ...row.channels,
+            ...overrides[row.type],
+          })),
+          ...(mentionsMuted ? [] : [mentionChannels]),
+        ];
+    return t(
+      'settings_notifications_project_counts',
+      'In-App {inApp} · Email {email}',
+      channelCounts(channels)
+    );
   };
 
   return (
@@ -554,9 +651,36 @@ const ProjectRow = ({
       <StyledSummary data-cy="notifications-project-summary">
         {summary()}
       </StyledSummary>
-      <Box className={TABLE_LAST_CELL}>
+      <Box
+        className={TABLE_LAST_CELL}
+        display="flex"
+        alignItems="center"
+        gap={2}
+      >
+        <Box
+          component="label"
+          display="flex"
+          alignItems="center"
+          sx={{
+            fontSize: 14,
+            color: 'text.secondary',
+            cursor: 'pointer',
+            gap: 0.5,
+          }}
+        >
+          <Switch
+            size="small"
+            checked={!!pref.muted}
+            disabled={mentionsMutation.isLoading}
+            onChange={toggleMute}
+            data-cy="notifications-project-mute-switch"
+            data-cy-project-id={project.projectId}
+          />
+          {t('settings_notifications_project_mute_label', 'Mute')}
+        </Box>
         <IconButton
           size="small"
+          disabled={!!pref.muted}
           onClick={() => setOpen(true)}
           data-cy="notifications-project-settings-button"
           data-cy-project-id={project.projectId}
@@ -587,12 +711,16 @@ const ProjectRow = ({
 
 type AllProjectsRowProps = {
   projects: ProjectLanguages[];
+  typeRows: TypeRow[];
+  mentionChannels: Channels;
   globalTags: string[] | null;
   afterChange: (tags: string[] | null) => void;
 };
 
 const AllProjectsRow = ({
   projects,
+  typeRows,
+  mentionChannels,
   globalTags,
   afterChange,
 }: AllProjectsRowProps) => {
@@ -642,19 +770,18 @@ const AllProjectsRow = ({
     <>
       <div className={TABLE_FIRST_CELL}>
         <Typography variant="body1" fontWeight={500}>
-          {t(
-            'settings_notifications_global_all_projects',
-            'Global (all projects)'
-          )}
+          {t('settings_notifications_global_all_projects', 'Global settings')}
         </Typography>
       </div>
       <StyledSummary data-cy="notifications-all-projects-languages">
         <Flags languages={selected} />
       </StyledSummary>
-      <StyledSummary>
-        {globalTags === null
-          ? t('settings_notifications_languages_all_short', 'All languages')
-          : t('settings_notifications_project_custom', 'Custom languages')}
+      <StyledSummary data-cy="notifications-all-projects-summary">
+        {t(
+          'settings_notifications_project_counts',
+          'In-App {inApp} · Email {email}',
+          channelCounts([...typeRows.map((r) => r.channels), mentionChannels])
+        )}
       </StyledSummary>
       <Box className={TABLE_LAST_CELL}>
         <IconButton
@@ -671,53 +798,35 @@ const AllProjectsRow = ({
       {open && (
         <Dialog open onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle>
-            {t(
-              'settings_notifications_global_all_projects',
-              'Global (all projects)'
-            )}
+            {t('settings_notifications_global_all_projects', 'Global settings')}
             <Typography variant="body2" color="text.secondary">
               {t(
-                'settings_notifications_all_projects_subtitle',
-                'Applies to projects without their own languages'
+                'settings_notifications_all_projects_languages_subtitle',
+                'Languages used in all projects, unless a project has its own.'
               )}
             </Typography>
           </DialogTitle>
           <DialogContent>
             <Box
-              display="flex"
-              flexWrap="wrap"
-              alignItems="center"
-              columnGap={4}
-              rowGap={1}
+              sx={{
+                '& .MuiFormControl-root, & .MuiInputBase-root': {
+                  width: '100%',
+                  maxWidth: 320,
+                },
+              }}
             >
-              <Box flex="1 1 200px">
-                <Typography variant="body1">
-                  {t(
-                    'settings_notifications_project_languages_label',
-                    'Notify me about'
-                  )}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {t(
-                    'settings_notifications_all_projects_hint',
-                    'Projects without these languages notify you about none.'
-                  )}
-                </Typography>
-              </Box>
-              <Box flex="0 0 auto" ml="auto">
-                <LanguagesSelect
-                  enableEmpty
-                  placeholder={t(
-                    'settings_notifications_languages_none',
-                    'No languages'
-                  )}
-                  languages={allLanguages}
-                  selectAllToggle
-                  value={tags}
-                  onChange={setTags}
-                  context="notifications-all-projects-languages-picker"
-                />
-              </Box>
+              <LanguagesSelect
+                enableEmpty
+                placeholder={t(
+                  'settings_notifications_languages_none',
+                  'No languages'
+                )}
+                languages={allLanguages}
+                selectAllToggle
+                value={tags}
+                onChange={setTags}
+                context="notifications-all-projects-languages-picker"
+              />
             </Box>
           </DialogContent>
           <DialogActions>
@@ -746,6 +855,18 @@ export const NotificationProjectsSection = ({
   settings: Settings;
 }) => {
   const typeRows = useTypeRows(settings);
+  const suggestedRow = useSuggestedRow();
+  const commentedRow = useCommentedRow();
+  const allProjectsLoadable = useApiQuery({
+    url: '/v2/projects',
+    method: 'get',
+    query: { size: 1000 },
+  });
+  const suggestionProjects = new Set(
+    (allProjectsLoadable.data?._embedded?.projects ?? [])
+      .filter((p) => p.suggestionsMode !== 'DISABLED')
+      .map((p) => p.id)
+  );
   const [globalTags, setGlobalTags] = useState<string[] | null>(() =>
     readJson<string[] | null>(STORAGE_KEYS.globalLanguages, null)
   );
@@ -777,6 +898,8 @@ export const NotificationProjectsSection = ({
       <StyledLanguageTable style={{ gridTemplateColumns: '1fr 1fr 1fr auto' }}>
         <AllProjectsRow
           projects={projects}
+          typeRows={[...typeRows, commentedRow]}
+          mentionChannels={settings.comments}
           globalTags={globalTags}
           afterChange={(next) => {
             setGlobalTags(next);
@@ -790,7 +913,11 @@ export const NotificationProjectsSection = ({
             globalTags={globalTags}
             mentionsMuted={mutedMentions.has(project.projectId)}
             mentionChannels={settings.comments}
-            typeRows={typeRows}
+            typeRows={
+              suggestionProjects.has(project.projectId)
+                ? [...typeRows, suggestedRow, commentedRow]
+                : [...typeRows, commentedRow]
+            }
             afterChange={refetch}
           />
         ))}

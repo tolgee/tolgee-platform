@@ -1,51 +1,82 @@
 import { useState } from 'react';
-import {
-  Badge,
-  Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Tooltip,
-} from '@mui/material';
+import { Badge, Box, Divider, IconButton, Menu, Tooltip } from '@mui/material';
 import { FilterLines } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
-import { CompactListSubheader } from 'tg.component/ListComponents';
-import { useProject } from 'tg.hooks/useProject';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { ActivityCategory } from './activityCategories';
-import { useActivityCategoryLabels } from './useActivityCategoryLabels';
-import { ActivityFilter, DEFAULT_ACTIVITY_FILTER } from './activityStreamQuery';
+import { SubmenuItem } from 'tg.component/SubmenuItem';
+import { CompactMenuItem } from 'tg.component/ListComponents';
+import { useLanguagesContent } from 'tg.component/common/form/LanguagesSelect/useLanguagesContent';
+import {
+  ActivityFilter,
+  DEFAULT_ACTIVITY_FILTER,
+  useActivityFilter,
+} from './activityStreamQuery';
+import {
+  activityFilterOptions,
+  activityTreeOptions,
+} from './ActivityFilterOptions';
+
+const SUBMENU_MAX_WIDTH = 400;
+
+type SubmenuKey = 'people' | 'events' | 'languages';
 
 type Props = {
   value: ActivityFilter;
   onChange: (value: ActivityFilter) => void;
+  filter: ReturnType<typeof useActivityFilter>;
 };
 
-export const ActivityMiniFilter = ({ value, onChange }: Props) => {
+export const ActivityMiniFilter = ({ value, onChange, filter }: Props) => {
   const { t } = useTranslate();
-  const project = useProject();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const categoryLabels = useActivityCategoryLabels();
-  const members = useApiQuery({
-    url: '/v2/projects/{projectId}/users',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
-    options: { enabled: Boolean(anchorEl) },
-  });
-  const languages = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
-    options: { enabled: Boolean(anchorEl) },
+  const [submenu, setSubmenu] = useState<SubmenuKey>();
+  const [submenuPos, setSubmenuPos] = useState<{
+    top: number;
+    left: number;
+    side: 'left' | 'right';
+  }>({ top: 0, left: 0, side: 'left' });
+
+  const languagesContent = useLanguagesContent({
+    ...filter.languages,
+    disabledLanguages: undefined,
+    enableEmpty: true,
+    selectAllToggle: true,
   });
 
-  const isDefault =
-    JSON.stringify(value) === JSON.stringify(DEFAULT_ACTIVITY_FILTER);
-  const set = (patch: Partial<ActivityFilter>) => {
-    onChange({ ...value, ...patch });
-  };
+  const openSubmenu =
+    (key: SubmenuKey) => (e: React.MouseEvent<HTMLElement>) => {
+      const item = e.currentTarget;
+      const paper = item.closest<HTMLElement>('.MuiPaper-root');
+      const paperLeft = parseFloat(paper?.style.left ?? '') || 0;
+      const paperTop = parseFloat(paper?.style.top ?? '') || 0;
+      const left = paperLeft;
+      const right = paperLeft + (paper?.offsetWidth ?? 0);
+      const rect = {
+        left,
+        right,
+        top: paperTop + item.offsetTop - (paper?.scrollTop ?? 0),
+      };
+      const fitsRight =
+        window.innerWidth - rect.right >= SUBMENU_MAX_WIDTH + 16;
+      setSubmenuPos({
+        top: rect.top,
+        left: fitsRight ? rect.right : rect.left,
+        side: fitsRight ? 'left' : 'right',
+      });
+      setSubmenu(key);
+    };
+
+  const submenuProps = (key: SubmenuKey) => ({
+    open: submenu === key,
+    anchorReference: 'anchorPosition' as const,
+    anchorPosition: { top: submenuPos.top, left: submenuPos.left },
+    onClose: () => setSubmenu(undefined),
+    transformOrigin: { vertical: 'top' as const, horizontal: submenuPos.side },
+    slotProps: {
+      paper: {
+        sx: { maxHeight: 420, minWidth: 220, maxWidth: SUBMENU_MAX_WIDTH },
+      },
+    },
+  });
 
   return (
     <>
@@ -53,7 +84,7 @@ export const ActivityMiniFilter = ({ value, onChange }: Props) => {
         <Badge
           color="primary"
           variant="dot"
-          badgeContent={isDefault ? 0 : 1}
+          invisible={!filter.isActive}
           overlap="circular"
         >
           <IconButton
@@ -67,79 +98,54 @@ export const ActivityMiniFilter = ({ value, onChange }: Props) => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        slotProps={{ paper: { sx: { maxHeight: 520 } } }}
+        onClose={() => {
+          setAnchorEl(null);
+          setSubmenu(undefined);
+        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <CompactListSubheader sx={{ pt: 0 }}>
-          <T keyName="activity_filter_people" defaultValue="People" />
-        </CompactListSubheader>
-        <MenuItem
-          selected={value.user === 'ALL'}
-          onClick={() => set({ user: 'ALL' })}
-        >
-          <T keyName="activity_stream_all_users" defaultValue="All users" />
-        </MenuItem>
-        <MenuItem
-          selected={value.user === 'EXCEPT_ME'}
-          onClick={() => set({ user: 'EXCEPT_ME' })}
-        >
-          <T
-            keyName="activity_stream_except_me"
-            defaultValue="Everyone except me"
+        <Box display="grid" minWidth={220}>
+          <SubmenuItem
+            label={<T keyName="activity_filter_people" defaultValue="People" />}
+            open={submenu === 'people'}
+            selected={Boolean(value.users.length)}
+            onClick={openSubmenu('people')}
           />
-        </MenuItem>
-        {members.data?._embedded?.users?.map((member) => (
-          <MenuItem
-            key={member.id}
-            selected={value.user === String(member.id)}
-            onClick={() => set({ user: String(member.id) })}
-          >
-            {member.name}
-          </MenuItem>
-        ))}
-        <Divider />
-        <CompactListSubheader>
-          <T keyName="activity_filter_events" defaultValue="Events" />
-        </CompactListSubheader>
-        <MenuItem
-          selected={value.category === 'ALL'}
-          onClick={() => set({ category: 'ALL' })}
-        >
-          <T keyName="activity_filter_all_events" defaultValue="All events" />
-        </MenuItem>
-        {(Object.keys(categoryLabels) as ActivityCategory[]).map((c) => (
-          <MenuItem
-            key={c}
-            selected={value.category === c}
-            onClick={() => set({ category: c })}
-          >
-            {categoryLabels[c]}
-          </MenuItem>
-        ))}
-        <Divider />
-        <CompactListSubheader>
-          <T keyName="activity_filter_languages" defaultValue="Languages" />
-        </CompactListSubheader>
-        <MenuItem
-          selected={value.language === 'ALL'}
-          onClick={() => set({ language: 'ALL' })}
-        >
-          <T
-            keyName="activity_stream_all_languages"
-            defaultValue="All languages"
+          <SubmenuItem
+            label={<T keyName="activity_filter_events" defaultValue="Events" />}
+            open={submenu === 'events'}
+            selected={Boolean(value.activities.length)}
+            onClick={openSubmenu('events')}
           />
-        </MenuItem>
-        {languages.data?._embedded?.languages?.map((language) => (
-          <MenuItem
-            key={language.id}
-            selected={value.language === String(language.id)}
-            onClick={() => set({ language: String(language.id) })}
-          >
-            {language.flagEmoji} {language.name}
-          </MenuItem>
-        ))}
+          <SubmenuItem
+            label={
+              <T keyName="activity_filter_languages" defaultValue="Languages" />
+            }
+            open={submenu === 'languages'}
+            selected={Boolean(value.languages.length)}
+            onClick={openSubmenu('languages')}
+          />
+          {filter.isActive && [
+            <Divider key="divider" />,
+            <CompactMenuItem
+              key="clear"
+              onClick={() => onChange(DEFAULT_ACTIVITY_FILTER)}
+              data-cy="activity-mini-filter-clear"
+            >
+              <T keyName="activity_filter_clear" defaultValue="Clear filters" />
+            </CompactMenuItem>,
+          ]}
+        </Box>
       </Menu>
+
+      <Menu {...submenuProps('people')}>
+        {activityFilterOptions(filter.users)}
+      </Menu>
+      <Menu {...submenuProps('events')}>
+        {activityTreeOptions(filter.activities)}
+      </Menu>
+      <Menu {...submenuProps('languages')}>{languagesContent}</Menu>
     </>
   );
 };

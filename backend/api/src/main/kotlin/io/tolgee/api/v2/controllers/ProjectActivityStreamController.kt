@@ -1,10 +1,12 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.stream.ActivityStreamFilter
 import io.tolgee.activity.stream.ActivityStreamService
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.activity.ProjectActivityModel
 import io.tolgee.hateoas.activity.ProjectActivityModelAssembler
 import io.tolgee.model.enums.Scope
@@ -43,8 +45,8 @@ class ProjectActivityStreamController(
   @AllowApiAccess
   fun getStream(
     @ParameterObject pageable: Pageable,
-    @RequestParam(required = false) authorId: Long? = null,
-    @RequestParam(required = false) excludeAuthorId: Long? = null,
+    @RequestParam(required = false) authorIds: List<Long>? = null,
+    @RequestParam(required = false) excludeAuthorIds: List<Long>? = null,
     @RequestParam(required = false) types: List<String>? = null,
     @RequestParam(required = false) languageIds: List<Long>? = null,
     @RequestParam(required = false) from: Long? = null,
@@ -55,12 +57,39 @@ class ProjectActivityStreamController(
       limit = tolgeeProperties.rateLimits.activityRequestLimit,
       refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
     )
+    if (from != null && to != null && to - from > MAX_RANGE_MS) {
+      throw BadRequestException("activity_stream_range_too_long")
+    }
     val views =
       activityStreamService.find(
         projectHolder.project.id,
-        ActivityStreamFilter(authorId, excludeAuthorId, types, languageIds, from, to),
+        ActivityStreamFilter(authorIds, excludeAuthorIds, types, languageIds, from, to),
         pageable,
       )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
+
+  @Operation(summary = "Get the time bounds for filtering project activity")
+  @GetMapping("/bounds")
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
+  @AllowApiAccess
+  fun getBounds(): ActivityStreamBoundsModel {
+    return ActivityStreamBoundsModel(
+      since = activityStreamService.findSince(projectHolder.project.id),
+      maxRangeDays = MAX_RANGE_DAYS,
+      presentTypes = activityStreamService.findPresentTypes(projectHolder.project.id),
+    )
+  }
+
+  companion object {
+    const val MAX_RANGE_DAYS = 366
+    private const val MAX_RANGE_MS = MAX_RANGE_DAYS * 24L * 60 * 60 * 1000
+  }
 }
+
+data class ActivityStreamBoundsModel(
+  val since: Long?,
+  val maxRangeDays: Int,
+  @Schema(description = "Activity types that occur at least once in the project's history")
+  val presentTypes: List<String>,
+)

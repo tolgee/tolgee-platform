@@ -16,15 +16,20 @@ import { ActivityRevisionRow } from 'tg.views/projects/activityStream/ActivityRe
 import { ActivityRevisionDialog } from 'tg.views/projects/activityStream/ActivityRevisionDialog';
 import { ActivityShowPastTimesContext } from 'tg.views/projects/activityStream/ActivityRowShell';
 import { ActivityMiniFilter } from 'tg.views/projects/activityStream/ActivityMiniFilter';
-import { ActivityFilter } from 'tg.views/projects/activityStream/activityStreamQuery';
+import {
+  ActivityFilter,
+  useActivityFilter,
+} from 'tg.views/projects/activityStream/activityStreamQuery';
 
 type ProjectActivityModel = components['schemas']['ProjectActivityModel'];
 type PagedModelProjectActivityModel =
   components['schemas']['PagedModelProjectActivityModel'];
 
 const StyledContainer = styled('div')`
-  display: grid;
-  gap: 5px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: 10px;
   overflow: hidden;
@@ -34,17 +39,32 @@ const StyledContainer = styled('div')`
 const StyledHeader = styled('div')`
   display: flex;
   justify-content: space-between;
-  margin: 12px 18px 8px 12px;
+  align-items: center;
+  padding: 12px 10px 0px 22px;
 `;
 
 const StyledScroller = styled('div')`
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 600px;
-  margin: 0 4px 10px 0;
-  padding-right: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: ${({ theme }) => theme.palette.divider1} transparent;
+  flex: 1;
+  min-height: 0;
+  margin: 0 2px 10px 0;
+  padding: 0 0 0 8px;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    margin-top: 36px;
+    margin-bottom: 12px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: transparent;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.palette.divider1};
+  }
   mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
 `;
 
@@ -65,12 +85,14 @@ type Props = {
   activityLoadable: UseInfiniteQueryResult<PagedModelProjectActivityModel>;
   filter: ActivityFilter;
   onFilterChange: (value: ActivityFilter) => void;
+  filterState: ReturnType<typeof useActivityFilter>;
 };
 
 export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
   activityLoadable,
   filter,
   onFilterChange,
+  filterState,
 }) => {
   const { ref, inView } = useInView({ rootMargin: '100px' });
   const project = useProject();
@@ -114,7 +136,11 @@ export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
               defaultValue="Activity stream"
             />
           </Button>
-          <ActivityMiniFilter value={filter} onChange={onFilterChange} />
+          <ActivityMiniFilter
+            value={filter}
+            onChange={onFilterChange}
+            filter={filterState}
+          />
         </Box>
       </StyledHeader>
       <ActivityShowPastTimesContext.Provider value={true}>

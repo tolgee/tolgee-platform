@@ -3,6 +3,9 @@ export const STORAGE_KEYS = {
   projectLanguages: 'tolgee-notification-project-languages',
   globalLanguages: 'tolgee-notification-global-languages',
   myTranslations: 'tolgee-notification-my-translations',
+  yourSuggestions: 'tolgee-notification-your-suggestions',
+  suggestedByOthers: 'tolgee-notification-suggested-by-others',
+  commentedByOthers: 'tolgee-notification-commented-by-others',
 };
 
 export const OVERRIDES_PREFIX = 'tolgee-notification-project-overrides-';

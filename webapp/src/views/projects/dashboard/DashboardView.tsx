@@ -12,10 +12,9 @@ import { ProjectTotals } from './ProjectTotals';
 import { LanguageStats } from './LanguageStats/LanguageStats';
 import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
-import { useUser } from 'tg.globalContext/helpers';
 import {
   ActivityFilter,
-  activityFilterQuery,
+  useActivityFilter,
   DEFAULT_ACTIVITY_FILTER,
 } from 'tg.views/projects/activityStream/activityStreamQuery';
 import { BaseProjectView } from '../BaseProjectView';
@@ -71,7 +70,6 @@ export const DashboardView = () => {
   }, [project?.name]);
 
   const { t } = useTranslate();
-  const user = useUser();
   const { satisfiesPermission } = useProjectPermissions();
 
   const canViewActivity = satisfiesPermission('activity.view');
@@ -80,10 +78,14 @@ export const DashboardView = () => {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>(
     DEFAULT_ACTIVITY_FILTER
   );
+  const activityFilterState = useActivityFilter(
+    activityFilter,
+    setActivityFilter
+  );
   const query = {
     size: 15,
     sort: ['timestamp,desc'],
-    ...activityFilterQuery(activityFilter, user?.id),
+    ...activityFilterState.query,
   };
   const activityLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/activity/stream',
@@ -173,11 +175,15 @@ export const DashboardView = () => {
                 <Box
                   gridArea="activityList"
                   data-cy="project-dashboard-activity-list"
+                  position="relative"
+                  alignSelf="start"
+                  height="clamp(480px, calc(100vh - 160px), 860px)"
                 >
                   <ActivityList
                     activityLoadable={activityLoadable}
                     filter={activityFilter}
                     onFilterChange={setActivityFilter}
+                    filterState={activityFilterState}
                   />
                 </Box>
                 <Box

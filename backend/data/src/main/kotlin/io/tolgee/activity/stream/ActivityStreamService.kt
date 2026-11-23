@@ -20,6 +20,33 @@ class ActivityStreamService(
   private val activityRevisionRepository: ActivityRevisionRepository,
 ) {
   @Transactional(readOnly = true)
+  fun findSince(projectId: Long): Long? =
+    jdbcTemplate
+      .queryForObject(
+        """
+        select least(
+          (select p.created_at from project p where p.id = ?),
+          (select min(ar.timestamp) from activity_revision ar where ar.project_id = ?)
+        )
+        """.trimIndent(),
+        Timestamp::class.java,
+        projectId,
+        projectId,
+      )?.time
+
+  @Transactional(readOnly = true)
+  fun findPresentTypes(projectId: Long): List<String> =
+    jdbcTemplate
+      .queryForList(
+        """
+        select distinct ar.type from activity_revision ar
+        where ar.project_id = ? and ar.type is not null and ar.batch_job_chunk_execution_id is null
+        """.trimIndent(),
+        String::class.java,
+        projectId,
+      ).filterNotNull()
+
+  @Transactional(readOnly = true)
   fun find(
     projectId: Long,
     filter: ActivityStreamFilter,
@@ -27,15 +54,30 @@ class ActivityStreamService(
   ): Page<ProjectActivityView> {
     val params = mutableListOf<Any>(projectId)
     val where = mutableListOf("ar.project_id = ?", "ar.batch_job_chunk_execution_id is null")
-    val types = filter.types?.takeIf { it.isNotEmpty() } ?: VISIBLE_TYPES
-    where += "ar.type in (${types.joinToString { "'${ActivityType.valueOf(it).name}'" }})"
-    filter.authorId?.let {
-      where += "ar.author_id = ?"
-      params += it
+    val requested = filter.types?.takeIf { it.isNotEmpty() } ?: VISIBLE_TYPES
+    val wantsMentions = requested.contains(COMMENT_MENTION)
+    val types = requested.filter { it != COMMENT_MENTION }.map { ActivityType.valueOf(it).name }
+    val typeConditions = mutableListOf<String>()
+    if (types.isNotEmpty()) {
+      typeConditions += "ar.type in (${types.joinToString { "'$it'" }})"
     }
-    filter.excludeAuthorId?.let {
-      where += "ar.author_id is distinct from ?"
-      params += it
+    if (wantsMentions) {
+      typeConditions +=
+        """
+        (ar.type in ('TRANSLATION_COMMENT_ADD', 'TRANSLATION_COMMENT_EDIT') and exists (
+          select 1 from activity_modified_entity ame
+          where ame.activity_revision_id = ar.id
+            and ame.entity_class = 'TranslationComment'
+            and ame.modifications -> 'text' ->> 'new' ~ '<@[0-9]+>'
+        ))
+        """.trimIndent()
+    }
+    where += typeConditions.ifEmpty { listOf("false") }.joinToString(" or ", "(", ")")
+    filter.authorIds?.takeIf { it.isNotEmpty() }?.let { ids ->
+      where += "ar.author_id in (${ids.joinToString { it.toString() }})"
+    }
+    filter.excludeAuthorIds?.takeIf { it.isNotEmpty() }?.let { ids ->
+      where += "(ar.author_id is null or ar.author_id not in (${ids.joinToString { it.toString() }}))"
     }
     filter.from?.let {
       where += "ar.timestamp >= ?"
@@ -73,19 +115,28 @@ class ActivityStreamService(
         ).filterNotNull()
     val byId = activityRevisionRepository.findAllById(ids).associateBy { it.id }
     val revisions = ids.mapNotNull { byId[it] }
-    val views = ActivityViewByRevisionsProvider(applicationContext, revisions).get()
+    val views =
+      ActivityViewByRevisionsProvider(
+        applicationContext,
+        revisions,
+        onlyCountInListAbove = 20,
+        allBranches = true,
+      ).get()
     val viewsById = views.associateBy { it.revisionId }
     return PageImpl(ids.mapNotNull { viewsById[it] }, pageable, total)
   }
 
   companion object {
+    /** Not an [ActivityType]: comments whose text mentions someone (`<@userId>`). */
+    const val COMMENT_MENTION = "COMMENT_MENTION"
+
     private val VISIBLE_TYPES = ActivityType.entries.filter { !it.hideInList }.map { it.name }
   }
 }
 
 data class ActivityStreamFilter(
-  val authorId: Long? = null,
-  val excludeAuthorId: Long? = null,
+  val authorIds: List<Long>? = null,
+  val excludeAuthorIds: List<Long>? = null,
   val types: List<String>? = null,
   val languageIds: List<Long>? = null,
   val from: Long? = null,

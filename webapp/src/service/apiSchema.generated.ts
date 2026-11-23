@@ -483,6 +483,9 @@ export interface paths {
   "/v2/projects/{projectId}/activity/stream": {
     get: operations["getStream"];
   };
+  "/v2/projects/{projectId}/activity/stream/bounds": {
+    get: operations["getBounds"];
+  };
   "/v2/projects/{projectId}/ai-playground-result": {
     post: operations["getAiPlaygroundResult"];
   };
@@ -1377,6 +1380,14 @@ export interface components {
   schemas: {
     AcceptAuthProviderChangeRequest: {
       id: string;
+    };
+    ActivityStreamBoundsModel: {
+      /** Format: int32 */
+      maxRangeDays: number;
+      /** @description Activity types that occur at least once in the project's history */
+      presentTypes: string[];
+      /** Format: int64 */
+      since?: number;
     };
     AiPlaygroundResultModel: {
       contextDescription?: string;
@@ -15997,8 +16008,8 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        authorId?: number;
-        excludeAuthorId?: number;
+        authorIds?: number[];
+        excludeAuthorIds?: number[];
         types?: string[];
         languageIds?: number[];
         from?: number;
@@ -16013,6 +16024,53 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getBounds: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ActivityStreamBoundsModel"];
         };
       };
       /** Bad Request */

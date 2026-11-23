@@ -33,7 +33,7 @@ const StyledDetail = styled(Box)`
   overflow-wrap: break-word;
 
   b {
-    font-weight: 500;
+    font-weight: 600;
   }
 `;
 

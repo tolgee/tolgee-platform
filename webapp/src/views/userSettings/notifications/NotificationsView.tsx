@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { LINKS } from 'tg.constants/links';
 import { BaseUserSettingsView } from 'tg.views/userSettings/BaseUserSettingsView';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, styled, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  styled,
+  Switch,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { InfoCircle } from '@untitled-ui/icons-react';
 import { components } from 'tg.service/apiSchema.generated';
 import { WorkEmailFrequencyRow } from 'tg.views/userSettings/notifications/WorkEmailFrequencyRow';
@@ -21,10 +28,14 @@ import {
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import { confirmation } from 'tg.hooks/confirmation';
+import {
+  StyledColumnHeader,
+  StyledSectionTitle,
+} from 'tg.views/userSettings/notifications/notificationsTableStyles';
 
 const StyledRoot = styled(Box)`
   display: grid;
-  grid-template-columns: 1fr 80px 110px;
+  grid-template-columns: 1fr 72px 72px;
   grid-auto-rows: auto;
   grid-row-gap: 12px;
   padding-bottom: ${({ theme }) => theme.spacing(8)};
@@ -38,26 +49,9 @@ const StyledAlwaysOn = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-const StyledSectionTitle = styled(Box)`
-  font-size: 15px;
-  font-weight: 500;
-  text-transform: uppercase;
-`;
-
 const StyledSectionSpacer = styled(Box)`
   grid-column: 1 / -1;
   height: ${({ theme }) => theme.spacing(3)};
-`;
-
-const StyledTableHeader = styled(Box)`
-  align-self: center;
-  justify-self: end;
-  width: 34px;
-  display: flex;
-  justify-content: center;
-  white-space: nowrap;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  font-size: 13px;
 `;
 
 type LocalizationType =
@@ -72,23 +66,55 @@ type Item = {
   channels: Channels;
   label: string;
   description?: string;
+  hint?: string;
+  alsoTypes?: LocalizationType[];
 };
 
-const MY_TRANSLATIONS = 'MY_TRANSLATIONS';
-const MY_TRANSLATIONS_DEFAULT: Channels = { inApp: true, email: false };
+// shortcut: no backend types yet, kept in this browser
+const LOCAL_ITEMS: Record<string, string> = {
+  SUGGESTED_BY_OTHERS: STORAGE_KEYS.suggestedByOthers,
+  COMMENTED_BY_OTHERS: STORAGE_KEYS.commentedByOthers,
+};
+const LOCAL_DEFAULTS: Record<string, Channels> = {
+  SUGGESTED_BY_OTHERS: { inApp: false, email: false },
+  COMMENTED_BY_OTHERS: { inApp: false, email: false },
+};
+
+const readLocal = () =>
+  Object.fromEntries(
+    Object.entries(LOCAL_ITEMS).map(([key, storageKey]) => [
+      key,
+      readJson<Channels>(storageKey, LOCAL_DEFAULTS[key]),
+    ])
+  ) as Record<string, Channels>;
+
+const TEAM_TYPES: string[] = ['STRINGS_TRANSLATED', 'STRINGS_REVIEWED'];
+
+const defaultChannels = (item: Item): Channels =>
+  LOCAL_DEFAULTS[item.key] ?? {
+    inApp: !TEAM_TYPES.includes(item.key),
+    email: !TEAM_TYPES.includes(item.key),
+  };
 
 const isDefaultChannels = (item: Item) =>
-  item.channels.inApp &&
-  item.channels.email === (item.group !== 'LOCALIZATION');
+  item.channels.inApp === defaultChannels(item).inApp &&
+  item.channels.email === defaultChannels(item).email;
 
 export const NotificationsView: React.FC<
   React.PropsWithChildren<unknown>
 > = () => {
   const { t } = useTranslate();
   const [projectsKey, setProjectsKey] = useState(0);
-  const [myTranslations, setMyTranslations] = useState<Channels>(() =>
-    readJson<Channels>(STORAGE_KEYS.myTranslations, MY_TRANSLATIONS_DEFAULT)
-  );
+  const [localChannels, setLocalChannels] = useState(readLocal);
+
+  const projectsLoadable = useApiQuery({
+    url: '/v2/projects',
+    method: 'get',
+    query: { size: 1000 },
+  });
+  const suggestionsEnabled = (
+    projectsLoadable.data?._embedded?.projects ?? []
+  ).some((p) => p.suggestionsMode !== 'DISABLED');
 
   const settingsLoadable = useApiQuery({
     url: '/v2/notification-settings',
@@ -129,30 +155,32 @@ export const NotificationsView: React.FC<
   const afterChange = () => settingsLoadable.refetch();
 
   const localizationCopy: Partial<
-    Record<LocalizationType, { label: string; description: string }>
+    Record<
+      LocalizationType,
+      {
+        label: string;
+        description: string;
+        hint?: string;
+        alsoTypes?: LocalizationType[];
+      }
+    >
   > = {
     KEYS_ADDED: {
       label: t('settings_notifications_type_keys_added', 'New keys'),
       description: t(
         'settings_notifications_type_keys_added_description',
-        'New keys waiting for translation'
+        'Waiting for translation, including imports'
       ),
-    },
-    IMPORTED: {
-      label: t('settings_notifications_type_imported', 'Imports'),
-      description: t(
-        'settings_notifications_type_imported_description',
-        'Keys and translations uploaded from a file or the CLI'
-      ),
+      alsoTypes: ['IMPORTED'],
     },
     AUTOMATICALLY_TRANSLATED: {
       label: t(
         'settings_notifications_type_auto_translated',
-        'Auto-translated'
+        'Machine translated'
       ),
       description: t(
         'settings_notifications_type_auto_translated_description',
-        'Machine translations waiting for review'
+        'Auto or bulk translated (AI, TM or other providers)'
       ),
     },
     SOURCE_CHANGED: {
@@ -162,7 +190,7 @@ export const NotificationsView: React.FC<
       ),
       description: t(
         'settings_notifications_type_source_changed_description',
-        'Source text changed, translations may need an update'
+        'Base language texts edited, translations may need an update'
       ),
     },
     STRINGS_TRANSLATED: {
@@ -172,7 +200,7 @@ export const NotificationsView: React.FC<
       ),
       description: t(
         'settings_notifications_type_strings_translated_description',
-        'Someone else translated a key'
+        'Someone else translated keys'
       ),
     },
     STRINGS_REVIEWED: {
@@ -182,7 +210,7 @@ export const NotificationsView: React.FC<
       ),
       description: t(
         'settings_notifications_type_strings_reviewed_description',
-        'Someone else reviewed a translation'
+        'Someone else reviewed translations'
       ),
     },
   };
@@ -205,36 +233,15 @@ export const NotificationsView: React.FC<
       ];
     });
 
-  const workItems: Item[] = [
+  const directItems: Item[] = [
     {
       key: 'COMMENTS',
       group: 'COMMENTS',
       channels: settings.comments,
       label: t('settings_notifications_mentions_description', 'Mentions'),
-      description: settings.comments.email
-        ? t(
-            'settings_notifications_mentions_subdescription_email',
-            'Someone mentions you in a comment. Emailed within a few minutes.'
-          )
-        : t(
-            'settings_notifications_mentions_subdescription',
-            'Someone mentions you in a comment'
-          ),
-    },
-    ...localizationItems([
-      'KEYS_ADDED',
-      'IMPORTED',
-      'AUTOMATICALLY_TRANSLATED',
-      'SOURCE_CHANGED',
-    ]),
-    {
-      key: MY_TRANSLATIONS,
-      group: 'LOCALIZATION',
-      channels: myTranslations,
-      label: t('settings_notifications_my_translations', 'My translations'),
       description: t(
-        'settings_notifications_my_translations_description',
-        'Someone reviewed or changed a translation you wrote'
+        'settings_notifications_mentions_subdescription',
+        'Someone mentioned you in comments'
       ),
     },
     // shortcut: shown without the isEnabled('TASKS') EE check so the prototype has it, restore before shipping
@@ -243,24 +250,53 @@ export const NotificationsView: React.FC<
       group: 'TASKS' as const,
       channels: settings.tasks,
       label: t('settings_notifications_tasks_description'),
-      description: settings.tasks.email
-        ? t(
-            'settings_notifications_tasks_subdescription_email',
-            'Assigned, completed, closed. Emailed within a few minutes.'
-          )
-        : t('settings_notifications_tasks_subdescription'),
+      description: t('settings_notifications_tasks_subdescription'),
     },
+  ];
+  const workItems: Item[] = [
+    ...localizationItems([
+      'KEYS_ADDED',
+      'AUTOMATICALLY_TRANSLATED',
+      'SOURCE_CHANGED',
+    ]),
   ];
   const teamItems: Item[] = [
     ...localizationItems(['STRINGS_TRANSLATED', 'STRINGS_REVIEWED']),
+    ...(suggestionsEnabled
+      ? [
+          {
+            key: 'SUGGESTED_BY_OTHERS',
+            group: 'LOCALIZATION' as const,
+            channels: localChannels.SUGGESTED_BY_OTHERS,
+            label: t(
+              'settings_notifications_suggested_by_others',
+              'Suggested by others'
+            ),
+            description: t(
+              'settings_notifications_suggested_by_others_description',
+              'Someone else suggested translations'
+            ),
+          },
+        ]
+      : []),
+    {
+      key: 'COMMENTED_BY_OTHERS',
+      group: 'LOCALIZATION' as const,
+      channels: localChannels.COMMENTED_BY_OTHERS,
+      label: t(
+        'settings_notifications_commented_by_others',
+        'Commented by others'
+      ),
+      description: t(
+        'settings_notifications_commented_by_others_description',
+        'Someone else commented on translations'
+      ),
+    },
   ];
-  const allItems = [...workItems, ...teamItems];
+  const updateItems = [...workItems, ...teamItems];
+  const allItems = [...directItems, ...updateItems];
 
   const delivery = settings.digestFrequency;
-  const emailDisabledReason =
-    delivery === 'OFF'
-      ? t('settings_notifications_tooltip_summary_off', 'Summary email is off')
-      : undefined;
 
   const saveItems = (
     items: Item[],
@@ -271,26 +307,30 @@ export const NotificationsView: React.FC<
       items
         .filter((item) => item.channels[channel] !== enabled(item))
         .map((item) => {
-          if (item.key === MY_TRANSLATIONS) {
-            // shortcut: no backend type yet, kept in this browser
+          const storageKey = LOCAL_ITEMS[item.key];
+          if (storageKey) {
             const next = { ...item.channels, [channel]: enabled(item) };
             const isDefault =
-              next.inApp === MY_TRANSLATIONS_DEFAULT.inApp &&
-              next.email === MY_TRANSLATIONS_DEFAULT.email;
-            writeJson(STORAGE_KEYS.myTranslations, isDefault ? null : next);
-            setMyTranslations(next);
+              next.inApp === LOCAL_DEFAULTS[item.key].inApp &&
+              next.email === LOCAL_DEFAULTS[item.key].email;
+            writeJson(storageKey, isDefault ? null : next);
+            setLocalChannels((prev) => ({ ...prev, [item.key]: next }));
             return Promise.resolve();
           }
-          return settingMutation.mutateAsync({
-            content: {
-              'application/json': {
-                group: item.group,
-                type: item.type,
-                channel: channel === 'inApp' ? 'IN_APP' : 'EMAIL',
-                enabled: enabled(item),
-              },
-            },
-          });
+          return Promise.all(
+            [item.type, ...(item.alsoTypes ?? [])].map((type) =>
+              settingMutation.mutateAsync({
+                content: {
+                  'application/json': {
+                    group: item.group,
+                    type,
+                    channel: channel === 'inApp' ? 'IN_APP' : 'EMAIL',
+                    enabled: enabled(item),
+                  },
+                },
+              })
+            )
+          );
         })
     );
 
@@ -310,8 +350,8 @@ export const NotificationsView: React.FC<
     !hasPrototypeOverrides();
 
   const resetToDefaults = async () => {
-    await saveItems(allItems, 'inApp', () => true);
-    await saveItems(allItems, 'email', (item) => item.group !== 'LOCALIZATION');
+    await saveItems(allItems, 'inApp', (item) => defaultChannels(item).inApp);
+    await saveItems(allItems, 'email', (item) => defaultChannels(item).email);
     await frequencyMutation.mutateAsync({
       content: { 'application/json': { frequency: 'DAILY' } },
     });
@@ -330,6 +370,7 @@ export const NotificationsView: React.FC<
       ),
     ]);
     clearPrototypeStorage();
+    setLocalChannels(readLocal());
     messageService.success(
       <T keyName="settings_notifications_message_saved" />
     );
@@ -360,11 +401,30 @@ export const NotificationsView: React.FC<
       <ChannelRow
         key={item.key}
         label={item.label}
+        hint={item.hint}
+        description={item.description}
+        inApp={{ checked: item.channels.inApp }}
+        email={{ checked: item.channels.email }}
+        onChange={(channel, enabled) => change([item], channel, enabled)}
+        dataCyType={item.key}
+      />
+    ));
+
+  const renderUpdateRows = (items: Item[]) =>
+    items.map((item) => (
+      <ChannelRow
+        key={item.key}
+        label={item.label}
         description={item.description}
         inApp={{ checked: item.channels.inApp }}
         email={{ checked: item.channels.email }}
         emailDisabledReason={
-          item.group === 'LOCALIZATION' ? emailDisabledReason : undefined
+          delivery === 'OFF'
+            ? t(
+                'settings_notifications_tooltip_summary_off',
+                'Email summary is off'
+              )
+            : undefined
         }
         onChange={(channel, enabled) => change([item], channel, enabled)}
         dataCyType={item.key}
@@ -374,7 +434,7 @@ export const NotificationsView: React.FC<
   const renderPlainSection = (
     title: React.ReactNode,
     dataCy: string,
-    columns?: boolean
+    columns?: 'instant' | 'summary'
   ) => (
     <>
       <StyledSectionSpacer />
@@ -388,12 +448,20 @@ export const NotificationsView: React.FC<
       </StyledSectionTitle>
       {columns && (
         <>
-          <StyledTableHeader>
+          <StyledColumnHeader>
             {t('settings_notifications_channel_in_app')}
-          </StyledTableHeader>
-          <StyledTableHeader>
-            {t('settings_notifications_channel_email')}
-          </StyledTableHeader>
+          </StyledColumnHeader>
+          <StyledColumnHeader>
+            {columns === 'summary' ? (
+              <T
+                keyName="settings_notifications_channel_summary_email"
+                defaultValue="Summary<br></br>email"
+                params={{ br: <br /> }}
+              />
+            ) : (
+              t('settings_notifications_channel_email')
+            )}
+          </StyledColumnHeader>
         </>
       )}
     </>
@@ -403,7 +471,7 @@ export const NotificationsView: React.FC<
     title: React.ReactNode,
     dataCy: string,
     items: Item[],
-    columns?: boolean
+    columns?: 'instant' | 'summary'
   ) => (
     <>
       {renderPlainSection(title, dataCy, columns)}
@@ -441,9 +509,10 @@ export const NotificationsView: React.FC<
       ]}
     >
       <StyledRoot>
-        {renderSection(
+        {renderSection('', 'direct', directItems, 'instant')}
+        {renderPlainSection(
           <Box display="flex" alignItems="center" gap={0.5}>
-            {t('settings_notifications_group_my_work', 'My work')}
+            {t('settings_notifications_group_my_work', 'Work for you')}
             <Tooltip
               title={t(
                 'settings_notifications_my_work_languages_hint',
@@ -457,17 +526,24 @@ export const NotificationsView: React.FC<
             </Tooltip>
           </Box>,
           'work',
-          workItems,
-          true
+          'summary'
         )}
-        {renderSection(
+        {renderUpdateRows(workItems)}
+        {renderPlainSection(
           t('settings_notifications_group_team_activity', 'Team activity'),
           'team-activity',
-          teamItems
+          'summary'
         )}
+        {renderUpdateRows(teamItems)}
+        {renderPlainSection(
+          t('settings_notifications_group_summary_email', 'Summary email'),
+          'summary-email'
+        )}
+        <WorkEmailFrequencyRow value={delivery} afterChange={afterChange} />
         {renderPlainSection(
           t('settings_notifications_group_account', 'Account'),
-          'account'
+          'account',
+          'instant'
         )}
         <Box data-cy="notifications-settings-security-row">
           <Typography variant="body1">
@@ -480,22 +556,36 @@ export const NotificationsView: React.FC<
             )}
           </Typography>
         </Box>
-        <StyledAlwaysOn>
-          {t('settings_notifications_always_on', 'Always on')}
-        </StyledAlwaysOn>
-        <StyledAlwaysOn>
-          {t('settings_notifications_always_on', 'Always on')}
-        </StyledAlwaysOn>
-        {renderPlainSection(
-          t('settings_notifications_group_delivery', 'Delivery'),
-          'delivery'
+        {(['IN_APP', 'EMAIL'] as const).map((channel) => (
+          <StyledAlwaysOn key={channel}>
+            <Tooltip
+              title={t('settings_notifications_always_on', 'Always on')}
+              disableInteractive
+            >
+              <span>
+                <Switch
+                  sx={{ mr: '-12px' }}
+                  checked
+                  disabled
+                  data-cy="notifications-settings-security-toggle"
+                  data-cy-channel={channel}
+                />
+              </span>
+            </Tooltip>
+          </StyledAlwaysOn>
+        ))}
+        {Boolean(languagesLoadable.data?.length) && (
+          <>
+            {renderPlainSection(
+              t('settings_notifications_group_projects', 'Projects'),
+              'projects'
+            )}
+            <NotificationProjectsSection
+              key={projectsKey}
+              settings={settings}
+            />
+          </>
         )}
-        <WorkEmailFrequencyRow value={delivery} afterChange={afterChange} />
-        {renderPlainSection(
-          t('settings_notifications_group_projects', 'Projects'),
-          'projects'
-        )}
-        <NotificationProjectsSection key={projectsKey} settings={settings} />
       </StyledRoot>
     </BaseUserSettingsView>
   );

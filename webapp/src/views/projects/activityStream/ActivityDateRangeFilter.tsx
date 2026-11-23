@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Box,
-  ButtonBase,
+  FormControl,
   MenuItem,
   MenuList,
   Popover,
+  Select,
   styled,
+  Typography,
 } from '@mui/material';
 import { DateCalendar, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
 import type {} from '@mui/x-date-pickers/AdapterDateFns';
@@ -102,33 +104,28 @@ export const decodeDateRange = (raw: string | undefined): DateRangeValue => {
   return { preset: raw as DateRangePreset };
 };
 
-const StyledTrigger = styled(ButtonBase)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-width: 160px;
-  height: 37px;
-  padding: 0 10px 0 14px;
-  border-radius: 4px;
-  font-size: 14px;
-  border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
-  color: ${({ theme }) => theme.palette.text.primary};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.palette.text.primary};
+const StyledSelect = styled(Select)`
+  width: 200px;
+  height: 40px;
+  & .MuiSelect-select {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
   }
-
-  &.open {
-    border-color: ${({ theme }) => theme.palette.primary.main};
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.palette.primary.main};
-  }
-
-  svg {
+  & .MuiSelect-icon {
     width: 20px;
     height: 20px;
+    top: calc(50% - 10px);
+    right: 10px;
     color: ${({ theme }) => theme.palette.text.secondary};
   }
+`;
+
+const StyledValue = styled(Typography)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: -2px 0px;
 `;
 
 const StyledPanel = styled(Box)`
@@ -136,7 +133,7 @@ const StyledPanel = styled(Box)`
 `;
 
 const StyledPresets = styled(MenuList)`
-  min-width: 160px;
+  min-width: 200px;
   border-right: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
@@ -179,13 +176,23 @@ const RangeDay = ({ rangeFrom, rangeTo, ...props }: RangeDayProps) => {
 type Props = {
   value: DateRangeValue;
   onChange: (value: DateRangeValue) => void;
+  since?: number;
+  maxRangeDays?: number;
 };
 
-export const ActivityDateRangeFilter = ({ value, onChange }: Props) => {
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const ActivityDateRangeFilter = ({
+  value,
+  onChange,
+  since,
+  maxRangeDays,
+}: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<{ from?: number; to?: number }>({});
   const [leftMonth, setLeftMonth] = useState(() => monthStart(-1));
   const [rightMonth, setRightMonth] = useState(() => monthStart(0));
@@ -208,8 +215,8 @@ export const ActivityDateRangeFilter = ({ value, onChange }: Props) => {
       ? `${formatDate(value.from)} – ${formatDate(value.to ?? value.from)}`
       : presets.find((p) => p.value === value.preset)?.label;
 
-  const open = (e: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(e.currentTarget);
+  const open = () => {
+    setAnchorEl(triggerRef.current);
     setShowCalendar(value.preset === 'CUSTOM');
     setDraft({ from: value.from, to: value.to });
     if (value.preset === 'CUSTOM' && value.from !== undefined) {
@@ -247,18 +254,40 @@ export const ActivityDateRangeFilter = ({ value, onChange }: Props) => {
     onChange({ preset: 'CUSTOM', from, to });
   };
 
+  const sinceDate =
+    since !== undefined ? new Date(startOfDay(new Date(since))) : undefined;
+  const isOutOfRange = (day: Date) => {
+    if (sinceDate && day.getTime() < sinceDate.getTime()) return true;
+    if (!maxRangeDays || draft.from === undefined || draft.to !== undefined)
+      return false;
+    return Math.abs(startOfDay(day) - draft.from) > maxRangeDays * DAY_MS;
+  };
+
   const dayProps = { rangeFrom: draft.from, rangeTo: draft.to ?? draft.from };
 
   return (
     <>
-      <StyledTrigger
-        onClick={open}
-        className={anchorEl ? 'open' : undefined}
+      <FormControl
+        ref={triggerRef}
+        variant="outlined"
+        size="small"
+        focused={Boolean(anchorEl)}
         data-cy="activity-stream-filter-time"
       >
-        <span>{label}</span>
-        <Calendar />
-      </StyledTrigger>
+        <StyledSelect
+          value={value.preset}
+          open={false}
+          onOpen={open}
+          IconComponent={Calendar}
+          renderValue={() => (
+            <StyledValue color="textPrimary" variant="body1">
+              {label}
+            </StyledValue>
+          )}
+        >
+          <MenuItem value={value.preset}>{label}</MenuItem>
+        </StyledSelect>
+      </FormControl>
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
@@ -301,6 +330,8 @@ export const ActivityDateRangeFilter = ({ value, onChange }: Props) => {
                 onMonthChange={(m) => setLeftMonth(monthOf(m.getTime()))}
                 onYearChange={(y) => setLeftMonth(monthOf(y.getTime()))}
                 maxDate={new Date(rightMonth.getTime() - 1)}
+                minDate={sinceDate}
+                shouldDisableDate={isOutOfRange}
                 views={['year', 'month', 'day']}
                 openTo="day"
                 showDaysOutsideCurrentMonth
@@ -316,6 +347,7 @@ export const ActivityDateRangeFilter = ({ value, onChange }: Props) => {
                 onMonthChange={(m) => setRightMonth(monthOf(m.getTime()))}
                 onYearChange={(y) => setRightMonth(monthOf(y.getTime()))}
                 minDate={shiftMonth(leftMonth, 1)}
+                shouldDisableDate={isOutOfRange}
                 views={['year', 'month', 'day']}
                 openTo="day"
                 showDaysOutsideCurrentMonth

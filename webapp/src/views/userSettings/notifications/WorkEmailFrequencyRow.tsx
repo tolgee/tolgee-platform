@@ -45,17 +45,17 @@ export const WorkEmailFrequencyRow = ({ value, afterChange }: Props) => {
       case 'SOON':
         return t(
           'settings_notifications_email_hint_3_times_a_day',
-          'In the morning, at midday and at the end of the day, your time.'
+          'Everything turned on above, sent at 9:00, 13:00 and 17:00 your time.'
         );
       case 'DAILY':
         return t(
           'settings_notifications_email_hint_daily',
-          'Every morning in your time zone, covering the last 24 hours.'
+          'Everything turned on above from the last 24 hours, sent at 9:00 your time.'
         );
       case 'OFF':
         return t(
           'settings_notifications_summary_hint_off',
-          'No summaries. Mentions, tasks and security alerts still arrive by email.'
+          'Updates stay in the app only. Mentions and tasks are still emailed right away.'
         );
     }
   };
@@ -74,37 +74,14 @@ export const WorkEmailFrequencyRow = ({ value, afterChange }: Props) => {
       <Box sx={{ flex: '1 1 300px' }}>
         <Box display="flex" alignItems="center" gap={0.5}>
           <Typography variant="body1">
-            {t('settings_notifications_summary_email', 'Summary email')}
+            {t('settings_notifications_summary_frequency', 'Frequency')}
           </Typography>
           <Tooltip
-            title={
-              <>
-                {t(
-                  'settings_notifications_summary_email_info_intro',
-                  'Notifications with Email on, except mentions and tasks.'
-                )}
-                <Box component="ul" m={0} pl={2}>
-                  <li>
-                    {t(
-                      'settings_notifications_summary_email_info_3_times',
-                      '3 times a day: 9:00, 13:00, 17:00'
-                    )}
-                  </li>
-                  <li>
-                    {t(
-                      'settings_notifications_summary_email_info_morning',
-                      'Every morning: 9:00'
-                    )}
-                  </li>
-                </Box>
-                {t(
-                  'settings_notifications_summary_email_info_outro',
-                  'In your time zone, only when there is something new.'
-                )}
-              </>
-            }
+            title={t(
+              'settings_notifications_summary_email_info',
+              'Sent only when there is something new. Mentions and tasks are emailed right away.'
+            )}
             disableInteractive
-            componentsProps={{ tooltip: { style: { maxWidth: 400 } } }}
           >
             <Box display="flex" color="text.secondary">
               <InfoCircle width={16} height={16} />

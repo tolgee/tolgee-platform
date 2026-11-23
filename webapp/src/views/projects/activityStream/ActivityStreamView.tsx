@@ -1,17 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Box,
-  Divider,
-  MenuItem,
-  Select,
-  styled,
-  Typography,
-} from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useInView } from 'react-intersection-observer';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useUser } from 'tg.globalContext/helpers';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
@@ -21,11 +14,13 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
 import { ActivityDateSeparator } from 'tg.views/projects/dashboard/ActivityDateSeparator';
 import { ProjectActivityModel } from 'tg.component/activity/types';
+import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { ActivityRevisionRow } from './ActivityRevisionRow';
+import { ActivityMultiSelect } from './ActivityMultiSelect';
+import { ActivityTreeSelect } from './ActivityTreeSelect';
 import { ActivityRevisionChanges } from './ActivityRevisionDialog';
 import { ActivityShowPastTimesContext } from './ActivityRowShell';
-import { ACTIVITY_CATEGORIES, ActivityCategory } from './activityCategories';
-import { useActivityCategoryLabels } from './useActivityCategoryLabels';
+import { useActivityFilter } from './activityStreamQuery';
 import {
   ActivityDateRangeFilter,
   decodeDateRange,
@@ -39,22 +34,18 @@ const StyledHeader = styled(Box)`
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 24px;
+  position: sticky;
+  z-index: 2;
+  transition: top 0.2s;
+  padding: 12px 0 8px;
+  margin: -12px 0 0;
+  background: ${({ theme }) => theme.palette.background.default};
 `;
 
 const StyledFilters = styled(Box)`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-`;
-
-const StyledSelect = styled(Select)`
-  min-width: 160px;
-  font-size: 14px;
-  & .MuiSelect-select {
-    padding-top: 7px;
-    padding-bottom: 7px;
-  }
 `;
 
 const StyledList = styled(Box)`
@@ -71,32 +62,50 @@ const StyledExpanded = styled(Box)`
 export const ActivityStreamView = () => {
   const { t } = useTranslate();
   const project = useProject();
-  const user = useUser();
-  const [userFilter, setUserFilter] = useUrlSearchState('user', {
-    defaultVal: 'ALL',
+  const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+  const [headerEl, setHeaderEl] = useState<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useEffect(() => {
+    if (!headerEl) return;
+    const observer = new ResizeObserver(() =>
+      setHeaderHeight(headerEl.offsetHeight)
+    );
+    observer.observe(headerEl);
+    return () => observer.disconnect();
+  }, [headerEl]);
+  const [users, setUsers] = useUrlSearchState('user', {
+    array: true,
+    defaultVal: [],
   });
-  const [categoryParam, setCategory] = useUrlSearchState('activity', {
-    defaultVal: 'ALL',
+  const [categoriesParam, setCategories] = useUrlSearchState('activity', {
+    array: true,
+    defaultVal: [],
   });
-  const category = categoryParam as ActivityCategory | 'ALL';
-  const [languageId, setLanguageId] = useUrlSearchState('language', {
-    defaultVal: 'ALL',
+  const [languageTags, setLanguageTags] = useUrlSearchState('language', {
+    array: true,
+    defaultVal: [],
   });
   const [time, setTime] = useUrlSearchState('time', { defaultVal: 'ALL' });
   const [expanded, setExpanded] = useState<number>();
   const { ref, inView } = useInView({ rootMargin: '200px' });
 
-  const members = useApiQuery({
-    url: '/v2/projects/{projectId}/users',
+  const filter = useActivityFilter(
+    {
+      users: users as string[],
+      activities: categoriesParam as string[],
+      languages: languageTags as string[],
+    },
+    (f) => {
+      setUsers(f.users);
+      setCategories(f.activities);
+      setLanguageTags(f.languages);
+    }
+  );
+
+  const bounds = useApiQuery({
+    url: '/v2/projects/{projectId}/activity/stream/bounds',
     method: 'get',
     path: { projectId: project.id },
-    query: { size: 1000 },
-  });
-  const languages = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
   });
 
   const dateRange = decodeDateRange(time as string | undefined);
@@ -106,16 +115,7 @@ export const ActivityStreamView = () => {
   const query = {
     size: 30,
     sort: ['timestamp,desc'],
-    authorId:
-      userFilter !== 'ALL' && userFilter !== 'EXCEPT_ME'
-        ? Number(userFilter)
-        : undefined,
-    excludeAuthorId: userFilter === 'EXCEPT_ME' ? user?.id : undefined,
-    types:
-      category === 'ALL'
-        ? undefined
-        : ([...ACTIVITY_CATEGORIES[category]] as string[]),
-    languageIds: languageId === 'ALL' ? undefined : [Number(languageId)],
+    ...filter.query,
     from,
     to,
   };
@@ -151,12 +151,10 @@ export const ActivityStreamView = () => {
   );
   const counter = useDateCounter();
 
-  const categoryLabels = useActivityCategoryLabels();
-
   return (
     <BaseProjectView
       windowTitle={t('activity_stream_title', 'Activity stream')}
-      maxWidth={1000}
+      maxWidth="wide"
       navigation={[
         [
           t('activity_stream_title', 'Activity stream'),
@@ -165,75 +163,31 @@ export const ActivityStreamView = () => {
       ]}
     >
       <ProjectLanguagesProvider>
-        <StyledHeader>
+        <StyledHeader ref={setHeaderEl} sx={{ top: topBarHeight }}>
           <Typography variant="h4">
             <T keyName="activity_stream_title" defaultValue="Activity stream" />
           </Typography>
           <StyledFilters>
-            <StyledSelect
-              size="small"
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value as string)}
+            <ActivityMultiSelect
               data-cy="activity-stream-filter-user"
-            >
-              <MenuItem value="ALL">
-                <T
-                  keyName="activity_stream_all_users"
-                  defaultValue="All users"
-                />
-              </MenuItem>
-              <MenuItem value="EXCEPT_ME">
-                <T
-                  keyName="activity_stream_except_me"
-                  defaultValue="Everyone except me"
-                />
-              </MenuItem>
-              <Divider />
-              {members.data?._embedded?.users?.map((member) => (
-                <MenuItem key={member.id} value={String(member.id)}>
-                  {member.name}
-                </MenuItem>
-              ))}
-            </StyledSelect>
-            <StyledSelect
-              size="small"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as ActivityCategory)}
+              {...filter.users}
+            />
+            <ActivityTreeSelect
               data-cy="activity-stream-filter-activity"
-            >
-              <MenuItem value="ALL">
-                <T
-                  keyName="activity_stream_all_activities"
-                  defaultValue="All activities"
-                />
-              </MenuItem>
-              {(Object.keys(categoryLabels) as ActivityCategory[]).map((c) => (
-                <MenuItem key={c} value={c}>
-                  {categoryLabels[c]}
-                </MenuItem>
-              ))}
-            </StyledSelect>
-            <StyledSelect
-              size="small"
-              value={languageId}
-              onChange={(e) => setLanguageId(e.target.value as string)}
-              data-cy="activity-stream-filter-language"
-            >
-              <MenuItem value="ALL">
-                <T
-                  keyName="activity_stream_all_languages"
-                  defaultValue="All languages"
-                />
-              </MenuItem>
-              {languages.data?._embedded?.languages?.map((language) => (
-                <MenuItem key={language.id} value={String(language.id)}>
-                  {language.flagEmoji} {language.name}
-                </MenuItem>
-              ))}
-            </StyledSelect>
+              {...filter.activities}
+            />
+            <LanguagesSelect
+              context="activity-stream"
+              placeholder={t('activity_stream_no_languages', 'No languages')}
+              {...filter.languages}
+              enableEmpty
+              selectAllToggle
+            />
             <ActivityDateRangeFilter
               value={dateRange}
               onChange={(value) => setTime(encodeDateRange(value))}
+              since={bounds.data?.since}
+              maxRangeDays={bounds.data?.maxRangeDays}
             />
           </StyledFilters>
         </StyledHeader>
@@ -255,7 +209,11 @@ export const ActivityStreamView = () => {
                 return (
                   <React.Fragment key={item.revisionId}>
                     {counter.isNewDate(date) && (
-                      <ActivityDateSeparator date={date} />
+                      <ActivityDateSeparator
+                        date={date}
+                        stickyTop={topBarHeight + headerHeight}
+                        background="default"
+                      />
                     )}
                     <ActivityRevisionRow
                       data={item}

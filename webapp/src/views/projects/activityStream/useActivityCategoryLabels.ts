@@ -21,9 +21,9 @@ export const useActivityCategoryLabels = (): Record<
     LABELS: t('activity_stream_category_labels', 'Labels'),
     TASKS: t('activity_stream_category_tasks', 'Tasks'),
     LANGUAGES: t('activity_stream_category_languages', 'Languages'),
-    GLOSSARY_TM: t(
-      'activity_stream_category_glossary_tm',
-      'Glossaries and translation memory'
+    TRANSLATION_MEMORY: t(
+      'activity_category_translation_memory',
+      'Translation memory'
     ),
     PROJECT: t(
       'activity_stream_category_project',
