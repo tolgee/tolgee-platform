@@ -49,6 +49,26 @@ class McpKeyBranchGateTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `get_key with branch fails when branching is not enabled`() {
+    assertToolFails(
+      client,
+      "get_key",
+      mapOf("projectId" to data.projectId, "keyName" to "some.key", "branch" to "main"),
+      expectedError = "feature_not_enabled",
+    )
+  }
+
+  @Test
+  fun `delete_keys with branch fails when branching is not enabled`() {
+    assertToolFails(
+      client,
+      "delete_keys",
+      mapOf("projectId" to data.projectId, "keyNames" to listOf("some.key"), "branch" to "main"),
+      expectedError = "feature_not_enabled",
+    )
+  }
+
+  @Test
   fun `create_keys with branch fails when branching is not enabled`() {
     assertToolFails(
       client,

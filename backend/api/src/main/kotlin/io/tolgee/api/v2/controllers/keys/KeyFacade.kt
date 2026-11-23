@@ -68,7 +68,10 @@ class KeyFacade(
     name: String,
     namespace: String?,
     branch: String?,
-  ): Key? = keyService.find(projectHolder.project.id, name, namespace, branch)
+  ): Key? {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    return keyService.find(projectHolder.project.id, name, namespace, branch)
+  }
 
   fun edit(
     id: Long,
@@ -94,7 +97,10 @@ class KeyFacade(
     keyNames: List<String>,
     namespace: String?,
     branch: String?,
-  ) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+  ): Pair<List<Key>, List<String>> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    return keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+  }
 
   fun checkNamespaceFeature(namespace: String?) {
     if (projectHolder.projectEntity.useNamespaces) return

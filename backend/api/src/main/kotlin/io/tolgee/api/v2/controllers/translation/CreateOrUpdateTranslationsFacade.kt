@@ -2,6 +2,9 @@ package io.tolgee.api.v2.controllers.translation
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.mcp.McpFacade
+import io.tolgee.api.mcp.checkValid
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.hateoas.translations.SetTranslationsResponseModel
@@ -11,9 +14,11 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
+import jakarta.validation.Validator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.RequestBody
@@ -26,12 +31,16 @@ class CreateOrUpdateTranslationsFacade(
   private val activityHolder: ActivityHolder,
   private val translationService: TranslationService,
   private val translationModelAssembler: TranslationModelAssembler,
-) {
+  private val projectFeatureGuard: ProjectFeatureGuard,
+  private val validator: Validator,
+) : McpFacade {
   @Transactional
   fun createOrUpdateTranslations(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    validator.checkValid(dto)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace, dto.branch) ?: return create(dto)
     return setTranslations(dto, key)
   }
@@ -75,6 +84,8 @@ class CreateOrUpdateTranslationsFacade(
     dto: SetTranslationsWithKeyDto,
     key: Key? = null,
   ): SetTranslationsResponseModel {
+    validator.checkValid(dto)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace, dto.branch)
     securityService.checkBranchModify(keyNotNull)
     securityService.checkLanguageTranslatePermissionsByTag(

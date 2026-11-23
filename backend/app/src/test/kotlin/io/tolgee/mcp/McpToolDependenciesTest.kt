@@ -34,7 +34,6 @@ class McpToolDependenciesTest : AbstractSpringTest() {
       "ProjectMcpTools",
       "SuggestionMcpTools",
       "TagMcpTools",
-      "TranslationMcpTools",
     )
 
   @Test
