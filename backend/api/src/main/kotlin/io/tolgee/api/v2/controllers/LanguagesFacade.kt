@@ -26,6 +26,8 @@ class LanguagesFacade(
     filters: LanguageFilters?,
   ): Page<LanguageDto> = languageService.getPaged(projectHolder.project.id, pageable, filters)
 
+  fun findByTag(tag: String): LanguageDto? = languageService.findByTag(tag, projectHolder.project.id)
+
   fun createLanguage(dto: LanguageRequest): Language {
     validator.checkValid(dto)
     val project = projectHolder.projectEntity

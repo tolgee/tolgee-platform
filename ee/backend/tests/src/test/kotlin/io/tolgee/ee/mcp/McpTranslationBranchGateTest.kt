@@ -44,6 +44,21 @@ class McpTranslationBranchGateTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `machine_translate with branch fails when branching is not enabled`() {
+    assertToolFails(
+      client,
+      "machine_translate",
+      mapOf(
+        "projectId" to data.projectId,
+        "keyNames" to listOf("some.key"),
+        "targetLanguageTags" to listOf("en"),
+        "branch" to "main",
+      ),
+      expectedError = "feature_not_enabled",
+    )
+  }
+
+  @Test
   fun `get_translations with branch fails when branching is not enabled`() {
     assertToolFails(
       client,

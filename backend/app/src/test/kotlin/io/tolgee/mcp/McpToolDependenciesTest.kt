@@ -26,7 +26,6 @@ class McpToolDependenciesTest : AbstractSpringTest() {
   /** Tools written before the facade pattern. Shrinks with each migrated controller; never grows. */
   private val notMigratedYet =
     setOf(
-      "BatchJobMcpTools",
       "BranchMcpTools",
       "SuggestionMcpTools",
     )
