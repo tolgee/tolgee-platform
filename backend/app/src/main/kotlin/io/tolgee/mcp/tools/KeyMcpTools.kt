@@ -9,6 +9,7 @@ import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.getSafeNamespace
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -222,7 +223,7 @@ class KeyMcpTools(
             val dto =
               EditKeyDto(
                 name = request.arguments.requireString("newName"),
-                namespace = request.arguments.getString("newNamespace"),
+                namespace = getSafeNamespace(request.arguments.getString("newNamespace")),
                 description = request.arguments.getString("newDescription"),
               )
             val updated = keyFacade.edit(key.id, dto)

@@ -82,6 +82,25 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `update_key treats a blank new namespace as no namespace`() {
+    keyService.create(data.testData.projectBuilder.self, "blank.ns.key", null)
+
+    val json =
+      callToolAndGetJson(
+        client,
+        "update_key",
+        mapOf(
+          "projectId" to data.projectId,
+          "keyName" to "blank.ns.key",
+          "newName" to "blank.ns.key",
+          "newNamespace" to "",
+        ),
+      )
+
+    assertThat(json["namespace"].isNull).isTrue()
+  }
+
+  @Test
   fun `create_keys refuses a blank key name`() {
     assertToolFails(
       client,
