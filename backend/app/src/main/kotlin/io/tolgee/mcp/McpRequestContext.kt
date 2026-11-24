@@ -2,11 +2,9 @@ package io.tolgee.mcp
 
 import io.tolgee.activity.ActivityHandlerInterceptor
 import io.tolgee.activity.ActivityHolder
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
 import io.tolgee.security.ProjectNotSelectedException
@@ -21,10 +19,7 @@ import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import io.tolgee.security.ratelimit.RateLimitService
-import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.TenantService
 import io.tolgee.service.organization.OrganizationRoleService
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -37,11 +32,8 @@ class McpRequestContext(
   private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val rateLimitService: RateLimitService,
   private val projectContextService: ProjectContextService,
-  @Lazy
-  private val emailVerificationService: EmailVerificationService,
-  @Lazy
-  private val tenantService: TenantService,
-  private val tolgeeProperties: TolgeeProperties,
+  private val emailValidationInterceptor: EmailValidationInterceptor,
+  private val ssoAuthenticationInterceptor: SsoAuthenticationInterceptor,
 ) {
   fun <T> executeAs(
     spec: ToolEndpointSpec,
@@ -80,20 +72,12 @@ class McpRequestContext(
     return block()
   }
 
-  /** Mirrors [EmailValidationInterceptor.preHandle] */
   private fun checkEmailVerified() {
-    if (emailVerificationService.isVerified(authenticationFacade.authenticatedUser)) return
-    throw PermissionException(Message.EMAIL_NOT_VERIFIED)
+    emailValidationInterceptor.checkEmailVerificationOrThrow(authenticationFacade.authenticatedUser)
   }
 
-  /** Mirrors [SsoAuthenticationInterceptor.preHandle] */
   private fun checkForcedSso() {
-    if (!tolgeeProperties.authentication.enabled) return
-    val user = authenticationFacade.authenticatedUser
-    if (user.thirdPartyAuth == ThirdPartyAuthType.SSO) return
-    if (user.thirdPartyAuth == ThirdPartyAuthType.SSO_GLOBAL) return
-    if (!tenantService.isSsoForcedForDomain(user.domain)) return
-    throw PermissionException(Message.SSO_LOGIN_FORCED_FOR_THIS_ACCOUNT, listOf(user.domain))
+    ssoAuthenticationInterceptor.checkNonSsoAccessAllowed(authenticationFacade.authenticatedUser)
   }
 
   private fun requireAuthenticated() {

@@ -42,8 +42,12 @@ class SsoAuthenticationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
+    if (handler.hasMethodAnnotation(BypassForcedSsoAuthentication::class.java)) {
+      return true
+    }
+
     val user = authenticationFacade.authenticatedUser
-    checkNonSsoAccessAllowed(user, handler)
+    checkNonSsoAccessAllowed(user)
 
     return true
   }
@@ -52,14 +56,7 @@ class SsoAuthenticationInterceptor(
     return Ordered.HIGHEST_PRECEDENCE
   }
 
-  private fun checkNonSsoAccessAllowed(
-    userAccount: UserAccountDto,
-    handler: HandlerMethod,
-  ) {
-    if (handler.hasMethodAnnotation(BypassForcedSsoAuthentication::class.java)) {
-      return
-    }
-
+  fun checkNonSsoAccessAllowed(userAccount: UserAccountDto) {
     if (!tolgeeProperties.authentication.enabled) {
       return
     }
