@@ -2772,6 +2772,7 @@
   "project_languages_primary_provider_hint": "Il provider principale viene utilizzato per la traduzione automatica delle nuove chiavi ed è visualizzato per primo nel pannello di traduzione.",
   "project_languages_title": "Lingue del progetto",
   "project_leave_button": "Abbandona progetto",
+  "project_list_community_badge_tooltip": "Progetto community",
   "project_list_keys_count": "{keysCount, plural, one {1 chiave} other {# chiavi} }",
   "project_list_more_button": "Altro",
   "project_list_public_badge": "Pubblico",

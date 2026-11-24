@@ -2810,6 +2810,7 @@
   "project_languages_primary_provider_hint": "Primární poskytovatel je použit při automatickém překladu nových klíčů a je zobrazen jako první v nabídce překladů.",
   "project_languages_title": "Jazyky projektu",
   "project_leave_button": "Opustit projekt",
+  "project_list_community_badge_tooltip": "Komunitní projekt",
   "project_list_keys_count": "{keysCount, plural, one {1 klíč} few {# klíče} other {# klíčů}}",
   "project_list_more_button": "Více",
   "project_list_public_badge": "Veřejný",

@@ -2800,6 +2800,7 @@
   "project_languages_primary_provider_hint": "O provedor principal é usado para tradução automática de novas chaves e é exibido em primeiro no painel de tradução.",
   "project_languages_title": "Idiomas do projeto",
   "project_leave_button": "Sair do projeto",
+  "project_list_community_badge_tooltip": "Projeto comunitário",
   "project_list_keys_count": "{keysCount, plural, one {# chave} other {# chaves}}",
   "project_list_more_button": "Mais",
   "project_list_public_badge": "Público",

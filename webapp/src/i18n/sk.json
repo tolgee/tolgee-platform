@@ -592,6 +592,7 @@
   "project_dashboard_group_progress": "Pokrok",
   "project_dashboard_group_team": "Tím",
   "project_dashboard_words_count_plural": "{value, plural, one {Slovo} few {Slová} many {Slova} other {Slov}}",
+  "project_list_community_badge_tooltip": "Komunitný projekt",
   "project_storage_invalid_field_name": "Názov poľa môže obsahovať iba písmená, číslice, bodky, pomlčky a podčiarkovníky (max. 64 znakov)",
   "project_storage_too_many_fields": "Príliš veľa uložených polí pre tento projekt (max {0})",
   "project_storage_value_too_large": "Uložená hodnota je príliš veľká (max {0} bajtov)",

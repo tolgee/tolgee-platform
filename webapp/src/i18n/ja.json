@@ -2810,6 +2810,7 @@
   "project_languages_primary_provider_hint": "プライマリプロバイダーは、新しいキーの機械翻訳に使用され、翻訳パネルの最初に表示されます。",
   "project_languages_title": "プロジェクト言語",
   "project_leave_button": "プロジェクトから脱退する",
+  "project_list_community_badge_tooltip": "コミュニティプロジェクト",
   "project_list_keys_count": "{keysCount, plural, one {1 キー} other {# キー}}",
   "project_list_more_button": "詳細",
   "project_list_public_badge": "公開",

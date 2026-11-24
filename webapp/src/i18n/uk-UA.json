@@ -2588,6 +2588,7 @@
   "project_languages_primary_provider_hint": "Основний постачальник використовується для машинного перекладу нових ключів і відображається першим у панелі перекладу.",
   "project_languages_title": "Мови проєкту",
   "project_leave_button": "Залишити проєкт",
+  "project_list_community_badge_tooltip": "Проєкт спільного перекладу",
   "project_list_keys_count": "{keysCount, plural, one {1 ключ} few {# ключі} many {# ключів} other {# ключа}}",
   "project_list_more_button": "Більше",
   "project_list_public_badge": "Публічний",

@@ -2810,6 +2810,7 @@
   "project_languages_primary_provider_hint": "Primary provider is used for machine translation of new keys and is displayed as first on the translation panel.",
   "project_languages_title": "Project languages",
   "project_leave_button": "Leave project",
+  "project_list_community_badge_tooltip": "Community project",
   "project_list_keys_count": "{keysCount, plural, one {1 key} other {# keys}}",
   "project_list_more_button": "More",
   "project_list_public_badge": "public",

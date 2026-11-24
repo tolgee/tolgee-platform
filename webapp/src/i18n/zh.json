@@ -2804,6 +2804,7 @@
   "project_languages_primary_provider_hint": "主要提供商用于新词条的机器翻译，并在翻译面板上显示为第一项。",
   "project_languages_title": "项目语言",
   "project_leave_button": "离开项目",
+  "project_list_community_badge_tooltip": "社区项目",
   "project_list_keys_count": "{keysCount, plural, one {1 个词条} other {# 个词条}}",
   "project_list_more_button": "更多",
   "project_list_public_badge": "公开",

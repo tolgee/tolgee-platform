@@ -1,3 +1,10 @@
+## [3.246.1](https://github.com/tolgee/tolgee-platform/compare/v3.246.0...v3.246.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* run MCP tools through facades shared with REST controllers ([#4086](https://github.com/tolgee/tolgee-platform/issues/4086)) ([65eaa48](https://github.com/tolgee/tolgee-platform/commit/65eaa480f1fde3f91910f01ee92ca2c91fcd0a0e))
+
 # [3.246.0](https://github.com/tolgee/tolgee-platform/compare/v3.245.2...v3.246.0) (2026-11-19)
 
 

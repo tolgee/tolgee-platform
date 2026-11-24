@@ -2808,6 +2808,7 @@
   "project_languages_primary_provider_hint": "De primaire aanbieder wordt gebruikt voor machinevertaling van nieuwe sleutels en wordt als eerste weergegeven op het vertaalpaneel.",
   "project_languages_title": "Projecttalen",
   "project_leave_button": "Project verlaten",
+  "project_list_community_badge_tooltip": "Community-project",
   "project_list_keys_count": "{keysCount, plural, one {1 sleutel} other {# sleutels}}",
   "project_list_more_button": "Meer",
   "project_list_public_badge": "Openbaar",

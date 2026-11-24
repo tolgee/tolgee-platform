@@ -2587,6 +2587,7 @@
   "project_languages_primary_provider_hint": "Główny dostawca jest używany do tłumaczenia maszynowego nowych kluczy i jest wyświetlany jako pierwszy w panelu tłumaczeń.",
   "project_languages_title": "Języki projektu",
   "project_leave_button": "Opuść projekt",
+  "project_list_community_badge_tooltip": "Projekt społecznościowy",
   "project_list_keys_count": "{keysCount, plural, one {1 klucz} few {# klucze} many {# kluczy} other {# klucza}}",
   "project_list_more_button": "Więcej",
   "project_list_public_badge": "Publiczny",

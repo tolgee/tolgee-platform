@@ -2807,6 +2807,7 @@
   "project_languages_primary_provider_hint": "Primær udbyder bruges til maskinoversættelse af nye nøgler og vises som den første på oversættelsespanelet.",
   "project_languages_title": "Projektsprog",
   "project_leave_button": "Forlad projekt",
+  "project_list_community_badge_tooltip": "Community-projekt",
   "project_list_keys_count": "{keysCount, plural, one {1 nøgle} other {# nøgler}}",
   "project_list_more_button": "Mere",
   "project_list_public_badge": "Offentlig",
