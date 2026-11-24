@@ -1,19 +1,17 @@
 package io.tolgee.mcp.tools
 
 import io.tolgee.api.v2.controllers.NamespaceController
+import io.tolgee.api.v2.controllers.NamespacesFacade
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.key.NamespaceService
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
 
 @Component
 class NamespaceMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val namespaceService: NamespaceService,
-  private val projectHolder: ProjectHolder,
+  private val namespacesFacade: NamespacesFacade,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listNamespacesSpec = buildSpec(NamespaceController::getAllNamespaces, "list_namespaces")
@@ -30,8 +28,7 @@ class NamespaceMcpTools(
       spec = listNamespacesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listNamespacesSpec, request.arguments.getProjectId()) {
-        val namespaces =
-          namespaceService.getAllInProject(projectHolder.project.id)
+        val namespaces = namespacesFacade.getAllInProject()
         val result =
           namespaces.map { ns ->
             mapOf(

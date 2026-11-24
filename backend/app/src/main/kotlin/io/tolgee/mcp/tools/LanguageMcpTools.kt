@@ -1,12 +1,11 @@
 package io.tolgee.mcp.tools
 
+import io.tolgee.api.v2.controllers.LanguagesFacade
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.language.LanguageService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -15,8 +14,7 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class LanguageMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val languageService: LanguageService,
-  private val projectHolder: ProjectHolder,
+  private val languagesFacade: LanguagesFacade,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listLanguagesSpec = buildSpec(V2LanguagesController::getAll, "list_languages")
@@ -37,8 +35,7 @@ class LanguageMcpTools(
       mcpRequestContext.executeAs(listLanguagesSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
         val languages =
-          languageService.getPaged(
-            projectHolder.project.id,
+          languagesFacade.getPaged(
             PageRequest.of(pageNum, 1000, Sort.by("tag")),
             null,
           )
@@ -66,7 +63,7 @@ class LanguageMcpTools(
         projectId()
         string("name", "Language display name (e.g. 'German')", required = true)
         string("tag", "Language tag / IETF BCP 47 code (e.g. 'de')", required = true)
-        string("originalName", "Native name of the language (e.g. 'Deutsch')")
+        string("originalName", "Native name of the language (e.g. 'Deutsch'). Defaults to the value of 'name'.")
         string("flagEmoji", "Flag emoji for this language")
       },
       spec = createLanguageSpec,
@@ -76,10 +73,10 @@ class LanguageMcpTools(
           LanguageRequest(
             name = request.arguments.requireString("name"),
             tag = request.arguments.requireString("tag"),
-            originalName = request.arguments.getString("originalName"),
+            originalName = request.arguments.getString("originalName") ?: request.arguments.requireString("name"),
             flagEmoji = request.arguments.getString("flagEmoji"),
           )
-        val language = languageService.createLanguage(dto, projectHolder.projectEntity)
+        val language = languagesFacade.createLanguage(dto)
         val result =
           mapOf(
             "id" to language.id,

@@ -52,6 +52,7 @@ class StartBatchJobController(
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val batchJobsFacade: BatchJobsFacade,
 ) {
   @PostMapping(value = ["/pre-translate-by-tm"])
   @Operation(
@@ -86,15 +87,7 @@ class StartBatchJobController(
     @Valid @RequestBody
     data: MachineTranslationRequest,
   ): BatchJobModel {
-    securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
-    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService
-      .startJob(
-        data,
-        projectHolder.projectEntity,
-        authenticationFacade.authenticatedUserEntity,
-        BatchJobType.MACHINE_TRANSLATE,
-      ).model
+    return batchJobsFacade.startMachineTranslation(data).model
   }
 
   @PostMapping(value = ["/ai-playground-translate"])

@@ -7,7 +7,6 @@ import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
-import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.BatchJobView
 import io.tolgee.security.ProjectHolder
@@ -44,6 +43,7 @@ class BatchJobManagementController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<BatchJobView>,
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
+  private val batchJobsFacade: BatchJobsFacade,
 ) {
   @GetMapping(value = ["batch-jobs"])
   @Operation(summary = "List batch operations")
@@ -103,8 +103,7 @@ class BatchJobManagementController(
   fun get(
     @PathVariable id: Long,
   ): BatchJobModel {
-    val view = batchJobService.getView(projectHolder.project.id, id)
-    checkViewPermission(view.batchJob)
+    val view = batchJobsFacade.getView(id)
     return batchJobModelAssembler.toModel(view)
   }
 
@@ -118,13 +117,6 @@ class BatchJobManagementController(
   ) {
     checkCancelPermission(batchJobService.getJobDto(projectHolder.project.id, id))
     batchJobCancellationManager.cancel(id)
-  }
-
-  private fun checkViewPermission(job: BatchJob) {
-    if (authenticationFacade.isAuthorSelfAccess(job.author?.id)) {
-      return
-    }
-    securityService.checkProjectPermission(projectHolder.project.id, Scope.BATCH_JOBS_VIEW)
   }
 
   private fun checkCancelPermission(job: BatchJobDto) {

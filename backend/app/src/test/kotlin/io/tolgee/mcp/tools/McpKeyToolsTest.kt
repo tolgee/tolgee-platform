@@ -49,6 +49,71 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `update_key refuses a blank new name`() {
+    keyService.create(data.testData.projectBuilder.self, "old.key", null)
+
+    assertToolFails(
+      client,
+      "update_key",
+      mapOf(
+        "projectId" to data.projectId,
+        "keyName" to "old.key",
+        "newName" to " ",
+      ),
+      expectedError = "must not be blank",
+    )
+  }
+
+  @Test
+  fun `update_key refuses a new namespace when the project does not use namespaces`() {
+    keyService.create(data.testData.projectBuilder.self, "ns.key", null)
+
+    assertToolFails(
+      client,
+      "update_key",
+      mapOf(
+        "projectId" to data.projectId,
+        "keyName" to "ns.key",
+        "newName" to "ns.key",
+        "newNamespace" to "ns",
+      ),
+      expectedError = "ValidationException",
+    )
+  }
+
+  @Test
+  fun `update_key treats a blank new namespace as no namespace`() {
+    keyService.create(data.testData.projectBuilder.self, "blank.ns.key", null)
+
+    val json =
+      callToolAndGetJson(
+        client,
+        "update_key",
+        mapOf(
+          "projectId" to data.projectId,
+          "keyName" to "blank.ns.key",
+          "newName" to "blank.ns.key",
+          "newNamespace" to "",
+        ),
+      )
+
+    assertThat(json["namespace"].isNull).isTrue()
+  }
+
+  @Test
+  fun `create_keys refuses a blank key name`() {
+    assertToolFails(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to " ")),
+      ),
+      expectedError = "must not be blank",
+    )
+  }
+
+  @Test
   fun `create_keys creates keys`() {
     val json =
       callToolAndGetJson(
