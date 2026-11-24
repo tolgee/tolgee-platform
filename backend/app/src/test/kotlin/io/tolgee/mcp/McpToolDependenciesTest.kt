@@ -23,11 +23,8 @@ class McpToolDependenciesTest : AbstractSpringTest() {
       PlatformTransactionManager::class.java,
     )
 
-  /** Tools written before the facade pattern. Shrinks with each migrated controller; never grows. */
-  private val notMigratedYet =
-    setOf(
-      "SuggestionMcpTools",
-    )
+  /** Tools written before the facade pattern were listed here; it must stay empty. */
+  private val notMigratedYet = setOf<String>()
 
   @Test
   fun `MCP tools depend only on facades and infrastructure`() {
