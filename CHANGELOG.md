@@ -1,3 +1,10 @@
+## [3.246.3](https://github.com/tolgee/tolgee-platform/compare/v3.246.2...v3.246.3) (2026-11-25)
+
+
+### Bug Fixes
+
+* bump PostgreSQL JDBC driver to 42.7.15 to patch Snyk-reported vulnerabilities ([#4089](https://github.com/tolgee/tolgee-platform/issues/4089)) ([78d1012](https://github.com/tolgee/tolgee-platform/commit/78d10129cdb8f4e32dcd9c96b9b8083925583a12))
+
 ## [3.246.2](https://github.com/tolgee/tolgee-platform/compare/v3.246.1...v3.246.2) (2026-11-25)
 
 
