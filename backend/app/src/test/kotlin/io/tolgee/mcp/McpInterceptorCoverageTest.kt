@@ -42,6 +42,14 @@ class McpInterceptorCoverageTest : AbstractSpringTest() {
       AdminAccessInterceptor::class.java,
     )
 
+  /** For modules outside this compile classpath; the billing build runs this test with its beans loaded. */
+  private val notApplicableToMcpByName =
+    setOf(
+      // Marketing attribution read from the tg_sid browser cookie after a response;
+      // MCP clients authenticate with tokens and send no cookies, and it checks nothing.
+      "io.tolgee.billing.component.marketing.AcquisitionLinkInterceptor",
+    )
+
   @Test
   fun `every HandlerInterceptor is mirrored in McpRequestContext or known not to apply`() {
     val actual =
@@ -49,6 +57,7 @@ class McpInterceptorCoverageTest : AbstractSpringTest() {
         .getBeansOfType(HandlerInterceptor::class.java)
         .values
         .map { it.javaClass as Class<*> }
+        .filterNot { it.name in notApplicableToMcpByName }
         .toSet()
     val uncovered = actual - mirroredInMcpRequestContext - notApplicableToMcp
     assertThat(uncovered)
