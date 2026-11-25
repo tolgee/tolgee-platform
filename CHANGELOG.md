@@ -1,3 +1,10 @@
+## [3.246.4](https://github.com/tolgee/tolgee-platform/compare/v3.246.3...v3.246.4) (2026-11-25)
+
+
+### Bug Fixes
+
+* allow billing's AcquisitionLinkInterceptor in the MCP coverage guard ([#4090](https://github.com/tolgee/tolgee-platform/issues/4090)) ([340595e](https://github.com/tolgee/tolgee-platform/commit/340595e2729f325089e3f63b1cabb8068e5f872d)), closes [#4086](https://github.com/tolgee/tolgee-platform/issues/4086)
+
 ## [3.246.3](https://github.com/tolgee/tolgee-platform/compare/v3.246.2...v3.246.3) (2026-11-25)
 
 
