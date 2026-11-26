@@ -3641,6 +3641,7 @@
   "translations_cell_cancel": "キャンセル",
   "translations_cell_change_state": "状態を変更",
   "translations_cell_close": "閉じる",
+  "translations_cell_copy": "クリップボードにコピー",
   "translations_cell_edit": "編集",
   "translations_cell_insert_base": "ベーステキストを挿入",
   "translations_cell_outdated": "古い（ベース翻訳が変更されました）",

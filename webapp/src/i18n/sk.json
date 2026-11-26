@@ -620,6 +620,7 @@
   "translation_filters_in_open_task": "V otvorenej úlohe",
   "translation_filters_task_status_any": "Akýkoľvek",
   "translation_filters_task_type_status": "{taskType}: {status}",
+  "translations_cell_copy": "Kopírovať do schránky",
   "translations_filter_non_plural_keys": "Nemnožné kľúče",
   "translations_filter_plural_keys": "Množné kľúče",
   "translations_filters_heading_ai_review": "AI kontrola",

@@ -1,3 +1,12 @@
+## [3.246.5](https://github.com/tolgee/tolgee-platform/compare/v3.246.4...v3.246.5) (2026-11-26)
+
+
+### Bug Fixes
+
+* pin DNS for content storage S3 client ([#4049](https://github.com/tolgee/tolgee-platform/issues/4049)) ([9274985](https://github.com/tolgee/tolgee-platform/commit/9274985865b63a3d0a6cd0f4ffc30e15e2bc07e3))
+* treat empty export filter lists as no filter ([#4079](https://github.com/tolgee/tolgee-platform/issues/4079)) ([8a58959](https://github.com/tolgee/tolgee-platform/commit/8a5895965aaa521cf01c9e47c377c1d689dbcee4))
+* use Taiwanese flag for Traditional Chinese ([#4093](https://github.com/tolgee/tolgee-platform/issues/4093)) ([e2bf080](https://github.com/tolgee/tolgee-platform/commit/e2bf0805ba1b73c808ea04c7e1841580439bc0ec)), closes [tolgee/language-util#3](https://github.com/tolgee/language-util/issues/3)
+
 ## [3.246.4](https://github.com/tolgee/tolgee-platform/compare/v3.246.3...v3.246.4) (2026-11-25)
 
 

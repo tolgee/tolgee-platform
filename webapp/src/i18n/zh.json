@@ -3629,6 +3629,7 @@
   "translations_cell_cancel": "取消",
   "translations_cell_change_state": "更改状态",
   "translations_cell_close": "关闭",
+  "translations_cell_copy": "复制到剪贴板",
   "translations_cell_edit": "编辑",
   "translations_cell_insert_base": "插入基础文本",
   "translations_cell_outdated": "过时（基础翻译已更改）",
