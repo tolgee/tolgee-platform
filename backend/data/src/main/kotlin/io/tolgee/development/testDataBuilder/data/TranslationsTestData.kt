@@ -631,13 +631,19 @@ class TranslationsTestData {
       }.self
   }
 
-  fun addFailedProductBatchJob(keySucceeded: Boolean = false): BatchJob {
+  fun addFailedProductBatchJob(
+    keySucceeded: Boolean = false,
+    alsoMaterialized: Boolean = false,
+  ): BatchJob {
     return projectBuilder
       .addBatchJob {
         status = BatchJobStatus.FAILED
       }.build {
         this.targetProductProvider = {
           TranslationTargetProductSpec(listOf(aKey.id), listOf(germanLanguage.id))
+        }
+        if (alsoMaterialized) {
+          this.targetProvider = { listOf(mapOf("keyId" to aKey.id, "languageId" to germanLanguage.id)) }
         }
         addChunkExecution {
           this.retry = false

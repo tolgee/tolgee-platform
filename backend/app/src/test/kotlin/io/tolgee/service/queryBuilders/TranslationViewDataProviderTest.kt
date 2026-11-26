@@ -160,6 +160,19 @@ class TranslationViewDataProviderTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `returns failed keys of a job stored both as product and as materialized target`() {
+    val testData = TranslationsTestData()
+    val job = testData.addFailedProductBatchJob(alsoMaterialized = true)
+    testDataService.saveTestData(testData.root)
+
+    try {
+      getKeyNamesFailedInJob(testData, job.id).assert.containsExactly("A key")
+    } finally {
+      testDataService.cleanTestData(testData.root)
+    }
+  }
+
   private fun getKeyNamesFailedInJob(
     testData: TranslationsTestData,
     jobId: Long,

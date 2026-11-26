@@ -329,7 +329,7 @@ class TranslationViewDataProvider(
                 FROM (
                          SELECT jsonb_array_elements(bj.target) AS target
                          FROM tolgee_batch_job bj
-                         WHERE bj.id = :batchJobId
+                         WHERE bj.id = :batchJobId AND bj.target_product IS NULL
                          UNION ALL
                          SELECT jsonb_build_object('keyId', key_id, 'languageId', language_id) AS target
                          FROM tolgee_batch_job bj,
