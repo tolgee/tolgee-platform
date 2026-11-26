@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.tolgee.ActivityTestUtil
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.data.PropertyModification
@@ -12,6 +13,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -29,6 +31,9 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  private lateinit var activityTestUtil: ActivityTestUtil
 
   @BeforeEach
   fun setup() {
@@ -140,7 +145,7 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val activity = storedWebhookActivity(ActivityType.WEBHOOK_CONFIG_UPDATE)
     activity.modifications.keys.assert
       .containsExactly("enabled")
-    activity.describingData["url"].assert.isEqualTo(SEEDED_HOST)
+    activity.describingData!!["url"].assert.isEqualTo(SEEDED_HOST)
   }
 
   @Test
@@ -156,28 +161,10 @@ class WebhookConfigControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPut("webhook-configs/${testData.webhookConfig.self.id}", body).andIsOk
   }
 
-  private class StoredActivity(
-    val modifications: Map<String, PropertyModification>,
-    val describingData: Map<String, Any?>,
-  )
-
-  @Suppress("UNCHECKED_CAST")
-  private fun storedWebhookActivity(type: ActivityType): StoredActivity {
-    val row =
-      entityManager
-        .createQuery(
-          """
-          select ame.modifications, ame.describingData from ActivityRevision ar
-          join ar.modifiedEntities ame
-          where ar.type = :type and ar.projectId = :projectId and ame.entityClass = 'WebhookConfig'
-          """,
-        ).setParameter("type", type)
-        .setParameter("projectId", project.id)
-        .singleResult as Array<Any?>
-    return StoredActivity(
-      modifications = row[0] as Map<String, PropertyModification>,
-      describingData = row[1] as Map<String, Any?>,
-    )
+  private fun storedWebhookActivity(type: ActivityType): ActivityModifiedEntity {
+    val revision = activityTestUtil.getLastRevision()!!
+    revision.type.assert.isEqualTo(type)
+    return revision.modifiedEntities.single { it.entityClass == "WebhookConfig" }
   }
 
   @Test
