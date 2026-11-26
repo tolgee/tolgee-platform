@@ -41,16 +41,20 @@ class InconsistentPlaceholdersCheck : QaCheck {
     val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
     val textCounts = textArgs.groupingBy { it.name }.eachCount()
 
-    val missingArgNames = findMissingArgNames(baseCounts, textCounts)
-    val extraArgs = findExtraArgs(textArgs, baseCounts, textCounts)
+    val allMissingArgNames = findMissingArgNames(baseCounts, textCounts)
+    val missingArgNames = allMissingArgNames.filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }
+    val extraArgs =
+      findExtraArgs(textArgs, baseCounts, textCounts).filterNot { isNumberAddedToPluralVariant(it, pluralVariant) }
 
-    // Special case - when we can rename placeholder to correct it
-    tryRenameArg(baseArgs, missingArgNames, extraArgs)?.let {
+    // Special case - when we can rename placeholder to correct it. A tolerated missing number
+    // is still the rename target when the translation uses an unknown argument in its place.
+    val rename =
+      tryRenameArg(baseArgs, missingArgNames, extraArgs) ?: tryRenameArg(baseArgs, allMissingArgNames, extraArgs)
+    rename?.let {
       return listOf(it)
     }
 
-    return addMissingArgs(missingArgNames.filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }) +
-      removeExtraArgs(extraArgs.filterNot { isNumberAddedToPluralVariant(it, pluralVariant) })
+    return addMissingArgs(missingArgNames) + removeExtraArgs(extraArgs)
   }
 
   private fun comparableArgs(
@@ -130,17 +134,17 @@ class InconsistentPlaceholdersCheck : QaCheck {
     extraArgs: List<ArgInfo>,
   ): QaCheckResult? {
     val expectedName = missingArgNames.singleOrNull() ?: return null
-    val currentName = extraArgs.singleOrNull() ?: return null
+    val extraArg = extraArgs.singleOrNull() ?: return null
     val source = baseArgs.firstOrNull { it.name == expectedName }?.sourceText ?: return null
-    if (currentName.positionStart == null || currentName.positionEnd == null) return null
+    if (extraArg.positionStart == null || extraArg.positionEnd == null) return null
 
     return QaCheckResult(
       type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
       message = QaIssueMessage.QA_PLACEHOLDERS_REPLACE,
       replacement = source,
-      positionStart = currentName.positionStart,
-      positionEnd = currentName.positionEnd,
-      params = mapOf("placeholder" to currentName.name, "expected" to expectedName),
+      positionStart = extraArg.positionStart,
+      positionEnd = extraArg.positionEnd,
+      params = mapOf("placeholder" to extraArg.name, "expected" to expectedName),
     )
   }
 

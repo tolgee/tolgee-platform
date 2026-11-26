@@ -241,4 +241,20 @@ class PunctuationMismatchCheckTest {
       position(5, 5)
     }
   }
+
+  @Test
+  fun `ignores an invisible direction mark after the base punctuation`() {
+    check.check(params("Are you sure?", "هل أنت متأكد؟\u200F", baseLanguageTag = "ar")).assertNoIssues()
+    check.check(params("Are you sure", "هل أنت متأكد؟\u200F", baseLanguageTag = "ar")).assertSingleIssue {
+      message(QaIssueMessage.QA_PUNCTUATION_ADD)
+      replacement("?")
+    }
+  }
+
+  @Test
+  fun `ignores other invisible format characters after the punctuation`() {
+    listOf("\u061C", "\u202C", "\u2069", "\u200B", "\uFEFF").forEach { mark ->
+      check.check(params("نص.$mark", "Text.", languageTag = "ar")).assertNoIssues()
+    }
+  }
 }

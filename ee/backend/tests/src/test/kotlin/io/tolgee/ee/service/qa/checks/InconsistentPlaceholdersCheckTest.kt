@@ -721,4 +721,63 @@ class InconsistentPlaceholdersCheckTest {
         }
       }
   }
+
+  @Test
+  fun `does not offer to replace an added number with a missing placeholder`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# soubor} other {# souboru od {author}}}",
+          base = "{count, plural, one {1 file from {author}} other {# files from {author}}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# soubor", "other" to "# souboru od {author}"),
+          baseTextVariants = mapOf("one" to "1 file from {author}", "other" to "# files from {author}"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 38),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "author")
+        pluralVariant("one")
+      }
+  }
+
+  @Test
+  fun `offers a rename next to a spelled-out number`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {jedna polozka od {autor}} other {# polozek od {author}}}",
+          base = "{count, plural, one {# item by {author}} other {# items by {author}}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "jedna polozka od {autor}", "other" to "# polozek od {author}"),
+          baseTextVariants = mapOf("one" to "# item by {author}", "other" to "# items by {author}"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 54),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+        params("placeholder" to "autor", "expected" to "author")
+        replacement("{author}")
+        pluralVariant("one")
+      }
+  }
+
+  @Test
+  fun `offers a rename of a typo next to an added number`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {{nme} hat # Element} other {{name} hat # Elemente}}",
+          base = "{count, plural, one {{name} has one item} other {{name} has # items}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "{nme} hat # Element", "other" to "{name} hat # Elemente"),
+          baseTextVariants = mapOf("one" to "{name} has one item", "other" to "{name} has # items"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 49),
+          languageTag = "de",
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+        params("placeholder" to "nme", "expected" to "name")
+        pluralVariant("one")
+      }
+  }
 }

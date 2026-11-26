@@ -29,9 +29,9 @@ class PunctuationMismatchCheck : QaCheck {
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
-    val textTrimmed = trimEnd(text)
+    val textTrimmed = withoutTrailingInvisibleChars(text)
 
-    val basePunct = trailingPunctuation(trimEnd(base), baseLanguageTag)
+    val basePunct = trailingPunctuation(withoutTrailingInvisibleChars(base), baseLanguageTag)
     val textPunct = trailingPunctuation(textTrimmed, languageTag)
 
     val expectedAscii = basePunct?.let { toAsciiPunctuation(it, baseLanguageTag) }
@@ -130,10 +130,8 @@ class PunctuationMismatchCheck : QaCheck {
       )
 
     /** Right-to-left text often ends with an invisible direction mark after the punctuation. */
-    private val DIRECTION_MARKS = setOf('\u200E', '\u200F')
-
-    private fun trimEnd(text: String): String {
-      return text.trimEnd { it.isWhitespace() || it in DIRECTION_MARKS }
+    private fun withoutTrailingInvisibleChars(text: String): String {
+      return text.trimEnd { it.isWhitespace() || it.category == CharCategory.FORMAT }
     }
 
     fun trailingPunctuation(
