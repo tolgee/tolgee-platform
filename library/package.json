@@ -34,7 +34,7 @@
     "@storybook/addon-docs": "^10.1.5",
     "@storybook/addon-themes": "^10.1.5",
     "@storybook/react-vite": "^10.1.5",
-    "@tginternal/language-util": "^1.1.1",
+    "@tginternal/language-util": "^1.1.2",
     "@tolgee/react": "^6.2.7",
     "@tolgee/storybook-addon": "file:../storybook-tolgee-addon",
     "@types/node": "^20.16.0",
