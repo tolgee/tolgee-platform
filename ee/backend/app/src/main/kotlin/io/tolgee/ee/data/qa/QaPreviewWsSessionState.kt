@@ -14,6 +14,7 @@ data class QaPreviewWsSessionState(
   val enabledCheckTypes: List<QaCheckType>,
   val isPlural: Boolean,
   val baseVariants: Map<String, String>?,
+  val basePluralArgName: String?,
   val maxCharLimit: Int?,
   val icuPlaceholders: Boolean,
   val organizationOwnerId: Long,

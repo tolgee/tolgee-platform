@@ -5,10 +5,6 @@ import io.tolgee.ee.service.qa.QaCheckResult
 /**
  * Filters out results that overlap with placeholders, HTML tags, or URLs.
  * These are usually false positives, plus dedicated checks already cover those elements.
- *
- * Used by text-scanning checks (Spelling, Grammar, RepeatedWords) that operate on raw
- * translation text and would otherwise misclassify tag names, ICU placeholder identifiers,
- * or URL fragments as content.
  */
 fun filterResultsInBlockedRanges(
   results: List<QaCheckResult>,
@@ -43,6 +39,13 @@ internal fun QaCheckResult.overlaps(
   val start = positionStart ?: return false
   val end = positionEnd ?: return false
   return start < rangeEnd && end > rangeStart
+}
+
+internal fun isInBlockedRange(
+  text: String,
+  index: Int,
+): Boolean {
+  return buildBlockedRanges(text).any { index >= it.start && index < it.end }
 }
 
 private fun buildBlockedRanges(text: String): List<BlockedRange> {
