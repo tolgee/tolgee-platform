@@ -20,6 +20,7 @@ export const CommunityTopContributor = ({ contributor }: Props) => {
     method: 'get',
     path: { projectId: project.id },
     query: { page: 0, size: 1000, sort: ['tag'] },
+    options: { staleTime: 60_000 },
   });
 
   return (
