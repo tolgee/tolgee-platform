@@ -57,7 +57,12 @@ describe('Branch scope - import & export', () => {
     const branchName = 'feature-branch';
 
     visitImport(projectId, branchName);
-    cy.gcy('import-file-input').attachFile('import/simple.json');
+    cy.gcy('import-file-input').selectFile(
+      'cypress/fixtures/import/simple.json',
+      {
+        force: true,
+      }
+    );
     cy.gcy('import-result-row').should('exist');
     cy.gcy('import-row-language-select-form-control').click();
     cy.get('[role="listbox"]').contains('English').click();
