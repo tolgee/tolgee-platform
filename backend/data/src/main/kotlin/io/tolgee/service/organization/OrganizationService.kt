@@ -322,8 +322,8 @@ class OrganizationService(
   @Transactional
   @Caching(
     evict = [
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
     ],
   )
   fun removeAvatar(organization: Organization) {
@@ -333,8 +333,8 @@ class OrganizationService(
   @Transactional
   @Caching(
     evict = [
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
     ],
   )
   fun setAvatar(
@@ -374,8 +374,8 @@ class OrganizationService(
 
   @Caching(
     evict = [
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.id"),
-      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "#organization.slug"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'id', #organization.id}"),
+      CacheEvict(cacheNames = [Caches.ORGANIZATIONS], key = "{'slug', #organization.slug}"),
     ],
   )
   fun save(organization: Organization) {
