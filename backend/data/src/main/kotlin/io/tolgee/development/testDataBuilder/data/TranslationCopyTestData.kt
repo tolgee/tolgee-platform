@@ -17,6 +17,17 @@ class TranslationCopyTestData :
           text = "Hello {name}, you have <b>new</b> messages"
         }
       }
+
+      addKey {
+        name = "unread-count"
+        isPlural = true
+        pluralArgName = "count"
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "{count, plural, one {# unread message} other {# unread messages}}"
+        }
+      }
     }
   }
 }

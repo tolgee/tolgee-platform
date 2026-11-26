@@ -8,12 +8,25 @@ import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationVariantVisual } from 'tg.views/projects/translations/translationVisual/TranslationVariantVisual';
+import { CopyTranslationButton } from 'tg.views/projects/translations/cell/CopyTranslationButton';
+import { CELL_SHOW_ON_HOVER } from 'tg.views/projects/translations/cell/styles';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
 const StyledDisabled = styled(DirectionLocaleWrapper)`
   color: ${({ theme }) => theme.palette.text.disabled};
   cursor: default;
+`;
+
+const StyledCopyableVariant = styled('div')`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  align-items: start;
+  gap: 8px;
+
+  & > button {
+    margin-top: -6px;
+  }
 `;
 
 type Props = {
@@ -28,6 +41,8 @@ type Props = {
   extraPadding?: boolean;
   qaIssues?: QaIssueModel[] | null;
   translationId?: number;
+  variantsCopyable?: boolean;
+  active?: boolean;
 };
 
 export const TranslationVisual = ({
@@ -42,6 +57,8 @@ export const TranslationVisual = ({
   extraPadding,
   qaIssues,
   translationId,
+  variantsCopyable,
+  active,
 }: Props) => {
   const project = useProject();
   const value = useMemo(() => {
@@ -69,21 +86,38 @@ export const TranslationVisual = ({
       value={value}
       locale={locale}
       extraPadding={extraPadding}
-      render={({ content, exampleValue, variant }) => (
-        <TranslationVariantVisual
-          value={value}
-          variant={variant}
-          qaIssues={openedQaIssues}
-          maxLines={maxLines}
-          width={width}
-          content={content}
-          exampleValue={exampleValue}
-          locale={locale}
-          targetLocale={targetLocale}
-          showHighlights={showHighlights}
-          translationId={translationId}
-        />
-      )}
+      render={({ content, exampleValue, variant }) => {
+        const variantVisual = (
+          <TranslationVariantVisual
+            value={value}
+            variant={variant}
+            qaIssues={openedQaIssues}
+            maxLines={maxLines}
+            width={width}
+            content={content}
+            exampleValue={exampleValue}
+            locale={locale}
+            targetLocale={targetLocale}
+            showHighlights={showHighlights}
+            translationId={translationId}
+          />
+        );
+        if (!variantsCopyable || !variant) {
+          return variantVisual;
+        }
+        return (
+          <StyledCopyableVariant>
+            {variantVisual}
+            {active && content && (
+              <CopyTranslationButton
+                text={content}
+                variant={variant}
+                className={CELL_SHOW_ON_HOVER}
+              />
+            )}
+          </StyledCopyableVariant>
+        );
+      }}
     />
   );
 };

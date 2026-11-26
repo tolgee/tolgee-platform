@@ -7,11 +7,17 @@ import { ControlsButton } from 'tg.views/projects/translations/cell/ControlsButt
 
 type Props = {
   text: string;
+  variant?: string;
   style?: React.CSSProperties;
   className?: string;
 };
 
-export const CopyTranslationButton = ({ text, style, className }: Props) => {
+export const CopyTranslationButton = ({
+  text,
+  variant,
+  style,
+  className,
+}: Props) => {
   const { t } = useTranslate();
   const { copied, copyText } = useCopyWithFeedback();
 
@@ -29,6 +35,7 @@ export const CopyTranslationButton = ({ text, style, className }: Props) => {
       onClick={handleCopy}
       data-cy="translations-cell-copy-button"
       data-cy-copied={copied}
+      data-cy-variant={variant}
       className={className}
       tooltip={
         copied

@@ -170,6 +170,17 @@ export function getTranslationCopyButton(key: string, languageTag: string) {
   );
 }
 
+export function getTranslationVariantCopyButton(
+  key: string,
+  languageTag: string,
+  variant: string
+) {
+  return getTranslationCell(key, languageTag).findDcyAdvanced({
+    value: 'translations-cell-copy-button',
+    variant,
+  });
+}
+
 export function editTranslation({
   key,
   languageTag,

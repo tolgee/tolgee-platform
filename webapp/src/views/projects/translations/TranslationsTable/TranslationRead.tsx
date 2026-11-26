@@ -122,6 +122,8 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           isPlural={keyData.keyIsPlural}
           qaIssues={languageQaEnabled ? translation?.qaIssues : undefined}
           translationId={translation?.id}
+          variantsCopyable={!aiPlaygroundEnabled}
+          active={active}
         />
         {Boolean(translation?.totalSuggestionCount) && (
           <SuggestionsFirst
@@ -186,7 +188,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           stateChangeEnabled={canChangeState}
           editEnabled={controlsEnabled}
           state={state}
-          text={translation?.text}
+          text={keyData.keyIsPlural ? undefined : translation?.text}
           onStateChange={handleStateChange}
           active={active}
           lastFocusable={lastFocusable}
