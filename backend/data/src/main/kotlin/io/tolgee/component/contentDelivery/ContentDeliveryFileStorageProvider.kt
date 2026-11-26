@@ -27,7 +27,10 @@ class ContentDeliveryFileStorageProvider(
       }
 
       is S3Config -> {
-        s3FileStorageFactory.create(config)
+        s3FileStorageFactory.createSsrfSafe(
+          config,
+          allowLocalAddresses = tolgeeProperties.contentDelivery.storage.allowLocalAddresses,
+        )
       }
 
       else -> {
@@ -36,9 +39,12 @@ class ContentDeliveryFileStorageProvider(
     }
   }
 
-  val defaultStorage by lazy {
-    val props = getDefaultStorageProperties()
-    getStorage(props)
+  val defaultStorage: FileStorage by lazy {
+    when (val props = getDefaultStorageProperties()) {
+      is S3Config -> s3FileStorageFactory.create(props)
+      is AzureBlobConfig -> azureFileStorageFactory.create(props)
+      else -> throw Exception("Unknown storage config")
+    }
   }
 
   fun getDefaultStorageProperties(): StorageConfig {

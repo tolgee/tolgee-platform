@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
 import java.net.InetSocketAddress
 
 class S3FileStorageFactoryTest {
@@ -52,6 +53,6 @@ class S3FileStorageFactoryTest {
         signingRegion = "us-east-1",
         publicRead = publicRead,
       )
-    S3FileStorageFactory().create(properties).storeFile("en.json", "{}".toByteArray())
+    S3FileStorageFactory(mock()).create(properties).storeFile("en.json", "{}".toByteArray())
   }
 }

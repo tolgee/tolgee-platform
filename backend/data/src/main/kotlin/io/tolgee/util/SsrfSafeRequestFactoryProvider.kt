@@ -37,6 +37,7 @@ import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import java.net.InetAddress
+import java.net.ProxySelector
 import java.net.UnknownHostException
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
@@ -44,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Builds a [ClientHttpRequestFactory] that pins DNS, per [UrlSecurity.resolveAndValidateUrl], for every request an
  * SSRF-sensitive [RestTemplate] makes to a user-configured URL (webhooks, custom LLM endpoints, SSO token endpoints).
+ * Project content storages' S3 clients pin through the same [validatingResolver] and [proxyHopOnlyRoutePlanner].
  *
  * The pin is defeated by an egress proxy, which resolves the target host itself — the proxy, not this class, is then
  * the control on where a request may reach. Tolgee honours the JVM's proxy system properties here anyway: an
@@ -88,7 +90,7 @@ class SsrfSafeRequestFactoryProvider(
     return HttpComponentsClientHttpRequestFactory(client)
   }
 
-  private fun validatingResolver(allowLocalAddresses: Boolean): DnsResolver =
+  internal fun validatingResolver(allowLocalAddresses: Boolean): DnsResolver =
     object : DnsResolver {
       override fun resolve(host: String): Array<InetAddress> =
         try {
@@ -124,16 +126,22 @@ class SsrfSafeRequestFactoryProvider(
      * private one, which the address rules would refuse, taking every webhook, SSO and LLM call down with it.
      *
      * Only the proxy hop is exempt. The resolver cannot tell that hop from a direct request whose target merely
-     * carries the same name, which `http.nonProxyHosts` or an https URL under an http-only proxy would send straight
-     * out; [ProxyHopOnlyRoutePlanner] refuses those before the resolver sees them.
+     * carries the same name, which `http.nonProxyHosts` or (unless the planner's proxy selector covers it) an https URL
+     * under an http-only proxy would send straight out; [ProxyHopOnlyRoutePlanner] refuses those before the resolver
+     * sees them.
      */
     private fun isOperatorProxy(host: String): Boolean {
       if (host.isBlank()) return false
       return PROXY_HOST_PROPERTIES.any { host.equals(System.getProperty(it)?.trim(), ignoreCase = true) }
     }
 
-    private object ProxyHopOnlyRoutePlanner : HttpRoutePlanner {
-      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, null)
+    internal fun proxyHopOnlyRoutePlanner(proxySelector: ProxySelector?): HttpRoutePlanner =
+      ProxyHopOnlyRoutePlanner(proxySelector)
+
+    private class ProxyHopOnlyRoutePlanner(
+      proxySelector: ProxySelector?,
+    ) : HttpRoutePlanner {
+      private val system = SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, proxySelector)
 
       override fun determineRoute(
         target: HttpHost,
@@ -192,7 +200,7 @@ class SsrfSafeRequestFactoryProvider(
           .disableAutomaticRetries()
           .setDefaultRequestConfig(requestConfig)
       if (!followRedirects) builder.disableRedirectHandling()
-      if (useSystemProperties) builder.useSystemProperties().setRoutePlanner(ProxyHopOnlyRoutePlanner)
+      if (useSystemProperties) builder.useSystemProperties().setRoutePlanner(ProxyHopOnlyRoutePlanner(null))
       return builder
     }
 
