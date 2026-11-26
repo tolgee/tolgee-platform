@@ -6,11 +6,14 @@ import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
+import io.tolgee.service.SlackConfigCleanupService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.language.LanguageService
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 
+@Primary
 @Service
 class SlackConfigManageService(
   private val automationService: AutomationService,
@@ -19,7 +22,20 @@ class SlackConfigManageService(
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
   private val languageService: LanguageService,
   private val slackErrorProvider: SlackErrorProvider,
-) {
+) : SlackConfigCleanupService {
+  @Transactional
+  override fun deleteAllOfOrganizationWorkspaces(
+    projectId: Long,
+    organizationId: Long,
+  ) {
+    slackConfigRepository
+      .findAllByProjectIdAndWorkspaceOrganizationId(projectId, organizationId)
+      .forEach {
+        automationService.deleteForSlackIntegration(it)
+        slackConfigRepository.delete(it)
+      }
+  }
+
   @Transactional
   fun delete(
     projectId: Long,

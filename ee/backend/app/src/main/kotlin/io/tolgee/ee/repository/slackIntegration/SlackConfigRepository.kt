@@ -24,4 +24,15 @@ interface SlackConfigRepository : JpaRepository<SlackConfig, Long> {
   ): SlackConfig?
 
   fun getAllByChannelId(channelId: String): List<SlackConfig>
+
+  @Query(
+    """
+    from SlackConfig sc
+    where sc.project.id = :projectId and sc.organizationSlackWorkspace.organization.id = :organizationId
+    """,
+  )
+  fun findAllByProjectIdAndWorkspaceOrganizationId(
+    projectId: Long,
+    organizationId: Long,
+  ): List<SlackConfig>
 }

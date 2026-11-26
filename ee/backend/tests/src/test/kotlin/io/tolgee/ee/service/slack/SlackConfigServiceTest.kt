@@ -5,8 +5,6 @@ import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.slackintegration.SlackConfigDto
 import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
 import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
-import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
-import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions
@@ -30,6 +28,7 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   fun setup() {
     testData = SlackTestData()
     testData.addLanguageOnlySlackConfigWithChannelEvents()
+    testData.addProjectTransferSetup()
     testDataService.saveTestData(testData.root)
   }
 
@@ -105,40 +104,18 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   @Test
   fun `transferring a project removes subscriptions of the workspaces of the organization it leaves`() {
     val projectId = testData.projectBuilder.self.id
-    val otherOrganization =
-      dbPopulator.createOrganizationIfNotExist("slack-transfer-target", userAccount = testData.user)
-    executeInNewTransaction {
-      entityManager
-        .createQuery("update OrganizationSlackWorkspace w set w.organization = :organization where w.id = :id")
-        .setParameter("organization", otherOrganization)
-        .setParameter("id", testData.slackWorkspace2.id)
-        .executeUpdate()
-      bindToWorkspace(testData.slackConfig, testData.slackWorkspace)
-      bindToWorkspace(testData.languageOnlySlackConfig, testData.slackWorkspace2)
-    }
 
-    projectService.transferToOrganization(projectId, otherOrganization.id)
+    projectService.transferToOrganization(projectId, testData.otherOrganization.id)
 
     executeInNewTransaction {
       slackConfigReadService.find(projectId, "testChannel").assert.isNull()
       slackConfigReadService.find(projectId, "languageOnlyChannel").assert.isNotNull()
       entityManager
-        .createQuery("select count(a) from Automation a where a.project.id = :projectId")
+        .createQuery("select a.id from Automation a where a.project.id = :projectId")
         .setParameter("projectId", projectId)
-        .singleResult
+        .resultList
         .assert
-        .isEqualTo(0L)
+        .containsExactly(testData.languageOnlySlackConfigAutomation.id)
     }
-  }
-
-  private fun bindToWorkspace(
-    config: SlackConfig,
-    workspace: OrganizationSlackWorkspace,
-  ) {
-    entityManager
-      .createQuery("update SlackConfig s set s.organizationSlackWorkspace = :workspace where s.id = :id")
-      .setParameter("workspace", workspace)
-      .setParameter("id", config.id)
-      .executeUpdate()
   }
 }

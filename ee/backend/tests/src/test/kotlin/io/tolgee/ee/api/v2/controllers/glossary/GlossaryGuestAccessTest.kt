@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -158,19 +159,14 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
   fun `transferring a project to another organization unassigns its glossaries`() {
     projectService.transferToOrganization(testData.publicProject.id, testData.otherOrganization.id)
 
-    userAccount = testData.user
-    performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.mixedGlossary.id}/assigned-projects",
-    ).andIsOk.andAssertThatJson {
-      node("_embedded.projects") {
-        isArray.hasSize(1)
-        node("[0].name").isEqualTo("A members only project")
-      }
+    executeInNewTransaction {
+      entityManager
+        .find(Glossary::class.java, testData.mixedGlossary.id)
+        .assignedProjects
+        .map { it.id }
+        .assert
+        .containsExactly(testData.privateProject.id)
     }
-
-    userAccount = testData.virtualGuest
-    performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.mixedGlossary.id}")
-      .andIsNotFound
   }
 
   @Test

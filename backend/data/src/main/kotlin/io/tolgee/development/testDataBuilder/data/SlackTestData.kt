@@ -47,6 +47,8 @@ class SlackTestData {
 
   lateinit var slackUserConnection: SlackUserConnection
   lateinit var languageOnlySlackConfig: SlackConfig
+  lateinit var otherOrganization: Organization
+  lateinit var languageOnlySlackConfigAutomation: Automation
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -258,6 +260,37 @@ class SlackTestData {
           userAccount = userAccountBuilder.self
           isGlobalSubscription = false
           events = mutableSetOf(SlackEventType.NEW_KEY)
+        }.self
+  }
+
+  fun addProjectTransferSetup() {
+    val otherOrganizationBuilder =
+      root.addOrganization {
+        name = "Transfer target organization"
+      }
+    otherOrganization = otherOrganizationBuilder.self
+    otherOrganizationBuilder.addSlackWorkspace {
+      author = userAccountBuilder.self
+      slackTeamId = "otherOrganizationSlackTeamId"
+      slackTeamName = "otherOrganizationSlackTeamName"
+      accessToken = "accessToken"
+      organization = otherOrganizationBuilder.self
+      languageOnlySlackConfig.organizationSlackWorkspace = this
+    }
+    slackConfig.organizationSlackWorkspace = slackWorkspace
+    languageOnlySlackConfigAutomation =
+      projectBuilder
+        .addAutomation {
+          this.triggers.add(
+            AutomationTrigger(this)
+              .also { it.type = AutomationTriggerType.ACTIVITY },
+          )
+          this.actions.add(
+            AutomationAction(this).also {
+              it.type = AutomationActionType.SLACK_SUBSCRIPTION
+              it.slackConfig = languageOnlySlackConfig
+            },
+          )
         }.self
   }
 

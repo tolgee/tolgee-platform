@@ -25,7 +25,6 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.SuggestionsMode
-import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
@@ -34,7 +33,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.GlossaryCleanupService
-import io.tolgee.service.automations.AutomationService
+import io.tolgee.service.SlackConfigCleanupService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
@@ -98,7 +97,7 @@ class ProjectService(
 
   @set:Autowired
   @set:Lazy
-  lateinit var automationService: AutomationService
+  lateinit var slackConfigCleanupService: SlackConfigCleanupService
 
   @set:Autowired
   @set:Lazy
@@ -603,30 +602,10 @@ class ProjectService(
       glossaryCleanupService.unassignFromAllProjects(project)
       translationMemoryManagementService.unassignAllSharedTmsByProject(projectId)
       translationMemoryManagementService.getProjectTm(projectId)?.organizationOwner = organization
-      deleteSlackConfigsOfOrganizationWorkspaces(projectId, project.organizationOwner.id)
+      slackConfigCleanupService.deleteAllOfOrganizationWorkspaces(projectId, project.organizationOwner.id)
     }
     project.organizationOwner = organization
     save(project)
-  }
-
-  private fun deleteSlackConfigsOfOrganizationWorkspaces(
-    projectId: Long,
-    organizationId: Long,
-  ) {
-    entityManager
-      .createQuery(
-        """
-        from SlackConfig s
-        where s.project.id = :projectId and s.organizationSlackWorkspace.organization.id = :organizationId
-        """,
-        SlackConfig::class.java,
-      ).setParameter("projectId", projectId)
-      .setParameter("organizationId", organizationId)
-      .resultList
-      .forEach {
-        automationService.deleteForSlackIntegration(it)
-        entityManager.remove(it)
-      }
   }
 
   @Transactional(readOnly = true)

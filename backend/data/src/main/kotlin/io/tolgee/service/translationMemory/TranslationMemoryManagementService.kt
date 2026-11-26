@@ -65,6 +65,11 @@ class TranslationMemoryManagementService(
       ?.translationMemory
   }
 
+  @Transactional
+  fun unassignAllSharedTmsByProject(projectId: Long) {
+    translationMemoryProjectRepository.deleteAll(getSharedTmAssignmentsForProject(projectId))
+  }
+
   fun getSharedTmAssignmentsForProject(projectId: Long): List<TranslationMemoryProject> {
     return translationMemoryProjectRepository
       .findByProjectId(projectId)
@@ -96,11 +101,6 @@ class TranslationMemoryManagementService(
         }
     if (assignments.isEmpty()) return
     translationMemoryProjectRepository.deleteAll(assignments)
-  }
-
-  @Transactional
-  fun unassignAllSharedTmsByProject(projectId: Long) {
-    translationMemoryProjectRepository.deleteAll(getSharedTmAssignmentsForProject(projectId))
   }
 
   @Transactional
