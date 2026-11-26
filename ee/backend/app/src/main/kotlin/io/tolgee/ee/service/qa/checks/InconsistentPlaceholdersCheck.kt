@@ -41,20 +41,20 @@ class InconsistentPlaceholdersCheck : QaCheck {
     val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
     val textCounts = textArgs.groupingBy { it.name }.eachCount()
 
-    val allMissingArgNames = findMissingArgNames(baseCounts, textCounts)
-    val missingArgNames = allMissingArgNames.filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }
-    val extraArgs =
+    val missingArgNames = findMissingArgNames(baseCounts, textCounts)
+    val reportedMissingArgNames = missingArgNames.filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }
+    val reportedExtraArgs =
       findExtraArgs(textArgs, baseCounts, textCounts).filterNot { isNumberAddedToPluralVariant(it, pluralVariant) }
 
-    // Special case - when we can rename placeholder to correct it. A tolerated missing number
-    // is still the rename target when the translation uses an unknown argument in its place.
+    // Special case - when we can rename placeholder to correct it
     val rename =
-      tryRenameArg(baseArgs, missingArgNames, extraArgs) ?: tryRenameArg(baseArgs, allMissingArgNames, extraArgs)
+      tryRenameArg(baseArgs, reportedMissingArgNames, reportedExtraArgs)
+        ?: tryRenameArg(baseArgs, missingArgNames, reportedExtraArgs)
     rename?.let {
       return listOf(it)
     }
 
-    return addMissingArgs(missingArgNames) + removeExtraArgs(extraArgs)
+    return addMissingArgs(reportedMissingArgNames) + removeExtraArgs(reportedExtraArgs)
   }
 
   private fun comparableArgs(

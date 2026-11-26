@@ -129,7 +129,6 @@ class PunctuationMismatchCheck : QaCheck {
         GREEK to mapOf('?' to ';'),
       )
 
-    /** Right-to-left text often ends with an invisible direction mark after the punctuation. */
     private fun withoutTrailingInvisibleChars(text: String): String {
       return text.trimEnd { it.isWhitespace() || it.category == CharCategory.FORMAT }
     }
