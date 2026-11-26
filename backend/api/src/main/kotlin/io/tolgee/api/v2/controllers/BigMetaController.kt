@@ -13,6 +13,7 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.util.Logging
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection")
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"],
 )
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 class BigMetaController(
   private val bigMetaService: BigMetaService,
+  private val bigMetaFacade: BigMetaFacade,
   private val projectHolder: ProjectHolder,
   private val keyWithBaseTranslationModelAssembler: KeyWithBaseTranslationModelAssembler,
 ) : Logging {
@@ -44,7 +47,7 @@ class BigMetaController(
     @RequestBody @Valid
     data: BigMetaDto,
   ) {
-    bigMetaService.store(data, projectHolder.projectEntity)
+    bigMetaFacade.store(data)
   }
 
   @GetMapping("/keys/{id}/big-meta")

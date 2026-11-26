@@ -1,13 +1,9 @@
 package io.tolgee.mcp.tools
 
-import io.tolgee.constants.Feature
+import io.tolgee.api.v2.controllers.branching.BranchesFacade
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.service.branching.BranchService
-import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.data.domain.PageRequest
@@ -21,10 +17,7 @@ import tools.jackson.databind.ObjectMapper
 @ConditionalOnClass(name = ["io.tolgee.ee.service.branching.BranchServiceImpl"])
 class BranchMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val branchService: BranchService,
-  private val projectFeatureGuard: ProjectFeatureGuard,
-  private val projectHolder: ProjectHolder,
-  private val authenticationFacade: AuthenticationFacade,
+  private val branchesFacade: BranchesFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -56,13 +49,11 @@ class BranchMcpTools(
       spec = listBranchesSpec,
     ) { request ->
       mcpRequestContext.executeAs(listBranchesSpec, request.arguments.getProjectId()) {
-        projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val search = request.arguments.getString("search")
         val pageNum = request.arguments.getInt("page") ?: 0
         val page =
-          branchService.getBranches(
-            projectId = projectHolder.project.id,
-            page = PageRequest.of(pageNum, 100, Sort.by("id")),
+          branchesFacade.getBranches(
+            pageable = PageRequest.of(pageNum, 100, Sort.by("id")),
             search = search,
           )
         val result =
@@ -91,16 +82,9 @@ class BranchMcpTools(
       spec = createBranchSpec,
     ) { request ->
       mcpRequestContext.executeAs(createBranchSpec, request.arguments.getProjectId()) {
-        projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val name = request.arguments.requireString("name")
         val originBranchId = request.arguments.requireLong("originBranchId")
-        val branch =
-          branchService.createBranch(
-            projectId = projectHolder.project.id,
-            name = name,
-            originBranchId = originBranchId,
-            author = authenticationFacade.authenticatedUserEntity,
-          )
+        val branch = branchesFacade.createBranch(name, originBranchId)
         val result =
           mapOf(
             "id" to branch.id,
@@ -124,11 +108,10 @@ class BranchMcpTools(
       spec = deleteBranchSpec,
     ) { request ->
       mcpRequestContext.executeAs(deleteBranchSpec, request.arguments.getProjectId()) {
-        projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val branchName = request.arguments.requireString("branchName")
         executeInNewTransaction(transactionManager) {
-          val branch = branchService.getActiveBranch(projectHolder.project.id, branchName)
-          branchService.deleteBranch(projectHolder.project.id, branch.id)
+          val branch = branchesFacade.getActiveBranch(branchName)
+          branchesFacade.deleteBranch(branch.id)
           textResult(objectMapper.writeValueAsString(mapOf("deleted" to true)))
         }
       }

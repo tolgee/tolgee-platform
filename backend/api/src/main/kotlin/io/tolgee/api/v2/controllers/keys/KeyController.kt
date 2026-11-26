@@ -7,7 +7,6 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.constants.Feature
-import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.GetKeysRequestDto
@@ -18,8 +17,6 @@ import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyImportResolvableResultModel
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
@@ -35,7 +32,6 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.key.Key
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -47,7 +43,6 @@ import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
-import io.tolgee.util.withoutSort
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.context.ApplicationContext
@@ -84,6 +79,7 @@ import org.springframework.web.bind.annotation.RestController
 @KeysDocsTag
 class KeyController(
   private val keyService: KeyService,
+  private val keyFacade: KeyFacade,
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler,
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
@@ -120,7 +116,7 @@ class KeyController(
     checkTranslatePermission(dto)
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
-    checkNamespaceFeature(dto.namespace)
+    keyFacade.checkNamespaceFeature(dto.namespace)
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     securityService.checkBranchModify(projectHolder.projectEntity, dto.branch)
     val key = keyService.create(projectHolder.projectEntity, dto)
@@ -137,7 +133,7 @@ class KeyController(
     @PathVariable
     id: Long,
   ): KeyModel {
-    val key = keyService.getView(projectHolder.project.id, id)
+    val key = keyFacade.getView(id)
     return keyModelAssembler.toModel(key)
   }
 
@@ -154,8 +150,7 @@ class KeyController(
     @RequestParam
     branch: String? = null,
   ): PagedModel<KeyModel> {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    val data = keyService.getPaged(projectHolder.project.id, branch, pageable)
+    val data = keyFacade.getPaged(branch, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
@@ -171,13 +166,9 @@ class KeyController(
     @RequestBody @Valid
     dto: EditKeyDto,
   ): KeyModel {
-    val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
-    key.checkInProject()
-    checkNamespaceFeature(dto.namespace)
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
-    keyService.edit(id, dto)
+    val key = keyFacade.edit(id, dto)
     val view =
-      KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
+      KeyView(key.id, key.name, key.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
     return keyModelAssembler.toModel(view)
   }
 
@@ -191,13 +182,7 @@ class KeyController(
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
-    keyService.findAllWithProjectsAndMetas(ids).forEach {
-      it.run {
-        checkInProject()
-        checkBranchPermission()
-      }
-    }
-    keyService.softDeleteMultiple(ids)
+    keyFacade.delete(ids)
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
@@ -213,7 +198,7 @@ class KeyController(
     @RequestBody @Valid
     dto: ComplexEditKeyDto,
   ): KeyWithDataModel {
-    checkNamespaceFeature(dto.namespace)
+    keyFacade.checkNamespaceFeature(dto.namespace)
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
@@ -251,8 +236,7 @@ class KeyController(
     dto: ImportKeysDto,
     @RequestParam branch: String?,
   ) {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    keyService.importKeys(dto.keys, projectHolder.projectEntity, branch)
+    keyFacade.importKeys(dto, branch)
   }
 
   @PostMapping("/import-resolvable")
@@ -310,14 +294,7 @@ class KeyController(
     branch: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    languageTag?.let {
-      securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(languageTag))
-    }
-    projectHolder.projectEntity.baseLanguage?.let {
-      securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
-    }
-    val result = keyService.searchKeys(search, languageTag, projectHolder.project, branch, pageable.withoutSort)
+    val result = keyFacade.searchKeys(search, languageTag, branch, pageable)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
@@ -378,14 +355,6 @@ class KeyController(
     return this.map { LanguageDto.fromEntity(it, baseLanguage?.id ?: 0) }
   }
 
-  private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project.id)
-  }
-
-  private fun Key.checkBranchPermission() {
-    securityService.checkBranchModify(this)
-  }
-
   private fun Project.checkScreenshotsUploadPermission() {
     securityService.checkScreenshotsUploadPermission(this.id)
   }
@@ -415,12 +384,6 @@ class KeyController(
   private fun checkScreenshotUploadPermissions(dto: CreateKeyDto) {
     if (dto.screenshotUploadedImageIds != null || !dto.screenshots.isNullOrEmpty()) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
-    }
-  }
-
-  private fun checkNamespaceFeature(namespace: String?) {
-    if (!projectHolder.projectEntity.useNamespaces && namespace != null) {
-      throw ValidationException(Message.NAMESPACE_CANNOT_BE_USED_WHEN_FEATURE_IS_DISABLED)
     }
   }
 }

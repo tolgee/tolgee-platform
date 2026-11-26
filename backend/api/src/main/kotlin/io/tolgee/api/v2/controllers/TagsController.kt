@@ -50,6 +50,7 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 class TagsController(
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
+  private val tagsFacade: TagsFacade,
   private val branchService: BranchService,
   private val tagModelAssembler: TagModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
@@ -70,7 +71,7 @@ class TagsController(
     @Valid @RequestBody
     tagKeyDto: TagKeyDto,
   ): TagModel {
-    return tagService.tagKey(projectHolder.project.id, keyId, tagKeyDto.name.trim()).model
+    return tagsFacade.tagKey(keyId, tagKeyDto).model
   }
 
   @DeleteMapping(value = ["keys/{keyId:[0-9]+}/tags/{tagId:[0-9]+}"])
@@ -93,7 +94,7 @@ class TagsController(
     @RequestParam search: String? = null,
     @SortDefault("name") @ParameterObject pageable: Pageable,
   ): PagedModel<TagModel> {
-    val data = tagService.getProjectTags(projectHolder.project.id, search, pageable)
+    val data = tagsFacade.getProjectTags(search, pageable)
     return pagedResourcesAssembler.toModel(data, tagModelAssembler)
   }
 

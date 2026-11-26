@@ -28,6 +28,20 @@ class McpBatchToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `machine_translate refuses an empty key list`() {
+    assertToolFails(
+      client,
+      "machine_translate",
+      mapOf(
+        "projectId" to data.projectId,
+        "keyNames" to emptyList<String>(),
+        "targetLanguageTags" to listOf("en"),
+      ),
+      expectedError = "must not be empty",
+    )
+  }
+
+  @Test
   fun `machine_translate auto-resolves projectId from PAK`() {
     callTool(
       client,

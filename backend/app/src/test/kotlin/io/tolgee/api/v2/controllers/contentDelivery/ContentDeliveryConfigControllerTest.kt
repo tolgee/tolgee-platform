@@ -162,6 +162,9 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     doAnswer {
       mockedFileStorage
     }.whenever(s3FileStorageFactory).create(any())
+    doAnswer {
+      mockedFileStorage
+    }.whenever(s3FileStorageFactory).createSsrfSafe(any(), any())
     return mockedFileStorage
   }
 

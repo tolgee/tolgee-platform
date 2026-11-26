@@ -184,6 +184,9 @@ class LanguageService(
     languageId: Long,
     projectId: Long,
   ): LanguageDto? {
+    self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }?.let { return it }
+    languageRepository.find(languageId, projectId) ?: return null
+    cacheManager.getCache(Caches.LANGUAGES)?.evictIfPresent(projectId)
     return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
   }
 
@@ -267,7 +270,7 @@ class LanguageService(
     projectId: Long,
     userId: Long,
   ): Set<LanguageDto> {
-    if (languages == null) {
+    if (languages.isNullOrEmpty()) {
       return permissionService.getPermittedViewLanguages(projectId, userId).toSet()
     } else {
       securityService.checkLanguageViewPermissionByTag(projectId, languages)

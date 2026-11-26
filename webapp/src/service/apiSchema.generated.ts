@@ -21224,6 +21224,10 @@ export interface operations {
         )[];
         /** Limit the AI review filter to these language tags. */
         filterAiReviewInLang?: string[];
+        /** Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. Applies only together with filterAiReviewScore. */
+        filterAiReviewScoreMode?: "HIGHER_THAN" | "LOWER_THAN" | "EQUAL_TO";
+        /** The score (0-100) that filterAiReviewScoreMode compares against. */
+        filterAiReviewScore?: number;
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21513,6 +21517,10 @@ export interface operations {
         )[];
         /** Limit the AI review filter to these language tags. */
         filterAiReviewInLang?: string[];
+        /** Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. Applies only together with filterAiReviewScore. */
+        filterAiReviewScoreMode?: "HIGHER_THAN" | "LOWER_THAN" | "EQUAL_TO";
+        /** The score (0-100) that filterAiReviewScoreMode compares against. */
+        filterAiReviewScore?: number;
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21846,6 +21854,10 @@ export interface operations {
         )[];
         /** Limit the AI review filter to these language tags. */
         filterAiReviewInLang?: string[];
+        /** Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. Applies only together with filterAiReviewScore. */
+        filterAiReviewScoreMode?: "HIGHER_THAN" | "LOWER_THAN" | "EQUAL_TO";
+        /** The score (0-100) that filterAiReviewScoreMode compares against. */
+        filterAiReviewScore?: number;
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -28050,6 +28062,10 @@ export interface operations {
         )[];
         /** Limit the AI review filter to these language tags. */
         filterAiReviewInLang?: string[];
+        /** Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. Applies only together with filterAiReviewScore. */
+        filterAiReviewScoreMode?: "HIGHER_THAN" | "LOWER_THAN" | "EQUAL_TO";
+        /** The score (0-100) that filterAiReviewScoreMode compares against. */
+        filterAiReviewScore?: number;
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -28551,6 +28567,10 @@ export interface operations {
         )[];
         /** Limit the AI review filter to these language tags. */
         filterAiReviewInLang?: string[];
+        /** Filter by AI review score: HIGHER_THAN and LOWER_THAN are strict. Applies only together with filterAiReviewScore. */
+        filterAiReviewScoreMode?: "HIGHER_THAN" | "LOWER_THAN" | "EQUAL_TO";
+        /** The score (0-100) that filterAiReviewScoreMode compares against. */
+        filterAiReviewScore?: number;
         /** Filter keys whose QA checks are stale (pending recomputation) in lang. When set, only keys with at least one stale translation in any of the provided languages are returned. */
         filterQaChecksStaleInLang?: string[];
         /** Filter keys with any suggestions in lang */
@@ -30730,11 +30750,6 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
   };
   /**
    * This is triggered when bot event is triggered. E.g., when app is uninstalled from workspace.
@@ -30788,11 +30803,6 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": string;
-      };
-    };
   };
   /** This is triggered when interactivity event is triggered. E.g., when user clicks button provided in previous messages. */
   onInteractivityEvent: {
@@ -30836,11 +30846,6 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": string;
       };
     };
   };

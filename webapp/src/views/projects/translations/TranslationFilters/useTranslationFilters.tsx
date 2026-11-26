@@ -1,7 +1,12 @@
 import { useRef } from 'react';
 
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
-import { AddParams, FiltersInternal, FiltersType } from './tools';
+import {
+  AddParams,
+  aiReviewScoreFilterActive,
+  FiltersInternal,
+  FiltersType,
+} from 'tg.views/projects/translations/TranslationFilters/tools';
 
 function remove<T extends string | number>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];
@@ -375,7 +380,8 @@ export const useTranslationFilters = ({
         });
       });
 
-    if (filters.filterAiReviewOutcomes?.length) {
+    const aiReviewScoreSet = aiReviewScoreFilterActive(filters);
+    if (filters.filterAiReviewOutcomes?.length || aiReviewScoreSet) {
       const aiReviewLanguages = selectedLanguages.filter((tag) => {
         switch (filters.filterAiReviewOutcomeLanguage) {
           case undefined:
@@ -386,8 +392,13 @@ export const useTranslationFilters = ({
             return tag === filters.filterAiReviewOutcomeLanguage;
         }
       });
-      // Always send the status: without it the backend returns all keys.
-      filtersQuery.filterAiReviewStatus = filters.filterAiReviewOutcomes;
+      if (filters.filterAiReviewOutcomes?.length) {
+        filtersQuery.filterAiReviewStatus = filters.filterAiReviewOutcomes;
+      }
+      if (aiReviewScoreSet) {
+        filtersQuery.filterAiReviewScoreMode = filters.filterAiReviewScoreMode;
+        filtersQuery.filterAiReviewScore = filters.filterAiReviewScore;
+      }
       if (aiReviewLanguages.length) {
         filtersQuery.filterAiReviewInLang = aiReviewLanguages;
       }

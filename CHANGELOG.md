@@ -1,3 +1,77 @@
+## [3.246.4](https://github.com/tolgee/tolgee-platform/compare/v3.246.3...v3.246.4) (2026-11-25)
+
+
+### Bug Fixes
+
+* allow billing's AcquisitionLinkInterceptor in the MCP coverage guard ([#4090](https://github.com/tolgee/tolgee-platform/issues/4090)) ([340595e](https://github.com/tolgee/tolgee-platform/commit/340595e2729f325089e3f63b1cabb8068e5f872d)), closes [#4086](https://github.com/tolgee/tolgee-platform/issues/4086)
+
+## [3.246.3](https://github.com/tolgee/tolgee-platform/compare/v3.246.2...v3.246.3) (2026-11-25)
+
+
+### Bug Fixes
+
+* bump PostgreSQL JDBC driver to 42.7.15 to patch Snyk-reported vulnerabilities ([#4089](https://github.com/tolgee/tolgee-platform/issues/4089)) ([78d1012](https://github.com/tolgee/tolgee-platform/commit/78d10129cdb8f4e32dcd9c96b9b8083925583a12))
+
+## [3.246.2](https://github.com/tolgee/tolgee-platform/compare/v3.246.1...v3.246.2) (2026-11-25)
+
+
+### Bug Fixes
+
+* bump Spring Boot to 4.1.3 to patch Snyk-reported vulnerabilities ([#4088](https://github.com/tolgee/tolgee-platform/issues/4088)) ([b458ad6](https://github.com/tolgee/tolgee-platform/commit/b458ad642098926e135f21b82a2888b5ca6f9b5c)), closes [spring-projects/spring-framework#37517](https://github.com/spring-projects/spring-framework/issues/37517)
+
+## [3.246.1](https://github.com/tolgee/tolgee-platform/compare/v3.246.0...v3.246.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* run MCP tools through facades shared with REST controllers ([#4086](https://github.com/tolgee/tolgee-platform/issues/4086)) ([65eaa48](https://github.com/tolgee/tolgee-platform/commit/65eaa480f1fde3f91910f01ee92ca2c91fcd0a0e))
+
+# [3.246.0](https://github.com/tolgee/tolgee-platform/compare/v3.245.2...v3.246.0) (2026-11-19)
+
+
+### Bug Fixes
+
+* check Slack signatures against the raw request body ([#4068](https://github.com/tolgee/tolgee-platform/issues/4068)) ([40bf8a9](https://github.com/tolgee/tolgee-platform/commit/40bf8a90465d0b54d53c173bc888eaf7be893cb4)), closes [#4043](https://github.com/tolgee/tolgee-platform/issues/4043) [#4043](https://github.com/tolgee/tolgee-platform/issues/4043) [#4043](https://github.com/tolgee/tolgee-platform/issues/4043)
+
+
+### Features
+
+* allow API token access to AI prompt customization endpoints ([#4067](https://github.com/tolgee/tolgee-platform/issues/4067)) ([ea16ce3](https://github.com/tolgee/tolgee-platform/commit/ea16ce394449659c57f55f8c85e8c32cdda99756))
+
+## [3.245.2](https://github.com/tolgee/tolgee-platform/compare/v3.245.1...v3.245.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* find a newly created language when the cached language list is stale ([#4061](https://github.com/tolgee/tolgee-platform/issues/4061)) ([7a2c1c2](https://github.com/tolgee/tolgee-platform/commit/7a2c1c2f8bb65b37887d887e62234520ea8d42e1))
+
+## [3.245.1](https://github.com/tolgee/tolgee-platform/compare/v3.245.0...v3.245.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* disable the vulnerable Base64 intrinsic in the Docker image (CVE-2026-114938) ([#4063](https://github.com/tolgee/tolgee-platform/issues/4063)) ([4b66187](https://github.com/tolgee/tolgee-platform/commit/4b661874a5ad12bc40549071ce414a19912c3f36))
+
+# [3.245.0](https://github.com/tolgee/tolgee-platform/compare/v3.244.0...v3.245.0) (2026-11-18)
+
+
+### Features
+
+* filter translations by AI review score ([#4060](https://github.com/tolgee/tolgee-platform/issues/4060)) ([9651419](https://github.com/tolgee/tolgee-platform/commit/9651419b90ececed80b1cb513cc2f3196a8f015e))
+
+# [3.244.0](https://github.com/tolgee/tolgee-platform/compare/v3.243.2...v3.244.0) (2026-11-18)
+
+
+### Bug Fixes
+
+* bump OkHttp to 4.12.1 to block compromised eMudhra certificates ([#4059](https://github.com/tolgee/tolgee-platform/issues/4059)) ([11fbec8](https://github.com/tolgee/tolgee-platform/commit/11fbec80331bfef7ae1ad7104b20e06e2165795e)), closes [#4019](https://github.com/tolgee/tolgee-platform/issues/4019)
+* verify the Slack signature for every interactivity payload ([#4043](https://github.com/tolgee/tolgee-platform/issues/4043)) ([bdd7d33](https://github.com/tolgee/tolgee-platform/commit/bdd7d330e031a0eb84d1cbeda3251695488353a5))
+
+
+### Features
+
+* community translation foundation (pitch tolgee/tolgee-platform[#3987](https://github.com/tolgee/tolgee-platform/issues/3987)) ([#3996](https://github.com/tolgee/tolgee-platform/issues/3996)) ([5212e6f](https://github.com/tolgee/tolgee-platform/commit/5212e6fd8c9a04c179ce14b1083456c2f9134f3d)), closes [tolgee/billing#350](https://github.com/tolgee/billing/issues/350) [tolgee/billing#350](https://github.com/tolgee/billing/issues/350)
+
 ## [3.243.2](https://github.com/tolgee/tolgee-platform/compare/v3.243.1...v3.243.2) (2026-11-17)
 
 

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.slack.SlackEventDto
 import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
+import io.tolgee.ee.component.slackIntegration.SlackRawBodyFilter
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackRequestValidation
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackSlackCommandBlocksProvider
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
@@ -11,7 +12,7 @@ import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -44,9 +45,9 @@ class SlackEventsController(
   fun onInteractivityEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody payload: String,
+    @RequestAttribute(SlackRawBodyFilter.RAW_BODY_ATTRIBUTE) payload: String,
   ) {
-    val event: SlackEventDto = parseInteractivityPayload(payload, slackSignature, timestamp)
+    val event: SlackEventDto = validateAndParsePayload(payload, slackSignature, timestamp)
 
     // Since we cannot respond to the event directly, we have to send a message to the channel.
     // Sometimes Tolgee might be unable to do it, because the token might be missing in Tolgee DB.
@@ -91,7 +92,7 @@ class SlackEventsController(
   fun fetchBotEvent(
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody payload: String,
+    @RequestAttribute(SlackRawBodyFilter.RAW_BODY_ATTRIBUTE) payload: String,
   ): Any? {
     val data: Map<String, Any?> = validateAndParsePayload(payload, slackSignature, timestamp)
 
@@ -110,19 +111,6 @@ class SlackEventsController(
     }
 
     return null
-  }
-
-  private fun parseInteractivityPayload(
-    payload: String,
-    slackSignature: String,
-    timestamp: String,
-  ): SlackEventDto {
-    val decodedPayload = decodePayload(payload)
-    // Redirect buttons are handled by Slack client-side and may not carry a valid signature.
-    if (decodedPayload.contains("\"value\":\"redirect\"")) {
-      return objectMapper.readValue(decodedPayload)
-    }
-    return validateAndParsePayload(payload, slackSignature, timestamp)
   }
 
   private inline fun <reified T> validateAndParsePayload(

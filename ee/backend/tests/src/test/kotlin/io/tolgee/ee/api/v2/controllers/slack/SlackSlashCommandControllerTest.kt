@@ -76,6 +76,16 @@ class SlackSlashCommandControllerTest : AuthorizedControllerTest() {
       .isNotNull()
   }
 
+  @Test
+  fun `unsubscribes when Slack percent-encodes the body differently than Java`() {
+    performSlashCommand("unsubscribe ${testData.projectBuilder.self.id}").andIsOk
+
+    slackConfigReadService
+      .find(testData.projectBuilder.self.id, testData.slackConfig.channelId)
+      .assert
+      .isNull()
+  }
+
   private fun performSlashCommand(text: String): ResultActions {
     val fields =
       mapOf(
@@ -84,14 +94,15 @@ class SlackSlashCommandControllerTest : AuthorizedControllerTest() {
         "command" to "/tolgee",
         "channel_name" to "test",
         "user_id" to "slackUserId",
-        "user_name" to "user",
+        "user_name" to "user*",
         "text" to text,
         "team_domain" to "team",
       )
     val body =
-      fields.entries.joinToString("&") { (name, value) ->
-        "$name=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
-      }
+      fields.entries
+        .joinToString("&") { (name, value) ->
+          "$name=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
+        }.replace("*", "%2A") // Slack encodes `*`, Java's URLEncoder does not
     val timestamp = Instant.now().epochSecond.toString()
     return perform(
       MockMvcRequestBuilders

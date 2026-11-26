@@ -15,6 +15,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.NullSource
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.mock
 
 class FileStorageConfigurationTest {
   companion object {
@@ -96,7 +97,11 @@ class FileStorageConfigurationTest {
   }
 
   private fun fileStorage() =
-    FileStorageConfiguration(properties, S3FileStorageFactory(), AzureFileStorageFactory()).fileStorage()
+    FileStorageConfiguration(
+      properties,
+      S3FileStorageFactory(mock()),
+      AzureFileStorageFactory(),
+    ).fileStorage()
 
   private fun enableAzure() {
     properties.fileStorage.azure.apply {

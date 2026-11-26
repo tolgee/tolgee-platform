@@ -1,16 +1,15 @@
 package io.tolgee.mcp.tools
 
 import io.tolgee.api.v2.controllers.keys.KeyController
+import io.tolgee.api.v2.controllers.keys.KeyFacade
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.getSafeNamespace
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -19,9 +18,7 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class KeyMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val keyService: KeyService,
-  private val securityService: SecurityService,
-  private val projectHolder: ProjectHolder,
+  private val keyFacade: KeyFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -62,8 +59,7 @@ class KeyMcpTools(
       mcpRequestContext.executeAs(listKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
         val page =
-          keyService.getPaged(
-            projectHolder.project.id,
+          keyFacade.getPaged(
             request.arguments.getString("branch"),
             PageRequest.of(pageNum, 100),
           )
@@ -97,19 +93,11 @@ class KeyMcpTools(
     ) { request ->
       mcpRequestContext.executeAs(searchKeysSpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
-          val languageTag = request.arguments.getString("languageTag")
-          languageTag?.let {
-            securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it))
-          }
-          projectHolder.projectEntity.baseLanguage?.let {
-            securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
-          }
           val pageNum = request.arguments.getInt("page") ?: 0
           val results =
-            keyService.searchKeys(
+            keyFacade.searchKeys(
               search = request.arguments.requireString("query"),
-              languageTag = languageTag,
-              project = projectHolder.project,
+              languageTag = request.arguments.getString("languageTag"),
               branch = request.arguments.getString("branch"),
               pageable = PageRequest.of(pageNum, 50),
             )
@@ -163,7 +151,7 @@ class KeyMcpTools(
             )
           }
 
-        keyService.importKeys(keys, projectHolder.projectEntity, branch)
+        keyFacade.importKeys(ImportKeysDto(keys), branch)
         textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))
       }
     }
@@ -184,8 +172,7 @@ class KeyMcpTools(
       mcpRequestContext.executeAs(getKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
           val key =
-            keyService.find(
-              projectId = projectHolder.project.id,
+            keyFacade.find(
               name = request.arguments.requireString("keyName"),
               namespace = request.arguments.getString("namespace"),
               branch = request.arguments.getString("branch"),
@@ -225,8 +212,7 @@ class KeyMcpTools(
       mcpRequestContext.executeAs(editKeySpec, request.arguments.getProjectId()) {
         executeInNewTransaction(transactionManager) {
           val key =
-            keyService.find(
-              projectId = projectHolder.project.id,
+            keyFacade.find(
               name = request.arguments.requireString("keyName"),
               namespace = request.arguments.getString("keyNamespace"),
               branch = request.arguments.getString("keyBranch"),
@@ -237,10 +223,10 @@ class KeyMcpTools(
             val dto =
               EditKeyDto(
                 name = request.arguments.requireString("newName"),
-                namespace = request.arguments.getString("newNamespace"),
+                namespace = getSafeNamespace(request.arguments.getString("newNamespace")),
                 description = request.arguments.getString("newDescription"),
               )
-            val updated = keyService.edit(key.id, dto)
+            val updated = keyFacade.edit(key.id, dto)
             val result =
               mapOf(
                 "id" to updated.id,
@@ -272,16 +258,14 @@ class KeyMcpTools(
         val branch = request.arguments.getString("branch")
 
         executeInNewTransaction(transactionManager) {
-          val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+          val (keys, notFound) = keyFacade.resolveKeysByName(keyNames, namespace, branch)
           if (notFound.isNotEmpty()) {
             errorResult("Keys not found: ${notFound.joinToString(", ")}")
           } else {
-            keys.forEach { securityService.checkBranchModify(it) }
-            val ids = keys.map { it.id }.toSet()
-            keyService.softDeleteMultiple(ids)
+            keyFacade.delete(keys.map { it.id }.toSet())
             textResult(
               objectMapper.writeValueAsString(
-                mapOf("deleted" to true, "keyCount" to ids.size),
+                mapOf("deleted" to true, "keyCount" to keys.size),
               ),
             )
           }

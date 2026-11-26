@@ -198,7 +198,6 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.setTranslations(dto)
   }
 
@@ -216,7 +215,6 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
   }
 
@@ -245,6 +243,7 @@ When null, resulting file will be a flat key-value object.
   fun getTranslations(
     @ParameterObject
     @ModelAttribute("translationFilters")
+    @Valid
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {

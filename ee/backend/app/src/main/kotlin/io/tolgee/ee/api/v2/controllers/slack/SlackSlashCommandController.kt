@@ -8,6 +8,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
+import io.tolgee.ee.component.slackIntegration.SlackRawBodyFilter
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackBotInfoProvider
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackErrorProvider
 import io.tolgee.ee.component.slackIntegration.slashcommand.SlackExceptionHandler
@@ -32,7 +33,7 @@ import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -67,7 +68,7 @@ class SlackSlashCommandController(
     @ModelAttribute payload: SlackCommandDto,
     @RequestHeader("X-Slack-Signature") slackSignature: String,
     @RequestHeader("X-Slack-Request-Timestamp") timestamp: String,
-    @RequestBody body: String,
+    @RequestAttribute(SlackRawBodyFilter.RAW_BODY_ATTRIBUTE) body: String,
   ): String? {
     return slackExceptionHandler.handle {
       slackRequestValidation.validate(slackSignature, timestamp, body)

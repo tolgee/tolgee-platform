@@ -223,6 +223,7 @@ dependencies {
      * AWS
      */
     implementation libs.amazonS3
+    implementation libs.amazonApache5Client
     implementation libs.amazonTranslate
     implementation libs.cloudfront
 

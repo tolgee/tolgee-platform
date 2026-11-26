@@ -11,7 +11,9 @@ import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.AuthenticationInterceptor
+import io.tolgee.security.authentication.EmailValidationInterceptor
 import io.tolgee.security.authentication.ReadOnlyModeInterceptor
+import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationFeatureGuard
@@ -30,6 +32,8 @@ class McpRequestContext(
   private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val rateLimitService: RateLimitService,
   private val projectContextService: ProjectContextService,
+  private val emailValidationInterceptor: EmailValidationInterceptor,
+  private val ssoAuthenticationInterceptor: SsoAuthenticationInterceptor,
 ) {
   fun <T> executeAs(
     spec: ToolEndpointSpec,
@@ -40,6 +44,9 @@ class McpRequestContext(
     // so unauthenticated tool calls reach this point and must be rejected here.
     requireAuthenticated()
     // Order mirrors the HTTP interceptor chain:
+    // 0. EmailValidationInterceptor + SsoAuthenticationInterceptor (HIGHEST_PRECEDENCE)
+    checkEmailVerified()
+    checkForcedSso()
     // 1. RateLimitInterceptor
     applyRateLimit(spec)
     // 2. AuthenticationInterceptor (token type check)
@@ -63,6 +70,14 @@ class McpRequestContext(
     setupActivity(spec)
     emitPostHogEvent(spec)
     return block()
+  }
+
+  private fun checkEmailVerified() {
+    emailValidationInterceptor.checkEmailVerificationOrThrow(authenticationFacade.authenticatedUser)
+  }
+
+  private fun checkForcedSso() {
+    ssoAuthenticationInterceptor.checkNonSsoAccessAllowed(authenticationFacade.authenticatedUser)
   }
 
   private fun requireAuthenticated() {

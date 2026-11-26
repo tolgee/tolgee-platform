@@ -156,6 +156,10 @@ export class ReactList extends Component {
   componentDidMount() {
     this.updateFrameAndClearCache = this.updateFrameAndClearCache.bind(this);
     window.addEventListener('resize', this.updateFrameAndClearCache);
+    // React StrictMode remounts the same instance in development; without the reset
+    // updateScrollParent sees an unchanged parent and never attaches the scroll listener again.
+    // Not in componentWillUnmount: a delayed caller still asks an unmounted list for its visible range.
+    this.scrollParent = undefined;
     this.updateFrame(this.scrollTo.bind(this, this.props.initialIndex));
   }
 

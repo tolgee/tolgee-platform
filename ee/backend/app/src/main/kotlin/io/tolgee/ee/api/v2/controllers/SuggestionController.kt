@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.api.v2.controllers.suggestion.SuggestionsFacade
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
@@ -54,6 +55,7 @@ class SuggestionController(
   private val arrayResourcesAssembler: PagedResourcesAssembler<TranslationSuggestion>,
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
+  private val suggestionsFacade: SuggestionsFacade,
 ) {
   @GetMapping("")
   @Operation(summary = "Get suggestions")
@@ -68,19 +70,7 @@ class SuggestionController(
     @PathVariable languageId: Long,
     @PathVariable keyId: Long,
   ): PagedModel<TranslationSuggestionModel> {
-    val projectId = projectHolder.project.id
-    securityService.checkLanguageViewSuggestionsPermission(
-      projectId,
-      listOf(languageId),
-    )
-    val suggestions =
-      translationSuggestionService.getSuggestionsPaged(
-        pageable,
-        projectId,
-        languageId,
-        keyId,
-        filters,
-      )
+    val suggestions = suggestionsFacade.getSuggestions(languageId, keyId, filters, pageable)
     return arrayResourcesAssembler.toModel(
       suggestions,
       translationSuggestionModelAssembler,
@@ -161,9 +151,7 @@ class SuggestionController(
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ): TranslationSuggestionModel {
-    val projectId = projectHolder.project.id
-    securityService.checkLanguageStateChangePermission(projectId, listOf(languageId))
-    val suggestion = translationSuggestionService.declineSuggestion(projectId, languageId, keyId, suggestionId)
+    val suggestion = suggestionsFacade.declineSuggestion(languageId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 
@@ -178,17 +166,7 @@ class SuggestionController(
     @PathVariable suggestionId: Long,
     @RequestParam declineOther: Boolean = false,
   ): TranslationSuggestionAcceptResponse {
-    val projectId = projectHolder.project.id
-    securityService.checkLanguageTranslatePermission(projectId, listOf(languageId))
-    securityService.checkLanguageStateChangePermission(projectId, listOf(languageId))
-    val (suggestion, declined) =
-      translationSuggestionService.acceptSuggestion(
-        projectId,
-        languageId,
-        keyId,
-        suggestionId,
-        declineOther,
-      )
+    val (suggestion, declined) = suggestionsFacade.acceptSuggestion(languageId, keyId, suggestionId, declineOther)
     val accepted = translationSuggestionModelAssembler.toModel(suggestion)
     return TranslationSuggestionAcceptResponse(accepted, declined)
   }

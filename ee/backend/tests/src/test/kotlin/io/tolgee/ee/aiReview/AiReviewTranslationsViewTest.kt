@@ -8,6 +8,7 @@ import io.tolgee.ee.service.aiReview.AiReviewRuleEvaluator
 import io.tolgee.ee.service.aiReview.AiReviewRuleStatsService
 import io.tolgee.ee.service.aiReview.matching.RuleDecision
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.aiReview.AiReviewFailureReason
@@ -149,6 +150,93 @@ class AiReviewTranslationsViewTest : AuthorizedControllerTest() {
     keysFor("filterAiReviewStatus=SCORE_ONLY_FAIL").assert.containsExactly("k.dryfail")
     keysFor("filterAiReviewStatus=FAILED").assert.containsExactly("k.failed")
     keysFor("filterAiReviewStatus=OVERRIDDEN").assert.containsExactly("k.overridden")
+  }
+
+  @Test
+  fun `the score filter compares strictly`() {
+    save()
+    val moreThan90 = "filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=90"
+    keysFor(moreThan90).assert.containsExactly("k.overridden")
+    totalFor(moreThan90).assert.isEqualTo(1)
+    keysFor("filterAiReviewScoreMode=LOWER_THAN&filterAiReviewScore=40").assert.containsExactly("k.dryfail")
+    keysFor("filterAiReviewScoreMode=EQUAL_TO&filterAiReviewScore=90")
+      .assert
+      .containsExactlyInAnyOrder("k.approved", "k.drypass")
+  }
+
+  @Test
+  fun `rows without a score never match the score filter`() {
+    save()
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0")
+      .assert
+      .containsExactlyInAnyOrder("k.approved", "k.below", "k.drypass", "k.dryfail", "k.overridden")
+  }
+
+  @Test
+  fun `a non-applying result row does not match the score filter`() {
+    testData.addKeyWithTranslations("k.unreviewed").let {
+      testData.addReview(it.de, AiReviewStatus.APPROVED, 90) { rule = testData.rule }
+    }
+    save()
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0")
+      .assert
+      .doesNotContain("k.unreviewed")
+  }
+
+  @Test
+  fun `an unresolved language tag drops the filter like the other language filters`() {
+    save()
+    val all = keysFor("search=")
+    keysFor("filterAiReviewStatus=REVIEWED_BY_AI&filterAiReviewInLang=xx")
+      .assert
+      .containsExactlyInAnyOrderElementsOf(all)
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0&filterAiReviewInLang=xx")
+      .assert
+      .containsExactlyInAnyOrderElementsOf(all)
+  }
+
+  @Test
+  fun `an out-of-range score is rejected`() {
+    save()
+    fetch("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=101").andIsBadRequest
+    fetch("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=-1").andIsBadRequest
+  }
+
+  @Test
+  fun `a score mode without a value is ignored`() {
+    save()
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN")
+      .assert
+      .containsExactlyInAnyOrderElementsOf(keysFor("search="))
+  }
+
+  @Test
+  fun `the outcome and score filters must match the same row`() {
+    save()
+    keysFor(
+      "filterAiReviewStatus=SCORE_ONLY_PASS&filterAiReviewStatus=SCORE_ONLY_FAIL" +
+        "&filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=50",
+    ).assert.containsExactly("k.drypass")
+  }
+
+  @Test
+  fun `NOT_REVIEWED_YET combined with the score filter matches nothing`() {
+    save()
+    keysFor(
+      "filterAiReviewStatus=NOT_REVIEWED_YET&filterAiReviewInLang=de" +
+        "&filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0",
+    ).assert.isEmpty()
+  }
+
+  @Test
+  fun `the score filter respects the language scope`() {
+    save()
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0&filterAiReviewInLang=fr")
+      .assert
+      .isEmpty()
+    keysFor("filterAiReviewScoreMode=HIGHER_THAN&filterAiReviewScore=0&filterAiReviewInLang=en")
+      .assert
+      .isEmpty()
   }
 
   @Test
