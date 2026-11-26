@@ -1,12 +1,11 @@
 package io.tolgee.mcp.tools
 
 import io.tolgee.api.v2.controllers.TagsController
+import io.tolgee.api.v2.controllers.TagsFacade
+import io.tolgee.api.v2.controllers.keys.KeyFacade
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.key.TagService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -17,9 +16,8 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class TagMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val tagService: TagService,
-  private val keyService: KeyService,
-  private val projectHolder: ProjectHolder,
+  private val tagsFacade: TagsFacade,
+  private val keyFacade: KeyFacade,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -43,8 +41,7 @@ class TagMcpTools(
         val search = request.arguments.getString("search")
         val pageNum = request.arguments.getInt("page") ?: 0
         val tags =
-          tagService.getProjectTags(
-            projectId = projectHolder.project.id,
+          tagsFacade.getProjectTags(
             search = search,
             pageable = PageRequest.of(pageNum, 1000, Sort.by("name")),
           )
@@ -80,12 +77,12 @@ class TagMcpTools(
         val branch = request.arguments.getString("branch")
 
         executeInNewTransaction(transactionManager) {
-          val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+          val (keys, notFound) = keyFacade.resolveKeysByName(keyNames, namespace, branch)
           if (notFound.isNotEmpty()) {
             errorResult("Keys not found: ${notFound.joinToString(", ")}")
           } else {
             val keyIdToTags = keys.associate { key -> key.id to tags }
-            tagService.tagKeysById(projectHolder.project.id, keyIdToTags)
+            tagsFacade.tagKeysById(keyIdToTags)
             textResult(
               objectMapper.writeValueAsString(
                 mapOf(

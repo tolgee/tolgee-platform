@@ -2800,6 +2800,7 @@
   "project_languages_primary_provider_hint": "Hovedleverandør brukes for maskinoversettelse av nye nøkler og vises først på oversettelsespanelet.",
   "project_languages_title": "Prosjektspråk",
   "project_leave_button": "Forlat prosjektet",
+  "project_list_community_badge_tooltip": "Fellesskapsprosjekt",
   "project_list_keys_count": "{keysCount, plural, one {1 nøkkel} other {# nøkler}}",
   "project_list_more_button": "Mer",
   "project_list_public_badge": "Offentlig",

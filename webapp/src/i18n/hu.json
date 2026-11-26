@@ -2800,6 +2800,7 @@
   "project_languages_primary_provider_hint": "Az elsődleges szolgáltatót használjuk az új kulcsok gépi fordításához, és az első helyen jelenik meg a fordítási panelen.",
   "project_languages_title": "Projekt nyelvek",
   "project_leave_button": "Projekt elhagyása",
+  "project_list_community_badge_tooltip": "Közösségi projekt",
   "project_list_keys_count": "{keysCount, plural, one {1 kulcs} other {# kulcs}}",
   "project_list_more_button": "Több",
   "project_list_public_badge": "Nyilvános",

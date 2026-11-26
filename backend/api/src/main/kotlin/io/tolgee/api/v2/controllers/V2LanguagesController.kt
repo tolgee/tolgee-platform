@@ -23,7 +23,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -53,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController
 @OpenApiOrderExtension(2)
 class V2LanguagesController(
   private val languageService: LanguageService,
-  private val projectService: ProjectService,
+  private val languagesFacade: LanguagesFacade,
   private val languageValidator: LanguageValidator,
   private val languageModelAssembler: LanguageModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<LanguageDto>,
@@ -70,10 +69,9 @@ class V2LanguagesController(
     @RequestBody @Valid
     dto: LanguageRequest,
   ): LanguageModel {
-    val project = projectService.get(projectId)
-    languageValidator.validateCreate(dto, project)
-    val language = languageService.createLanguage(dto, project)
-    return languageModelAssembler.toModel(LanguageDto.fromEntity(language, project.baseLanguage?.id))
+    val language = languagesFacade.createLanguage(dto)
+    val baseLanguageId = projectHolder.projectEntity.baseLanguage?.id
+    return languageModelAssembler.toModel(LanguageDto.fromEntity(language, baseLanguageId))
   }
 
   @GetMapping(value = ["/{languageId}"])
@@ -99,7 +97,7 @@ class V2LanguagesController(
     @ParameterObject
     filters: LanguageFilters,
   ): PagedModel<LanguageModel> {
-    val data = languageService.getPaged(projectHolder.project.id, pageable, filters)
+    val data = languagesFacade.getPaged(pageable, filters)
     return pagedAssembler.toModel(data, languageModelAssembler)
   }
 

@@ -2804,6 +2804,7 @@
   "project_languages_primary_provider_hint": "Der primäre Anbieter wird für die maschinelle Übersetzung neuer Schlüssel verwendet und wird im Übersetzungspanel als erster angezeigt.",
   "project_languages_title": "Projektsprachen",
   "project_leave_button": "Projekt verlassen",
+  "project_list_community_badge_tooltip": "Community-Projekt",
   "project_list_keys_count": "{keysCount, plural, one {1 Schlüssel} other {# Schlüssel}}",
   "project_list_more_button": "Mehr",
   "project_list_public_badge": "Öffentlich",

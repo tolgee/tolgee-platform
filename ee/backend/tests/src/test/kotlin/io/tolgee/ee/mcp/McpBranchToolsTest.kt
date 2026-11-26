@@ -66,6 +66,21 @@ class McpBranchToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `create_branch refuses an invalid branch name`() {
+    val mainBranch = branchService.getDefaultBranch(data.projectId)!!
+    assertToolFails(
+      client,
+      "create_branch",
+      mapOf(
+        "projectId" to data.projectId,
+        "name" to "x",
+        "originBranchId" to mainBranch.id,
+      ),
+      expectedError = "max_length",
+    )
+  }
+
+  @Test
   fun `create_branch creates a new branch`() {
     val mainBranch = branchService.getDefaultBranch(data.projectId)!!
 

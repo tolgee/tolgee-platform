@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController
 @OpenApiOrderExtension(7)
 class NamespaceController(
   private val namespaceService: NamespaceService,
+  private val namespacesFacade: NamespacesFacade,
   private val projectHolder: ProjectHolder,
   private val namespaceModelAssembler: NamespaceModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -63,7 +64,7 @@ class NamespaceController(
     pageable: Pageable,
     @RequestParam("search") search: String?,
   ): PagedModel<NamespaceModel> {
-    val namespaces = namespaceService.getAllInProject(projectHolder.project.id, pageable, search)
+    val namespaces = namespacesFacade.getAllInProject(pageable, search)
     return pagedResourcesAssembler.toModel(namespaces, namespaceModelAssembler)
   }
 

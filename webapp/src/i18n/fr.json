@@ -2802,6 +2802,7 @@
   "project_languages_primary_provider_hint": "Le fournisseur principal est utilisé pour la traduction automatique des nouvelles clés et s'affiche en premier sur le panneau de traduction.",
   "project_languages_title": "Langues du projet",
   "project_leave_button": "Abandonner le projet",
+  "project_list_community_badge_tooltip": "Projet communautaire",
   "project_list_keys_count": "{keysCount, plural, one {# clé} other {# clés}}",
   "project_list_more_button": "Plus",
   "project_list_public_badge": "Public",

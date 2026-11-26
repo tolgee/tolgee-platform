@@ -1,16 +1,13 @@
 package io.tolgee.mcp.tools
 
+import io.tolgee.api.v2.controllers.keys.KeyFacade
 import io.tolgee.api.v2.controllers.translation.CreateOrUpdateTranslationsFacade
+import io.tolgee.api.v2.controllers.translation.TranslationFacade
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
-import io.tolgee.service.key.KeyService
-import io.tolgee.service.language.LanguageService
-import io.tolgee.service.security.SecurityService
-import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
@@ -19,12 +16,9 @@ import tools.jackson.databind.ObjectMapper
 @Component
 class TranslationMcpTools(
   private val mcpRequestContext: McpRequestContext,
-  private val keyService: KeyService,
-  private val translationService: TranslationService,
+  private val keyFacade: KeyFacade,
+  private val translationFacade: TranslationFacade,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
-  private val securityService: SecurityService,
-  private val languageService: LanguageService,
-  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
@@ -51,8 +45,7 @@ class TranslationMcpTools(
     ) { request ->
       mcpRequestContext.executeAs(getTranslationsSpec, request.arguments.getProjectId()) {
         val key =
-          keyService.find(
-            projectId = projectHolder.project.id,
+          keyFacade.find(
             name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
             branch = request.arguments.getString("branch"),
@@ -61,19 +54,11 @@ class TranslationMcpTools(
         if (key == null) {
           errorResult("Key not found")
         } else {
-          val requestedTags =
-            request.arguments
-              .getStringList("languages")
-              ?.takeIf { it.isNotEmpty() }
-              ?.toSet()
-              ?: languageService.findAll(projectHolder.project.id).map { it.tag }.toSet()
-          val permittedTags =
-            securityService.filterViewPermissionByTag(projectHolder.project.id, requestedTags)
           val translations =
-            permittedTags
-              .takeIf { it.isNotEmpty() }
-              ?.let { translationService.findForKeyByLanguages(key, it) }
-              .orEmpty()
+            translationFacade.getKeyTranslations(
+              key,
+              request.arguments.getStringList("languages")?.toSet(),
+            )
           val result =
             mapOf(
               "keyId" to key.id,
@@ -122,8 +107,7 @@ class TranslationMcpTools(
 
         executeInNewTransaction(transactionManager) {
           val key =
-            keyService.find(
-              projectId = projectHolder.project.id,
+            keyFacade.find(
               name = dto.key,
               namespace = dto.namespace,
               branch = dto.branch,

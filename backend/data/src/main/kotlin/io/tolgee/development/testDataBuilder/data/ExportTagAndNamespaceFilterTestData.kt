@@ -8,6 +8,7 @@ class ExportTagAndNamespaceFilterTestData : BaseTestData("export_tag_filter_user
       addTaggedKey(null, "default-included-excluded", "included", "excluded")
       addTaggedKey(null, "default-feature", "feature-login")
       addTaggedKey(null, "default-untagged")
+      addKey(null, "default-untranslated")
 
       addTaggedKey("ns-1", "ns1-included", "included")
       addTaggedKey("ns-1", "ns1-included-excluded", "included", "excluded")

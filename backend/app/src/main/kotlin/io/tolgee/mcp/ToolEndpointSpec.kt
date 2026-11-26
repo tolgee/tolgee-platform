@@ -18,6 +18,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.security.ratelimit.RateLimited
 import org.springframework.core.annotation.AnnotationUtils
+import org.springframework.core.annotation.MergedAnnotations
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -73,6 +74,7 @@ private fun buildSpecFromMethod(
   method: java.lang.reflect.Method,
   mcpOperation: String,
 ): ToolEndpointSpec {
+  checkAllAnnotationsHandled(method, mcpOperation)
   val allowApiAccess = AnnotationUtils.getAnnotation(method, AllowApiAccess::class.java)
   require(allowApiAccess != null) {
     "MCP tool $mcpOperation references ${method.name} which lacks @AllowApiAccess"
@@ -105,4 +107,41 @@ private fun buildSpecFromMethod(
           }
       },
   )
+}
+
+private val handledAnnotations =
+  setOf(
+    AllowApiAccess::class.java,
+    RequiresSuperAuthentication::class.java,
+    RequiresProjectPermissions::class.java,
+    UseDefaultPermissions::class.java,
+    IsGlobalRoute::class.java,
+    RequiresOrganizationRole::class.java,
+    RequiresFeatures::class.java,
+    RequiresOneOfFeatures::class.java,
+    RequestActivity::class.java,
+    RateLimited::class.java,
+    WriteOperation::class.java,
+    ReadOnlyOperation::class.java,
+  )
+
+private val guardedPackages = listOf("io.tolgee.security.", "io.tolgee.activity.")
+
+private fun checkAllAnnotationsHandled(
+  method: java.lang.reflect.Method,
+  mcpOperation: String,
+) {
+  val unhandled =
+    MergedAnnotations
+      .from(method)
+      .map { it.type }
+      .filter { cls -> guardedPackages.any { cls.name.startsWith(it) } }
+      .filterNot { it in handledAnnotations }
+      .distinct()
+  require(unhandled.isEmpty()) {
+    "MCP tool $mcpOperation references ${method.name} annotated with " +
+      "${unhandled.map { it.simpleName }}, which the MCP security mirror does not handle. " +
+      "Mirror it in McpRequestContext and ToolEndpointSpec, or the MCP tool will skip " +
+      "the check it enforces (GHSA-j998-54vh-rwpg)."
+  }
 }

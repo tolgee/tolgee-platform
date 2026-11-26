@@ -39,8 +39,12 @@ class EmailValidationInterceptor(
       return super.preHandle(request, response, handler)
     }
 
+    if (handler.hasMethodAnnotation(BypassEmailVerification::class.java)) {
+      return true
+    }
+
     val user = authenticationFacade.authenticatedUser
-    checkEmailVerificationOrThrow(user, handler)
+    checkEmailVerificationOrThrow(user)
 
     return true
   }
@@ -49,14 +53,7 @@ class EmailValidationInterceptor(
     return Ordered.HIGHEST_PRECEDENCE
   }
 
-  private fun checkEmailVerificationOrThrow(
-    userAccount: UserAccountDto,
-    handler: HandlerMethod,
-  ) {
-    if (handler.hasMethodAnnotation(BypassEmailVerification::class.java)) {
-      return
-    }
-
+  fun checkEmailVerificationOrThrow(userAccount: UserAccountDto) {
     if (emailVerificationService.isVerified(userAccount)) {
       return
     }

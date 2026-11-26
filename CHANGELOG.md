@@ -1,3 +1,31 @@
+## [3.246.4](https://github.com/tolgee/tolgee-platform/compare/v3.246.3...v3.246.4) (2026-11-25)
+
+
+### Bug Fixes
+
+* allow billing's AcquisitionLinkInterceptor in the MCP coverage guard ([#4090](https://github.com/tolgee/tolgee-platform/issues/4090)) ([340595e](https://github.com/tolgee/tolgee-platform/commit/340595e2729f325089e3f63b1cabb8068e5f872d)), closes [#4086](https://github.com/tolgee/tolgee-platform/issues/4086)
+
+## [3.246.3](https://github.com/tolgee/tolgee-platform/compare/v3.246.2...v3.246.3) (2026-11-25)
+
+
+### Bug Fixes
+
+* bump PostgreSQL JDBC driver to 42.7.15 to patch Snyk-reported vulnerabilities ([#4089](https://github.com/tolgee/tolgee-platform/issues/4089)) ([78d1012](https://github.com/tolgee/tolgee-platform/commit/78d10129cdb8f4e32dcd9c96b9b8083925583a12))
+
+## [3.246.2](https://github.com/tolgee/tolgee-platform/compare/v3.246.1...v3.246.2) (2026-11-25)
+
+
+### Bug Fixes
+
+* bump Spring Boot to 4.1.3 to patch Snyk-reported vulnerabilities ([#4088](https://github.com/tolgee/tolgee-platform/issues/4088)) ([b458ad6](https://github.com/tolgee/tolgee-platform/commit/b458ad642098926e135f21b82a2888b5ca6f9b5c)), closes [spring-projects/spring-framework#37517](https://github.com/spring-projects/spring-framework/issues/37517)
+
+## [3.246.1](https://github.com/tolgee/tolgee-platform/compare/v3.246.0...v3.246.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* run MCP tools through facades shared with REST controllers ([#4086](https://github.com/tolgee/tolgee-platform/issues/4086)) ([65eaa48](https://github.com/tolgee/tolgee-platform/commit/65eaa480f1fde3f91910f01ee92ca2c91fcd0a0e))
+
 # [3.246.0](https://github.com/tolgee/tolgee-platform/compare/v3.245.2...v3.246.0) (2026-11-19)
 
 
