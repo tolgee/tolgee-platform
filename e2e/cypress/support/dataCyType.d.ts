@@ -1188,6 +1188,7 @@ declare namespace DataCy {
         "translations-cell-ai-review-button": true;
         "translations-cell-cancel-button": true;
         "translations-cell-comments-button": true;
+        "translations-cell-copy-button": true;
         "translations-cell-edit-button": true;
         "translations-cell-insert-base-button": true;
         "translations-cell-main-action-button": true;

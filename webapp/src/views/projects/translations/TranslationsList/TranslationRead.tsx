@@ -154,6 +154,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           stateChangeEnabled={canChangeState}
           editEnabled={controlsEnabled}
           state={state}
+          text={translation?.text}
           onStateChange={handleStateChange}
           active={active}
           lastFocusable={lastFocusable}
