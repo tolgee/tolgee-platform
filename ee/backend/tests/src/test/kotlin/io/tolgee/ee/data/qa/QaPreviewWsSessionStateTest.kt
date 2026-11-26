@@ -24,6 +24,7 @@ class QaPreviewWsSessionStateTest {
         enabledCheckTypes = listOf(QaCheckType.EMPTY_TRANSLATION),
         isPlural = false,
         baseVariants = null,
+        basePluralArgName = null,
         maxCharLimit = null,
         icuPlaceholders = true,
         organizationOwnerId = 1L,

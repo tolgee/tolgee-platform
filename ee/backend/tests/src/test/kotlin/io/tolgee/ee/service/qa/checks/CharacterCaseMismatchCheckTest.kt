@@ -130,4 +130,155 @@ class CharacterCaseMismatchCheckTest {
       position(0, 1)
     }
   }
+
+  @Test
+  fun `does not compare case when the base starts with a placeholder`() {
+    check.check(params("Zaznaczono {count} słowo", "{count} word highlighted", languageTag = "pl")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not compare case when the translation starts with a placeholder`() {
+    check.check(params("{count} élément ignoré", "Skipped {count} item", languageTag = "fr")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not compare case when a plural variant starts with the number`() {
+    check
+      .check(
+        QaCheckParams(
+          baseText = "{count, plural, one {# word highlighted} other {# words highlighted}}",
+          text = "{count, plural, one {Zaznaczono # słowo} other {Zaznaczono # słów}}",
+          baseLanguageTag = "en",
+          languageTag = "pl",
+          isPlural = true,
+          textVariants = mapOf("one" to "Zaznaczono # słowo", "other" to "Zaznaczono # słów"),
+          baseTextVariants = mapOf("one" to "# word highlighted", "other" to "# words highlighted"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 48),
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `does not use a base letter inside a placeholder or HTML tag`() {
+    check.check(params("Napsal „{author}“", "\"{author}\" wrote")).assertNoIssues()
+    check.check(params("Položky", "<b>items</b>")).assertNoIssues()
+  }
+
+  @Test
+  fun `allows capitalized German and Luxembourgish nouns`() {
+    check.check(params("Zeilen", "rows", languageTag = "de-DE")).assertNoIssues()
+    check.check(params("Zeilen", "rows", languageTag = "lb")).assertNoIssues()
+  }
+
+  @Test
+  fun `still flags lowercase German translation of a capitalized base`() {
+    check.check(params("anzeigen", "Show", languageTag = "de-DE")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+      replacement("A")
+      position(0, 1)
+    }
+  }
+
+  @Test
+  fun `does not flag when the base starts with a brand name or code literal`() {
+    check
+      .check(
+        params("Anmodning om iManage-adgangskontrol mislykkedes", "iManage access check request failed"),
+      ).assertNoIssues()
+    check.check(params("Télécharger index.html", "index.html download")).assertNoIssues()
+    check.check(params("Rozsah refresh_token je povinný", "refresh_token scope is required")).assertNoIssues()
+    check.check(params("Adresa name@example.com je obsazená", "name@example.com is taken")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag when the translation starts with a brand name or code literal`() {
+    check.check(params("iManage yüklemelerine izin ver", "Allow iManage uploads", languageTag = "tr")).assertNoIssues()
+    check.check(params("vLLM sunucusunu seç", "Select the vLLM server", languageTag = "tr")).assertNoIssues()
+    check.check(params("index.html herunterladen", "Download index.html", languageTag = "de")).assertNoIssues()
+  }
+
+  @Test
+  fun `still flags a plain word followed by sentence punctuation`() {
+    check.check(params("hotovo. Další krok", "Done. Next step")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+    }
+  }
+
+  @Test
+  fun `still flags an all-caps acronym moved from the start`() {
+    check.check(params("clé API", "API key", languageTag = "fr")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+    }
+  }
+
+  @Test
+  fun `skips languages written in a script without letter case`() {
+    listOf("ja", "ko", "zh-Hans", "zh-TW", "ar", "he", "th", "hi").forEach { tag ->
+      check.check(params("test value", "Copy the value", languageTag = tag)).assertNoIssues()
+    }
+  }
+
+  @Test
+  fun `still checks languages written in cased scripts`() {
+    listOf("cs", "ru", "el", "hy", "sr-Cyrl").forEach { tag ->
+      check.check(params("test", "Copy the value", languageTag = tag)).assertSingleIssue {
+        message(QaIssueMessage.QA_CASE_CAPITALIZE)
+      }
+    }
+  }
+
+  @Test
+  fun `does not flag when the base starts with a lowercase abbreviation`() {
+    check.check(params("Bijv. Alleen retailbankieren", "e.g. Only retail banking", languageTag = "nl")).assertNoIssues()
+    check.check(params("P. ex. Réviseur", "e.g. Reviewer", languageTag = "fr")).assertNoIssues()
+    check.check(params("Tj. vše", "i.e. everything", languageTag = "cs")).assertNoIssues()
+    check.check(params("Atd. je zkratka", "etc. is an abbreviation", languageTag = "cs")).assertNoIssues()
+    check.check(params("Versus", "vs. the rest", languageTag = "cs")).assertNoIssues()
+  }
+
+  @Test
+  fun `still flags hyphenated and slash-joined title-case words`() {
+    check.check(params("anmeldung erforderlich", "Sign-In required")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+    }
+    check.check(params("ano/ne otázka", "Yes/No question")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+    }
+    check.check(params("E-Mail odeslán", "email sent")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_LOWERCASE)
+    }
+  }
+
+  @Test
+  fun `still flags a word followed by an ellipsis without a space`() {
+    check.check(params("načítání...prosím", "Loading...please")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+    }
+  }
+
+  @Test
+  fun `still compares case when a non-plural string starts with a hash`() {
+    check.check(params("#Obecné kanál", "#general channel")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_LOWERCASE)
+      position(1, 2)
+    }
+  }
+
+  @Test
+  fun `does not suggest lowercasing an acronym that starts the translation`() {
+    check.check(params("URL du fichier", "file URL", languageTag = "fr")).assertNoIssues()
+    check.check(params("ID klíče", "key id")).assertNoIssues()
+  }
+
+  @Test
+  fun `still suggests lowercasing a single capital letter word`() {
+    check.check(params("A soubor", "and a file")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_LOWERCASE)
+    }
+  }
+
+  @Test
+  fun `skips a base language written in a script without letter case`() {
+    check.check(params("Hello", "გამარჯობა", baseLanguageTag = "ka", languageTag = "en")).assertNoIssues()
+  }
 }

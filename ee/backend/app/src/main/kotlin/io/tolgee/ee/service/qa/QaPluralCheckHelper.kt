@@ -19,11 +19,20 @@ object QaPluralCheckHelper {
     params: QaCheckParams,
     checkFn: (text: String, baseText: String?, isVariant: Boolean) -> List<QaCheckResult>,
   ): List<QaCheckResult> {
+    return runPerVariantKeyed(params) { text, baseText, variantKey ->
+      checkFn(text, baseText, variantKey != null)
+    }
+  }
+
+  fun runPerVariantKeyed(
+    params: QaCheckParams,
+    checkFn: (text: String, baseText: String?, variantKey: String?) -> List<QaCheckResult>,
+  ): List<QaCheckResult> {
     val textVariants = params.textVariants
     val offsets = params.textVariantOffsets
 
     if (!params.isPlural || textVariants == null) {
-      return checkFn(params.text, params.baseText, false)
+      return checkFn(params.text, params.baseText, null)
     }
 
     val baseVariants = params.baseTextVariants
@@ -33,7 +42,7 @@ object QaPluralCheckHelper {
       val baseVariantText = baseVariants?.get(variantKey) ?: baseVariants?.get("other")
       val offset = offsets?.get(variantKey) ?: 0
 
-      val variantResults = checkFn(variantText, baseVariantText, true)
+      val variantResults = checkFn(variantText, baseVariantText, variantKey)
       results.addAll(
         variantResults.map { result ->
           result.copy(

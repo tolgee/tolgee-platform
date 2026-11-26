@@ -4,6 +4,7 @@ import io.tolgee.ee.service.qa.QaCheck
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckResult
 import io.tolgee.ee.service.qa.QaPluralCheckHelper
+import io.tolgee.formats.pluralVariantMatchesSingleInteger
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
@@ -13,8 +14,65 @@ class InconsistentPlaceholdersCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.INCONSISTENT_PLACEHOLDERS
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    return QaPluralCheckHelper.runPerVariant(params) { text, baseText, isVariant ->
-      checkVariant(text, baseText, isVariant)
+    return QaPluralCheckHelper.runPerVariantKeyed(params) { text, baseText, variantKey ->
+      checkVariant(text, baseText, variantKey?.let { PluralVariant(it, params) })
+    }
+  }
+
+  private class PluralVariant(
+    key: String,
+    params: QaCheckParams,
+  ) {
+    val textPluralArgName = params.textPluralArgName
+    val basePluralArgName = params.basePluralArgName
+    val matchesSingleInteger by lazy { pluralVariantMatchesSingleInteger(params.languageTag, key) }
+  }
+
+  private fun checkVariant(
+    text: String,
+    baseText: String?,
+    pluralVariant: PluralVariant?,
+  ): List<QaCheckResult> {
+    val base = baseText ?: return emptyList()
+    if (base.isBlank() || text.isBlank()) return emptyList()
+
+    val isPluralVariant = pluralVariant != null
+    val baseArgs = comparableArgs(base, isPluralVariant, pluralVariant?.basePluralArgName) ?: return emptyList()
+    val textArgs = comparableArgs(text, isPluralVariant, pluralVariant?.textPluralArgName) ?: return emptyList()
+
+    val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
+    val textCounts = textArgs.groupingBy { it.name }.eachCount()
+
+    val missingArgNames =
+      findMissingArgNames(baseCounts, textCounts).filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }
+    val extraArgs =
+      findExtraArgs(textArgs, baseCounts, textCounts).filterNot { isNumberAddedToPluralVariant(it, pluralVariant) }
+
+    // Special case - when we can rename placeholder to correct it
+    tryRenameArg(baseArgs, missingArgNames, extraArgs)?.let {
+      return listOf(it)
+    }
+
+    return addMissingArgs(missingArgNames) + removeExtraArgs(extraArgs)
+  }
+
+  private fun comparableArgs(
+    text: String,
+    isPluralVariant: Boolean,
+    pluralArgName: String?,
+  ): List<ArgInfo>? {
+    val args = extractArgs(text, isPluralVariant) ?: return null
+    return deduplicateNestedArgs(args.unifyPluralArg(pluralArgName))
+  }
+
+  /**
+   * Inside a plural, `#` and the plural's own argument (`{count}`) render the same number,
+   * so both are counted as `#`.
+   */
+  private fun List<ArgInfo>.unifyPluralArg(pluralArgName: String?): List<ArgInfo> {
+    pluralArgName ?: return this
+    return map { arg ->
+      arg.takeIf { it.name != pluralArgName } ?: arg.copy(name = REPLACE_NUMBER_PLACEHOLDER_NAME)
     }
   }
 
@@ -28,29 +86,18 @@ class InconsistentPlaceholdersCheck : QaCheck {
     return positioned + nested.distinctBy { it.name }
   }
 
-  private fun checkVariant(
-    text: String,
-    baseText: String?,
-    isPluralVariant: Boolean,
-  ): List<QaCheckResult> {
-    val base = baseText ?: return emptyList()
-    if (base.isBlank() || text.isBlank()) return emptyList()
+  private fun isNumberSpelledOutAsWord(
+    missingArgName: String,
+    pluralVariant: PluralVariant?,
+  ): Boolean {
+    return missingArgName == REPLACE_NUMBER_PLACEHOLDER_NAME && pluralVariant?.matchesSingleInteger == true
+  }
 
-    val baseArgs = deduplicateNestedArgs(extractArgs(base, isPluralVariant) ?: return emptyList())
-    val textArgs = deduplicateNestedArgs(extractArgs(text, isPluralVariant) ?: return emptyList())
-
-    val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
-    val textCounts = textArgs.groupingBy { it.name }.eachCount()
-
-    val missingArgNames = findMissingArgNames(baseCounts, textCounts)
-    val extraArgs = findExtraArgs(textArgs, baseCounts, textCounts)
-
-    // Special case - when we can rename placeholder to correct it
-    tryRenameArg(baseArgs, missingArgNames, extraArgs)?.let {
-      return listOf(it)
-    }
-
-    return addMissingArgs(missingArgNames) + removeExtraArgs(extraArgs)
+  private fun isNumberAddedToPluralVariant(
+    extraArg: ArgInfo,
+    pluralVariant: PluralVariant?,
+  ): Boolean {
+    return pluralVariant != null && extraArg.name == REPLACE_NUMBER_PLACEHOLDER_NAME
   }
 
   private fun findMissingArgNames(

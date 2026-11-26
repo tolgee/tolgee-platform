@@ -19,15 +19,18 @@ class InconsistentPlaceholdersCheckTest {
     textVariants: Map<String, String>? = null,
     baseTextVariants: Map<String, String>? = null,
     textVariantOffsets: Map<String, Int>? = null,
+    languageTag: String = "cs",
   ) = QaCheckParams(
     baseText = base,
     text = text,
     baseLanguageTag = "en",
-    languageTag = "cs",
+    languageTag = languageTag,
     isPlural = isPlural,
     textVariants = textVariants,
     baseTextVariants = baseTextVariants,
     textVariantOffsets = textVariantOffsets,
+    textPluralArgName = "count".takeIf { isPlural },
+    basePluralArgName = "count".takeIf { isPlural },
   )
 
   @Test
@@ -289,22 +292,21 @@ class InconsistentPlaceholdersCheckTest {
 
   @Test
   fun `detects missing hash placeholder in plural variants`() {
-    // Base has # in both variants, translation has none in either.
     check
       .check(
         params(
-          text = "{count, plural, one {polozka} other {polozek}}",
-          base = "{count, plural, one {# polozka} other {# polozek}}",
+          text = "{count, plural, one {# polozka} few {polozky} other {polozek}}",
+          base = "{count, plural, one {# item} other {# items}}",
           isPlural = true,
-          textVariants = mapOf("one" to "polozka", "other" to "polozek"),
-          baseTextVariants = mapOf("one" to "# polozka", "other" to "# polozek"),
-          textVariantOffsets = mapOf("one" to 21, "other" to 37),
+          textVariants = mapOf("one" to "# polozka", "few" to "polozky", "other" to "polozek"),
+          baseTextVariants = mapOf("one" to "# item", "other" to "# items"),
+          textVariantOffsets = mapOf("one" to 21, "few" to 37, "other" to 53),
         ),
       ).assertIssues {
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
           param("placeholder", "#")
-          pluralVariant("one")
+          pluralVariant("few")
         }
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
@@ -315,29 +317,209 @@ class InconsistentPlaceholdersCheckTest {
   }
 
   @Test
-  fun `detects extra hash placeholder in plural variants`() {
+  fun `allows a spelled-out number in a variant that matches a single integer`() {
+    // Czech `one` is selected only for 1, so "jedna polozka" is as good as "# polozka".
     check
       .check(
         params(
-          text = "{count, plural, one {# polozka} other {# polozek}}",
-          base = "{count, plural, one {polozka} other {polozek}}",
+          text = "{count, plural, one {jedna polozka} few {# polozky} other {# polozek}}",
+          base = "{count, plural, one {# item} other {# items}}",
           isPlural = true,
-          textVariants = mapOf("one" to "# polozka", "other" to "# polozek"),
-          baseTextVariants = mapOf("one" to "polozka", "other" to "polozek"),
-          textVariantOffsets = mapOf("one" to 21, "other" to 39),
+          textVariants = mapOf("one" to "jedna polozka", "few" to "# polozky", "other" to "# polozek"),
+          baseTextVariants = mapOf("one" to "# item", "other" to "# items"),
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `allows spelled-out numbers in Arabic zero, one and two but not in few, many and other`() {
+    val variants =
+      mapOf(
+        "zero" to "لا توجد مستندات",
+        "one" to "مستند واحد",
+        "two" to "مستندان",
+        "few" to "ثلاثة مستندات",
+        "many" to "أحد عشر مستندًا",
+        "other" to "مستند",
+      )
+    check
+      .check(
+        params(
+          text = "{count, plural, ${variants.entries.joinToString(" ") { "${it.key} {${it.value}}" }}}",
+          base = "{count, plural, one {# document} other {# documents}}",
+          isPlural = true,
+          textVariants = variants,
+          baseTextVariants = mapOf("one" to "# document", "other" to "# documents"),
+          languageTag = "ar",
         ),
       ).assertIssues {
-        issue {
-          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+        listOf("few", "many", "other").forEach { variant ->
+          issue {
+            message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+            param("placeholder", "#")
+            pluralVariant(variant)
+          }
+        }
+      }
+  }
+
+  @Test
+  fun `allows spelled-out numbers in Hebrew one and two`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {מסמך אחד} two {שני מסמכים} other {# מסמכים}}",
+          base = "{count, plural, one {# document} other {# documents}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "מסמך אחד", "two" to "שני מסמכים", "other" to "# מסמכים"),
+          baseTextVariants = mapOf("one" to "# document", "other" to "# documents"),
+          languageTag = "he",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `requires the number in a variant that matches several integers`() {
+    // French `one` covers 0 and 1, Russian `one` covers 1, 21, 31...
+    listOf("fr" to "un document", "ru" to "один документ").forEach { (tag, oneText) ->
+      check
+        .check(
+          params(
+            text = "{count, plural, one {$oneText} other {# x}}",
+            base = "{count, plural, one {# document} other {# documents}}",
+            isPlural = true,
+            textVariants = mapOf("one" to oneText, "other" to "# x"),
+            baseTextVariants = mapOf("one" to "# document", "other" to "# documents"),
+            languageTag = tag,
+          ),
+        ).assertSingleIssue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
           param("placeholder", "#")
           pluralVariant("one")
         }
+    }
+  }
+
+  @Test
+  fun `allows a spelled-out number in an exact variant`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, =0 {aucun document} one {# document} other {# documents}}",
+          base = "{count, plural, one {# document} other {# documents}}",
+          isPlural = true,
+          textVariants = mapOf("=0" to "aucun document", "one" to "# document", "other" to "# documents"),
+          baseTextVariants = mapOf("one" to "# document", "other" to "# documents"),
+          languageTag = "fr",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `still requires other placeholders in a variant that matches a single integer`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {jedna polozka} other {# polozek od {author}}}",
+          base = "{count, plural, one {# item by {author}} other {# items by {author}}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "jedna polozka", "other" to "# polozek od {author}"),
+          baseTextVariants = mapOf("one" to "# item by {author}", "other" to "# items by {author}"),
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "author")
+        pluralVariant("one")
+      }
+  }
+
+  @Test
+  fun `treats hash and the plural argument as the same placeholder`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# bewerking} other {# bewerkingen}}",
+          base = "{count, plural, one {{count} edit} other {{count} edits}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# bewerking", "other" to "# bewerkingen"),
+          baseTextVariants = mapOf("one" to "{count} edit", "other" to "{count} edits"),
+          languageTag = "nl",
+        ),
+      ).assertNoIssues()
+    check
+      .check(
+        params(
+          text = "{count, plural, one {{count} bewerking} other {{count, number} bewerkingen}}",
+          base = "{count, plural, one {# edit} other {# edits}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "{count} bewerking", "other" to "{count, number} bewerkingen"),
+          baseTextVariants = mapOf("one" to "# edit", "other" to "# edits"),
+          languageTag = "nl",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `detects a missing number when the base uses the plural argument`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# bewerking} other {bewerkingen}}",
+          base = "{count, plural, one {{count} edit} other {{count} edits}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# bewerking", "other" to "bewerkingen"),
+          baseTextVariants = mapOf("one" to "{count} edit", "other" to "{count} edits"),
+          languageTag = "nl",
+        ),
+      ).assertSingleIssue {
+        message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+        param("placeholder", "#")
+        pluralVariant("other")
+      }
+  }
+
+  @Test
+  fun `does not treat another argument as the plural number`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {{total} bewerking} other {{total} bewerkingen}}",
+          base = "{count, plural, one {# edit} other {# edits}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "{total} bewerking", "other" to "{total} bewerkingen"),
+          baseTextVariants = mapOf("one" to "# edit", "other" to "# edits"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 46),
+          languageTag = "nl",
+        ),
+      ).assertIssues {
+        // Dutch `one` matches only 1, so the missing number is tolerated there
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
-          param("placeholder", "#")
+          param("placeholder", "total")
+          pluralVariant("one")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+          params("placeholder" to "total", "expected" to "#")
           pluralVariant("other")
         }
       }
+  }
+
+  @Test
+  fun `allows the number in plural variants where the base has a literal or no number`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# samling} other {# samlingar}}",
+          base = "{count, plural, one {1 Collection} other {Collections}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# samling", "other" to "# samlingar"),
+          baseTextVariants = mapOf("one" to "1 Collection", "other" to "Collections"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 39),
+          languageTag = "sv",
+        ),
+      ).assertNoIssues()
   }
 
   @Test
@@ -357,47 +539,23 @@ class InconsistentPlaceholdersCheckTest {
 
   @Test
   fun `counts hash occurrences within a single plural variant`() {
-    // Base has # twice in 'one' (e.g. "# orders, # total"), translation has it once —
+    // Base has # twice (e.g. "# orders, # total"), translation has it once in `few` —
     // one # is missing. Top-level # gets a position just like a regular {arg}, so each
     // occurrence is tracked individually rather than collapsed by name.
     check
       .check(
         params(
-          text = "{count, plural, one {# polozek celkem} other {# polozek}}",
-          base = "{count, plural, one {# polozek, # celkem} other {# polozek}}",
+          text = "{count, plural, few {# polozky celkem} other {# polozek, # celkem}}",
+          base = "{count, plural, one {# item, # total} other {# items, # total}}",
           isPlural = true,
-          textVariants = mapOf("one" to "# polozek celkem", "other" to "# polozek"),
-          baseTextVariants = mapOf("one" to "# polozek, # celkem", "other" to "# polozek"),
-          textVariantOffsets = mapOf("one" to 21, "other" to 46),
+          textVariants = mapOf("few" to "# polozky celkem", "other" to "# polozek, # celkem"),
+          baseTextVariants = mapOf("one" to "# item, # total", "other" to "# items, # total"),
+          textVariantOffsets = mapOf("few" to 21, "other" to 46),
         ),
       ).assertSingleIssue {
         message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
         param("placeholder", "#")
-        pluralVariant("one")
-      }
-  }
-
-  @Test
-  fun `reports position of extra hash placeholder`() {
-    // Base has no # — translation added one in 'one'. The extra-issue path should
-    // include the # position (offset back into the full ICU text) and a "" replacement
-    // so the editor can offer to delete it.
-    check
-      .check(
-        params(
-          text = "{count, plural, one {# polozka} other {polozek}}",
-          base = "{count, plural, one {polozka} other {polozek}}",
-          isPlural = true,
-          textVariants = mapOf("one" to "# polozka", "other" to "polozek"),
-          baseTextVariants = mapOf("one" to "polozka", "other" to "polozek"),
-          textVariantOffsets = mapOf("one" to 21, "other" to 39),
-        ),
-      ).assertSingleIssue {
-        message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
-        param("placeholder", "#")
-        pluralVariant("one")
-        position(21, 22)
-        replacement("")
+        pluralVariant("few")
       }
   }
 
@@ -423,18 +581,18 @@ class InconsistentPlaceholdersCheckTest {
     check
       .check(
         params(
-          text = "{count, plural, one {'#' polozka} other {'#' polozek}}",
+          text = "{count, plural, few {'#' polozky} other {'#' polozek}}",
           base = "{count, plural, one {# item} other {# items}}",
           isPlural = true,
-          textVariants = mapOf("one" to "'#' polozka", "other" to "'#' polozek"),
+          textVariants = mapOf("few" to "'#' polozky", "other" to "'#' polozek"),
           baseTextVariants = mapOf("one" to "# item", "other" to "# items"),
-          textVariantOffsets = mapOf("one" to 21, "other" to 41),
+          textVariantOffsets = mapOf("few" to 21, "other" to 41),
         ),
       ).assertIssues {
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
           param("placeholder", "#")
-          pluralVariant("one")
+          pluralVariant("few")
         }
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
@@ -506,6 +664,42 @@ class InconsistentPlaceholdersCheckTest {
       ).assertSingleIssue {
         pluralVariant("other")
         param("placeholder", "author")
+      }
+  }
+
+  @Test
+  fun `does not report the number repeated in a plural variant`() {
+    check
+      .check(
+        params(
+          text = "{count, plural, one {# von # Datei} other {# von {count} Dateien}}",
+          base = "{count, plural, one {# file} other {# files}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "# von # Datei", "other" to "# von {count} Dateien"),
+          baseTextVariants = mapOf("one" to "# file", "other" to "# files"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 43),
+          languageTag = "de",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `compares hash and the plural argument separately outside plural keys`() {
+    check
+      .check(
+        params(
+          text = "Máte {count, plural, one {{count} soubor} other {{count} souborů}}",
+          base = "You have {count, plural, one {# file} other {# files}}",
+        ),
+      ).assertIssues {
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+          param("placeholder", "#")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+          param("placeholder", "count")
+        }
       }
   }
 }
