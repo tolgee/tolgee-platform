@@ -24,16 +24,13 @@ class SlackConfigManageService(
   private val slackErrorProvider: SlackErrorProvider,
 ) : SlackConfigCleanupService {
   @Transactional
-  override fun deleteAllOfOrganizationWorkspaces(
+  override fun deleteProjectConfigsOnOrganizationWorkspaces(
     projectId: Long,
     organizationId: Long,
   ) {
     slackConfigRepository
       .findAllByProjectIdAndWorkspaceOrganizationId(projectId, organizationId)
-      .forEach {
-        automationService.deleteForSlackIntegration(it)
-        slackConfigRepository.delete(it)
-      }
+      .forEach(::deleteWithAutomations)
   }
 
   @Transactional
@@ -53,9 +50,13 @@ class SlackConfigManageService(
         } ?: throw SlackErrorException(slackErrorProvider.getNotSubscribedToLanguageOrBadLanguageTagError())
       slackConfigPreferenceService.delete(pref)
     } else {
-      automationService.deleteForSlackIntegration(config)
-      slackConfigRepository.delete(config)
+      deleteWithAutomations(config)
     }
+  }
+
+  private fun deleteWithAutomations(config: SlackConfig) {
+    automationService.deleteForSlackIntegration(config)
+    slackConfigRepository.delete(config)
   }
 
   @Transactional

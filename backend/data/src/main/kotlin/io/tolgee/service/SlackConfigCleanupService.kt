@@ -1,7 +1,7 @@
 package io.tolgee.service
 
 interface SlackConfigCleanupService {
-  fun deleteAllOfOrganizationWorkspaces(
+  fun deleteProjectConfigsOnOrganizationWorkspaces(
     projectId: Long,
     organizationId: Long,
   )

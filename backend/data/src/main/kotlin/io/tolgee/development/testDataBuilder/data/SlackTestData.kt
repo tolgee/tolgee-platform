@@ -48,6 +48,7 @@ class SlackTestData {
   lateinit var slackUserConnection: SlackUserConnection
   lateinit var languageOnlySlackConfig: SlackConfig
   lateinit var otherOrganization: Organization
+  lateinit var noWorkspaceSlackConfig: SlackConfig
   lateinit var languageOnlySlackConfigAutomation: Automation
 
   val root: TestDataBuilder =
@@ -263,21 +264,38 @@ class SlackTestData {
         }.self
   }
 
-  fun addProjectTransferSetup() {
+  fun bindSlackConfigsToWorkspacesOfTwoOrganizations() {
     val otherOrganizationBuilder =
       root.addOrganization {
         name = "Transfer target organization"
       }
     otherOrganization = otherOrganizationBuilder.self
-    otherOrganizationBuilder.addSlackWorkspace {
-      author = userAccountBuilder.self
-      slackTeamId = "otherOrganizationSlackTeamId"
-      slackTeamName = "otherOrganizationSlackTeamName"
-      accessToken = "accessToken"
-      organization = otherOrganizationBuilder.self
-      languageOnlySlackConfig.organizationSlackWorkspace = this
-    }
+    val otherOrganizationSlackWorkspace =
+      otherOrganizationBuilder
+        .addSlackWorkspace {
+          author = userAccountBuilder.self
+          slackTeamId = "otherOrganizationSlackTeamId"
+          slackTeamName = "otherOrganizationSlackTeamName"
+          accessToken = "accessToken"
+          organization = otherOrganizationBuilder.self
+        }.self
     slackConfig.organizationSlackWorkspace = slackWorkspace
+    languageOnlySlackConfig.organizationSlackWorkspace = otherOrganizationSlackWorkspace
+  }
+
+  fun addSlackConfigWithoutWorkspace() {
+    noWorkspaceSlackConfig =
+      projectBuilder
+        .addSlackConfig {
+          channelId = "noWorkspaceChannel"
+          project = projectBuilder.self
+          userAccount = userAccountBuilder.self
+          isGlobalSubscription = true
+          events = mutableSetOf(SlackEventType.ALL)
+        }.self
+  }
+
+  fun addAutomationForLanguageOnlySlackConfig() {
     languageOnlySlackConfigAutomation =
       projectBuilder
         .addAutomation {

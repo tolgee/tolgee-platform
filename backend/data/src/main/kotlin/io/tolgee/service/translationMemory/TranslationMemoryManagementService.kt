@@ -2,6 +2,7 @@ package io.tolgee.service.translationMemory
 
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.translationMemory.TranslationMemory
 import io.tolgee.model.translationMemory.TranslationMemoryProject
@@ -101,6 +102,16 @@ class TranslationMemoryManagementService(
         }
     if (assignments.isEmpty()) return
     translationMemoryProjectRepository.deleteAll(assignments)
+  }
+
+  @Transactional
+  fun moveProjectTmToOrganization(
+    projectId: Long,
+    organization: Organization,
+  ) {
+    val tm = getProjectTm(projectId) ?: return
+    tm.organizationOwner = organization
+    translationMemoryRepository.save(tm)
   }
 
   @Transactional

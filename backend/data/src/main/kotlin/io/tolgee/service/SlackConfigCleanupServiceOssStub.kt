@@ -3,11 +3,10 @@ package io.tolgee.service
 import org.springframework.stereotype.Service
 
 @Service
-class SlackConfigCleanupServiceOosStub : SlackConfigCleanupService {
-  override fun deleteAllOfOrganizationWorkspaces(
+class SlackConfigCleanupServiceOssStub : SlackConfigCleanupService {
+  override fun deleteProjectConfigsOnOrganizationWorkspaces(
     projectId: Long,
     organizationId: Long,
   ) {
-    // no-op
   }
 }

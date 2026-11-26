@@ -210,16 +210,13 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
   @Test
   @ProjectJWTAuthTestMethod
   fun `transferring a project to another organization keeps only its own TM`() {
-    val otherOrganization =
-      dbPopulator.createOrganizationIfNotExist("tm-transfer-target", userAccount = testData.user)
-
-    projectService.transferToOrganization(project.id, otherOrganization.id)
+    projectService.transferToOrganization(project.id, testData.transferTargetOrganization.id)
 
     executeInNewTransaction {
       assertThat(translationMemoryManagementService.getSharedTmAssignmentsForProject(project.id))
         .isEmpty()
       assertThat(translationMemoryManagementService.getProjectTm(project.id)!!.organizationOwner.id)
-        .isEqualTo(otherOrganization.id)
+        .isEqualTo(testData.transferTargetOrganization.id)
     }
   }
 }

@@ -601,8 +601,8 @@ class ProjectService(
     if (project.organizationOwner.id != organization.id) {
       glossaryCleanupService.unassignFromAllProjects(project)
       translationMemoryManagementService.unassignAllSharedTmsByProject(projectId)
-      translationMemoryManagementService.getProjectTm(projectId)?.organizationOwner = organization
-      slackConfigCleanupService.deleteAllOfOrganizationWorkspaces(projectId, project.organizationOwner.id)
+      translationMemoryManagementService.moveProjectTmToOrganization(projectId, organization)
+      slackConfigCleanupService.deleteProjectConfigsOnOrganizationWorkspaces(projectId, project.organizationOwner.id)
     }
     project.organizationOwner = organization
     save(project)

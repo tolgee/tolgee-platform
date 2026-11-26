@@ -28,7 +28,6 @@ class SlackConfigServiceTest : AbstractSpringTest() {
   fun setup() {
     testData = SlackTestData()
     testData.addLanguageOnlySlackConfigWithChannelEvents()
-    testData.addProjectTransferSetup()
     testDataService.saveTestData(testData.root)
   }
 
@@ -98,24 +97,6 @@ class SlackConfigServiceTest : AbstractSpringTest() {
       config.preferences.map { it.languageTag to it.events }.assert.containsExactly(
         "fr" to mutableSetOf(SlackEventType.NEW_KEY),
       )
-    }
-  }
-
-  @Test
-  fun `transferring a project removes subscriptions of the workspaces of the organization it leaves`() {
-    val projectId = testData.projectBuilder.self.id
-
-    projectService.transferToOrganization(projectId, testData.otherOrganization.id)
-
-    executeInNewTransaction {
-      slackConfigReadService.find(projectId, "testChannel").assert.isNull()
-      slackConfigReadService.find(projectId, "languageOnlyChannel").assert.isNotNull()
-      entityManager
-        .createQuery("select a.id from Automation a where a.project.id = :projectId")
-        .setParameter("projectId", projectId)
-        .resultList
-        .assert
-        .containsExactly(testData.languageOnlySlackConfigAutomation.id)
     }
   }
 }
