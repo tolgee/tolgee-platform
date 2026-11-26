@@ -149,7 +149,6 @@ class QaCheckBatchServiceImpl(
           textVariants = textParsed?.forms,
           textVariantOffsets = textParsed?.offsets,
           baseTextVariants = baseParsed?.forms,
-          textPluralArgName = textParsed?.argName,
           basePluralArgName = baseParsed?.argName,
           maxCharLimit = key.maxCharLimit,
           icuPlaceholders = project.icuPlaceholders,

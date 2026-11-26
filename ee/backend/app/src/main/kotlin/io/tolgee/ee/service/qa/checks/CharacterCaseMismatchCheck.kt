@@ -6,10 +6,10 @@ import io.tolgee.ee.service.qa.QaCheckResult
 import io.tolgee.ee.service.qa.QaPluralCheckHelper
 import io.tolgee.formats.capitalizesAllNouns
 import io.tolgee.formats.isWrittenInCaselessScript
+import io.tolgee.formats.javaLocaleOf
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
-import java.util.Locale
 
 @Component
 class CharacterCaseMismatchCheck : QaCheck {
@@ -54,7 +54,7 @@ class CharacterCaseMismatchCheck : QaCheck {
     if (!isFirstLetterCaseMeaningful(text, textFirstIndex, isPluralVariant)) return emptyList()
     if (startsWithLowercaseAbbreviation(base) || isInBlockedRange(base, baseFirstIndex)) return emptyList()
 
-    val locale = Locale.forLanguageTag(languageTag)
+    val locale = javaLocaleOf(languageTag)
 
     if (shouldCapitalize) {
       return listOf(

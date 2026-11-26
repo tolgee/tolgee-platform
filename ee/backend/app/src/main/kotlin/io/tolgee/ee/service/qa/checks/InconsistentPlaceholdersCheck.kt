@@ -23,8 +23,7 @@ class InconsistentPlaceholdersCheck : QaCheck {
     key: String,
     params: QaCheckParams,
   ) {
-    val textPluralArgName = params.textPluralArgName
-    val basePluralArgName = params.basePluralArgName
+    val pluralArgName = params.basePluralArgName
     val matchesSingleInteger by lazy { pluralVariantMatchesSingleInteger(params.languageTag, key) }
   }
 
@@ -37,8 +36,8 @@ class InconsistentPlaceholdersCheck : QaCheck {
     if (base.isBlank() || text.isBlank()) return emptyList()
 
     val isPluralVariant = pluralVariant != null
-    val baseArgs = comparableArgs(base, isPluralVariant, pluralVariant?.basePluralArgName) ?: return emptyList()
-    val textArgs = comparableArgs(text, isPluralVariant, pluralVariant?.textPluralArgName) ?: return emptyList()
+    val baseArgs = comparableArgs(base, isPluralVariant, pluralVariant?.pluralArgName) ?: return emptyList()
+    val textArgs = comparableArgs(text, isPluralVariant, pluralVariant?.pluralArgName) ?: return emptyList()
 
     val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
     val textCounts = textArgs.groupingBy { it.name }.eachCount()

@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.util.ULocale
+import java.util.Locale
 
 private const val LATIN_SCRIPT = "Latn"
 
@@ -38,6 +39,10 @@ fun pluralVariantMatchesSingleInteger(
 
 private fun likelyScript(languageTag: String): String {
   return ULocale.addLikelySubtags(localeOf(languageTag)).script
+}
+
+fun javaLocaleOf(languageTag: String): Locale {
+  return localeOf(languageTag).toLocale()
 }
 
 /** Project language tags are free text and often use an underscore (`zh_CN`), which ICU does not parse. */

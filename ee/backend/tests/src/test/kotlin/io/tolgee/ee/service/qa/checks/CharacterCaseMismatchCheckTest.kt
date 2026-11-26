@@ -281,4 +281,12 @@ class CharacterCaseMismatchCheckTest {
   fun `skips a base language written in a script without letter case`() {
     check.check(params("Hello", "გამარჯობა", baseLanguageTag = "ka", languageTag = "en")).assertNoIssues()
   }
+
+  @Test
+  fun `uses Turkish casing for a language tag written with an underscore`() {
+    check.check(params("istanbul", "Istanbul", languageTag = "tr_TR")).assertSingleIssue {
+      message(QaIssueMessage.QA_CASE_CAPITALIZE)
+      replacement("İ")
+    }
+  }
 }

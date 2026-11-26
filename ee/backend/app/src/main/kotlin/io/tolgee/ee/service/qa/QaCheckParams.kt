@@ -9,7 +9,6 @@ data class QaCheckParams(
   val textVariants: Map<String, String>? = null,
   val textVariantOffsets: Map<String, Int>? = null,
   val baseTextVariants: Map<String, String>? = null,
-  val textPluralArgName: String? = null,
   val basePluralArgName: String? = null,
   val maxCharLimit: Int? = null,
   val icuPlaceholders: Boolean = true,

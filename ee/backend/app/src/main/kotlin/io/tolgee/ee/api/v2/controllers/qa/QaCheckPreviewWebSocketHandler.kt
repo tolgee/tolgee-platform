@@ -91,7 +91,6 @@ class QaCheckPreviewWebSocketHandler(
           textVariants = textParsed?.forms,
           textVariantOffsets = textParsed?.offsets,
           baseTextVariants = state.baseVariants,
-          textPluralArgName = textParsed?.argName,
           basePluralArgName = state.basePluralArgName,
           maxCharLimit = state.maxCharLimit,
           icuPlaceholders = state.icuPlaceholders,

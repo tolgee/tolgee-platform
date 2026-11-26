@@ -217,4 +217,14 @@ class PunctuationMismatchCheckTest {
       replacement("。")
     }
   }
+
+  @Test
+  fun `suggests a question mark for a semicolon that translates a Greek question`() {
+    check.check(params("Are you sure;", "Είστε σίγουροι;", baseLanguageTag = "el")).assertSingleIssue {
+      message(QaIssueMessage.QA_PUNCTUATION_REPLACE)
+      replacement("?")
+      param("punctuation", ";")
+      param("expected", "?")
+    }
+  }
 }

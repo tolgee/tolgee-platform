@@ -29,7 +29,6 @@ class InconsistentPlaceholdersCheckTest {
     textVariants = textVariants,
     baseTextVariants = baseTextVariants,
     textVariantOffsets = textVariantOffsets,
-    textPluralArgName = "count".takeIf { isPlural },
     basePluralArgName = "count".takeIf { isPlural },
   )
 
@@ -699,6 +698,34 @@ class InconsistentPlaceholdersCheckTest {
         issue {
           message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
           param("placeholder", "count")
+        }
+      }
+  }
+
+  @Test
+  fun `reports a translation that renames the plural argument`() {
+    check
+      .check(
+        params(
+          text = "{total, plural, one {{total} polozka} other {{total} polozek}}",
+          base = "{count, plural, one {{count} item} other {{count} items}}",
+          isPlural = true,
+          textVariants = mapOf("one" to "{total} polozka", "other" to "{total} polozek"),
+          baseTextVariants = mapOf("one" to "{count} item", "other" to "{count} items"),
+          textVariantOffsets = mapOf("one" to 21, "other" to 44),
+        ),
+      ).assertIssues {
+        // Czech `one` matches only 1, so the missing number is tolerated there
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+          param("placeholder", "total")
+          pluralVariant("one")
+        }
+        issue {
+          message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+          params("placeholder" to "total", "expected" to "#")
+          replacement("{count}")
+          pluralVariant("other")
         }
       }
   }

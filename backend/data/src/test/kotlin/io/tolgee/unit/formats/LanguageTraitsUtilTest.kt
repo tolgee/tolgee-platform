@@ -3,6 +3,7 @@ package io.tolgee.unit.formats
 import io.tolgee.formats.capitalizesAllNouns
 import io.tolgee.formats.isWrittenInCaselessScript
 import io.tolgee.formats.isWrittenInNonLatinScript
+import io.tolgee.formats.javaLocaleOf
 import io.tolgee.formats.languageCodeOf
 import io.tolgee.formats.pluralVariantMatchesSingleInteger
 import io.tolgee.testing.assert
@@ -94,6 +95,7 @@ class LanguageTraitsUtilTest {
     "de_DE".assert.matches(::capitalizesAllNouns, "capitalizes all nouns")
     languageCodeOf("el_GR").assert.isEqualTo("el")
     languageCodeOf("pt-BR").assert.isEqualTo("pt")
+    javaLocaleOf("tr_TR").toLanguageTag().assert.isEqualTo("tr-TR")
     ("ar_SA" to "two").assert.matches({ (tag, key) -> pluralVariantMatchesSingleInteger(tag, key) }, "single integer")
   }
 }

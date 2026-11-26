@@ -34,12 +34,12 @@ class PunctuationMismatchCheck : QaCheck {
     val basePunct = trailingPunctuation(base.trimEnd(), baseLanguageTag)
     val textPunct = trailingPunctuation(textTrimmed, languageTag)
 
-    if (basePunct == textPunct) return emptyList()
-
     val expectedAscii = basePunct?.let { toAsciiPunctuation(it, baseLanguageTag) }
     if (expectedAscii == textPunct?.let { toAsciiPunctuation(it, languageTag) }) return emptyList()
 
     val expected = expectedAscii?.let { localizePunctuation(it, languageTag).toString() }
+    if (expected == textPunct?.toString()) return emptyList()
+
     val textEnd = textTrimmed.length
     return when {
       expected != null && textPunct == null -> {
