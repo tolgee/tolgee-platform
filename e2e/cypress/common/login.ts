@@ -44,6 +44,9 @@ const loginWithFakeThirdPartyService = (
     cy.origin(redirectUrlOrigin, () => {
       cy.contains('Fake third party auth').should('be.visible');
     });
+    // Cypress 16 routes registered before leaving for another origin miss the requests of the
+    // first page loaded after coming back, so return to the app before loading the callback.
+    cy.visit(HOST);
     let url = `${HOST}/login/auth_callback/${service}`;
     url += `?code=this_is_dummy_code_${username}`;
     if (state) {

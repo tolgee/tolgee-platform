@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress';
 import { GLOBAL_RETRIES } from './cypress/common/globalRetries';
 import { registerFlakyReport } from './cypress/common/flakyReport';
+import { exposeEnv } from './cypress/common/exposeEnv';
 
 export default defineConfig({
   scrollBehavior: 'center',
@@ -15,7 +16,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       registerFlakyReport(on);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./cypress/plugins/index.js')(on, config);
+      return exposeEnv(require('./cypress/plugins/index.js')(on, config));
     },
     retries: { runMode: GLOBAL_RETRIES },
   },
