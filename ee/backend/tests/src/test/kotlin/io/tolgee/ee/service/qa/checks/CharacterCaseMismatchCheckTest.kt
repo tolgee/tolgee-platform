@@ -289,4 +289,10 @@ class CharacterCaseMismatchCheckTest {
       replacement("İ")
     }
   }
+
+  @Test
+  fun `does not compare case when only one string starts with a number`() {
+    check.check(params("Hace 2 minutos", "2 minutes ago", languageTag = "es")).assertNoIssues()
+    check.check(params("3 položky vybrány", "Selected 3 items")).assertNoIssues()
+  }
 }

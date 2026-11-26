@@ -32,7 +32,7 @@ class BracketsMismatchCheck : QaCheck {
     if (rawText.isBlank()) return emptyList()
 
     val (base, textWithGlosses) =
-      withoutUnmatchedOptionalSuffixes(fullWidthBracketsToAscii(rawBase), fullWidthBracketsToAscii(rawText))
+      withoutOptionalSuffixesUnlessBalanced(fullWidthBracketsToAscii(rawBase), fullWidthBracketsToAscii(rawText))
     val text = withoutAddedLatinGlosses(textWithGlosses, base, latinGlossesExpected)
 
     val baseCounts = countBrackets(base, bracketChars)
@@ -45,25 +45,27 @@ class BracketsMismatchCheck : QaCheck {
       val baseCount = baseCounts[bracket] ?: 0
       val textCount = textCounts[bracket] ?: 0
 
-      if (textCount > baseCount) {
-        // Extra brackets in translation — report each extra occurrence (they have unique positions)
-        val positions = findBracketPositions(text, bracket)
-        for (pos in positions.drop(baseCount)) {
-          results.add(
-            QaCheckResult(
-              type = QaCheckType.BRACKETS_MISMATCH,
-              message = QaIssueMessage.QA_BRACKETS_EXTRA,
-              replacement = null,
-              positionStart = pos,
-              positionEnd = pos + 1,
-              params = mapOf("bracket" to bracket.toString()),
-            ),
-          )
+      when {
+        textCount > baseCount -> {
+          // Extra brackets in translation — report each extra occurrence (they have unique positions)
+          val positions = findBracketPositions(text, bracket)
+          for (pos in positions.drop(baseCount)) {
+            results.add(
+              QaCheckResult(
+                type = QaCheckType.BRACKETS_MISMATCH,
+                message = QaIssueMessage.QA_BRACKETS_EXTRA,
+                replacement = null,
+                positionStart = pos,
+                positionEnd = pos + 1,
+                params = mapOf("bracket" to bracket.toString()),
+              ),
+            )
+          }
         }
-      }
 
-      if (textCount < baseCount) {
-        missingBrackets.add(bracket to (baseCount - textCount))
+        textCount < baseCount -> {
+          missingBrackets.add(bracket to (baseCount - textCount))
+        }
       }
     }
 
@@ -101,11 +103,14 @@ class BracketsMismatchCheck : QaCheck {
 
     private val LATIN_GLOSS_REGEX = Regex("""\((?=[^()]*\p{IsLatin})[\p{IsLatin}\p{N}\s.,&/'_+-]+\)""")
 
+    fun getBracketChars(icuPlaceholders: Boolean): CharArray =
+      if (icuPlaceholders) NON_ICU_BRACKET_CHARS else ALL_BRACKET_CHARS
+
     private fun fullWidthBracketsToAscii(text: String): String {
       return String(CharArray(text.length) { FULL_WIDTH_BRACKETS[text[it]] ?: text[it] })
     }
 
-    private fun withoutUnmatchedOptionalSuffixes(
+    private fun withoutOptionalSuffixesUnlessBalanced(
       base: String,
       text: String,
     ): Pair<String, String> {
@@ -142,9 +147,6 @@ class BracketsMismatchCheck : QaCheck {
       matches.forEach { chars.fill(' ', it.range.first, it.range.last + 1) }
       return String(chars)
     }
-
-    fun getBracketChars(icuPlaceholders: Boolean): CharArray =
-      if (icuPlaceholders) NON_ICU_BRACKET_CHARS else ALL_BRACKET_CHARS
 
     private fun countBrackets(
       text: String,

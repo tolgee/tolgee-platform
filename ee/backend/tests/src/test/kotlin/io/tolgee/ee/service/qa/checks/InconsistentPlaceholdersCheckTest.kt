@@ -491,16 +491,12 @@ class InconsistentPlaceholdersCheckTest {
           languageTag = "nl",
         ),
       ).assertIssues {
-        // Dutch `one` matches only 1, so the missing number is tolerated there
-        issue {
-          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
-          param("placeholder", "total")
-          pluralVariant("one")
-        }
-        issue {
-          message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
-          params("placeholder" to "total", "expected" to "#")
-          pluralVariant("other")
+        listOf("one", "other").forEach { variant ->
+          issue {
+            message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+            params("placeholder" to "total", "expected" to "#")
+            pluralVariant(variant)
+          }
         }
       }
   }
@@ -715,17 +711,13 @@ class InconsistentPlaceholdersCheckTest {
           textVariantOffsets = mapOf("one" to 21, "other" to 44),
         ),
       ).assertIssues {
-        // Czech `one` matches only 1, so the missing number is tolerated there
-        issue {
-          message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
-          param("placeholder", "total")
-          pluralVariant("one")
-        }
-        issue {
-          message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
-          params("placeholder" to "total", "expected" to "#")
-          replacement("{count}")
-          pluralVariant("other")
+        listOf("one", "other").forEach { variant ->
+          issue {
+            message(QaIssueMessage.QA_PLACEHOLDERS_REPLACE)
+            params("placeholder" to "total", "expected" to "#")
+            replacement("{count}")
+            pluralVariant(variant)
+          }
         }
       }
   }

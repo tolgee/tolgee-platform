@@ -29,16 +29,18 @@ class PunctuationMismatchCheck : QaCheck {
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
-    val textTrimmed = text.trimEnd()
+    val textTrimmed = trimEnd(text)
 
-    val basePunct = trailingPunctuation(base.trimEnd(), baseLanguageTag)
+    val basePunct = trailingPunctuation(trimEnd(base), baseLanguageTag)
     val textPunct = trailingPunctuation(textTrimmed, languageTag)
 
     val expectedAscii = basePunct?.let { toAsciiPunctuation(it, baseLanguageTag) }
-    if (expectedAscii == textPunct?.let { toAsciiPunctuation(it, languageTag) }) return emptyList()
+    val textAscii = textPunct?.let { toAsciiPunctuation(it, languageTag) }
+    if (expectedAscii == textAscii) return emptyList()
 
     val expected = expectedAscii?.let { localizePunctuation(it, languageTag).toString() }
-    if (expected == textPunct?.toString()) return emptyList()
+    val isAlreadyWrittenAsSuggested = expected == textPunct?.toString()
+    if (isAlreadyWrittenAsSuggested) return emptyList()
 
     val textEnd = textTrimmed.length
     return when {
@@ -126,6 +128,13 @@ class PunctuationMismatchCheck : QaCheck {
         "ur" to ARABIC_PUNCTUATION + ('.' to '۔'),
         GREEK to mapOf('?' to ';'),
       )
+
+    /** Right-to-left text often ends with an invisible direction mark after the punctuation. */
+    private val DIRECTION_MARKS = setOf('\u200E', '\u200F')
+
+    private fun trimEnd(text: String): String {
+      return text.trimEnd { it.isWhitespace() || it in DIRECTION_MARKS }
+    }
 
     fun trailingPunctuation(
       text: String,

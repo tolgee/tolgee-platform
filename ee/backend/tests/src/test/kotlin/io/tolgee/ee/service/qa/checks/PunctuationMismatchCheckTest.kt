@@ -227,4 +227,18 @@ class PunctuationMismatchCheckTest {
       param("expected", "?")
     }
   }
+
+  @Test
+  fun `ignores an invisible direction mark after the punctuation`() {
+    check.check(params("هل أنت متأكد؟\u200F", "Are you sure?", languageTag = "ar")).assertNoIssues()
+    check.check(params("בטוח?\u200F ", "Are you sure?", languageTag = "he")).assertNoIssues()
+  }
+
+  @Test
+  fun `adds missing punctuation before a trailing direction mark`() {
+    check.check(params("مرحبا\u200F", "Hello.", languageTag = "ar")).assertSingleIssue {
+      message(QaIssueMessage.QA_PUNCTUATION_ADD)
+      position(5, 5)
+    }
+  }
 }

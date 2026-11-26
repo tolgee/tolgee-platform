@@ -53,6 +53,7 @@ class CharacterCaseMismatchCheck : QaCheck {
     if (!isFirstLetterCaseMeaningful(base, baseFirstIndex, isPluralVariant)) return emptyList()
     if (!isFirstLetterCaseMeaningful(text, textFirstIndex, isPluralVariant)) return emptyList()
     if (startsWithLowercaseAbbreviation(base) || isInBlockedRange(base, baseFirstIndex)) return emptyList()
+    if (startsWithNumber(base) != startsWithNumber(text)) return emptyList()
 
     val locale = javaLocaleOf(languageTag)
 
@@ -108,6 +109,10 @@ class CharacterCaseMismatchCheck : QaCheck {
     ): Boolean {
       val start = text.indexOfFirst { !it.isWhitespace() }
       return extractArgs(text, isPluralVariant)?.any { it.positionStart == start } ?: false
+    }
+
+    private fun startsWithNumber(text: String): Boolean {
+      return text.trimStart().firstOrNull()?.isDigit() == true
     }
 
     private fun startsWithLowercaseAbbreviation(text: String): Boolean {

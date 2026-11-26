@@ -12,18 +12,10 @@ object QaPluralCheckHelper {
    * to full-ICU-text-relative.
    *
    * @param params The QA check params containing text, variants, and offsets
-   * @param checkFn The per-variant check logic. Receives (`variantText`, `baseVariantText`)
-   *                and returns issues with positions relative to the variant text.
+   * @param checkFn The per-variant check logic. Receives (`variantText`, `baseVariantText`,
+   *                `variantKey`, which is null for non-plural text) and returns issues with
+   *                positions relative to the variant text.
    */
-  fun runPerVariant(
-    params: QaCheckParams,
-    checkFn: (text: String, baseText: String?, isVariant: Boolean) -> List<QaCheckResult>,
-  ): List<QaCheckResult> {
-    return runPerVariantKeyed(params) { text, baseText, variantKey ->
-      checkFn(text, baseText, variantKey != null)
-    }
-  }
-
   fun runPerVariantKeyed(
     params: QaCheckParams,
     checkFn: (text: String, baseText: String?, variantKey: String?) -> List<QaCheckResult>,
@@ -55,5 +47,14 @@ object QaPluralCheckHelper {
     }
 
     return results
+  }
+
+  fun runPerVariant(
+    params: QaCheckParams,
+    checkFn: (text: String, baseText: String?, isVariant: Boolean) -> List<QaCheckResult>,
+  ): List<QaCheckResult> {
+    return runPerVariantKeyed(params) { text, baseText, variantKey ->
+      checkFn(text, baseText, variantKey != null)
+    }
   }
 }

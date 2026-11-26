@@ -37,12 +37,12 @@ fun pluralVariantMatchesSingleInteger(
   return rules.getUniqueKeywordValue(variantKey) != PluralRules.NO_UNIQUE_VALUE
 }
 
-private fun likelyScript(languageTag: String): String {
-  return ULocale.addLikelySubtags(localeOf(languageTag)).script
-}
-
 fun javaLocaleOf(languageTag: String): Locale {
   return localeOf(languageTag).toLocale()
+}
+
+private fun likelyScript(languageTag: String): String {
+  return ULocale.addLikelySubtags(localeOf(languageTag)).script
 }
 
 /** Project language tags are free text and often use an underscore (`zh_CN`), which ICU does not parse. */

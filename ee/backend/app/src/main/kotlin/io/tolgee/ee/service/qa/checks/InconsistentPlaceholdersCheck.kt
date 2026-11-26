@@ -35,33 +35,30 @@ class InconsistentPlaceholdersCheck : QaCheck {
     val base = baseText ?: return emptyList()
     if (base.isBlank() || text.isBlank()) return emptyList()
 
-    val isPluralVariant = pluralVariant != null
-    val baseArgs = comparableArgs(base, isPluralVariant, pluralVariant?.pluralArgName) ?: return emptyList()
-    val textArgs = comparableArgs(text, isPluralVariant, pluralVariant?.pluralArgName) ?: return emptyList()
+    val baseArgs = comparableArgs(base, pluralVariant) ?: return emptyList()
+    val textArgs = comparableArgs(text, pluralVariant) ?: return emptyList()
 
     val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
     val textCounts = textArgs.groupingBy { it.name }.eachCount()
 
-    val missingArgNames =
-      findMissingArgNames(baseCounts, textCounts).filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }
-    val extraArgs =
-      findExtraArgs(textArgs, baseCounts, textCounts).filterNot { isNumberAddedToPluralVariant(it, pluralVariant) }
+    val missingArgNames = findMissingArgNames(baseCounts, textCounts)
+    val extraArgs = findExtraArgs(textArgs, baseCounts, textCounts)
 
     // Special case - when we can rename placeholder to correct it
     tryRenameArg(baseArgs, missingArgNames, extraArgs)?.let {
       return listOf(it)
     }
 
-    return addMissingArgs(missingArgNames) + removeExtraArgs(extraArgs)
+    return addMissingArgs(missingArgNames.filterNot { isNumberSpelledOutAsWord(it, pluralVariant) }) +
+      removeExtraArgs(extraArgs.filterNot { isNumberAddedToPluralVariant(it, pluralVariant) })
   }
 
   private fun comparableArgs(
     text: String,
-    isPluralVariant: Boolean,
-    pluralArgName: String?,
+    pluralVariant: PluralVariant?,
   ): List<ArgInfo>? {
-    val args = extractArgs(text, isPluralVariant) ?: return null
-    return deduplicateNestedArgs(args.unifyPluralArg(pluralArgName))
+    val args = extractArgs(text, isPluralVariant = pluralVariant != null) ?: return null
+    return deduplicateNestedArgs(args.unifyPluralArg(pluralVariant?.pluralArgName))
   }
 
   /**
