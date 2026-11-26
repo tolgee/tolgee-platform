@@ -90,11 +90,7 @@ const MainWrapper = () => {
                         <BottomPanelProvider>
                           <GlobalStyles />
                           <MuiLocalizationProvider>
-                            {/* Must stay below BrowserRouter: when the outer boundary suspends it,
-                                react-router 5 loses its popstate listener and Back/Forward stop rendering. */}
-                            <Suspense fallback={<FullPageLoading />}>
-                              <App />
-                            </Suspense>
+                            <App />
                             <GlobalErrorModal />
                           </MuiLocalizationProvider>
                         </BottomPanelProvider>

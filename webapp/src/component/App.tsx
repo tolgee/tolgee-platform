@@ -1,8 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
 import { GlobalError } from '../error/GlobalError';
 import ConfirmationDialog from './common/ConfirmationDialog';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { RootRouter } from './RootRouter';
 import { MandatoryDataProvider } from './MandatoryDataProvider';
 import { SensitiveOperationAuthDialog } from './SensitiveOperationAuthDialog';
@@ -66,7 +67,11 @@ export class App extends React.Component {
         <MandatoryDataProvider>
           <SensitiveOperationAuthDialog />
           <Ga4Tag />
-          <RootRouter />
+          {/* Must stay below BrowserRouter: when a boundary above it suspends,
+              react-router 5 loses its popstate listener and Back/Forward stop rendering. */}
+          <Suspense fallback={<FullPageLoading />}>
+            <RootRouter />
+          </Suspense>
           <GlobalConfirmation />
           <GlobalLimitPopover />
         </MandatoryDataProvider>
