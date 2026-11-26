@@ -176,7 +176,7 @@ export function getTranslationVariantCopyButton(
   variant: string
 ) {
   return getTranslationCell(key, languageTag).findDcyAdvanced({
-    value: 'translations-cell-copy-button',
+    value: 'translations-cell-copy-variant-button',
     variant,
   });
 }

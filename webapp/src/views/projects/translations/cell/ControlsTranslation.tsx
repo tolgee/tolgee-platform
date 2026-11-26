@@ -66,7 +66,7 @@ const StyledCheckIcon = styled(Check)`
 
 type ControlsProps = {
   state?: State;
-  text?: string;
+  copyableText?: string;
   editEnabled?: boolean;
   stateChangeEnabled?: boolean;
   onEdit?: () => void;
@@ -92,7 +92,7 @@ export const ControlsTranslation: React.FC<
   React.PropsWithChildren<ControlsProps>
 > = ({
   state,
-  text,
+  copyableText,
   editEnabled,
   stateChangeEnabled,
   onEdit,
@@ -142,7 +142,7 @@ export const ControlsTranslation: React.FC<
   if (displayEdit) {
     spots.push('edit');
   }
-  if (text) {
+  if (copyableText) {
     spots.push('copy');
   }
   if (displayComments) {
@@ -200,10 +200,11 @@ export const ControlsTranslation: React.FC<
           <Edit02 />
         </ControlsButton>
       )}
-      {text && active && (
+      {copyableText && active && (
         <CopyTranslationButton
+          dataCy="translations-cell-copy-button"
           style={{ gridArea: 'copy' }}
-          text={text}
+          text={copyableText}
           className={CELL_SHOW_ON_HOVER}
         />
       )}

@@ -1,15 +1,12 @@
-import { useMemo } from 'react';
-import { getTolgeeFormat } from '@tginternal/editor';
+import React, { useMemo } from 'react';
 
 import { TranslationPlurals } from './TranslationPlurals';
 import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
-import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationVariantVisual } from 'tg.views/projects/translations/translationVisual/TranslationVariantVisual';
-import { CopyTranslationButton } from 'tg.views/projects/translations/cell/CopyTranslationButton';
-import { CELL_SHOW_ON_HOVER } from 'tg.views/projects/translations/cell/styles';
+import { useTolgeeFormat } from 'tg.views/projects/translations/translationVisual/useTolgeeFormat';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
@@ -18,16 +15,17 @@ const StyledDisabled = styled(DirectionLocaleWrapper)`
   cursor: default;
 `;
 
-const StyledCopyableVariant = styled('div')`
+const StyledVariantWithAction = styled('div')`
   display: grid;
   grid-template-columns: minmax(0, 1fr) 20px;
   align-items: start;
-  gap: 8px;
-
-  & > button {
-    margin-top: -6px;
-  }
+  gap: ${({ theme }) => theme.spacing(1)};
 `;
+
+type VariantActionProps = {
+  variant: string;
+  content: string;
+};
 
 type Props = {
   maxLines?: number;
@@ -41,8 +39,7 @@ type Props = {
   extraPadding?: boolean;
   qaIssues?: QaIssueModel[] | null;
   translationId?: number;
-  variantsCopyable?: boolean;
-  active?: boolean;
+  variantAction?: (props: VariantActionProps) => React.ReactNode;
 };
 
 export const TranslationVisual = ({
@@ -57,13 +54,9 @@ export const TranslationVisual = ({
   extraPadding,
   qaIssues,
   translationId,
-  variantsCopyable,
-  active,
+  variantAction,
 }: Props) => {
-  const project = useProject();
-  const value = useMemo(() => {
-    return getTolgeeFormat(text || '', isPlural, !project.icuPlaceholders);
-  }, [text, isPlural]);
+  const value = useTolgeeFormat(text, isPlural);
   const openedQaIssues = useMemo(
     () => (qaIssues ?? []).filter((issue) => issue.state === 'OPEN'),
     [qaIssues]
@@ -102,20 +95,14 @@ export const TranslationVisual = ({
             translationId={translationId}
           />
         );
-        if (!variantsCopyable || !variant) {
+        if (!variantAction || !variant) {
           return variantVisual;
         }
         return (
-          <StyledCopyableVariant>
+          <StyledVariantWithAction>
             {variantVisual}
-            {active && content && (
-              <CopyTranslationButton
-                text={content}
-                variant={variant}
-                className={CELL_SHOW_ON_HOVER}
-              />
-            )}
-          </StyledCopyableVariant>
+            {variantAction({ variant, content: content ?? '' })}
+          </StyledVariantWithAction>
         );
       }}
     />

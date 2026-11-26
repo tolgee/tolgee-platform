@@ -15,6 +15,7 @@ import {
 
 const KEY = 'greeting';
 const PLURAL_KEY = 'unread-count';
+const VIEWS = ['list', 'table'] as const;
 const TEXT = 'Hello {name}, you have <b>new</b> messages';
 
 describe('Copy translation to clipboard', () => {
@@ -37,11 +38,9 @@ describe('Copy translation to clipboard', () => {
       translationCopyTestData.clean();
     });
 
-    ['list', 'table'].forEach((view) => {
+    VIEWS.forEach((view) => {
       it(`copies the raw text without opening the editor in the ${view} view`, () => {
-        if (view === 'table') {
-          cy.gcy('translations-view-table-button').click();
-        }
+        switchToView(view);
         const clipboard = stubClipboard();
 
         hoverTranslationCell(KEY, 'en');
@@ -68,18 +67,25 @@ describe('Copy translation to clipboard', () => {
       );
     });
 
-    it('copies each plural form on its own', () => {
-      const clipboard = stubClipboard();
+    VIEWS.forEach((view) => {
+      it(`copies each plural form on its own in the ${view} view`, () => {
+        switchToView(view);
+        const clipboard = stubClipboard();
 
+        hoverTranslationCell(PLURAL_KEY, 'en');
+        getTranslationVariantCopyButton(PLURAL_KEY, 'en', 'other').click();
+        cy.wrap(clipboard).should('have.property', 'text', '# unread messages');
+
+        getTranslationVariantCopyButton(PLURAL_KEY, 'en', 'one').click();
+        cy.wrap(clipboard).should('have.property', 'text', '# unread message');
+        cy.gcy('global-editor').should('not.exist');
+      });
+    });
+
+    it('offers no whole-cell copy button for a plural translation', () => {
       hoverTranslationCell(PLURAL_KEY, 'en');
-      getTranslationCopyButton(PLURAL_KEY, 'en').should('have.length', 2);
-
-      getTranslationVariantCopyButton(PLURAL_KEY, 'en', 'other').click();
-      cy.wrap(clipboard).should('have.property', 'text', '# unread messages');
-
-      getTranslationVariantCopyButton(PLURAL_KEY, 'en', 'one').click();
-      cy.wrap(clipboard).should('have.property', 'text', '# unread message');
-      cy.gcy('global-editor').should('not.exist');
+      getTranslationVariantCopyButton(PLURAL_KEY, 'en', 'one').should('exist');
+      getTranslationCopyButton(PLURAL_KEY, 'en').should('not.exist');
     });
 
     it('offers no copy button for an empty translation', () => {
@@ -122,6 +128,12 @@ describe('Copy translation to clipboard', () => {
     });
   });
 });
+
+function switchToView(view: typeof VIEWS[number]) {
+  if (view === 'table') {
+    cy.gcy('translations-view-table-button').click();
+  }
+}
 
 function stubClipboard() {
   const clipboard: { text?: string } = {};
