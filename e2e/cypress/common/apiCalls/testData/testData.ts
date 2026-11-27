@@ -196,6 +196,9 @@ export const softDeleteKeysTestData =
 
 export const charLimitTestData = generateTestDataObject('char-limit');
 
+export const translationCopyTestData =
+  generateTestDataObject('translation-copy');
+
 export const suggestionsTestData = {
   ...generateTestDataObject('suggestions'),
   generate: (props?: {

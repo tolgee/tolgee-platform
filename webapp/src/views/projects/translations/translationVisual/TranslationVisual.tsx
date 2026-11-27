@@ -1,13 +1,12 @@
-import { useMemo } from 'react';
-import { getTolgeeFormat } from '@tginternal/editor';
+import React, { useMemo } from 'react';
 
 import { TranslationPlurals } from './TranslationPlurals';
 import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
-import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationVariantVisual } from 'tg.views/projects/translations/translationVisual/TranslationVariantVisual';
+import { useTolgeeFormat } from 'tg.views/projects/translations/translationVisual/useTolgeeFormat';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
@@ -15,6 +14,18 @@ const StyledDisabled = styled(DirectionLocaleWrapper)`
   color: ${({ theme }) => theme.palette.text.disabled};
   cursor: default;
 `;
+
+const StyledVariantWithAction = styled('div')`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  align-items: start;
+  gap: ${({ theme }) => theme.spacing(1)};
+`;
+
+type VariantActionProps = {
+  variant: string;
+  content: string;
+};
 
 type Props = {
   maxLines?: number;
@@ -28,6 +39,7 @@ type Props = {
   extraPadding?: boolean;
   qaIssues?: QaIssueModel[] | null;
   translationId?: number;
+  variantAction?: (props: VariantActionProps) => React.ReactNode;
 };
 
 export const TranslationVisual = ({
@@ -42,11 +54,9 @@ export const TranslationVisual = ({
   extraPadding,
   qaIssues,
   translationId,
+  variantAction,
 }: Props) => {
-  const project = useProject();
-  const value = useMemo(() => {
-    return getTolgeeFormat(text || '', isPlural, !project.icuPlaceholders);
-  }, [text, isPlural]);
+  const value = useTolgeeFormat(text, isPlural);
   const openedQaIssues = useMemo(
     () => (qaIssues ?? []).filter((issue) => issue.state === 'OPEN'),
     [qaIssues]
@@ -69,21 +79,32 @@ export const TranslationVisual = ({
       value={value}
       locale={locale}
       extraPadding={extraPadding}
-      render={({ content, exampleValue, variant }) => (
-        <TranslationVariantVisual
-          value={value}
-          variant={variant}
-          qaIssues={openedQaIssues}
-          maxLines={maxLines}
-          width={width}
-          content={content}
-          exampleValue={exampleValue}
-          locale={locale}
-          targetLocale={targetLocale}
-          showHighlights={showHighlights}
-          translationId={translationId}
-        />
-      )}
+      render={({ content, exampleValue, variant }) => {
+        const variantVisual = (
+          <TranslationVariantVisual
+            value={value}
+            variant={variant}
+            qaIssues={openedQaIssues}
+            maxLines={maxLines}
+            width={width}
+            content={content}
+            exampleValue={exampleValue}
+            locale={locale}
+            targetLocale={targetLocale}
+            showHighlights={showHighlights}
+            translationId={translationId}
+          />
+        );
+        if (!variantAction || !variant) {
+          return variantVisual;
+        }
+        return (
+          <StyledVariantWithAction>
+            {variantVisual}
+            {variantAction({ variant, content: content ?? '' })}
+          </StyledVariantWithAction>
+        );
+      }}
     />
   );
 };

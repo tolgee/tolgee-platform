@@ -12,6 +12,7 @@ import { useTranslate } from '@tolgee/react';
 import { StateInType } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
 import { ControlsButton } from './ControlsButton';
+import { CopyTranslationButton } from 'tg.views/projects/translations/cell/CopyTranslationButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
@@ -65,6 +66,7 @@ const StyledCheckIcon = styled(Check)`
 
 type ControlsProps = {
   state?: State;
+  copyableText?: string;
   editEnabled?: boolean;
   stateChangeEnabled?: boolean;
   onEdit?: () => void;
@@ -90,6 +92,7 @@ export const ControlsTranslation: React.FC<
   React.PropsWithChildren<ControlsProps>
 > = ({
   state,
+  copyableText,
   editEnabled,
   stateChangeEnabled,
   onEdit,
@@ -138,6 +141,9 @@ export const ControlsTranslation: React.FC<
   }
   if (displayEdit) {
     spots.push('edit');
+  }
+  if (copyableText) {
+    spots.push('copy');
   }
   if (displayComments) {
     spots.push('comments');
@@ -193,6 +199,14 @@ export const ControlsTranslation: React.FC<
         >
           <Edit02 />
         </ControlsButton>
+      )}
+      {copyableText && active && (
+        <CopyTranslationButton
+          dataCy="translations-cell-copy-button"
+          style={{ gridArea: 'copy' }}
+          text={copyableText}
+          className={CELL_SHOW_ON_HOVER}
+        />
       )}
       {inDomComments && (
         <ControlsButton

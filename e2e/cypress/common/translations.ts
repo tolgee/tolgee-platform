@@ -160,6 +160,27 @@ export function getTranslationCell(key: string, languageTag: string) {
     .getElement();
 }
 
+export function hoverTranslationCell(key: string, languageTag: string) {
+  return getTranslationCell(key, languageTag).trigger('mouseover');
+}
+
+export function getTranslationCopyButton(key: string, languageTag: string) {
+  return getTranslationCell(key, languageTag).findDcy(
+    'translations-cell-copy-button'
+  );
+}
+
+export function getTranslationVariantCopyButton(
+  key: string,
+  languageTag: string,
+  variant: string
+) {
+  return getTranslationCell(key, languageTag).findDcyAdvanced({
+    value: 'translations-cell-copy-variant-button',
+    variant,
+  });
+}
+
 export function editTranslation({
   key,
   languageTag,

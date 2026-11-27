@@ -4,6 +4,8 @@ import { styled } from '@mui/material';
 import { useTranslationCell } from '../useTranslationCell';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
+import { CopyVariantButton } from 'tg.views/projects/translations/cell/CopyVariantButton';
+import { useTolgeeFormat } from 'tg.views/projects/translations/translationVisual/useTolgeeFormat';
 import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
@@ -97,6 +99,11 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
   const languageQaEnabled =
     qaChecksEnabled && !qaDisabledLanguageIds.has(language.id);
 
+  const controlsShown = !aiPlaygroundEnabled;
+  const hasPluralForms = Boolean(
+    useTolgeeFormat(translation?.text, keyData.keyIsPlural).parameter
+  );
+
   const toggleEdit = () => (isEditing ? handleClose() : handleOpen());
 
   const state = translation?.state || 'UNTRANSLATED';
@@ -122,6 +129,12 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           isPlural={keyData.keyIsPlural}
           qaIssues={languageQaEnabled ? translation?.qaIssues : undefined}
           translationId={translation?.id}
+          variantAction={
+            controlsShown
+              ? (variantProps) =>
+                  active && <CopyVariantButton {...variantProps} />
+              : undefined
+          }
         />
         {Boolean(translation?.totalSuggestionCount) && (
           <SuggestionsFirst
@@ -162,7 +175,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
         onSelect={(label) => addLabel(label.id)}
         onDelete={(labelId) => removeLabel(labelId)}
       />
-      {!aiPlaygroundEnabled && (
+      {controlsShown && (
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
@@ -186,6 +199,7 @@ export const TranslationRead: React.FC<React.PropsWithChildren<Props>> = ({
           stateChangeEnabled={canChangeState}
           editEnabled={controlsEnabled}
           state={state}
+          copyableText={hasPluralForms ? undefined : translation?.text}
           onStateChange={handleStateChange}
           active={active}
           lastFocusable={lastFocusable}
