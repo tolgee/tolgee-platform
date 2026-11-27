@@ -68,6 +68,7 @@ export const ContributorsContent = () => {
     setSearchInput,
     search,
     selectedLanguages,
+    noLanguagesSelected,
     setLanguageTags,
   } = useContributorsFilters(projectLanguages, project.createdAt);
 
@@ -86,7 +87,8 @@ export const ContributorsContent = () => {
     path: { projectId: project.id },
     query: contributorsQuery,
     options: {
-      keepPreviousData: true,
+      enabled: !noLanguagesSelected,
+      keepPreviousData: !noLanguagesSelected,
       getNextPageParam: (lastPage) =>
         lastPage.page && lastPage.page.number! < lastPage.page.totalPages! - 1
           ? {
@@ -102,7 +104,10 @@ export const ContributorsContent = () => {
     method: 'get',
     path: { projectId: project.id },
     query: statsQuery,
-    options: { keepPreviousData: true },
+    options: {
+      enabled: !noLanguagesSelected,
+      keepPreviousData: !noLanguagesSelected,
+    },
   });
 
   const totalContributors = contributors.data?.pages[0]?.page?.totalElements;
@@ -135,6 +140,11 @@ export const ContributorsContent = () => {
     value: selectedLanguages.map((l) => l.tag),
     onChange: setLanguageTags,
     context: 'translations',
+    enableEmpty: true,
+    placeholder: t(
+      'batch_operations_select_languages_placeholder',
+      'Select languages...'
+    ),
     allSelectedLabel: t('community_languages_all', 'All languages'),
   };
 
@@ -276,7 +286,14 @@ export const ContributorsContent = () => {
         ) : activity.isError ? (
           <QueryErrorAlert code={activity.error?.code} />
         ) : (
-          <EmptyListMessage loading={activity.isLoading} />
+          <EmptyListMessage loading={activity.isLoading}>
+            {noLanguagesSelected && (
+              <T
+                keyName="set_at_least_one_language_error"
+                defaultValue="Select at least one language."
+              />
+            )}
+          </EmptyListMessage>
         )}
       </Box>
 
@@ -334,7 +351,24 @@ export const ContributorsContent = () => {
       ) : contributors.isError ? (
         <QueryErrorAlert code={contributors.error?.code} />
       ) : (
-        <ContributorsEmptyState searching={Boolean(search)} />
+        <ContributorsEmptyState
+          message={
+            noLanguagesSelected
+              ? t(
+                  'set_at_least_one_language_error',
+                  'Select at least one language.'
+                )
+              : search
+              ? t(
+                  'community_contributors_search_empty',
+                  'No contributors found'
+                )
+              : t(
+                  'community_contributors_empty',
+                  'No contributions in this period'
+                )
+          }
+        />
       )}
     </Box>
   );

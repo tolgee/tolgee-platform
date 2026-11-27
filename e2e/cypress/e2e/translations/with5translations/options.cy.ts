@@ -71,6 +71,18 @@ describe('Options with 5 Translations', () => {
         .should('not.be.checked');
     });
 
+    it('keeps all languages selected when All is clicked again', () => {
+      cy.gcy('translations-language-select-form-control').click();
+      cy.gcy('translations-language-select-all').click();
+      cy.gcy('translations-language-select-all')
+        .find('input')
+        .should('be.checked');
+      cy.gcy('translations-language-select-all').click();
+      cy.gcy('translations-language-select-all')
+        .find('input')
+        .should('be.checked');
+    });
+
     it('will search', () => {
       cy.gcy('global-search-field').find('.cm-content').type('Cool key 04');
       cy.contains('Cool key 01').should('not.exist');
