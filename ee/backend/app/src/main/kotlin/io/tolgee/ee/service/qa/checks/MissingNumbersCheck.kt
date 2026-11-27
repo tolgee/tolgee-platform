@@ -26,8 +26,16 @@ class MissingNumbersCheck : QaCheck {
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
-    val baseNumbers = extractNumbers(base)
-    val textNumbers = extractNumbers(text)
+    var baseNumbers = extractNumbers(base)
+    var textNumbers = extractNumbers(text)
+
+    //compare both numbers if they have comma then make them same and then compare
+    val baseNumbersNormalized = baseNumbers.map { it.replace(",", "") }
+    val textNumbersNormalized = textNumbers.map { it.replace(",", "") }
+
+    if(baseNumbersNormalized == textNumbersNormalized) {
+      baseNumbers = textNumbers
+    }
 
     val baseMultiset = baseNumbers.groupingBy { it }.eachCount()
     val textMultiset = textNumbers.groupingBy { it }.eachCount()
@@ -50,10 +58,24 @@ class MissingNumbersCheck : QaCheck {
   }
 
   companion object {
+    private val LENIENT_BLOCK_REGEX = Regex("""\d+(?:[^0-9]\d+)*""")
     private val NUMBER_REGEX = Regex("""\d+([.,]\d+)*""")
 
     fun extractNumbers(text: String): List<String> {
-      return NUMBER_REGEX.findAll(text).map { it.value }.toList()
+      return LENIENT_BLOCK_REGEX.findAll(text).mapNotNull { matchResult ->
+        val rawBlock = matchResult.value
+        
+        // Step 2: Cycle through and keep ONLY digits, periods, and commas
+        val filteredString = rawBlock.filter { it.isDigit() || it == '.' || it == ',' }
+        
+        // Step 3: Pass the filtered string through your target regex
+        // If it matches completely, we return the value; otherwise, we discard it (mapNotNull)
+        if (NUMBER_REGEX.matches(filteredString)) {
+            filteredString
+        } else {
+            null 
+        }
+      }.toList()
     }
   }
 }
