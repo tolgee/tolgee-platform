@@ -1,3 +1,15 @@
+# [3.247.0](https://github.com/tolgee/tolgee-platform/compare/v3.246.5...v3.247.0) (2026-11-27)
+
+
+### Bug Fixes
+
+* language-aware QA checks to reduce false positives ([#4095](https://github.com/tolgee/tolgee-platform/issues/4095)) ([66f1c44](https://github.com/tolgee/tolgee-platform/commit/66f1c4426888cea4144ad7590f1f356de5a74720)), closes [#4080](https://github.com/tolgee/tolgee-platform/issues/4080)
+
+
+### Features
+
+* hidden features (404 when missing, hidden in limited views) ([#4062](https://github.com/tolgee/tolgee-platform/issues/4062)) ([cceec82](https://github.com/tolgee/tolgee-platform/commit/cceec82aa6e35f5a20710f65ae25f70935644587)), closes [#3984](https://github.com/tolgee/tolgee-platform/issues/3984) [#3990](https://github.com/tolgee/tolgee-platform/issues/3990) [#3995](https://github.com/tolgee/tolgee-platform/issues/3995) [tolgee/billing#355](https://github.com/tolgee/billing/issues/355)
+
 ## [3.246.5](https://github.com/tolgee/tolgee-platform/compare/v3.246.4...v3.246.5) (2026-11-26)
 
 
