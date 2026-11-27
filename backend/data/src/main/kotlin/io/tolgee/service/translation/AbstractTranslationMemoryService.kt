@@ -84,6 +84,7 @@ abstract class AbstractTranslationMemoryService(
     targetLanguageTag: String,
     pageable: Pageable,
   ): Page<TranslationMemoryItemView> {
+    if (baseTranslationText.length > MAX_SUGGESTION_SOURCE_LENGTH) return Page.empty(pageable)
     val tmIds =
       translationMemoryManagementService.getReadableTmIdsForSuggestions(projectId, organizationId)
     if (tmIds.isEmpty()) return Page.empty(pageable)
@@ -137,6 +138,7 @@ abstract class AbstractTranslationMemoryService(
     targetLanguageTag: String,
     limit: Int,
   ): List<TranslationMemoryItemView> {
+    if (baseTranslationText.length > MAX_SUGGESTION_SOURCE_LENGTH) return emptyList()
     val tmIds =
       translationMemoryManagementService.getReadableTmIdsForSuggestions(projectId, organizationId)
     if (tmIds.isEmpty()) return emptyList()
@@ -195,4 +197,12 @@ abstract class AbstractTranslationMemoryService(
       // index 8 is assignmentPriority (kept for ordering only — not exposed)
       updatedAt = (row[9] as LocalDateTime?)?.let { Date.from(it.atZone(ZoneId.systemDefault()).toInstant()) },
     )
+
+  companion object {
+    /**
+     * Trigram matching cost grows with the source length. Above this, lookups on large instances
+     * get slow enough to block the TM panel and Tolgee AI, which waits for TM examples.
+     */
+    const val MAX_SUGGESTION_SOURCE_LENGTH = 1000
+  }
 }
