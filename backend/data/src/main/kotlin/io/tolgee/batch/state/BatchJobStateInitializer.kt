@@ -22,34 +22,36 @@ class BatchJobStateInitializer(
   fun getInitialState(jobId: Long): MutableMap<Long, ExecutionState> {
     logger.debug("Initializing batch job state for job $jobId")
     // we want to get state which is not affected by current transaction
-    val executions =
+    val rows =
       executeInNewTransaction(
         platformTransactionManager,
         isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
         readOnly = true,
       ) {
+        @Suppress("UNCHECKED_CAST")
         entityManager
-          .createQuery(
+          .createNativeQuery(
             """
-      from BatchJobChunkExecution bjce
-      where bjce.batchJob.id = :jobId
-      """,
-            BatchJobChunkExecution::class.java,
+            select id, status, chunk_number, retry, coalesce(jsonb_array_length(success_targets), 0)
+            from tolgee_batch_job_chunk_execution
+            where batch_job_id = :jobId
+            """,
           ).setParameter("jobId", jobId)
-          .resultList
+          .resultList as List<Array<Any?>>
       }
 
-    return executions
-      .associate {
-        it.id to
+    return rows
+      .associate { row ->
+        val status = BatchJobChunkExecutionStatus.valueOf(row[1] as String)
+        (row[0] as Number).toLong() to
           ExecutionState(
-            it.successTargets.size,
-            it.status,
-            it.chunkNumber,
-            it.retry,
+            successTargetsCount = (row[4] as Number).toInt(),
+            status = status,
+            chunkNumber = (row[2] as Number?)?.toInt(),
+            retry = row[3] as Boolean?,
             // Only mark as committed if the execution has already completed.
             // PENDING and RUNNING executions haven't committed their changes yet.
-            it.status.completed,
+            transactionCommitted = status.completed,
           )
       }.toMutableMap()
   }

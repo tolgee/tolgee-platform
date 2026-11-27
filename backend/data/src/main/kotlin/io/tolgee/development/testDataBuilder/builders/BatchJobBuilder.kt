@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.builders
 
+import io.tolgee.batch.data.TranslationTargetProductSpec
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -19,6 +20,8 @@ class BatchJobBuilder(
     }
 
   var targetProvider: (() -> List<Any>)? = null
+
+  var targetProductProvider: (() -> TranslationTargetProductSpec)? = null
 
   fun addChunkExecution(ft: FT<BatchJobChunkExecution>) = addOperation(data.chunkExecutions, ft)
 }

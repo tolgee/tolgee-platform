@@ -1,7 +1,9 @@
 package io.tolgee.component.eventListeners
 
+import io.tolgee.batch.BatchJobTargetProvider
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
@@ -29,6 +31,7 @@ class LanguageStatsListener(
   private val keyRepository: KeyRepository,
   private val translationRepository: TranslationRepository,
   private val objectMapper: ObjectMapper,
+  private val batchJobTargetProvider: BatchJobTargetProvider,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -62,7 +65,7 @@ class LanguageStatsListener(
       if (!affectsStats(modifiedEntityClasses)) return@runSentryCatching
 
       if (affectsGlobalStats(modifiedEntityClasses)) {
-        languageStatsService.refreshLanguageStats(projectId)
+        languageStatsService.refreshLanguageStatsCoalesced(projectId)
         return@runSentryCatching
       }
 
@@ -78,7 +81,7 @@ class LanguageStatsListener(
     runSentryCatching {
       projectService.findDto(projectId) ?: return@runSentryCatching
 
-      val keyIds = extractKeyIdsFromQaJobTarget(event.job.target)
+      val keyIds = extractKeyIdsFromQaJobTarget(batchJobTargetProvider.getTargetWithoutCaching(event.job.id))
       if (keyIds.isEmpty()) {
         return@runSentryCatching
       }
@@ -97,12 +100,13 @@ class LanguageStatsListener(
     branchIds: Set<Long?>,
   ) {
     branchIds.forEach { branchId ->
-      languageStatsService.refreshLanguageStats(projectId, branchId)
+      languageStatsService.refreshLanguageStatsCoalesced(projectId, branchId)
     }
   }
 
   private fun extractKeyIdsFromQaJobTarget(target: List<Any>): List<Long> {
     if (target.isEmpty()) return emptyList()
+    if (target is TranslationTargetProduct) return target.keyIds.distinct()
     val type =
       objectMapper.typeFactory.constructCollectionType(
         List::class.java,

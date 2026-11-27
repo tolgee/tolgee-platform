@@ -180,6 +180,36 @@ class TagService(
     return projectIds.single()
   }
 
+  /**
+   * Parallel transactions that each insert the same missing tag fail on the unique (project_id, name) index. This lock
+   * only narrows that race: two transactions waiting on a bucket can both insert the same tag when the bucket's holder
+   * creates a different one, so callers still rely on the batch chunk retry.
+   */
+  fun lockCreationOfMissingTags(
+    projectId: Long,
+    names: Collection<String>,
+  ) {
+    val existing = getFromProject(projectId, names).map { it.name }.toSet()
+    tagCreationLockBuckets(names.filter { it !in existing }).forEach { lockCreationOfTagBucket(projectId, it) }
+  }
+
+  private fun lockCreationOfTagBucket(
+    projectId: Long,
+    bucket: Int,
+  ) {
+    val lockKey = "tag-creation-$projectId-$bucket"
+    val creatingTag =
+      entityManager
+        .createNativeQuery("select pg_try_advisory_xact_lock(hashtextextended(:lockKey, 0))")
+        .setParameter("lockKey", lockKey)
+        .singleResult as Boolean
+    if (creatingTag) return
+    entityManager
+      .createNativeQuery("select pg_advisory_xact_lock_shared(hashtextextended(:lockKey, 0))")
+      .setParameter("lockKey", lockKey)
+      .singleResult
+  }
+
   private fun getFromProject(
     projectId: Long,
     tags: Collection<String>,
@@ -417,5 +447,12 @@ class TagService(
 
   companion object {
     private const val COMPLEX_TAG_BATCH_SIZE = 5000
+    private const val TAG_CREATION_LOCK_BUCKETS = 16
+
+    /**
+     * The buckets must be locked in sorted order, otherwise two transactions can deadlock on each other's buckets.
+     */
+    fun tagCreationLockBuckets(tagNames: Collection<String>): List<Int> =
+      tagNames.map { it.hashCode().mod(TAG_CREATION_LOCK_BUCKETS) }.distinct().sorted()
   }
 }

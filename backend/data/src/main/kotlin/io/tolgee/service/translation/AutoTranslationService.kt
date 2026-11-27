@@ -3,7 +3,8 @@ package io.tolgee.service.translation
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.batch.data.BatchTranslationTargetItem
+import io.tolgee.batch.data.TranslationTargetProduct
+import io.tolgee.batch.data.TranslationTargetProductOrder
 import io.tolgee.batch.request.AutoTranslationRequest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -74,17 +75,11 @@ class AutoTranslationService(
     val request =
       AutoTranslationRequest().apply {
         target =
-          languageIds.flatMap { languageId ->
-            if (configs[languageId]?.let { translatesLanguage(it) } == false) {
-              return@flatMap emptyList()
-            }
-            keyIds.map { keyId ->
-              BatchTranslationTargetItem(
-                keyId = keyId,
-                languageId = languageId,
-              )
-            }
-          }
+          TranslationTargetProduct(
+            keyIds = keyIds,
+            languageIds = languageIds.filterNot { configs[it]?.let { config -> translatesLanguage(config) } == false },
+            order = TranslationTargetProductOrder.LANGUAGE_MAJOR,
+          )
       }
     autoTranslateViaBatchJob(project, request, isHiddenJob)
   }

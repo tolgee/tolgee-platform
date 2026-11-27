@@ -236,7 +236,6 @@ class AiReviewSelfHealTest : AbstractAiReviewTest() {
       id = -1,
       projectId = testData.project.id,
       authorId = null,
-      target = listOf(),
       totalItems = 0,
       totalChunks = 0,
       chunkSize = 5,

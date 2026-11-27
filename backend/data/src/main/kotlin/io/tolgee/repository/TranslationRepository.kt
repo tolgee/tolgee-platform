@@ -10,6 +10,7 @@ import io.tolgee.model.views.TranslationMemoryItemView
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -216,6 +217,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageTags: List<String>,
   ): List<Translation>
 
+  @EntityGraph(attributePaths = ["key", "language"])
   fun findAllByKeyIdInAndLanguageIdIn(
     keysIds: List<Long>,
     languagesIds: List<Long>,

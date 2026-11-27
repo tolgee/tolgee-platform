@@ -33,7 +33,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.coroutineContext
 
@@ -55,6 +55,7 @@ class BatchJobActionService(
   private val tracingContext: TolgeeTracingContext,
   @Lazy
   private val projectService: ProjectService,
+  private val objectMapper: ObjectMapper,
 ) : Logging {
   @WithSpan
   suspend fun handleItem(
@@ -265,7 +266,7 @@ class BatchJobActionService(
   fun publishRemoveConsuming(item: ExecutionQueueItem) {
     if (usingRedisProvider.areWeUsingRedis) {
       val message =
-        jacksonObjectMapper()
+        objectMapper
           .writeValueAsString(JobQueueItemsEvent(listOf(item), QueueEventType.REMOVE))
       redisTemplate.convertAndSend(RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC, message)
     }

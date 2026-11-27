@@ -750,7 +750,6 @@ class AiReviewRunTest : AbstractAiReviewTest() {
       id = 777,
       projectId = testData.project.id,
       authorId = testData.user.id,
-      target = listOf(),
       totalItems = 0,
       totalChunks = 0,
       chunkSize = 5,

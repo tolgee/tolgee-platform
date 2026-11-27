@@ -5,6 +5,7 @@ import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
+import io.tolgee.batch.BatchJobTargetProvider
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.data.BatchTranslationTargetItem
@@ -55,6 +56,7 @@ class AiReviewActivityListener(
   private val aiReviewActionService: AiReviewActionService,
   private val aiReviewRunService: AiReviewRunService,
   private val aiReviewRuleEvaluator: AiReviewRuleEvaluator,
+  private val batchJobTargetProvider: BatchJobTargetProvider,
 ) : BypassableActivityListener {
   @Volatile
   override var bypass = false
@@ -139,7 +141,10 @@ class AiReviewActivityListener(
     projectId: Long,
   ) {
     if (!isAiReviewOn(projectId)) return
-    val items = event.job.target.map { objectMapper.convertValue(it, BatchTranslationTargetItem::class.java) }
+    val items =
+      batchJobTargetProvider
+        .getTargetWithoutCaching(event.job.id)
+        .map { objectMapper.convertValue(it, BatchTranslationTargetItem::class.java) }
     if (items.isEmpty()) return
     val translationIds =
       items.map { it.keyId }.distinct().chunked(IN_CLAUSE_CHUNK).flatMap { keyIds ->
