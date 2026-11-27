@@ -23,9 +23,7 @@ open class ActivityHolder(
 
   open var meta: MutableMap<String, Any?> = mutableMapOf()
 
-  open val activityRevision: ActivityRevision by lazy {
-    ActivityRevision()
-  }
+  open var activityRevision: ActivityRevision = ActivityRevision()
 
   /**
    * Per-revision cache of pre-modification collection snapshots, keyed by
@@ -89,6 +87,14 @@ open class ActivityHolder(
     provider: () -> ActivityDescribingEntity,
   ): ActivityDescribingEntity {
     return describingRelationCache.getOrPut(entityId to entityClass, provider)
+  }
+
+  open fun resetAfterRollback() {
+    activityRevision = activityRevision.copyForRetry()
+    modifiedEntities = mutableMapOf()
+    modifiedCollections = mutableMapOf()
+    forcedRevisionTypes = mutableMapOf()
+    describingRelationCache.clear()
   }
 
   @PreDestroy

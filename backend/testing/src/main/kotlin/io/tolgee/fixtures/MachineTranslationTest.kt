@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
+import java.util.concurrent.atomic.AtomicInteger
 
 open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
@@ -26,7 +27,11 @@ open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   @MockitoBean
   lateinit var amazonTranslate: TranslateClient
 
-  fun initMachineTranslationMocks(translateDelay: Long = 0) {
+  fun initMachineTranslationMocks(
+    translateDelay: Long = 0,
+    onGoogleTranslate: (callIndex: Int) -> Unit = {},
+  ) {
+    val googleCalls = AtomicInteger()
     internalProperties.fakeMtProviders = false
     Mockito.reset(googleTranslate)
     Mockito.reset(amazonTranslate)
@@ -44,6 +49,7 @@ open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
     ).thenReturn(googleTranslationMock)
 
     whenever(googleTranslationMock.translatedText).then {
+      onGoogleTranslate(googleCalls.incrementAndGet())
       Thread.sleep(translateDelay)
       return@then "Translated with Google"
     }

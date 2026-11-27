@@ -30,7 +30,7 @@ import org.springframework.transaction.TransactionDefinition
 import tools.jackson.databind.ObjectMapper
 import kotlin.properties.Delegates
 
-class KeyComplexEditHelper(
+class KeyComplexEditHelper private constructor(
   applicationContext: ApplicationContext,
   private val keyId: Long,
   private val dto: ComplexEditKeyDto,
@@ -46,8 +46,6 @@ class KeyComplexEditHelper(
   private val objectMapper: ObjectMapper = applicationContext.getBean(ObjectMapper::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
-  private val transactionManager: PlatformTransactionManager =
-    applicationContext.getBean(PlatformTransactionManager::class.java)
   private val bigMetaService = applicationContext.getBean(BigMetaService::class.java)
   private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
   private val keyCustomValuesValidator = applicationContext.getBean(KeyCustomValuesValidator::class.java)
@@ -92,23 +90,34 @@ class KeyComplexEditHelper(
       .toMutableMap()
   }
 
-  fun doComplexUpdate(): KeyWithDataModel {
-    // we don't want phantoms, since we are updating all the translations when isPlural is changed
-    return executeInNewRepeatableTransaction(
-      transactionManager = transactionManager,
-      isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE,
-    ) {
-      prepareData()
-      prepareConditions()
-      setActivityHolder()
-      doTranslationsUpdate()
-      doStateUpdate()
-      doUpdateTags()
-      doUpdateScreenshots()
-      val result = doUpdateKey()
-      storeBigMeta()
-      result
+  companion object {
+    fun edit(
+      applicationContext: ApplicationContext,
+      keyId: Long,
+      dto: ComplexEditKeyDto,
+    ): KeyWithDataModel {
+      val transactionManager = applicationContext.getBean(PlatformTransactionManager::class.java)
+      // we don't want phantoms, since we are updating all the translations when isPlural is changed
+      return executeInNewRepeatableTransaction(
+        transactionManager = transactionManager,
+        isolationLevel = TransactionDefinition.ISOLATION_SERIALIZABLE,
+      ) {
+        KeyComplexEditHelper(applicationContext, keyId, dto).doComplexUpdate()
+      }
     }
+  }
+
+  private fun doComplexUpdate(): KeyWithDataModel {
+    prepareData()
+    prepareConditions()
+    setActivityHolder()
+    doTranslationsUpdate()
+    doStateUpdate()
+    doUpdateTags()
+    doUpdateScreenshots()
+    val result = doUpdateKey()
+    storeBigMeta()
+    return result
   }
 
   private fun storeBigMeta() {

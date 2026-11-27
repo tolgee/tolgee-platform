@@ -112,6 +112,16 @@ class ActivityRevision : java.io.Serializable {
   @Transient
   var cancelledBatchJobExecutionCount: Int? = null
 
+  fun copyForRetry(): ActivityRevision =
+    ActivityRevision().also {
+      it.type = type
+      it.systemActor = systemActor
+      it.projectId = projectId
+      it.organizationId = organizationId
+      it.authorId = authorId
+      it.batchJobChunkExecution = batchJobChunkExecution
+    }
+
   companion object {
     @Configurable
     class ActivityRevisionListener {
