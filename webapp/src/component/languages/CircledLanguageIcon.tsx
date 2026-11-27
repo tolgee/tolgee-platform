@@ -4,6 +4,7 @@ import { Box, styled } from '@mui/material';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const DEFAULT_SIZE = 18;
+export const CIRCLED_ICON_PADDING = 2;
 
 type CircledIconProps = {
   size?: number;
@@ -15,7 +16,7 @@ type CircledLanguageIconProps = {
 } & CircledIconProps;
 
 const StyledBox = styled(Box)`
-  padding: 2px;
+  padding: ${CIRCLED_ICON_PADDING}px;
 `;
 
 const StyledIconWrapper = styled(Box)`

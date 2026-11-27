@@ -303,6 +303,7 @@ declare namespace DataCy {
         "community-in-context-info": true;
         "community-in-context-switch": true;
         "community-language-base": true;
+        "community-language-flag-more": true;
         "community-language-not-started": true;
         "community-language-row": true;
         "community-language-translations-button": true;
