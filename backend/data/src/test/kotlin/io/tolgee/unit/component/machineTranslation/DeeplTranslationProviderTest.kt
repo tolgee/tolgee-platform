@@ -3,7 +3,7 @@ package io.tolgee.unit.component.machineTranslation
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.DeeplTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -14,7 +14,7 @@ import org.mockito.kotlin.verify
 class DeeplTranslationProviderTest {
   private val provider =
     DeeplTranslationProvider(
-      DeeplMachineTranslationProperties(),
+      TolgeeProperties(),
       mock<DeeplApiService>(),
     )
 
@@ -26,7 +26,7 @@ class DeeplTranslationProviderTest {
   @Test
   fun `forwards the context to the DeepL API`() {
     val apiService = mock<DeeplApiService>()
-    val provider = DeeplTranslationProvider(DeeplMachineTranslationProperties(), apiService)
+    val provider = DeeplTranslationProvider(TolgeeProperties(), apiService)
 
     provider.translate(
       ProviderTranslateParams(

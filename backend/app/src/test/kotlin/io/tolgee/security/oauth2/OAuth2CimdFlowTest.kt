@@ -38,8 +38,7 @@ class OAuth2CimdFlowTest : AbstractOAuth2FlowTest() {
   @Autowired
   private lateinit var documentCheckRepository: OAuth2ClientDocumentCheckRepository
 
-  @Autowired
-  private lateinit var oauth2Properties: OAuth2ServerProperties
+  private val oauth2Properties get() = tolgeeProperties.oauth2
 
   private var server: HttpServer? = null
 

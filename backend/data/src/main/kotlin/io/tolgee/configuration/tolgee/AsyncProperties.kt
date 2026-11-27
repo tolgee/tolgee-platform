@@ -1,10 +1,10 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-@ConfigurationProperties(prefix = "tolgee.async")
 @DocProperty(
+  prefix = "tolgee.async",
   displayName = "Asynchronous execution",
   description =
     "Sizing of the thread pools Tolgee uses for work that runs outside the HTTP request thread.\n\n" +
@@ -18,12 +18,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties
       ":::",
 )
 class AsyncProperties {
+  @NestedConfigurationProperty
   var streaming: StreamingAsyncProperties = StreamingAsyncProperties()
+
+  @NestedConfigurationProperty
   var background: BackgroundAsyncProperties = BackgroundAsyncProperties()
 }
 
-@ConfigurationProperties(prefix = "tolgee.async.streaming")
 @DocProperty(
+  prefix = "tolgee.async.streaming",
   displayName = "Streaming responses",
   description =
     "Thread pool serving streaming HTTP responses: project and glossary export, import progress " +
@@ -61,8 +64,8 @@ class StreamingAsyncProperties {
   var keepAliveSeconds: Int = 60
 }
 
-@ConfigurationProperties(prefix = "tolgee.async.background")
 @DocProperty(
+  prefix = "tolgee.async.background",
   displayName = "Background tasks",
   description =
     "Thread pool serving background (`@Async`) work: e-mail sending, analytics reporting, " +

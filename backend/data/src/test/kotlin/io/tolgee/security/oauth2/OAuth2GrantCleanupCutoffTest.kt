@@ -1,7 +1,7 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
@@ -23,7 +23,7 @@ class OAuth2GrantCleanupCutoffTest {
     val now = Instant.parse("2026-08-07T00:00:00Z")
     val authorizationService = mock<OAuth2AuthorizationService>()
     val dateProvider = mock<CurrentDateProvider> { on { date } doReturn Date.from(now) }
-    val properties = OAuth2ServerProperties().apply { grantRetentionDays = 7 }
+    val properties = TolgeeProperties().apply { oauth2.grantRetentionDays = 7 }
 
     OAuth2GrantCleanup(
       authorizationService,
@@ -47,7 +47,7 @@ class OAuth2GrantCleanupCutoffTest {
     OAuth2GrantCleanup(
       authorizationService,
       mock<CimdClientLifecycleService>(),
-      OAuth2ServerProperties(),
+      TolgeeProperties(),
       dateProvider,
       AlwaysFreeLockingProvider(),
     ).cleanUpExpiredGrants()
@@ -64,7 +64,7 @@ class OAuth2GrantCleanupCutoffTest {
     OAuth2GrantCleanup(
       mock<OAuth2AuthorizationService>(),
       lifecycle,
-      OAuth2ServerProperties(),
+      TolgeeProperties(),
       dateProvider,
       AlwaysFreeLockingProvider(),
     ).cleanUpExpiredGrants()

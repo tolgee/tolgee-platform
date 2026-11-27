@@ -2,7 +2,7 @@ package io.tolgee.service.machineTranslation.mtCreditsConsumption
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.exceptions.OutOfCreditsException
@@ -29,7 +29,7 @@ class MtCreditBucketService(
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
-  private val machineTranslationProperties: MachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val mtCreditConsumptionChecker: MtCreditConsumptionChecker,
 ) : Logging,
   MtCreditsService {
@@ -82,7 +82,7 @@ class MtCreditBucketService(
   }
 
   private fun shouldConsumeCredits(): Boolean {
-    return machineTranslationProperties.freeCreditsAmount > -1
+    return tolgeeProperties.machineTranslation.freeCreditsAmount > -1
   }
 
   /**
@@ -204,7 +204,7 @@ class MtCreditBucketService(
   }
 
   private fun getRefillAmount(): Long {
-    return machineTranslationProperties.freeCreditsAmount
+    return tolgeeProperties.machineTranslation.freeCreditsAmount
   }
 
   private fun refillIfItsTime(bucket: MtCreditBucket) {

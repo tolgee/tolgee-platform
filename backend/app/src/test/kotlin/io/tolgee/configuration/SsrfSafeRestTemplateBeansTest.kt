@@ -1,9 +1,7 @@
 package io.tolgee.configuration
 
 import com.sun.net.httpserver.HttpServer
-import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.WebhookProperties
 import io.tolgee.testing.assert
 import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.UrlSecurity
@@ -19,13 +17,10 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 class SsrfSafeRestTemplateBeansTest {
-  private val internalProperties = InternalProperties()
   private val properties = TolgeeProperties()
-  private val webhookProperties = WebhookProperties()
   private val configuration =
     RestTemplateConfiguration(
-      SsrfSafeRequestFactoryProvider(UrlSecurity(internalProperties), internalProperties),
-      webhookProperties,
+      SsrfSafeRequestFactoryProvider(UrlSecurity(properties), properties),
       properties,
     )
 
@@ -75,7 +70,7 @@ class SsrfSafeRestTemplateBeansTest {
       exchange.sendResponseHeaders(302, -1)
       exchange.close()
     }
-    webhookProperties.allowLocalAddresses = true
+    properties.webhook.allowLocalAddresses = true
     properties.authentication.ssoOrganizations.allowLocalAddresses = true
 
     listOf(

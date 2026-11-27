@@ -19,6 +19,7 @@ package io.tolgee.security.oauth2
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.oauth2.cimd.CimdClientLifecycleService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -30,10 +31,12 @@ import java.time.Duration
 class OAuth2GrantCleanup(
   private val oauth2AuthorizationService: OAuth2AuthorizationService,
   private val cimdClientLifecycleService: CimdClientLifecycleService,
-  private val properties: OAuth2ServerProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val lockingProvider: LockingProvider,
 ) : Logging {
+  private val properties get() = tolgeeProperties.oauth2
+
   @Scheduled(
     cron =
       "\${tolgee.oauth2.grant-cleanup-cron:${OAuth2ServerProperties.DEFAULT_GRANT_CLEANUP_CRON}}",

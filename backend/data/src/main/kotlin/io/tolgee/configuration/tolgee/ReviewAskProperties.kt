@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.review-ask")
 @DocProperty(
+  prefix = "tolgee.review-ask",
   description =
     "Once startup finishes, self-hosted instances print a short message asking for a review of Tolgee on G2.",
   displayName = "Review ask",

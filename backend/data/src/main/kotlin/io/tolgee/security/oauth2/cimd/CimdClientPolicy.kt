@@ -17,8 +17,7 @@
 package io.tolgee.security.oauth2.cimd
 
 import io.tolgee.component.FrontendUrlProvider
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.oauth2.OAuth2IssuerResolver
 import io.tolgee.security.oauth2.UrlOrigins
 import org.springframework.stereotype.Component
@@ -26,11 +25,13 @@ import org.springframework.stereotype.Component
 /** Routing only — the SSRF-hardening is in [CimdDocumentFetcher]. */
 @Component
 class CimdClientPolicy(
-  private val properties: OAuth2ServerProperties,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val oauth2IssuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
 ) {
+  private val properties get() = tolgeeProperties.oauth2
+  private val internalProperties get() = tolgeeProperties.internal
+
   fun isCandidate(clientId: String): Boolean {
     if (!properties.cimdEnabled) return false
     if (!CimdUrls.isAcceptableClientId(clientId, allowHttp = internalProperties.disableUrlSsrfProtection)) return false

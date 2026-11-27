@@ -1,10 +1,10 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-@ConfigurationProperties(prefix = "tolgee.content-delivery")
 @DocProperty(
+  prefix = "tolgee.content-delivery",
   displayName = "Content Delivery",
   description =
     "These properties are used to configure " +
@@ -24,6 +24,7 @@ class ContentDeliveryProperties {
   var publicUrlPrefix: String? = null
 
   @DocProperty(description = "Configuration of the storage. You have to configure exactly one storage.")
+  @NestedConfigurationProperty
   var storage: ContentStorageProperties = ContentStorageProperties()
 
   @DocProperty(
@@ -32,5 +33,6 @@ class ContentDeliveryProperties {
       "Several services can be used as cache. Tolgee is able to purge the cache when " +
         "new files are published when this configuration is set.",
   )
+  @NestedConfigurationProperty
   var cachePurging: ContentDeliveryCachePurgingProperties = ContentDeliveryCachePurgingProperties()
 }

@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.postgres-autostart")
 @DocProperty(
+  prefix = "tolgee.postgres-autostart",
   description = "Defines whether and how is PostgreSQL started on Tolgee startup.",
   displayName = "Postgres autostart",
 )

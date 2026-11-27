@@ -1,9 +1,10 @@
 package io.tolgee
 
 import io.tolgee.configuration.Banner
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.persistence.autoconfigure.EntityScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
@@ -13,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 )
 @EnableJpaAuditing(dateTimeProviderRef = "currentDateProvider")
 @EntityScan("io.tolgee.model")
-@ConfigurationPropertiesScan
+@EnableConfigurationProperties(TolgeeProperties::class)
 @EnableJpaRepositories("io.tolgee.repository")
 class Application {
   companion object {

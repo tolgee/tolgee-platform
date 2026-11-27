@@ -19,7 +19,7 @@ package io.tolgee.security.oauth2.cimd
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.tolgee.Metrics
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.oauth2.UrlOrigins
 import io.tolgee.security.oauth2.lowercaseHost
 import io.tolgee.util.Logging
@@ -48,9 +48,11 @@ import java.util.concurrent.TimeoutException
 @Component
 class CimdHostResolver(
   private val urlSecurity: UrlSecurity,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val metrics: Metrics,
 ) : Logging {
+  private val internalProperties get() = tolgeeProperties.internal
+
   private val resolvers = resolverPool(MAX_CONCURRENT_RESOLUTIONS, "cimd-resolve")
 
   /** Threads only a lookup for an existing grant may use. */

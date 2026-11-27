@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.machine-translation.baidu")
 @DocProperty(
+  prefix = "tolgee.machine-translation.baidu",
   description =
     "See [Baidu's](https://fanyi-api.baidu.com/product/11) page (in Chinese) " +
       "for more information and applicable pricing.",

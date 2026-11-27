@@ -1,7 +1,6 @@
 package io.tolgee.security.oauth2.cimd
 
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
@@ -139,11 +138,11 @@ class CimdClientPolicyTest {
     cimdEnabled: Boolean = true,
     frontendUrl: String? = "https://app.tolgee.example.com",
   ) = CimdClientPolicy(
-    OAuth2ServerProperties().apply {
-      cimdAllowedHosts = allowedHosts
-      this.cimdEnabled = cimdEnabled
+    TolgeeProperties().apply {
+      oauth2.cimdAllowedHosts = allowedHosts
+      oauth2.cimdEnabled = cimdEnabled
+      internal.disableUrlSsrfProtection = disableSsrf
     },
-    InternalProperties().apply { disableUrlSsrfProtection = disableSsrf },
     mock { on { issuerUrl } doReturn "https://tolgee.example.com" },
     mock { on { stableUrl } doReturn frontendUrl },
   )

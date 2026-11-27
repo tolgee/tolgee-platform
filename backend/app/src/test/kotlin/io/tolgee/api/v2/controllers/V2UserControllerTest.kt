@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
 import io.tolgee.development.testDataBuilder.data.UserDeletionTestData
@@ -38,9 +37,6 @@ class V2UserControllerTest : AuthorizedControllerTest() {
   companion object {
     private val LONG_PASSWORD = "a".repeat(60)
   }
-
-  @Autowired
-  override lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   lateinit var passwordEncoder: PasswordEncoder

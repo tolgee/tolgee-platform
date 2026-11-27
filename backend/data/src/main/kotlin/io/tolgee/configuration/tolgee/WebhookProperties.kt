@@ -1,12 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import jakarta.annotation.PostConstruct
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.webhook")
-@DocProperty(description = "Configuration for webhook behavior.", displayName = "Webhooks")
-class WebhookProperties {
+@DocProperty(prefix = "tolgee.webhook", description = "Configuration for webhook behavior.", displayName = "Webhooks")
+class WebhookProperties : SelfValidatingProperties {
   @DocProperty(
     description = "Whether the automatic disabling of failing webhooks is enabled.",
   )
@@ -36,8 +33,7 @@ class WebhookProperties {
   )
   var allowLocalAddresses: Boolean = false
 
-  @PostConstruct
-  fun validate() {
+  override fun validate() {
     require(autoDisableWarningAfterHours < autoDisableAfterDays * 24) {
       "tolgee.webhook.auto-disable-warning-after-hours ($autoDisableWarningAfterHours) " +
         "must be less than auto-disable-after-days ($autoDisableAfterDays) converted to hours (${autoDisableAfterDays * 24})"

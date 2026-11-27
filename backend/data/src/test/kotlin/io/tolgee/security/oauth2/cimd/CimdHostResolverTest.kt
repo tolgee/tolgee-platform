@@ -2,7 +2,7 @@ package io.tolgee.security.oauth2.cimd
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -31,7 +31,7 @@ class CimdHostResolverTest {
           listOf(loopback())
         }
       }
-    val resolver = CimdHostResolver(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
+    val resolver = CimdHostResolver(urlSecurity, TolgeeProperties(), Metrics(SimpleMeterRegistry()))
     val pool = Executors.newFixedThreadPool(CimdHostResolver.MAX_RESOLUTIONS_PER_HOST)
     repeat(CimdHostResolver.MAX_RESOLUTIONS_PER_HOST) { i ->
       pool.submit { resolver.resolve("https://one-host.invalid:${8000 + i}/client-$i", CimdFetchLane.REQUEST) }
@@ -61,7 +61,7 @@ class CimdHostResolverTest {
         }
       }
     val metrics = Metrics(SimpleMeterRegistry())
-    val resolver = CimdHostResolver(urlSecurity, InternalProperties(), metrics)
+    val resolver = CimdHostResolver(urlSecurity, TolgeeProperties(), metrics)
 
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.REQUEST).assert.isNull()
     resolver.resolve("https://stuck.invalid/other", CimdFetchLane.REQUEST).assert.isNull()
@@ -84,7 +84,7 @@ class CimdHostResolverTest {
           listOf(loopback())
         }
       }
-    val resolver = CimdHostResolver(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
+    val resolver = CimdHostResolver(urlSecurity, TolgeeProperties(), Metrics(SimpleMeterRegistry()))
 
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.REQUEST).assert.isNull()
     resolver.resolve("https://stuck.invalid/client", CimdFetchLane.GRANT_CHECK).assert.isNull()
@@ -109,7 +109,7 @@ class CimdHostResolverTest {
           listOf(loopback())
         }
       }
-    val resolver = CimdHostResolver(urlSecurity, InternalProperties(), Metrics(SimpleMeterRegistry()))
+    val resolver = CimdHostResolver(urlSecurity, TolgeeProperties(), Metrics(SimpleMeterRegistry()))
     val hosts = CimdHostResolver.MAX_CONCURRENT_RESOLUTIONS / CimdHostResolver.MAX_RESOLUTIONS_PER_HOST
     val pool = Executors.newFixedThreadPool(CimdHostResolver.MAX_CONCURRENT_RESOLUTIONS)
     repeat(hosts) { host ->

@@ -2,14 +2,17 @@ package io.tolgee.commandLineRunners
 
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties
 import io.tolgee.configuration.tolgee.PostgresAutostartProperties.PostgresAutostartMode
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 
 @Component
 class EmbeddedPostgresDeprecationCommandLineRunner(
-  private val postgresAutostartProperties: PostgresAutostartProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : CommandLineRunner {
+  private val postgresAutostartProperties get() = tolgeeProperties.postgresAutostart
+
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun run(vararg args: String) {

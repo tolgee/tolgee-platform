@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.authentication.github")
 @DocProperty(
+  prefix = "tolgee.authentication.github",
   description =
     ":::info\n" +
       "GitHub authentication can be used in combination with native authentication.\n" +

@@ -2,7 +2,6 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.component.KeyGenerator
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.development.testDataBuilder.data.OAuth2AuthorizationServiceTestData
 import io.tolgee.development.testDataBuilder.newOAuth2Grant
 import io.tolgee.model.UserAccount
@@ -29,8 +28,7 @@ class OAuth2AuthorizationServiceTest : AbstractSpringTest() {
   @Autowired
   private lateinit var keyGenerator: KeyGenerator
 
-  @Autowired
-  private lateinit var properties: OAuth2ServerProperties
+  private val properties get() = tolgeeProperties.oauth2
 
   private lateinit var testData: OAuth2AuthorizationServiceTestData
 

@@ -1,5 +1,6 @@
 package io.tolgee.service.machineTranslation
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
@@ -32,6 +33,7 @@ class MtServiceConfigService(
   private val applicationContext: ApplicationContext,
   private val mtServiceConfigRepository: MtServiceConfigRepository,
   private val entityManager: EntityManager,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   @Autowired
   private lateinit var promptService: PromptService
@@ -426,7 +428,7 @@ class MtServiceConfigService(
 
   val services by lazy {
     MtServiceType.entries.associateWith {
-      (it.propertyClass?.let { applicationContext.getBean(it) } to applicationContext.getBean(it.providerClass))
+      it.propertiesGetter(tolgeeProperties) to applicationContext.getBean(it.providerClass)
     }
   }
 

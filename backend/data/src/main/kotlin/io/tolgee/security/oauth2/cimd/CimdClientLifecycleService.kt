@@ -17,7 +17,7 @@
 package io.tolgee.security.oauth2.cimd
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.oauth2.OAuth2ClientDocumentCheck
 import io.tolgee.model.oauth2.OAuth2Grant
 import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
@@ -44,8 +44,10 @@ class CimdClientLifecycleService(
   private val oauth2GrantRepository: OAuth2GrantRepository,
   private val documentCheckRepository: OAuth2ClientDocumentCheckRepository,
   private val currentDateProvider: CurrentDateProvider,
-  private val properties: OAuth2ServerProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val properties get() = tolgeeProperties.oauth2
+
   /**
    * Takes this client's next attempt if the last one is older than `cimd-check-interval-minutes`. Returns the
    * attempt time, or null when another caller got there first or the client is not due.
