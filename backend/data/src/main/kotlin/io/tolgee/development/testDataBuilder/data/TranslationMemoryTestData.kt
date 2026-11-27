@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -28,6 +29,7 @@ import java.util.Date
  */
 class TranslationMemoryTestData : BaseTestData() {
   var projectWithTm: Project
+  private lateinit var projectWithTmProjectBuilder: ProjectBuilder
   lateinit var projectTm: TranslationMemory
   lateinit var sharedTm: TranslationMemory
 
@@ -376,6 +378,7 @@ class TranslationMemoryTestData : BaseTestData() {
           }
         }
       projectWithTm = projectWithTmBuilder.self
+      projectWithTmProjectBuilder = projectWithTmBuilder
 
       userAccountBuilder.defaultOrganizationBuilder
         .addTranslationMemory {
@@ -640,6 +643,21 @@ class TranslationMemoryTestData : BaseTestData() {
           user = projectOnlyViewer
           type = ProjectPermissionType.EDIT
         }
+      }
+    }
+  }
+
+  fun addLongSourceKey(sourceText: String) {
+    projectWithTmProjectBuilder.addKey { name = "long-source-key" }.build keyBuilder@{
+      addTranslation {
+        language = projectWithTmProjectBuilder.getLanguageByTag("en")!!.self
+        key = this@keyBuilder.self
+        text = sourceText
+      }
+      addTranslation {
+        language = germanLanguageWithTm
+        key = this@keyBuilder.self
+        text = "Langer Text"
       }
     }
   }
