@@ -102,7 +102,13 @@ class ExportDataProvider(
     filterBranch()
 
     query.where(*whereConditions.toTypedArray())
-    query.orderBy(cb.asc(key.get(Key_.name)))
+    // Indexed keys follow their source document. Legacy and manually created keys retain name order.
+    query.orderBy(
+      cb.asc(key.get(Key_.sourceDocument), jakarta.persistence.criteria.Nulls.LAST),
+      cb.asc(key.get(Key_.listId), jakarta.persistence.criteria.Nulls.LAST),
+      cb.asc(key.get(Key_.name)),
+      cb.asc(key.get(Key_.id)),
+    )
   }
 
   private fun filterProjectId() {

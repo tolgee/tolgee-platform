@@ -30,6 +30,8 @@ class ImportKey(
   @OneToOne(mappedBy = "importKey")
   override var keyMeta: KeyMeta? = null
 
+  var listId: Long? = null
+
   var pluralArgName: String? = null
 
   @ColumnDefault("true")

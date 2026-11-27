@@ -23,6 +23,7 @@ class KeyWithTranslationsModelAssembler(
     KeyWithTranslationsModel(
       createdAt = view.createdAt.time,
       keyId = view.keyId,
+      listId = view.listId,
       keyName = view.keyName,
       keyNamespaceId = view.keyNamespaceId,
       keyIsPlural = view.keyIsPlural,

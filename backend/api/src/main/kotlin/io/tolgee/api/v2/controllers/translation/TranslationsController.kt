@@ -91,6 +91,7 @@ import java.time.Duration
 @OpenApiOrderExtension(4)
 class TranslationsController(
   private val projectHolder: ProjectHolder,
+  private val keyService: io.tolgee.service.key.KeyService,
   private val translationService: TranslationService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
@@ -260,6 +261,10 @@ When null, resulting file will be a flat key-value object.
         authenticationFacade.authenticatedUserOrGuest.id,
       )
 
+    params.contextKeyId?.let { anchor ->
+      val ids = keyService.contextIds(projectHolder.project.id, anchor, params.contextRadius)
+      params.filterKeyId = params.filterKeyId?.intersect(ids.toSet())?.toList() ?: ids
+    }
     val pageableWithSort = getSafeSortPageable(pageable)
 
     val data =

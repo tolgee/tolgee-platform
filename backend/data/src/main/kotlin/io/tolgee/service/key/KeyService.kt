@@ -79,6 +79,12 @@ class KeyService(
   @Lazy
   private val translationSuggestionService: TranslationSuggestionService,
 ) : Logging {
+  fun contextIds(
+    projectId: Long,
+    keyId: Long,
+    radius: Int,
+  ): List<Long> = keyRepository.contextIds(projectId, keyId, radius)
+
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
   }

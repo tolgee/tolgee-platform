@@ -19,6 +19,8 @@ data class KeyWithTranslationsView(
   val screenshotCount: Long,
   val contextPresent: Boolean,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
+  val listId: Long? = null,
+  val sourceDocument: String? = null,
   val deletedAt: Timestamp? = null,
   val deletedByUserId: Long? = null,
   val deletedByUserName: String? = null,
@@ -64,7 +66,7 @@ data class KeyWithTranslationsView(
      * data for the returned view is empty at this point; it is populated later by Query 2 in
      * `TranslationViewDataProvider`.
      *
-     * The row layout is fixed to 12 key-level columns + optional 6 trashed-only columns. See
+     * The row layout is fixed to 14 key-level columns + optional 6 trashed-only columns. See
      * `QueryBase.kt` for the full list and order.
      */
     fun of(
@@ -85,6 +87,8 @@ data class KeyWithTranslationsView(
         keyDescription = data.removeFirst() as String?,
         screenshotCount = data.removeFirst() as Long,
         contextPresent = data.removeFirst() as Boolean,
+        sourceDocument = data.removeFirst() as String?,
+        listId = data.removeFirst() as Long?,
         deletedAt = if (trashed) data.removeFirst() as Timestamp? else null,
         deletedByUserId = if (trashed) data.removeFirst() as Long? else null,
         deletedByUserName = if (trashed) data.removeFirst() as String? else null,
@@ -112,6 +116,9 @@ data class KeyWithTranslationsView(
       KeyWithTranslationsView::keyName.name -> keyName
       KeyWithTranslationsView::screenshotCount.name -> screenshotCount.toString()
       KeyWithTranslationsView::branch.name -> branch
+      "sourceOrderGroup" -> if (listId == null) "1" else "0"
+      "sourceDocument" -> sourceDocument
+      "listId" -> listId?.toString()
       else -> null
     }
   }

@@ -26,7 +26,7 @@ fun performImport(
         "files",
         it.first,
         "application/zip",
-        it.second.file.readBytes(),
+        it.second.inputStream.use { stream -> stream.readBytes() },
       ),
     )
   }
@@ -51,7 +51,7 @@ fun performSingleStepImport(
         "files",
         it.first,
         "application/zip",
-        it.second.file.readBytes(),
+        it.second.inputStream.use { stream -> stream.readBytes() },
       ),
     )
   }

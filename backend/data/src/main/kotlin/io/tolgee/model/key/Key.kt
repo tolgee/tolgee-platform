@@ -59,6 +59,7 @@ import java.util.Date
     Index(columnList = "project_id"),
     Index(columnList = "namespace_id"),
     Index(columnList = "branch_id"),
+    Index(name = "idx_key_source_order", columnList = "project_id,branch_id,namespace_id,source_document,list_id,id"),
   ],
 )
 class Key(
@@ -79,6 +80,11 @@ class Key(
   @ManyToOne
   @ActivityLoggedProp
   var namespace: Namespace? = null
+
+  var listId: Long? = null
+
+  @Column(length = 2000)
+  var sourceDocument: String? = null
 
   // Nullable for backward compatibility: NULL represents default branch for legacy data
   @ManyToOne(fetch = FetchType.LAZY)
@@ -158,6 +164,8 @@ class Key(
   override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["isPlural"] != this.isPlural ||
       oldState["pluralArgName"] != this.pluralArgName ||
+      oldState["listId"] != this.listId ||
+      oldState["sourceDocument"] != this.sourceDocument ||
       oldState["maxCharLimit"] != this.maxCharLimit ||
       oldState["deletedAt"] != this.deletedAt
   }
@@ -168,6 +176,8 @@ class Key(
         this.namespace?.name != snapshot.namespace ||
         this.isPlural != snapshot.isPlural ||
         this.pluralArgName != snapshot.pluralArgName ||
+        this.listId != snapshot.listId ||
+        this.sourceDocument != snapshot.sourceDocument ||
         this.maxCharLimit != snapshot.maxCharLimit
     if (changed) {
       return true
@@ -206,6 +216,14 @@ class Key(
       return true
     }
     if (isConflictingThreeWay(source.pluralArgName, this.pluralArgName, snapshot.pluralArgName)) {
+      return true
+    }
+    if (isConflictingThreeWay(
+        source.sourceDocument to source.listId,
+        sourceDocument to listId,
+        snapshot.sourceDocument to snapshot.listId,
+      )
+    ) {
       return true
     }
     if (isConflictingThreeWay(source.maxCharLimit, this.maxCharLimit, snapshot.maxCharLimit)) {
@@ -250,6 +268,15 @@ class Key(
     snapshot: KeySnapshot?,
     resolution: BranchKeyMergeResolutionType,
   ) {
+    chooseThreeWay(
+      source.sourceDocument to source.listId,
+      sourceDocument to listId,
+      snapshot?.let { it.sourceDocument to it.listId },
+      resolution,
+    )?.let { (document, position) ->
+      sourceDocument = document
+      listId = position
+    }
     this.isPlural = chooseThreeWay(source.isPlural, this.isPlural, snapshot?.isPlural, resolution) ?: false
     this.pluralArgName = chooseThreeWay(source.pluralArgName, this.pluralArgName, snapshot?.pluralArgName, resolution)
     this.maxCharLimit = chooseThreeWay(source.maxCharLimit, this.maxCharLimit, snapshot?.maxCharLimit, resolution)

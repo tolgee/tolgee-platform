@@ -4598,6 +4598,8 @@ export interface components {
       keyPluralArgName?: string;
       /** @description Tags of key */
       keyTags: components["schemas"]["TagModel"][];
+      /** Format: int64 */
+      listId?: number;
       /**
        * Format: int64
        * @description Count of screenshots provided for the key
@@ -27836,6 +27838,8 @@ export interface operations {
       query: {
         /** Cursor to get next data */
         cursor?: string;
+        contextKeyId?: number;
+        contextRadius?: number;
         /** Include detailed QA issues for inline highlighting */
         includeQaIssues?: boolean;
         /**

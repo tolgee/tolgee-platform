@@ -115,6 +115,8 @@ class TranslationsViewQueryBuilder(
     queryBase: QueryBase<*>,
     property: String,
   ): Expression<*>? {
+    if (property == "sourceOrderGroup") return queryBase.sourceOrderGroup
+
     // Fast path: direct column in query selection
     queryBase.querySelection[property]?.let { return it as Expression<*> }
 

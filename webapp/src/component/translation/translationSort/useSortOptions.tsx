@@ -5,6 +5,7 @@ export type SortOption = { value: string; label: string };
 export const useSortOptions = (): SortOption[] => {
   const { t } = useTranslate();
   return [
+    { value: 'listId', label: t('translation_sort_source_document', 'Source file order') },
     { value: 'keyName', label: t('translation_sort_item_key_name_a_to_z') },
     {
       value: 'keyName,desc',
