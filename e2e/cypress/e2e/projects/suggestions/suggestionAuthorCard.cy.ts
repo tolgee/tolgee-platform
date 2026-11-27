@@ -50,7 +50,7 @@ describe('Suggestion author card', () => {
   it('shows the contributor card with a profile link on a community project', () => {
     login('communityStatsOwner');
     hoverSuggestionAuthor(publicProjectId, 'key-1', alice.id);
-    gcy('suggestion-author-card')
+    gcy('contributor-popover-card')
       .should('be.visible')
       .and('contain', alice.name);
     gcy('community-contributor-card-suggestions')
@@ -87,10 +87,10 @@ describe('Suggestion author card', () => {
   it('shows only a no-stats line and stays on the page for an author the endpoint rejects', () => {
     login('communityStatsOwner');
     hoverSuggestionAuthor(publicProjectId, 'key-3', dave.id);
-    gcy('suggestion-author-card')
+    gcy('contributor-popover-card')
       .should('be.visible')
       .and('contain', dave.name);
-    gcy('suggestion-author-card-no-stats').should('be.visible');
+    gcy('contributor-popover-card-no-stats').should('be.visible');
     gcy('community-contributor-card-suggestions').should('not.exist');
     gcy('community-contributor-card-contributions').should('not.exist');
     gcy('community-contributor-card-profile-link').should('not.exist');
@@ -101,6 +101,6 @@ describe('Suggestion author card', () => {
     login('communityStatsOwner');
     hoverSuggestionAuthor(privateProjectId, 'private-key', alice.id);
     gcy('suggestion-author-tooltip').should('be.visible');
-    gcy('suggestion-author-card').should('not.exist');
+    gcy('contributor-popover-card').should('not.exist');
   });
 });

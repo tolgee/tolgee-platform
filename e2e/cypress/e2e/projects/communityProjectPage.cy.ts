@@ -4,8 +4,10 @@ import { communityStatsData } from '../../common/apiCalls/testData/testData';
 import { gcy } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2CommunityPageSettings } from '../../compounds/projectSettings/E2CommunityPageSettings';
+import { E2CommunityPage } from '../../compounds/E2CommunityPage';
 
 const settings = new E2CommunityPageSettings();
+const communityPage = new E2CommunityPage();
 
 const OWNER = 'communityStatsOwner';
 const PROJECT_NAME = 'Community Stats Demo';
@@ -46,6 +48,24 @@ describe('Community project page', () => {
           .should('have.attr', 'href')
           .and('include', `/community/contributors?period=${period}`);
       });
+  });
+
+  it('shows the contributor card when hovering a top contributor', () => {
+    visitPage();
+    communityPage.hoverLastTopContributor().then((userId) => {
+      gcy('contributor-popover-card').should('be.visible');
+      gcy('community-contributor-card-contributions').should('be.visible');
+      const languagesEverySeededSuggesterUses = 3;
+      gcy('community-contributor-card-flag').should(
+        'have.length',
+        languagesEverySeededSuggesterUses
+      );
+      gcy('community-contributor-card-profile-link').should(
+        'have.attr',
+        'href',
+        `/users/${userId}`
+      );
+    });
   });
 
   const stubRecentTopTotal = (total: number) => {
