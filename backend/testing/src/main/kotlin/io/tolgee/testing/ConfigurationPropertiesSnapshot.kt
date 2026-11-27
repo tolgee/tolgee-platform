@@ -1,7 +1,9 @@
 package io.tolgee.testing
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 /**
  * Restore updates the existing object graph in place (`readerForUpdating` + merging on) rather than
@@ -10,19 +12,23 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
  */
 object ConfigurationPropertiesSnapshot {
   private val mapper =
-    jacksonObjectMapper()
-      .findAndRegisterModules()
+    jacksonMapperBuilder()
+      .findAndAddModules()
       .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+      // Both are off by default since Jackson 3. Without them a `val` collection property is skipped
+      // on restore, and a snapshot that no longer matches the bean is ignored instead of failing.
+      .configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, true)
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+      .defaultMergeable(true)
       .apply {
-        setDefaultMergeable(true)
         // Merging a collection/map appends to it; replace instead so a snapshotted baseline is
         // restored exactly rather than concatenated with the test's in-place additions. configOverride
         // is matched by the property's concrete type and does not cascade from Collection, so every
         // declared container type (List/Set/Map) is listed explicitly.
         listOf(Collection::class, List::class, Set::class, Map::class).forEach {
-          configOverride(it.java).mergeable = false
+          withConfigOverride(it.java) { override -> override.setMergeable(false) }
         }
-      }
+      }.build()
 
   fun snapshot(bean: Any): String = mapper.writeValueAsString(bean)
 
