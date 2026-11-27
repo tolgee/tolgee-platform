@@ -2,10 +2,12 @@ package io.tolgee.activity
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
+import io.tolgee.activity.annotation.ActivityUrlHostOnly
 import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.model.EntityWithId
 import io.tolgee.util.EntityUtil
+import io.tolgee.util.urlHostOnly
 import org.springframework.stereotype.Component
 import java.lang.reflect.Field
 import java.util.concurrent.ConcurrentHashMap
@@ -45,13 +47,21 @@ class EntityDescriptionProvider(
     val props = describingProps(entityClass)
     val fieldValues = HashMap<String, Any?>(props.size)
     for ((name, field) in props) {
-      fieldValues[name] = field.get(entity)
+      fieldValues[name] = withUrlReducedToHost(field, field.get(entity))
     }
     return EntityDescription(
       entityClass.simpleName,
       entityId = entity.id,
       fieldValues,
     )
+  }
+
+  private fun withUrlReducedToHost(
+    field: Field,
+    value: Any?,
+  ): Any? {
+    if (field.isAnnotationPresent(ActivityUrlHostOnly::class.java)) return urlHostOnly(value)
+    return value
   }
 
   private fun describingPaths(entityClass: Class<*>): List<Path> =
