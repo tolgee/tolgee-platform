@@ -11,19 +11,28 @@ export type AddFirstGlossaryMessageProps = {
 export const AddFirstGlossaryMessage: React.VFC<
   AddFirstGlossaryMessageProps
 > = ({ height, onCreateClick }) => {
-  return (
-    <EmptyResourceMessage
-      title={{
-        keyName: 'glossaries_list_empty_title',
-      }}
-      message={{
+  const message = onCreateClick
+    ? {
         keyName: 'glossaries_list_empty_message',
         params: {
           bestPractice: (
             <Link href="https://docs.tolgee.io/platform/glossaries/managing_glossaries" />
           ),
         },
+      }
+    : {
+        // @tolgee-key glossaries_list_empty_no_create_permission
+        keyName: 'glossaries_list_empty_no_create_permission',
+        defaultValue:
+          'You need permission to create glossaries. Ask an organization Owner or Maintainer to create one or update your role.',
+      };
+
+  return (
+    <EmptyResourceMessage
+      title={{
+        keyName: 'glossaries_list_empty_title',
       }}
+      message={message}
       image={<EmptyImage />}
       imageHeight={height}
       button={{
