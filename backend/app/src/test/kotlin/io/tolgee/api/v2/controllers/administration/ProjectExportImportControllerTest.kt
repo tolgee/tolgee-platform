@@ -169,7 +169,7 @@ class ProjectExportImportControllerTest : AuthorizedControllerTest() {
     assertThat(projectKeyNames()).contains("greeting", "labeled")
   }
 
-  // Headerless bytes make ImageIO.read return null; a valid PNG header over a corrupt body makes it throw
+  // Headerless bytes are rejected before decoding; a valid PNG header over a corrupt body makes the decoder throw
   // IIOException. Both decode-failure paths must surface as a clean 400, not a 500.
   @Test
   fun `import rejects an archive whose screenshot blob has no image header`() {

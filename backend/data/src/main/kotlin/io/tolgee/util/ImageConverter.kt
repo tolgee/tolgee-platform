@@ -11,10 +11,6 @@ import kotlin.math.sqrt
 class ImageConverter(
   imageStream: InputStream,
 ) : ImageProcessor(imageStream) {
-  val originalDimension: Dimension by lazy {
-    Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
-  }
-
   fun getImage(
     compressionQuality: Float = 0.8f,
     targetDimension: Dimension? = null,
@@ -79,14 +75,15 @@ class ImageConverter(
   }
 
   val targetDimension: Dimension by lazy {
-    val imagePxs = sourceBufferedImage.height * sourceBufferedImage.width
-    val maxPxs = 3000000
-    val newHeight = floor(sqrt(maxPxs.toDouble() * sourceBufferedImage.height / sourceBufferedImage.width)).toInt()
-    val newWidth = floor(sqrt(maxPxs.toDouble() * sourceBufferedImage.width / sourceBufferedImage.height)).toInt()
+    val width = originalDimension.width
+    val height = originalDimension.height
+    val imagePxs = width.toLong() * height
+    val newHeight = floor(sqrt(MAX_STORED_PIXELS.toDouble() * height / width)).toInt()
+    val newWidth = floor(sqrt(MAX_STORED_PIXELS.toDouble() * width / height)).toInt()
 
-    if (imagePxs > maxPxs) {
+    if (imagePxs > MAX_STORED_PIXELS) {
       return@lazy Dimension(newWidth, newHeight)
     }
-    return@lazy Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
+    return@lazy Dimension(width, height)
   }
 }

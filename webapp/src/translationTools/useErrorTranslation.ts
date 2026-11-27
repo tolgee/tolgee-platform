@@ -378,6 +378,8 @@ export function useErrorTranslation() {
         return t('max_screenshots_exceeded');
       case 'too_many_uploaded_images':
         return t('too_many_uploaded_images');
+      case 'image_too_large':
+        return t('image_too_large', 'The uploaded image is too large');
       case 'screenshot_not_of_key':
         return t('screenshot_not_of_key');
       case 'unsupported_media_type':
