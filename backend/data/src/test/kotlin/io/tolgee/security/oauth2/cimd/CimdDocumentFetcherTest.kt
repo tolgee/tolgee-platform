@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import io.tolgee.util.UrlSecurity
 import org.junit.jupiter.api.AfterEach
@@ -16,8 +16,8 @@ import java.time.Duration
 class CimdDocumentFetcherTest {
   private val fetcher =
     CimdDocumentFetcher(
-      CimdHostResolver(UrlSecurity(InternalProperties()), InternalProperties(), Metrics(SimpleMeterRegistry())),
-      InternalProperties(),
+      CimdHostResolver(UrlSecurity(TolgeeProperties()), TolgeeProperties(), Metrics(SimpleMeterRegistry())),
+      TolgeeProperties(),
     )
   private var server: HttpServer? = null
 

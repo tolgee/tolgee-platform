@@ -2,7 +2,7 @@ package io.tolgee.security.oauth2
 
 import io.tolgee.api.v2.controllers.oauth2.OAuth2AuthorizationServerController
 import io.tolgee.api.v2.controllers.oauth2.ProtectedResourceMetadataController
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.NotFoundException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ class OAuth2MetadataDisabledTest {
   @Test
   fun `the RFC 8414 document is not served, and the throwing issuer getter is never reached`() {
     val controller =
-      OAuth2AuthorizationServerController(mock(), mock(), unconfigured, mock(), mock(), OAuth2ServerProperties())
+      OAuth2AuthorizationServerController(mock(), mock(), unconfigured, mock(), mock(), TolgeeProperties())
 
     assertThatThrownBy { controller.metadata() }.isInstanceOf(NotFoundException::class.java)
 

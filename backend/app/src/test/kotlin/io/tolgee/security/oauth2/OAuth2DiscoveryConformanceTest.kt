@@ -17,8 +17,7 @@ import java.nio.charset.StandardCharsets
  * The RFC 8414 discovery document, and the query encoding both legs of the flow depend on.
  */
 class OAuth2DiscoveryConformanceTest : AbstractOAuth2ConformanceTest() {
-  @Autowired
-  private lateinit var oauth2Properties: OAuth2ServerProperties
+  private val oauth2Properties get() = tolgeeProperties.oauth2
 
   @AfterEach
   fun restoreCimd() {

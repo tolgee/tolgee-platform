@@ -16,7 +16,7 @@
 
 package io.tolgee.security.oauth2.cimd
 
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import io.tolgee.util.logger
@@ -43,8 +43,10 @@ import java.util.concurrent.TimeUnit
 @Component
 class CimdDocumentFetcher(
   private val hostResolver: CimdHostResolver,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val internalProperties get() = tolgeeProperties.internal
+
   // A drip-feeding host resets the per-read socket timeout on every byte, so only a total deadline bounds a fetch.
   private val watchdog =
     Executors.newSingleThreadScheduledExecutor { runnable ->

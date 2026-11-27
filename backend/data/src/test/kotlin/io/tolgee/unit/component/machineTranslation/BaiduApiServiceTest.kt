@@ -3,6 +3,7 @@ package io.tolgee.unit.component.machineTranslation
 import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.BaiduApiService.Companion.BaiduResponse
 import io.tolgee.component.machineTranslation.providers.BaiduApiService.Companion.BaiduTranslation
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -86,6 +87,10 @@ class BaiduApiServiceTest {
         on { postForEntity(any<String>(), any(), eq(BaiduResponse::class.java)) } doReturn
           ResponseEntity.ok(response)
       }
-    return BaiduApiService(BaiduMachineTranslationProperties(appId = "id", appSecret = "secret"), restTemplate)
+    val properties =
+      TolgeeProperties().apply {
+        machineTranslation.baidu = BaiduMachineTranslationProperties(appId = "id", appSecret = "secret")
+      }
+    return BaiduApiService(properties, restTemplate)
   }
 }

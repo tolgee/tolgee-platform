@@ -15,6 +15,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 class FileStorageProperties(
   @NestedConfigurationProperty
   var s3: S3Settings = S3Settings(),
+  @NestedConfigurationProperty
   var azure: AzureBlobSettings = AzureBlobSettings(),
   @DocProperty(
     description = "Path to directory where Tolgee will store its files.",

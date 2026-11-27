@@ -2,7 +2,7 @@ package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.SchedulingManager
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
@@ -30,8 +30,10 @@ class DeletedOrganizationProjectPurgeScheduler(
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
   private val schedulingManager: SchedulingManager,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val internalProperties get() = tolgeeProperties.internal
+
   @EventListener(ApplicationReadyEvent::class)
   fun schedulePurge() {
     if (!internalProperties.orphanProjectPurgeEnabled) {

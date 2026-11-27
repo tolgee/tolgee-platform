@@ -2,10 +2,9 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.security.oauth2.OAuth2Constants
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.oauth2")
 @DocProperty(
+  prefix = "tolgee.oauth2",
   description =
     "Settings for Tolgee acting as an OAuth 2.1 authorization server (CLI and browser-extension login, MCP).",
   displayName = "OAuth2 authorization server",

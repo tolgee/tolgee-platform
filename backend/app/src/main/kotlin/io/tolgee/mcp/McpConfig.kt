@@ -3,7 +3,7 @@ package io.tolgee.mcp
 import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpStatelessSyncServer
 import io.modelcontextprotocol.spec.McpSchema
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.mcp.tools.McpToolRegistrar
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.oauth2.OAuth2BearerChallengeProvider
@@ -93,10 +93,10 @@ class McpConfig {
   fun mcpAuthChallengeFilter(
     challengeProvider: OAuth2BearerChallengeProvider,
     objectMapper: ObjectMapper,
-    authenticationProperties: AuthenticationProperties,
+    tolgeeProperties: TolgeeProperties,
   ): FilterRegistrationBean<McpAuthChallengeFilter> {
     val registration =
-      FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper, authenticationProperties))
+      FilterRegistrationBean(McpAuthChallengeFilter(challengeProvider, objectMapper, tolgeeProperties.authentication))
     registration.addUrlPatterns("/mcp/*")
     return registration
   }

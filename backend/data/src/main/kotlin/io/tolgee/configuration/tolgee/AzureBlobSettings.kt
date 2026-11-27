@@ -2,10 +2,9 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.model.contentDelivery.AzureBlobConfig
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.file-storage.azure")
 @DocProperty(
+  prefix = "tolgee.file-storage.azure",
   description =
     "Tolgee supports storing its files in Azure Blob Storage. " +
       "When enabled, Tolgee will store all its files in the configured container rather than in filesystem. " +

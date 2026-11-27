@@ -75,6 +75,7 @@ class TolgeeProperties(
   var smtp: SmtpProperties = SmtpProperties(),
   @NestedConfigurationProperty
   var sentry: SentryProperties = SentryProperties(),
+  @NestedConfigurationProperty
   var oauth2: OAuth2ServerProperties = OAuth2ServerProperties(),
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,

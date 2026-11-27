@@ -1,7 +1,6 @@
 package io.tolgee.configuration
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.WebhookProperties
 import io.tolgee.util.SsrfSafeRequestFactoryProvider
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.springframework.context.annotation.Bean
@@ -16,7 +15,6 @@ import java.time.Duration
 @Component
 class RestTemplateConfiguration(
   private val ssrfSafeRequestFactoryProvider: SsrfSafeRequestFactoryProvider,
-  private val webhookProperties: WebhookProperties,
   private val tolgeeProperties: TolgeeProperties,
 ) {
   @Bean
@@ -47,7 +45,7 @@ class RestTemplateConfiguration(
   @Bean(name = ["webhookRestTemplate"])
   fun webhookRestTemplate(): RestTemplate =
     ssrfSafeTemplate(
-      webhookProperties.allowLocalAddresses,
+      tolgeeProperties.webhook.allowLocalAddresses,
       Duration.ofSeconds(2),
       followRedirects = false,
     )

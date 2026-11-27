@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.FrontendUrlProvider
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.oauth2.AuthorizationServerMetadataModel
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
@@ -49,8 +49,10 @@ class OAuth2AuthorizationServerController(
   private val oauth2IssuerResolver: OAuth2IssuerResolver,
   private val frontendUrlProvider: FrontendUrlProvider,
   private val oauth2Resources: OAuth2Resources,
-  private val oauth2Properties: OAuth2ServerProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : IController {
+  private val oauth2Properties get() = tolgeeProperties.oauth2
+
   @GetMapping(OAuth2Constants.AUTHORIZE_PATH)
   @Operation(summary = "OAuth 2.1 authorization endpoint (authorization code + PKCE)")
   @RateLimited(limit = 40, refillDurationInMs = 60_000, isAuthentication = true)

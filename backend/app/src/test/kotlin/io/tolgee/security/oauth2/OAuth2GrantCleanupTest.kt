@@ -1,7 +1,6 @@
 package io.tolgee.security.oauth2
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
 import io.tolgee.development.testDataBuilder.data.OAuth2GrantCleanupTestData
 import io.tolgee.repository.oauth2.OAuth2ClientDocumentCheckRepository
 import io.tolgee.repository.oauth2.OAuth2GrantRepository
@@ -25,8 +24,7 @@ class OAuth2GrantCleanupTest : AbstractSpringTest() {
   @Autowired
   private lateinit var documentCheckRepository: OAuth2ClientDocumentCheckRepository
 
-  @Autowired
-  private lateinit var properties: OAuth2ServerProperties
+  private val properties get() = tolgeeProperties.oauth2
 
   @Autowired
   private lateinit var oauth2AuthorizationService: OAuth2AuthorizationService

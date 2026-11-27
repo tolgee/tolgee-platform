@@ -1,6 +1,6 @@
 package io.tolgee.security.oauth2
 
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions.assertThatCode
@@ -244,11 +244,11 @@ class PreRegisteredOAuth2ClientsTest {
     resolver: OAuth2IssuerResolver = resolver(),
   ): PreRegisteredOAuth2Clients {
     val properties =
-      OAuth2ServerProperties().apply {
-        browserExtensionEnabled = extensionEnabled
-        browserExtensionRedirectUris = extensionUris
-        cliRedirectUris = cliUris
-        this.cliEnabled = cliEnabled
+      TolgeeProperties().apply {
+        oauth2.browserExtensionEnabled = extensionEnabled
+        oauth2.browserExtensionRedirectUris = extensionUris
+        oauth2.cliRedirectUris = cliUris
+        oauth2.cliEnabled = cliEnabled
       }
     return PreRegisteredOAuth2Clients(properties, resolver)
   }

@@ -1,13 +1,13 @@
 package io.tolgee.unit.configuration
 
 import io.tolgee.configuration.PostgresAutoStartConfiguration
-import io.tolgee.configuration.tolgee.PostgresAutostartProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.sql.SQLException
 
 class PostgresAutoStartConfigurationTest {
-  private val configuration = PostgresAutoStartConfiguration(PostgresAutostartProperties())
+  private val configuration = PostgresAutoStartConfiguration(TolgeeProperties())
 
   @Test
   fun `recognises a server that is still starting`() {

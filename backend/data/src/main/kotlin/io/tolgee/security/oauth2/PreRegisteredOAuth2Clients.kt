@@ -16,7 +16,7 @@
 
 package io.tolgee.security.oauth2
 
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.enums.Scope
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
@@ -40,9 +40,11 @@ private const val DEFAULT_CLI_REDIRECT_URI = "http://127.0.0.1/callback"
  */
 @Component
 class PreRegisteredOAuth2Clients(
-  private val properties: OAuth2ServerProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val oauth2IssuerResolver: OAuth2IssuerResolver,
 ) {
+  private val properties get() = tolgeeProperties.oauth2
+
   /** The clients an operator asked for explicitly, which is what the startup guard is keyed on. */
   private val configured: List<OAuth2Client> = listOfNotNull(browserExtension(), configuredCli())
 

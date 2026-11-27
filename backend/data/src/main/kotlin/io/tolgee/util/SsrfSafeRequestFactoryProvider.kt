@@ -16,7 +16,7 @@
 
 package io.tolgee.util
 
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import jakarta.annotation.PreDestroy
 import org.apache.hc.client5.http.DnsResolver
 import org.apache.hc.client5.http.HttpRoute
@@ -54,8 +54,10 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class SsrfSafeRequestFactoryProvider(
   private val urlSecurity: UrlSecurity,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val internalProperties get() = tolgeeProperties.internal
+
   private data class ClientKey(
     val allowLocalAddresses: Boolean,
     val connectTimeoutMs: Long,

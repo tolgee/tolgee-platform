@@ -20,6 +20,7 @@ import io.tolgee.Metrics
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isTokenInvalidated
 import io.tolgee.exceptions.NotFoundException
@@ -55,12 +56,14 @@ class OAuth2AuthorizationService(
   private val userAccountService: UserAccountService,
   private val keyGenerator: KeyGenerator,
   private val currentDateProvider: CurrentDateProvider,
-  private val properties: OAuth2ServerProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val cimdClientLifecycleService: CimdClientLifecycleService,
   private val cimdDocumentCheck: CimdDocumentCheck,
   private val oauth2Resources: OAuth2Resources,
   private val metrics: Metrics,
 ) : Logging {
+  private val properties get() = tolgeeProperties.oauth2
+
   data class AuthorizeParams(
     val responseType: String?,
     val scope: String?,

@@ -1,7 +1,6 @@
 package io.tolgee.security.oauth2
 
-import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.OAuth2ServerProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.oauth2.cimd.CimdClient
 import io.tolgee.security.oauth2.cimd.CimdClientCache
 import io.tolgee.security.oauth2.cimd.CimdClientPolicy
@@ -221,17 +220,17 @@ class OAuth2ClientRegistryTest {
     resolver: OAuth2IssuerResolver = resolver(),
   ): OAuth2ClientRegistry {
     val properties =
-      OAuth2ServerProperties().apply {
-        browserExtensionEnabled = extensionEnabled
-        browserExtensionRedirectUris = extensionUris
-        cliRedirectUris = cliUris
-        this.cliEnabled = cliEnabled
-        this.cimdAllowedHosts = cimdAllowedHosts
+      TolgeeProperties().apply {
+        oauth2.browserExtensionEnabled = extensionEnabled
+        oauth2.browserExtensionRedirectUris = extensionUris
+        oauth2.cliRedirectUris = cliUris
+        oauth2.cliEnabled = cliEnabled
+        oauth2.cimdAllowedHosts = cimdAllowedHosts
       }
     return OAuth2ClientRegistry(
       PreRegisteredOAuth2Clients(properties, resolver),
       cache,
-      CimdClientPolicy(properties, InternalProperties(), resolver, mock { on { stableUrl } doReturn null }),
+      CimdClientPolicy(properties, resolver, mock { on { stableUrl } doReturn null }),
       resolver,
     )
   }

@@ -1,7 +1,7 @@
 package io.tolgee.unit.util
 
 import com.sun.net.httpserver.HttpServer
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.testing.assert
@@ -29,8 +29,8 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 class SsrfSafeRequestFactoryProviderTest {
-  private val internalProperties = InternalProperties()
-  private val provider = SsrfSafeRequestFactoryProvider(UrlSecurity(internalProperties), internalProperties)
+  private val tolgeeProperties = TolgeeProperties()
+  private val provider = SsrfSafeRequestFactoryProvider(UrlSecurity(tolgeeProperties), tolgeeProperties)
   private lateinit var server: HttpServer
   private var port = 0
 
@@ -171,7 +171,7 @@ class SsrfSafeRequestFactoryProviderTest {
 
   @Test
   fun `a local address is reachable when SSRF protection is disabled for dev, matching create-time validation`() {
-    val devProperties = InternalProperties().apply { disableUrlSsrfProtection = true }
+    val devProperties = TolgeeProperties().apply { internal.disableUrlSsrfProtection = true }
     val devProvider = SsrfSafeRequestFactoryProvider(UrlSecurity(devProperties), devProperties)
     val restTemplate =
       RestTemplate(devProvider.create(allowLocalAddresses = false, connectTimeout = SHORT, responseTimeout = SHORT))
@@ -261,7 +261,7 @@ class SsrfSafeRequestFactoryProviderTest {
     }
   }
 
-  private fun providerWith(urlSecurity: UrlSecurity) = SsrfSafeRequestFactoryProvider(urlSecurity, internalProperties)
+  private fun providerWith(urlSecurity: UrlSecurity) = SsrfSafeRequestFactoryProvider(urlSecurity, tolgeeProperties)
 
   companion object {
     private val SHORT = Duration.ofSeconds(2)
