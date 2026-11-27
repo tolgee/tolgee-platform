@@ -17,6 +17,7 @@ const { isFileExist } = require('cy-verify-downloads');
 const path = require('path');
 const unzipping = require('./unzipping');
 const { readFile } = require('xlsx');
+const fs = require('fs');
 
 /**
  * @type {Cypress.PluginConfig}
@@ -26,6 +27,10 @@ module.exports = (on, config) => {
     isFileExist,
     unzipping: unzipping.unzip,
     readXlsx: readFile,
+    deleteFile(filePath) {
+      fs.rmSync(filePath, { force: true });
+      return null;
+    },
   });
 
   return dotenvPlugin(config, {

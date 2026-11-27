@@ -23,8 +23,8 @@ describe('Reviewed translation protect in import', () => {
 
     cy.gcy('dropzone')
       .should('be.visible')
-      .attachFile('translationProtection/conflict.json', {
-        subjectType: 'drag-n-drop',
+      .selectFile('cypress/fixtures/translationProtection/conflict.json', {
+        action: 'drag-drop',
       });
     cy.gcy('import-row-language-select-form-control').click();
     cy.contains('Czech').click();
@@ -42,8 +42,8 @@ describe('Reviewed translation protect in import', () => {
 
     cy.gcy('dropzone')
       .should('be.visible')
-      .attachFile('translationProtection/conflict.json', {
-        subjectType: 'drag-n-drop',
+      .selectFile('cypress/fixtures/translationProtection/conflict.json', {
+        action: 'drag-drop',
       });
     cy.gcy('import-row-language-select-form-control').click();
     cy.contains('Czech').click();
@@ -69,8 +69,8 @@ describe('Reviewed translation protect in import', () => {
 
     cy.gcy('dropzone')
       .should('be.visible')
-      .attachFile('translationProtection/conflict.json', {
-        subjectType: 'drag-n-drop',
+      .selectFile('cypress/fixtures/translationProtection/conflict.json', {
+        action: 'drag-drop',
       });
     cy.gcy('import-row-language-select-form-control').click();
     cy.contains('Czech').click();

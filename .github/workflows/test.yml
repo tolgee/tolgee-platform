@@ -234,17 +234,6 @@ jobs:
           tar --zstd -xf ~/cypress_cache.tar.zst
         working-directory: /home/runner/.cache/
 
-      # Cypress 13 crashes between specs with "Error: * is not a valid URL" on Chrome 158, which
-      # runner images from 20261122 ship. Remove once Cypress is upgraded to a version that runs on it.
-      - name: Pin Chrome version
-        run: |
-          curl -fsSL --retry 3 -o "$RUNNER_TEMP/chrome.deb" \
-            "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb"
-          sudo apt-get install -y --allow-downgrades "$RUNNER_TEMP/chrome.deb"
-          google-chrome --version
-        env:
-          CHROME_VERSION: 157.0.8103.78
-
       - name: Run e2e test
         uses: nick-fields/retry@v2
         with:

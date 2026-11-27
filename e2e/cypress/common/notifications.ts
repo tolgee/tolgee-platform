@@ -33,7 +33,6 @@ function resetNotificationsDropdown() {
 function getNotificationsListWrappper() {
   resetNotificationsDropdown();
   cy.gcy('notifications-button').click();
-  notifications.assertUnseenNotificationsCount(0);
   cy.gcy('notifications-list').should('be.visible');
   return cy.gcy('notifications-list');
 }

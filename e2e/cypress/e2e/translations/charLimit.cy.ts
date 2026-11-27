@@ -117,7 +117,12 @@ describe('Translation character limit', () => {
   it('Import shows warning when translation exceeds char limit', () => {
     visitImport(projectId);
     waitForGlobalLoading();
-    cy.gcy('import-file-input').attachFile('import/charLimit.json');
+    cy.gcy('import-file-input').selectFile(
+      'cypress/fixtures/import/charLimit.json',
+      {
+        force: true,
+      }
+    );
     gcy('import-result-file-cell', { timeout: 30000 }).should('be.visible');
     gcy('import-file-issues-button').click();
     getFileIssuesDialog()
