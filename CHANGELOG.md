@@ -1,3 +1,10 @@
+# [3.248.0](https://github.com/tolgee/tolgee-platform/compare/v3.247.0...v3.248.0) (2026-11-27)
+
+
+### Features
+
+* copy a translation to the clipboard from the translations view ([#4094](https://github.com/tolgee/tolgee-platform/issues/4094)) ([c4523ce](https://github.com/tolgee/tolgee-platform/commit/c4523ce02a35aa841c2c2803ed43896944363c25))
+
 # [3.247.0](https://github.com/tolgee/tolgee-platform/compare/v3.246.5...v3.247.0) (2026-11-27)
 
 
