@@ -12,7 +12,7 @@ class AzureCognitiveTranslationProvider(
   private val tolgeeProperties: TolgeeProperties,
   private val azureCognitiveApiService: AzureCognitiveApiService,
 ) : AbstractMtValueProvider() {
-  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
+  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azurecognitive
   override val isEnabled: Boolean
     get() = !azureCognitiveTranslationProperties.authKey.isNullOrEmpty()
 

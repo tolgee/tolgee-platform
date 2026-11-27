@@ -28,6 +28,9 @@ class ConfigurationPropertiesResetListener : TestExecutionListener {
     }
 
   override fun afterTestMethod(testContext: TestContext) {
+    // After-callbacks run in reverse order, so @DirtiesContext has already closed the context here;
+    // asking for it again would start a new one just to restore into it.
+    if (!testContext.hasApplicationContext()) return
     @Suppress("UNCHECKED_CAST")
     val snapshots = testContext.getAttribute(SNAPSHOTS_ATTRIBUTE) as? Map<String, String> ?: return
     val beans = rootBeans(testContext)
@@ -57,12 +60,6 @@ class ConfigurationPropertiesResetListener : TestExecutionListener {
       .getBeansWithAnnotation(ConfigurationProperties::class.java)
       .filterValues { isResettableRoot(it) }
 
-  /**
-   * Our `@ConfigurationProperties` root holder beans. Restricted to `io.tolgee` classes so framework
-   * roots (e.g. Spring Boot's `SslProperties`, which holds types our mapper can't serialize) are left
-   * alone, and to beans whose own class carries the annotation so infrastructure beans that get it from
-   * a `@Bean` factory method (e.g. the `spring.datasource` DataSource) are excluded.
-   */
   internal fun isResettableRoot(bean: Any): Boolean {
     val userClass = ClassUtils.getUserClass(bean)
     return userClass.name.startsWith("io.tolgee.") &&

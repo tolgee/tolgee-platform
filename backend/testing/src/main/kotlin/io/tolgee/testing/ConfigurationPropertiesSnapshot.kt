@@ -5,11 +5,6 @@ import tools.jackson.databind.MapperFeature
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 
-/**
- * Restore updates the existing object graph in place (`readerForUpdating` + merging on) rather than
- * replacing nested objects, so a bean that captured a sub-properties instance by reference keeps
- * observing the restored values.
- */
 object ConfigurationPropertiesSnapshot {
   private val mapper =
     jacksonMapperBuilder()
@@ -21,10 +16,8 @@ object ConfigurationPropertiesSnapshot {
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
       .defaultMergeable(true)
       .apply {
-        // Merging a collection/map appends to it; replace instead so a snapshotted baseline is
-        // restored exactly rather than concatenated with the test's in-place additions. configOverride
-        // is matched by the property's concrete type and does not cascade from Collection, so every
-        // declared container type (List/Set/Map) is listed explicitly.
+        // A config override is matched by the property's declared type and does not cascade from
+        // Collection, so every declared container type is listed.
         listOf(Collection::class, List::class, Set::class, Map::class).forEach {
           withConfigOverride(it.java) { override -> override.setMergeable(false) }
         }

@@ -12,7 +12,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServi
 
 /** Ordinal-persisted by [io.tolgee.model.translation.Translation.mtProvider] — do not reorder. */
 enum class MtServiceType(
-  val propertiesGetter: ((TolgeeProperties) -> MachineTranslationServiceProperties),
+  val propertiesGetter: (TolgeeProperties) -> MachineTranslationServiceProperties,
   val providerClass: Class<out MtValueProvider>,
   val usesMetadata: Boolean = false,
   val supportsPlurals: Boolean = false,
@@ -34,7 +34,7 @@ enum class MtServiceType(
     order = 3,
   ),
   AZURE(
-    propertiesGetter = { it.machineTranslation.azure },
+    propertiesGetter = { it.machineTranslation.azurecognitive },
     providerClass = AzureCognitiveTranslationProvider::class.java,
     order = 4,
   ),
@@ -47,7 +47,7 @@ enum class MtServiceType(
     propertiesGetter = { it.llm },
     providerClass = LlmTranslationProvider::class.java,
     usesMetadata = true,
-    supportsPlurals = true,
     order = -1,
+    supportsPlurals = true,
   ),
 }

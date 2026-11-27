@@ -148,7 +148,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   val deeplMachineTranslationProperties get() = tolgeeProperties.machineTranslation.deepl
 
-  val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
+  val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azurecognitive
 
   val baiduMachineTranslationProperties get() = tolgeeProperties.machineTranslation.baidu
 

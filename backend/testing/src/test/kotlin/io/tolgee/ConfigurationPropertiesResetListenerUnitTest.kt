@@ -4,7 +4,9 @@ import com.example.ExternalConfigProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.test.context.TestContext
 
 class ConfigurationPropertiesResetListenerUnitTest {
   private val listener = ConfigurationPropertiesResetListener()
@@ -51,5 +53,21 @@ class ConfigurationPropertiesResetListenerUnitTest {
     assertThat(listener.isResettableRoot(OwnRoot())).isTrue()
     assertThat(listener.isResettableRoot(ExternalConfigProperties())).isFalse()
     assertThat(listener.isResettableRoot(Holder("v"))).isFalse()
+  }
+
+  @Test
+  fun `does not load a new context after DirtiesContext closed the test's one`() {
+    val testContext = Mockito.mock(TestContext::class.java)
+    Mockito.`when`(testContext.hasApplicationContext()).thenReturn(false)
+    Mockito.`when`(testContext.getAttribute(Mockito.anyString())).thenReturn(mapOf("root" to "{}"))
+
+    listener.afterTestMethod(testContext)
+
+    Mockito.verify(testContext, Mockito.never()).applicationContext
+  }
+
+  @Test
+  fun `a Mockito spy of a root is still reset`() {
+    assertThat(listener.isResettableRoot(Mockito.spy(OwnRoot::class.java))).isTrue()
   }
 }

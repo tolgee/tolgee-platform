@@ -1,7 +1,7 @@
 package io.tolgee.configuration.tolgee
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty
-import java.lang.reflect.Field
+import org.springframework.util.ReflectionUtils
 import java.util.Collections
 import java.util.IdentityHashMap
 
@@ -28,10 +28,14 @@ private fun validateRecursively(
 ) {
   if (!visited.add(node)) return
   if (node is SelfValidatingProperties) node.validate()
-  nestedFields(node.javaClass).forEach { field ->
-    field.isAccessible = true
-    visitValue(field.get(node), visited)
-  }
+  ReflectionUtils.doWithFields(
+    node.javaClass,
+    { field ->
+      field.isAccessible = true
+      visitValue(field.get(node), visited)
+    },
+    { it.isAnnotationPresent(NestedConfigurationProperty::class.java) },
+  )
 }
 
 private fun visitValue(
@@ -45,9 +49,3 @@ private fun visitValue(
     else -> validateRecursively(value, visited)
   }
 }
-
-private fun nestedFields(type: Class<*>): Sequence<Field> =
-  generateSequence(type) { it.superclass }
-    .takeWhile { it != Any::class.java }
-    .flatMap { it.declaredFields.asSequence() }
-    .filter { it.isAnnotationPresent(NestedConfigurationProperty::class.java) }

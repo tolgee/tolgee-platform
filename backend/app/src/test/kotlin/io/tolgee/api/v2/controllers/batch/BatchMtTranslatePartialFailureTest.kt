@@ -48,7 +48,7 @@ class BatchMtTranslatePartialFailureTest : ProjectAuthControllerTest("/v2/projec
   @BeforeEach
   fun setup() {
     batchJobTestBase.setup()
-    whenever(internalProperties.fakeMtProviders).thenReturn(false)
+    internalProperties.fakeMtProviders = false
     doAnswer { invocation ->
       val params = invocation.arguments[0] as ProviderTranslateParams
       if (params.keyName == FAILING_KEY_NAME) {

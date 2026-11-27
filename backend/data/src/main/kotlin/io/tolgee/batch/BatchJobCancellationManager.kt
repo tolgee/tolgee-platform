@@ -4,6 +4,7 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.cleaning.BatchJobStatusProvider
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.fixtures.waitFor
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -35,7 +36,7 @@ class BatchJobCancellationManager(
   private val batchJobStatusProvider: BatchJobStatusProvider,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
-  private val tolgeeProperties: io.tolgee.configuration.tolgee.TolgeeProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val objectMapper: ObjectMapper,
 ) : Logging {
   private val batchProperties get() = tolgeeProperties.batch

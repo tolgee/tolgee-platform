@@ -11,6 +11,7 @@ import org.junit.jupiter.api.TestMethodOrder
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class ConfigurationPropertiesResetListenerTest : AbstractSpringTest() {
   private var capturedGithub: GithubAuthenticationProperties? = null
+  private var baselineClientId: String? = null
 
   @Test
   @Order(1)
@@ -30,6 +31,8 @@ class ConfigurationPropertiesResetListenerTest : AbstractSpringTest() {
   @Order(3)
   fun `mutates a sub-properties object captured by reference`() {
     capturedGithub = tolgeeProperties.authentication.github
+    baselineClientId = tolgeeProperties.authentication.github.clientId
+    assertThat(baselineClientId).isNotEqualTo("leaked")
     tolgeeProperties.authentication.github.clientId = "leaked"
   }
 
@@ -38,6 +41,6 @@ class ConfigurationPropertiesResetListenerTest : AbstractSpringTest() {
   fun `a reference captured in a prior test still observes the restored value`() {
     val captured = capturedGithub!!
     assertThat(tolgeeProperties.authentication.github).isSameAs(captured)
-    assertThat(captured.clientId).isEqualTo("fake_id")
+    assertThat(captured.clientId).isEqualTo(baselineClientId)
   }
 }

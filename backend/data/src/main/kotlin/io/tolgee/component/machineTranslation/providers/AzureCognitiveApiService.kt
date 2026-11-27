@@ -20,7 +20,7 @@ class AzureCognitiveApiService(
   private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
 ) {
-  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
+  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azurecognitive
 
   fun translate(
     text: String,

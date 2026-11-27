@@ -16,7 +16,7 @@ open class MachineTranslationProperties(
   @NestedConfigurationProperty
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
   @NestedConfigurationProperty
-  var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
+  var azurecognitive: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
   @NestedConfigurationProperty
   var baidu: BaiduMachineTranslationProperties = BaiduMachineTranslationProperties(),
   @DocProperty(

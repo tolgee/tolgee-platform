@@ -13,11 +13,11 @@ class ContentDeliveryCachePurgingProperties {
   var cloudflare = ContentDeliveryCloudflareProperties()
 
   @NestedConfigurationProperty
-  var bunny = ContentDeliveryBunnyProperties()
+  var awsCloudfront = ContentDeliveryAWSCloudFrontProperties()
 
   @NestedConfigurationProperty
-  var awsCloudFront = ContentDeliveryAWSCloudFrontProperties()
+  var bunny = ContentDeliveryBunnyProperties()
 }
 
 fun ContentDeliveryCachePurgingProperties.all(): List<ContentDeliveryPurgingConfig> =
-  listOf(azureFrontDoor, cloudflare, bunny, awsCloudFront)
+  listOf(azureFrontDoor, cloudflare, bunny, awsCloudfront)
