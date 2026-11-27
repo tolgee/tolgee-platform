@@ -1,3 +1,10 @@
+## [3.248.1](https://github.com/tolgee/tolgee-platform/compare/v3.248.0...v3.248.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* describe the export response as binary in the API spec ([#4078](https://github.com/tolgee/tolgee-platform/issues/4078)) ([31a4061](https://github.com/tolgee/tolgee-platform/commit/31a4061a93aed6e3687d7d58b383eeadb3f4205e))
+
 # [3.248.0](https://github.com/tolgee/tolgee-platform/compare/v3.247.0...v3.248.0) (2026-11-27)
 
 
