@@ -56,6 +56,17 @@ class OpenApiTest : AbstractControllerTest() {
   }
 
   @Test
+  fun `export response is described as binary`() {
+    performGet("/v3/api-docs/Public API (All)").andIsOk.andAssertThatJson {
+      listOf("get", "post").forEach { method ->
+        val schema = "paths./v2/projects/{projectId}/export.$method.responses.200.content.application/*.schema"
+        node("$schema.type").isEqualTo("string")
+        node("$schema.format").isEqualTo("binary")
+      }
+    }
+  }
+
+  @Test
   fun `java util Date fields are described as the epoch millis they are serialized as`() {
     performGet("/v3/api-docs/All Internal - for Tolgee Web application").andIsOk.andAssertThatJson {
       val createdAt = "components.schemas.TranslationCommentModel.properties.createdAt"

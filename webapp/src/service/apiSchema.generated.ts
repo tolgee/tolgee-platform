@@ -19288,7 +19288,7 @@ export interface operations {
        */
       200: {
         content: {
-          "application/*": unknown;
+          "application/*": string;
         };
       };
       /** Bad Request */
@@ -19362,7 +19362,7 @@ export interface operations {
        */
       200: {
         content: {
-          "application/*": unknown;
+          "application/*": string;
         };
       };
       /** Bad Request */
