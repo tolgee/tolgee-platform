@@ -2,7 +2,11 @@
 
 package io.tolgee.constants
 
-enum class Feature {
+// Stored by name in varchar[] columns, billing's included; removing a constant needs a migration
+// that removes the name from those arrays (array_remove), or loading them fails.
+enum class Feature(
+  val hidden: Boolean = false,
+) {
   GRANULAR_PERMISSIONS,
   PRIORITIZED_FEATURE_REQUESTS,
   PREMIUM_SUPPORT,
@@ -26,7 +30,7 @@ enum class Feature {
   BRANCHING,
   QA_CHECKS,
   TRANSLATION_MEMORY,
-  AI_REVIEW,
+  AI_REVIEW(hidden = true),
   ;
 
   companion object {

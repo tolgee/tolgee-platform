@@ -37,6 +37,7 @@ ext {
                             "activity_sequence," +
                             "FK9xs5a07fba5yqje5jqm6qrehs," +
                             "column:enabled_features,"+
+                            "column:granted_features,"+
                             // Exclude id columns: liquibase-hibernate7 emits a spurious addDefaultValue for them. https://github.com/liquibase/liquibase-hibernate/issues/919
                             "column:(?i)^id\$,"+
                             "table:temp_unsuccessful_job_keys"
