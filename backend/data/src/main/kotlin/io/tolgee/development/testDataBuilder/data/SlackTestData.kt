@@ -47,6 +47,9 @@ class SlackTestData {
 
   lateinit var slackUserConnection: SlackUserConnection
   lateinit var languageOnlySlackConfig: SlackConfig
+  lateinit var otherOrganization: Organization
+  lateinit var noWorkspaceSlackConfig: SlackConfig
+  lateinit var languageOnlySlackConfigAutomation: Automation
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -258,6 +261,54 @@ class SlackTestData {
           userAccount = userAccountBuilder.self
           isGlobalSubscription = false
           events = mutableSetOf(SlackEventType.NEW_KEY)
+        }.self
+  }
+
+  fun bindSlackConfigsToWorkspacesOfTwoOrganizations() {
+    val otherOrganizationBuilder =
+      root.addOrganization {
+        name = "Transfer target organization"
+      }
+    otherOrganization = otherOrganizationBuilder.self
+    val otherOrganizationSlackWorkspace =
+      otherOrganizationBuilder
+        .addSlackWorkspace {
+          author = userAccountBuilder.self
+          slackTeamId = "otherOrganizationSlackTeamId"
+          slackTeamName = "otherOrganizationSlackTeamName"
+          accessToken = "accessToken"
+          organization = otherOrganizationBuilder.self
+        }.self
+    slackConfig.organizationSlackWorkspace = slackWorkspace
+    languageOnlySlackConfig.organizationSlackWorkspace = otherOrganizationSlackWorkspace
+  }
+
+  fun addSlackConfigWithoutWorkspace() {
+    noWorkspaceSlackConfig =
+      projectBuilder
+        .addSlackConfig {
+          channelId = "noWorkspaceChannel"
+          project = projectBuilder.self
+          userAccount = userAccountBuilder.self
+          isGlobalSubscription = true
+          events = mutableSetOf(SlackEventType.ALL)
+        }.self
+  }
+
+  fun addAutomationForLanguageOnlySlackConfig() {
+    languageOnlySlackConfigAutomation =
+      projectBuilder
+        .addAutomation {
+          this.triggers.add(
+            AutomationTrigger(this)
+              .also { it.type = AutomationTriggerType.ACTIVITY },
+          )
+          this.actions.add(
+            AutomationAction(this).also {
+              it.type = AutomationActionType.SLACK_SUBSCRIPTION
+              it.slackConfig = languageOnlySlackConfig
+            },
+          )
         }.self
   }
 

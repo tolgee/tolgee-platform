@@ -32,6 +32,8 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.GlossaryCleanupService
+import io.tolgee.service.SlackConfigCleanupService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
@@ -89,6 +91,14 @@ class ProjectService(
   private val branchService: BranchService,
   private val businessEventPublisher: BusinessEventPublisher,
 ) : Logging {
+  @set:Autowired
+  @set:Lazy
+  lateinit var glossaryCleanupService: GlossaryCleanupService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var slackConfigCleanupService: SlackConfigCleanupService
+
   @set:Autowired
   @set:Lazy
   lateinit var keyService: KeyService
@@ -588,6 +598,12 @@ class ProjectService(
   ) {
     val project = get(projectId)
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
+    if (project.organizationOwner.id != organization.id) {
+      glossaryCleanupService.unassignFromAllProjects(project)
+      translationMemoryManagementService.unassignAllSharedTmsByProject(projectId)
+      translationMemoryManagementService.moveProjectTmToOrganization(projectId, organization)
+      slackConfigCleanupService.deleteProjectConfigsOnOrganizationWorkspaces(projectId, project.organizationOwner.id)
+    }
     project.organizationOwner = organization
     save(project)
   }

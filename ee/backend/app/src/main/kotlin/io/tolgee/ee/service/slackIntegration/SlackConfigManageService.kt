@@ -6,11 +6,14 @@ import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.SlackErrorException
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.slackIntegration.SlackEventType
+import io.tolgee.service.SlackConfigCleanupService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.language.LanguageService
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 
+@Primary
 @Service
 class SlackConfigManageService(
   private val automationService: AutomationService,
@@ -19,7 +22,17 @@ class SlackConfigManageService(
   private val slackConfigPreferenceService: SlackConfigPreferenceService,
   private val languageService: LanguageService,
   private val slackErrorProvider: SlackErrorProvider,
-) {
+) : SlackConfigCleanupService {
+  @Transactional
+  override fun deleteProjectConfigsOnOrganizationWorkspaces(
+    projectId: Long,
+    organizationId: Long,
+  ) {
+    slackConfigRepository
+      .findAllByProjectIdAndWorkspaceOrganizationId(projectId, organizationId)
+      .forEach(::deleteWithAutomations)
+  }
+
   @Transactional
   fun delete(
     projectId: Long,
@@ -37,9 +50,13 @@ class SlackConfigManageService(
         } ?: throw SlackErrorException(slackErrorProvider.getNotSubscribedToLanguageOrBadLanguageTagError())
       slackConfigPreferenceService.delete(pref)
     } else {
-      automationService.deleteForSlackIntegration(config)
-      slackConfigRepository.delete(config)
+      deleteWithAutomations(config)
     }
+  }
+
+  private fun deleteWithAutomations(config: SlackConfig) {
+    automationService.deleteForSlackIntegration(config)
+    slackConfigRepository.delete(config)
   }
 
   @Transactional

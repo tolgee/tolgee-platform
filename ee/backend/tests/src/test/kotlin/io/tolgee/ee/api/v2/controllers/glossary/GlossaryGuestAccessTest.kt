@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -143,6 +144,32 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `glossaries assigned only to another organization's project stay hidden from guests`() {
+    userAccount = testData.virtualGuest
+    val base = "/v2/organizations/${testData.organization.id}/glossaries"
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}").andIsNotFound
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}/terms").andIsNotFound
+    performAuthGet("$base/${testData.otherOrganizationProjectGlossary.id}/assigned-projects").andIsNotFound
+    performAuthGet("$base-with-stats?sort=name&sort=id").andIsOk.andAssertThatJson {
+      node("_embedded.glossaries").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  fun `transferring a project to another organization unassigns its glossaries`() {
+    projectService.transferToOrganization(testData.publicProject.id, testData.otherOrganization.id)
+
+    executeInNewTransaction {
+      entityManager
+        .find(Glossary::class.java, testData.mixedGlossary.id)
+        .assignedProjects
+        .map { it.id }
+        .assert
+        .containsExactly(testData.privateProject.id)
+    }
+  }
+
+  @Test
   fun `guest single-term reads follow the glossary accessibility`() {
     userAccount = testData.virtualGuest
     val publicTermPath =
@@ -180,7 +207,7 @@ class GlossaryGuestAccessTest : AuthorizedControllerTest() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
       .andIsOk
       .andAssertThatJson {
-        node("_embedded.glossaries").isArray.hasSize(6)
+        node("_embedded.glossaries").isArray.hasSize(7)
       }
   }
 

@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.model.Language
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
@@ -167,8 +168,15 @@ class TranslationMemoryTestData : BaseTestData() {
    */
   var projectOnlyViewer: UserAccount
 
+  lateinit var transferTargetOrganization: Organization
+
   init {
     root.apply {
+      transferTargetOrganization =
+        addOrganization {
+          name = "TM transfer target"
+        }.self
+
       // Base project from BaseTestData has no TM — add German so tests can save translations
       projectBuilder.apply {
         germanLanguageNoTm =

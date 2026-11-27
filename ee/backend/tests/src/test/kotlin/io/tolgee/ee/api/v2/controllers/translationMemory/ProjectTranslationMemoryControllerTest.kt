@@ -206,4 +206,17 @@ class ProjectTranslationMemoryControllerTest : ProjectAuthControllerTest("/v2/pr
         .isEmpty()
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `transferring a project to another organization keeps only its own TM`() {
+    projectService.transferToOrganization(project.id, testData.transferTargetOrganization.id)
+
+    executeInNewTransaction {
+      assertThat(translationMemoryManagementService.getSharedTmAssignmentsForProject(project.id))
+        .isEmpty()
+      assertThat(translationMemoryManagementService.getProjectTm(project.id)!!.organizationOwner.id)
+        .isEqualTo(testData.transferTargetOrganization.id)
+    }
+  }
 }
