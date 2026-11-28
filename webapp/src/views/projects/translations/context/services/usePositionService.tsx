@@ -55,7 +55,7 @@ export function usePositionService({ translations, viewRefs }: Props) {
         viewRefs.scrollToElement({
           keyId: position.keyId,
           language: position.language,
-          options: { block: 'center', inline: 'center', behavior: 'smooth' },
+          options: { block: 'nearest', inline: 'nearest', behavior: 'smooth' },
         });
       }
     });
