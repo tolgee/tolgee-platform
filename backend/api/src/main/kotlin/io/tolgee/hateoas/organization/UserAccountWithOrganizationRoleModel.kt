@@ -13,7 +13,7 @@ data class UserAccountWithOrganizationRoleModel(
   var username: String,
   val organizationRole: OrganizationRoleType?,
   val projectsWithDirectPermission: List<SimpleProjectModel>,
-  val mfaEnabled: Boolean,
+  var mfaEnabled: Boolean?,
   val avatar: Avatar?,
   val managed: Boolean,
   val disabled: Boolean,

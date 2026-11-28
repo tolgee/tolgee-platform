@@ -13,22 +13,27 @@ import { E2OrganizationMembersView } from '../../compounds/organizationMembers/E
 const MANAGED_MEMBER = 'LonelyDev@tolgee.io';
 const OTHER_OWNER = 'evan@netsuite.com';
 const NON_MANAGED_MEMBER = 'cukrberg@facebook.com';
+const NON_OWNER_MEMBER = 'gates@microsoft.com';
+
+type OrganizationData = Record<string, { slug: string }>;
+
+const membersView = new E2OrganizationMembersView();
+
+const generateOrganizations = () => {
+  organizationTestData.clean();
+  return organizationTestData
+    .generate()
+    .then((res) => res.body as OrganizationData);
+};
+
+const visitMembers = (organizationData: OrganizationData, name: string) => {
+  cy.visit(`${HOST}/organizations/${organizationData[name].slug}/members`);
+};
 
 describe('Organization Members', () => {
-  let organizationData: Record<string, { slug: string }>;
-  const membersView = new E2OrganizationMembersView();
-
   beforeEach(() => {
     login();
-    organizationTestData.clean();
-    organizationTestData
-      .generate()
-      .then((res) => {
-        return (organizationData = res.body as any);
-      })
-      .then(() => {
-        visit('Tolgee');
-      });
+    generateOrganizations().then((data) => visitMembers(data, 'Tolgee'));
   });
 
   afterEach(() => {
@@ -36,6 +41,7 @@ describe('Organization Members', () => {
   });
 
   it('contains organization users', () => {
+    membersView.getMfaBadge(OTHER_OWNER).should('be.visible');
     gcy('global-paginated-list').within(() => {
       cy.contains('Cukrberg')
         .closestDcy('organization-member-item')
@@ -114,23 +120,6 @@ describe('Organization Members', () => {
     });
   });
 
-  it('Paginates', () => {
-    visit('Facebook');
-    gcy('global-paginated-list').contains('Cukrberg').should('be.visible');
-    gcy('global-paginated-list')
-      .contains('owner@zzzcool16.com')
-      .should('be.visible');
-    goToPage(2);
-    gcy('global-paginated-list')
-      .contains('owner@zzzcool2.com')
-      .should('be.visible');
-  });
-
-  const visit = (name: string) => {
-    const slug = organizationData[name].slug;
-    cy.visit(`${HOST}/organizations/${slug}/members`);
-  };
-
   const setGoldbergMember = () => {
     gcy('global-paginated-list').within(() => {
       cy.contains('Goldberg')
@@ -156,4 +145,52 @@ describe('Organization Members', () => {
     });
     confirmStandard();
   }
+});
+
+describe('Organization Members pagination', () => {
+  beforeEach(() => {
+    login();
+    generateOrganizations().then((data) => visitMembers(data, 'Facebook'));
+  });
+
+  afterEach(() => {
+    organizationTestData.clean();
+  });
+
+  it('Paginates', () => {
+    gcy('global-paginated-list').contains('Cukrberg').should('be.visible');
+    gcy('global-paginated-list')
+      .contains('owner@zzzcool16.com')
+      .should('be.visible');
+    goToPage(2);
+    gcy('global-paginated-list')
+      .contains('owner@zzzcool2.com')
+      .should('be.visible');
+  });
+});
+
+describe('Organization Members as a member', () => {
+  beforeEach(() => {
+    generateOrganizations().then((data) => {
+      login(NON_OWNER_MEMBER);
+      membersView.spyOnInvitationsRequest();
+      visitMembers(data, 'Tolgee');
+    });
+  });
+
+  afterEach(() => {
+    organizationTestData.clean();
+  });
+
+  it('sees the members but cannot manage them', () => {
+    membersView.getMember(OTHER_OWNER).should('be.visible');
+    membersView.getMember(NON_MANAGED_MEMBER).should('be.visible');
+    membersView.getMember(MANAGED_MEMBER).should('be.visible');
+    membersView.getInviteButton().should('not.exist');
+    membersView.getRoleMenuButton(OTHER_OWNER).should('be.disabled');
+    membersView.getRemoveButton(NON_MANAGED_MEMBER).should('not.exist');
+    membersView.getDisableButton(MANAGED_MEMBER).should('not.exist');
+    membersView.getMfaBadge(OTHER_OWNER).should('not.exist');
+    membersView.assertInvitationsNotRequested();
+  });
 });
